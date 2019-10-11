@@ -1,8 +1,6 @@
-# TODO
-* Be sure to use parenting
-* Use resource cache
+# ec-operator
 
-# Debug with minikube
+## Debug with minikube
 
 Setup minikube:
 
