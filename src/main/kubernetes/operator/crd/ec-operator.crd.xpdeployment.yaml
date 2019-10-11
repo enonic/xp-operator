@@ -1,0 +1,13 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: xp-deployments.enonic.io
+spec:
+  group: enonic.io
+  names:
+    kind: XPDeployment
+    listKind: XPDeploymentList
+    plural: xp-deployments
+    singular: xp-deployment
+  scope: Cluster
+  version: v1alpha1
