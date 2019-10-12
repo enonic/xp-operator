@@ -18,14 +18,14 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
-import com.enonic.ec.kubernetes.common.commands.CommandCreateXpDeployment;
-import com.enonic.ec.kubernetes.common.commands.CommandDeleteXpDeployment;
-import com.enonic.ec.kubernetes.common.crd.CrdClientsProducer;
-import com.enonic.ec.kubernetes.common.crd.XpDeployment.XpDeploymentResource;
-import com.enonic.ec.kubernetes.common.crd.XpDeploymentCache;
+import com.enonic.ec.kubernetes.deployment.CommandCreateXpDeployment;
+import com.enonic.ec.kubernetes.deployment.CommandDeleteXpDeployment;
+import com.enonic.ec.kubernetes.deployment.CrdClientsProducer;
+import com.enonic.ec.kubernetes.deployment.XpDeployment.XpDeploymentResource;
+import com.enonic.ec.kubernetes.deployment.XpDeploymentCache;
 
 @ApplicationScoped
-@Path("/")
+@Path("/api")
 public class DeploymentService
 {
 

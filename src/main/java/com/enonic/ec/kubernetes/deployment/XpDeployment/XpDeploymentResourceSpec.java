@@ -1,4 +1,4 @@
-package com.enonic.ec.kubernetes.common.crd.XpDeployment;
+package com.enonic.ec.kubernetes.deployment.XpDeployment;
 
 import java.util.Map;
 
@@ -95,7 +95,7 @@ public class XpDeploymentResourceSpec
         return Map.of( "cloud", getCloud(), "project", getProject(), "app", getApp(), "name", getName() );
     }
 
-    @JsonPOJOBuilder(buildMethodName = "build", withPrefix = "")
+    @JsonPOJOBuilder(withPrefix = "")
     public static final class Builder
     {
         private String xpVersion;

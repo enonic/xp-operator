@@ -1,19 +1,16 @@
 # ec-operator
 
+## TODO
+
+* Create admission endpoint in operator for validation
+
 ## Debug with minikube
 
-Setup minikube:
+### Run operator locally
+* Setup minikube: `make minikube-setup`
+* Create jar run configuration with mvn pre step: `-DskipTests clean package`
+* Run the project
 
-```bash
-minikube start
-
-kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.namespace.yml
-kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.clusterrole.yaml
-kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.serviceaccount.yaml
-kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.clusterrolebinding.yaml
-kubectl apply -f src/main/kubernetes/operator/crd/ec-operator.crd.xpdeployment.yaml
-```
-
-Create jar run configuration with mvn pre step: `-DskipTests clean package`
-
-Run the project
+### Run operator on minikube
+* Setup minikube: `make minikube-setup`
+* Deploy to minikube: `make minikube-deploy-operator`

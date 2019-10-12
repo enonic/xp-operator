@@ -22,7 +22,7 @@ public class ResourceCache<T extends HasMetadata>
 
     private final List<OnAction<T>> eventListeners;
 
-    private Executor executor;
+    private final Executor executor;
 
     protected ResourceCache()
     {
@@ -33,7 +33,7 @@ public class ResourceCache<T extends HasMetadata>
 
     public Stream<T> stream()
     {
-        return cache.entrySet().stream().map( e -> e.getValue() );
+        return cache.values().stream();
     }
 
     public T get( String id )
@@ -48,9 +48,7 @@ public class ResourceCache<T extends HasMetadata>
 
     public void initialize( List<T> initialState )
     {
-        initialState.forEach( resource -> {
-            cache.put( resource.getMetadata().getUid(), resource );
-        } );
+        initialState.forEach( resource -> cache.put( resource.getMetadata().getUid(), resource ) );
     }
 
     protected void handleEvent( final Watcher.Action action, final T resource )
@@ -71,16 +69,12 @@ public class ResourceCache<T extends HasMetadata>
             if ( action == Watcher.Action.ADDED || action == Watcher.Action.MODIFIED )
             {
                 cache.put( uid, resource );
-                executor.execute( () -> {
-                    eventListeners.forEach( eventListener -> eventListener.accept( action, uid, resource ) );
-                } );
+                executor.execute( () -> eventListeners.forEach( eventListener -> eventListener.accept( action, uid, resource ) ) );
             }
             else if ( action == Watcher.Action.DELETED )
             {
                 cache.remove( uid );
-                executor.execute( () -> {
-                    eventListeners.forEach( eventListener -> eventListener.accept( action, uid, resource ) );
-                } );
+                executor.execute( () -> eventListeners.forEach( eventListener -> eventListener.accept( action, uid, resource ) ) );
             }
             else
             {
@@ -93,7 +87,7 @@ public class ResourceCache<T extends HasMetadata>
         catch ( Exception e )
         {
             // Better just to let kubernetes restart the operator
-            log.error( "Something when terrably wrong", e );
+            log.error( "Something when terribly wrong", e );
             System.exit( -1 );
         }
     }

@@ -15,4 +15,4 @@ minikube-deploy-operator:
 	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.deployment.yaml
 
 post:
-	cat src/test/json/test.json | http -v -j POST :8080/
+	cat src/test/json/test.json | http -v -j POST :8080/api

@@ -1,7 +1,7 @@
-package com.enonic.ec.kubernetes.common.commands;
+package com.enonic.ec.kubernetes.deployment;
 
-import com.enonic.ec.kubernetes.common.crd.CrdClientsProducer;
-import com.enonic.ec.kubernetes.common.crd.XpDeployment.XpDeploymentResource;
+import com.enonic.ec.kubernetes.common.commands.Command;
+import com.enonic.ec.kubernetes.deployment.XpDeployment.XpDeploymentResource;
 
 import static com.enonic.ec.kubernetes.common.assertions.Assertions.assertNotNull;
 

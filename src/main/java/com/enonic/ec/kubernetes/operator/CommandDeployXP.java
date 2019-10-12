@@ -1,4 +1,4 @@
-package com.enonic.ec.kubernetes.operator.commands;
+package com.enonic.ec.kubernetes.operator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,7 +8,10 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 
 import com.enonic.ec.kubernetes.common.commands.CombinedCommand;
 import com.enonic.ec.kubernetes.common.commands.Command;
-import com.enonic.ec.kubernetes.common.crd.XpDeployment.XpDeploymentResource;
+import com.enonic.ec.kubernetes.deployment.XpDeployment.XpDeploymentResource;
+import com.enonic.ec.kubernetes.operator.commands.CommandCreateConfigMap;
+import com.enonic.ec.kubernetes.operator.commands.CommandCreateNamespace;
+import com.enonic.ec.kubernetes.operator.commands.CommandDeleteNamespace;
 
 import static com.enonic.ec.kubernetes.common.assertions.Assertions.assertNotNull;
 

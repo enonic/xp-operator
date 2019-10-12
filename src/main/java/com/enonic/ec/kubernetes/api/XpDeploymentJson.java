@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 
 import io.quarkus.runtime.annotations.RegisterForReflection;
 
-import com.enonic.ec.kubernetes.common.crd.XpDeployment.XpDeploymentResourceSpec;
+import com.enonic.ec.kubernetes.deployment.XpDeployment.XpDeploymentResourceSpec;
 
 import static com.enonic.ec.kubernetes.common.assertions.Assertions.assertNotNull;
 
@@ -46,7 +46,7 @@ public class XpDeploymentJson
         return apiVersion;
     }
 
-    @JsonPOJOBuilder(buildMethodName = "build", withPrefix = "")
+    @JsonPOJOBuilder(withPrefix = "")
     public static final class Builder
     {
         private String uid;

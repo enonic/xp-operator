@@ -1,4 +1,4 @@
-package com.enonic.ec.kubernetes.common.crd.XpDeployment;
+package com.enonic.ec.kubernetes.deployment.XpDeployment;
 
 import io.fabric8.kubernetes.api.builder.Function;
 import io.fabric8.kubernetes.client.CustomResourceDoneable;

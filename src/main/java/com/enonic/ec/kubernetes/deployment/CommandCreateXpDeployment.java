@@ -1,18 +1,21 @@
-package com.enonic.ec.kubernetes.common.commands;
+package com.enonic.ec.kubernetes.deployment;
 
-import com.enonic.ec.kubernetes.common.crd.CrdClientsProducer;
-import com.enonic.ec.kubernetes.common.crd.XpDeployment.XpDeploymentResource;
-import com.enonic.ec.kubernetes.common.crd.XpDeployment.XpDeploymentResourceSpec;
+import com.enonic.ec.kubernetes.common.commands.Command;
+import com.enonic.ec.kubernetes.deployment.XpDeployment.XpDeploymentResource;
+import com.enonic.ec.kubernetes.deployment.XpDeployment.XpDeploymentResourceSpec;
 
 import static com.enonic.ec.kubernetes.common.assertions.Assertions.assertEquals;
 import static com.enonic.ec.kubernetes.common.assertions.Assertions.assertNotNull;
 
+@SuppressWarnings("FieldCanBeLocal")
 public class CommandCreateXpDeployment
     implements Command<XpDeploymentResource>
 {
     private final CrdClientsProducer.XpDeploymentClient client;
 
     private final String apiVersion;
+
+    private final String kind = "XPDeployment";
 
     private final XpDeploymentResourceSpec spec;
 
@@ -36,8 +39,8 @@ public class CommandCreateXpDeployment
     public XpDeploymentResource execute()
     {
         XpDeploymentResource newDeployment = new XpDeploymentResource();
-        newDeployment.setApiVersion( "enonic.cloud/v1alpha1" );
-        newDeployment.setKind( "XPDeployment" );
+        newDeployment.setApiVersion( apiVersion );
+        newDeployment.setKind( kind );
         newDeployment.getMetadata().setName( spec.getFullName() );
         newDeployment.getMetadata().setLabels( spec.getDefaultLabels() );
         newDeployment.setSpec( spec );

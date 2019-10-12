@@ -6,7 +6,7 @@ import java.util.List;
 public class CombinedCommand
     implements Command<Exception>
 {
-    final List<Command> commands;
+    private final List<Command> commands;
 
     private CombinedCommand( final Builder builder )
     {
@@ -38,7 +38,7 @@ public class CombinedCommand
 
     public static final class Builder
     {
-        private List<Command> commands;
+        private final List<Command> commands;
 
         private Builder()
         {

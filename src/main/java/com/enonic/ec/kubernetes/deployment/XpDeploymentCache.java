@@ -1,4 +1,4 @@
-package com.enonic.ec.kubernetes.common.crd;
+package com.enonic.ec.kubernetes.deployment;
 
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
@@ -9,14 +9,14 @@ import io.fabric8.kubernetes.client.Watcher;
 import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.ec.kubernetes.common.cache.ResourceCache;
-import com.enonic.ec.kubernetes.common.crd.XpDeployment.XpDeploymentResource;
+import com.enonic.ec.kubernetes.deployment.XpDeployment.XpDeploymentResource;
 
 @Singleton
 public class XpDeploymentCache
     extends ResourceCache<XpDeploymentResource>
 {
 
-    private CrdClientsProducer.XpDeploymentClient client;
+    private final CrdClientsProducer.XpDeploymentClient client;
 
     @Inject
     public XpDeploymentCache( final CrdClientsProducer.XpDeploymentClient client )
@@ -28,7 +28,7 @@ public class XpDeploymentCache
     void onStartup( @Observes StartupEvent _ev )
     {
         initialize( client.getClient().inAnyNamespace().list().getItems() );
-        client.getClient().inAnyNamespace().watch( new Watcher<XpDeploymentResource>()
+        client.getClient().inAnyNamespace().watch( new Watcher<>()
         {
             @Override
             public void eventReceived( final Action action, final XpDeploymentResource deployment )
