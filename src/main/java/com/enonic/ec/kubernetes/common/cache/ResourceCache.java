@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,9 +31,9 @@ public class ResourceCache<T extends HasMetadata>
         this.executor = Executors.newSingleThreadExecutor();
     }
 
-    public List<T> list()
+    public Stream<T> stream()
     {
-        return cache.entrySet().stream().map( e -> e.getValue() ).collect( Collectors.toList() );
+        return cache.entrySet().stream().map( e -> e.getValue() );
     }
 
     public T get( String id )
@@ -46,7 +46,7 @@ public class ResourceCache<T extends HasMetadata>
         eventListeners.add( event );
     }
 
-    protected void initialize( List<T> initialState )
+    public void initialize( List<T> initialState )
     {
         initialState.forEach( resource -> {
             cache.put( resource.getMetadata().getUid(), resource );
@@ -67,7 +67,7 @@ public class ResourceCache<T extends HasMetadata>
                     return;
                 }
             }
-            log.info( "Resource " + uid + " " + action + " " + resource.getKind() + ": " + resource.getMetadata().getName() );
+            log.debug( "Resource " + uid + " " + action + " " + resource.getKind() + ": " + resource.getMetadata().getName() );
             if ( action == Watcher.Action.ADDED || action == Watcher.Action.MODIFIED )
             {
                 cache.put( uid, resource );
@@ -92,8 +92,8 @@ public class ResourceCache<T extends HasMetadata>
         }
         catch ( Exception e )
         {
-            //TODO: Should this be the case?
-            e.printStackTrace();
+            // Better just to let kubernetes restart the operator
+            log.error( "Something when terrably wrong", e );
             System.exit( -1 );
         }
     }

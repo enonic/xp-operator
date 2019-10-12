@@ -8,6 +8,8 @@ import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 
 import io.quarkus.runtime.annotations.RegisterForReflection;
 
+import static com.enonic.ec.kubernetes.common.assertions.Assertions.assertNotNull;
+
 @JsonDeserialize(builder = XpDeploymentResourceSpec.Builder.class)
 @RegisterForReflection
 public class XpDeploymentResourceSpec
@@ -26,13 +28,12 @@ public class XpDeploymentResourceSpec
 
     private XpDeploymentResourceSpec( final Builder builder )
     {
-        // TODO: Assertions
-        xpVersion = builder.xpVersion;
-        cloud = builder.cloud;
-        project = builder.project;
-        app = builder.app;
-        name = builder.name;
-        config = builder.config;
+        xpVersion = assertNotNull( "xpVersion", builder.xpVersion );
+        cloud = assertNotNull( "cloud", builder.cloud );
+        project = assertNotNull( "project", builder.project );
+        app = assertNotNull( "app", builder.app );
+        name = assertNotNull( "name", builder.name );
+        config = assertNotNull( "config", builder.config );
     }
 
     public static Builder newBuilder()
@@ -71,13 +72,15 @@ public class XpDeploymentResourceSpec
     }
 
     @JsonIgnore
-    public String getFullProjectName() {
-        return String.join( "-", getCloud(), getProject());
+    public String getFullProjectName()
+    {
+        return String.join( "-", getCloud(), getProject() );
     }
 
     @JsonIgnore
-    public String getFullAppName() {
-        return String.join( "-", getApp(), getName());
+    public String getFullAppName()
+    {
+        return String.join( "-", getApp(), getName() );
     }
 
     @JsonIgnore

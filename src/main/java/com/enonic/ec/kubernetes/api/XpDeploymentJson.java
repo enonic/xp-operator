@@ -7,6 +7,8 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 
 import com.enonic.ec.kubernetes.common.crd.XpDeployment.XpDeploymentResourceSpec;
 
+import static com.enonic.ec.kubernetes.common.assertions.Assertions.assertNotNull;
+
 @JsonDeserialize(builder = XpDeploymentJson.Builder.class)
 @RegisterForReflection
 public class XpDeploymentJson
@@ -20,8 +22,8 @@ public class XpDeploymentJson
     private XpDeploymentJson( final Builder builder )
     {
         uid = builder.uid;
-        apiVersion = builder.apiVersion;
-        spec = builder.spec;
+        apiVersion = assertNotNull( "apiVersion", builder.apiVersion );
+        spec = assertNotNull( "spec", builder.spec );
     }
 
     public static Builder newBuilder()

@@ -50,12 +50,6 @@ public class CommandCreateXpDeployment
 
         private String apiVersion;
 
-        private String cloud;
-
-        private String project;
-
-        private String name;
-
         private XpDeploymentResourceSpec spec;
 
         private Builder()
@@ -71,24 +65,6 @@ public class CommandCreateXpDeployment
         public Builder apiVersion( final String val )
         {
             apiVersion = val;
-            return this;
-        }
-
-        public Builder cloud( final String val )
-        {
-            cloud = val;
-            return this;
-        }
-
-        public Builder project( final String val )
-        {
-            project = val;
-            return this;
-        }
-
-        public Builder name( final String val )
-        {
-            name = val;
             return this;
         }
 

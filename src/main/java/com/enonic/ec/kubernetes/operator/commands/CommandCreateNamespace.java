@@ -1,6 +1,7 @@
 package com.enonic.ec.kubernetes.operator.commands;
 
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,11 +26,14 @@ public class CommandCreateNamespace
 
     private final String name;
 
+    private final Map<String, String> labels;
+
     private CommandCreateNamespace( final Builder builder )
     {
         client = assertNotNull( "client", builder.client );
         ownerReference = assertNotNull( "ownerReference", builder.ownerReference );
         name = assertNotNull( "name", builder.name );
+        labels = assertNotNull( "labels", builder.labels );
     }
 
     public static Builder newBuilder()
@@ -49,6 +53,7 @@ public class CommandCreateNamespace
         ObjectMeta metaData = new ObjectMeta();
         metaData.setOwnerReferences( List.of( ownerReference ) );
         metaData.setName( name );
+        metaData.setLabels( labels );
 
         Namespace ns = new Namespace();
         ns.setMetadata( metaData );
@@ -69,6 +74,8 @@ public class CommandCreateNamespace
 
         private String name;
 
+        private Map<String, String> labels;
+
         private Builder()
         {
         }
@@ -88,6 +95,12 @@ public class CommandCreateNamespace
         public Builder name( final String val )
         {
             name = val;
+            return this;
+        }
+
+        public Builder labels( final Map<String, String> val )
+        {
+            labels = val;
             return this;
         }
 

@@ -20,4 +20,7 @@ minikube-logs:
 	kubectl -n ec-system get pods | grep ec-operator | awk '{print $$1}' | xargs kubectl -n ec-system logs -f
 
 post:
-	cat src/test/json/test.json | http -v -j POST :8080/xp
+	cat src/test/json/test.json | http -v -j POST :8080/
+
+put:
+	cat src/test/json/test.json | http -v -j PUT :8080/

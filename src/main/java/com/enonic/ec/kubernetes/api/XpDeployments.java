@@ -9,6 +9,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -24,7 +25,7 @@ import com.enonic.ec.kubernetes.common.crd.XpDeployment.XpDeploymentResource;
 import com.enonic.ec.kubernetes.common.crd.XpDeploymentCache;
 
 @ApplicationScoped
-@Path("/xp")
+@Path("/")
 public class XpDeployments
 {
 
@@ -37,10 +38,9 @@ public class XpDeployments
     @GET
     @Path("/")
     @Produces("application/json")
-    public List<String> getXpDeployments()
+    public List<XpDeploymentJson> getXpDeployments()
     {
-        // TODO: Create a command?
-        return xpDeploymentCache.list().stream().map( r -> r.getMetadata().getUid() ).collect( Collectors.toList() );
+        return xpDeploymentCache.stream().map( XpDeployments::resourceToJson ).collect( Collectors.toList() );
     }
 
     @POST
@@ -59,7 +59,7 @@ public class XpDeployments
         UriBuilder builder = uriInfo.getAbsolutePathBuilder();
         builder.path( resource.getMetadata().getUid() );
 
-        return Response.created( builder.build() ).build();
+        return Response.created( builder.build() ).entity( resourceToJson( resource ) ).build();
     }
 
     @GET
@@ -72,29 +72,29 @@ public class XpDeployments
         {
             return Response.status( 404 ).build();
         }
-        return Response.ok( XpDeploymentJson.
-            newBuilder().
-            apiVersion( resource.getApiVersion() ).
-            uid( resource.getMetadata().getUid() ).
-            spec( resource.getSpec() ).
-            build() ).build();
+        return Response.ok( resourceToJson( resource ) ).build();
     }
 
-//    @PUT
-//    @Path("/{uid}")
-//    public Response editXpDeployment( @PathParam("uid") String uid, XpDeployment deployment )
-//    {
-//        XpDeploymentResource resource = xpDeploymentCache.get( uid );
-//        if ( resource == null )
-//        {
-//            return Response.status( 404 ).build();
-//        }
-//        resource.setSpec( deployment.spec ); // TODO: Do this better
-//
-//        xpDeploymentClient.getClient().createOrReplace( resource );
-//
-//        return Response.ok().build();
-//    }
+    @PUT
+    @Path("/{uid}")
+    public Response editXpDeployment( @PathParam("uid") String uid, XpDeploymentJson deployment )
+    {
+        XpDeploymentResource resource = xpDeploymentCache.get( uid );
+        if ( resource == null )
+        {
+            return Response.status( 404 ).build();
+        }
+
+        if ( !resource.getApiVersion().equals( deployment.getApiVersion() ) )
+        {
+            return Response.status( 400, "cannot update deployment to a different apiVersion" ).build();
+        }
+
+        resource.setSpec( deployment.getSpec() );
+        xpDeploymentClient.getClient().createOrReplace( resource );
+
+        return Response.ok( resourceToJson( resource ) ).build();
+    }
 
     @DELETE
     @Path("/{uid}")
@@ -113,6 +113,15 @@ public class XpDeployments
             execute();
 
         return Response.ok().build();
+    }
+
+    private static XpDeploymentJson resourceToJson( XpDeploymentResource r )
+    {
+        return XpDeploymentJson.newBuilder().
+            apiVersion( r.getApiVersion() ).
+            uid( r.getMetadata().getUid() ).
+            spec( r.getSpec() ).
+            build();
     }
 
 }
