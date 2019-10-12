@@ -24,7 +24,7 @@ public class CommandCreateXpDeployment
         assertNotNull( "spec.cloud", builder.spec.getCloud() );
         assertNotNull( "spec.name", builder.spec.getName() );
         assertNotNull( "spec.project", builder.spec.getProject() );
-        assertEquals( "Only version 'enonic.io/v1alpha1' allowed", builder.apiVersion, "enonic.io/v1alpha1" );
+        assertEquals( "Only version 'enonic.cloud/v1alpha1' allowed", builder.apiVersion, "enonic.cloud/v1alpha1" );
     }
 
     public static Builder newBuilder()
@@ -36,7 +36,7 @@ public class CommandCreateXpDeployment
     public XpDeploymentResource execute()
     {
         XpDeploymentResource newDeployment = new XpDeploymentResource();
-        newDeployment.setApiVersion( "enonic.io/v1alpha1" );
+        newDeployment.setApiVersion( "enonic.cloud/v1alpha1" );
         newDeployment.setKind( "XPDeployment" );
         newDeployment.getMetadata().setName( spec.getFullName() );
         newDeployment.getMetadata().setLabels( spec.getDefaultLabels() );

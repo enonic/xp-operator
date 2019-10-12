@@ -53,7 +53,7 @@ public class CrdClientsProducer
     XpDeploymentClient produceXpDeploymentClient( KubernetesClient defaultClient )
     {
         return new XpDeploymentClient(
-            createCrdClient( defaultClient, "enonic.io/v1alpha1", "XPDeployment", "xp-deployments.enonic.io", XpDeploymentResource.class,
+            createCrdClient( defaultClient, "enonic.cloud/v1alpha1", "XPDeployment", "xp-deployments.enonic.cloud", XpDeploymentResource.class,
                              XpDeploymentResourceList.class, XpDeploymentResourceDoneable.class ) );
     }
 }

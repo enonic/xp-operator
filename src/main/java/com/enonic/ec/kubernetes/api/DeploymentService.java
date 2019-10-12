@@ -26,7 +26,7 @@ import com.enonic.ec.kubernetes.common.crd.XpDeploymentCache;
 
 @ApplicationScoped
 @Path("/")
-public class XpDeployments
+public class DeploymentService
 {
 
     @Inject
@@ -40,7 +40,7 @@ public class XpDeployments
     @Produces("application/json")
     public List<XpDeploymentJson> getXpDeployments()
     {
-        return xpDeploymentCache.stream().map( XpDeployments::resourceToJson ).collect( Collectors.toList() );
+        return xpDeploymentCache.stream().map( DeploymentService::resourceToJson ).collect( Collectors.toList() );
     }
 
     @POST

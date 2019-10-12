@@ -1,5 +1,5 @@
 {
-  "apiVersion": "enonic.io/v1alpha1",
+  "apiVersion": "enonic.cloud/v1alpha1",
   "spec": {
     "cloud": "mycloud",
     "name": "myname",

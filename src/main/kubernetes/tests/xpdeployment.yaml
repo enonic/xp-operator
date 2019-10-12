@@ -1,4 +1,4 @@
-apiVersion: enonic.io/v1alpha1
+apiVersion: enonic.cloud/v1alpha1
 kind: XPDeployment
 metadata:
   name: "xp-engine1"
