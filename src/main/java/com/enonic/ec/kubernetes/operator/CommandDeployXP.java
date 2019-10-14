@@ -9,9 +9,8 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import com.enonic.ec.kubernetes.common.commands.CombinedCommand;
 import com.enonic.ec.kubernetes.common.commands.Command;
 import com.enonic.ec.kubernetes.deployment.XpDeployment.XpDeploymentResource;
-import com.enonic.ec.kubernetes.operator.commands.CommandCreateConfigMap;
-import com.enonic.ec.kubernetes.operator.commands.CommandCreateNamespace;
-import com.enonic.ec.kubernetes.operator.commands.CommandDeleteNamespace;
+import com.enonic.ec.kubernetes.operator.commands.CommandApplyConfigMap;
+import com.enonic.ec.kubernetes.operator.commands.CommandApplyNamespace;
 
 import static com.enonic.ec.kubernetes.common.assertions.Assertions.assertNotNull;
 
@@ -42,19 +41,20 @@ public class CommandDeployXP
     @Override
     public XpDeploymentResource execute()
     {
-        log.info( "Creating XP deployment for resource with uid '" + resource.getMetadata().getUid() + "'" );
+        log.info( "Creating/Updating XP deployment for resource with uid '" + resource.getMetadata().getUid() + "'" );
         String namespaceName = resource.getSpec().getFullProjectName();
+
+        // TODO: What to do if cloud+project of 2 different people have the same name??
 
         CombinedCommand.Builder commandBuilder = CombinedCommand.newBuilder();
 
-        commandBuilder.add( CommandCreateNamespace.newBuilder().
+        commandBuilder.add( CommandApplyNamespace.newBuilder().
             client( client ).
             ownerReference( ownerReference ).
             name( namespaceName ).
-            labels( resource.getSpec().getDefaultLabels() ).
             build() );
 
-        commandBuilder.add( CommandCreateConfigMap.newBuilder().
+        commandBuilder.add( CommandApplyConfigMap.newBuilder().
             client( client ).
             ownerReference( ownerReference ).
             name( resource.getSpec().getFullAppName() ).
@@ -67,21 +67,8 @@ public class CommandDeployXP
 
         if ( exception != null )
         {
-            if ( exception instanceof CommandCreateNamespace.NamespaceExists )
-            {
-                // A namespace with this name already exists
-                log.info( "Aborted because namespace '" + namespaceName + "' already exists" );
-            }
-            else
-            {
-                log.error( "Failed creating XP deployment", exception );
-                log.info( "Cleaning up the failed deployment" );
-                CommandDeleteNamespace.newBuilder().
-                    client( client ).
-                    name( namespaceName ).
-                    build().
-                    execute();
-            }
+            // TODO: What to do in this case? Update XP deployment with info maybe?
+            log.error( "Failed creating XP deployment", exception );
         }
 
         return resource;

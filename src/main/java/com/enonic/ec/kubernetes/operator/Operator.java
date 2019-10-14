@@ -34,12 +34,13 @@ public class Operator
     {
         log.debug( "Starting operator" );
 
-        // We do this so we do not get old ADD events during startup
         log.debug( "Initialize xpDeployment cache" );
         xpDeploymentCache.initialize( xpDeploymentClient.getClient().list().getItems() );
 
+        // TODO: Why are we getting add events on startup?
+
         xpDeploymentCache.addWatcher( ( action, id, resource ) -> {
-            if ( action == Watcher.Action.ADDED )
+            if ( action == Watcher.Action.ADDED || action == Watcher.Action.MODIFIED )
             {
                 CommandDeployXP.newBuilder().
                     client( defaultClient ).
