@@ -20,7 +20,7 @@ import com.enonic.ec.kubernetes.deployment.XpDeployment.XpDeploymentResourceList
 public class CrdClientsProducer
 {
 
-    private static <T extends HasMetadata, L extends CustomResourceList<T>, D extends Doneable<T>> MixedOperation<T, L, D, Resource<T, D>> createCrdClient(
+    public static <T extends HasMetadata, L extends CustomResourceList<T>, D extends Doneable<T>> MixedOperation<T, L, D, Resource<T, D>> createCrdClient(
         final KubernetesClient defaultClient, final String apiVersion, final String kind, final String name, final Class<T> resourceClass,
         final Class<L> resourceListClass, final Class<D> resourceDoneableClass )
     {

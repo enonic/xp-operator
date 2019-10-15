@@ -14,11 +14,12 @@ import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.ec.kubernetes.deployment.CrdClientsProducer;
 import com.enonic.ec.kubernetes.deployment.XpDeploymentCache;
+import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerClientProducer;
 
 @ApplicationScoped
 public class Operator
 {
-    private final Logger log = LoggerFactory.getLogger( Operator.class );
+    private final static Logger log = LoggerFactory.getLogger( Operator.class );
 
     @Inject
     @Named("default")
@@ -26,6 +27,9 @@ public class Operator
 
     @Inject
     CrdClientsProducer.XpDeploymentClient xpDeploymentClient;
+
+    @Inject
+    IssuerClientProducer.IssuerClient issuerClient;
 
     @Inject
     XpDeploymentCache xpDeploymentCache;
@@ -43,7 +47,8 @@ public class Operator
             if ( action == Watcher.Action.ADDED || action == Watcher.Action.MODIFIED )
             {
                 CommandDeployXP.newBuilder().
-                    client( defaultClient ).
+                    defaultClient( defaultClient ).
+                    issuerClient( issuerClient ).
                     resource( resource ).
                     build().
                     execute();

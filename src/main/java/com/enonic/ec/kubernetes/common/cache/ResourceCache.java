@@ -16,7 +16,7 @@ import io.fabric8.kubernetes.client.Watcher;
 
 public class ResourceCache<T extends HasMetadata>
 {
-    private final Logger log = LoggerFactory.getLogger( ResourceCache.class );
+    private final static Logger log = LoggerFactory.getLogger( ResourceCache.class );
 
     private final Map<String, T> cache;
 

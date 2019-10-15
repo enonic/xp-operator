@@ -4,6 +4,7 @@ minikube-setup:
 	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.clusterrole.yaml
 	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.serviceaccount.yaml
 	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.clusterrolebinding.yaml
+	kubectl apply -f src/main/kubernetes/operator/crd/cert-manager.crd.issuer.yaml
 	kubectl apply -f src/main/kubernetes/operator/crd/ec-operator.crd.xpdeployment.yaml
 
 minikube-deploy-operator:

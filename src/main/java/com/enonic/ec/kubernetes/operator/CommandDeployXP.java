@@ -9,17 +9,20 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import com.enonic.ec.kubernetes.common.commands.CombinedCommand;
 import com.enonic.ec.kubernetes.common.commands.Command;
 import com.enonic.ec.kubernetes.deployment.XpDeployment.XpDeploymentResource;
-import com.enonic.ec.kubernetes.operator.commands.CommandApplyConfigMap;
-import com.enonic.ec.kubernetes.operator.commands.CommandApplyNamespace;
+import com.enonic.ec.kubernetes.operator.commands.apply.CommandApplyConfigMap;
+import com.enonic.ec.kubernetes.operator.commands.apply.CommandApplyNamespace;
+import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerClientProducer;
 
 import static com.enonic.ec.kubernetes.common.assertions.Assertions.assertNotNull;
 
 public class CommandDeployXP
     implements Command<XpDeploymentResource>
 {
-    private final Logger log = LoggerFactory.getLogger( CommandDeployXP.class );
+    private final static Logger log = LoggerFactory.getLogger( CommandDeployXP.class );
 
-    private final KubernetesClient client;
+    private final KubernetesClient defaultClient;
+
+    private final IssuerClientProducer.IssuerClient issuerClient;
 
     private final XpDeploymentResource resource;
 
@@ -27,7 +30,8 @@ public class CommandDeployXP
 
     private CommandDeployXP( final Builder builder )
     {
-        client = assertNotNull( "client", builder.client );
+        defaultClient = assertNotNull( "defaultClient", builder.defaultClient );
+        issuerClient = assertNotNull( "issuerClient", builder.issuerClient );
         resource = assertNotNull( "resource", builder.resource );
         ownerReference = new OwnerReference( resource.getApiVersion(), true, true, resource.getKind(), resource.getMetadata().getName(),
                                              resource.getMetadata().getUid() );
@@ -49,13 +53,13 @@ public class CommandDeployXP
         CombinedCommand.Builder commandBuilder = CombinedCommand.newBuilder();
 
         commandBuilder.add( CommandApplyNamespace.newBuilder().
-            client( client ).
+            client( defaultClient ).
             ownerReference( ownerReference ).
             name( namespaceName ).
             build() );
 
         commandBuilder.add( CommandApplyConfigMap.newBuilder().
-            client( client ).
+            client( defaultClient ).
             ownerReference( ownerReference ).
             name( resource.getSpec().getFullAppName() ).
             namespace( namespaceName ).
@@ -76,17 +80,25 @@ public class CommandDeployXP
 
     public static final class Builder
     {
-        private KubernetesClient client;
+        private KubernetesClient defaultClient;
 
         private XpDeploymentResource resource;
+
+        private IssuerClientProducer.IssuerClient issuerClient;
 
         private Builder()
         {
         }
 
-        public Builder client( final KubernetesClient val )
+        public Builder defaultClient( final KubernetesClient val )
         {
-            client = val;
+            defaultClient = val;
+            return this;
+        }
+
+        public Builder issuerClient( final IssuerClientProducer.IssuerClient val )
+        {
+            issuerClient = val;
             return this;
         }
 
