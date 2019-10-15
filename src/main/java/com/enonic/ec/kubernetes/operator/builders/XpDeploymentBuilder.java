@@ -1,5 +1,7 @@
 package com.enonic.ec.kubernetes.operator.builders;
 
+import java.util.Map;
+
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
@@ -8,44 +10,58 @@ import com.enonic.ec.kubernetes.common.commands.Command;
 import com.enonic.ec.kubernetes.deployment.XpDeployment.XpDeploymentResource;
 import com.enonic.ec.kubernetes.operator.commands.apply.CommandApplyConfigMap;
 import com.enonic.ec.kubernetes.operator.commands.apply.CommandApplyNamespace;
+import com.enonic.ec.kubernetes.operator.commands.apply.CommandApplyPodDisruptionBudget;
+import com.enonic.ec.kubernetes.operator.commands.apply.CommandApplyStatefulSet;
 import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerClientProducer;
 
 import static com.enonic.ec.kubernetes.common.assertions.Assertions.assertNotNull;
 
 public class XpDeploymentBuilder
-    implements Command<XpDeploymentResource>
+    implements com.enonic.ec.kubernetes.common.Builder<Command<Void>>
 {
-    private final KubernetesClient defaultClient;
+    private KubernetesClient defaultClient;
 
-    private final IssuerClientProducer.IssuerClient issuerClient;
+    private IssuerClientProducer.IssuerClient issuerClient;
 
-    private final XpDeploymentResource resource;
+    private XpDeploymentResource resource;
 
-    private final OwnerReference ownerReference;
+    private OwnerReference ownerReference;
 
-    private XpDeploymentBuilder( final Builder builder )
+    private XpDeploymentBuilder()
     {
-        defaultClient = assertNotNull( "defaultClient", builder.defaultClient );
-        issuerClient = assertNotNull( "issuerClient", builder.issuerClient );
-        resource = assertNotNull( "resource", builder.resource );
-        ownerReference = createOwnerReference();
     }
 
-    public static Builder newBuilder()
+    public static XpDeploymentBuilder newBuilder()
     {
-        return new Builder();
+        return new XpDeploymentBuilder();
     }
 
-    private OwnerReference createOwnerReference()
+    public XpDeploymentBuilder defaultClient( KubernetesClient var )
     {
-        return new OwnerReference( resource.getApiVersion(), true, true, resource.getKind(), resource.getMetadata().getName(),
-                                   resource.getMetadata().getUid() );
+        defaultClient = var;
+        return this;
+    }
+
+    public XpDeploymentBuilder issuerClient( IssuerClientProducer.IssuerClient var )
+    {
+        issuerClient = var;
+        return this;
+    }
+
+    public XpDeploymentBuilder resource( XpDeploymentResource var )
+    {
+        resource = var;
+        return this;
     }
 
     @Override
-    public XpDeploymentResource execute()
-        throws Exception
+    public Command<Void> build()
     {
+        defaultClient = assertNotNull( "defaultClient", defaultClient );
+        issuerClient = assertNotNull( "issuerClient", issuerClient );
+        resource = assertNotNull( "resource", resource );
+        ownerReference = createOwnerReference();
+
         String namespaceName = resource.getSpec().getFullProjectName();
 
         CombinedCommand.Builder commandBuilder = CombinedCommand.newBuilder();
@@ -65,43 +81,58 @@ public class XpDeploymentBuilder
 //            spec( null ). // TODO: Fix
 //            build() );
 
-        createCluster( namespaceName, commandBuilder );
+        createXpCluster( namespaceName, commandBuilder );
 
-        commandBuilder.build().execute();
-
-        return resource;
+        return commandBuilder.build();
     }
 
-    public void createCluster( String namespaceName, CombinedCommand.Builder commandBuilder )
+    private OwnerReference createOwnerReference()
+    {
+        return new OwnerReference( resource.getApiVersion(), true, true, resource.getKind(), resource.getMetadata().getName(),
+                                   resource.getMetadata().getUid() );
+    }
+
+    private void createXpCluster( String namespace, CombinedCommand.Builder commandBuilder )
     {
         // TODO: Below here you could have multiple resources depending on the deployment
+        // To begin with we will only handle a single node
+
+        String defaultResourceName = resource.getSpec().getFullAppName();
+        Map<String, String> defaultLabels = resource.getSpec().getDefaultLabels();
 
         commandBuilder.add( CommandApplyConfigMap.newBuilder().
             client( defaultClient ).
             ownerReference( ownerReference ).
-            name( resource.getSpec().getFullAppName() ).
-            namespace( namespaceName ).
-            labels( resource.getSpec().getDefaultLabels() ).
+            name( defaultResourceName ).
+            namespace( namespace ).
+            labels( defaultLabels ).
             data( resource.getSpec().getConfig() ).
             build() );
 
-//        commandBuilder.add( CommandApplyPodDisruptionBudget.newBuilder().
-//            client( defaultClient ).
-//            ownerReference( ownerReference ).
-//            name( resource.getSpec().getFullAppName() ).
-//            namespace( namespaceName ).
-//            labels( resource.getSpec().getDefaultLabels() ).
-//            spec( null ). // TODO: Fix
-//            build() );
-//
-//        commandBuilder.add( CommandApplyStatefulSet.newBuilder().
-//            client( defaultClient ).
-//            ownerReference( ownerReference ).
-//            name( resource.getSpec().getFullAppName() ).
-//            namespace( namespaceName ).
-//            labels( resource.getSpec().getDefaultLabels() ).
-//            spec( null ). // TODO: Fix
-//            build() );
+        commandBuilder.add( CommandApplyPodDisruptionBudget.newBuilder().
+            client( defaultClient ).
+            ownerReference( ownerReference ).
+            name( defaultResourceName ).
+            namespace( namespace ).
+            labels( resource.getSpec().getDefaultLabels() ).
+            spec( PodDisruptionBudgetSpecBuilder.newBuilder().
+                minAvailable( 0 ). // This has to be 0 for a single node
+                matchLabels( defaultLabels ).
+                build() ).
+            build() );
+
+        commandBuilder.add( CommandApplyStatefulSet.newBuilder().
+            client( defaultClient ).
+            ownerReference( ownerReference ).
+            name( defaultResourceName ).
+            namespace( namespace ).
+            labels( resource.getSpec().getDefaultLabels() ).
+            spec( StatefulSetSpecBuilder.newBuilder().
+                podLabels( defaultLabels ).
+                replicas( 1 ).
+                serviceName( defaultResourceName ).
+                build() ).
+            build() );
 //
 //        commandBuilder.add( CommandApplyService.newBuilder().
 //            client( defaultClient ).
@@ -129,41 +160,5 @@ public class XpDeploymentBuilder
 //            labels( resource.getSpec().getDefaultLabels() ).
 //            spec( null ). // TODO: Fix
 //            build() );
-    }
-
-    public static final class Builder
-    {
-        private KubernetesClient defaultClient;
-
-        private IssuerClientProducer.IssuerClient issuerClient;
-
-        private XpDeploymentResource resource;
-
-        private Builder()
-        {
-        }
-
-        public Builder defaultClient( final KubernetesClient val )
-        {
-            defaultClient = val;
-            return this;
-        }
-
-        public Builder issuerClient( final IssuerClientProducer.IssuerClient val )
-        {
-            issuerClient = val;
-            return this;
-        }
-
-        public Builder resource( final XpDeploymentResource val )
-        {
-            resource = val;
-            return this;
-        }
-
-        public XpDeploymentBuilder build()
-        {
-            return new XpDeploymentBuilder( this );
-        }
     }
 }
