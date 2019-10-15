@@ -1,5 +1,6 @@
 package com.enonic.ec.kubernetes.operator.commands.apply;
 
+import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -15,13 +16,23 @@ public class CommandApplyNamespace
 
     private CommandApplyNamespace( final Builder builder )
     {
-        super( builder );
+        super( builder.namespace( "null" ) ); // Creating a namespace does not require a namespace
         client = assertNotNull( "client", builder.client );
     }
 
     public static Builder newBuilder()
     {
         return new Builder();
+    }
+
+    @Override
+    protected void checkValidity( final HasMetadata resource )
+        throws Exception
+    {
+        if ( !resource.getMetadata().getName().equals( name ) )
+        {
+            throw new Exception( "Resource names do not match" );
+        }
     }
 
     @Override

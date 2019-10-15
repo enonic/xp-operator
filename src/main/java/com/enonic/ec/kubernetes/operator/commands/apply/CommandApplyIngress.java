@@ -40,7 +40,7 @@ public class CommandApplyIngress
         Ingress ingress = new Ingress();
         ingress.setMetadata( metadata );
         ingress.setSpec( spec );
-        return client.extensions().ingresses().createOrReplace( ingress );
+        return client.extensions().ingresses().inNamespace( namespace ).createOrReplace( ingress );
     }
 
     public static final class Builder

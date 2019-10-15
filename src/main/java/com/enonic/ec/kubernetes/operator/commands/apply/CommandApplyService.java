@@ -40,7 +40,7 @@ public class CommandApplyService
         Service service = new Service();
         service.setMetadata( metadata );
         service.setSpec( spec );
-        return client.services().createOrReplace( service );
+        return client.services().inNamespace( namespace ).createOrReplace( service );
     }
 
     public static final class Builder

@@ -40,7 +40,7 @@ public class CommandApplyPodDisruptionBudget
         PodDisruptionBudget podDisruptionBudget = new PodDisruptionBudget();
         podDisruptionBudget.setMetadata( metadata );
         podDisruptionBudget.setSpec( spec );
-        return client.policy().podDisruptionBudget().createOrReplace( podDisruptionBudget );
+        return client.policy().podDisruptionBudget().inNamespace( namespace ).createOrReplace( podDisruptionBudget );
     }
 
     public static final class Builder

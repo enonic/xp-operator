@@ -43,6 +43,18 @@ public abstract class CommandApplyResource<T extends HasMetadata>
         return new Builder();
     }
 
+    protected void checkValidity( HasMetadata resource )
+        throws Exception
+    {
+        if ( !resource.getMetadata().getName().equals( name ) )
+        {
+            throw new Exception( "Resource names do not match" );
+        }
+        if ( !resource.getMetadata().getNamespace().equals( namespace ) )
+        {
+            throw new Exception( "Resource namespace do not match" );
+        }
+    }
 
     @Override
     public T execute()
@@ -53,14 +65,6 @@ public abstract class CommandApplyResource<T extends HasMetadata>
         String method = null;
         if ( resource != null )
         {
-            if ( !resource.getMetadata().getName().equals( name ) )
-            {
-                throw new Exception( "Resource names do not match" );
-            }
-            if ( !resource.getMetadata().getNamespace().equals( namespace ) )
-            {
-                throw new Exception( "Resource namespace do not match" );
-            }
             metadata = CommandMergeMetadata.newBuilder().
                 kind( resource.getKind() ).
                 objectMeta( resource.getMetadata() ).
@@ -69,6 +73,7 @@ public abstract class CommandApplyResource<T extends HasMetadata>
                 annotations( annotations ).
                 build().
                 execute();
+            metadata.setResourceVersion( null );
             method = "Updated";
         }
         else
@@ -82,7 +87,6 @@ public abstract class CommandApplyResource<T extends HasMetadata>
         log.info( method + " in Namespace '" + namespace + "' " + resource.getKind() + " '" + name + "'" );
         return resource;
     }
-
 
     protected abstract T fetchResource();
 

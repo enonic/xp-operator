@@ -40,7 +40,7 @@ public class CommandApplyIssuer
         IssuerResource issuerResource = new IssuerResource();
         issuerResource.setMetadata( metadata );
         issuerResource.setSpec( spec );
-        return client.getClient().createOrReplace( issuerResource );
+        return client.getClient().inNamespace( namespace ).createOrReplace( issuerResource );
     }
 
     public static final class Builder

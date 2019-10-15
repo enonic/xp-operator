@@ -4,7 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class CombinedCommand
-    implements Command<Exception>
+    implements Command<Void>
 {
     private final List<Command> commands;
 
@@ -19,18 +19,12 @@ public class CombinedCommand
     }
 
     @Override
-    public Exception execute()
+    public Void execute()
+        throws Exception
     {
         for ( Command c : commands )
         {
-            try
-            {
-                c.execute();
-            }
-            catch ( Exception e )
-            {
-                return e;
-            }
+            c.execute();
         }
         return null;
     }
@@ -48,6 +42,12 @@ public class CombinedCommand
         public Builder add( final Command val )
         {
             commands.add( val );
+            return this;
+        }
+
+        public Builder add( final List<Command> val )
+        {
+            val.forEach( commands::add );
             return this;
         }
 

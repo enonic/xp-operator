@@ -38,9 +38,9 @@ public class DeploymentService
     @GET
     @Path("/")
     @Produces("application/json")
-    public List<XpDeploymentJson> getXpDeployments()
+    public List<String> getXpDeployments()
     {
-        return xpDeploymentCache.stream().map( DeploymentService::resourceToJson ).collect( Collectors.toList() );
+        return xpDeploymentCache.stream().map( e -> e.getMetadata().getUid() ).collect( Collectors.toList() );
     }
 
     @POST

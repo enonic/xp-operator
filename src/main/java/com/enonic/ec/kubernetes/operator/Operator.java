@@ -14,6 +14,7 @@ import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.ec.kubernetes.deployment.CrdClientsProducer;
 import com.enonic.ec.kubernetes.deployment.XpDeploymentCache;
+import com.enonic.ec.kubernetes.operator.builders.XpDeploymentBuilder;
 import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerClientProducer;
 
 @ApplicationScoped
@@ -46,12 +47,21 @@ public class Operator
         xpDeploymentCache.addWatcher( ( action, id, resource ) -> {
             if ( action == Watcher.Action.ADDED || action == Watcher.Action.MODIFIED )
             {
-                CommandDeployXP.newBuilder().
-                    defaultClient( defaultClient ).
-                    issuerClient( issuerClient ).
-                    resource( resource ).
-                    build().
-                    execute();
+                try
+                {
+                    // TODO: What to do if cloud+project of 2 different people have the same name??
+                    XpDeploymentBuilder.newBuilder().
+                        defaultClient( defaultClient ).
+                        issuerClient( issuerClient ).
+                        resource( resource ).
+                        build().
+                        execute();
+                }
+                catch ( Exception e )
+                {
+                    // TODO: What to do in this case? Update XP deployment with info maybe?
+                    log.error( "Failed creating XP deployment", e );
+                }
             }
             else if ( action == Watcher.Action.DELETED )
             {

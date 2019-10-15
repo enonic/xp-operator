@@ -40,7 +40,7 @@ public class CommandApplyNetworkPolicy
         NetworkPolicy networkPolicy = new NetworkPolicy();
         networkPolicy.setMetadata( metadata );
         networkPolicy.setSpec( spec );
-        return client.network().networkPolicies().createOrReplace( networkPolicy );
+        return client.network().networkPolicies().inNamespace( namespace ).createOrReplace( networkPolicy );
     }
 
     public static final class Builder

@@ -42,7 +42,7 @@ public class CommandApplyConfigMap
         ConfigMap configMap = new ConfigMap();
         configMap.setMetadata( metadata );
         configMap.setData( data );
-        return client.configMaps().createOrReplace( configMap );
+        return client.configMaps().inNamespace( namespace ).createOrReplace( configMap );
     }
 
     public static final class Builder

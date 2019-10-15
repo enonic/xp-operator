@@ -45,7 +45,7 @@ public class CommandApplyStatefulSet
         StatefulSet statefulSet = new StatefulSet();
         statefulSet.setMetadata( metadata );
         statefulSet.setSpec( spec );
-        return client.apps().statefulSets().createOrReplace( statefulSet );
+        return client.apps().statefulSets().inNamespace( namespace ).createOrReplace( statefulSet );
     }
 
     public static final class Builder
