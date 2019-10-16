@@ -30,3 +30,6 @@ post:
 
 put:
 	cat src/test/json/test.json | http -v -j PUT :8080/api/4143b189-f371-4c58-b126-04a7adce257e
+
+vhost:
+	 http -v --verify=no https://$(shell minikube ip)/ host:company.com
