@@ -3,6 +3,7 @@
 ## TODO
 
 * Create admission endpoint in operator for validation
+* "cloud-project" string must be unique, else people can override deployments
 
 ## Debug with minikube
 

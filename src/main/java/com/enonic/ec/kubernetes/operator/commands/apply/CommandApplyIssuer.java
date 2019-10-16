@@ -12,6 +12,8 @@ import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerResourceSp
 public abstract class CommandApplyIssuer
     extends CommandApplyResource<IssuerResource>
 {
+    private static final String kind = "Issuer";
+
     protected abstract IssuerClientProducer.IssuerClient client();
 
     protected abstract IssuerResourceSpec spec();
@@ -28,6 +30,7 @@ public abstract class CommandApplyIssuer
         IssuerResource issuerResource = new IssuerResource();
         issuerResource.setMetadata( metadata );
         issuerResource.setSpec( spec() );
+        issuerResource.setKind( kind );
         return client().getClient().inNamespace( namespace() ).createOrReplace( issuerResource );
     }
 }

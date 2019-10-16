@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.immutables.value.Value;
+import org.wildfly.common.annotation.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -21,18 +22,21 @@ public abstract class XpDeploymentResourceSpec
     public abstract String project();
 
     @Value.Default
-    public Boolean enabled()
-    {
-        return true;
-    }
-
-    @Value.Default
     public String app()
     {
         return "xp";
     }
 
     public abstract String name();
+
+    @Value.Default
+    public Boolean enabled()
+    {
+        return true;
+    }
+
+    @Nullable
+    public abstract Map<String, XpDeploymentResourceSpecVhost> vhost();
 
     public abstract List<XpDeploymentResourceSpecNode> nodes();
 
@@ -76,10 +80,17 @@ public abstract class XpDeploymentResourceSpec
         Preconditions.checkState( singleNode.isPresent(), "Operator only supports nodes of type " + NodeType.STANDALONE.name() );
 
         nodes().forEach( node -> {
-            Preconditions.checkState( singleNode.get().resources().disks().containsKey( "repo" ),
+            Preconditions.checkState( node.resources().disks().containsKey( "repo" ), "field resources.disks.repo on node has to be set" );
+            Preconditions.checkState( node.resources().disks().containsKey( "snapshots" ),
                                       "field resources.disks.repo on node has to be set" );
-            Preconditions.checkState( singleNode.get().resources().disks().containsKey( "snapshots" ),
-                                      "field resources.disks.repo on node has to be set" );
+
+            if ( node.vhost() != null )
+            {
+                node.vhost().forEach( v -> {
+                    Preconditions.checkState( vhost() != null && vhost().get( v ) != null, "vhost definition " + v + "missing" );
+                } );
+            }
+
         } );
 
         singleNode.ifPresent( xpDeploymentResourceSpecNode -> Preconditions.checkState( xpDeploymentResourceSpecNode.replicas().equals( 1 ),

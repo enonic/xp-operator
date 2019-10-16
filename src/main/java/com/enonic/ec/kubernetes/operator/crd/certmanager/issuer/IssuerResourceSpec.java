@@ -1,5 +1,7 @@
 package com.enonic.ec.kubernetes.operator.crd.certmanager.issuer;
 
+import java.util.Map;
+
 import org.immutables.value.Value;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -8,5 +10,5 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 @Value.Immutable
 public abstract class IssuerResourceSpec
 {
-    public abstract Object selfSigned();
+    public abstract Map<String, String> selfSigned();
 }

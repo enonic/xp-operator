@@ -6,8 +6,22 @@
     "name": "myname",
     "xpVersion": "7.1.0",
     "enabled": true,
+
+    "vhost": {
+      "app1": {
+        "host": "company.com",
+        "config": "mapping.myapp.host = company.com\nmapping.myapplication.source = /app\nmapping.myapp.target = /webapp/name.of.my.app\nmapping.myapp.idProvider.myldap = default",
+        "certificate": {
+          "selfSigned": true
+        }
+      }
+    },
+
     "nodes": [
       {
+        "vhost": [
+          "app1"
+        ],
         "replicas": 1,
         "type": "STANDALONE",
         "resources": {

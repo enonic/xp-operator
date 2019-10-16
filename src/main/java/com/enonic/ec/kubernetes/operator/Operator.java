@@ -51,12 +51,14 @@ public class Operator
                     try
                     {
                         // TODO: What to do if cloud+project of 2 different people have the same name??
-                        ImmutableCommandDeployXp.builder().
+                        ImmutableCommandDeployXp deployCommand = ImmutableCommandDeployXp.builder().
                             defaultClient( defaultClient ).
                             issuerClient( issuerClient ).
                             resource( newResource ).
-                            build().
-                            execute();
+                            build();
+
+                        Thread.sleep( 500 ); // Give kubernetes some time to register owner reference
+                        deployCommand.execute();
                     }
                     catch ( Exception e )
                     {

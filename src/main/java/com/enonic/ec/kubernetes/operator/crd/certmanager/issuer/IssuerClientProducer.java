@@ -34,7 +34,7 @@ public class IssuerClientProducer
     IssuerClient produceXpDeploymentClient( @Named("default") KubernetesClient defaultClient )
     {
         return new IssuerClient(
-            createCrdClient( defaultClient, "certmanager.k8s.io/v1alpha1", "Issuer", "issuers.cert-manager.io", IssuerResource.class,
+            createCrdClient( defaultClient, "apiextensions.k8s.io/v1beta1", "Issuer", "issuers.certmanager.k8s.io", IssuerResource.class,
                              IssuerResourceList.class, IssuerResourceDoneable.class ) );
     }
 }
