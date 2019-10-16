@@ -6,5 +6,5 @@ import io.fabric8.kubernetes.client.Watcher;
 @FunctionalInterface
 public interface OnAction<T extends HasMetadata>
 {
-    void accept( Watcher.Action action, String id, T resource );
+    void accept( Watcher.Action action, String id, T oldResource, T newResource );
 }

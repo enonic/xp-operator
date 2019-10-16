@@ -1,3 +1,6 @@
+mvn-dependencies:
+	mvn versions:display-plugin-updates
+
 minikube-setup:
 	minikube start
 	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.namespace.yaml

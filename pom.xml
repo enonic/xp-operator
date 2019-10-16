@@ -14,6 +14,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
     <quarkus.version>0.24.0</quarkus.version>
+    <org.immutables.version>2.8.0</org.immutables.version>
     <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
     <surefire-plugin.version>3.0.0-M3</surefire-plugin.version>
     <versions-maven-plugin.version>2.7</versions-maven-plugin.version>
@@ -52,6 +53,12 @@
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-resteasy-jackson</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.immutables</groupId>
+      <artifactId>value</artifactId>
+      <version>${org.immutables.version}</version>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -89,7 +96,16 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>${maven-compiler-plugin.version}</version>
         <configuration>
+          <source>${maven.compiler.source}</source>
+          <target>${maven.compiler.target}</target>
           <release>${maven.compiler.release}</release>
+          <annotationProcessorPaths>
+            <dependency>
+              <groupId>org.immutables</groupId>
+              <artifactId>value</artifactId>
+              <version>${org.immutables.version}</version>
+            </dependency>
+          </annotationProcessorPaths>
         </configuration>
       </plugin>
     </plugins>

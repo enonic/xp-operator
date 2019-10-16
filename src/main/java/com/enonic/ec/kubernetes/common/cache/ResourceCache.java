@@ -56,9 +56,10 @@ public class ResourceCache<T extends HasMetadata>
         try
         {
             String uid = resource.getMetadata().getUid();
-            if ( cache.containsKey( uid ) )
+            final T oldResource = cache.get( uid );
+            if ( oldResource != null )
             {
-                int knownResourceVersion = Integer.parseInt( cache.get( uid ).getMetadata().getResourceVersion() );
+                int knownResourceVersion = Integer.parseInt( oldResource.getMetadata().getResourceVersion() );
                 int receivedResourceVersion = Integer.parseInt( resource.getMetadata().getResourceVersion() );
                 if ( knownResourceVersion > receivedResourceVersion )
                 {
@@ -69,12 +70,13 @@ public class ResourceCache<T extends HasMetadata>
             if ( action == Watcher.Action.ADDED || action == Watcher.Action.MODIFIED )
             {
                 cache.put( uid, resource );
-                executor.execute( () -> eventListeners.forEach( eventListener -> eventListener.accept( action, uid, resource ) ) );
+                executor.execute(
+                    () -> eventListeners.forEach( eventListener -> eventListener.accept( action, uid, oldResource, resource ) ) );
             }
             else if ( action == Watcher.Action.DELETED )
             {
                 cache.remove( uid );
-                executor.execute( () -> eventListeners.forEach( eventListener -> eventListener.accept( action, uid, resource ) ) );
+                executor.execute( () -> eventListeners.forEach( eventListener -> eventListener.accept( action, uid, resource, null ) ) );
             }
             else
             {

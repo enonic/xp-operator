@@ -14,7 +14,6 @@ public class IssuerClientProducer
 {
     public static class IssuerClient
     {
-
         private final MixedOperation<IssuerResource, IssuerResourceList, IssuerResourceDoneable, Resource<IssuerResource, IssuerResourceDoneable>>
             client;
 

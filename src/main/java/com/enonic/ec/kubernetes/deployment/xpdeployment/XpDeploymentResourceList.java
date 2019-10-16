@@ -1,4 +1,4 @@
-package com.enonic.ec.kubernetes.deployment.XpDeployment;
+package com.enonic.ec.kubernetes.deployment.xpdeployment;
 
 import io.fabric8.kubernetes.client.CustomResourceList;
 

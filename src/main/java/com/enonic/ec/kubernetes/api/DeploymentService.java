@@ -18,11 +18,11 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
-import com.enonic.ec.kubernetes.deployment.CommandCreateXpDeployment;
-import com.enonic.ec.kubernetes.deployment.CommandDeleteXpDeployment;
 import com.enonic.ec.kubernetes.deployment.CrdClientsProducer;
-import com.enonic.ec.kubernetes.deployment.XpDeployment.XpDeploymentResource;
+import com.enonic.ec.kubernetes.deployment.ImmutableCommandCreateXpDeployment;
+import com.enonic.ec.kubernetes.deployment.ImmutableCommandDeleteXpDeployment;
 import com.enonic.ec.kubernetes.deployment.XpDeploymentCache;
+import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResource;
 
 @ApplicationScoped
 @Path("/api")
@@ -49,10 +49,10 @@ public class DeploymentService
     @Produces("application/json")
     public Response createXpDeployment( XpDeploymentJson deployment, @Context UriInfo uriInfo )
     {
-        XpDeploymentResource resource = CommandCreateXpDeployment.newBuilder().
+        XpDeploymentResource resource = ImmutableCommandCreateXpDeployment.builder().
             client( xpDeploymentClient ).
-            apiVersion( deployment.getApiVersion() ).
-            spec( deployment.getSpec() ).
+            apiVersion( deployment.apiVersion() ).
+            spec( deployment.spec() ).
             build().
             execute();
 
@@ -85,12 +85,12 @@ public class DeploymentService
             return Response.status( 404 ).build();
         }
 
-        if ( !resource.getApiVersion().equals( deployment.getApiVersion() ) )
+        if ( !resource.getApiVersion().equals( deployment.apiVersion() ) )
         {
             return Response.status( 400, "cannot update deployment to a different apiVersion" ).build();
         }
 
-        resource.setSpec( deployment.getSpec() );
+        resource.setSpec( deployment.spec() );
         xpDeploymentClient.getClient().createOrReplace( resource );
 
         return Response.ok( resourceToJson( resource ) ).build();
@@ -106,7 +106,7 @@ public class DeploymentService
             return Response.status( 404 ).build();
         }
 
-        CommandDeleteXpDeployment.newBuilder().
+        ImmutableCommandDeleteXpDeployment.builder().
             client( xpDeploymentClient ).
             resource( resource ).
             build().
@@ -117,7 +117,7 @@ public class DeploymentService
 
     private static XpDeploymentJson resourceToJson( XpDeploymentResource r )
     {
-        return XpDeploymentJson.newBuilder().
+        return ImmutableXpDeploymentJson.builder().
             apiVersion( r.getApiVersion() ).
             uid( r.getMetadata().getUid() ).
             spec( r.getSpec() ).

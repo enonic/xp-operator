@@ -14,7 +14,7 @@ import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.ec.kubernetes.deployment.CrdClientsProducer;
 import com.enonic.ec.kubernetes.deployment.XpDeploymentCache;
-import com.enonic.ec.kubernetes.operator.builders.XpDeploymentBuilder;
+import com.enonic.ec.kubernetes.operator.commands.ImmutableCommandDeployXp;
 import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerClientProducer;
 
 @ApplicationScoped
@@ -42,35 +42,38 @@ public class Operator
         log.debug( "Initialize xpDeployment cache" );
         xpDeploymentCache.initialize( xpDeploymentClient.getClient().list().getItems() );
 
-        // TODO: Why are we getting add events on startup?
-
-        xpDeploymentCache.addWatcher( ( action, id, resource ) -> {
+        xpDeploymentCache.addWatcher( ( action, id, oldResource, newResource ) -> {
             if ( action == Watcher.Action.ADDED || action == Watcher.Action.MODIFIED )
             {
-                try
+                // Only modify if spec has changed
+                if ( oldResource == null || !oldResource.getSpec().equals( newResource.getSpec() ) )
                 {
-                    // TODO: What to do if cloud+project of 2 different people have the same name??
-                    XpDeploymentBuilder.newBuilder().
-                        defaultClient( defaultClient ).
-                        issuerClient( issuerClient ).
-                        resource( resource ).
-                        build().
-                        execute();
+                    try
+                    {
+                        // TODO: What to do if cloud+project of 2 different people have the same name??
+                        ImmutableCommandDeployXp.builder().
+                            defaultClient( defaultClient ).
+                            issuerClient( issuerClient ).
+                            resource( newResource ).
+                            build().
+                            execute();
+                    }
+                    catch ( Exception e )
+                    {
+                        // TODO: What to do in this case? Update XP deployment with info maybe?
+                        log.error( "Failed creating XP deployment", e );
+                    }
                 }
-                catch ( Exception e )
-                {
-                    // TODO: What to do in this case? Update XP deployment with info maybe?
-                    log.error( "Failed creating XP deployment", e );
-                }
+
             }
             else if ( action == Watcher.Action.DELETED )
             {
-                log.info( "XpDeployment with id '" + resource.getMetadata().getUid() + "' and name '" + resource.getMetadata().getName() +
-                              "' DELETED" );
+                log.info(
+                    "XpDeployment with id '" + oldResource.getMetadata().getUid() + "' and name '" + oldResource.getMetadata().getName() +
+                        "' DELETED" );
                 // Note that we do not have to do anything on DELETE events because the
                 // Kubernetes garbage collector cleans up the deployment for us.
             }
-
         } );
     }
 }

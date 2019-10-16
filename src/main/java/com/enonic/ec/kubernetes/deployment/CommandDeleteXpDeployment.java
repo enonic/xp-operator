@@ -1,59 +1,21 @@
 package com.enonic.ec.kubernetes.deployment;
 
+import org.immutables.value.Value;
+
 import com.enonic.ec.kubernetes.common.commands.Command;
-import com.enonic.ec.kubernetes.deployment.XpDeployment.XpDeploymentResource;
+import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResource;
 
-import static com.enonic.ec.kubernetes.common.assertions.Assertions.assertNotNull;
-
-public class CommandDeleteXpDeployment
+@Value.Immutable
+public abstract class CommandDeleteXpDeployment
     implements Command<Boolean>
 {
-    private final CrdClientsProducer.XpDeploymentClient client;
+    public abstract CrdClientsProducer.XpDeploymentClient client();
 
-    private final XpDeploymentResource resource;
-
-    private CommandDeleteXpDeployment( final Builder builder )
-    {
-        client = assertNotNull( "client", builder.client );
-        resource = assertNotNull( "resource", builder.resource );
-    }
-
-    public static Builder newBuilder()
-    {
-        return new Builder();
-    }
+    public abstract XpDeploymentResource resource();
 
     @Override
     public Boolean execute()
     {
-        return client.getClient().withName( resource.getMetadata().getName() ).cascading( true ).delete();
-    }
-
-    public static final class Builder
-    {
-        private CrdClientsProducer.XpDeploymentClient client;
-
-        private XpDeploymentResource resource;
-
-        private Builder()
-        {
-        }
-
-        public Builder client( final CrdClientsProducer.XpDeploymentClient val )
-        {
-            client = val;
-            return this;
-        }
-
-        public Builder resource( final XpDeploymentResource val )
-        {
-            resource = val;
-            return this;
-        }
-
-        public CommandDeleteXpDeployment build()
-        {
-            return new CommandDeleteXpDeployment( this );
-        }
+        return client().getClient().withName( resource().getMetadata().getName() ).cascading( true ).delete();
     }
 }

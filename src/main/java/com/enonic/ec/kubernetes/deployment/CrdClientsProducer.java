@@ -13,9 +13,9 @@ import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.kubernetes.internal.KubernetesDeserializer;
 
-import com.enonic.ec.kubernetes.deployment.XpDeployment.XpDeploymentResource;
-import com.enonic.ec.kubernetes.deployment.XpDeployment.XpDeploymentResourceDoneable;
-import com.enonic.ec.kubernetes.deployment.XpDeployment.XpDeploymentResourceList;
+import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResource;
+import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceDoneable;
+import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceList;
 
 public class CrdClientsProducer
 {
