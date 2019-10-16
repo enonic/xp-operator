@@ -35,7 +35,7 @@ public abstract class CommandCreateXpDeployment
         newDeployment.getMetadata().setName( spec().fullName() );
         newDeployment.getMetadata().setLabels( spec().defaultLabels() );
         newDeployment.setSpec( spec() );
-        return client().getClient().create( newDeployment );
+        return client().getClient().createOrReplace( newDeployment );
     }
 
 }

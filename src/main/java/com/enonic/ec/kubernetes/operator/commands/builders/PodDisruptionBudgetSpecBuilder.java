@@ -1,4 +1,4 @@
-package com.enonic.ec.kubernetes.operator.builders;
+package com.enonic.ec.kubernetes.operator.commands.builders;
 
 import java.util.Map;
 

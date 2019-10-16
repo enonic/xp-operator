@@ -1,19 +1,29 @@
 package com.enonic.ec.kubernetes.operator.commands;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.immutables.value.Value;
 
+import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
 import com.enonic.ec.kubernetes.common.commands.Command;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
+import com.enonic.ec.kubernetes.deployment.xpdeployment.NodeType;
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResource;
-import com.enonic.ec.kubernetes.operator.builders.ImmutablePodDisruptionBudgetSpecBuilder;
+import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceSpecNode;
 import com.enonic.ec.kubernetes.operator.commands.apply.ImmutableCommandApplyConfigMap;
 import com.enonic.ec.kubernetes.operator.commands.apply.ImmutableCommandApplyNamespace;
 import com.enonic.ec.kubernetes.operator.commands.apply.ImmutableCommandApplyPodDisruptionBudget;
+import com.enonic.ec.kubernetes.operator.commands.apply.ImmutableCommandApplyService;
+import com.enonic.ec.kubernetes.operator.commands.apply.ImmutableCommandApplyStatefulSet;
+import com.enonic.ec.kubernetes.operator.commands.builders.ImmutablePodDisruptionBudgetSpecBuilder;
+import com.enonic.ec.kubernetes.operator.commands.builders.ImmutableServiceSpecBuilder;
+import com.enonic.ec.kubernetes.operator.commands.builders.ImmutableStatefulSetSpecNonClusteredSpec;
 import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerClientProducer;
 
 @Value.Immutable
@@ -33,6 +43,12 @@ public abstract class CommandDeployXp
                                    resource().getMetadata().getUid() );
     }
 
+    @Value.Derived
+    protected String podImageName()
+    {
+        return "gbbirkisson/xp:" + resource().getSpec().xpVersion() + "-ubuntu"; // TODO: Fix
+    }
+
     @Override
     public Void execute()
         throws Exception
@@ -47,53 +63,98 @@ public abstract class CommandDeployXp
             name( namespaceName ).
             build() );
 
-        createXpCluster( namespaceName, commandBuilder );
+        // TODO: Create network policy
+
+        Optional<XpDeploymentResourceSpecNode> singleNode =
+            resource().getSpec().nodes().stream().filter( n -> n.type() == NodeType.STANDALONE ).findAny();
+
+        if ( singleNode.isPresent() )
+        {
+            createNonClusteredDeployment( namespaceName, resource().getSpec().fullAppName(), singleNode.get(),
+                                          resource().getSpec().defaultLabels(), commandBuilder );
+        }
+        else
+        {
+            throw new Exception( "Cluster deployment not implemented" );
+        }
 
         return commandBuilder.build().execute();
     }
 
-    private void createXpCluster( String namespace, ImmutableCombinedCommand.Builder commandBuilder )
+    private void createNonClusteredDeployment( String namespace, String name, XpDeploymentResourceSpecNode node, Map<String, String> labels,
+                                               ImmutableCombinedCommand.Builder commandBuilder )
     {
-        // TODO: Below here you could have multiple resources depending on the deployment
-        // To begin with we will only handle a single node
-
-        String defaultResourceName = resource().getSpec().fullAppName();
-        Map<String, String> defaultLabels = resource().getSpec().defaultLabels();
-
+        // Add pod disruption budget
         commandBuilder.addCommand( ImmutableCommandApplyPodDisruptionBudget.builder().
             client( defaultClient() ).
             ownerReference( ownerReference() ).
-            name( "" ).
-            namespace( defaultResourceName ).
-            labels( defaultLabels ).
+            name( name ).
+            namespace( namespace ).
+            labels( labels ).
             spec( ImmutablePodDisruptionBudgetSpecBuilder.builder().
-                minAvailable( 0 ).
-                matchLabels( defaultLabels ).
+                minAvailable( 0 ). // Since we only have 1 node we have to be able to turn it off during upgrades
+                matchLabels( labels ).
                 build().
                 execute() ).
             build() );
 
+        // Add Config map
         commandBuilder.addCommand( ImmutableCommandApplyConfigMap.builder().
             client( defaultClient() ).
             ownerReference( ownerReference() ).
-            name( defaultResourceName ).
+            name( name ).
             namespace( namespace ).
-            labels( defaultLabels ).
-            data( resource().getSpec().config() ).
+            labels( labels ).
+            data( node.config() ).
             build() );
 
-//        commandBuilder.addCommand( CommandApplyStatefulSet.newBuilder().
-//            client( defaultClient ).
-//            ownerReference( ownerReference ).
-//            name( defaultResourceName ).
-//            namespace( namespace ).
-//            labels( resource.getSpec().defaultLabels() ).
-//            spec( StatefulSetSpecBuilder.newBuilder().
-//                podLabels( defaultLabels ).
-//                replicas( 1 ).
-//                serviceName( defaultResourceName ).
-//                build() ).
-//            build() );
+        List<EnvVar> podEnv = new LinkedList<>();
+        if ( node.env() != null )
+        {
+            for ( Map.Entry<String, String> e : node.env().entrySet() )
+            {
+                podEnv.add( new EnvVar( e.getKey(), e.getValue(), null ) );
+            }
+        }
+
+        // Add stateful set
+        commandBuilder.addCommand( ImmutableCommandApplyStatefulSet.builder().
+            client( defaultClient() ).
+            ownerReference( ownerReference() ).
+            name( name ).
+            namespace( namespace ).
+            labels( labels ).
+            spec( ImmutableStatefulSetSpecNonClusteredSpec.builder().
+                podLabels( labels ).
+                replicas( resource().getSpec().enabled() ? node.replicas() : 0 ).
+                podImage( podImageName() ).
+                podEnv( podEnv ).
+                podResources( Map.of( "cpu", node.resources().cpu(), "memory", node.resources().memory() ) ).
+                repoDiskSize( node.resources().disks().get( "repo" ) ).
+                snapshotDiskSize( node.resources().disks().get( "snapshots" ) ).
+                serviceName( name ).
+                configMapName( name ).
+                build().
+                execute() ).
+            build() );
+
+        // Add service
+        commandBuilder.addCommand( ImmutableCommandApplyService.builder().
+            client( defaultClient() ).
+            ownerReference( ownerReference() ).
+            name( name ).
+            namespace( namespace ).
+            labels( labels ).
+            spec( ImmutableServiceSpecBuilder.builder().
+                putAllSelector( labels ).
+                build().
+                execute() ).
+            build() );
+    }
+
+    private void createXpCluster( String namespace, ImmutableCombinedCommand.Builder commandBuilder )
+    {
+
 //
 //        commandBuilder.add( CommandApplyService.newBuilder().
 //            client( defaultClient ).

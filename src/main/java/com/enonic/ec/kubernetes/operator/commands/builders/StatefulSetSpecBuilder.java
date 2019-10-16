@@ -1,6 +1,7 @@
-package com.enonic.ec.kubernetes.operator.builders;
+package com.enonic.ec.kubernetes.operator.commands.builders;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -8,10 +9,8 @@ import java.util.Map;
 import org.immutables.value.Value;
 
 import io.fabric8.kubernetes.api.model.Capabilities;
-import io.fabric8.kubernetes.api.model.ConfigMapVolumeSource;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerPort;
-import io.fabric8.kubernetes.api.model.EmptyDirVolumeSource;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.EnvVarSource;
 import io.fabric8.kubernetes.api.model.HTTPGetAction;
@@ -36,7 +35,6 @@ import io.fabric8.kubernetes.api.model.apps.StatefulSetUpdateStrategy;
 
 import com.enonic.ec.kubernetes.common.commands.Command;
 
-@Value.Immutable
 public abstract class StatefulSetSpecBuilder
     implements Command<StatefulSetSpec>
 {
@@ -62,15 +60,17 @@ public abstract class StatefulSetSpecBuilder
 
     protected abstract String configMapName();
 
-    private static final String volumePostfixIndex = "-repo-index";
+    static final String volumeRepo = "repo";
 
-    private static final String volumePostfixBlob = "-repo-blob";
+    protected static final String volumeIndex = volumeRepo + "index";
 
-    private static final String volumePostfixSnapshots = "-snapshots";
+    protected static final String volumeBlob = volumeRepo + "blob";
 
-    private static final String volumePostfixConfig = "-config";
+    static final String volumeSnapshots = "snapshots";
 
-    private static final String volumePostfixDeploy = "-deploy";
+    static final String volumeConfig = "config";
+
+    static final String volumeDeploy = "deploy";
 
     @Override
     public StatefulSetSpec execute()
@@ -127,7 +127,7 @@ public abstract class StatefulSetSpecBuilder
         initSecurityContext.setPrivileged( true );
         init.setSecurityContext( initSecurityContext );
         init.setCommand( Arrays.asList( "sysctl", "-w", "vm.max_map_count=262144" ) );
-        return Arrays.asList( init );
+        return Collections.singletonList( init );
     }
 
     private List<Container> createPodContainers()
@@ -139,16 +139,20 @@ public abstract class StatefulSetSpecBuilder
         exp.setImagePullPolicy( podImagePullPolicy() );
 
         // Environment
+        List<EnvVar> envVars = new LinkedList<>();
+        envVars.addAll( podEnv() );
+
         EnvVar envNodeName = new EnvVar();
         envNodeName.setName( "XP_NODE_NAME" );
         envNodeName.setValueFrom( new EnvVarSource( null, new ObjectFieldSelector( null, "metadata.name" ), null, null ) );
-        podEnv().add( envNodeName );
-        exp.setEnv( podEnv() );
+        envVars.add( envNodeName );
+
+        exp.setEnv( envVars );
 
         // Security
         SecurityContext podSecurityContext = new SecurityContext();
         Capabilities capabilities = new Capabilities();
-        capabilities.setDrop( Arrays.asList( "ALL" ) );
+        capabilities.setDrop( Collections.singletonList( "ALL" ) );
         podSecurityContext.setRunAsNonRoot( true );
         podSecurityContext.setRunAsUser( 1337L );
         podSecurityContext.setCapabilities( capabilities );
@@ -168,14 +172,14 @@ public abstract class StatefulSetSpecBuilder
         readinessProbe.setTimeoutSeconds( 1 );
         readinessProbe.setTcpSocket( new TCPSocketAction( null, new IntOrString( "xp-main" ) ) );
 
-        Probe livenessProbe = new Probe();
-        exp.setLivenessProbe( livenessProbe );
-        livenessProbe.setFailureThreshold( 3 );
-        livenessProbe.setInitialDelaySeconds( 5 );
-        livenessProbe.setPeriodSeconds( 20 );
-        livenessProbe.setSuccessThreshold( 3 );
-        livenessProbe.setTimeoutSeconds( 1 );
-        livenessProbe.setHttpGet( new HTTPGetAction( null, null, "/server", new IntOrString( "xp-stats" ), null ) );
+        Probe livelinessProbe = new Probe();
+        exp.setLivenessProbe( livelinessProbe );
+        livelinessProbe.setFailureThreshold( 3 );
+        livelinessProbe.setInitialDelaySeconds( 5 );
+        livelinessProbe.setPeriodSeconds( 20 );
+        livelinessProbe.setSuccessThreshold( 1 );
+        livelinessProbe.setTimeoutSeconds( 1 );
+        livelinessProbe.setHttpGet( new HTTPGetAction( null, null, "/server", new IntOrString( "xp-stats" ), null ) );
 
         // Resources
         ResourceRequirements resourceRequirements = new ResourceRequirements();
@@ -187,40 +191,13 @@ public abstract class StatefulSetSpecBuilder
         // TODO:
 
         // Volume mounts
-        List<VolumeMount> volumeMounts = new LinkedList<>();
-        exp.setVolumeMounts( volumeMounts );
-        volumeMounts.add( new VolumeMount( "/enonic-xp/home/repo/index", null, serviceName() + volumePostfixIndex, null, null, null ) );
-        volumeMounts.add( new VolumeMount( "/enonic-xp/home/repo/blob", null, serviceName() + volumePostfixBlob, null, null, null ) );
-        volumeMounts.add( new VolumeMount( "/enonic-xp/home/snapshots", null, serviceName() + volumePostfixSnapshots, null, null, null ) );
-        volumeMounts.add( new VolumeMount( "/enonic-xp/home/config", null, serviceName() + volumePostfixConfig, null, null, null ) );
-        volumeMounts.add( new VolumeMount( "/enonic-xp/home/deploy", null, serviceName() + volumePostfixDeploy, null, null, null ) );
+        exp.setVolumeMounts( createVolumeMounts() );
 
-        return Arrays.asList( exp );
+        return Collections.singletonList( exp );
     }
 
-    private List<Volume> createVolumes()
-    {
-        Volume configMap = new Volume();
-        configMap.setName( serviceName() + volumePostfixConfig );
-        configMap.setConfigMap( new ConfigMapVolumeSource( null, null, configMapName(), null ) );
-
-        Volume deploy = new Volume();
-        deploy.setName( serviceName() + volumePostfixDeploy );
-        deploy.setEmptyDir( new EmptyDirVolumeSource( null, null ) );
-
-        return Arrays.asList( configMap, deploy );
-    }
-
-    private List<PersistentVolumeClaim> createVolumeClaimTemplates()
-    {
-        return Arrays.asList( standard( serviceName() + volumePostfixIndex, podLabels(), null, "ReadWriteOnce", new Quantity( "5Gi" ) ),
-                              standard( serviceName() + volumePostfixBlob, podLabels(), null, "ReadWriteOnce", new Quantity( "5Gi" ) ),
-                              standard( serviceName() + volumePostfixSnapshots, podLabels(), null, "ReadWriteOnce",
-                                        new Quantity( "5Gi" ) ) );
-    }
-
-    private static PersistentVolumeClaim standard( String name, Map<String, String> labels, String storageClassName, String accessMode,
-                                                   Quantity size )
+    static PersistentVolumeClaim standard( String name, Map<String, String> labels, String storageClassName, String accessMode,
+                                           Quantity size )
     {
         PersistentVolumeClaim claim = new PersistentVolumeClaim();
 
@@ -231,10 +208,16 @@ public abstract class StatefulSetSpecBuilder
 
         PersistentVolumeClaimSpec spec = new PersistentVolumeClaimSpec();
         claim.setSpec( spec );
-        spec.setAccessModes( Arrays.asList( accessMode ) );
+        spec.setAccessModes( Collections.singletonList( accessMode ) );
         spec.setStorageClassName( storageClassName );
         spec.setResources( new ResourceRequirements( null, Map.of( "storage", size ) ) );
 
         return claim;
     }
+
+    protected abstract List<VolumeMount> createVolumeMounts();
+
+    protected abstract List<Volume> createVolumes();
+
+    protected abstract List<PersistentVolumeClaim> createVolumeClaimTemplates();
 }

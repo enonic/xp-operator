@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wildfly.common.annotation.Nullable;
 
+import com.google.common.base.Preconditions;
+
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.OwnerReference;
@@ -30,28 +32,21 @@ public abstract class CommandApplyResource<T extends HasMetadata>
 
     protected abstract Map<String, String> annotations();
 
-    protected void checkValidity( HasMetadata resource )
-        throws Exception
+    void checkValidity( HasMetadata resource )
     {
-        if ( !resource.getMetadata().getName().equals( name() ) )
-        {
-            throw new Exception( "Resource names do not match" );
-        }
-        if ( !resource.getMetadata().getNamespace().equals( namespace() ) )
-        {
-            throw new Exception( "Resource namespace do not match" );
-        }
+        Preconditions.checkState( resource.getMetadata().getName().equals( name() ), "Resource names do not match" );
+        Preconditions.checkState( resource.getMetadata().getNamespace().equals( namespace() ), "Resource namespace do not match" );
     }
 
     @Override
     public T execute()
-        throws Exception
     {
         T resource = fetchResource();
-        ObjectMeta metadata = null;
-        String method = null;
+        ObjectMeta metadata;
+        String method;
         if ( resource != null )
         {
+            checkValidity( resource );
             metadata = ImmutableCommandMergeMetadata.builder().
                 kind( resource.getKind() ).
                 metadata( resource.getMetadata() ).
