@@ -5,7 +5,6 @@ metadata:
 spec:
   cloud: mycloud
   project: myproject
-  app: xp
   name: myname
 
   xpVersion: 7.1.0
@@ -14,6 +13,10 @@ spec:
   vHostCertificates:
     company.com:
       selfSigned: true
+    # letEncrypt: true
+    # custom:
+      # key: xxxx
+      # crt: xxxx
 
   nodes:
   - replicas: 1
@@ -28,6 +31,11 @@ spec:
       com.enonic.xp.app.main.cfg: |
         tourDisabled = true
       com.enonic.xp.web.vhost.cfg: |
+        mapping.admin.host = company.com
+        mapping.admin.source = /admin
+        mapping.admin.target = /admin
+        mapping.admin.idProvider.system = default
+
         mapping.myapp.host = company.com
         mapping.myapp.source = /app
         mapping.myapp.target = /webapp/name.of.my.app
