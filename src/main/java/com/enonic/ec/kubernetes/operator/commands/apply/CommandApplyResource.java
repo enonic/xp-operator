@@ -64,9 +64,13 @@ public abstract class CommandApplyResource<T extends HasMetadata>
 
         T newResource = createResource( newMetadata );
 
-        // TODO: Compare metadata + resource
-        log.info( "Updating in Namespace '" + namespace() + "' " + newResource.getKind() + " '" + name() + "'" );
+        if ( noChangesMadeToMetadata( oldResource, newResource ) && noChangesMadeToSpec( oldResource, newResource ) )
+        {
+            log.info( "Skipping in Namespace '" + namespace() + "' " + newResource.getKind() + " '" + name() + "'" );
+            return oldResource;
+        }
 
+        log.info( "Updating in Namespace '" + namespace() + "' " + newResource.getKind() + " '" + name() + "'" );
         return apply( newResource );
     }
 
@@ -76,4 +80,23 @@ public abstract class CommandApplyResource<T extends HasMetadata>
     protected abstract T createResource( ObjectMeta metadata );
 
     protected abstract T apply( T resource );
+
+    private boolean noChangesMadeToMetadata( T oldResource, T newResource )
+    {
+        boolean res = oldResource.getMetadata().getName().equals( newResource.getMetadata().getName() ) &&
+            oldResource.getMetadata().getLabels().equals( newResource.getMetadata().getLabels() ) &&
+            oldResource.getMetadata().getAnnotations().equals( newResource.getMetadata().getAnnotations() );
+
+        if ( oldResource.getKind().equals( "Namespace" ) )
+        {
+            return res;
+        }
+
+        return res && oldResource.getMetadata().getNamespace().equals( newResource.getMetadata().getNamespace() );
+    }
+
+    protected boolean noChangesMadeToSpec( T oldResource, T newResource )
+    {
+        return false;
+    }
 }

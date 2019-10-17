@@ -36,4 +36,11 @@ public abstract class CommandApplyConfigMap
     {
         return client().configMaps().inNamespace( namespace() ).createOrReplace( resource );
     }
+
+
+    @Override
+    protected boolean noChangesMadeToSpec( final ConfigMap oldResource, final ConfigMap newResource )
+    {
+        return oldResource.getData().equals( newResource.getData() );
+    }
 }
