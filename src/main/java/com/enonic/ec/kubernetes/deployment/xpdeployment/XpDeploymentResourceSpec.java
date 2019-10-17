@@ -35,10 +35,10 @@ public abstract class XpDeploymentResourceSpec
         return true;
     }
 
-    @Nullable
-    public abstract Map<String, XpDeploymentResourceSpecVhost> vhost();
-
     public abstract List<XpDeploymentResourceSpecNode> nodes();
+
+    @Nullable
+    public abstract Map<String, XpDeploymentResourceSpecVhostCertificate> vHostCertificates();
 
     @Value.Derived
     @JsonIgnore
@@ -83,14 +83,6 @@ public abstract class XpDeploymentResourceSpec
             Preconditions.checkState( node.resources().disks().containsKey( "repo" ), "field resources.disks.repo on node has to be set" );
             Preconditions.checkState( node.resources().disks().containsKey( "snapshots" ),
                                       "field resources.disks.repo on node has to be set" );
-
-            if ( node.vhost() != null )
-            {
-                node.vhost().forEach( v -> {
-                    Preconditions.checkState( vhost() != null && vhost().get( v ) != null, "vhost definition " + v + "missing" );
-                } );
-            }
-
         } );
 
         singleNode.ifPresent( xpDeploymentResourceSpecNode -> Preconditions.checkState( xpDeploymentResourceSpecNode.replicas().equals( 1 ),

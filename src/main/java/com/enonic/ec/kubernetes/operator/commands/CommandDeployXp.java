@@ -1,11 +1,9 @@
 package com.enonic.ec.kubernetes.operator.commands;
 
-import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.immutables.value.Value;
 
@@ -15,10 +13,8 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 
 import com.enonic.ec.kubernetes.common.commands.Command;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
-import com.enonic.ec.kubernetes.deployment.xpdeployment.NodeType;
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResource;
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceSpecNode;
-import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceSpecVhost;
 import com.enonic.ec.kubernetes.operator.commands.apply.ImmutableCommandApplyConfigMap;
 import com.enonic.ec.kubernetes.operator.commands.apply.ImmutableCommandApplyIngress;
 import com.enonic.ec.kubernetes.operator.commands.apply.ImmutableCommandApplyIssuer;
@@ -72,73 +68,54 @@ public abstract class CommandDeployXp
 
         // TODO: Create network policy
 
-        Optional<XpDeploymentResourceSpecNode> singleNode =
-            resource().getSpec().nodes().stream().filter( n -> n.type() == NodeType.STANDALONE ).findAny();
+        Vhosts vhosts = ImmutableVhostBuilder.builder().
+            nodes( resource().getSpec().nodes() ).
+            certificates( resource().getSpec().vHostCertificates() ).
+            build().
+            execute();
 
-        if ( singleNode.isPresent() )
+        for ( XpDeploymentResourceSpecNode node : resource().getSpec().nodes() )
         {
-            createNonClusteredDeployment( namespaceName, resource().getSpec().fullAppName(), singleNode.get(), resource().getSpec().vhost(),
-                                          resource().getSpec().defaultLabels(), commandBuilder );
-        }
-        else
-        {
-            throw new Exception( "Cluster deployment not implemented" );
+            createDeployNodeCommands( commandBuilder, namespaceName, resource().getSpec().fullAppName(),
+                                      resource().getSpec().defaultLabels(), node, vhosts );
         }
 
-        // Add service for each vhost
-        if ( resource().getSpec().vhost() != null )
+        for ( Vhost vhost : vhosts )
         {
-            for ( Map.Entry<String, XpDeploymentResourceSpecVhost> e : resource().getSpec().vhost().entrySet() )
-            {
-                createVhostServices( commandBuilder, namespaceName, resource().getSpec().fullAppName(), e.getKey(), e.getValue(),
-                                     resource().getSpec().defaultLabels() );
-            }
+            createDeployVhostCommands( commandBuilder, namespaceName, resource().getSpec().fullAppName(),
+                                       resource().getSpec().defaultLabels(), vhost );
         }
+
+        // TODO clean up old ingress, services and certs
 
         return commandBuilder.build().execute();
     }
 
-    private void createNonClusteredDeployment( String namespace, String name, XpDeploymentResourceSpecNode node,
-                                               Map<String, XpDeploymentResourceSpecVhost> vHosts, Map<String, String> labels,
-                                               ImmutableCombinedCommand.Builder commandBuilder )
+    private void createDeployNodeCommands( final ImmutableCombinedCommand.Builder commandBuilder, final String namespaceName,
+                                           final String fullAppName, final Map<String, String> defaultLabels,
+                                           final XpDeploymentResourceSpecNode node, final Vhosts vhosts )
     {
-        // Add pod disruption budget
+        // TODO: Handle all nodetypes
         commandBuilder.addCommand( ImmutableCommandApplyPodDisruptionBudget.builder().
             client( defaultClient() ).
             ownerReference( ownerReference() ).
-            name( name ).
-            namespace( namespace ).
-            labels( labels ).
+            namespace( namespaceName ).
+            name( fullAppName ).
+            labels( defaultLabels ).
             spec( ImmutablePodDisruptionBudgetSpecBuilder.builder().
                 minAvailable( 0 ). // Since we only have 1 node we have to be able to turn it off during upgrades
-                matchLabels( labels ).
+                matchLabels( defaultLabels ).
                 build().
                 execute() ).
             build() );
 
-        // Add Config map
-        Map<String, String> configMap = new HashMap<>();
-        configMap.putAll( node.config() );
-
-        boolean vHostEnabled = node.vhost() != null && node.vhost().size() > 0;
-        if ( vHostEnabled )
-        {
-            StringBuilder builder = new StringBuilder( "enabled = true" ).append( "\n" );
-
-            node.vhost().forEach( v -> {
-                builder.append( vHosts.get( v ).config() );
-                builder.append( "\n" );
-            } );
-            configMap.put( "com.enonic.xp.web.vhost.cfg", builder.toString() );
-        }
-
         commandBuilder.addCommand( ImmutableCommandApplyConfigMap.builder().
             client( defaultClient() ).
             ownerReference( ownerReference() ).
-            name( name ).
-            namespace( namespace ).
-            labels( labels ).
-            data( configMap ).
+            namespace( namespaceName ).
+            name( fullAppName ).
+            labels( defaultLabels ).
+            data( node.config() ).
             build() );
 
         List<EnvVar> podEnv = new LinkedList<>();
@@ -150,23 +127,16 @@ public abstract class CommandDeployXp
             }
         }
 
-        // Add stateful set
         Map<String, String> podLabels = new HashMap<>();
-        podLabels.putAll( labels );
-        if ( vHostEnabled )
-        {
-            node.vhost().forEach( v -> {
-                Map.Entry<String, String> e = vhostLabel( name, v );
-                podLabels.put( e.getKey(), e.getValue() );
-            } );
-        }
+        podLabels.putAll( defaultLabels );
+        podLabels.putAll( vhosts.getVhostLabel( node ) );
 
         commandBuilder.addCommand( ImmutableCommandApplyStatefulSet.builder().
             client( defaultClient() ).
             ownerReference( ownerReference() ).
-            name( name ).
-            namespace( namespace ).
-            labels( labels ).
+            namespace( namespaceName ).
+            name( fullAppName ).
+            labels( defaultLabels ).
             spec( ImmutableStatefulSetSpecNonClusteredSpec.builder().
                 podLabels( podLabels ).
                 replicas( resource().getSpec().enabled() ? node.replicas() : 0 ).
@@ -175,111 +145,78 @@ public abstract class CommandDeployXp
                 podResources( Map.of( "cpu", node.resources().cpu(), "memory", node.resources().memory() ) ).
                 repoDiskSize( node.resources().disks().get( "repo" ) ).
                 snapshotDiskSize( node.resources().disks().get( "snapshots" ) ).
-                serviceName( name ).
-                configMapName( name ).
+                serviceName( fullAppName ).
+                configMapName( fullAppName ).
                 build().
                 execute() ).
             build() );
 
-        // Add service
-        commandBuilder.addCommand( ImmutableCommandApplyService.builder().
-            client( defaultClient() ).
-            ownerReference( ownerReference() ).
-            name( name ).
-            namespace( namespace ).
-            labels( labels ).
-            spec( ImmutableServiceSpecBuilder.builder().
-                putAllSelector( labels ).
-                build().
-                execute() ).
-            build() );
     }
 
-    private static Map.Entry<String, String> vhostLabel( String appFullName, String vhostName )
-    {
-        return new AbstractMap.SimpleEntry<String, String>( "xp.vhost." + vhostName, appFullName );
-    }
-
-    private void createVhostServices( ImmutableCombinedCommand.Builder commandBuilder, String namespace, String appFullName,
-                                      String vhostName, XpDeploymentResourceSpecVhost vhost, Map<String, String> labels )
+    private void createDeployVhostCommands( final ImmutableCombinedCommand.Builder commandBuilder, final String namespaceName,
+                                            final String fullAppName, final Map<String, String> defaultLabels, final Vhost vhost )
         throws Exception
     {
-        String vHostResourceName = appFullName + "-vhost-" + vhostName;
-        Map.Entry<String, String> vhostSelector = vhostLabel( appFullName, vhostName );
-        commandBuilder.addCommand( ImmutableCommandApplyService.builder().
-            client( defaultClient() ).
-            ownerReference( ownerReference() ).
-            name( vHostResourceName ).
-            namespace( namespace ).
-            labels( labels ).
-            spec( ImmutableServiceSpecBuilder.builder().
-                putAllSelector( Map.of( vhostSelector.getKey(), vhostSelector.getValue() ) ).
-                build().
-                execute() ).
-            build() );
+        if ( vhost.certificate() != null )
+        {
+            commandBuilder.addCommand( ImmutableCommandApplyIssuer.builder().
+                client( issuerClient() ).
+                ownerReference( ownerReference() ).
+                namespace( namespaceName ).
+                name( vhost.getVhostResourceName( fullAppName ) ).
+                labels( defaultLabels ).
+                spec( ImmutableIssuerSpecBuilder.builder().
+                    certificate( vhost.certificate() ).
+                    build().
+                    execute() ).
+                build() );
+        }
 
-        commandBuilder.addCommand( ImmutableCommandApplyIssuer.builder().
-            client( issuerClient() ).
-            ownerReference( ownerReference() ).
-            name( vHostResourceName ).
-            namespace( namespace ).
-            labels( labels ).
-            spec( ImmutableIssuerSpecBuilder.builder().
-                certificate( vhost.certificate() ).
-                build().
-                execute() ).
-            build() );
+        for ( VhostPath path : vhost.vhostPaths() )
+        {
+            Map<String, String> serviceLabels = new HashMap<>(  );
+            serviceLabels.putAll( defaultLabels );
+            serviceLabels.putAll( path.getVhostLabel(vhost) );
+            commandBuilder.addCommand( ImmutableCommandApplyService.builder().
+                client( defaultClient() ).
+                ownerReference( ownerReference() ).
+                namespace( namespaceName ).
+                name( path.getPathResourceName( fullAppName, vhost.host() ) ).
+                labels( serviceLabels ).
+                spec( ImmutableServiceSpecBuilder.builder().
+                    selector( path.getVhostLabel(vhost) ).
+                    build().
+                    execute() ).
+                build() );
+        }
+
+        Map<String, String> serviceAnnotations = new HashMap<>();
+        serviceAnnotations.put( "kubernetes.io/ingress.class", "nginx" );
+        serviceAnnotations.put( "ingress.kubernetes.io/rewrite-target", "/" );
+        serviceAnnotations.put( "nginx.ingress.kubernetes.io/configuration-snippet",
+                                "proxy_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;\n" +
+                                    "      proxy_hide_header l5d-remote-ip;\n" + "      proxy_hide_header l5d-server-id;" );
+
+        if ( vhost.certificate() != null )
+        {
+            serviceAnnotations.put( "nginx.ingress.kubernetes.io/ssl-redirect", "true" );
+            serviceAnnotations.put( "certmanager.k8s.io/issuer", vhost.getVhostResourceName( fullAppName ) );
+        }
 
         commandBuilder.addCommand( ImmutableCommandApplyIngress.builder().
             client( defaultClient() ).
             ownerReference( ownerReference() ).
-            name( vHostResourceName ).
-            namespace( namespace ).
-            labels( labels ).
-            annotations( Map.of( "kubernetes.io/ingress.class", "nginx", "ingress.kubernetes.io/rewrite-target", "/",
-                                 "nginx.ingress.kubernetes.io/configuration-snippet",
-                                 "proxy_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;\n" +
-                                     "      proxy_hide_header l5d-remote-ip;\n" + "      proxy_hide_header l5d-server-id;",
-                                 "nginx.ingress.kubernetes.io/ssl-redirect", "true", "certmanager.k8s.io/issuer", vHostResourceName ) ).
+            namespace( namespaceName ).
+            name( vhost.getVhostResourceName( fullAppName ) ).
+            labels( defaultLabels ).
+            annotations( serviceAnnotations ).
             spec( ImmutableIngressSpecBuilder.builder().
-                certificateSecretName( vHostResourceName ).
-                serviceName( vHostResourceName ).
-                servicePort( 8080 ).
+                certificateSecretName( vhost.certificate() != null ? vhost.getVhostResourceName( fullAppName ) : null ).
                 vhost( vhost ).
+                appFullName( fullAppName ).
                 build().
                 execute() ).
             build() );
-    }
 
-    private void createXpCluster( String namespace, ImmutableCombinedCommand.Builder commandBuilder )
-    {
-
-//
-//        commandBuilder.add( CommandApplyService.newBuilder().
-//            client( defaultClient ).
-//            ownerReference( ownerReference ).
-//            name( resource.getSpec().getFullAppName() ).
-//            namespace( namespaceName ).
-//            labels( resource.getSpec().getDefaultLabels() ).
-//            spec( null ). // TODO: Fix
-//            build() );
-//
-//        commandBuilder.add( CommandApplyIssuer.newBuilder().
-//            client( issuerClient ).
-//            ownerReference( ownerReference ).
-//            name( resource.getSpec().getFullAppName() ).
-//            namespace( namespaceName ).
-//            labels( resource.getSpec().getDefaultLabels() ).
-//            spec( null ). // TODO: Fix
-//            build() );
-//
-//        commandBuilder.add( CommandApplyIngress.newBuilder().
-//            client( defaultClient ).
-//            ownerReference( ownerReference ).
-//            name( resource.getSpec().getFullAppName() ).
-//            namespace( namespaceName ).
-//            labels( resource.getSpec().getDefaultLabels() ).
-//            spec( null ). // TODO: Fix
-//            build() );
     }
 }

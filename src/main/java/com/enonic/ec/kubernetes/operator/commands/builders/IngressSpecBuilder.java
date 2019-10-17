@@ -1,8 +1,11 @@
 package com.enonic.ec.kubernetes.operator.commands.builders;
 
 import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.immutables.value.Value;
+import org.wildfly.common.annotation.Nullable;
 
 import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.extensions.HTTPIngressPath;
@@ -13,38 +16,48 @@ import io.fabric8.kubernetes.api.model.extensions.IngressSpec;
 import io.fabric8.kubernetes.api.model.extensions.IngressTLS;
 
 import com.enonic.ec.kubernetes.common.commands.Command;
-import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceSpecVhost;
+import com.enonic.ec.kubernetes.operator.commands.Vhost;
+import com.enonic.ec.kubernetes.operator.commands.VhostPath;
 
 @Value.Immutable
 public abstract class IngressSpecBuilder
     implements Command<IngressSpec>
 {
 
-    protected abstract XpDeploymentResourceSpecVhost vhost();
-
+    @Nullable
     protected abstract String certificateSecretName();
 
-    protected abstract String serviceName();
+    protected abstract Vhost vhost();
 
-    protected abstract Integer servicePort();
+    protected abstract String appFullName();
 
     @Override
     public IngressSpec execute()
     {
         IngressSpec spec = new IngressSpec();
-        IngressTLS tls = new IngressTLS();
-        tls.setHosts( Collections.singletonList( vhost().host() ) );
-        tls.setSecretName( certificateSecretName() );
-        spec.setTls( Collections.singletonList( tls ) );
+
+        if ( certificateSecretName() != null )
+        {
+            IngressTLS tls = new IngressTLS();
+            tls.setHosts( Collections.singletonList( vhost().host() ) );
+            tls.setSecretName( certificateSecretName() );
+            spec.setTls( Collections.singletonList( tls ) );
+        }
 
         HTTPIngressRuleValue http = new HTTPIngressRuleValue();
-        http.setPaths( Collections.singletonList(
-            new HTTPIngressPath( new IngressBackend( serviceName(), new IntOrString( servicePort() ) ), "/" ) ) );
 
         IngressRule ingressRule = new IngressRule();
         ingressRule.setHost( vhost().host() );
         ingressRule.setHttp( http );
         spec.setRules( Collections.singletonList( ingressRule ) );
+
+        List<HTTPIngressPath> paths = new LinkedList<>();
+        for ( VhostPath path : vhost().vhostPaths() )
+        {
+            paths.add( new HTTPIngressPath(
+                new IngressBackend( path.getPathResourceName( appFullName(), vhost().host() ), new IntOrString( 8080 ) ), path.path() ) );
+        }
+        http.setPaths( paths );
 
         return spec;
     }

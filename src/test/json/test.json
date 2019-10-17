@@ -7,21 +7,8 @@
     "xpVersion": "7.1.0",
     "enabled": true,
 
-    "vhost": {
-      "app1": {
-        "host": "company.com",
-        "config": "mapping.myapp.host = company.com\nmapping.myapplication.source = /app\nmapping.myapp.target = /webapp/name.of.my.app\nmapping.myapp.idProvider.myldap = default",
-        "certificate": {
-          "selfSigned": true
-        }
-      }
-    },
-
     "nodes": [
       {
-        "vhost": [
-          "app1"
-        ],
         "replicas": 1,
         "type": "STANDALONE",
         "resources": {
@@ -38,10 +25,17 @@
         },
         "config": {
           "system.properties": "xp.suPassword = {sha512}5b722b307fce6c944905d132691d5e4a2214b7fe92b738920eb3fce3a90420a19511c3010a0e7712b054daef5b57bad59ecbd93b3280f210578f547f4aed4d25\nxp.init.adminUserCreation = false",
-          "com.enonic.xp.app.main.cfg": "tourDisabled = true"
+          "com.enonic.xp.app.main.cfg": "tourDisabled = true",
+          "com.enonic.xp.web.vhost.cfg": "mapping.myapp.host = company.com\nmapping.myapp.source = /app\nmapping.myapp.target = /webapp/name.of.my.app\nmapping.myapp.idProvider.myldap = default"
         }
       }
-    ]
+    ],
+
+    "vHostCertificates": {
+      "company.com": {
+        "selfSigned": true
+      }
+    }
   }
 }
 

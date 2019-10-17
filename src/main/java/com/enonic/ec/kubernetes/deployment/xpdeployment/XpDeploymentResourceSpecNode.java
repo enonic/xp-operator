@@ -1,6 +1,5 @@
 package com.enonic.ec.kubernetes.deployment.xpdeployment;
 
-import java.util.List;
 import java.util.Map;
 
 import org.immutables.value.Value;
@@ -13,9 +12,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 public abstract class XpDeploymentResourceSpecNode
 {
     public abstract Integer replicas();
-
-    @Nullable
-    public abstract List<String> vhost();
 
     public abstract NodeType type();
 
