@@ -2,6 +2,7 @@ package com.enonic.ec.kubernetes.operator.commands.builders;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +40,8 @@ public abstract class StatefulSetSpecBuilder
     implements Command<StatefulSetSpec>
 {
     protected abstract Map<String, String> podLabels();
+
+    protected abstract Map<String, String> extraPodLabels(); // TODO: Is this a good name
 
     protected abstract Map<String, String> podAnnotations();
 
@@ -94,7 +97,11 @@ public abstract class StatefulSetSpecBuilder
 
         ObjectMeta meta = new ObjectMeta();
         podTemplateSpec.setMetadata( meta );
-        meta.setLabels( podLabels() );
+
+        Map<String, String> combinedPodLabels = new HashMap<>();
+        combinedPodLabels.putAll( podLabels() );
+        combinedPodLabels.putAll( extraPodLabels() );
+        meta.setLabels( combinedPodLabels );
         meta.setAnnotations( podAnnotations() );
 
         PodSpec podSpec = new PodSpec();

@@ -10,16 +10,9 @@ spec:
   xpVersion: 7.1.0
   enabled: true
 
-  vHostCertificates:
-    company.com:
-      selfSigned: true
-    # letEncrypt: true
-    # custom:
-      # key: xxxx
-      # crt: xxxx
-
   nodes:
-  - replicas: 1
+  - alias: woop
+    replicas: 1
     type: STANDALONE
     resources:
       cpu: "1"
@@ -36,10 +29,10 @@ spec:
         mapping.admin.target = /admin
         mapping.admin.idProvider.system = default
 
-        mapping.myapp.host = company.com
-        mapping.myapp.source = /app
-        mapping.myapp.target = /webapp/name.of.my.app
-        mapping.myapp.idProvider.myldap = default
+#        mapping.myapp.host = company.com
+#        mapping.myapp.source = /app
+#        mapping.myapp.target = /webapp/name.of.my.app
+#        mapping.admin.idProvider.system = default
       system.properties: |-
         xp.suPassword = {sha512}5b722b307fce6c944905d132691d5e4a2214b7fe92b738920eb3fce3a90420a19511c3010a0e7712b054daef5b57bad59ecbd93b3280f210578f547f4aed4d25
         xp.init.adminUserCreation = false
@@ -56,3 +49,11 @@ spec:
         -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=*:5005
       XP_APPS: |
         com.enonic.app.snapshotter:2.1.1
+
+  vHostCertificates:
+    company.com:
+      selfSigned: true
+      # letEncrypt: true
+      # custom:
+      #   key: xxxx
+      #   crt: xxxx

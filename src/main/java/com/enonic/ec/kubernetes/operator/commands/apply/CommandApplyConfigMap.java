@@ -23,12 +23,17 @@ public abstract class CommandApplyConfigMap
     }
 
     @Override
-    protected ConfigMap apply( final ObjectMeta metadata )
+    protected ConfigMap createResource( final ObjectMeta metadata )
     {
         ConfigMap configMap = new ConfigMap();
         configMap.setMetadata( metadata );
         configMap.setData( data() );
-        return client().configMaps().inNamespace( namespace() ).createOrReplace( configMap );
+        return configMap;
     }
 
+    @Override
+    protected ConfigMap apply( final ConfigMap resource )
+    {
+        return client().configMaps().inNamespace( namespace() ).createOrReplace( resource );
+    }
 }

@@ -1,9 +1,8 @@
 package com.enonic.ec.kubernetes.operator.commands;
 
-import java.util.AbstractMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import org.immutables.value.Value;
 
@@ -16,16 +15,11 @@ public abstract class VhostPath
 
     public abstract String path();
 
-    public Map<String, String> getVhostLabel(Vhost vhost)
+    public Map<String, String> getVhostLabel()
     {
-        String pathString;
-        if(path().equals( "/" )) {
-            pathString = "root";
-        }
-        else {
-            pathString = path().substring( 1 ).replace( "/", "_" );
-        }
-        return Map.of("xp.vhost/" + vhost.host(), pathString);
+        Map<String, String> res = new HashMap<>();
+        nodes().stream().forEach( n -> res.putAll( n.extraLabels() ) );
+        return res;
     }
 
     public String getPathResourceName( String appFullName, String vhost )

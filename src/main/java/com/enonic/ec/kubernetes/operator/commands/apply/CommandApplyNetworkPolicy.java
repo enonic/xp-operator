@@ -22,11 +22,17 @@ public abstract class CommandApplyNetworkPolicy
     }
 
     @Override
-    protected NetworkPolicy apply( final ObjectMeta metadata )
+    protected NetworkPolicy createResource( final ObjectMeta metadata )
     {
         NetworkPolicy networkPolicy = new NetworkPolicy();
         networkPolicy.setMetadata( metadata );
         networkPolicy.setSpec( spec() );
-        return client().network().networkPolicies().inNamespace( namespace() ).createOrReplace( networkPolicy );
+        return networkPolicy;
+    }
+
+    @Override
+    protected NetworkPolicy apply( final NetworkPolicy resource )
+    {
+        return client().network().networkPolicies().inNamespace( namespace() ).createOrReplace( resource );
     }
 }

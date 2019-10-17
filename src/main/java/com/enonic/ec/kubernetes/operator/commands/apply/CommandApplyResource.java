@@ -41,39 +41,39 @@ public abstract class CommandApplyResource<T extends HasMetadata>
     @Override
     public T execute()
     {
-        T resource = fetchResource();
-        ObjectMeta metadata;
-        String method;
-        if ( resource != null )
+        T oldResource = fetchResource();
+
+        if ( oldResource == null )
         {
-            checkValidity( resource );
-            metadata = ImmutableCommandMergeMetadata.builder().
-                kind( resource.getKind() ).
-                metadata( resource.getMetadata() ).
-                ownerReference( ownerReference() ).
-                labels( labels() ).
-                annotations( annotations() ).
-                build().
-                execute();
-            metadata.setResourceVersion( null );
-            method = "Updated";
-        }
-        else
-        {
-            metadata = new ObjectMeta( annotations(), null, null, null, null, null, null, null, labels(), null, name(), namespace(),
-                                       List.of( ownerReference() ), null, null, null );
-            method = "Created";
+            T newResource = createResource(
+                new ObjectMeta( annotations(), null, null, null, null, null, null, null, labels(), null, name(), namespace(),
+                                List.of( ownerReference() ), null, null, null ) );
+            log.info( "Creating in Namespace '" + namespace() + "' " + newResource.getKind() + " '" + name() + "'" );
+            return apply( newResource );
         }
 
-        resource = apply( metadata );
-        log.info( method + " in Namespace '" + namespace() + "' " + resource.getKind() + " '" + name() + "'" );
-        return resource;
+        ObjectMeta newMetadata = ImmutableCommandMergeMetadata.builder().
+            kind( oldResource.getKind() ).
+            metadata( oldResource.getMetadata() ).
+            ownerReference( ownerReference() ).
+            labels( labels() ).
+            annotations( annotations() ).
+            build().
+            execute();
+        newMetadata.setResourceVersion( null );
+
+        T newResource = createResource( newMetadata );
+
+        // TODO: Compare metadata + resource
+        log.info( "Updating in Namespace '" + namespace() + "' " + newResource.getKind() + " '" + name() + "'" );
+
+        return apply( newResource );
     }
 
     @Value.Derived
     protected abstract T fetchResource();
 
-    @Value.Derived
-    protected abstract T apply( ObjectMeta metadata );
+    protected abstract T createResource( ObjectMeta metadata );
 
+    protected abstract T apply( T resource );
 }

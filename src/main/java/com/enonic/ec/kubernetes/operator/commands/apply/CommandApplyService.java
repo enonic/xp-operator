@@ -22,12 +22,17 @@ public abstract class CommandApplyService
     }
 
     @Override
-    protected Service apply( final ObjectMeta metadata )
+    protected Service createResource( final ObjectMeta metadata )
     {
         Service service = new Service();
         service.setMetadata( metadata );
         service.setSpec( spec() );
-        return client().services().inNamespace( namespace() ).createOrReplace( service );
+        return service;
     }
 
+    @Override
+    protected Service apply( final Service resource )
+    {
+        return client().services().inNamespace( namespace() ).createOrReplace( resource );
+    }
 }

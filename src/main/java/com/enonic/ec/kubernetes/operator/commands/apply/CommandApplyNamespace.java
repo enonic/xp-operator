@@ -28,10 +28,17 @@ public abstract class CommandApplyNamespace
     }
 
     @Override
-    protected Namespace apply( final ObjectMeta metadata )
+    protected Namespace createResource( final ObjectMeta metadata )
     {
         Namespace namespace = new Namespace();
         namespace.setMetadata( metadata );
-        return client().namespaces().createOrReplace( namespace );
+        return namespace;
     }
+
+    @Override
+    protected Namespace apply( final Namespace resource )
+    {
+        return client().namespaces().createOrReplace( resource );
+    }
+
 }

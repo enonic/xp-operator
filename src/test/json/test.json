@@ -9,6 +9,7 @@
 
     "nodes": [
       {
+        "alias": "woop",
         "replicas": 1,
         "type": "STANDALONE",
         "resources": {

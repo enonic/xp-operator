@@ -25,12 +25,18 @@ public abstract class CommandApplyIssuer
     }
 
     @Override
-    protected IssuerResource apply( final ObjectMeta metadata )
+    protected IssuerResource createResource( final ObjectMeta metadata )
     {
         IssuerResource issuerResource = new IssuerResource();
         issuerResource.setMetadata( metadata );
         issuerResource.setSpec( spec() );
         issuerResource.setKind( kind );
-        return client().getClient().inNamespace( namespace() ).createOrReplace( issuerResource );
+        return issuerResource;
+    }
+
+    @Override
+    protected IssuerResource apply( final IssuerResource resource )
+    {
+        return client().getClient().inNamespace( namespace() ).createOrReplace( resource );
     }
 }

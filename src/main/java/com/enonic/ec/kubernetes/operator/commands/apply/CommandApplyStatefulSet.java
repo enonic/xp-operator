@@ -22,12 +22,17 @@ public abstract class CommandApplyStatefulSet
     }
 
     @Override
-    protected StatefulSet apply( final ObjectMeta metadata )
+    protected StatefulSet createResource( final ObjectMeta metadata )
     {
         StatefulSet statefulSet = new StatefulSet();
         statefulSet.setMetadata( metadata );
         statefulSet.setSpec( spec() );
-        return client().apps().statefulSets().inNamespace( namespace() ).createOrReplace( statefulSet );
+        return statefulSet;
     }
 
+    @Override
+    protected StatefulSet apply( final StatefulSet resource )
+    {
+        return client().apps().statefulSets().inNamespace( namespace() ).createOrReplace( resource );
+    }
 }

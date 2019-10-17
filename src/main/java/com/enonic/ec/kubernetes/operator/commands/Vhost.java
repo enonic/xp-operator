@@ -27,7 +27,7 @@ public abstract class Vhost
         {
             if ( path.nodes().contains( node ) )
             {
-                labels.putAll( path.getVhostLabel(this) );
+                labels.putAll( path.getVhostLabel() );
             }
         }
         return labels;

@@ -127,10 +127,6 @@ public abstract class CommandDeployXp
             }
         }
 
-        Map<String, String> podLabels = new HashMap<>();
-        podLabels.putAll( defaultLabels );
-        podLabels.putAll( vhosts.getVhostLabel( node ) );
-
         commandBuilder.addCommand( ImmutableCommandApplyStatefulSet.builder().
             client( defaultClient() ).
             ownerReference( ownerReference() ).
@@ -138,7 +134,8 @@ public abstract class CommandDeployXp
             name( fullAppName ).
             labels( defaultLabels ).
             spec( ImmutableStatefulSetSpecNonClusteredSpec.builder().
-                podLabels( podLabels ).
+                podLabels( defaultLabels ).
+                extraPodLabels( node.extraLabels() ).
                 replicas( resource().getSpec().enabled() ? node.replicas() : 0 ).
                 podImage( podImageName() ).
                 podEnv( podEnv ).
@@ -174,9 +171,9 @@ public abstract class CommandDeployXp
 
         for ( VhostPath path : vhost.vhostPaths() )
         {
-            Map<String, String> serviceLabels = new HashMap<>(  );
+            Map<String, String> serviceLabels = new HashMap<>();
             serviceLabels.putAll( defaultLabels );
-            serviceLabels.putAll( path.getVhostLabel(vhost) );
+            serviceLabels.putAll( path.getVhostLabel() );
             commandBuilder.addCommand( ImmutableCommandApplyService.builder().
                 client( defaultClient() ).
                 ownerReference( ownerReference() ).
@@ -184,7 +181,7 @@ public abstract class CommandDeployXp
                 name( path.getPathResourceName( fullAppName, vhost.host() ) ).
                 labels( serviceLabels ).
                 spec( ImmutableServiceSpecBuilder.builder().
-                    selector( path.getVhostLabel(vhost) ).
+                    selector( path.getVhostLabel() ).
                     build().
                     execute() ).
                 build() );

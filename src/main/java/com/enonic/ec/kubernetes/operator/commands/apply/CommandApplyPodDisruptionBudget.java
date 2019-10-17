@@ -22,12 +22,17 @@ public abstract class CommandApplyPodDisruptionBudget
     }
 
     @Override
-    protected PodDisruptionBudget apply( final ObjectMeta metadata )
+    protected PodDisruptionBudget createResource( final ObjectMeta metadata )
     {
         PodDisruptionBudget podDisruptionBudget = new PodDisruptionBudget();
         podDisruptionBudget.setMetadata( metadata );
         podDisruptionBudget.setSpec( spec() );
-        return client().policy().podDisruptionBudget().inNamespace( namespace() ).createOrReplace( podDisruptionBudget );
+        return podDisruptionBudget;
     }
 
+    @Override
+    protected PodDisruptionBudget apply( final PodDisruptionBudget resource )
+    {
+        return client().policy().podDisruptionBudget().inNamespace( namespace() ).createOrReplace( resource );
+    }
 }
