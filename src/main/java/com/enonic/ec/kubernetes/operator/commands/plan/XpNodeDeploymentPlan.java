@@ -48,13 +48,13 @@ public abstract class XpNodeDeploymentPlan
     }
 
     @Value.Derived
-    public boolean changeDisruptionBudget()
+    public boolean changeDisruptionBudget( Integer nodeScale )
     {
         if ( nodeTuple().getOldNode() == null )
         {
             return true;
         }
-        return changeScale();
+        return nodeScale > 1 && changeScale();
     }
 
     @Value.Derived

@@ -2,14 +2,13 @@ package com.enonic.ec.kubernetes.operator.commands;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
 import org.immutables.value.Value;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.wildfly.common.annotation.Nullable;
 
 import com.enonic.ec.kubernetes.common.commands.Command;
@@ -18,10 +17,8 @@ import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceSpec
 
 @Value.Immutable
 public abstract class VhostBuilder
-    implements Command<Vhosts>
+    implements Command<List<Vhost>>
 {
-
-    private final static Logger log = LoggerFactory.getLogger( VhostBuilder.class );
 
     protected abstract List<XpDeploymentResourceSpecNode> nodes();
 
@@ -29,10 +26,10 @@ public abstract class VhostBuilder
     protected abstract Map<String, XpDeploymentResourceSpecVhostCertificate> certificates();
 
     @Override
-    public Vhosts execute()
+    public List<Vhost> execute()
     {
         Set<VhostConfig> vhostConfigs = extractVhostsAndPaths();
-        Vhosts vhost = new Vhosts();
+        List<Vhost> vhosts = new LinkedList<>();
         for ( VhostConfig cfg : vhostConfigs )
         {
             ImmutableVhost.Builder builder = ImmutableVhost.builder().
@@ -46,14 +43,13 @@ public abstract class VhostBuilder
                     path( e.getKey() ).
                     build() );
             }
-            vhost.add( builder.build() );
+            vhosts.add( builder.build() );
         }
-        return vhost;
+        return vhosts;
     }
 
     private static class VhostConfig
     {
-
         String host;
 
         Map<String, Set<XpDeploymentResourceSpecNode>> paths;

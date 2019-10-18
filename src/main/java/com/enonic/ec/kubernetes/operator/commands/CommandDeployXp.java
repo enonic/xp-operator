@@ -28,6 +28,8 @@ import com.enonic.ec.kubernetes.operator.commands.builders.ImmutableServiceSpecB
 import com.enonic.ec.kubernetes.operator.commands.builders.ImmutableStatefulSetSpecNonClusteredSpec;
 import com.enonic.ec.kubernetes.operator.commands.plan.XpNodeDeploymentDiff;
 import com.enonic.ec.kubernetes.operator.commands.plan.XpNodeDeploymentPlan;
+import com.enonic.ec.kubernetes.operator.commands.plan.XpVhostDeploymentDiff;
+import com.enonic.ec.kubernetes.operator.commands.plan.XpVhostDeploymentPlan;
 import com.enonic.ec.kubernetes.operator.commands.scale.ImmutableCommandScaleStatefulSet;
 import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerClientProducer;
 
@@ -44,6 +46,8 @@ public abstract class CommandDeployXp
     protected abstract XpDeploymentResource resource();
 
     protected abstract XpNodeDeploymentDiff nodeDiff();
+
+    protected abstract XpVhostDeploymentDiff vHostDiff();
 
     @Value.Derived
     protected OwnerReference ownerReference()
@@ -77,32 +81,28 @@ public abstract class CommandDeployXp
             // TODO: Create network policy
         }
 
-        Vhosts vhosts = ImmutableVhostBuilder.builder().
-            nodes( resource().getSpec().nodes() ).
-            certificates( resource().getSpec().vHostCertificates() ).
-            build().
-            execute();
-
         for ( XpNodeDeploymentPlan nodePlan : nodeDiff().deploymentPlans() )
         {
             createDeployNodeCommands( commandBuilder, namespaceName, resource().getSpec().fullAppName(),
-                                      resource().getSpec().defaultLabels(), nodePlan, vhosts );
+                                      resource().getSpec().defaultLabels(), nodePlan );
         }
 
-        for ( Vhost vhost : vhosts )
+        // TODO: Delete old deployments
+
+        for ( XpVhostDeploymentPlan vhostPlan : vHostDiff().deploymentPlans() )
         {
             createDeployVhostCommands( commandBuilder, namespaceName, resource().getSpec().fullAppName(),
-                                       resource().getSpec().defaultLabels(), vhost );
+                                       resource().getSpec().defaultLabels(), vhostPlan );
         }
 
-        // TODO clean up old stuff
+        // TODO Delete old vHosts
 
         return commandBuilder.build().execute();
     }
 
     private void createDeployNodeCommands( final ImmutableCombinedCommand.Builder commandBuilder, final String namespaceName,
                                            final String fullAppName, final Map<String, String> defaultLabels,
-                                           final XpNodeDeploymentPlan nodePlan, final Vhosts vhosts )
+                                           final XpNodeDeploymentPlan nodePlan )
     {
         // TODO: Handle all nodetypes
 
@@ -111,7 +111,7 @@ public abstract class CommandDeployXp
         nodeLabels.putAll( nodePlan.node().nodeAliasLabel() );
         Integer nodeScale = resource().getSpec().enabled() ? nodePlan.node().replicas() : 0;
 
-        if ( nodeScale > 1 && nodePlan.changeDisruptionBudget() )
+        if ( nodePlan.changeDisruptionBudget( nodeScale ) )
         {
             commandBuilder.addCommand( ImmutableCommandApplyPodDisruptionBudget.builder().
                 client( defaultClient() ).
@@ -183,69 +183,73 @@ public abstract class CommandDeployXp
     }
 
     private void createDeployVhostCommands( final ImmutableCombinedCommand.Builder commandBuilder, final String namespaceName,
-                                            final String fullAppName, final Map<String, String> defaultLabels, final Vhost vhost )
+                                            final String fullAppName, final Map<String, String> defaultLabels,
+                                            final XpVhostDeploymentPlan vhostPlan )
         throws Exception
     {
-        if ( vhost.certificate() != null )
+        if ( vhostPlan.changeIssuer() )
         {
             commandBuilder.addCommand( ImmutableCommandApplyIssuer.builder().
                 client( issuerClient() ).
                 ownerReference( ownerReference() ).
                 namespace( namespaceName ).
-                name( vhost.getVhostResourceName( fullAppName ) ).
+                name( vhostPlan.vhost().getVhostResourceName( fullAppName ) ).
                 labels( defaultLabels ).
                 spec( ImmutableIssuerSpecBuilder.builder().
-                    certificate( vhost.certificate() ).
+                    certificate( vhostPlan.vhost().certificate() ).
                     build().
                     execute() ).
                 build() );
         }
 
-        for ( VhostPath path : vhost.vhostPaths() )
+        if ( vhostPlan.changeIngress() )
         {
-            Map<String, String> serviceLabels = new HashMap<>();
-            serviceLabels.putAll( defaultLabels );
-            serviceLabels.putAll( path.getVhostLabel() );
-            commandBuilder.addCommand( ImmutableCommandApplyService.builder().
+            for ( VhostPath path : vhostPlan.vhost().vhostPaths() )
+            {
+                Map<String, String> serviceLabels = new HashMap<>();
+                serviceLabels.putAll( defaultLabels );
+                serviceLabels.putAll( path.getVhostLabel() );
+                commandBuilder.addCommand( ImmutableCommandApplyService.builder().
+                    client( defaultClient() ).
+                    ownerReference( ownerReference() ).
+                    namespace( namespaceName ).
+                    name( path.getPathResourceName( fullAppName, vhostPlan.vhost().host() ) ).
+                    labels( serviceLabels ).
+                    spec( ImmutableServiceSpecBuilder.builder().
+                        selector( path.getVhostLabel() ).
+                        build().
+                        execute() ).
+                    build() );
+            }
+
+            Map<String, String> serviceAnnotations = new HashMap<>();
+            serviceAnnotations.put( "kubernetes.io/ingress.class", "nginx" );
+            serviceAnnotations.put( "ingress.kubernetes.io/rewrite-target", "/" );
+            serviceAnnotations.put( "nginx.ingress.kubernetes.io/configuration-snippet",
+                                    "proxy_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;\n" +
+                                        "      proxy_hide_header l5d-remote-ip;\n" + "      proxy_hide_header l5d-server-id;" );
+
+            if ( vhostPlan.vhost().certificate() != null )
+            {
+                serviceAnnotations.put( "nginx.ingress.kubernetes.io/ssl-redirect", "true" );
+                serviceAnnotations.put( "certmanager.k8s.io/issuer", vhostPlan.vhost().getVhostResourceName( fullAppName ) );
+            }
+
+            commandBuilder.addCommand( ImmutableCommandApplyIngress.builder().
                 client( defaultClient() ).
                 ownerReference( ownerReference() ).
                 namespace( namespaceName ).
-                name( path.getPathResourceName( fullAppName, vhost.host() ) ).
-                labels( serviceLabels ).
-                spec( ImmutableServiceSpecBuilder.builder().
-                    selector( path.getVhostLabel() ).
+                name( vhostPlan.vhost().getVhostResourceName( fullAppName ) ).
+                labels( defaultLabels ).
+                annotations( serviceAnnotations ).
+                spec( ImmutableIngressSpecBuilder.builder().
+                    certificateSecretName(
+                        vhostPlan.vhost().certificate() != null ? vhostPlan.vhost().getVhostResourceName( fullAppName ) : null ).
+                    vhost( vhostPlan.vhost() ).
+                    appFullName( fullAppName ).
                     build().
                     execute() ).
                 build() );
         }
-
-        Map<String, String> serviceAnnotations = new HashMap<>();
-        serviceAnnotations.put( "kubernetes.io/ingress.class", "nginx" );
-        serviceAnnotations.put( "ingress.kubernetes.io/rewrite-target", "/" );
-        serviceAnnotations.put( "nginx.ingress.kubernetes.io/configuration-snippet",
-                                "proxy_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;\n" +
-                                    "      proxy_hide_header l5d-remote-ip;\n" + "      proxy_hide_header l5d-server-id;" );
-
-        if ( vhost.certificate() != null )
-        {
-            serviceAnnotations.put( "nginx.ingress.kubernetes.io/ssl-redirect", "true" );
-            serviceAnnotations.put( "certmanager.k8s.io/issuer", vhost.getVhostResourceName( fullAppName ) );
-        }
-
-        commandBuilder.addCommand( ImmutableCommandApplyIngress.builder().
-            client( defaultClient() ).
-            ownerReference( ownerReference() ).
-            namespace( namespaceName ).
-            name( vhost.getVhostResourceName( fullAppName ) ).
-            labels( defaultLabels ).
-            annotations( serviceAnnotations ).
-            spec( ImmutableIngressSpecBuilder.builder().
-                certificateSecretName( vhost.certificate() != null ? vhost.getVhostResourceName( fullAppName ) : null ).
-                vhost( vhost ).
-                appFullName( fullAppName ).
-                build().
-                execute() ).
-            build() );
-
     }
 }

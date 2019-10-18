@@ -1,0 +1,170 @@
+package com.enonic.ec.kubernetes.operator.commands.plan;
+
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.immutables.value.Value;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.wildfly.common.annotation.Nullable;
+
+import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResource;
+import com.enonic.ec.kubernetes.operator.commands.ImmutableVhostBuilder;
+import com.enonic.ec.kubernetes.operator.commands.Vhost;
+
+@Value.Immutable
+public abstract class XpVhostDeploymentDiff
+{
+    private final static Logger log = LoggerFactory.getLogger( XpVhostDeploymentDiff.class );
+
+    @Nullable
+    public abstract XpDeploymentResource oldDeployment();
+
+    public abstract XpDeploymentResource newDeployment();
+
+    @Value.Derived
+    protected List<Vhost> oldVHosts()
+    {
+        if ( oldDeployment() == null )
+        {
+            return Collections.EMPTY_LIST;
+        }
+        return ImmutableVhostBuilder.builder().
+            nodes( oldDeployment().getSpec().nodes() ).
+            certificates( oldDeployment().getSpec().vHostCertificates() ).
+            build().
+            execute();
+    }
+
+    @Value.Derived
+    protected List<Vhost> newVHosts()
+    {
+        return ImmutableVhostBuilder.builder().
+            nodes( newDeployment().getSpec().nodes() ).
+            certificates( newDeployment().getSpec().vHostCertificates() ).
+            build().
+            execute();
+    }
+
+    @Value.Derived
+    protected List<Vhost> vHostsAdded()
+    {
+        if ( oldDeployment() == null )
+        {
+            return newVHosts();
+        }
+        List<String> oldHosts = oldVHosts().stream().map( h -> h.host() ).collect( Collectors.toList() );
+        return newVHosts().stream().filter( h -> !oldHosts.contains( h.host() ) ).collect( Collectors.toList() );
+    }
+
+    @Value.Derived
+    public List<XpVhostDeploymentPlan> deploymentPlans()
+    {
+        List<XpVhostDeploymentPlan> res = new LinkedList<>();
+        vHostsAdded().forEach( n -> res.add( ImmutableXpVhostDeploymentPlan.builder().
+            vHostTuple( VhostTuple.of( null, n ) ).
+            build() ) );
+        vHostsChanged().forEach( n -> res.add( ImmutableXpVhostDeploymentPlan.builder().
+            vHostTuple( n ).
+            build() ) );
+        return res;
+    }
+
+    @Value.Derived
+    public List<Vhost> vHostsRemoved()
+    {
+        if ( oldDeployment() == null )
+        {
+            return Collections.EMPTY_LIST;
+        }
+        List<String> newVHosts = newVHosts().stream().map( h -> h.host() ).collect( Collectors.toList() );
+        return oldVHosts().stream().
+            filter( h -> !newVHosts.contains( h.host() ) ).
+            collect( Collectors.toList() );
+    }
+
+    @Value.Derived
+    protected List<VhostTuple> vHostsChanged()
+    {
+        if ( oldDeployment() == null )
+        {
+            // No old deployment
+            return Collections.EMPTY_LIST;
+        }
+
+        List<VhostTuple> changes = new LinkedList<>();
+        for ( VhostTuple t : vhostTuples() )
+        {
+            if ( !t.oldVhost.equals( t.newVhost ) )
+            {
+                changes.add( t );
+            }
+        }
+        return changes;
+    }
+
+    @Value.Derived
+    protected List<VhostTuple> vhostTuples()
+    {
+        if ( oldDeployment() == null )
+        {
+            return Collections.EMPTY_LIST;
+        }
+
+        List<VhostTuple> res = new LinkedList<>();
+        for ( Vhost oldVhost : oldVHosts() )
+        {
+            Optional<Vhost> newVhost = newVHosts().stream().filter( h -> h.host().equals( oldVhost.host() ) ).findAny();
+            if ( newVhost.isPresent() )
+            {
+                res.add( new VhostTuple( oldVhost, newVhost.get() ) );
+            }
+        }
+        return res;
+    }
+
+    @Value.Check
+    protected void logInfo()
+    {
+        log.debug( "vHosts added: " + vHostsAdded() );
+        log.debug( "vHosts removed: " + vHostsRemoved() );
+        log.debug( "vHosts changed: " + vHostsChanged() );
+    }
+
+    public static class VhostTuple
+    {
+        private final Vhost oldVhost;
+
+        private final Vhost newVhost;
+
+        protected VhostTuple( final Vhost oldVhost, final Vhost newVhost )
+        {
+            this.oldVhost = oldVhost;
+            this.newVhost = newVhost;
+        }
+
+        public static VhostTuple of( final Vhost oldVhost, final Vhost newVhost )
+        {
+            return new VhostTuple( oldVhost, newVhost );
+        }
+
+        public Vhost getOldVhost()
+        {
+            return oldVhost;
+        }
+
+        public Vhost getNewVhost()
+        {
+            return newVhost;
+        }
+
+        @Override
+        public String toString()
+        {
+            return newVhost.host();
+        }
+    }
+}

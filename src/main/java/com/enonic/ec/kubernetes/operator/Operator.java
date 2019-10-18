@@ -16,6 +16,7 @@ import com.enonic.ec.kubernetes.deployment.CrdClientsProducer;
 import com.enonic.ec.kubernetes.deployment.XpDeploymentCache;
 import com.enonic.ec.kubernetes.operator.commands.ImmutableCommandDeployXp;
 import com.enonic.ec.kubernetes.operator.commands.plan.ImmutableXpNodeDeploymentDiff;
+import com.enonic.ec.kubernetes.operator.commands.plan.ImmutableXpVhostDeploymentDiff;
 import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerClientProducer;
 
 @ApplicationScoped
@@ -58,6 +59,10 @@ public class Operator
                             resource( newResource ).
                             newDeployment( oldResource == null ).
                             nodeDiff( ImmutableXpNodeDeploymentDiff.builder().
+                                oldDeployment( oldResource ).
+                                newDeployment( newResource ).
+                                build() ).
+                            vHostDiff( ImmutableXpVhostDeploymentDiff.builder().
                                 oldDeployment( oldResource ).
                                 newDeployment( newResource ).
                                 build() ).
