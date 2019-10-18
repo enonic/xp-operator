@@ -51,8 +51,6 @@ spec:
         com.enonic.app.snapshotter:2.1.1
 
   vHostCertificates:
-    company.com1:
-      selfSigned: true
     company.com:
       selfSigned: true
       # letEncrypt: true

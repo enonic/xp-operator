@@ -1,6 +1,5 @@
 package com.enonic.ec.kubernetes.operator.commands.apply;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -35,7 +34,6 @@ public abstract class CommandMergeMetadata
     @Override
     public ObjectMeta execute()
     {
-        // TODO: Create new objects
         mergeOwnerReferences();
         metadata().setLabels( mergeMap( kind(), metadata().getName(), "label", metadata().getLabels(), labels() ) );
         metadata().setAnnotations( mergeMap( kind(), metadata().getName(), "annotation", metadata().getAnnotations(), annotations() ) );

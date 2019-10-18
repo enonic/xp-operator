@@ -25,7 +25,7 @@ public abstract class CommandApplyIssuer
     }
 
     @Override
-    protected IssuerResource createResource( final ObjectMeta metadata )
+    protected IssuerResource build( final ObjectMeta metadata )
     {
         IssuerResource issuerResource = new IssuerResource();
         issuerResource.setMetadata( metadata );

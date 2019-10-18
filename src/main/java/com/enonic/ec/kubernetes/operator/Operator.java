@@ -15,6 +15,7 @@ import io.quarkus.runtime.StartupEvent;
 import com.enonic.ec.kubernetes.deployment.CrdClientsProducer;
 import com.enonic.ec.kubernetes.deployment.XpDeploymentCache;
 import com.enonic.ec.kubernetes.operator.commands.ImmutableCommandDeployXp;
+import com.enonic.ec.kubernetes.operator.commands.plan.ImmutableXpNodeDeploymentDiff;
 import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerClientProducer;
 
 @ApplicationScoped
@@ -51,14 +52,17 @@ public class Operator
                     try
                     {
                         // TODO: What to do if cloud+project of 2 different people have the same name??
-                        ImmutableCommandDeployXp deployCommand = ImmutableCommandDeployXp.builder().
+                        ImmutableCommandDeployXp.builder().
                             defaultClient( defaultClient ).
                             issuerClient( issuerClient ).
                             resource( newResource ).
-                            build();
-
-                        Thread.sleep( 500 ); // Give kubernetes some time to register owner reference
-                        deployCommand.execute();
+                            newDeployment( oldResource == null ).
+                            nodeDiff( ImmutableXpNodeDeploymentDiff.builder().
+                                oldDeployment( oldResource ).
+                                newDeployment( newResource ).
+                                build() ).
+                            build().
+                            execute();
                     }
                     catch ( Exception e )
                     {

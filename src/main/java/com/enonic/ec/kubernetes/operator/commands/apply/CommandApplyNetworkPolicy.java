@@ -22,7 +22,7 @@ public abstract class CommandApplyNetworkPolicy
     }
 
     @Override
-    protected NetworkPolicy createResource( final ObjectMeta metadata )
+    protected NetworkPolicy build( final ObjectMeta metadata )
     {
         NetworkPolicy networkPolicy = new NetworkPolicy();
         networkPolicy.setMetadata( metadata );

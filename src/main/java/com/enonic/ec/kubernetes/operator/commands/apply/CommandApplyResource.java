@@ -45,10 +45,11 @@ public abstract class CommandApplyResource<T extends HasMetadata>
 
         if ( oldResource == null )
         {
-            T newResource = createResource(
+            T newResource = build(
                 new ObjectMeta( annotations(), null, null, null, null, null, null, null, labels(), null, name(), namespace(),
                                 List.of( ownerReference() ), null, null, null ) );
-            log.info( "Creating in Namespace '" + namespace() + "' " + newResource.getKind() + " '" + name() + "'" );
+            log.info( "Creating in Namespace '" + newResource.getMetadata().getNamespace() + "' " + newResource.getKind() + " '" +
+                          newResource.getMetadata().getName() + "'" );
             return apply( newResource );
         }
 
@@ -62,41 +63,16 @@ public abstract class CommandApplyResource<T extends HasMetadata>
             execute();
         newMetadata.setResourceVersion( null );
 
-        T newResource = createResource( newMetadata );
-
-        if ( noChangesMadeToMetadata( oldResource, newResource ) && noChangesMadeToSpec( oldResource, newResource ) )
-        {
-            log.info( "Skipping in Namespace '" + namespace() + "' " + newResource.getKind() + " '" + name() + "'" );
-            return oldResource;
-        }
-
-        log.info( "Updating in Namespace '" + namespace() + "' " + newResource.getKind() + " '" + name() + "'" );
+        T newResource = build( newMetadata );
+        log.info( "Updating in Namespace '" + newResource.getMetadata().getNamespace() + "' " + newResource.getKind() + " '" +
+                      newResource.getMetadata().getName() + "'" );
         return apply( newResource );
     }
 
     @Value.Derived
     protected abstract T fetchResource();
 
-    protected abstract T createResource( ObjectMeta metadata );
+    protected abstract T build( ObjectMeta metadata );
 
     protected abstract T apply( T resource );
-
-    private boolean noChangesMadeToMetadata( T oldResource, T newResource )
-    {
-        boolean res = oldResource.getMetadata().getName().equals( newResource.getMetadata().getName() ) &&
-            oldResource.getMetadata().getLabels().equals( newResource.getMetadata().getLabels() ) &&
-            oldResource.getMetadata().getAnnotations().equals( newResource.getMetadata().getAnnotations() );
-
-        if ( oldResource.getKind().equals( "Namespace" ) )
-        {
-            return res;
-        }
-
-        return res && oldResource.getMetadata().getNamespace().equals( newResource.getMetadata().getNamespace() );
-    }
-
-    protected boolean noChangesMadeToSpec( T oldResource, T newResource )
-    {
-        return false;
-    }
 }

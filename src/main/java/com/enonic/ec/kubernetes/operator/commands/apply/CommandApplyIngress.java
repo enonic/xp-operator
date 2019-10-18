@@ -2,7 +2,6 @@ package com.enonic.ec.kubernetes.operator.commands.apply;
 
 import org.immutables.value.Value;
 
-import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.kubernetes.api.model.extensions.IngressSpec;
@@ -23,7 +22,7 @@ public abstract class CommandApplyIngress
     }
 
     @Override
-    protected Ingress createResource( final ObjectMeta metadata )
+    protected Ingress build( final ObjectMeta metadata )
     {
         Ingress ingress = new Ingress();
         ingress.setMetadata( metadata );

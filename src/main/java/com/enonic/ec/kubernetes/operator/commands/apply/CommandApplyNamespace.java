@@ -28,7 +28,7 @@ public abstract class CommandApplyNamespace
     }
 
     @Override
-    protected Namespace createResource( final ObjectMeta metadata )
+    protected Namespace build( final ObjectMeta metadata )
     {
         Namespace namespace = new Namespace();
         namespace.setMetadata( metadata );

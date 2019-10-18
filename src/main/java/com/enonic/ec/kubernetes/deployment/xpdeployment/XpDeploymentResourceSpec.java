@@ -3,6 +3,7 @@ package com.enonic.ec.kubernetes.deployment.xpdeployment;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.immutables.value.Value;
 import org.wildfly.common.annotation.Nullable;
@@ -88,6 +89,10 @@ public abstract class XpDeploymentResourceSpec
         singleNode.ifPresent( xpDeploymentResourceSpecNode -> Preconditions.checkState( xpDeploymentResourceSpecNode.replicas().equals( 1 ),
                                                                                         "field replicas on node type " +
                                                                                             NodeType.STANDALONE.name() + " has to be 1" ) );
-
+        for ( Map.Entry<String, List<XpDeploymentResourceSpecNode>> e : nodes().stream().
+            collect( Collectors.groupingBy( XpDeploymentResourceSpecNode::alias ) ).entrySet() )
+        {
+            Preconditions.checkState( e.getValue().size() == 1, "two nodes have the same alias: " + e.getValue().get( 0 ).alias() );
+        }
     }
 }

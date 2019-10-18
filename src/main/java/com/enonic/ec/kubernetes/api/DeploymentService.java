@@ -1,6 +1,7 @@
 package com.enonic.ec.kubernetes.api;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -23,6 +24,7 @@ import com.enonic.ec.kubernetes.deployment.ImmutableCommandCreateXpDeployment;
 import com.enonic.ec.kubernetes.deployment.ImmutableCommandDeleteXpDeployment;
 import com.enonic.ec.kubernetes.deployment.XpDeploymentCache;
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResource;
+import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentSpecChangeValidation;
 
 @ApplicationScoped
 @Path("/api")
@@ -49,6 +51,13 @@ public class DeploymentService
     @Produces("application/json")
     public Response createXpDeployment( XpDeploymentJson deployment, @Context UriInfo uriInfo )
     {
+        Optional<XpDeploymentResource> old =
+            xpDeploymentCache.stream().filter( d -> d.getSpec().fullName().equals( deployment.spec().fullName() ) ).findAny();
+        if ( old.isPresent() )
+        {
+            XpDeploymentSpecChangeValidation.check( old.get().getSpec(), deployment.spec() );
+        }
+
         XpDeploymentResource resource = ImmutableCommandCreateXpDeployment.builder().
             client( xpDeploymentClient ).
             apiVersion( deployment.apiVersion() ).
@@ -89,6 +98,8 @@ public class DeploymentService
         {
             return Response.status( 400, "cannot update deployment to a different apiVersion" ).build();
         }
+
+        XpDeploymentSpecChangeValidation.check( resource.getSpec(), deployment.spec() );
 
         resource.setSpec( deployment.spec() );
         xpDeploymentClient.getClient().createOrReplace( resource );

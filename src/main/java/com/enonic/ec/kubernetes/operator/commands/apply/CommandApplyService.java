@@ -22,7 +22,7 @@ public abstract class CommandApplyService
     }
 
     @Override
-    protected Service createResource( final ObjectMeta metadata )
+    protected Service build( final ObjectMeta metadata )
     {
         Service service = new Service();
         service.setMetadata( metadata );

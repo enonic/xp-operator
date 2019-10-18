@@ -18,7 +18,7 @@ public abstract class VhostPath
     public Map<String, String> getVhostLabel()
     {
         Map<String, String> res = new HashMap<>();
-        nodes().stream().forEach( n -> res.putAll( n.extraLabels() ) );
+        nodes().stream().forEach( n -> res.putAll( n.nodeAliasLabel() ) );
         return res;
     }
 

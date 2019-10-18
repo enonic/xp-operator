@@ -1,7 +1,5 @@
 package com.enonic.ec.kubernetes.operator.commands;
 
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -73,37 +71,28 @@ public abstract class VhostBuilder
 
         for ( XpDeploymentResourceSpecNode node : nodes() )
         {
-            String vHostConfig = node.config().get( "com.enonic.xp.web.vhost.cfg" );
-            if ( vHostConfig != null )
+            Properties p = node.configAsProperties( "com.enonic.xp.web.vhost.cfg" );
+            if ( p != null )
             {
-                Properties p = new Properties();
-                try
+                if ( !p.containsKey( "enabled" ) || p.getProperty( "enabled" ).equals( "true" ) )
                 {
-                    p.load( new StringReader( vHostConfig ) );
-                    if ( !p.containsKey( "enabled" ) || p.getProperty( "enabled" ).equals( "true" ) )
+                    Set<String> keys = p.stringPropertyNames();
+                    for ( String key : keys )
                     {
-                        Set<String> keys = p.stringPropertyNames();
-                        for ( String key : keys )
+                        if ( key.startsWith( "mapping." ) && key.endsWith( ".host" ) )
                         {
-                            if ( key.startsWith( "mapping." ) && key.endsWith( ".host" ) )
+                            String host = p.getProperty( key );
+                            String source = p.getProperty( key.replace( ".host", ".source" ) );
+                            if ( source != null )
                             {
-                                String host = p.getProperty( key );
-                                String source = p.getProperty( key.replace( ".host", ".source" ) );
-                                if ( source != null )
-                                {
-                                    VhostConfig cfg = tmp.getOrDefault( host, new VhostConfig( host ) );
-                                    Set<XpDeploymentResourceSpecNode> nodes = cfg.paths.getOrDefault( source, new HashSet<>() );
-                                    nodes.add( node );
-                                    cfg.paths.put( source, nodes );
-                                    tmp.put( host, cfg );
-                                }
+                                VhostConfig cfg = tmp.getOrDefault( host, new VhostConfig( host ) );
+                                Set<XpDeploymentResourceSpecNode> nodes = cfg.paths.getOrDefault( source, new HashSet<>() );
+                                nodes.add( node );
+                                cfg.paths.put( source, nodes );
+                                tmp.put( host, cfg );
                             }
                         }
                     }
-                }
-                catch ( IOException e )
-                {
-                    log.warn( "Failed to parse vhost config", e );
                 }
             }
         }

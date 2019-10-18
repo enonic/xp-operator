@@ -23,7 +23,7 @@ public abstract class CommandApplyConfigMap
     }
 
     @Override
-    protected ConfigMap createResource( final ObjectMeta metadata )
+    protected ConfigMap build( final ObjectMeta metadata )
     {
         ConfigMap configMap = new ConfigMap();
         configMap.setMetadata( metadata );
@@ -37,10 +37,4 @@ public abstract class CommandApplyConfigMap
         return client().configMaps().inNamespace( namespace() ).createOrReplace( resource );
     }
 
-
-    @Override
-    protected boolean noChangesMadeToSpec( final ConfigMap oldResource, final ConfigMap newResource )
-    {
-        return oldResource.getData().equals( newResource.getData() );
-    }
 }

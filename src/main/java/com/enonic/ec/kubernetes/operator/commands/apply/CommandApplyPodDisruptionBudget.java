@@ -22,7 +22,7 @@ public abstract class CommandApplyPodDisruptionBudget
     }
 
     @Override
-    protected PodDisruptionBudget createResource( final ObjectMeta metadata )
+    protected PodDisruptionBudget build( final ObjectMeta metadata )
     {
         PodDisruptionBudget podDisruptionBudget = new PodDisruptionBudget();
         podDisruptionBudget.setMetadata( metadata );

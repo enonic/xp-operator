@@ -14,7 +14,6 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import com.enonic.ec.kubernetes.common.commands.Command;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResource;
-import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceSpecNode;
 import com.enonic.ec.kubernetes.operator.commands.apply.ImmutableCommandApplyConfigMap;
 import com.enonic.ec.kubernetes.operator.commands.apply.ImmutableCommandApplyIngress;
 import com.enonic.ec.kubernetes.operator.commands.apply.ImmutableCommandApplyIssuer;
@@ -27,6 +26,8 @@ import com.enonic.ec.kubernetes.operator.commands.builders.ImmutableIssuerSpecBu
 import com.enonic.ec.kubernetes.operator.commands.builders.ImmutablePodDisruptionBudgetSpecBuilder;
 import com.enonic.ec.kubernetes.operator.commands.builders.ImmutableServiceSpecBuilder;
 import com.enonic.ec.kubernetes.operator.commands.builders.ImmutableStatefulSetSpecNonClusteredSpec;
+import com.enonic.ec.kubernetes.operator.commands.plan.XpNodeDeploymentDiff;
+import com.enonic.ec.kubernetes.operator.commands.plan.XpNodeDeploymentPlan;
 import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerClientProducer;
 
 @Value.Immutable
@@ -37,7 +38,11 @@ public abstract class CommandDeployXp
 
     protected abstract IssuerClientProducer.IssuerClient issuerClient();
 
+    protected abstract boolean newDeployment();
+
     protected abstract XpDeploymentResource resource();
+
+    protected abstract XpNodeDeploymentDiff nodeDiff();
 
     @Value.Derived
     protected OwnerReference ownerReference()
@@ -60,13 +65,16 @@ public abstract class CommandDeployXp
 
         ImmutableCombinedCommand.Builder commandBuilder = ImmutableCombinedCommand.builder();
 
-        commandBuilder.addCommand( ImmutableCommandApplyNamespace.builder().
-            client( defaultClient() ).
-            ownerReference( ownerReference() ).
-            name( namespaceName ).
-            build() );
+        if ( newDeployment() )
+        {
+            commandBuilder.addCommand( ImmutableCommandApplyNamespace.builder().
+                client( defaultClient() ).
+                ownerReference( ownerReference() ).
+                name( namespaceName ).
+                build() );
 
-        // TODO: Create network policy
+            // TODO: Create network policy
+        }
 
         Vhosts vhosts = ImmutableVhostBuilder.builder().
             nodes( resource().getSpec().nodes() ).
@@ -74,10 +82,10 @@ public abstract class CommandDeployXp
             build().
             execute();
 
-        for ( XpDeploymentResourceSpecNode node : resource().getSpec().nodes() )
+        for ( XpNodeDeploymentPlan nodePlan : nodeDiff().deploymentPlans() )
         {
             createDeployNodeCommands( commandBuilder, namespaceName, resource().getSpec().fullAppName(),
-                                      resource().getSpec().defaultLabels(), node, vhosts );
+                                      resource().getSpec().defaultLabels(), nodePlan, vhosts );
         }
 
         for ( Vhost vhost : vhosts )
@@ -86,68 +94,85 @@ public abstract class CommandDeployXp
                                        resource().getSpec().defaultLabels(), vhost );
         }
 
-        // TODO clean up old ingress, services and certs
+        // TODO clean up old stuff
 
         return commandBuilder.build().execute();
     }
 
     private void createDeployNodeCommands( final ImmutableCombinedCommand.Builder commandBuilder, final String namespaceName,
                                            final String fullAppName, final Map<String, String> defaultLabels,
-                                           final XpDeploymentResourceSpecNode node, final Vhosts vhosts )
+                                           final XpNodeDeploymentPlan nodePlan, final Vhosts vhosts )
     {
         // TODO: Handle all nodetypes
-        commandBuilder.addCommand( ImmutableCommandApplyPodDisruptionBudget.builder().
-            client( defaultClient() ).
-            ownerReference( ownerReference() ).
-            namespace( namespaceName ).
-            name( fullAppName ).
-            labels( defaultLabels ).
-            spec( ImmutablePodDisruptionBudgetSpecBuilder.builder().
-                minAvailable( 0 ). // Since we only have 1 node we have to be able to turn it off during upgrades
-                matchLabels( defaultLabels ).
-                build().
-                execute() ).
-            build() );
 
-        commandBuilder.addCommand( ImmutableCommandApplyConfigMap.builder().
-            client( defaultClient() ).
-            ownerReference( ownerReference() ).
-            namespace( namespaceName ).
-            name( fullAppName ).
-            labels( defaultLabels ).
-            data( node.config() ).
-            build() );
+        String nodeName = fullAppName + "-" + nodePlan.node().alias();
+        Map<String, String> nodeLabels = new HashMap<>( defaultLabels );
+        nodeLabels.putAll( nodePlan.node().nodeAliasLabel() );
 
-        List<EnvVar> podEnv = new LinkedList<>();
-        if ( node.env() != null )
+        if ( nodePlan.changeDisruptionBudget() )
         {
-            for ( Map.Entry<String, String> e : node.env().entrySet() )
-            {
-                podEnv.add( new EnvVar( e.getKey(), e.getValue(), null ) );
-            }
+            commandBuilder.addCommand( ImmutableCommandApplyPodDisruptionBudget.builder().
+                client( defaultClient() ).
+                ownerReference( ownerReference() ).
+                namespace( namespaceName ).
+                name( nodeName ).
+                labels( nodeLabels ).
+                spec( ImmutablePodDisruptionBudgetSpecBuilder.builder().
+                    minAvailable( 0 ). // TODO: Since we only have 1 node we have to be able to turn it off during upgrades
+                    matchLabels( nodeLabels ).
+                    build().
+                    execute() ).
+                build() );
         }
 
-        commandBuilder.addCommand( ImmutableCommandApplyStatefulSet.builder().
-            client( defaultClient() ).
-            ownerReference( ownerReference() ).
-            namespace( namespaceName ).
-            name( fullAppName ).
-            labels( defaultLabels ).
-            spec( ImmutableStatefulSetSpecNonClusteredSpec.builder().
-                podLabels( defaultLabels ).
-                extraPodLabels( node.extraLabels() ).
-                replicas( resource().getSpec().enabled() ? node.replicas() : 0 ).
-                podImage( podImageName() ).
-                podEnv( podEnv ).
-                podResources( Map.of( "cpu", node.resources().cpu(), "memory", node.resources().memory() ) ).
-                repoDiskSize( node.resources().disks().get( "repo" ) ).
-                snapshotDiskSize( node.resources().disks().get( "snapshots" ) ).
-                serviceName( fullAppName ).
-                configMapName( fullAppName ).
-                build().
-                execute() ).
-            build() );
+        if ( nodePlan.changeConfigMap() )
+        {
+            commandBuilder.addCommand( ImmutableCommandApplyConfigMap.builder().
+                client( defaultClient() ).
+                ownerReference( ownerReference() ).
+                namespace( namespaceName ).
+                name( nodeName ).
+                labels( nodeLabels ).
+                data( nodePlan.node().config() ).
+                build() );
+        }
 
+        if ( nodePlan.changeStatefulSet() )
+        {
+            List<EnvVar> podEnv = new LinkedList<>();
+            if ( nodePlan.node().env() != null )
+            {
+                for ( Map.Entry<String, String> e : nodePlan.node().env().entrySet() )
+                {
+                    podEnv.add( new EnvVar( e.getKey(), e.getValue(), null ) );
+                }
+            }
+
+            commandBuilder.addCommand( ImmutableCommandApplyStatefulSet.builder().
+                client( defaultClient() ).
+                ownerReference( ownerReference() ).
+                namespace( namespaceName ).
+                name( nodeName ).
+                labels( nodeLabels ).
+                spec( ImmutableStatefulSetSpecNonClusteredSpec.builder().
+                    podLabels( nodeLabels ).
+                    replicas( resource().getSpec().enabled() ? nodePlan.node().replicas() : 0 ).
+                    podImage( podImageName() ).
+                    podEnv( podEnv ).
+                    podResources( Map.of( "cpu", nodePlan.node().resources().cpu(), "memory", nodePlan.node().resources().memory() ) ).
+                    repoDiskSize( nodePlan.node().resources().disks().get( "repo" ) ).
+                    snapshotDiskSize( nodePlan.node().resources().disks().get( "snapshots" ) ).
+                    serviceName( nodeName ).
+                    configMapName( nodeName ).
+                    build().
+                    execute() ).
+                build() );
+        }
+
+        if ( nodePlan.changeScale() )
+        {
+            // TODO: Change scale
+        }
     }
 
     private void createDeployVhostCommands( final ImmutableCombinedCommand.Builder commandBuilder, final String namespaceName,
