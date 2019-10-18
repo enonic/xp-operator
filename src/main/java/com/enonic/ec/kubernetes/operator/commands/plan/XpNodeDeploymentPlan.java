@@ -44,7 +44,7 @@ public abstract class XpNodeDeploymentPlan
         {
             return false;
         }
-        return enabledDisabled() || !nodeTuple().getOldNode().replicas().equals( nodeTuple().getOldNode().replicas() );
+        return enabledDisabled() || !nodeTuple().getOldNode().replicas().equals( nodeTuple().getNewNode().replicas() );
     }
 
     @Value.Derived

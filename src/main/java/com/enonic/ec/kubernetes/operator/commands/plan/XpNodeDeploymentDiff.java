@@ -11,8 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wildfly.common.annotation.Nullable;
 
-import com.google.common.base.Preconditions;
-
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResource;
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceSpecNode;
 
@@ -102,7 +100,7 @@ public abstract class XpNodeDeploymentDiff
         List<NodeTuple> changes = new LinkedList<>();
         for ( NodeTuple t : nodeTuples() )
         {
-            if ( !t.oldNode.equals( t.newNode ) )
+            if ( !t.oldNode.equals( t.newNode ) || enabledDisabled() )
             {
                 changes.add( t );
             }

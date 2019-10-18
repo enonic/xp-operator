@@ -86,9 +86,10 @@ public abstract class XpDeploymentResourceSpec
                                       "field resources.disks.repo on node has to be set" );
         } );
 
-        singleNode.ifPresent( xpDeploymentResourceSpecNode -> Preconditions.checkState( xpDeploymentResourceSpecNode.replicas().equals( 1 ),
+        singleNode.ifPresent( xpDeploymentResourceSpecNode -> Preconditions.checkState( xpDeploymentResourceSpecNode.replicas() <= 1,
                                                                                         "field replicas on node type " +
-                                                                                            NodeType.STANDALONE.name() + " has to be 1" ) );
+                                                                                            NodeType.STANDALONE.name() +
+                                                                                            " has to be less than 2" ) );
         for ( Map.Entry<String, List<XpDeploymentResourceSpecNode>> e : nodes().stream().
             collect( Collectors.groupingBy( XpDeploymentResourceSpecNode::alias ) ).entrySet() )
         {

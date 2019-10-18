@@ -28,6 +28,7 @@ import com.enonic.ec.kubernetes.operator.commands.builders.ImmutableServiceSpecB
 import com.enonic.ec.kubernetes.operator.commands.builders.ImmutableStatefulSetSpecNonClusteredSpec;
 import com.enonic.ec.kubernetes.operator.commands.plan.XpNodeDeploymentDiff;
 import com.enonic.ec.kubernetes.operator.commands.plan.XpNodeDeploymentPlan;
+import com.enonic.ec.kubernetes.operator.commands.scale.ImmutableCommandScaleStatefulSet;
 import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerClientProducer;
 
 @Value.Immutable
@@ -108,8 +109,9 @@ public abstract class CommandDeployXp
         String nodeName = fullAppName + "-" + nodePlan.node().alias();
         Map<String, String> nodeLabels = new HashMap<>( defaultLabels );
         nodeLabels.putAll( nodePlan.node().nodeAliasLabel() );
+        Integer nodeScale = resource().getSpec().enabled() ? nodePlan.node().replicas() : 0;
 
-        if ( nodePlan.changeDisruptionBudget() )
+        if ( nodeScale > 1 && nodePlan.changeDisruptionBudget() )
         {
             commandBuilder.addCommand( ImmutableCommandApplyPodDisruptionBudget.builder().
                 client( defaultClient() ).
@@ -118,7 +120,7 @@ public abstract class CommandDeployXp
                 name( nodeName ).
                 labels( nodeLabels ).
                 spec( ImmutablePodDisruptionBudgetSpecBuilder.builder().
-                    minAvailable( 0 ). // TODO: Since we only have 1 node we have to be able to turn it off during upgrades
+                    minAvailable( nodeScale / 2 ). // TODO: Reconsider
                     matchLabels( nodeLabels ).
                     build().
                     execute() ).
@@ -156,7 +158,7 @@ public abstract class CommandDeployXp
                 labels( nodeLabels ).
                 spec( ImmutableStatefulSetSpecNonClusteredSpec.builder().
                     podLabels( nodeLabels ).
-                    replicas( resource().getSpec().enabled() ? nodePlan.node().replicas() : 0 ).
+                    replicas( nodeScale ).
                     podImage( podImageName() ).
                     podEnv( podEnv ).
                     podResources( Map.of( "cpu", nodePlan.node().resources().cpu(), "memory", nodePlan.node().resources().memory() ) ).
@@ -171,7 +173,12 @@ public abstract class CommandDeployXp
 
         if ( nodePlan.changeScale() )
         {
-            // TODO: Change scale
+            commandBuilder.addCommand( ImmutableCommandScaleStatefulSet.builder().
+                client( defaultClient() ).
+                namespace( namespaceName ).
+                name( nodeName ).
+                scale( nodeScale ).
+                build() );
         }
     }
 
