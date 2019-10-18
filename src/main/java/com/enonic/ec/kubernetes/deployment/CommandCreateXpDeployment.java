@@ -32,7 +32,7 @@ public abstract class CommandCreateXpDeployment
         XpDeploymentResource newDeployment = new XpDeploymentResource();
         newDeployment.setApiVersion( apiVersion() );
         newDeployment.setKind( kind );
-        newDeployment.getMetadata().setName( spec().fullName() );
+        newDeployment.getMetadata().setName( spec().deploymentName() );
         newDeployment.getMetadata().setLabels( spec().defaultLabels() );
         newDeployment.setSpec( spec() );
         return client().getClient().createOrReplace( newDeployment );

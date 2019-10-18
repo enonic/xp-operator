@@ -47,23 +47,28 @@ public abstract class XpDeploymentResourceSpec
 
     @Value.Derived
     @JsonIgnore
-    public String fullProjectName()
+    public String defaultNamespaceName()
     {
         return String.join( "-", cloud(), project() );
     }
 
     @Value.Derived
     @JsonIgnore
-    public String fullAppName()
+    public String defaultResourceName()
     {
         return String.join( "-", app(), name() );
     }
 
+    public String defaultResourceName( String... postfix )
+    {
+        return String.join( "-", defaultResourceName(), String.join( "-", postfix ) );
+    }
+
     @Value.Derived
     @JsonIgnore
-    public String fullName()
+    public String deploymentName()
     {
-        return String.join( "-", fullProjectName(), fullAppName() );
+        return String.join( "-", defaultNamespaceName(), defaultResourceName() );
     }
 
     @Value.Derived

@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.immutables.value.Value;
 
+import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResource;
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceSpecNode;
 
 @Value.Immutable
@@ -19,17 +20,34 @@ public abstract class VhostPath
     public abstract String path();
 
     @Value.Derived
-    public Map<String, String> getVhostLabel()
+    public Map<String, String> getServiceSelectorLabels()
     {
         Map<String, String> res = new HashMap<>();
         nodes().stream().forEach( n -> res.putAll( n.nodeAliasLabel() ) );
         return res;
     }
 
-    public String getPathResourceName( String appFullName, String vhost )
+    public Map<String, String> getVhostLabels( Vhost vhost )
     {
-        String hashString = appFullName + vhost + path();
-        return String.join( "-", appFullName, vhost.replace( ".", "-" ), Integer.toString( Math.abs( path().hashCode() ) ) );
+        String pathLabel = path().replace( "/", "_" );
+        if ( pathLabel.equals( "_" ) )
+        {
+            pathLabel = "root";
+        }
+        else
+        {
+            pathLabel = pathLabel.substring( 1 );
+        }
+        Map<String, String> res = new HashMap<>();
+        res.put( "xp.vhost.host", vhost.host() );
+        res.put( "xp.vhost.path", pathLabel );
+        return res;
+    }
+
+    public String getPathResourceName( XpDeploymentResource resource, Vhost vhost )
+    {
+        return resource.getSpec().defaultResourceName( vhost.host().replace( ".", "-" ),
+                                                       Integer.toString( Math.abs( path().hashCode() ) ) );
     }
 
     @Override

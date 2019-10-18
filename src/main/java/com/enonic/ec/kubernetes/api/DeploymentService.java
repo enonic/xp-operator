@@ -51,8 +51,10 @@ public class DeploymentService
     @Produces("application/json")
     public Response createXpDeployment( XpDeploymentJson deployment, @Context UriInfo uriInfo )
     {
-        Optional<XpDeploymentResource> old =
-            xpDeploymentCache.stream().filter( d -> d.getSpec().fullName().equals( deployment.spec().fullName() ) ).findAny();
+        Optional<XpDeploymentResource> old = xpDeploymentCache.stream().
+            filter( d -> d.getSpec().deploymentName().equals( deployment.spec().deploymentName() ) ).
+            findAny();
+
         if ( old.isPresent() )
         {
             XpDeploymentSpecChangeValidation.check( old.get().getSpec(), deployment.spec() );

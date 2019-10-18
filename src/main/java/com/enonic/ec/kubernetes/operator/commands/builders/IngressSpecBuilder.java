@@ -18,6 +18,7 @@ import io.fabric8.kubernetes.api.model.extensions.IngressTLS;
 import com.enonic.ec.kubernetes.common.commands.Command;
 import com.enonic.ec.kubernetes.deployment.vhost.Vhost;
 import com.enonic.ec.kubernetes.deployment.vhost.VhostPath;
+import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResource;
 
 @Value.Immutable
 public abstract class IngressSpecBuilder
@@ -29,7 +30,7 @@ public abstract class IngressSpecBuilder
 
     protected abstract Vhost vhost();
 
-    protected abstract String appFullName();
+    protected abstract XpDeploymentResource resource();
 
     @Override
     public IngressSpec execute()
@@ -54,8 +55,8 @@ public abstract class IngressSpecBuilder
         List<HTTPIngressPath> paths = new LinkedList<>();
         for ( VhostPath path : vhost().vhostPaths() )
         {
-            paths.add( new HTTPIngressPath(
-                new IngressBackend( path.getPathResourceName( appFullName(), vhost().host() ), new IntOrString( 8080 ) ), path.path() ) );
+            paths.add( new HTTPIngressPath( new IngressBackend( path.getPathResourceName( resource(), vhost() ), new IntOrString( 8080 ) ),
+                                            path.path() ) );
         }
         http.setPaths( paths );
 

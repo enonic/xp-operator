@@ -5,6 +5,7 @@ import java.util.List;
 import org.immutables.value.Value;
 import org.wildfly.common.annotation.Nullable;
 
+import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResource;
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceSpecVhostCertificate;
 
 @Value.Immutable
@@ -17,8 +18,8 @@ public abstract class Vhost
 
     public abstract List<VhostPath> vhostPaths();
 
-    public String getVhostResourceName( final String fullAppName )
+    public String getVHostResourceName( final XpDeploymentResource resource )
     {
-        return fullAppName + "-" + host().replace( ".", "-" );
+        return resource.getSpec().defaultResourceName( host().replace( ".", "-" ) );
     }
 }
