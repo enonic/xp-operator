@@ -11,9 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wildfly.common.annotation.Nullable;
 
+import com.enonic.ec.kubernetes.deployment.vhost.Vhost;
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResource;
-import com.enonic.ec.kubernetes.operator.commands.ImmutableVhostBuilder;
-import com.enonic.ec.kubernetes.operator.commands.Vhost;
 
 @Value.Immutable
 public abstract class XpVhostDeploymentDiff
@@ -26,38 +25,14 @@ public abstract class XpVhostDeploymentDiff
     public abstract XpDeploymentResource newDeployment();
 
     @Value.Derived
-    protected List<Vhost> oldVHosts()
-    {
-        if ( oldDeployment() == null )
-        {
-            return Collections.EMPTY_LIST;
-        }
-        return ImmutableVhostBuilder.builder().
-            nodes( oldDeployment().getSpec().nodes() ).
-            certificates( oldDeployment().getSpec().vHostCertificates() ).
-            build().
-            execute();
-    }
-
-    @Value.Derived
-    protected List<Vhost> newVHosts()
-    {
-        return ImmutableVhostBuilder.builder().
-            nodes( newDeployment().getSpec().nodes() ).
-            certificates( newDeployment().getSpec().vHostCertificates() ).
-            build().
-            execute();
-    }
-
-    @Value.Derived
     protected List<Vhost> vHostsAdded()
     {
         if ( oldDeployment() == null )
         {
-            return newVHosts();
+            return newDeployment().getSpec().vHosts();
         }
-        List<String> oldHosts = oldVHosts().stream().map( h -> h.host() ).collect( Collectors.toList() );
-        return newVHosts().stream().filter( h -> !oldHosts.contains( h.host() ) ).collect( Collectors.toList() );
+        List<String> oldHosts = oldDeployment().getSpec().vHosts().stream().map( h -> h.host() ).collect( Collectors.toList() );
+        return newDeployment().getSpec().vHosts().stream().filter( h -> !oldHosts.contains( h.host() ) ).collect( Collectors.toList() );
     }
 
     @Value.Derived
@@ -80,8 +55,8 @@ public abstract class XpVhostDeploymentDiff
         {
             return Collections.EMPTY_LIST;
         }
-        List<String> newVHosts = newVHosts().stream().map( h -> h.host() ).collect( Collectors.toList() );
-        return oldVHosts().stream().
+        List<String> newVHosts = newDeployment().getSpec().vHosts().stream().map( h -> h.host() ).collect( Collectors.toList() );
+        return oldDeployment().getSpec().vHosts().stream().
             filter( h -> !newVHosts.contains( h.host() ) ).
             collect( Collectors.toList() );
     }
@@ -115,9 +90,10 @@ public abstract class XpVhostDeploymentDiff
         }
 
         List<VhostTuple> res = new LinkedList<>();
-        for ( Vhost oldVhost : oldVHosts() )
+        for ( Vhost oldVhost : oldDeployment().getSpec().vHosts() )
         {
-            Optional<Vhost> newVhost = newVHosts().stream().filter( h -> h.host().equals( oldVhost.host() ) ).findAny();
+            Optional<Vhost> newVhost =
+                newDeployment().getSpec().vHosts().stream().filter( h -> h.host().equals( oldVhost.host() ) ).findAny();
             if ( newVhost.isPresent() )
             {
                 res.add( new VhostTuple( oldVhost, newVhost.get() ) );

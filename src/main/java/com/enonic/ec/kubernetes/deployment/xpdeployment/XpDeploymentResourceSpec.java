@@ -12,6 +12,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.base.Preconditions;
 
+import com.enonic.ec.kubernetes.deployment.vhost.ImmutableVhostBuilder;
+import com.enonic.ec.kubernetes.deployment.vhost.Vhost;
+import com.enonic.ec.kubernetes.deployment.vhost.VhostPath;
+
 @JsonDeserialize(builder = ImmutableXpDeploymentResourceSpec.Builder.class)
 @Value.Immutable
 public abstract class XpDeploymentResourceSpec
@@ -69,6 +73,17 @@ public abstract class XpDeploymentResourceSpec
         return Map.of( "cloud", cloud(), "project", project(), "app", app(), "name", name() );
     }
 
+    @Value.Derived
+    @JsonIgnore
+    public List<Vhost> vHosts()
+    {
+        return ImmutableVhostBuilder.builder().
+            nodes( nodes() ).
+            certificates( vHostCertificates() ).
+            build().
+            execute();
+    }
+
     @Value.Check
     protected void check()
     {
@@ -93,7 +108,17 @@ public abstract class XpDeploymentResourceSpec
         for ( Map.Entry<String, List<XpDeploymentResourceSpecNode>> e : nodes().stream().
             collect( Collectors.groupingBy( XpDeploymentResourceSpecNode::alias ) ).entrySet() )
         {
-            Preconditions.checkState( e.getValue().size() == 1, "two nodes have the same alias: " + e.getValue().get( 0 ).alias() );
+            Preconditions.checkState( e.getValue().size() == 1, "Two nodes have the same alias: " + e.getValue().get( 0 ).alias() );
+        }
+
+        for ( Vhost vhost : vHosts() )
+        {
+            for ( VhostPath path : vhost.vhostPaths() )
+            {
+                Preconditions.checkState( path.nodes().size() == 1,
+                                          "Cannot define same vHost path '" + path.path() + "' on same host '" + vhost.host() +
+                                              "' on multiple nodes." );
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.enonic.ec.kubernetes.operator.commands;
+package com.enonic.ec.kubernetes.deployment.vhost;
 
 import java.util.HashMap;
 import java.util.HashSet;

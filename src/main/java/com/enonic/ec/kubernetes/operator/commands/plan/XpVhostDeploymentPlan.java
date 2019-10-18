@@ -2,7 +2,7 @@ package com.enonic.ec.kubernetes.operator.commands.plan;
 
 import org.immutables.value.Value;
 
-import com.enonic.ec.kubernetes.operator.commands.Vhost;
+import com.enonic.ec.kubernetes.deployment.vhost.Vhost;
 
 @Value.Immutable
 public abstract class XpVhostDeploymentPlan
