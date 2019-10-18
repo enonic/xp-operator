@@ -188,8 +188,7 @@ public abstract class StatefulSetSpecBuilder
         resourceRequirements.setRequests( podResources() );
         resourceRequirements.setLimits( podResources() );
 
-        // Lifecycle
-        // TODO:
+        // TODO: Lifecycle
 
         // Volume mounts
         exp.setVolumeMounts( createVolumeMounts() );

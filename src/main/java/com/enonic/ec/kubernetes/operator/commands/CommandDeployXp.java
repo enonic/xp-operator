@@ -13,8 +13,10 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 
 import com.enonic.ec.kubernetes.common.commands.Command;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
+import com.enonic.ec.kubernetes.deployment.vhost.Vhost;
 import com.enonic.ec.kubernetes.deployment.vhost.VhostPath;
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResource;
+import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceSpecNode;
 import com.enonic.ec.kubernetes.operator.commands.apply.ImmutableCommandApplyConfigMap;
 import com.enonic.ec.kubernetes.operator.commands.apply.ImmutableCommandApplyIngress;
 import com.enonic.ec.kubernetes.operator.commands.apply.ImmutableCommandApplyIssuer;
@@ -27,6 +29,9 @@ import com.enonic.ec.kubernetes.operator.commands.builders.ImmutableIssuerSpecBu
 import com.enonic.ec.kubernetes.operator.commands.builders.ImmutablePodDisruptionBudgetSpecBuilder;
 import com.enonic.ec.kubernetes.operator.commands.builders.ImmutableServiceSpecBuilder;
 import com.enonic.ec.kubernetes.operator.commands.builders.ImmutableStatefulSetSpecNonClusteredSpec;
+import com.enonic.ec.kubernetes.operator.commands.delete.ImmutableCommandDeleteIngress;
+import com.enonic.ec.kubernetes.operator.commands.delete.ImmutableCommandDeleteIssuer;
+import com.enonic.ec.kubernetes.operator.commands.delete.ImmutableCommandDeleteService;
 import com.enonic.ec.kubernetes.operator.commands.plan.XpNodeDeploymentDiff;
 import com.enonic.ec.kubernetes.operator.commands.plan.XpNodeDeploymentPlan;
 import com.enonic.ec.kubernetes.operator.commands.plan.XpVhostDeploymentDiff;
@@ -68,6 +73,8 @@ public abstract class CommandDeployXp
         throws Exception
     {
         String namespaceName = resource().getSpec().fullProjectName();
+        String fullAppName = resource().getSpec().fullAppName();
+        Map<String, String> defaultLabels = resource().getSpec().defaultLabels();
 
         ImmutableCombinedCommand.Builder commandBuilder = ImmutableCombinedCommand.builder();
 
@@ -84,19 +91,23 @@ public abstract class CommandDeployXp
 
         for ( XpNodeDeploymentPlan nodePlan : nodeDiff().deploymentPlans() )
         {
-            createDeployNodeCommands( commandBuilder, namespaceName, resource().getSpec().fullAppName(),
-                                      resource().getSpec().defaultLabels(), nodePlan );
+            createDeployNodeCommands( commandBuilder, namespaceName, fullAppName, defaultLabels, nodePlan );
         }
 
-        // TODO: Delete old deployments
+        for ( XpDeploymentResourceSpecNode oldNode : nodeDiff().nodesRemoved() )
+        {
+            createDeleteNodeCommands( commandBuilder, namespaceName, oldNode );
+        }
 
         for ( XpVhostDeploymentPlan vhostPlan : vHostDiff().deploymentPlans() )
         {
-            createDeployVhostCommands( commandBuilder, namespaceName, resource().getSpec().fullAppName(),
-                                       resource().getSpec().defaultLabels(), vhostPlan );
+            createDeployVhostCommands( commandBuilder, namespaceName, fullAppName, defaultLabels, vhostPlan );
         }
 
-        // TODO Delete old vHosts
+        for ( Vhost oldVHost : vHostDiff().vHostsRemoved() )
+        {
+            createDeleteVHostsCommands( commandBuilder, namespaceName, fullAppName, oldVHost );
+        }
 
         return commandBuilder.build().execute();
     }
@@ -183,6 +194,12 @@ public abstract class CommandDeployXp
         }
     }
 
+    private void createDeleteNodeCommands( final ImmutableCombinedCommand.Builder commandBuilder, final String namespaceName,
+                                           final XpDeploymentResourceSpecNode oldNode )
+    {
+
+    }
+
     private void createDeployVhostCommands( final ImmutableCombinedCommand.Builder commandBuilder, final String namespaceName,
                                             final String fullAppName, final Map<String, String> defaultLabels,
                                             final XpVhostDeploymentPlan vhostPlan )
@@ -203,9 +220,11 @@ public abstract class CommandDeployXp
                 build() );
         }
 
+        // TODO: Delete issuer
+
         if ( vhostPlan.changeIngress() )
         {
-            for ( VhostPath path : vhostPlan.vhost().vhostPaths() )
+            for ( VhostPath path : vhostPlan.newPaths() )
             {
                 Map<String, String> serviceLabels = new HashMap<>();
                 serviceLabels.putAll( defaultLabels );
@@ -220,6 +239,15 @@ public abstract class CommandDeployXp
                         selector( path.getVhostLabel() ).
                         build().
                         execute() ).
+                    build() );
+            }
+
+            for ( VhostPath path : vhostPlan.pathsToDelete() )
+            {
+                commandBuilder.addCommand( ImmutableCommandDeleteService.builder().
+                    client( defaultClient() ).
+                    namespace( namespaceName ).
+                    name( path.getPathResourceName( fullAppName, vhostPlan.vhost().host() ) ).
                     build() );
             }
 
@@ -250,6 +278,33 @@ public abstract class CommandDeployXp
                     appFullName( fullAppName ).
                     build().
                     execute() ).
+                build() );
+        }
+    }
+
+    private void createDeleteVHostsCommands( final ImmutableCombinedCommand.Builder commandBuilder, final String namespaceName,
+                                             final String fullAppName, final Vhost oldVHost )
+    {
+        commandBuilder.addCommand( ImmutableCommandDeleteIngress.builder().
+            client( defaultClient() ).
+            namespace( namespaceName ).
+            name( oldVHost.getVhostResourceName( fullAppName ) ).
+            build() );
+
+        for ( VhostPath path : oldVHost.vhostPaths() )
+        {
+            commandBuilder.addCommand( ImmutableCommandDeleteService.builder().
+                namespace( namespaceName ).
+                name( path.getPathResourceName( fullAppName, oldVHost.host() ) ).
+                build() );
+        }
+
+        if ( oldVHost.certificate() != null )
+        {
+            commandBuilder.addCommand( ImmutableCommandDeleteIssuer.builder().
+                client( issuerClient() ).
+                namespace( namespaceName ).
+                name( oldVHost.getVhostResourceName( fullAppName ) ).
                 build() );
         }
     }

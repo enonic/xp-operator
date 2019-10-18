@@ -23,15 +23,13 @@ public abstract class VhostPath
     {
         Map<String, String> res = new HashMap<>();
         nodes().stream().forEach( n -> res.putAll( n.nodeAliasLabel() ) );
-        // TODO: 2 nodes with same vHost + path wont work, set as precondition check
-        // in Deployment spec
         return res;
     }
 
     public String getPathResourceName( String appFullName, String vhost )
     {
         String hashString = appFullName + vhost + path();
-        return appFullName + hashString.hashCode();
+        return String.join( "-", appFullName, vhost.replace( ".", "-" ), Integer.toString( Math.abs( path().hashCode() ) ) );
     }
 
     @Override
@@ -49,7 +47,8 @@ public abstract class VhostPath
         {
             return false;
         }
-        return Objects.equals( VhostPathSet( this ), VhostPathSet( (VhostPath) obj ) );
+        boolean result = Objects.equals( VhostPathSet( this ), VhostPathSet( (VhostPath) obj ) );
+        return result;
     }
 
     private static Set<String> VhostPathSet( VhostPath path )
