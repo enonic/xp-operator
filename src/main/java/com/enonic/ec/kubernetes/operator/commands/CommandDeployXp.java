@@ -29,9 +29,12 @@ import com.enonic.ec.kubernetes.operator.commands.builders.ImmutableIssuerSpecBu
 import com.enonic.ec.kubernetes.operator.commands.builders.ImmutablePodDisruptionBudgetSpecBuilder;
 import com.enonic.ec.kubernetes.operator.commands.builders.ImmutableServiceSpecBuilder;
 import com.enonic.ec.kubernetes.operator.commands.builders.ImmutableStatefulSetSpecNonClusteredSpec;
+import com.enonic.ec.kubernetes.operator.commands.delete.ImmutableCommandDeleteConfigMap;
 import com.enonic.ec.kubernetes.operator.commands.delete.ImmutableCommandDeleteIngress;
 import com.enonic.ec.kubernetes.operator.commands.delete.ImmutableCommandDeleteIssuer;
+import com.enonic.ec.kubernetes.operator.commands.delete.ImmutableCommandDeletePodDisruptionBudget;
 import com.enonic.ec.kubernetes.operator.commands.delete.ImmutableCommandDeleteService;
+import com.enonic.ec.kubernetes.operator.commands.delete.ImmutableCommandDeleteStatefulSet;
 import com.enonic.ec.kubernetes.operator.commands.plan.XpNodeDeploymentDiff;
 import com.enonic.ec.kubernetes.operator.commands.plan.XpNodeDeploymentPlan;
 import com.enonic.ec.kubernetes.operator.commands.plan.XpVhostDeploymentDiff;
@@ -195,7 +198,25 @@ public abstract class CommandDeployXp
     private void createDeleteNodeCommands( final ImmutableCombinedCommand.Builder commandBuilder, final String namespaceName,
                                            final XpDeploymentResourceSpecNode oldNode )
     {
+        String nodeName = resource().getSpec().defaultResourceName( oldNode.alias() );
 
+        commandBuilder.addCommand( ImmutableCommandDeleteStatefulSet.builder().
+            client( defaultClient() ).
+            namespace( namespaceName ).
+            name( nodeName ).
+            build() );
+
+        commandBuilder.addCommand( ImmutableCommandDeletePodDisruptionBudget.builder().
+            client( defaultClient() ).
+            namespace( namespaceName ).
+            name( nodeName ).
+            build() );
+
+        commandBuilder.addCommand( ImmutableCommandDeleteConfigMap.builder().
+            client( defaultClient() ).
+            namespace( namespaceName ).
+            name( nodeName ).
+            build() );
     }
 
     private void createDeployVhostCommands( final ImmutableCombinedCommand.Builder commandBuilder, final String namespaceName,
