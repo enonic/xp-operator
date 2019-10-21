@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResource;
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceSpecNode;
+import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentSpecChangeValidation;
 
 @Value.Immutable
 public abstract class XpNodeDeploymentDiff
@@ -131,6 +132,11 @@ public abstract class XpNodeDeploymentDiff
     @Value.Check
     void logInfo()
     {
+        if ( oldDeployment().isPresent() )
+        {
+            XpDeploymentSpecChangeValidation.checkSpec( oldDeployment().get().getSpec(), newDeployment().getSpec() );
+        }
+
         log.debug( "Deployment enabled/disabled: " + enabledDisabledChanged() );
         log.debug( "Deployment xp version change: " + updateXp() );
         log.debug( "Nodes added: " + nodesAdded() );

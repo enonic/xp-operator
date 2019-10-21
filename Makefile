@@ -26,10 +26,7 @@ minikube-operator-port-forward:
 	kubectl -n ec-system get pods | grep ec-operator | awk '{print $$1}' | xargs -I % kubectl -n ec-system port-forward % 8080
 
 post:
-	cat src/test/json/test.json | http -v -j POST :8080/api
-
-put:
-	cat src/test/json/test.json | http -v -j PUT :8080/api/4143b189-f371-4c58-b126-04a7adce257e
+	cat src/test/example.json | http -v -j POST :8080/api
 
 vhost:
 	 http -v --verify=no https://$(shell minikube ip)/app host:company.com

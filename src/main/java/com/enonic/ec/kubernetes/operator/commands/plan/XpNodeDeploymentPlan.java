@@ -95,6 +95,11 @@ public abstract class XpNodeDeploymentPlan
             return true;
         }
 
+        if ( !nodeTuple().getOldNode().get().env().equals( nodeTuple().getNewNode().env() ) )
+        {
+            return true;
+        }
+
         Optional<Properties> oldSystemProps = nodeTuple().getOldNode().get().configAsProperties( "system.properties" );
         Optional<Properties> newSystemProps = nodeTuple().getNewNode().configAsProperties( "system.properties" );
 
