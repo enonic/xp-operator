@@ -12,11 +12,10 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.Watcher;
 import io.quarkus.runtime.StartupEvent;
 
+import com.enonic.ec.kubernetes.common.commands.CombinedKubeCommand;
 import com.enonic.ec.kubernetes.deployment.CrdClientsProducer;
 import com.enonic.ec.kubernetes.deployment.XpDeploymentCache;
-import com.enonic.ec.kubernetes.operator.commands.ImmutableCommandDeployXp;
-import com.enonic.ec.kubernetes.operator.commands.plan.ImmutableXpNodeDeploymentDiff;
-import com.enonic.ec.kubernetes.operator.commands.plan.ImmutableXpVhostDeploymentDiff;
+import com.enonic.ec.kubernetes.operator.commands.ImmutableCreateXpDeployment;
 import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerClientProducer;
 
 @ApplicationScoped
@@ -53,21 +52,15 @@ public class Operator
                     try
                     {
                         // TODO: What to do if cloud+project of 2 different people have the same name??
-                        ImmutableCommandDeployXp.builder().
+                        CombinedKubeCommand command = ImmutableCreateXpDeployment.builder().
                             defaultClient( defaultClient ).
                             issuerClient( issuerClient ).
-                            resource( newResource ).
-                            newDeployment( oldResource == null ).
-                            nodeDiff( ImmutableXpNodeDeploymentDiff.builder().
-                                oldDeployment( oldResource ).
-                                newDeployment( newResource ).
-                                build() ).
-                            vHostDiff( ImmutableXpVhostDeploymentDiff.builder().
-                                oldDeployment( oldResource ).
-                                newDeployment( newResource ).
-                                build() ).
+                            oldResource( oldResource ).
+                            newResource( newResource ).
                             build().
                             execute();
+
+                        command.execute();
                     }
                     catch ( Exception e )
                     {

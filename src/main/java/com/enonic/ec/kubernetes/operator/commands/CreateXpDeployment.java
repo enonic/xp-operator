@@ -6,13 +6,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.immutables.value.Value;
+import org.wildfly.common.annotation.Nullable;
 
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
+import com.enonic.ec.kubernetes.common.commands.CombinedKubeCommand;
 import com.enonic.ec.kubernetes.common.commands.Command;
-import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
+import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedKubeCommand;
 import com.enonic.ec.kubernetes.deployment.vhost.Vhost;
 import com.enonic.ec.kubernetes.deployment.vhost.VhostPath;
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResource;
@@ -35,6 +37,8 @@ import com.enonic.ec.kubernetes.operator.commands.delete.ImmutableCommandDeleteI
 import com.enonic.ec.kubernetes.operator.commands.delete.ImmutableCommandDeletePodDisruptionBudget;
 import com.enonic.ec.kubernetes.operator.commands.delete.ImmutableCommandDeleteService;
 import com.enonic.ec.kubernetes.operator.commands.delete.ImmutableCommandDeleteStatefulSet;
+import com.enonic.ec.kubernetes.operator.commands.plan.ImmutableXpNodeDeploymentDiff;
+import com.enonic.ec.kubernetes.operator.commands.plan.ImmutableXpVhostDeploymentDiff;
 import com.enonic.ec.kubernetes.operator.commands.plan.XpNodeDeploymentDiff;
 import com.enonic.ec.kubernetes.operator.commands.plan.XpNodeDeploymentPlan;
 import com.enonic.ec.kubernetes.operator.commands.plan.XpVhostDeploymentDiff;
@@ -43,20 +47,47 @@ import com.enonic.ec.kubernetes.operator.commands.scale.ImmutableCommandScaleSta
 import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerClientProducer;
 
 @Value.Immutable
-public abstract class CommandDeployXp
-    implements Command<Void>
+public abstract class CreateXpDeployment
+    implements Command<CombinedKubeCommand>
 {
     protected abstract KubernetesClient defaultClient();
 
     protected abstract IssuerClientProducer.IssuerClient issuerClient();
 
-    protected abstract boolean newDeployment();
+    @Nullable
+    protected abstract XpDeploymentResource oldResource();
 
-    protected abstract XpDeploymentResource resource();
+    protected abstract XpDeploymentResource newResource();
 
-    protected abstract XpNodeDeploymentDiff nodeDiff();
+    @Value.Derived
+    protected XpDeploymentResource resource()
+    {
+        return newResource();
+    }
 
-    protected abstract XpVhostDeploymentDiff vHostDiff();
+    @Value.Derived
+    protected boolean newDeployment()
+    {
+        return oldResource() == null;
+    }
+
+    @Value.Derived
+    protected XpNodeDeploymentDiff nodeDiff()
+    {
+        return ImmutableXpNodeDeploymentDiff.builder().
+            oldDeployment( oldResource() ).
+            newDeployment( newResource() ).
+            build();
+    }
+
+    @Value.Derived
+    protected XpVhostDeploymentDiff vHostDiff()
+    {
+        return ImmutableXpVhostDeploymentDiff.builder().
+            oldDeployment( oldResource() ).
+            newDeployment( newResource() ).
+            build();
+    }
 
     @Value.Derived
     protected OwnerReference ownerReference()
@@ -72,14 +103,14 @@ public abstract class CommandDeployXp
     }
 
     @Override
-    public Void execute()
+    public CombinedKubeCommand execute()
         throws Exception
     {
         String namespaceName = resource().getSpec().defaultNamespaceName();
         String defaultResourceName = resource().getSpec().defaultResourceName();
         Map<String, String> defaultLabels = resource().getSpec().defaultLabels();
 
-        ImmutableCombinedCommand.Builder commandBuilder = ImmutableCombinedCommand.builder();
+        ImmutableCombinedKubeCommand.Builder commandBuilder = ImmutableCombinedKubeCommand.builder();
 
         if ( newDeployment() )
         {
@@ -112,10 +143,10 @@ public abstract class CommandDeployXp
             createDeleteVHostsCommands( commandBuilder, namespaceName, defaultResourceName, oldVHost );
         }
 
-        return commandBuilder.build().execute();
+        return commandBuilder.build();
     }
 
-    private void createDeployNodeCommands( final ImmutableCombinedCommand.Builder commandBuilder, final String namespaceName,
+    private void createDeployNodeCommands( final ImmutableCombinedKubeCommand.Builder commandBuilder, final String namespaceName,
                                            final Map<String, String> defaultLabels, final XpNodeDeploymentPlan nodePlan )
     {
         // TODO: Handle all nodetypes
@@ -195,7 +226,7 @@ public abstract class CommandDeployXp
         }
     }
 
-    private void createDeleteNodeCommands( final ImmutableCombinedCommand.Builder commandBuilder, final String namespaceName,
+    private void createDeleteNodeCommands( final ImmutableCombinedKubeCommand.Builder commandBuilder, final String namespaceName,
                                            final XpDeploymentResourceSpecNode oldNode )
     {
         String nodeName = resource().getSpec().defaultResourceName( oldNode.alias() );
@@ -219,7 +250,7 @@ public abstract class CommandDeployXp
             build() );
     }
 
-    private void createDeployVhostCommands( final ImmutableCombinedCommand.Builder commandBuilder, final String namespaceName,
+    private void createDeployVhostCommands( final ImmutableCombinedKubeCommand.Builder commandBuilder, final String namespaceName,
                                             final Map<String, String> defaultLabels, final XpVhostDeploymentPlan vhostPlan )
         throws Exception
     {
@@ -301,7 +332,7 @@ public abstract class CommandDeployXp
         }
     }
 
-    private void createDeleteVHostsCommands( final ImmutableCombinedCommand.Builder commandBuilder, final String namespaceName,
+    private void createDeleteVHostsCommands( final ImmutableCombinedKubeCommand.Builder commandBuilder, final String namespaceName,
                                              final String defaultResourceName, final Vhost oldVHost )
     {
         commandBuilder.addCommand( ImmutableCommandDeleteIngress.builder().

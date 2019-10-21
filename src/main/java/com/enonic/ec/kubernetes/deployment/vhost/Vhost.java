@@ -22,4 +22,10 @@ public abstract class Vhost
     {
         return resource.getSpec().defaultResourceName( host().replace( ".", "-" ) );
     }
+
+    @Override
+    public String toString()
+    {
+        return host();
+    }
 }

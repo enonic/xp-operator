@@ -1,29 +1,25 @@
 package com.enonic.ec.kubernetes.operator.commands.delete;
 
 import org.immutables.value.Value;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.client.KubernetesClient;
-
-import com.enonic.ec.kubernetes.common.commands.Command;
 
 @Value.Immutable
 public abstract class CommandDeleteConfigMap
-    implements Command<Boolean>
+    extends CommandDeleteResource
 {
-    private final static Logger log = LoggerFactory.getLogger( CommandDeleteConfigMap.class );
-
     protected abstract KubernetesClient client();
 
-    protected abstract String name();
-
-    protected abstract String namespace();
+    @Override
+    protected String resourceKind()
+    {
+        return ConfigMap.class.getName();
+    }
 
     @Override
-    public Boolean execute()
+    protected Boolean delete()
     {
-        log.info( "Deleting in Namespace '" + namespace() + "' ConfigMap '" + name() );
         return client().configMaps().inNamespace( namespace() ).withName( name() ).delete();
     }
 }

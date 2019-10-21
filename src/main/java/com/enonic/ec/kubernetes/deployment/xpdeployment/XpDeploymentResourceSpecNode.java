@@ -62,4 +62,10 @@ public abstract class XpDeploymentResourceSpecNode
             return null;
         }
     }
+
+    @Override
+    public String toString()
+    {
+        return alias();
+    }
 }

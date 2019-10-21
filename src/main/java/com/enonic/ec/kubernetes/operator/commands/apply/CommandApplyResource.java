@@ -11,15 +11,20 @@ import org.wildfly.common.annotation.Nullable;
 import com.google.common.base.Preconditions;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 
-import com.enonic.ec.kubernetes.common.commands.Command;
+import com.enonic.ec.kubernetes.common.commands.ImmutableKubeCommandSummary;
+import com.enonic.ec.kubernetes.common.commands.KubeCommand;
+import com.enonic.ec.kubernetes.common.commands.KubeCommandSummary;
 
 public abstract class CommandApplyResource<T extends HasMetadata>
-    implements Command<T>
+    extends KubeCommand<T>
 {
     private final static Logger log = LoggerFactory.getLogger( CommandApplyResource.class );
+
+    private KubeCommandSummary summary;
 
     protected abstract String name();
 
@@ -38,35 +43,52 @@ public abstract class CommandApplyResource<T extends HasMetadata>
         Preconditions.checkState( resource.getMetadata().getNamespace().equals( namespace() ), "Resource namespace do not match" );
     }
 
-    @Override
-    public T execute()
+    @Value.Derived
+    public T preparedResource()
     {
         T oldResource = fetchResource();
+        T newResource = null;
+        KubeCommandSummary.Action action = null;
 
         if ( oldResource == null )
         {
-            T newResource = build(
+            newResource = build(
                 new ObjectMeta( annotations(), null, null, null, null, null, null, null, labels(), null, name(), namespace(),
                                 List.of( ownerReference() ), null, null, null ) );
-            log.info( "Creating in Namespace '" + newResource.getMetadata().getNamespace() + "' " + newResource.getKind() + " '" +
-                          newResource.getMetadata().getName() + "'" );
-            return apply( newResource );
+            action = KubeCommandSummary.Action.CREATE;
         }
 
-        ObjectMeta newMetadata = ImmutableCommandMergeMetadata.builder().
-            kind( oldResource.getKind() ).
-            metadata( oldResource.getMetadata() ).
-            ownerReference( ownerReference() ).
-            labels( labels() ).
-            annotations( annotations() ).
-            build().
-            execute();
-        newMetadata.setResourceVersion( null );
+        if ( newResource == null )
+        {
+            checkValidity( oldResource );
+            ObjectMeta newMetadata = ImmutableCommandMergeMetadata.builder().
+                kind( oldResource.getKind() ).
+                metadata( oldResource.getMetadata() ).
+                ownerReference( ownerReference() ).
+                labels( labels() ).
+                annotations( annotations() ).
+                build().
+                execute();
+            newMetadata.setResourceVersion( null );
 
-        T newResource = build( newMetadata );
-        log.info( "Updating in Namespace '" + newResource.getMetadata().getNamespace() + "' " + newResource.getKind() + " '" +
-                      newResource.getMetadata().getName() + "'" );
-        return apply( newResource );
+            newResource = build( newMetadata );
+            action = KubeCommandSummary.Action.UPDATE;
+        }
+
+        summary = ImmutableKubeCommandSummary.builder().
+            namespace( newResource instanceof Namespace ? null : namespace() ).
+            name( newResource.getMetadata().getName() ).
+            kind( newResource.getKind() ).
+            action( action ).
+            build();
+
+        return newResource;
+    }
+
+    @Override
+    public final T execute()
+    {
+        return apply( preparedResource() );
     }
 
     @Value.Derived
@@ -75,4 +97,10 @@ public abstract class CommandApplyResource<T extends HasMetadata>
     protected abstract T build( ObjectMeta metadata );
 
     protected abstract T apply( T resource );
+
+    @Override
+    public KubeCommandSummary summary()
+    {
+        return summary;
+    }
 }
