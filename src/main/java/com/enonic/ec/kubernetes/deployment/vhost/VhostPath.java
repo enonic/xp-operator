@@ -46,8 +46,7 @@ public abstract class VhostPath
 
     public String getPathResourceName( XpDeploymentResource resource, Vhost vhost )
     {
-        return resource.getSpec().defaultResourceName( vhost.host().replace( ".", "-" ),
-                                                       Integer.toString( Math.abs( path().hashCode() ) ) );
+        return resource.spec().defaultResourceName( vhost.host().replace( ".", "-" ), Integer.toString( Math.abs( path().hashCode() ) ) );
     }
 
     @Override

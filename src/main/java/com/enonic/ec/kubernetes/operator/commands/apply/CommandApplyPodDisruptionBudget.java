@@ -1,5 +1,7 @@
 package com.enonic.ec.kubernetes.operator.commands.apply;
 
+import java.util.Optional;
+
 import org.immutables.value.Value;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
@@ -16,9 +18,9 @@ public abstract class CommandApplyPodDisruptionBudget
     protected abstract PodDisruptionBudgetSpec spec();
 
     @Override
-    protected PodDisruptionBudget fetchResource()
+    protected Optional<PodDisruptionBudget> fetchResource()
     {
-        return client().policy().podDisruptionBudget().inNamespace( namespace() ).withName( name() ).get();
+        return Optional.ofNullable( client().policy().podDisruptionBudget().inNamespace( namespace().get() ).withName( name() ).get() );
     }
 
     @Override
@@ -33,6 +35,6 @@ public abstract class CommandApplyPodDisruptionBudget
     @Override
     protected PodDisruptionBudget apply( final PodDisruptionBudget resource )
     {
-        return client().policy().podDisruptionBudget().inNamespace( namespace() ).createOrReplace( resource );
+        return client().policy().podDisruptionBudget().inNamespace( namespace().get() ).createOrReplace( resource );
     }
 }

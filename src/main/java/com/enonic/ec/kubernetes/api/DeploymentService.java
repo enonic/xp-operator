@@ -23,6 +23,7 @@ import com.enonic.ec.kubernetes.deployment.CrdClientsProducer;
 import com.enonic.ec.kubernetes.deployment.ImmutableCommandCreateXpDeployment;
 import com.enonic.ec.kubernetes.deployment.ImmutableCommandDeleteXpDeployment;
 import com.enonic.ec.kubernetes.deployment.XpDeploymentCache;
+import com.enonic.ec.kubernetes.deployment.xpdeployment.ImmutableXpDeploymentResource;
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResource;
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentSpecChangeValidation;
 
@@ -52,12 +53,12 @@ public class DeploymentService
     public Response createXpDeployment( XpDeploymentJson deployment, @Context UriInfo uriInfo )
     {
         Optional<XpDeploymentResource> old = xpDeploymentCache.stream().
-            filter( d -> d.getSpec().deploymentName().equals( deployment.spec().deploymentName() ) ).
+            filter( d -> d.spec().deploymentName().equals( deployment.spec().deploymentName() ) ).
             findAny();
 
         if ( old.isPresent() )
         {
-            XpDeploymentSpecChangeValidation.check( old.get().getSpec(), deployment.spec() );
+            XpDeploymentSpecChangeValidation.checkSpec( old.get().spec(), deployment.spec() );
         }
 
         XpDeploymentResource resource = ImmutableCommandCreateXpDeployment.builder().
@@ -78,50 +79,51 @@ public class DeploymentService
     @Produces("application/json")
     public Response getXpDeployment( @PathParam("uid") String uid )
     {
-        XpDeploymentResource resource = xpDeploymentCache.get( uid );
-        if ( resource == null )
+        Optional<XpDeploymentResource> resource = xpDeploymentCache.get( uid );
+        if ( resource.isEmpty() )
         {
             return Response.status( 404 ).build();
         }
-        return Response.ok( resourceToJson( resource ) ).build();
+        return Response.ok( resourceToJson( resource.get() ) ).build();
     }
 
     @PUT
     @Path("/{uid}")
     public Response editXpDeployment( @PathParam("uid") String uid, XpDeploymentJson deployment )
     {
-        XpDeploymentResource resource = xpDeploymentCache.get( uid );
-        if ( resource == null )
+        Optional<XpDeploymentResource> resource = xpDeploymentCache.get( uid );
+        if ( resource.isEmpty() )
         {
             return Response.status( 404 ).build();
         }
 
-        if ( !resource.getApiVersion().equals( deployment.apiVersion() ) )
+        if ( !resource.get().getApiVersion().equals( deployment.apiVersion() ) )
         {
             return Response.status( 400, "cannot update deployment to a different apiVersion" ).build();
         }
 
-        XpDeploymentSpecChangeValidation.check( resource.getSpec(), deployment.spec() );
+        XpDeploymentSpecChangeValidation.checkSpec( resource.get().spec(), deployment.spec() );
 
-        resource.setSpec( deployment.spec() );
-        xpDeploymentClient.getClient().createOrReplace( resource );
+        xpDeploymentClient.getClient().
+            createOrReplace( ImmutableXpDeploymentResource.copyOf( resource.get() ).
+                withSpec( deployment.spec() ) );
 
-        return Response.ok( resourceToJson( resource ) ).build();
+        return Response.ok( resourceToJson( resource.get() ) ).build();
     }
 
     @DELETE
     @Path("/{uid}")
     public Response deleteXpDeployment( @PathParam("uid") String uid )
     {
-        XpDeploymentResource resource = xpDeploymentCache.get( uid );
-        if ( resource == null )
+        Optional<XpDeploymentResource> resource = xpDeploymentCache.get( uid );
+        if ( resource.isEmpty() )
         {
             return Response.status( 404 ).build();
         }
 
         ImmutableCommandDeleteXpDeployment.builder().
             client( xpDeploymentClient ).
-            resource( resource ).
+            resource( resource.get() ).
             build().
             execute();
 
@@ -133,7 +135,7 @@ public class DeploymentService
         return ImmutableXpDeploymentJson.builder().
             apiVersion( r.getApiVersion() ).
             uid( r.getMetadata().getUid() ).
-            spec( r.getSpec() ).
+            spec( r.spec() ).
             build();
     }
 

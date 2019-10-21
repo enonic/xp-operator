@@ -1,0 +1,21 @@
+spec:
+  cloud: mycloud
+  project: myproject
+  name: myname
+
+  xpVersion: 7.1.0
+  enabled: true
+
+  nodes:
+    - alias: xp
+      replicas: 1
+      type: STANDALONE
+      resources:
+        cpu: "1"
+        memory: 1Gi
+        disks:
+          repo: 1Gi
+          snapshots: 1Gi
+
+  vHostCertificates:
+    company.com: {}

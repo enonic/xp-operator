@@ -1,10 +1,9 @@
 package com.enonic.ec.kubernetes.operator.commands.apply;
 
+import java.util.Optional;
+
 import org.immutables.value.Value;
 
-import com.google.common.base.Preconditions;
-
-import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -16,15 +15,9 @@ public abstract class CommandApplyNamespace
     protected abstract KubernetesClient client();
 
     @Override
-    void checkValidity( HasMetadata resource )
+    protected Optional<Namespace> fetchResource()
     {
-        Preconditions.checkState( resource.getMetadata().getName().equals( name() ), "Resource names do not match" );
-    }
-
-    @Override
-    protected Namespace fetchResource()
-    {
-        return client().namespaces().withName( name() ).get();
+        return Optional.ofNullable( client().namespaces().withName( name() ).get() );
     }
 
     @Override

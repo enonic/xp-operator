@@ -1,5 +1,7 @@
 package com.enonic.ec.kubernetes.operator.commands.apply;
 
+import java.util.Optional;
+
 import org.immutables.value.Value;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
@@ -16,9 +18,9 @@ public abstract class CommandApplyNetworkPolicy
     protected abstract NetworkPolicySpec spec();
 
     @Override
-    protected NetworkPolicy fetchResource()
+    protected Optional<NetworkPolicy> fetchResource()
     {
-        return client().network().networkPolicies().inNamespace( namespace() ).withName( name() ).get();
+        return Optional.ofNullable( client().network().networkPolicies().inNamespace( namespace().get() ).withName( name() ).get() );
     }
 
     @Override
@@ -33,6 +35,6 @@ public abstract class CommandApplyNetworkPolicy
     @Override
     protected NetworkPolicy apply( final NetworkPolicy resource )
     {
-        return client().network().networkPolicies().inNamespace( namespace() ).createOrReplace( resource );
+        return client().network().networkPolicies().inNamespace( namespace().get() ).createOrReplace( resource );
     }
 }

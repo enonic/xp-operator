@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import org.immutables.value.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wildfly.common.annotation.Nullable;
 
 import com.enonic.ec.kubernetes.deployment.vhost.Vhost;
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResource;
@@ -19,20 +18,19 @@ public abstract class XpVhostDeploymentDiff
 {
     private final static Logger log = LoggerFactory.getLogger( XpVhostDeploymentDiff.class );
 
-    @Nullable
-    public abstract XpDeploymentResource oldDeployment();
+    public abstract Optional<XpDeploymentResource> oldDeployment();
 
     public abstract XpDeploymentResource newDeployment();
 
     @Value.Derived
     protected List<Vhost> vHostsAdded()
     {
-        if ( oldDeployment() == null )
+        if ( oldDeployment().isEmpty() )
         {
-            return newDeployment().getSpec().vHosts();
+            return newDeployment().spec().vHosts();
         }
-        List<String> oldHosts = oldDeployment().getSpec().vHosts().stream().map( h -> h.host() ).collect( Collectors.toList() );
-        return newDeployment().getSpec().vHosts().stream().filter( h -> !oldHosts.contains( h.host() ) ).collect( Collectors.toList() );
+        List<String> oldHosts = oldDeployment().get().spec().vHosts().stream().map( h -> h.host() ).collect( Collectors.toList() );
+        return newDeployment().spec().vHosts().stream().filter( h -> !oldHosts.contains( h.host() ) ).collect( Collectors.toList() );
     }
 
     @Value.Derived
@@ -51,12 +49,12 @@ public abstract class XpVhostDeploymentDiff
     @Value.Derived
     public List<Vhost> vHostsRemoved()
     {
-        if ( oldDeployment() == null )
+        if ( oldDeployment().isEmpty() )
         {
             return Collections.EMPTY_LIST;
         }
-        List<String> newVHosts = newDeployment().getSpec().vHosts().stream().map( h -> h.host() ).collect( Collectors.toList() );
-        return oldDeployment().getSpec().vHosts().stream().
+        List<String> newVHosts = newDeployment().spec().vHosts().stream().map( h -> h.host() ).collect( Collectors.toList() );
+        return oldDeployment().get().spec().vHosts().stream().
             filter( h -> !newVHosts.contains( h.host() ) ).
             collect( Collectors.toList() );
     }
@@ -64,7 +62,7 @@ public abstract class XpVhostDeploymentDiff
     @Value.Derived
     protected List<VhostTuple> vHostsChanged()
     {
-        if ( oldDeployment() == null )
+        if ( oldDeployment().isEmpty() )
         {
             // No old deployment
             return Collections.EMPTY_LIST;
@@ -84,16 +82,15 @@ public abstract class XpVhostDeploymentDiff
     @Value.Derived
     protected List<VhostTuple> vhostTuples()
     {
-        if ( oldDeployment() == null )
+        if ( oldDeployment().isEmpty() )
         {
             return Collections.EMPTY_LIST;
         }
 
         List<VhostTuple> res = new LinkedList<>();
-        for ( Vhost oldVhost : oldDeployment().getSpec().vHosts() )
+        for ( Vhost oldVhost : oldDeployment().get().spec().vHosts() )
         {
-            Optional<Vhost> newVhost =
-                newDeployment().getSpec().vHosts().stream().filter( h -> h.host().equals( oldVhost.host() ) ).findAny();
+            Optional<Vhost> newVhost = newDeployment().spec().vHosts().stream().filter( h -> h.host().equals( oldVhost.host() ) ).findAny();
             if ( newVhost.isPresent() )
             {
                 res.add( new VhostTuple( oldVhost, newVhost.get() ) );
@@ -112,13 +109,13 @@ public abstract class XpVhostDeploymentDiff
 
     public static class VhostTuple
     {
-        private final Vhost oldVhost;
+        private final Optional<Vhost> oldVhost;
 
         private final Vhost newVhost;
 
         protected VhostTuple( final Vhost oldVhost, final Vhost newVhost )
         {
-            this.oldVhost = oldVhost;
+            this.oldVhost = Optional.ofNullable( oldVhost );
             this.newVhost = newVhost;
         }
 
@@ -127,7 +124,7 @@ public abstract class XpVhostDeploymentDiff
             return new VhostTuple( oldVhost, newVhost );
         }
 
-        public Vhost getOldVhost()
+        public Optional<Vhost> getOldVhost()
         {
             return oldVhost;
         }

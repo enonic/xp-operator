@@ -1,6 +1,7 @@
 package com.enonic.ec.kubernetes.operator.commands.apply;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.immutables.value.Value;
 
@@ -17,9 +18,9 @@ public abstract class CommandApplyConfigMap
     protected abstract Map<String, String> data();
 
     @Override
-    protected ConfigMap fetchResource()
+    protected Optional<ConfigMap> fetchResource()
     {
-        return client().configMaps().inNamespace( namespace() ).withName( name() ).get();
+        return Optional.ofNullable( client().configMaps().inNamespace( namespace().get() ).withName( name() ).get() );
     }
 
     @Override
@@ -34,7 +35,7 @@ public abstract class CommandApplyConfigMap
     @Override
     protected ConfigMap apply( final ConfigMap resource )
     {
-        return client().configMaps().inNamespace( namespace() ).createOrReplace( resource );
+        return client().configMaps().inNamespace( namespace().get() ).createOrReplace( resource );
     }
 
 }

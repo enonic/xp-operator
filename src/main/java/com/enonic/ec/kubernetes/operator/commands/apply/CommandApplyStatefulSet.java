@@ -1,5 +1,7 @@
 package com.enonic.ec.kubernetes.operator.commands.apply;
 
+import java.util.Optional;
+
 import org.immutables.value.Value;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
@@ -16,9 +18,9 @@ public abstract class CommandApplyStatefulSet
     protected abstract StatefulSetSpec spec();
 
     @Override
-    protected StatefulSet fetchResource()
+    protected Optional<StatefulSet> fetchResource()
     {
-        return client().apps().statefulSets().inNamespace( namespace() ).withName( name() ).get();
+        return Optional.ofNullable( client().apps().statefulSets().inNamespace( namespace().get() ).withName( name() ).get() );
     }
 
     @Override
@@ -33,7 +35,7 @@ public abstract class CommandApplyStatefulSet
     @Override
     protected StatefulSet apply( final StatefulSet resource )
     {
-        return client().apps().statefulSets().inNamespace( namespace() ).createOrReplace( resource );
+        return client().apps().statefulSets().inNamespace( namespace().get() ).createOrReplace( resource );
     }
 
 }

@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.immutables.value.Value;
-import org.wildfly.common.annotation.Nullable;
 
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.OwnerReference;
@@ -54,8 +54,7 @@ public abstract class CreateXpDeployment
 
     protected abstract IssuerClientProducer.IssuerClient issuerClient();
 
-    @Nullable
-    protected abstract XpDeploymentResource oldResource();
+    protected abstract Optional<XpDeploymentResource> oldResource();
 
     protected abstract XpDeploymentResource newResource();
 
@@ -68,7 +67,7 @@ public abstract class CreateXpDeployment
     @Value.Derived
     protected boolean newDeployment()
     {
-        return oldResource() == null;
+        return oldResource().isEmpty();
     }
 
     @Value.Derived
@@ -99,16 +98,16 @@ public abstract class CreateXpDeployment
     @Value.Derived
     protected String podImageName()
     {
-        return "gbbirkisson/xp:" + resource().getSpec().xpVersion() + "-ubuntu"; // TODO: Fix
+        return "gbbirkisson/xp:" + resource().spec().xpVersion() + "-ubuntu"; // TODO: Fix
     }
 
     @Override
     public CombinedKubeCommand execute()
         throws Exception
     {
-        String namespaceName = resource().getSpec().defaultNamespaceName();
-        String defaultResourceName = resource().getSpec().defaultResourceName();
-        Map<String, String> defaultLabels = resource().getSpec().defaultLabels();
+        String namespaceName = resource().spec().defaultNamespaceName();
+        String defaultResourceName = resource().spec().defaultResourceName();
+        Map<String, String> defaultLabels = resource().spec().defaultLabels();
 
         ImmutableCombinedKubeCommand.Builder commandBuilder = ImmutableCombinedKubeCommand.builder();
 
@@ -150,12 +149,11 @@ public abstract class CreateXpDeployment
                                            final Map<String, String> defaultLabels, final XpNodeDeploymentPlan nodePlan )
     {
         // TODO: Handle all nodetypes
-        String nodeName = resource().getSpec().defaultResourceName( nodePlan.node().alias() );
+        String nodeName = resource().spec().defaultResourceName( nodePlan.node().alias() );
         Map<String, String> nodeLabels = new HashMap<>( defaultLabels );
         nodeLabels.putAll( nodePlan.node().nodeAliasLabel() );
-        Integer nodeScale = resource().getSpec().enabled() ? nodePlan.node().replicas() : 0;
 
-        if ( nodePlan.changeDisruptionBudget( nodeScale ) )
+        if ( nodePlan.changeDisruptionBudget() )
         {
             commandBuilder.addCommand( ImmutableCommandApplyPodDisruptionBudget.builder().
                 client( defaultClient() ).
@@ -164,7 +162,7 @@ public abstract class CreateXpDeployment
                 name( nodeName ).
                 labels( nodeLabels ).
                 spec( ImmutablePodDisruptionBudgetSpecBuilder.builder().
-                    minAvailable( nodeScale / 2 ). // TODO: Reconsider
+                    minAvailable( nodePlan.scale() / 2 ). // TODO: Reconsider
                     matchLabels( nodeLabels ).
                     build().
                     execute() ).
@@ -186,12 +184,10 @@ public abstract class CreateXpDeployment
         if ( nodePlan.changeStatefulSet() )
         {
             List<EnvVar> podEnv = new LinkedList<>();
-            if ( nodePlan.node().env() != null )
+
+            for ( Map.Entry<String, String> e : nodePlan.node().env().entrySet() )
             {
-                for ( Map.Entry<String, String> e : nodePlan.node().env().entrySet() )
-                {
-                    podEnv.add( new EnvVar( e.getKey(), e.getValue(), null ) );
-                }
+                podEnv.add( new EnvVar( e.getKey(), e.getValue(), null ) );
             }
 
             commandBuilder.addCommand( ImmutableCommandApplyStatefulSet.builder().
@@ -202,7 +198,7 @@ public abstract class CreateXpDeployment
                 labels( nodeLabels ).
                 spec( ImmutableStatefulSetSpecNonClusteredSpec.builder().
                     podLabels( nodeLabels ).
-                    replicas( nodeScale ).
+                    replicas( nodePlan.scale() ).
                     podImage( podImageName() ).
                     podEnv( podEnv ).
                     podResources( Map.of( "cpu", nodePlan.node().resources().cpu(), "memory", nodePlan.node().resources().memory() ) ).
@@ -221,7 +217,7 @@ public abstract class CreateXpDeployment
                 client( defaultClient() ).
                 namespace( namespaceName ).
                 name( nodeName ).
-                scale( nodeScale ).
+                scale( nodePlan.scale() ).
                 build() );
         }
     }
@@ -229,7 +225,7 @@ public abstract class CreateXpDeployment
     private void createDeleteNodeCommands( final ImmutableCombinedKubeCommand.Builder commandBuilder, final String namespaceName,
                                            final XpDeploymentResourceSpecNode oldNode )
     {
-        String nodeName = resource().getSpec().defaultResourceName( oldNode.alias() );
+        String nodeName = resource().spec().defaultResourceName( oldNode.alias() );
 
         commandBuilder.addCommand( ImmutableCommandDeleteStatefulSet.builder().
             client( defaultClient() ).
@@ -263,7 +259,7 @@ public abstract class CreateXpDeployment
                 name( vhostPlan.vhost().getVHostResourceName( resource() ) ).
                 labels( defaultLabels ).
                 spec( ImmutableIssuerSpecBuilder.builder().
-                    certificate( vhostPlan.vhost().certificate() ).
+                    certificate( vhostPlan.vhost().certificate().get() ).
                     build().
                     execute() ).
                 build() );
@@ -308,12 +304,14 @@ public abstract class CreateXpDeployment
                                     "proxy_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;\n" +
                                         "      proxy_hide_header l5d-remote-ip;\n" + "      proxy_hide_header l5d-server-id;" );
 
-            if ( vhostPlan.vhost().certificate() != null )
+            if ( vhostPlan.vhost().certificate().isPresent() )
             {
                 serviceAnnotations.put( "nginx.ingress.kubernetes.io/ssl-redirect", "true" );
                 serviceAnnotations.put( "certmanager.k8s.io/issuer", vhostPlan.vhost().getVHostResourceName( resource() ) );
             }
-
+            Optional<String> certSecret = vhostPlan.vhost().certificate().isPresent()
+                ? Optional.of( vhostPlan.vhost().getVHostResourceName( resource() ) )
+                : Optional.empty();
             commandBuilder.addCommand( ImmutableCommandApplyIngress.builder().
                 client( defaultClient() ).
                 ownerReference( ownerReference() ).
@@ -322,8 +320,7 @@ public abstract class CreateXpDeployment
                 labels( defaultLabels ).
                 annotations( serviceAnnotations ).
                 spec( ImmutableIngressSpecBuilder.builder().
-                    certificateSecretName(
-                        vhostPlan.vhost().certificate() != null ? vhostPlan.vhost().getVHostResourceName( resource() ) : null ).
+                    certificateSecretName( certSecret ).
                     vhost( vhostPlan.vhost() ).
                     resource( resource() ).
                     build().
@@ -349,7 +346,7 @@ public abstract class CreateXpDeployment
                 build() );
         }
 
-        if ( oldVHost.certificate() != null )
+        if ( oldVHost.certificate().isPresent() )
         {
             commandBuilder.addCommand( ImmutableCommandDeleteIssuer.builder().
                 client( issuerClient() ).

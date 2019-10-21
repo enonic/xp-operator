@@ -29,11 +29,11 @@ public abstract class XpVhostDeploymentPlan
     @Value.Derived
     public List<VhostPath> pathsToDelete()
     {
-        if ( vHostTuple().getOldVhost() == null )
+        if ( vHostTuple().getOldVhost().isEmpty() )
         {
             return Collections.EMPTY_LIST;
         }
-        return vHostTuple().getOldVhost().vhostPaths().stream().
+        return vHostTuple().getOldVhost().get().vhostPaths().stream().
             filter( p -> !vHostTuple().getNewVhost().vhostPaths().contains( p ) ).
             collect( Collectors.toList() );
     }
@@ -41,26 +41,26 @@ public abstract class XpVhostDeploymentPlan
     @Value.Derived
     public boolean changeIssuer()
     {
-        if ( vHostTuple().getNewVhost().certificate() == null )
+        if ( vHostTuple().getNewVhost().certificate().isEmpty() )
         {
             return false;
         }
-        if ( vHostTuple().getOldVhost() == null )
+        if ( vHostTuple().getOldVhost().isEmpty() )
         {
             return true;
         }
-        return !vHostTuple().getNewVhost().certificate().equals( vHostTuple().getOldVhost().certificate() );
+        return !vHostTuple().getNewVhost().certificate().equals( vHostTuple().getOldVhost().get().certificate() );
     }
 
 
     @Value.Derived
     public boolean changeIngress()
     {
-        if ( vHostTuple().getOldVhost() == null )
+        if ( vHostTuple().getOldVhost().isEmpty() )
         {
             return true;
         }
-        return !vHostTuple().getOldVhost().equals( vHostTuple().getNewVhost() );
+        return !vHostTuple().getOldVhost().get().equals( vHostTuple().getNewVhost() );
     }
 
 }

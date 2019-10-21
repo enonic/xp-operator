@@ -1,0 +1,12 @@
+spec:
+  cloud: mycloud
+  project: myproject
+  name: myname
+
+  xpVersion: 7.1.0
+  enabled: true
+
+  nodes:
+    - config:
+        com.enonic.xp.app.main.cfg: |
+          tourDisabled = true

@@ -3,6 +3,7 @@ package com.enonic.ec.kubernetes.common.cache;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -36,9 +37,9 @@ public class ResourceCache<T extends HasMetadata>
         return cache.values().stream();
     }
 
-    public T get( String id )
+    public Optional<T> get( String id )
     {
-        return cache.get( id );
+        return Optional.ofNullable( cache.get( id ) );
     }
 
     public void addWatcher( OnAction<T> event )
@@ -56,10 +57,10 @@ public class ResourceCache<T extends HasMetadata>
         try
         {
             String uid = resource.getMetadata().getUid();
-            final T oldResource = cache.get( uid );
-            if ( oldResource != null )
+            final Optional<T> oldResource = Optional.ofNullable( cache.get( uid ) );
+            if ( oldResource.isPresent() )
             {
-                int knownResourceVersion = Integer.parseInt( oldResource.getMetadata().getResourceVersion() );
+                int knownResourceVersion = Integer.parseInt( oldResource.get().getMetadata().getResourceVersion() );
                 int receivedResourceVersion = Integer.parseInt( resource.getMetadata().getResourceVersion() );
                 if ( knownResourceVersion > receivedResourceVersion )
                 {
@@ -70,13 +71,14 @@ public class ResourceCache<T extends HasMetadata>
             if ( action == Watcher.Action.ADDED || action == Watcher.Action.MODIFIED )
             {
                 cache.put( uid, resource );
-                executor.execute(
-                    () -> eventListeners.forEach( eventListener -> eventListener.accept( action, uid, oldResource, resource ) ) );
+                executor.execute( () -> eventListeners.forEach(
+                    eventListener -> eventListener.accept( action, uid, oldResource, Optional.of( resource ) ) ) );
             }
             else if ( action == Watcher.Action.DELETED )
             {
                 cache.remove( uid );
-                executor.execute( () -> eventListeners.forEach( eventListener -> eventListener.accept( action, uid, resource, null ) ) );
+                executor.execute( () -> eventListeners.forEach(
+                    eventListener -> eventListener.accept( action, uid, Optional.of( resource ), Optional.empty() ) ) );
             }
             else
             {

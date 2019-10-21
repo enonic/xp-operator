@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import org.immutables.value.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wildfly.common.annotation.Nullable;
 
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResource;
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceSpecNode;
@@ -19,41 +18,40 @@ public abstract class XpNodeDeploymentDiff
 {
     private final static Logger log = LoggerFactory.getLogger( XpNodeDeploymentDiff.class );
 
-    @Nullable
-    public abstract XpDeploymentResource oldDeployment();
+    abstract Optional<XpDeploymentResource> oldDeployment();
 
-    public abstract XpDeploymentResource newDeployment();
+    abstract XpDeploymentResource newDeployment();
 
     @Value.Derived
-    public boolean enabledDisabled()
+    boolean enabledDisabledChanged()
     {
-        if ( oldDeployment() == null )
+        if ( oldDeployment().isEmpty() )
         {
             return false;
         }
-        return !oldDeployment().getSpec().enabled().equals( newDeployment().getSpec().enabled() );
+        return !oldDeployment().get().spec().enabled().equals( newDeployment().spec().enabled() );
     }
 
     @Value.Derived
-    protected boolean updateXp()
+    boolean updateXp()
     {
-        if ( oldDeployment() == null )
+        if ( oldDeployment().isEmpty() )
         {
             return false;
         }
-        return !oldDeployment().getSpec().xpVersion().equals( newDeployment().getSpec().xpVersion() );
+        return !oldDeployment().get().spec().xpVersion().equals( newDeployment().spec().xpVersion() );
     }
 
     @Value.Derived
-    protected List<XpDeploymentResourceSpecNode> nodesAdded()
+    List<XpDeploymentResourceSpecNode> nodesAdded()
     {
-        if ( oldDeployment() == null )
+        if ( oldDeployment().isEmpty() )
         {
-            return newDeployment().getSpec().nodes();
+            return newDeployment().spec().nodes();
         }
 
-        List<String> oldAliases = oldDeployment().getSpec().nodes().stream().map( n -> n.alias() ).collect( Collectors.toList() );
-        return newDeployment().getSpec().nodes().stream().filter( n -> !oldAliases.contains( n.alias() ) ).collect( Collectors.toList() );
+        List<String> oldAliases = oldDeployment().get().spec().nodes().stream().map( n -> n.alias() ).collect( Collectors.toList() );
+        return newDeployment().spec().nodes().stream().filter( n -> !oldAliases.contains( n.alias() ) ).collect( Collectors.toList() );
     }
 
     @Value.Derived
@@ -67,7 +65,8 @@ public abstract class XpNodeDeploymentDiff
         nodesChanged().forEach( n -> res.add( ImmutableXpNodeDeploymentPlan.builder().
             nodeTuple( n ).
             newDeployment( false ).
-            enabledDisabled( enabledDisabled() ).
+            enabled( newDeployment().spec().enabled() ).
+            enabledDisabledChanged( enabledDisabledChanged() ).
             updateXp( updateXp() ).
             build() ) );
         return res;
@@ -76,22 +75,22 @@ public abstract class XpNodeDeploymentDiff
     @Value.Derived
     public List<XpDeploymentResourceSpecNode> nodesRemoved()
     {
-        if ( oldDeployment() == null )
+        if ( oldDeployment().isEmpty() )
         {
             return Collections.EMPTY_LIST;
         }
 
-        List<String> newNodeAliases = newDeployment().getSpec().nodes().stream().map( n -> n.alias() ).collect( Collectors.toList() );
+        List<String> newNodeAliases = newDeployment().spec().nodes().stream().map( n -> n.alias() ).collect( Collectors.toList() );
 
-        return oldDeployment().getSpec().nodes().stream().
+        return oldDeployment().get().spec().nodes().stream().
             filter( n -> !newNodeAliases.contains( n.alias() ) ).
             collect( Collectors.toList() );
     }
 
     @Value.Derived
-    protected List<NodeTuple> nodesChanged()
+    List<NodeTuple> nodesChanged()
     {
-        if ( oldDeployment() == null )
+        if ( oldDeployment().isEmpty() )
         {
             // No old deployment
             return Collections.EMPTY_LIST;
@@ -100,7 +99,7 @@ public abstract class XpNodeDeploymentDiff
         List<NodeTuple> changes = new LinkedList<>();
         for ( NodeTuple t : nodeTuples() )
         {
-            if ( !t.oldNode.equals( t.newNode ) || enabledDisabled() )
+            if ( !t.oldNode.equals( t.newNode ) || enabledDisabledChanged() )
             {
                 changes.add( t );
             }
@@ -109,18 +108,18 @@ public abstract class XpNodeDeploymentDiff
     }
 
     @Value.Derived
-    protected List<NodeTuple> nodeTuples()
+    List<NodeTuple> nodeTuples()
     {
-        if ( oldDeployment() == null )
+        if ( oldDeployment().isEmpty() )
         {
             return Collections.EMPTY_LIST;
         }
 
         List<NodeTuple> res = new LinkedList<>();
-        for ( XpDeploymentResourceSpecNode oldNode : oldDeployment().getSpec().nodes() )
+        for ( XpDeploymentResourceSpecNode oldNode : oldDeployment().get().spec().nodes() )
         {
             Optional<XpDeploymentResourceSpecNode> newNode =
-                newDeployment().getSpec().nodes().stream().filter( n -> n.alias().equals( oldNode.alias() ) ).findAny();
+                newDeployment().spec().nodes().stream().filter( n -> n.alias().equals( oldNode.alias() ) ).findAny();
             if ( newNode.isPresent() )
             {
                 res.add( new NodeTuple( oldNode, newNode.get() ) );
@@ -130,9 +129,9 @@ public abstract class XpNodeDeploymentDiff
     }
 
     @Value.Check
-    protected void logInfo()
+    void logInfo()
     {
-        log.debug( "Deployment enabled/disabled: " + enabledDisabled() );
+        log.debug( "Deployment enabled/disabled: " + enabledDisabledChanged() );
         log.debug( "Deployment xp version change: " + updateXp() );
         log.debug( "Nodes added: " + nodesAdded() );
         log.debug( "Nodes removed: " + nodesRemoved() );
@@ -141,13 +140,13 @@ public abstract class XpNodeDeploymentDiff
 
     public static class NodeTuple
     {
-        private final XpDeploymentResourceSpecNode oldNode;
+        private final Optional<XpDeploymentResourceSpecNode> oldNode;
 
         private final XpDeploymentResourceSpecNode newNode;
 
         protected NodeTuple( final XpDeploymentResourceSpecNode oldNode, final XpDeploymentResourceSpecNode newNode )
         {
-            this.oldNode = oldNode;
+            this.oldNode = Optional.ofNullable( oldNode );
             this.newNode = newNode;
         }
 
@@ -156,7 +155,7 @@ public abstract class XpNodeDeploymentDiff
             return new NodeTuple( oldNode, newNode );
         }
 
-        protected XpDeploymentResourceSpecNode getOldNode()
+        protected Optional<XpDeploymentResourceSpecNode> getOldNode()
         {
             return oldNode;
         }

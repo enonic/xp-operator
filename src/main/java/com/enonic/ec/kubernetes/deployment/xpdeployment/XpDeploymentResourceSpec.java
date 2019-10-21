@@ -6,7 +6,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.immutables.value.Value;
-import org.wildfly.common.annotation.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -42,8 +41,7 @@ public abstract class XpDeploymentResourceSpec
 
     public abstract List<XpDeploymentResourceSpecNode> nodes();
 
-    @Nullable
-    public abstract Map<String, XpDeploymentResourceSpecVhostCertificate> vHostCertificates();
+    protected abstract Map<String, XpDeploymentResourceSpecVhostCertificate> vHostCertificates();
 
     @Value.Derived
     @JsonIgnore
@@ -93,18 +91,14 @@ public abstract class XpDeploymentResourceSpec
     protected void check()
     {
         Preconditions.checkState( app().equals( "xp" ), "field app has to be 'xp' for xp deployments" );
+        Preconditions.checkState( nodes().size() > 0, "field 'nodes' has to contain more than 0 nodes" );
 
         Optional<XpDeploymentResourceSpecNode> singleNode = nodes().stream().filter( n -> n.type() == NodeType.STANDALONE ).findAny();
 
-        Preconditions.checkState( singleNode.isPresent() || nodes().size() == 1,
-                                  "you can only have one node if a node of type " + NodeType.STANDALONE.name() + "is in the node list" );
         Preconditions.checkState( singleNode.isPresent(), "Operator only supports nodes of type " + NodeType.STANDALONE.name() );
-
-        nodes().forEach( node -> {
-            Preconditions.checkState( node.resources().disks().containsKey( "repo" ), "field resources.disks.repo on node has to be set" );
-            Preconditions.checkState( node.resources().disks().containsKey( "snapshots" ),
-                                      "field resources.disks.repo on node has to be set" );
-        } );
+        Preconditions.checkState( singleNode.isPresent() && nodes().size() == 1,
+                                  "you can only have one node there is a node of type " + NodeType.STANDALONE.name() +
+                                      " in the node list" );
 
         singleNode.ifPresent( xpDeploymentResourceSpecNode -> Preconditions.checkState( xpDeploymentResourceSpecNode.replicas() <= 1,
                                                                                         "field replicas on node type " +

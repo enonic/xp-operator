@@ -1,5 +1,7 @@
 package com.enonic.ec.kubernetes.operator.commands.apply;
 
+import java.util.Optional;
+
 import org.immutables.value.Value;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
@@ -16,9 +18,9 @@ public abstract class CommandApplyIngress
     protected abstract IngressSpec spec();
 
     @Override
-    protected Ingress fetchResource()
+    protected Optional<Ingress> fetchResource()
     {
-        return client().extensions().ingresses().inNamespace( namespace() ).withName( name() ).get();
+        return Optional.ofNullable( client().extensions().ingresses().inNamespace( namespace().get() ).withName( name() ).get() );
     }
 
     @Override
@@ -33,6 +35,6 @@ public abstract class CommandApplyIngress
     @Override
     protected Ingress apply( final Ingress resource )
     {
-        return client().extensions().ingresses().inNamespace( namespace() ).createOrReplace( resource );
+        return client().extensions().ingresses().inNamespace( namespace().get() ).createOrReplace( resource );
     }
 }

@@ -1,7 +1,8 @@
 package com.enonic.ec.kubernetes.api;
 
+import java.util.Optional;
+
 import org.immutables.value.Value;
-import org.wildfly.common.annotation.Nullable;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
@@ -12,8 +13,7 @@ import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceSpec
 public interface XpDeploymentJson
 {
 
-    @Nullable
-    String uid();
+    Optional<String> uid();
 
     String apiVersion();
 

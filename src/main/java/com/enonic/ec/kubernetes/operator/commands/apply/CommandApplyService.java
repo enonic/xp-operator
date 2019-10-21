@@ -1,5 +1,7 @@
 package com.enonic.ec.kubernetes.operator.commands.apply;
 
+import java.util.Optional;
+
 import org.immutables.value.Value;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
@@ -16,9 +18,9 @@ public abstract class CommandApplyService
     protected abstract ServiceSpec spec();
 
     @Override
-    protected Service fetchResource()
+    protected Optional<Service> fetchResource()
     {
-        return client().services().inNamespace( namespace() ).withName( name() ).get();
+        return Optional.ofNullable( client().services().inNamespace( namespace().get() ).withName( name() ).get() );
     }
 
     @Override
@@ -33,6 +35,6 @@ public abstract class CommandApplyService
     @Override
     protected Service apply( final Service resource )
     {
-        return client().services().inNamespace( namespace() ).createOrReplace( resource );
+        return client().services().inNamespace( namespace().get() ).createOrReplace( resource );
     }
 }

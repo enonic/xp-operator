@@ -1,0 +1,13 @@
+spec:
+  cloud: mycloud
+  project: myproject
+  name: myname
+  xpVersion: 7.1.0
+
+  nodes:
+    - alias: xp
+      replicas: 1
+      type: STANDALONE
+      resources:
+        cpu: "1"
+        memory: 1Gi

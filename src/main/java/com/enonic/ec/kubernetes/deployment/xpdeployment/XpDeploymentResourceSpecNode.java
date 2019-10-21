@@ -3,15 +3,16 @@ package com.enonic.ec.kubernetes.deployment.xpdeployment;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 
 import org.immutables.value.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wildfly.common.annotation.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.common.base.Preconditions;
 
 @JsonDeserialize(builder = ImmutableXpDeploymentResourceSpecNode.Builder.class)
 @Value.Immutable
@@ -27,7 +28,6 @@ public abstract class XpDeploymentResourceSpecNode
 
     public abstract XpDeploymentResourceSpecNodeResources resources();
 
-    @Nullable
     public abstract Map<String, String> env();
 
     public abstract Map<String, String> config();
@@ -42,25 +42,32 @@ public abstract class XpDeploymentResourceSpecNode
 
     @JsonIgnore
     @Value.Derived
-    public Properties configAsProperties( String key )
+    public Optional<Properties> configAsProperties( String key )
     {
-        String file = config().get( key );
-        if ( file == null )
+        Optional<String> file = Optional.ofNullable( config().get( key ) );
+        if ( file.isEmpty() )
         {
-            return null;
+            return Optional.empty();
         }
 
         Properties p = new Properties();
         try
         {
-            p.load( new StringReader( file ) );
-            return p;
+            p.load( new StringReader( file.get() ) );
+            return Optional.of( p );
         }
         catch ( IOException ex )
         {
             log.warn( "Failed to parse config file: " + key, ex );
-            return null;
+            return Optional.empty();
         }
+    }
+
+    @Value.Check
+    protected void check()
+    {
+        Preconditions.checkState( resources().disks().containsKey( "repo" ), "field resources.disks.repo on node has to be set" );
+        Preconditions.checkState( resources().disks().containsKey( "snapshots" ), "field resources.disks.snapshots on node has to be set" );
     }
 
     @Override

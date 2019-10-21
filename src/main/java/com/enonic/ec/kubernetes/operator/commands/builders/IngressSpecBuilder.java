@@ -3,9 +3,9 @@ package com.enonic.ec.kubernetes.operator.commands.builders;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 import org.immutables.value.Value;
-import org.wildfly.common.annotation.Nullable;
 
 import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.extensions.HTTPIngressPath;
@@ -25,8 +25,7 @@ public abstract class IngressSpecBuilder
     implements Command<IngressSpec>
 {
 
-    @Nullable
-    protected abstract String certificateSecretName();
+    protected abstract Optional<String> certificateSecretName();
 
     protected abstract Vhost vhost();
 
@@ -37,11 +36,11 @@ public abstract class IngressSpecBuilder
     {
         IngressSpec spec = new IngressSpec();
 
-        if ( certificateSecretName() != null )
+        if ( certificateSecretName().isPresent() )
         {
             IngressTLS tls = new IngressTLS();
             tls.setHosts( Collections.singletonList( vhost().host() ) );
-            tls.setSecretName( certificateSecretName() );
+            tls.setSecretName( certificateSecretName().get() );
             spec.setTls( Collections.singletonList( tls ) );
         }
 

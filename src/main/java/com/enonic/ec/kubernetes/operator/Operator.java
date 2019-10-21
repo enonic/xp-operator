@@ -47,7 +47,7 @@ public class Operator
             if ( action == Watcher.Action.ADDED || action == Watcher.Action.MODIFIED )
             {
                 // Only modify if spec has changed
-                if ( oldResource == null || !oldResource.getSpec().equals( newResource.getSpec() ) )
+                if ( oldResource.isEmpty() || !oldResource.get().spec().equals( newResource.get().spec() ) )
                 {
                     try
                     {
@@ -56,7 +56,7 @@ public class Operator
                             defaultClient( defaultClient ).
                             issuerClient( issuerClient ).
                             oldResource( oldResource ).
-                            newResource( newResource ).
+                            newResource( newResource.get() ).
                             build().
                             execute();
 
@@ -72,9 +72,8 @@ public class Operator
             }
             else if ( action == Watcher.Action.DELETED )
             {
-                log.info(
-                    "XpDeployment with id '" + oldResource.getMetadata().getUid() + "' and name '" + oldResource.getMetadata().getName() +
-                        "' DELETED" );
+                log.info( "XpDeployment with id '" + oldResource.get().getMetadata().getUid() + "' and name '" +
+                              oldResource.get().getMetadata().getName() + "' DELETED" );
                 // Note that we do not have to do anything on DELETE events because the
                 // Kubernetes garbage collector cleans up the deployment for us.
             }

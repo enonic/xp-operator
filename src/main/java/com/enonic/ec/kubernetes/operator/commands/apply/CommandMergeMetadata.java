@@ -1,12 +1,13 @@
 package com.enonic.ec.kubernetes.operator.commands.apply;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.immutables.value.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wildfly.common.annotation.Nullable;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.OwnerReference;
@@ -25,11 +26,9 @@ public abstract class CommandMergeMetadata
 
     protected abstract OwnerReference ownerReference();
 
-    @Nullable
-    protected abstract Map<String, String> labels();
+    protected abstract Optional<Map<String, String>> labels();
 
-    @Nullable
-    protected abstract Map<String, String> annotations();
+    protected abstract Optional<Map<String, String>> annotations();
 
     @Override
     public ObjectMeta execute()
@@ -59,24 +58,24 @@ public abstract class CommandMergeMetadata
     }
 
     private static Map<String, String> mergeMap( String kind, String name, String mapType, final Map<String, String> oldMap,
-                                                 final Map<String, String> newMap )
+                                                 final Optional<Map<String, String>> newMap )
     {
         if ( oldMap == null )
         {
-            return newMap;
+            return newMap.orElse( Collections.EMPTY_MAP );
         }
 
-        if ( newMap == null || newMap.size() == 0 )
+        if ( newMap.isPresent() || newMap.get().size() == 0 )
         {
-            return oldMap;
+            return Collections.EMPTY_MAP;
         }
 
-        for ( Map.Entry<String, String> e : newMap.entrySet() )
+        for ( Map.Entry<String, String> e : newMap.get().entrySet() )
         {
-            String tmp = oldMap.get( e.getKey() );
-            if ( tmp != null && !e.getValue().equals( tmp ) )
+            Optional<String> tmp = Optional.ofNullable( oldMap.get( e.getKey() ) );
+            if ( tmp.isPresent() && !e.getValue().equals( tmp.get() ) )
             {
-                log.warn( "Changing " + mapType + " on " + kind + " '" + name + "' from '" + tmp + "' to '" + e.getValue() + "'" );
+                log.warn( "Changing " + mapType + " on " + kind + " '" + name + "' from '" + tmp.get() + "' to '" + e.getValue() + "'" );
             }
             oldMap.put( e.getKey(), e.getValue() );
         }

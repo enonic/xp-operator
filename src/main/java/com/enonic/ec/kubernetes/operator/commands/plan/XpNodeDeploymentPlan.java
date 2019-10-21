@@ -1,5 +1,6 @@
 package com.enonic.ec.kubernetes.operator.commands.plan;
 
+import java.util.Optional;
 import java.util.Properties;
 
 import org.immutables.value.Value;
@@ -7,11 +8,18 @@ import org.immutables.value.Value;
 import com.google.common.base.Preconditions;
 
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceSpecNode;
+import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentSpecChangeValidation;
 
 @Value.Immutable
 public abstract class XpNodeDeploymentPlan
 {
     protected abstract XpNodeDeploymentDiff.NodeTuple nodeTuple();
+
+    @Value.Default
+    protected boolean enabled()
+    {
+        return true;
+    }
 
     @Value.Default
     protected boolean newDeployment()
@@ -20,7 +28,7 @@ public abstract class XpNodeDeploymentPlan
     }
 
     @Value.Default
-    protected boolean enabledDisabled()
+    protected boolean enabledDisabledChanged()
     {
         return false;
     }
@@ -38,29 +46,35 @@ public abstract class XpNodeDeploymentPlan
     }
 
     @Value.Derived
-    public boolean changeScale()
+    public int scale()
     {
-        if ( nodeTuple().getOldNode() == null )
-        {
-            return false;
-        }
-        return enabledDisabled() || !nodeTuple().getOldNode().replicas().equals( nodeTuple().getNewNode().replicas() );
+        return enabled() ? nodeTuple().getNewNode().replicas() : 0;
     }
 
     @Value.Derived
-    public boolean changeDisruptionBudget( Integer nodeScale )
+    public boolean changeScale()
     {
-        if ( nodeTuple().getOldNode() == null )
+        if ( nodeTuple().getOldNode().isEmpty() )
+        {
+            return false;
+        }
+        return enabledDisabledChanged() || !nodeTuple().getOldNode().get().replicas().equals( nodeTuple().getNewNode().replicas() );
+    }
+
+    @Value.Derived
+    public boolean changeDisruptionBudget()
+    {
+        if ( nodeTuple().getOldNode().isEmpty() )
         {
             return true;
         }
-        return nodeScale > 1 && changeScale();
+        return scale() > 1 && changeScale();
     }
 
     @Value.Derived
     public boolean changeConfigMap()
     {
-        return newDeployment() || !nodeTuple().getOldNode().config().equals( nodeTuple().getNewNode().config() );
+        return newDeployment() || !nodeTuple().getOldNode().get().config().equals( nodeTuple().getNewNode().config() );
     }
 
     @Value.Derived
@@ -71,24 +85,24 @@ public abstract class XpNodeDeploymentPlan
             return true;
         }
 
-        if ( !nodeTuple().getOldNode().resources().cpu().equals( nodeTuple().getOldNode().resources().cpu() ) )
+        if ( !nodeTuple().getOldNode().get().resources().cpu().equals( nodeTuple().getNewNode().resources().cpu() ) )
         {
             return true;
         }
 
-        if ( !nodeTuple().getOldNode().resources().memory().equals( nodeTuple().getOldNode().resources().memory() ) )
+        if ( !nodeTuple().getOldNode().get().resources().memory().equals( nodeTuple().getNewNode().resources().memory() ) )
         {
             return true;
         }
 
-        Properties oldSystemProps = nodeTuple().getOldNode().configAsProperties( "system.properties" );
-        Properties newSystemProps = nodeTuple().getNewNode().configAsProperties( "system.properties" );
+        Optional<Properties> oldSystemProps = nodeTuple().getOldNode().get().configAsProperties( "system.properties" );
+        Optional<Properties> newSystemProps = nodeTuple().getNewNode().configAsProperties( "system.properties" );
 
-        if ( oldSystemProps != null && !oldSystemProps.equals( newSystemProps ) )
+        if ( oldSystemProps.isPresent() && !oldSystemProps.equals( newSystemProps ) )
         {
             return true;
         }
-        if ( newSystemProps != null && !newSystemProps.equals( oldSystemProps ) )
+        if ( newSystemProps.isPresent() && !newSystemProps.equals( oldSystemProps ) )
         {
             return true;
         }
@@ -99,6 +113,10 @@ public abstract class XpNodeDeploymentPlan
     @Value.Check
     protected void check()
     {
+        if ( nodeTuple().getOldNode().isPresent() )
+        {
+            XpDeploymentSpecChangeValidation.checkNode( nodeTuple().getOldNode(), nodeTuple().getNewNode() );
+        }
         if ( newDeployment() )
         {
             Preconditions.checkState( !changeScale(), "Scale should never be true on new deployments" );

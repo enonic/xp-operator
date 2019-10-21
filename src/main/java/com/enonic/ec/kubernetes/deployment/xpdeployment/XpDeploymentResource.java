@@ -1,21 +1,19 @@
 package com.enonic.ec.kubernetes.deployment.xpdeployment;
 
+import org.immutables.value.Value;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 import io.fabric8.kubernetes.client.CustomResource;
 
-public class XpDeploymentResource
+@JsonDeserialize(builder = ImmutableXpDeploymentResource.Builder.class)
+@Value.Immutable
+public abstract class XpDeploymentResource
     extends CustomResource
 {
 
-    private XpDeploymentResourceSpec spec;
+    public abstract XpDeploymentResourceSpec spec();
 
-    public XpDeploymentResourceSpec getSpec()
-    {
-        return spec;
-    }
-
-    public void setSpec( XpDeploymentResourceSpec spec )
-    {
-        this.spec = spec;
-    }
-
+    @Override
+    public abstract String toString();
 }

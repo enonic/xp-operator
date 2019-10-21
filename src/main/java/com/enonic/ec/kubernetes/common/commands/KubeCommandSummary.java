@@ -1,13 +1,14 @@
 package com.enonic.ec.kubernetes.common.commands;
 
+import java.util.Optional;
+
 import org.immutables.value.Value;
-import org.wildfly.common.annotation.Nullable;
 
 @Value.Immutable
 public abstract class KubeCommandSummary
 {
-    @Nullable
-    public abstract String namespace();
+
+    public abstract Optional<String> namespace();
 
     public abstract String name();
 
@@ -15,8 +16,7 @@ public abstract class KubeCommandSummary
 
     public abstract Action action();
 
-    @Nullable
-    public abstract String info();
+    public abstract Optional<String> info();
 
     public enum Action
     {
@@ -34,13 +34,13 @@ public abstract class KubeCommandSummary
             append( " '" ).
             append( name() ).
             append( "'" );
-        if ( namespace() != null )
+        if ( namespace().isPresent() )
         {
-            sb.append( " in " ).append( "NS '" ).append( namespace() ).append( "'" );
+            sb.append( " in " ).append( "NS '" ).append( namespace().get() ).append( "'" );
         }
-        if ( info() != null )
+        if ( info().isPresent() )
         {
-            sb.append( ": " ).append( info() );
+            sb.append( ": " ).append( info().get() );
         }
         return sb.toString();
     }

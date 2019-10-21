@@ -2,11 +2,11 @@ package com.enonic.ec.kubernetes.operator.commands.apply;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.immutables.value.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wildfly.common.annotation.Nullable;
 
 import com.google.common.base.Preconditions;
 
@@ -28,8 +28,7 @@ public abstract class CommandApplyResource<T extends HasMetadata>
 
     protected abstract String name();
 
-    @Nullable
-    protected abstract String namespace();
+    protected abstract Optional<String> namespace();
 
     protected abstract OwnerReference ownerReference();
 
@@ -39,31 +38,33 @@ public abstract class CommandApplyResource<T extends HasMetadata>
 
     void checkValidity( HasMetadata resource )
     {
+        if ( !( resource instanceof Namespace ) )
+        {
+            Preconditions.checkState( resource.getMetadata().getNamespace().equals( namespace() ), "Resource namespace do not match" );
+        }
         Preconditions.checkState( resource.getMetadata().getName().equals( name() ), "Resource names do not match" );
-        Preconditions.checkState( resource.getMetadata().getNamespace().equals( namespace() ), "Resource namespace do not match" );
     }
 
     @Value.Derived
     public T preparedResource()
     {
-        T oldResource = fetchResource();
-        T newResource = null;
-        KubeCommandSummary.Action action = null;
+        Optional<T> oldResource = fetchResource();
+        Optional<T> newResource = Optional.empty();
+        KubeCommandSummary.Action action = KubeCommandSummary.Action.CREATE;
 
-        if ( oldResource == null )
+        if ( oldResource.isEmpty() )
         {
-            newResource = build(
-                new ObjectMeta( annotations(), null, null, null, null, null, null, null, labels(), null, name(), namespace(),
-                                List.of( ownerReference() ), null, null, null ) );
-            action = KubeCommandSummary.Action.CREATE;
+            newResource = Optional.of( build(
+                new ObjectMeta( annotations(), null, null, null, null, null, null, null, labels(), null, name(),
+                                namespace().isPresent() ? namespace().get() : null, List.of( ownerReference() ), null, null, null ) ) );
         }
 
-        if ( newResource == null )
+        if ( newResource.isEmpty() )
         {
-            checkValidity( oldResource );
+            checkValidity( oldResource.get() );
             ObjectMeta newMetadata = ImmutableCommandMergeMetadata.builder().
-                kind( oldResource.getKind() ).
-                metadata( oldResource.getMetadata() ).
+                kind( oldResource.get().getKind() ).
+                metadata( oldResource.get().getMetadata() ).
                 ownerReference( ownerReference() ).
                 labels( labels() ).
                 annotations( annotations() ).
@@ -71,18 +72,18 @@ public abstract class CommandApplyResource<T extends HasMetadata>
                 execute();
             newMetadata.setResourceVersion( null );
 
-            newResource = build( newMetadata );
+            newResource = Optional.of( build( newMetadata ) );
             action = KubeCommandSummary.Action.UPDATE;
         }
 
         summary = ImmutableKubeCommandSummary.builder().
-            namespace( newResource instanceof Namespace ? null : namespace() ).
-            name( newResource.getMetadata().getName() ).
-            kind( newResource.getKind() ).
+            namespace( newResource.get() instanceof Namespace ? Optional.empty() : namespace() ).
+            name( newResource.get().getMetadata().getName() ).
+            kind( newResource.get().getKind() ).
             action( action ).
             build();
 
-        return newResource;
+        return newResource.get();
     }
 
     @Override
@@ -92,7 +93,7 @@ public abstract class CommandApplyResource<T extends HasMetadata>
     }
 
     @Value.Derived
-    protected abstract T fetchResource();
+    protected abstract Optional<T> fetchResource();
 
     protected abstract T build( ObjectMeta metadata );
 
