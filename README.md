@@ -15,4 +15,6 @@
 ### Run operator on minikube
 * Setup minikube: `make minikube-setup`
 * Deploy to minikube: `make minikube-operator-deploy`
-* Port forward to operator: `make minikube-operator-port-forward`
+* Port forward to operator: `make minikube-operator-port-forward` (You can change the `LOCAL_OPERATOR_PORT` in the make file for a different port)
+* View operator logs: `make minikube-operator-logs`
+* Post sample json to operator: `make post`
