@@ -1,40 +1,27 @@
 package com.enonic.ec.kubernetes.operator.crd.certmanager.issuer;
 
-import javax.enterprise.inject.Produces;
-import javax.inject.Named;
+import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.dsl.MixedOperation;
-import io.fabric8.kubernetes.client.dsl.Resource;
+import com.enonic.ec.kubernetes.common.client.DefaultClientProducer;
 
 import static com.enonic.ec.kubernetes.deployment.CrdClientsProducer.createCrdClient;
 
+@Singleton
 public class IssuerClientProducer
 {
-    public static class IssuerClient
+    private IssuerClient issuerClient;
+
+    @Inject
+    public IssuerClientProducer( DefaultClientProducer defaultClientProducer )
     {
-        private final MixedOperation<IssuerResource, IssuerResourceList, IssuerResourceDoneable, Resource<IssuerResource, IssuerResourceDoneable>>
-            client;
-
-        public IssuerClient(
-            final MixedOperation<IssuerResource, IssuerResourceList, IssuerResourceDoneable, Resource<IssuerResource, IssuerResourceDoneable>> client )
-        {
-            this.client = client;
-        }
-
-        public MixedOperation<IssuerResource, IssuerResourceList, IssuerResourceDoneable, Resource<IssuerResource, IssuerResourceDoneable>> getClient()
-        {
-            return client;
-        }
+        issuerClient = new IssuerClient(
+            createCrdClient( defaultClientProducer.client(), "apiextensions.k8s.io/v1beta1", "Issuer", "issuers.certmanager.k8s.io",
+                             IssuerResource.class, IssuerResourceList.class, IssuerResourceDoneable.class ) );
     }
 
-    @Produces
-    @Singleton
-    IssuerClient produceXpDeploymentClient( @Named("default") KubernetesClient defaultClient )
+    public IssuerClient produce()
     {
-        return new IssuerClient(
-            createCrdClient( defaultClient, "apiextensions.k8s.io/v1beta1", "Issuer", "issuers.certmanager.k8s.io", IssuerResource.class,
-                             IssuerResourceList.class, IssuerResourceDoneable.class ) );
+        return issuerClient;
     }
 }

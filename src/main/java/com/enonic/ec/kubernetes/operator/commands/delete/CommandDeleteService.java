@@ -14,7 +14,7 @@ public abstract class CommandDeleteService
     @Override
     protected String resourceKind()
     {
-        return Service.class.getName();
+        return Service.class.getSimpleName();
     }
 
     @Override

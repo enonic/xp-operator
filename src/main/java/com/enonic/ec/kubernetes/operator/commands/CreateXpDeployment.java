@@ -44,7 +44,7 @@ import com.enonic.ec.kubernetes.operator.commands.plan.XpNodeDeploymentPlan;
 import com.enonic.ec.kubernetes.operator.commands.plan.XpVhostDeploymentDiff;
 import com.enonic.ec.kubernetes.operator.commands.plan.XpVhostDeploymentPlan;
 import com.enonic.ec.kubernetes.operator.commands.scale.ImmutableCommandScaleStatefulSet;
-import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerClientProducer;
+import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerClient;
 
 @Value.Immutable
 public abstract class CreateXpDeployment
@@ -52,7 +52,7 @@ public abstract class CreateXpDeployment
 {
     protected abstract KubernetesClient defaultClient();
 
-    protected abstract IssuerClientProducer.IssuerClient issuerClient();
+    protected abstract IssuerClient issuerClient();
 
     protected abstract Optional<XpDeploymentResource> oldResource();
 
@@ -98,16 +98,16 @@ public abstract class CreateXpDeployment
     @Value.Derived
     protected String podImageName()
     {
-        return "gbbirkisson/xp:" + resource().spec().xpVersion() + "-ubuntu"; // TODO: Fix
+        return "gbbirkisson/xp:" + resource().getSpec().xpVersion() + "-ubuntu"; // TODO: Fix
     }
 
     @Override
     public CombinedKubeCommand execute()
         throws Exception
     {
-        String namespaceName = resource().spec().defaultNamespaceName();
-        String defaultResourceName = resource().spec().defaultResourceName();
-        Map<String, String> defaultLabels = resource().spec().defaultLabels();
+        String namespaceName = resource().getSpec().defaultNamespaceName();
+        String defaultResourceName = resource().getSpec().defaultResourceName();
+        Map<String, String> defaultLabels = resource().getSpec().defaultLabels();
 
         ImmutableCombinedKubeCommand.Builder commandBuilder = ImmutableCombinedKubeCommand.builder();
 
@@ -149,7 +149,7 @@ public abstract class CreateXpDeployment
                                            final Map<String, String> defaultLabels, final XpNodeDeploymentPlan nodePlan )
     {
         // TODO: Handle all nodetypes
-        String nodeName = resource().spec().defaultResourceName( nodePlan.node().alias() );
+        String nodeName = resource().getSpec().defaultResourceName( nodePlan.node().alias() );
         Map<String, String> nodeLabels = new HashMap<>( defaultLabels );
         nodeLabels.putAll( nodePlan.node().nodeAliasLabel() );
 
@@ -225,7 +225,7 @@ public abstract class CreateXpDeployment
     private void createDeleteNodeCommands( final ImmutableCombinedKubeCommand.Builder commandBuilder, final String namespaceName,
                                            final XpDeploymentResourceSpecNode oldNode )
     {
-        String nodeName = resource().spec().defaultResourceName( oldNode.alias() );
+        String nodeName = resource().getSpec().defaultResourceName( oldNode.alias() );
 
         commandBuilder.addCommand( ImmutableCommandDeleteStatefulSet.builder().
             client( defaultClient() ).

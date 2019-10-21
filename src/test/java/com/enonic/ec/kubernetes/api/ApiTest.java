@@ -1,21 +1,26 @@
 package com.enonic.ec.kubernetes.api;
 
-import org.junit.jupiter.api.Test;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
-import io.quarkus.test.junit.QuarkusTest;
-
-@QuarkusTest
-public class ApiTest
+public abstract class ApiTest
 {
-
-    @Test
-    public void testHelloEndpoint()
+    private String loadFile( String file )
     {
-//        given()
-//          .when().get("/hello")
-//          .then()
-//             .statusCode(200)
-//             .body(is("hello"));
+        StringBuilder resultStringBuilder = new StringBuilder();
+        try (BufferedReader br = new BufferedReader( new InputStreamReader( this.getClass().getResourceAsStream( file ) ) ))
+        {
+            String line;
+            while ( ( line = br.readLine() ) != null )
+            {
+                resultStringBuilder.append( line ).append( "\n" );
+            }
+        }
+        catch ( IOException e )
+        {
+            throw new RuntimeException( e );
+        }
+        return resultStringBuilder.toString();
     }
-
 }

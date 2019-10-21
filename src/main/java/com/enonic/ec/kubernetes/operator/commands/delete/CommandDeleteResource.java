@@ -28,12 +28,7 @@ public abstract class CommandDeleteResource
     @Override
     public final Boolean execute()
     {
-        Boolean res = delete();
-        if ( !res )
-        {
-            log.warn( "Deletion did not return true: " + summary() );
-        }
-        return res;
+        return delete();
     }
 
     @Override

@@ -2,13 +2,13 @@ package com.enonic.ec.kubernetes.operator.commands.delete;
 
 import org.immutables.value.Value;
 
-import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerClientProducer;
+import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerClient;
 
 @Value.Immutable
 public abstract class CommandDeleteIssuer
     extends CommandDeleteResource
 {
-    protected abstract IssuerClientProducer.IssuerClient client();
+    protected abstract IssuerClient client();
 
     @Override
     protected String resourceKind()
@@ -19,6 +19,6 @@ public abstract class CommandDeleteIssuer
     @Override
     protected Boolean delete()
     {
-        return client().getClient().inNamespace( namespace() ).withName( name() ).delete();
+        return client().client().inNamespace( namespace() ).withName( name() ).delete();
     }
 }

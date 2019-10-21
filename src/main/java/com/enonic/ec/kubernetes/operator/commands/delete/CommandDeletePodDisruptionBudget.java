@@ -14,7 +14,7 @@ public abstract class CommandDeletePodDisruptionBudget
     @Override
     protected String resourceKind()
     {
-        return PodDisruptionBudget.class.getName();
+        return PodDisruptionBudget.class.getSimpleName();
     }
 
     @Override

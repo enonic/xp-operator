@@ -40,7 +40,8 @@ public abstract class CommandApplyResource<T extends HasMetadata>
     {
         if ( !( resource instanceof Namespace ) )
         {
-            Preconditions.checkState( resource.getMetadata().getNamespace().equals( namespace() ), "Resource namespace do not match" );
+            Preconditions.checkState( resource.getMetadata().getNamespace().equals( namespace().get() ),
+                                      "Resource namespace do not match" );
         }
         Preconditions.checkState( resource.getMetadata().getName().equals( name() ), "Resource names do not match" );
     }

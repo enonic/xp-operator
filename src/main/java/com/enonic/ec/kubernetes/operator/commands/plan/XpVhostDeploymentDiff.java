@@ -27,10 +27,10 @@ public abstract class XpVhostDeploymentDiff
     {
         if ( oldDeployment().isEmpty() )
         {
-            return newDeployment().spec().vHosts();
+            return newDeployment().getSpec().vHosts();
         }
-        List<String> oldHosts = oldDeployment().get().spec().vHosts().stream().map( h -> h.host() ).collect( Collectors.toList() );
-        return newDeployment().spec().vHosts().stream().filter( h -> !oldHosts.contains( h.host() ) ).collect( Collectors.toList() );
+        List<String> oldHosts = oldDeployment().get().getSpec().vHosts().stream().map( h -> h.host() ).collect( Collectors.toList() );
+        return newDeployment().getSpec().vHosts().stream().filter( h -> !oldHosts.contains( h.host() ) ).collect( Collectors.toList() );
     }
 
     @Value.Derived
@@ -53,8 +53,8 @@ public abstract class XpVhostDeploymentDiff
         {
             return Collections.EMPTY_LIST;
         }
-        List<String> newVHosts = newDeployment().spec().vHosts().stream().map( h -> h.host() ).collect( Collectors.toList() );
-        return oldDeployment().get().spec().vHosts().stream().
+        List<String> newVHosts = newDeployment().getSpec().vHosts().stream().map( h -> h.host() ).collect( Collectors.toList() );
+        return oldDeployment().get().getSpec().vHosts().stream().
             filter( h -> !newVHosts.contains( h.host() ) ).
             collect( Collectors.toList() );
     }
@@ -88,9 +88,10 @@ public abstract class XpVhostDeploymentDiff
         }
 
         List<VhostTuple> res = new LinkedList<>();
-        for ( Vhost oldVhost : oldDeployment().get().spec().vHosts() )
+        for ( Vhost oldVhost : oldDeployment().get().getSpec().vHosts() )
         {
-            Optional<Vhost> newVhost = newDeployment().spec().vHosts().stream().filter( h -> h.host().equals( oldVhost.host() ) ).findAny();
+            Optional<Vhost> newVhost =
+                newDeployment().getSpec().vHosts().stream().filter( h -> h.host().equals( oldVhost.host() ) ).findAny();
             if ( newVhost.isPresent() )
             {
                 res.add( new VhostTuple( oldVhost, newVhost.get() ) );

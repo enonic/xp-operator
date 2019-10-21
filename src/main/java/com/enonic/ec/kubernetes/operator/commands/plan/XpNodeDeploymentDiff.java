@@ -29,7 +29,7 @@ public abstract class XpNodeDeploymentDiff
         {
             return false;
         }
-        return !oldDeployment().get().spec().enabled().equals( newDeployment().spec().enabled() );
+        return !oldDeployment().get().getSpec().enabled().equals( newDeployment().getSpec().enabled() );
     }
 
     @Value.Derived
@@ -39,7 +39,7 @@ public abstract class XpNodeDeploymentDiff
         {
             return false;
         }
-        return !oldDeployment().get().spec().xpVersion().equals( newDeployment().spec().xpVersion() );
+        return !oldDeployment().get().getSpec().xpVersion().equals( newDeployment().getSpec().xpVersion() );
     }
 
     @Value.Derived
@@ -47,11 +47,11 @@ public abstract class XpNodeDeploymentDiff
     {
         if ( oldDeployment().isEmpty() )
         {
-            return newDeployment().spec().nodes();
+            return newDeployment().getSpec().nodes();
         }
 
-        List<String> oldAliases = oldDeployment().get().spec().nodes().stream().map( n -> n.alias() ).collect( Collectors.toList() );
-        return newDeployment().spec().nodes().stream().filter( n -> !oldAliases.contains( n.alias() ) ).collect( Collectors.toList() );
+        List<String> oldAliases = oldDeployment().get().getSpec().nodes().stream().map( n -> n.alias() ).collect( Collectors.toList() );
+        return newDeployment().getSpec().nodes().stream().filter( n -> !oldAliases.contains( n.alias() ) ).collect( Collectors.toList() );
     }
 
     @Value.Derived
@@ -65,7 +65,7 @@ public abstract class XpNodeDeploymentDiff
         nodesChanged().forEach( n -> res.add( ImmutableXpNodeDeploymentPlan.builder().
             nodeTuple( n ).
             newDeployment( false ).
-            enabled( newDeployment().spec().enabled() ).
+            enabled( newDeployment().getSpec().enabled() ).
             enabledDisabledChanged( enabledDisabledChanged() ).
             updateXp( updateXp() ).
             build() ) );
@@ -80,9 +80,9 @@ public abstract class XpNodeDeploymentDiff
             return Collections.EMPTY_LIST;
         }
 
-        List<String> newNodeAliases = newDeployment().spec().nodes().stream().map( n -> n.alias() ).collect( Collectors.toList() );
+        List<String> newNodeAliases = newDeployment().getSpec().nodes().stream().map( n -> n.alias() ).collect( Collectors.toList() );
 
-        return oldDeployment().get().spec().nodes().stream().
+        return oldDeployment().get().getSpec().nodes().stream().
             filter( n -> !newNodeAliases.contains( n.alias() ) ).
             collect( Collectors.toList() );
     }
@@ -116,10 +116,10 @@ public abstract class XpNodeDeploymentDiff
         }
 
         List<NodeTuple> res = new LinkedList<>();
-        for ( XpDeploymentResourceSpecNode oldNode : oldDeployment().get().spec().nodes() )
+        for ( XpDeploymentResourceSpecNode oldNode : oldDeployment().get().getSpec().nodes() )
         {
             Optional<XpDeploymentResourceSpecNode> newNode =
-                newDeployment().spec().nodes().stream().filter( n -> n.alias().equals( oldNode.alias() ) ).findAny();
+                newDeployment().getSpec().nodes().stream().filter( n -> n.alias().equals( oldNode.alias() ) ).findAny();
             if ( newNode.isPresent() )
             {
                 res.add( new NodeTuple( oldNode, newNode.get() ) );

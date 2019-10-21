@@ -26,18 +26,19 @@ public abstract class KubeCommandSummary
     @Override
     public String toString()
     {
-        StringBuilder sb = new StringBuilder();
-        sb.
-            append( action() ).
-            append( " " ).
-            append( kind() ).
-            append( " '" ).
-            append( name() ).
-            append( "'" );
+        StringBuilder sb = new StringBuilder( action().toString() );
+
         if ( namespace().isPresent() )
         {
             sb.append( " in " ).append( "NS '" ).append( namespace().get() ).append( "'" );
         }
+
+        sb.append( " " ).
+            append( kind() ).
+            append( " '" ).
+            append( name() ).
+            append( "'" );
+
         if ( info().isPresent() )
         {
             sb.append( ": " ).append( info().get() );

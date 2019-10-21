@@ -16,19 +16,19 @@ public class XpDeploymentCache
     extends ResourceCache<XpDeploymentResource>
 {
 
-    private final CrdClientsProducer.XpDeploymentClient client;
+    private final XpDeploymentClient client;
 
     @Inject
-    public XpDeploymentCache( final CrdClientsProducer.XpDeploymentClient client )
+    public XpDeploymentCache( XpDeploymentClientProducer xpDeploymentClientProducer )
     {
         super();
-        this.client = client;
+        this.client = xpDeploymentClientProducer.produce();
     }
 
-    void onStartup( @Observes StartupEvent _ev )
+    protected void onStartup( @Observes StartupEvent _ev )
     {
-        initialize( client.getClient().inAnyNamespace().list().getItems() );
-        client.getClient().inAnyNamespace().watch( new Watcher<>()
+        initialize( client.client().inAnyNamespace().list().getItems() );
+        client.client().inAnyNamespace().watch( new Watcher<>()
         {
             @Override
             public void eventReceived( final Action action, final XpDeploymentResource deployment )

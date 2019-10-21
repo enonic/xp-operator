@@ -19,11 +19,10 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
-import com.enonic.ec.kubernetes.deployment.CrdClientsProducer;
 import com.enonic.ec.kubernetes.deployment.ImmutableCommandCreateXpDeployment;
 import com.enonic.ec.kubernetes.deployment.ImmutableCommandDeleteXpDeployment;
 import com.enonic.ec.kubernetes.deployment.XpDeploymentCache;
-import com.enonic.ec.kubernetes.deployment.xpdeployment.ImmutableXpDeploymentResource;
+import com.enonic.ec.kubernetes.deployment.XpDeploymentClientProducer;
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResource;
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentSpecChangeValidation;
 
@@ -33,7 +32,7 @@ public class DeploymentService
 {
 
     @Inject
-    CrdClientsProducer.XpDeploymentClient xpDeploymentClient;
+    XpDeploymentClientProducer xpDeploymentClientProducer;
 
     @Inject
     XpDeploymentCache xpDeploymentCache;
@@ -53,16 +52,16 @@ public class DeploymentService
     public Response createXpDeployment( XpDeploymentJson deployment, @Context UriInfo uriInfo )
     {
         Optional<XpDeploymentResource> old = xpDeploymentCache.stream().
-            filter( d -> d.spec().deploymentName().equals( deployment.spec().deploymentName() ) ).
+            filter( d -> d.getSpec().deploymentName().equals( deployment.spec().deploymentName() ) ).
             findAny();
 
         if ( old.isPresent() )
         {
-            XpDeploymentSpecChangeValidation.checkSpec( old.get().spec(), deployment.spec() );
+            XpDeploymentSpecChangeValidation.checkSpec( old.get().getSpec(), deployment.spec() );
         }
 
         XpDeploymentResource resource = ImmutableCommandCreateXpDeployment.builder().
-            client( xpDeploymentClient ).
+            client( xpDeploymentClientProducer.produce() ).
             apiVersion( deployment.apiVersion() ).
             spec( deployment.spec() ).
             build().
@@ -102,11 +101,11 @@ public class DeploymentService
             return Response.status( 400, "cannot update deployment to a different apiVersion" ).build();
         }
 
-        XpDeploymentSpecChangeValidation.checkSpec( resource.get().spec(), deployment.spec() );
+        XpDeploymentSpecChangeValidation.checkSpec( resource.get().getSpec(), deployment.spec() );
 
-        xpDeploymentClient.getClient().
-            createOrReplace( ImmutableXpDeploymentResource.copyOf( resource.get() ).
-                withSpec( deployment.spec() ) );
+        resource.get().setSpec( deployment.spec() );
+        xpDeploymentClientProducer.produce().client().
+            createOrReplace( resource.get() );
 
         return Response.ok( resourceToJson( resource.get() ) ).build();
     }
@@ -122,7 +121,7 @@ public class DeploymentService
         }
 
         ImmutableCommandDeleteXpDeployment.builder().
-            client( xpDeploymentClient ).
+            client( xpDeploymentClientProducer.produce() ).
             resource( resource.get() ).
             build().
             execute();
@@ -135,7 +134,7 @@ public class DeploymentService
         return ImmutableXpDeploymentJson.builder().
             apiVersion( r.getApiVersion() ).
             uid( r.getMetadata().getUid() ).
-            spec( r.spec() ).
+            spec( r.getSpec() ).
             build();
     }
 

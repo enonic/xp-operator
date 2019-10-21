@@ -14,7 +14,7 @@ public abstract class CommandDeleteIngress
     @Override
     protected String resourceKind()
     {
-        return Ingress.class.getName();
+        return Ingress.class.getSimpleName();
     }
 
     @Override

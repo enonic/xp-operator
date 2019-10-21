@@ -5,7 +5,6 @@ import io.fabric8.kubernetes.client.CustomResource;
 public class IssuerResource
     extends CustomResource
 {
-
     private Object status;
 
     private IssuerResourceSpec spec;

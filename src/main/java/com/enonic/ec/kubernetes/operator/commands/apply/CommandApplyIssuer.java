@@ -6,7 +6,7 @@ import org.immutables.value.Value;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 
-import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerClientProducer;
+import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerClient;
 import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerResource;
 import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerResourceSpec;
 
@@ -16,14 +16,14 @@ public abstract class CommandApplyIssuer
 {
     private static final String kind = "Issuer";
 
-    protected abstract IssuerClientProducer.IssuerClient client();
+    protected abstract IssuerClient client();
 
     protected abstract IssuerResourceSpec spec();
 
     @Override
     protected Optional<IssuerResource> fetchResource()
     {
-        return Optional.ofNullable( client().getClient().inNamespace( namespace().get() ).withName( name() ).get() );
+        return Optional.ofNullable( client().client().inNamespace( namespace().get() ).withName( name() ).get() );
     }
 
     @Override
@@ -39,6 +39,6 @@ public abstract class CommandApplyIssuer
     @Override
     protected IssuerResource apply( final IssuerResource resource )
     {
-        return client().getClient().inNamespace( namespace().get() ).createOrReplace( resource );
+        return client().client().inNamespace( namespace().get() ).createOrReplace( resource );
     }
 }

@@ -5,7 +5,6 @@ import org.immutables.value.Value;
 import com.google.common.base.Preconditions;
 
 import com.enonic.ec.kubernetes.common.commands.Command;
-import com.enonic.ec.kubernetes.deployment.xpdeployment.ImmutableXpDeploymentResource;
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResource;
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceSpec;
 
@@ -15,7 +14,7 @@ public abstract class CommandCreateXpDeployment
 {
     private static final String kind = "XPDeployment";
 
-    public abstract CrdClientsProducer.XpDeploymentClient client();
+    public abstract XpDeploymentClient client();
 
     public abstract String apiVersion();
 
@@ -30,12 +29,13 @@ public abstract class CommandCreateXpDeployment
     @Override
     public XpDeploymentResource execute()
     {
-        XpDeploymentResource newDeployment = ImmutableXpDeploymentResource.builder().spec( spec() ).build();
+        XpDeploymentResource newDeployment = new XpDeploymentResource();
         newDeployment.setApiVersion( apiVersion() );
         newDeployment.setKind( kind );
         newDeployment.getMetadata().setName( spec().deploymentName() );
         newDeployment.getMetadata().setLabels( spec().defaultLabels() );
-        return client().getClient().createOrReplace( newDeployment );
+        newDeployment.setSpec( spec() );
+        return client().client().createOrReplace( newDeployment );
     }
 
 }

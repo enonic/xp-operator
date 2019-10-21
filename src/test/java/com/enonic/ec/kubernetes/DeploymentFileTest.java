@@ -33,7 +33,6 @@ public class DeploymentFileTest
     protected void loadSpecExpectIllegalState( String file, String expectedMessage )
     {
         RuntimeException e = Assertions.assertThrows( RuntimeException.class, () -> loadResource( file ) );
-        e.printStackTrace();
         Assertions.assertEquals( expectedMessage, e.getCause().getCause().getMessage() );
     }
 }

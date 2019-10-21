@@ -1,21 +1,22 @@
 package com.enonic.ec.kubernetes.common.client;
 
-import javax.enterprise.inject.Produces;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
+@Singleton
 public class DefaultClientProducer
 {
+    private KubernetesClient kubernetesClient;
 
-    @Produces
-    @Singleton
-    @Named("default")
-    KubernetesClient produceDefaultClient()
+    public DefaultClientProducer()
     {
-        return new DefaultKubernetesClient().inAnyNamespace();
+        kubernetesClient = new DefaultKubernetesClient().inAnyNamespace();
     }
 
+    public KubernetesClient client()
+    {
+        return kubernetesClient;
+    }
 }

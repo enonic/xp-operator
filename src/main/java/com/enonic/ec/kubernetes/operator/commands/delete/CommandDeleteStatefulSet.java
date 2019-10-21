@@ -14,7 +14,7 @@ public abstract class CommandDeleteStatefulSet
     @Override
     protected String resourceKind()
     {
-        return StatefulSet.class.getName();
+        return StatefulSet.class.getSimpleName();
     }
 
     @Override

@@ -3,18 +3,17 @@ package com.enonic.ec.kubernetes.operator;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.Watcher;
 import io.quarkus.runtime.StartupEvent;
 
+import com.enonic.ec.kubernetes.common.client.DefaultClientProducer;
 import com.enonic.ec.kubernetes.common.commands.CombinedKubeCommand;
-import com.enonic.ec.kubernetes.deployment.CrdClientsProducer;
 import com.enonic.ec.kubernetes.deployment.XpDeploymentCache;
+import com.enonic.ec.kubernetes.deployment.XpDeploymentClientProducer;
 import com.enonic.ec.kubernetes.operator.commands.ImmutableCreateXpDeployment;
 import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerClientProducer;
 
@@ -24,14 +23,13 @@ public class Operator
     private final static Logger log = LoggerFactory.getLogger( Operator.class );
 
     @Inject
-    @Named("default")
-    KubernetesClient defaultClient;
+    DefaultClientProducer defaultClientProducer;
 
     @Inject
-    CrdClientsProducer.XpDeploymentClient xpDeploymentClient;
+    XpDeploymentClientProducer xpDeploymentClientProducer;
 
     @Inject
-    IssuerClientProducer.IssuerClient issuerClient;
+    IssuerClientProducer issuerClient;
 
     @Inject
     XpDeploymentCache xpDeploymentCache;
@@ -41,20 +39,20 @@ public class Operator
         log.debug( "Starting operator" );
 
         log.debug( "Initialize xpDeployment cache" );
-        xpDeploymentCache.initialize( xpDeploymentClient.getClient().list().getItems() );
+        xpDeploymentCache.initialize( xpDeploymentClientProducer.produce().client().list().getItems() );
 
         xpDeploymentCache.addWatcher( ( action, id, oldResource, newResource ) -> {
             if ( action == Watcher.Action.ADDED || action == Watcher.Action.MODIFIED )
             {
                 // Only modify if spec has changed
-                if ( oldResource.isEmpty() || !oldResource.get().spec().equals( newResource.get().spec() ) )
+                if ( oldResource.isEmpty() || !oldResource.get().getSpec().equals( newResource.get().getSpec() ) )
                 {
                     try
                     {
                         // TODO: What to do if cloud+project of 2 different people have the same name??
                         CombinedKubeCommand command = ImmutableCreateXpDeployment.builder().
-                            defaultClient( defaultClient ).
-                            issuerClient( issuerClient ).
+                            defaultClient( defaultClientProducer.client() ).
+                            issuerClient( issuerClient.produce() ).
                             oldResource( oldResource ).
                             newResource( newResource.get() ).
                             build().

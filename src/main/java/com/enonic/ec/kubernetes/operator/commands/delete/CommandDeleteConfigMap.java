@@ -14,7 +14,7 @@ public abstract class CommandDeleteConfigMap
     @Override
     protected String resourceKind()
     {
-        return ConfigMap.class.getName();
+        return ConfigMap.class.getSimpleName();
     }
 
     @Override
