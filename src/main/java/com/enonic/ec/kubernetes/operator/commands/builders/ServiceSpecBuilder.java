@@ -8,10 +8,12 @@ import org.immutables.value.Value;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.ServiceSpec;
 
+import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.commands.Command;
 
 @Value.Immutable
 public abstract class ServiceSpecBuilder
+    extends Configuration
     implements Command<ServiceSpec>
 {
 
@@ -21,7 +23,9 @@ public abstract class ServiceSpecBuilder
     public ServiceSpec execute()
     {
         ServiceSpec spec = new ServiceSpec();
-        spec.setPorts( Collections.singletonList( new ServicePort( "xp-main", null, 8080, null, null ) ) );
+        spec.setPorts( Collections.singletonList(
+            new ServicePort( cfgStr( "operator.deployment.xp.port.main.name" ), null, cfgInt( "operator.deployment.xp.port.main.number" ),
+                             null, null ) ) );
         spec.setClusterIP( "None" );
         spec.setSelector( selector() );
         return spec;

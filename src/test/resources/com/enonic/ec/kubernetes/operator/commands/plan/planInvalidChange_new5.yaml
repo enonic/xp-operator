@@ -5,12 +5,12 @@ spec:
   xpVersion: 7.1.0
 
   sharedDisks:
-    blob: 1Gi
+    blob: 2Gi
 
   nodes:
-    - alias: xp2
+    - alias: xp
       replicas: 1
-      type: MASTER
+      type: STANDALONE
       resources:
         cpu: "1"
         memory: 1Gi

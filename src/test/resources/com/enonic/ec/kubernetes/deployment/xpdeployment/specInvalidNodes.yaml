@@ -6,6 +6,9 @@ spec:
   xpVersion: 7.1.0
   enabled: true
 
+  sharedDisks:
+    blob: 1Gi
+
   nodes:
     - config:
         com.enonic.xp.app.main.cfg: |

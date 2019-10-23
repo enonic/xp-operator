@@ -39,6 +39,8 @@ public abstract class XpDeploymentResourceSpec
         return true;
     }
 
+    public abstract XpDeploymentResourceSpecSharedDisks sharedDisks();
+
     public abstract List<XpDeploymentResourceSpecNode> nodes();
 
     protected abstract Map<String, XpDeploymentResourceSpecVhostCertificate> vHostCertificates();
@@ -57,9 +59,14 @@ public abstract class XpDeploymentResourceSpec
         return String.join( "-", app(), name() );
     }
 
-    public String defaultResourceName( String... postfix )
+    public String defaultResourceNameWithPostFix( String... postfix )
     {
         return String.join( "-", defaultResourceName(), String.join( "-", postfix ) );
+    }
+
+    public String defaultResourceNameWithPreFix( String... prefix )
+    {
+        return String.join( "-", String.join( "-", prefix ), defaultResourceName() );
     }
 
     @Value.Derived

@@ -9,6 +9,7 @@ import org.immutables.value.Value;
 import io.fabric8.kubernetes.api.model.ConfigMapVolumeSource;
 import io.fabric8.kubernetes.api.model.EmptyDirVolumeSource;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaimVolumeSource;
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeMount;
@@ -17,36 +18,52 @@ import io.fabric8.kubernetes.api.model.VolumeMount;
 public abstract class StatefulSetSpecNonClusteredSpec
     extends StatefulSetSpecBuilder
 {
-    protected abstract Quantity repoDiskSize();
+    protected abstract Quantity indexDiskSize();
 
     protected abstract Quantity snapshotDiskSize();
+
+    protected abstract String blobDiskPvcName();
+
+    protected abstract String configMapName();
+
+    private VolumeMount createVolumeMount( String pathConfigKey, String nameConfigKey )
+    {
+        return new VolumeMount( cfgStr( pathConfigKey ), null, cfgStr( nameConfigKey ), null, null, null );
+    }
 
     protected List<VolumeMount> createVolumeMounts()
     {
         List<VolumeMount> volumeMounts = new LinkedList<>();
-        volumeMounts.add( new VolumeMount( "/enonic-xp/home/repo", null, volumeRepo, null, null, null ) );
-        volumeMounts.add( new VolumeMount( "/enonic-xp/home/snapshots", null, volumeSnapshots, null, null, null ) );
-        volumeMounts.add( new VolumeMount( "/enonic-xp/home/config", null, volumeConfig, null, null, null ) );
-        volumeMounts.add( new VolumeMount( "/enonic-xp/home/deploy", null, volumeDeploy, null, null, null ) );
+        volumeMounts.add( createVolumeMount( "operator.deployment.xp.volume.blob.path", "operator.deployment.xp.volume.blob.name" ) );
+        volumeMounts.add( createVolumeMount( "operator.deployment.xp.volume.index.path", "operator.deployment.xp.volume.index.name" ) );
+        volumeMounts.add(
+            createVolumeMount( "operator.deployment.xp.volume.snapshots.path", "operator.deployment.xp.volume.snapshots.name" ) );
+        volumeMounts.add( createVolumeMount( "operator.deployment.xp.volume.config.path", "operator.deployment.xp.volume.config.name" ) );
+        volumeMounts.add( createVolumeMount( "operator.deployment.xp.volume.deploy.path", "operator.deployment.xp.volume.deploy.name" ) );
         return volumeMounts;
     }
 
     protected List<Volume> createVolumes()
     {
         Volume configMap = new Volume();
-        configMap.setName( volumeConfig );
+        configMap.setName( cfgStr( "operator.deployment.xp.volume.config.name" ) );
         configMap.setConfigMap( new ConfigMapVolumeSource( null, null, configMapName(), null ) );
 
         Volume deploy = new Volume();
-        deploy.setName( volumeDeploy );
+        deploy.setName( cfgStr( "operator.deployment.xp.volume.deploy.name" ) );
         deploy.setEmptyDir( new EmptyDirVolumeSource( null, null ) );
 
-        return Arrays.asList( configMap, deploy );
+        Volume blob = new Volume();
+        blob.setName( cfgStr( "operator.deployment.xp.volume.blob.name" ) );
+        blob.setPersistentVolumeClaim( new PersistentVolumeClaimVolumeSource( blobDiskPvcName(), false ) );
+
+        return Arrays.asList( configMap, deploy, blob );
     }
 
     protected List<PersistentVolumeClaim> createVolumeClaimTemplates()
     {
-        return Arrays.asList( standard( volumeRepo, podLabels(), null, "ReadWriteOnce", repoDiskSize() ),
-                              standard( volumeSnapshots, podLabels(), null, "ReadWriteOnce", snapshotDiskSize() ) );
+        return Arrays.asList(
+            standard( cfgStr( "operator.deployment.xp.volume.index.name" ), podLabels(), cfgStr( "operator.deployment.xp.volume.defaultStorageClass" ), "ReadWriteOnce", indexDiskSize() ),
+            standard( cfgStr( "operator.deployment.xp.volume.snapshots.name" ), podLabels(), cfgStr( "operator.deployment.xp.volume.defaultStorageClass" ), "ReadWriteOnce", snapshotDiskSize() ) );
     }
 }

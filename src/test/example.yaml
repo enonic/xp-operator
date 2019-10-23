@@ -8,6 +8,8 @@ spec:
   name: myname
   xpVersion: 7.1.0
   enabled: true
+  sharedDisks:
+    blob: 1Gi
   nodes:
     - alias: woop
       replicas: 1
@@ -16,7 +18,7 @@ spec:
         cpu: "1"
         memory: 1Gi
         disks:
-          repo: 1Gi
+          index: 1Gi
           snapshots: 1Gi
       env:
         JAVA_OPTS: |

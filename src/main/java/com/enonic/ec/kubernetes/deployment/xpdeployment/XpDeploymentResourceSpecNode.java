@@ -14,9 +14,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.base.Preconditions;
 
+import com.enonic.ec.kubernetes.common.Configuration;
+
 @JsonDeserialize(builder = ImmutableXpDeploymentResourceSpecNode.Builder.class)
 @Value.Immutable
 public abstract class XpDeploymentResourceSpecNode
+    extends Configuration
 {
     private final static Logger log = LoggerFactory.getLogger( XpDeploymentResourceSpecNode.class );
 
@@ -37,7 +40,7 @@ public abstract class XpDeploymentResourceSpecNode
     public Map<String, String> nodeAliasLabel()
     {
         // Do not add more labels here, it will brake service mapping to pods
-        return Map.of( "xp.node.alias." + alias(), alias() );
+        return Map.of( cfgStr( "operator.deployment.xp.pod.label.aliasPrefix" ) + alias(), alias() );
     }
 
     @JsonIgnore
@@ -66,7 +69,7 @@ public abstract class XpDeploymentResourceSpecNode
     @Value.Check
     protected void check()
     {
-        Preconditions.checkState( resources().disks().containsKey( "repo" ), "field resources.disks.repo on node has to be set" );
+        Preconditions.checkState( resources().disks().containsKey( "index" ), "field resources.disks.index on node has to be set" );
         Preconditions.checkState( resources().disks().containsKey( "snapshots" ), "field resources.disks.snapshots on node has to be set" );
     }
 

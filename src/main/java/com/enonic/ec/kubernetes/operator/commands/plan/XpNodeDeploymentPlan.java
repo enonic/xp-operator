@@ -107,12 +107,7 @@ public abstract class XpNodeDeploymentPlan
         {
             return true;
         }
-        if ( newSystemProps.isPresent() && !newSystemProps.equals( oldSystemProps ) )
-        {
-            return true;
-        }
-
-        return false;
+        return newSystemProps.isPresent() && !newSystemProps.equals( oldSystemProps );
     }
 
     @Value.Check

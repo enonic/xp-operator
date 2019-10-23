@@ -6,8 +6,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.immutables.value.Value;
-
 import io.fabric8.kubernetes.api.model.Capabilities;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerPort;
@@ -33,9 +31,11 @@ import io.fabric8.kubernetes.api.model.VolumeMount;
 import io.fabric8.kubernetes.api.model.apps.StatefulSetSpec;
 import io.fabric8.kubernetes.api.model.apps.StatefulSetUpdateStrategy;
 
+import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.commands.Command;
 
 public abstract class StatefulSetSpecBuilder
+    extends Configuration
     implements Command<StatefulSetSpec>
 {
     protected abstract Map<String, String> podLabels();
@@ -43,12 +43,6 @@ public abstract class StatefulSetSpecBuilder
     protected abstract Map<String, String> podAnnotations();
 
     protected abstract String podImage();
-
-    @Value.Default
-    protected String podImagePullPolicy()
-    {
-        return "Always"; // TODO: Change
-    }
 
     protected abstract String serviceName();
 
@@ -58,20 +52,6 @@ public abstract class StatefulSetSpecBuilder
 
     protected abstract Map<String, Quantity> podResources();
 
-    protected abstract String configMapName();
-
-    static final String volumeRepo = "repo";
-
-    protected static final String volumeIndex = volumeRepo + "index";
-
-    protected static final String volumeBlob = volumeRepo + "blob";
-
-    static final String volumeSnapshots = "snapshots";
-
-    static final String volumeConfig = "config";
-
-    static final String volumeDeploy = "deploy";
-
     @Override
     public StatefulSetSpec execute()
     {
@@ -80,8 +60,8 @@ public abstract class StatefulSetSpecBuilder
         spec.setSelector( new LabelSelector( null, podLabels() ) );
         spec.setServiceName( serviceName() );
         spec.setReplicas( replicas() );
-        spec.setPodManagementPolicy( "Parallel" );
-        spec.setUpdateStrategy( new StatefulSetUpdateStrategy( null, "RollingUpdate" ) );
+        spec.setPodManagementPolicy( cfgStr( "operator.deployment.xp.pod.managementPolicy" ) );
+        spec.setUpdateStrategy( new StatefulSetUpdateStrategy( null, cfgStr( "operator.deployment.xp.pod.updateStrategy" ) ) );
         spec.setTemplate( createPodTemplateSpec() );
         spec.setVolumeClaimTemplates( createVolumeClaimTemplates() );
 
@@ -104,12 +84,12 @@ public abstract class StatefulSetSpecBuilder
         podSpec.setRestartPolicy( "Always" );
 
         PodSecurityContext securityContext = new PodSecurityContext();
-        securityContext.setRunAsUser( 1337L );
+        securityContext.setRunAsUser( cfgLong( "operator.deployment.xp.pod.runAsUser" ) );
         podSpec.setSecurityContext( securityContext );
 
         // TODO: Set pod affinity
 
-        podSpec.setTerminationGracePeriodSeconds( 30L );
+        podSpec.setTerminationGracePeriodSeconds( cfgLong( "operator.deployment.xp.pod.gracePeriodSeconds" ) );
         podSpec.setInitContainers( createPodInitContainers() );
         podSpec.setContainers( createPodContainers() );
         podSpec.setVolumes( createVolumes() );
@@ -122,7 +102,7 @@ public abstract class StatefulSetSpecBuilder
         Container init = new Container();
         init.setName( "configure-sysctl" );
         init.setImage( podImage() );
-        init.setImagePullPolicy( podImagePullPolicy() );
+        init.setImagePullPolicy( cfgStr( "operator.deployment.xp.pod.imagePullPolicy" ) );
         SecurityContext initSecurityContext = new SecurityContext();
         initSecurityContext.setRunAsUser( 0L );
         initSecurityContext.setPrivileged( true );
@@ -137,7 +117,7 @@ public abstract class StatefulSetSpecBuilder
         Container exp = new Container();
         exp.setName( "exp" );
         exp.setImage( podImage() );
-        exp.setImagePullPolicy( podImagePullPolicy() );
+        exp.setImagePullPolicy( cfgStr( "operator.deployment.xp.pod.imagePullPolicy" ) );
 
         // Environment
         List<EnvVar> envVars = new LinkedList<>();
@@ -155,13 +135,15 @@ public abstract class StatefulSetSpecBuilder
         Capabilities capabilities = new Capabilities();
         capabilities.setDrop( Collections.singletonList( "ALL" ) );
         podSecurityContext.setRunAsNonRoot( true );
-        podSecurityContext.setRunAsUser( 1337L );
+        podSecurityContext.setRunAsUser( cfgLong( "operator.deployment.xp.pod.runAsUser" ) );
         podSecurityContext.setCapabilities( capabilities );
         exp.setSecurityContext( podSecurityContext );
 
         // Ports
-        exp.setPorts( Arrays.asList( new ContainerPort( 8080, null, null, "xp-main", null ),
-                                     new ContainerPort( 2609, null, null, "xp-stats", null ) ) );
+        exp.setPorts( Arrays.asList( new ContainerPort( cfgInt( "operator.deployment.xp.port.main.number" ), null, null,
+                                                        cfgStr( "operator.deployment.xp.port.main.name" ), null ),
+                                     new ContainerPort( cfgInt( "operator.deployment.xp.port.stats.number" ), null, null,
+                                                        cfgStr( "operator.deployment.xp.port.stats.name" ), null ) ) );
 
         // Probes
         Probe readinessProbe = new Probe();
@@ -171,7 +153,7 @@ public abstract class StatefulSetSpecBuilder
         readinessProbe.setPeriodSeconds( 5 );
         readinessProbe.setSuccessThreshold( 1 );
         readinessProbe.setTimeoutSeconds( 1 );
-        readinessProbe.setTcpSocket( new TCPSocketAction( null, new IntOrString( "xp-main" ) ) );
+        readinessProbe.setTcpSocket( new TCPSocketAction( null, new IntOrString( cfgInt( "operator.deployment.xp.port.main.number" ) ) ) );
 
         Probe livelinessProbe = new Probe();
         exp.setLivenessProbe( livelinessProbe );
@@ -200,7 +182,6 @@ public abstract class StatefulSetSpecBuilder
                                            Quantity size )
     {
         PersistentVolumeClaim claim = new PersistentVolumeClaim();
-
         ObjectMeta meta = new ObjectMeta();
         claim.setMetadata( meta );
         meta.setName( name );

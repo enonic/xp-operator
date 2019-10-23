@@ -19,7 +19,7 @@ public abstract class Vhost
 
     public String getVHostResourceName( final XpDeploymentResource resource )
     {
-        return resource.getSpec().defaultResourceName( host().replace( ".", "-" ) );
+        return resource.getSpec().defaultResourceNameWithPostFix( host().replace( ".", "-" ) );
     }
 
     @Override

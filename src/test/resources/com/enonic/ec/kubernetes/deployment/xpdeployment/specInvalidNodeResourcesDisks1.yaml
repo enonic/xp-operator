@@ -4,6 +4,9 @@ spec:
   name: myname
   xpVersion: 7.1.0
 
+  sharedDisks:
+    blob: 1Gi
+
   nodes:
     - alias: xp
       replicas: 1

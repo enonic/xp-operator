@@ -15,6 +15,7 @@ import io.fabric8.kubernetes.api.model.extensions.IngressRule;
 import io.fabric8.kubernetes.api.model.extensions.IngressSpec;
 import io.fabric8.kubernetes.api.model.extensions.IngressTLS;
 
+import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.commands.Command;
 import com.enonic.ec.kubernetes.deployment.vhost.Vhost;
 import com.enonic.ec.kubernetes.deployment.vhost.VhostPath;
@@ -22,6 +23,7 @@ import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResource;
 
 @Value.Immutable
 public abstract class IngressSpecBuilder
+    extends Configuration
     implements Command<IngressSpec>
 {
 
@@ -54,7 +56,8 @@ public abstract class IngressSpecBuilder
         List<HTTPIngressPath> paths = new LinkedList<>();
         for ( VhostPath path : vhost().vhostPaths() )
         {
-            paths.add( new HTTPIngressPath( new IngressBackend( path.getPathResourceName( resource(), vhost() ), new IntOrString( 8080 ) ),
+            paths.add( new HTTPIngressPath( new IngressBackend( path.getPathResourceName( resource(), vhost() ),
+                                                                new IntOrString( cfgInt( "operator.deployment.xp.port.main.number" ) ) ),
                                             path.path() ) );
         }
         http.setPaths( paths );

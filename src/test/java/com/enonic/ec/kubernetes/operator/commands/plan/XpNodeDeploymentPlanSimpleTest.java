@@ -71,6 +71,7 @@ class XpNodeDeploymentPlanSimpleTest
         loadDiffExpectIllegalState( "planInvalidChange_old.yaml", "planInvalidChange_new2.yaml", "cannot change 'project'" );
         loadDiffExpectIllegalState( "planInvalidChange_old.yaml", "planInvalidChange_new3.yaml", "cannot change 'name'" );
         loadDiffExpectIllegalState( "planInvalidChange_old.yaml", "planInvalidChange_new4.yaml", "cannot change node 'disks'" );
+        loadDiffExpectIllegalState( "planInvalidChange_old.yaml", "planInvalidChange_new5.yaml", "cannot change 'sharedDisks'" );
     }
 
     @Test

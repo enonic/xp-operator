@@ -24,7 +24,7 @@ class XpDeploymentSpecValidationTest
     public void specInvalid()
     {
         loadSpecExpectIllegalState( "specInvalid.yaml",
-                                    "Cannot build XpDeploymentResourceSpec, some of required attributes are not set [xpVersion, cloud, project, name]" );
+                                    "Cannot build XpDeploymentResourceSpec, some of required attributes are not set [xpVersion, cloud, project, name, sharedDisks]" );
     }
 
     @Test
@@ -79,7 +79,7 @@ class XpDeploymentSpecValidationTest
     @Test
     public void specInvalidNodeResourcesDisks1()
     {
-        loadSpecExpectIllegalState( "specInvalidNodeResourcesDisks1.yaml", "field resources.disks.repo on node has to be set" );
+        loadSpecExpectIllegalState( "specInvalidNodeResourcesDisks1.yaml", "field resources.disks.index on node has to be set" );
     }
 
     @Test

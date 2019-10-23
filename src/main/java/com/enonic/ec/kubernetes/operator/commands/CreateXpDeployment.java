@@ -12,6 +12,7 @@ import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
+import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.commands.CombinedKubeCommand;
 import com.enonic.ec.kubernetes.common.commands.Command;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedKubeCommand;
@@ -24,11 +25,13 @@ import com.enonic.ec.kubernetes.operator.commands.apply.ImmutableCommandApplyIng
 import com.enonic.ec.kubernetes.operator.commands.apply.ImmutableCommandApplyIssuer;
 import com.enonic.ec.kubernetes.operator.commands.apply.ImmutableCommandApplyNamespace;
 import com.enonic.ec.kubernetes.operator.commands.apply.ImmutableCommandApplyPodDisruptionBudget;
+import com.enonic.ec.kubernetes.operator.commands.apply.ImmutableCommandApplyPvc;
 import com.enonic.ec.kubernetes.operator.commands.apply.ImmutableCommandApplyService;
 import com.enonic.ec.kubernetes.operator.commands.apply.ImmutableCommandApplyStatefulSet;
 import com.enonic.ec.kubernetes.operator.commands.builders.ImmutableIngressSpecBuilder;
 import com.enonic.ec.kubernetes.operator.commands.builders.ImmutableIssuerSpecBuilder;
 import com.enonic.ec.kubernetes.operator.commands.builders.ImmutablePodDisruptionBudgetSpecBuilder;
+import com.enonic.ec.kubernetes.operator.commands.builders.ImmutablePvcSpecBuilder;
 import com.enonic.ec.kubernetes.operator.commands.builders.ImmutableServiceSpecBuilder;
 import com.enonic.ec.kubernetes.operator.commands.builders.ImmutableStatefulSetSpecNonClusteredSpec;
 import com.enonic.ec.kubernetes.operator.commands.delete.ImmutableCommandDeleteConfigMap;
@@ -48,6 +51,7 @@ import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerClient;
 
 @Value.Immutable
 public abstract class CreateXpDeployment
+    extends Configuration
     implements Command<CombinedKubeCommand>
 {
     protected abstract KubernetesClient defaultClient();
@@ -98,7 +102,7 @@ public abstract class CreateXpDeployment
     @Value.Derived
     protected String podImageName()
     {
-        return "gbbirkisson/xp:" + resource().getSpec().xpVersion() + "-ubuntu"; // TODO: Fix
+        return String.format( cfgStr( "operator.deployment.xp.pod.imageTemplate" ), resource().getSpec().xpVersion() );
     }
 
     @Override
@@ -107,16 +111,32 @@ public abstract class CreateXpDeployment
     {
         String namespaceName = resource().getSpec().defaultNamespaceName();
         String defaultResourceName = resource().getSpec().defaultResourceName();
+        String defaultBlobStorageName = resource().getSpec().defaultResourceNameWithPreFix( "blob" );
         Map<String, String> defaultLabels = resource().getSpec().defaultLabels();
 
         ImmutableCombinedKubeCommand.Builder commandBuilder = ImmutableCombinedKubeCommand.builder();
 
         if ( newDeployment() )
         {
+            // Create namespace
             commandBuilder.addCommand( ImmutableCommandApplyNamespace.builder().
                 client( defaultClient() ).
                 ownerReference( ownerReference() ).
                 name( namespaceName ).
+                build() );
+
+            // Create blob storage
+            commandBuilder.addCommand( ImmutableCommandApplyPvc.builder().
+                client( defaultClient() ).
+                ownerReference( ownerReference() ).
+                namespace( namespaceName ).
+                name( defaultBlobStorageName ).
+                labels( defaultLabels ).
+                spec( ImmutablePvcSpecBuilder.builder().
+                    size( resource().getSpec().sharedDisks().blob() ).
+                    addAccessMode( "ReadWriteMany" ).
+                    build().
+                    execute() ).
                 build() );
 
             // TODO: Create network policy
@@ -124,7 +144,7 @@ public abstract class CreateXpDeployment
 
         for ( XpNodeDeploymentPlan nodePlan : nodeDiff().deploymentPlans() )
         {
-            createDeployNodeCommands( commandBuilder, namespaceName, defaultLabels, nodePlan );
+            createDeployNodeCommands( commandBuilder, namespaceName, defaultLabels, nodePlan, defaultBlobStorageName );
         }
 
         for ( XpDeploymentResourceSpecNode oldNode : nodeDiff().nodesRemoved() )
@@ -146,10 +166,11 @@ public abstract class CreateXpDeployment
     }
 
     private void createDeployNodeCommands( final ImmutableCombinedKubeCommand.Builder commandBuilder, final String namespaceName,
-                                           final Map<String, String> defaultLabels, final XpNodeDeploymentPlan nodePlan )
+                                           final Map<String, String> defaultLabels, final XpNodeDeploymentPlan nodePlan,
+                                           final String defaultBlobStorageName )
     {
         // TODO: Handle all nodetypes
-        String nodeName = resource().getSpec().defaultResourceName( nodePlan.node().alias() );
+        String nodeName = resource().getSpec().defaultResourceNameWithPostFix( nodePlan.node().alias() );
         Map<String, String> nodeLabels = new HashMap<>( defaultLabels );
         nodeLabels.putAll( nodePlan.node().nodeAliasLabel() );
 
@@ -202,8 +223,9 @@ public abstract class CreateXpDeployment
                     podImage( podImageName() ).
                     podEnv( podEnv ).
                     podResources( Map.of( "cpu", nodePlan.node().resources().cpu(), "memory", nodePlan.node().resources().memory() ) ).
-                    repoDiskSize( nodePlan.node().resources().disks().get( "repo" ) ).
+                    indexDiskSize( nodePlan.node().resources().disks().get( "index" ) ).
                     snapshotDiskSize( nodePlan.node().resources().disks().get( "snapshots" ) ).
+                    blobDiskPvcName( defaultBlobStorageName ).
                     serviceName( nodeName ).
                     configMapName( nodeName ).
                     build().
@@ -225,7 +247,7 @@ public abstract class CreateXpDeployment
     private void createDeleteNodeCommands( final ImmutableCombinedKubeCommand.Builder commandBuilder, final String namespaceName,
                                            final XpDeploymentResourceSpecNode oldNode )
     {
-        String nodeName = resource().getSpec().defaultResourceName( oldNode.alias() );
+        String nodeName = resource().getSpec().defaultResourceNameWithPostFix( oldNode.alias() );
 
         commandBuilder.addCommand( ImmutableCommandDeleteStatefulSet.builder().
             client( defaultClient() ).

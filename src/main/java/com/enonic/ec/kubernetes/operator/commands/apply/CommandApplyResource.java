@@ -5,8 +5,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.immutables.value.Value;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 
@@ -22,8 +20,6 @@ import com.enonic.ec.kubernetes.common.commands.KubeCommandSummary;
 public abstract class CommandApplyResource<T extends HasMetadata>
     extends KubeCommand<T>
 {
-    private final static Logger log = LoggerFactory.getLogger( CommandApplyResource.class );
-
     private KubeCommandSummary summary;
 
     protected abstract String name();

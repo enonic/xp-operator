@@ -3,6 +3,8 @@ package com.enonic.ec.kubernetes.deployment;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+
 import com.enonic.ec.kubernetes.common.client.DefaultClientProducer;
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResource;
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceDoneable;
@@ -15,17 +17,15 @@ public class XpDeploymentClientProducer
 {
     private XpDeploymentClient xpDeploymentClient;
 
-    protected XpDeploymentClientProducer( final XpDeploymentClient xpDeploymentClient )
-    {
-        this.xpDeploymentClient = xpDeploymentClient;
-    }
-
     @Inject
-    public XpDeploymentClientProducer( DefaultClientProducer defaultClientProducer )
+    public XpDeploymentClientProducer( DefaultClientProducer defaultClientProducer,
+                                       @ConfigProperty(name = "operator.crd.xp.apiVersion") String apiVersion,
+                                       @ConfigProperty(name = "operator.crd.xp.kind") String kind,
+                                       @ConfigProperty(name = "operator.crd.xp.name") String name )
     {
         xpDeploymentClient = new XpDeploymentClient(
-            createCrdClient( defaultClientProducer.client(), "enonic.cloud/v1alpha1", "XPDeployment", "xp-deployments.enonic.cloud",
-                             XpDeploymentResource.class, XpDeploymentResourceList.class, XpDeploymentResourceDoneable.class ) );
+            createCrdClient( defaultClientProducer.client(), apiVersion, kind, name, XpDeploymentResource.class,
+                             XpDeploymentResourceList.class, XpDeploymentResourceDoneable.class ) );
     }
 
     public XpDeploymentClient produce()

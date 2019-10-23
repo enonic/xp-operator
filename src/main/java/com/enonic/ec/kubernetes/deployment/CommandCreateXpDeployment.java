@@ -4,15 +4,16 @@ import org.immutables.value.Value;
 
 import com.google.common.base.Preconditions;
 
+import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.commands.Command;
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResource;
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceSpec;
 
 @Value.Immutable
 public abstract class CommandCreateXpDeployment
+    extends Configuration
     implements Command<XpDeploymentResource>
 {
-    private static final String kind = "XPDeployment";
 
     public abstract XpDeploymentClient client();
 
@@ -23,7 +24,8 @@ public abstract class CommandCreateXpDeployment
     @Value.Check
     protected void check()
     {
-        Preconditions.checkState( apiVersion().equals( "enonic.cloud/v1alpha1" ), "Only version 'enonic.cloud/v1alpha1' allowed" );
+        String operatorApiVersion = cfgStr( "operator.crd.xp.apiVersion" );
+        Preconditions.checkState( apiVersion().equals( operatorApiVersion ), "Only version '" + operatorApiVersion + "' allowed" );
     }
 
     @Override
@@ -31,7 +33,7 @@ public abstract class CommandCreateXpDeployment
     {
         XpDeploymentResource newDeployment = new XpDeploymentResource();
         newDeployment.setApiVersion( apiVersion() );
-        newDeployment.setKind( kind );
+        newDeployment.setKind( cfgStr( "operator.crd.xp.kind" ) );
         newDeployment.getMetadata().setName( spec().deploymentName() );
         newDeployment.getMetadata().setLabels( spec().defaultLabels() );
         newDeployment.setSpec( spec() );

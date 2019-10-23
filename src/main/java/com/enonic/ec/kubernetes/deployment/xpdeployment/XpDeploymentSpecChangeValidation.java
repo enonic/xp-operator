@@ -12,6 +12,7 @@ public class XpDeploymentSpecChangeValidation
         Preconditions.checkState( oldSpec.project().equals( newSpec.project() ), "cannot change 'project'" );
         Preconditions.checkState( oldSpec.app().equals( newSpec.app() ), "cannot change 'app'" );
         Preconditions.checkState( oldSpec.name().equals( newSpec.name() ), "cannot change 'name'" );
+        Preconditions.checkState( oldSpec.sharedDisks().equals( newSpec.sharedDisks() ), "cannot change 'sharedDisks'" );
 
         for ( XpDeploymentResourceSpecNode newNode : newSpec.nodes() )
         {

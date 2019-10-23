@@ -11,12 +11,14 @@ import java.util.Set;
 
 import org.immutables.value.Value;
 
+import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.commands.Command;
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceSpecNode;
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceSpecVhostCertificate;
 
 @Value.Immutable
 public abstract class VhostBuilder
+    extends Configuration
     implements Command<List<Vhost>>
 {
 
@@ -66,7 +68,7 @@ public abstract class VhostBuilder
 
         for ( XpDeploymentResourceSpecNode node : nodes() )
         {
-            Optional<Properties> p = node.configAsProperties( "com.enonic.xp.web.vhost.cfg" );
+            Optional<Properties> p = node.configAsProperties( cfgStr( "operator.deployment.xp.vhost.configFile" ) );
             if ( p.isPresent() )
             {
                 if ( !p.get().containsKey( "enabled" ) || p.get().getProperty( "enabled" ).equals( "true" ) )

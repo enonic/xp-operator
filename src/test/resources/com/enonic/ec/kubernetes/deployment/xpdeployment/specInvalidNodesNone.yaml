@@ -3,3 +3,6 @@ spec:
   project: myproject
   name: myname
   xpVersion: 7.1.0
+
+  sharedDisks:
+    blob: 1Gi
