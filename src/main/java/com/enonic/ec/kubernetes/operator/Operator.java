@@ -1,9 +1,12 @@
 package com.enonic.ec.kubernetes.operator;
 
+import java.util.List;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +18,7 @@ import com.enonic.ec.kubernetes.common.commands.CombinedKubeCommand;
 import com.enonic.ec.kubernetes.deployment.XpDeploymentCache;
 import com.enonic.ec.kubernetes.deployment.XpDeploymentClientProducer;
 import com.enonic.ec.kubernetes.operator.commands.ImmutableCreateXpDeployment;
+import com.enonic.ec.kubernetes.operator.commands.ImmutablePrePullImages;
 import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerClientProducer;
 
 @ApplicationScoped
@@ -33,6 +37,9 @@ public class Operator
 
     @Inject
     XpDeploymentCache xpDeploymentCache;
+
+    @ConfigProperty(name = "operator.prePull.versions", defaultValue = "")
+    List<String> imageVersionPrePull;
 
     void onStartup( @Observes StartupEvent _ev )
     {
@@ -76,5 +83,22 @@ public class Operator
                 // Kubernetes garbage collector cleans up the deployment for us.
             }
         } );
+
+        if ( imageVersionPrePull.size() > 0 )
+        {
+            log.info( "Pre-Pulling images in cluster for versions: " + imageVersionPrePull );
+            try
+            {
+                ImmutablePrePullImages.builder().
+                    defaultClient( defaultClientProducer.client() ).
+                    addAllVersions( imageVersionPrePull ).
+                    build().
+                    execute();
+            }
+            catch ( Exception e )
+            {
+                log.error( "Failed to pre pull images", e );
+            }
+        }
     }
 }

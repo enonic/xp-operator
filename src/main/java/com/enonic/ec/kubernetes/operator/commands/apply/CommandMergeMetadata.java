@@ -24,7 +24,7 @@ public abstract class CommandMergeMetadata
 
     protected abstract ObjectMeta metadata();
 
-    protected abstract OwnerReference ownerReference();
+    protected abstract Optional<OwnerReference> ownerReference();
 
     protected abstract Optional<Map<String, String>> labels();
 
@@ -41,20 +41,25 @@ public abstract class CommandMergeMetadata
 
     private void mergeOwnerReferences()
     {
+        if ( ownerReference().isEmpty() )
+        {
+            return;
+        }
+
         if ( metadata().getOwnerReferences() == null || metadata().getOwnerReferences().size() == 0 )
         {
-            metadata().setOwnerReferences( List.of( ownerReference() ) );
+            metadata().setOwnerReferences( List.of( ownerReference().get() ) );
             return;
         }
 
         for ( OwnerReference existingOwnerReference : metadata().getOwnerReferences() )
         {
-            if ( existingOwnerReference.getUid().equals( ownerReference().getUid() ) )
+            if ( existingOwnerReference.getUid().equals( ownerReference().get().getUid() ) )
             {
                 return;
             }
         }
-        metadata().getOwnerReferences().add( ownerReference() );
+        metadata().getOwnerReferences().add( ownerReference().get() );
     }
 
     private static Map<String, String> mergeMap( String kind, String name, String mapType, final Map<String, String> oldMap,

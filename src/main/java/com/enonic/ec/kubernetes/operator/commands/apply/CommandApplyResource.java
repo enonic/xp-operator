@@ -26,20 +26,32 @@ public abstract class CommandApplyResource<T extends HasMetadata>
 
     protected abstract Optional<String> namespace();
 
-    protected abstract OwnerReference ownerReference();
+    protected abstract Optional<OwnerReference> ownerReference();
 
     protected abstract Map<String, String> labels();
 
     protected abstract Map<String, String> annotations();
 
-    void checkValidity( HasMetadata resource )
+    @Value.Default
+    protected boolean canSkipOwnerReference()
     {
-        if ( !( resource instanceof Namespace ) )
+        return false;
+    }
+
+    @Value.Check
+    protected void check()
+    {
+        Preconditions.checkState( ownerReference().isPresent() || canSkipOwnerReference(), "ownerReference missing" );
+    }
+
+    void checkValidityAgainstOld( HasMetadata oldResource )
+    {
+        if ( !( oldResource instanceof Namespace ) )
         {
-            Preconditions.checkState( resource.getMetadata().getNamespace().equals( namespace().get() ),
+            Preconditions.checkState( oldResource.getMetadata().getNamespace().equals( namespace().get() ),
                                       "Resource namespace do not match" );
         }
-        Preconditions.checkState( resource.getMetadata().getName().equals( name() ), "Resource names do not match" );
+        Preconditions.checkState( oldResource.getMetadata().getName().equals( name() ), "Resource names do not match" );
     }
 
     @Value.Derived
@@ -53,12 +65,13 @@ public abstract class CommandApplyResource<T extends HasMetadata>
         {
             newResource = Optional.of( build(
                 new ObjectMeta( annotations(), null, null, null, null, null, null, null, labels(), null, name(),
-                                namespace().isPresent() ? namespace().get() : null, List.of( ownerReference() ), null, null, null ) ) );
+                                namespace().isPresent() ? namespace().get() : null,
+                                ownerReference().isPresent() ? List.of( ownerReference().get() ) : null, null, null, null ) ) );
         }
 
         if ( newResource.isEmpty() )
         {
-            checkValidity( oldResource.get() );
+            checkValidityAgainstOld( oldResource.get() );
             ObjectMeta newMetadata = ImmutableCommandMergeMetadata.builder().
                 kind( oldResource.get().getKind() ).
                 metadata( oldResource.get().getMetadata() ).
