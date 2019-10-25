@@ -33,5 +33,4 @@ public abstract class CommandApplyNamespace
     {
         return client().namespaces().createOrReplace( resource );
     }
-
 }

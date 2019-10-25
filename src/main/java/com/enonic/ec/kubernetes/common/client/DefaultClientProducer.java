@@ -8,7 +8,7 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 @Singleton
 public class DefaultClientProducer
 {
-    private KubernetesClient kubernetesClient;
+    private final KubernetesClient kubernetesClient;
 
     public DefaultClientProducer()
     {

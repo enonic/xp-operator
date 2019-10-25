@@ -24,7 +24,7 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 
 import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.commands.Command;
-import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedKubeCommand;
+import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedKubernetesCommand;
 import com.enonic.ec.kubernetes.operator.commands.apply.ImmutableCommandApplyDaemonSet;
 
 @Value.Immutable
@@ -32,7 +32,6 @@ public abstract class PrePullImages
     extends Configuration
     implements Command<Void>
 {
-
     protected abstract KubernetesClient defaultClient();
 
     protected abstract List<String> versions();
@@ -41,6 +40,7 @@ public abstract class PrePullImages
     {
         try
         {
+            //noinspection SpellCheckingInspection
             return new String( Files.readAllBytes( Paths.get( "/var/run/secrets/kubernetes.io/serviceaccount/namespace" ) ) );
         }
         catch ( IOException e )
@@ -58,7 +58,7 @@ public abstract class PrePullImages
             return null;
         }
 
-        String name = "ec-prepull-images";
+        String name = "ec-pre-pull-images";
 
         String imageTemplate = cfgStr( "operator.deployment.xp.pod.imageTemplate" );
         List<String> commands = versions().stream().
@@ -87,7 +87,7 @@ public abstract class PrePullImages
         Container prePull = new Container();
         podSpec.setInitContainers( Collections.singletonList( prePull ) );
 
-        prePull.setName( "prepull" );
+        prePull.setName( "pre-pull" );
         prePull.setImage( "docker" );
         prePull.setCommand( Arrays.asList( "ash", "-c", String.join( " && ", commands ) ) );
         prePull.setVolumeMounts( Collections.singletonList( new VolumeMount( mountPath, null, mountName, null, null, null ) ) );
@@ -102,7 +102,7 @@ public abstract class PrePullImages
         vol.setName( mountName );
         vol.setHostPath( new HostPathVolumeSource( mountPath, null ) );
 
-        ImmutableCombinedKubeCommand.builder().addCommand( ImmutableCommandApplyDaemonSet.builder().
+        ImmutableCombinedKubernetesCommand.builder().addCommand( ImmutableCommandApplyDaemonSet.builder().
             client( defaultClient() ).
             namespace( getOperatorNamespace() ).
             name( name ).

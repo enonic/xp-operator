@@ -4,9 +4,9 @@ import org.immutables.value.Value;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-@JsonDeserialize(builder = ImmutableXpDeploymentResourceSpecVhostCertificate.Builder.class)
+@JsonDeserialize(builder = ImmutableXpDeploymentResourceSpecVHostCertificate.Builder.class)
 @Value.Immutable
-public abstract class XpDeploymentResourceSpecVhostCertificate
+public abstract class XpDeploymentResourceSpecVHostCertificate
 {
     public abstract Boolean selfSigned();
 }

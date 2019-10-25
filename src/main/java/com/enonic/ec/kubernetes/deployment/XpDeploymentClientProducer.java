@@ -15,7 +15,7 @@ import static com.enonic.ec.kubernetes.deployment.CrdClientsProducer.createCrdCl
 @Singleton
 public class XpDeploymentClientProducer
 {
-    private XpDeploymentClient xpDeploymentClient;
+    private final XpDeploymentClient xpDeploymentClient;
 
     @Inject
     public XpDeploymentClientProducer( DefaultClientProducer defaultClientProducer,

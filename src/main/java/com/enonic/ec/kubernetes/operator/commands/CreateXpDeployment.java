@@ -13,11 +13,11 @@ import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
 import com.enonic.ec.kubernetes.common.Configuration;
-import com.enonic.ec.kubernetes.common.commands.CombinedKubeCommand;
+import com.enonic.ec.kubernetes.common.commands.CombinedKubernetesCommand;
 import com.enonic.ec.kubernetes.common.commands.Command;
-import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedKubeCommand;
-import com.enonic.ec.kubernetes.deployment.vhost.Vhost;
-import com.enonic.ec.kubernetes.deployment.vhost.VhostPath;
+import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedKubernetesCommand;
+import com.enonic.ec.kubernetes.deployment.vhost.VHost;
+import com.enonic.ec.kubernetes.deployment.vhost.VHostPath;
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResource;
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceSpecNode;
 import com.enonic.ec.kubernetes.operator.commands.apply.ImmutableCommandApplyConfigMap;
@@ -41,18 +41,18 @@ import com.enonic.ec.kubernetes.operator.commands.delete.ImmutableCommandDeleteP
 import com.enonic.ec.kubernetes.operator.commands.delete.ImmutableCommandDeleteService;
 import com.enonic.ec.kubernetes.operator.commands.delete.ImmutableCommandDeleteStatefulSet;
 import com.enonic.ec.kubernetes.operator.commands.plan.ImmutableXpNodeDeploymentDiff;
-import com.enonic.ec.kubernetes.operator.commands.plan.ImmutableXpVhostDeploymentDiff;
+import com.enonic.ec.kubernetes.operator.commands.plan.ImmutableXpVHostDeploymentDiff;
 import com.enonic.ec.kubernetes.operator.commands.plan.XpNodeDeploymentDiff;
 import com.enonic.ec.kubernetes.operator.commands.plan.XpNodeDeploymentPlan;
-import com.enonic.ec.kubernetes.operator.commands.plan.XpVhostDeploymentDiff;
-import com.enonic.ec.kubernetes.operator.commands.plan.XpVhostDeploymentPlan;
+import com.enonic.ec.kubernetes.operator.commands.plan.XpVHostDeploymentDiff;
+import com.enonic.ec.kubernetes.operator.commands.plan.XpVHostDeploymentPlan;
 import com.enonic.ec.kubernetes.operator.commands.scale.ImmutableCommandScaleStatefulSet;
 import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerClient;
 
 @Value.Immutable
 public abstract class CreateXpDeployment
     extends Configuration
-    implements Command<CombinedKubeCommand>
+    implements Command<CombinedKubernetesCommand>
 {
     protected abstract KubernetesClient defaultClient();
 
@@ -84,9 +84,9 @@ public abstract class CreateXpDeployment
     }
 
     @Value.Derived
-    protected XpVhostDeploymentDiff vHostDiff()
+    protected XpVHostDeploymentDiff vHostDiff()
     {
-        return ImmutableXpVhostDeploymentDiff.builder().
+        return ImmutableXpVHostDeploymentDiff.builder().
             oldDeployment( oldResource() ).
             newDeployment( newResource() ).
             build();
@@ -106,15 +106,14 @@ public abstract class CreateXpDeployment
     }
 
     @Override
-    public CombinedKubeCommand execute()
+    public CombinedKubernetesCommand execute()
         throws Exception
     {
         String namespaceName = resource().getSpec().defaultNamespaceName();
-        String defaultResourceName = resource().getSpec().defaultResourceName();
         String defaultBlobStorageName = resource().getSpec().defaultResourceNameWithPreFix( "blob" );
         Map<String, String> defaultLabels = resource().getSpec().defaultLabels();
 
-        ImmutableCombinedKubeCommand.Builder commandBuilder = ImmutableCombinedKubeCommand.builder();
+        ImmutableCombinedKubernetesCommand.Builder commandBuilder = ImmutableCombinedKubernetesCommand.builder();
 
         if ( newDeployment() )
         {
@@ -152,24 +151,24 @@ public abstract class CreateXpDeployment
             createDeleteNodeCommands( commandBuilder, namespaceName, oldNode );
         }
 
-        for ( XpVhostDeploymentPlan vhostPlan : vHostDiff().deploymentPlans() )
+        for ( XpVHostDeploymentPlan vHostPlan : vHostDiff().deploymentPlans() )
         {
-            createDeployVhostCommands( commandBuilder, namespaceName, defaultLabels, vhostPlan );
+            createDeployVHostCommands( commandBuilder, namespaceName, defaultLabels, vHostPlan );
         }
 
-        for ( Vhost oldVHost : vHostDiff().vHostsRemoved() )
+        for ( VHost oldVHost : vHostDiff().vHostsRemoved() )
         {
-            createDeleteVHostsCommands( commandBuilder, namespaceName, defaultResourceName, oldVHost );
+            createDeleteVHostsCommands( commandBuilder, namespaceName, oldVHost );
         }
 
         return commandBuilder.build();
     }
 
-    private void createDeployNodeCommands( final ImmutableCombinedKubeCommand.Builder commandBuilder, final String namespaceName,
+    private void createDeployNodeCommands( final ImmutableCombinedKubernetesCommand.Builder commandBuilder, final String namespaceName,
                                            final Map<String, String> defaultLabels, final XpNodeDeploymentPlan nodePlan,
                                            final String defaultBlobStorageName )
     {
-        // TODO: Handle all nodetypes
+        // TODO: Handle all node types
         String nodeName = resource().getSpec().defaultResourceNameWithPostFix( nodePlan.node().alias() );
         Map<String, String> nodeLabels = new HashMap<>( defaultLabels );
         nodeLabels.putAll( nodePlan.node().nodeAliasLabel() );
@@ -244,7 +243,7 @@ public abstract class CreateXpDeployment
         }
     }
 
-    private void createDeleteNodeCommands( final ImmutableCombinedKubeCommand.Builder commandBuilder, final String namespaceName,
+    private void createDeleteNodeCommands( final ImmutableCombinedKubernetesCommand.Builder commandBuilder, final String namespaceName,
                                            final XpDeploymentResourceSpecNode oldNode )
     {
         String nodeName = resource().getSpec().defaultResourceNameWithPostFix( oldNode.alias() );
@@ -268,20 +267,20 @@ public abstract class CreateXpDeployment
             build() );
     }
 
-    private void createDeployVhostCommands( final ImmutableCombinedKubeCommand.Builder commandBuilder, final String namespaceName,
-                                            final Map<String, String> defaultLabels, final XpVhostDeploymentPlan vhostPlan )
+    private void createDeployVHostCommands( final ImmutableCombinedKubernetesCommand.Builder commandBuilder, final String namespaceName,
+                                            final Map<String, String> defaultLabels, final XpVHostDeploymentPlan vHostPlan )
         throws Exception
     {
-        if ( vhostPlan.changeIssuer() )
+        if ( vHostPlan.changeIssuer() )
         {
             commandBuilder.addCommand( ImmutableCommandApplyIssuer.builder().
                 client( issuerClient() ).
                 ownerReference( ownerReference() ).
                 namespace( namespaceName ).
-                name( vhostPlan.vhost().getVHostResourceName( resource() ) ).
+                name( vHostPlan.vhost().getVHostResourceName( resource() ) ).
                 labels( defaultLabels ).
                 spec( ImmutableIssuerSpecBuilder.builder().
-                    certificate( vhostPlan.vhost().certificate().get() ).
+                    certificate( vHostPlan.vhost().certificate().get() ).
                     build().
                     execute() ).
                 build() );
@@ -289,19 +288,19 @@ public abstract class CreateXpDeployment
 
         // TODO: Delete issuer
 
-        if ( vhostPlan.changeIngress() )
+        if ( vHostPlan.changeIngress() )
         {
-            for ( VhostPath path : vhostPlan.newPaths() )
+            for ( VHostPath path : vHostPlan.newPaths() )
             {
                 Map<String, String> serviceLabels = new HashMap<>();
                 serviceLabels.putAll( defaultLabels );
                 serviceLabels.putAll( path.getServiceSelectorLabels() );
-                serviceLabels.putAll( path.getVhostLabels( vhostPlan.vhost() ) );
+                serviceLabels.putAll( path.getVHostLabels( vHostPlan.vhost() ) );
                 commandBuilder.addCommand( ImmutableCommandApplyService.builder().
                     client( defaultClient() ).
                     ownerReference( ownerReference() ).
                     namespace( namespaceName ).
-                    name( path.getPathResourceName( resource(), vhostPlan.vhost() ) ).
+                    name( path.getPathResourceName( resource(), vHostPlan.vhost() ) ).
                     labels( serviceLabels ).
                     spec( ImmutableServiceSpecBuilder.builder().
                         selector( path.getServiceSelectorLabels() ).
@@ -310,12 +309,12 @@ public abstract class CreateXpDeployment
                     build() );
             }
 
-            for ( VhostPath path : vhostPlan.pathsToDelete() )
+            for ( VHostPath path : vHostPlan.pathsToDelete() )
             {
                 commandBuilder.addCommand( ImmutableCommandDeleteService.builder().
                     client( defaultClient() ).
                     namespace( namespaceName ).
-                    name( path.getPathResourceName( resource(), vhostPlan.vhost() ) ).
+                    name( path.getPathResourceName( resource(), vHostPlan.vhost() ) ).
                     build() );
             }
 
@@ -326,24 +325,24 @@ public abstract class CreateXpDeployment
                                     "proxy_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;\n" +
                                         "      proxy_hide_header l5d-remote-ip;\n" + "      proxy_hide_header l5d-server-id;" );
 
-            if ( vhostPlan.vhost().certificate().isPresent() )
+            if ( vHostPlan.vhost().certificate().isPresent() )
             {
                 serviceAnnotations.put( "nginx.ingress.kubernetes.io/ssl-redirect", "true" );
-                serviceAnnotations.put( "certmanager.k8s.io/issuer", vhostPlan.vhost().getVHostResourceName( resource() ) );
+                serviceAnnotations.put( "certmanager.k8s.io/issuer", vHostPlan.vhost().getVHostResourceName( resource() ) );
             }
-            Optional<String> certSecret = vhostPlan.vhost().certificate().isPresent()
-                ? Optional.of( vhostPlan.vhost().getVHostResourceName( resource() ) )
+            Optional<String> certSecret = vHostPlan.vhost().certificate().isPresent()
+                ? Optional.of( vHostPlan.vhost().getVHostResourceName( resource() ) )
                 : Optional.empty();
             commandBuilder.addCommand( ImmutableCommandApplyIngress.builder().
                 client( defaultClient() ).
                 ownerReference( ownerReference() ).
                 namespace( namespaceName ).
-                name( vhostPlan.vhost().getVHostResourceName( resource() ) ).
+                name( vHostPlan.vhost().getVHostResourceName( resource() ) ).
                 labels( defaultLabels ).
                 annotations( serviceAnnotations ).
                 spec( ImmutableIngressSpecBuilder.builder().
                     certificateSecretName( certSecret ).
-                    vhost( vhostPlan.vhost() ).
+                    vhost( vHostPlan.vhost() ).
                     resource( resource() ).
                     build().
                     execute() ).
@@ -351,8 +350,8 @@ public abstract class CreateXpDeployment
         }
     }
 
-    private void createDeleteVHostsCommands( final ImmutableCombinedKubeCommand.Builder commandBuilder, final String namespaceName,
-                                             final String defaultResourceName, final Vhost oldVHost )
+    private void createDeleteVHostsCommands( final ImmutableCombinedKubernetesCommand.Builder commandBuilder, final String namespaceName,
+                                             final VHost oldVHost )
     {
         commandBuilder.addCommand( ImmutableCommandDeleteIngress.builder().
             client( defaultClient() ).
@@ -360,7 +359,7 @@ public abstract class CreateXpDeployment
             name( oldVHost.getVHostResourceName( resource() ) ).
             build() );
 
-        for ( VhostPath path : oldVHost.vhostPaths() )
+        for ( VHostPath path : oldVHost.vHostPaths() )
         {
             commandBuilder.addCommand( ImmutableCommandDeleteService.builder().
                 namespace( namespaceName ).

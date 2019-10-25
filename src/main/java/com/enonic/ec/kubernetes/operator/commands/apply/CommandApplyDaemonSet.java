@@ -9,6 +9,7 @@ import io.fabric8.kubernetes.api.model.apps.DaemonSet;
 import io.fabric8.kubernetes.api.model.apps.DaemonSetSpec;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
+@SuppressWarnings("OptionalGetWithoutIsPresent")
 @Value.Immutable
 public abstract class CommandApplyDaemonSet
     extends CommandApplyResource<DaemonSet>
@@ -37,5 +38,4 @@ public abstract class CommandApplyDaemonSet
     {
         return client().apps().daemonSets().inNamespace( namespace().get() ).createOrReplace( resource );
     }
-
 }

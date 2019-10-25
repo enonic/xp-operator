@@ -9,6 +9,7 @@ import io.fabric8.kubernetes.api.model.networking.NetworkPolicy;
 import io.fabric8.kubernetes.api.model.networking.NetworkPolicySpec;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
+@SuppressWarnings("OptionalGetWithoutIsPresent")
 @Value.Immutable
 public abstract class CommandApplyNetworkPolicy
     extends CommandApplyResource<NetworkPolicy>

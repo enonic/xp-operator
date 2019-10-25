@@ -10,6 +10,7 @@ import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerClient;
 import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerResource;
 import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerResourceSpec;
 
+@SuppressWarnings("OptionalGetWithoutIsPresent")
 @Value.Immutable
 public abstract class CommandApplyIssuer
     extends CommandApplyResource<IssuerResource>

@@ -10,10 +10,13 @@ import org.immutables.value.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResource;
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceSpecNode;
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentSpecChangeValidation;
 
+@SuppressWarnings("unchecked")
 @Value.Immutable
 public abstract class XpNodeDeploymentDiff
 {
@@ -51,7 +54,8 @@ public abstract class XpNodeDeploymentDiff
             return newDeployment().getSpec().nodes();
         }
 
-        List<String> oldAliases = oldDeployment().get().getSpec().nodes().stream().map( n -> n.alias() ).collect( Collectors.toList() );
+        List<String> oldAliases =
+            oldDeployment().get().getSpec().nodes().stream().map( XpDeploymentResourceSpecNode::alias ).collect( Collectors.toList() );
         return newDeployment().getSpec().nodes().stream().filter( n -> !oldAliases.contains( n.alias() ) ).collect( Collectors.toList() );
     }
 
@@ -81,7 +85,8 @@ public abstract class XpNodeDeploymentDiff
             return Collections.EMPTY_LIST;
         }
 
-        List<String> newNodeAliases = newDeployment().getSpec().nodes().stream().map( n -> n.alias() ).collect( Collectors.toList() );
+        List<String> newNodeAliases =
+            newDeployment().getSpec().nodes().stream().map( XpDeploymentResourceSpecNode::alias ).collect( Collectors.toList() );
 
         return oldDeployment().get().getSpec().nodes().stream().
             filter( n -> !newNodeAliases.contains( n.alias() ) ).
@@ -100,7 +105,8 @@ public abstract class XpNodeDeploymentDiff
         List<NodeTuple> changes = new LinkedList<>();
         for ( NodeTuple t : nodeTuples() )
         {
-            if ( !t.oldNode.equals( t.newNode ) || enabledDisabledChanged() )
+            Preconditions.checkState( t.oldNode.isPresent(), "oldNode must be present" );
+            if ( !t.oldNode.get().equals( t.newNode ) || enabledDisabledChanged() )
             {
                 changes.add( t );
             }
@@ -121,10 +127,7 @@ public abstract class XpNodeDeploymentDiff
         {
             Optional<XpDeploymentResourceSpecNode> newNode =
                 newDeployment().getSpec().nodes().stream().filter( n -> n.alias().equals( oldNode.alias() ) ).findAny();
-            if ( newNode.isPresent() )
-            {
-                res.add( new NodeTuple( oldNode, newNode.get() ) );
-            }
+            newNode.ifPresent( xpDeploymentResourceSpecNode -> res.add( new NodeTuple( oldNode, xpDeploymentResourceSpecNode ) ) );
         }
         return res;
     }
@@ -144,29 +147,30 @@ public abstract class XpNodeDeploymentDiff
         log.debug( "Nodes changed: " + nodesChanged() );
     }
 
+    @SuppressWarnings("SameParameterValue")
     public static class NodeTuple
     {
         private final Optional<XpDeploymentResourceSpecNode> oldNode;
 
         private final XpDeploymentResourceSpecNode newNode;
 
-        protected NodeTuple( final XpDeploymentResourceSpecNode oldNode, final XpDeploymentResourceSpecNode newNode )
+        NodeTuple( final XpDeploymentResourceSpecNode oldNode, final XpDeploymentResourceSpecNode newNode )
         {
             this.oldNode = Optional.ofNullable( oldNode );
             this.newNode = newNode;
         }
 
-        public static NodeTuple of( final XpDeploymentResourceSpecNode oldNode, final XpDeploymentResourceSpecNode newNode )
+        static NodeTuple of( final XpDeploymentResourceSpecNode oldNode, final XpDeploymentResourceSpecNode newNode )
         {
             return new NodeTuple( oldNode, newNode );
         }
 
-        protected Optional<XpDeploymentResourceSpecNode> getOldNode()
+        Optional<XpDeploymentResourceSpecNode> getOldNode()
         {
             return oldNode;
         }
 
-        protected XpDeploymentResourceSpecNode getNewNode()
+        XpDeploymentResourceSpecNode getNewNode()
         {
             return newNode;
         }

@@ -14,7 +14,6 @@ public abstract class CommandCreateXpDeployment
     extends Configuration
     implements Command<XpDeploymentResource>
 {
-
     public abstract XpDeploymentClient client();
 
     public abstract String apiVersion();
@@ -39,5 +38,4 @@ public abstract class CommandCreateXpDeployment
         newDeployment.setSpec( spec() );
         return client().client().createOrReplace( newDeployment );
     }
-
 }

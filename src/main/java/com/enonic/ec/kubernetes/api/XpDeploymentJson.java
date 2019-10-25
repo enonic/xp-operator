@@ -12,11 +12,9 @@ import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceSpec
 @Value.Immutable
 public interface XpDeploymentJson
 {
-
     Optional<String> uid();
 
     String apiVersion();
 
     XpDeploymentResourceSpec spec();
-
 }

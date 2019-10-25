@@ -5,9 +5,8 @@ import java.util.Optional;
 import org.immutables.value.Value;
 
 @Value.Immutable
-public abstract class KubeCommandSummary
+public abstract class KubernetesCommandSummary
 {
-
     public abstract Optional<String> namespace();
 
     public abstract String name();

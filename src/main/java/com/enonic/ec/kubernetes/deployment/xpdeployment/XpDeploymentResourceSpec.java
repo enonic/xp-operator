@@ -11,9 +11,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.base.Preconditions;
 
-import com.enonic.ec.kubernetes.deployment.vhost.ImmutableVhostBuilder;
-import com.enonic.ec.kubernetes.deployment.vhost.Vhost;
-import com.enonic.ec.kubernetes.deployment.vhost.VhostPath;
+import com.enonic.ec.kubernetes.deployment.vhost.ImmutableVHostBuilder;
+import com.enonic.ec.kubernetes.deployment.vhost.VHost;
+import com.enonic.ec.kubernetes.deployment.vhost.VHostPath;
 
 @JsonDeserialize(builder = ImmutableXpDeploymentResourceSpec.Builder.class)
 @Value.Immutable
@@ -43,7 +43,7 @@ public abstract class XpDeploymentResourceSpec
 
     public abstract List<XpDeploymentResourceSpecNode> nodes();
 
-    protected abstract Map<String, XpDeploymentResourceSpecVhostCertificate> vHostCertificates();
+    protected abstract Map<String, XpDeploymentResourceSpecVHostCertificate> vHostCertificates();
 
     @Value.Derived
     @JsonIgnore
@@ -85,9 +85,9 @@ public abstract class XpDeploymentResourceSpec
 
     @Value.Derived
     @JsonIgnore
-    public List<Vhost> vHosts()
+    public List<VHost> vHosts()
     {
-        return ImmutableVhostBuilder.builder().
+        return ImmutableVHostBuilder.builder().
             nodes( nodes() ).
             certificates( vHostCertificates() ).
             build().
@@ -103,6 +103,8 @@ public abstract class XpDeploymentResourceSpec
         Optional<XpDeploymentResourceSpecNode> singleNode = nodes().stream().filter( n -> n.type() == NodeType.STANDALONE ).findAny();
 
         Preconditions.checkState( singleNode.isPresent(), "Operator only supports nodes of type " + NodeType.STANDALONE.name() );
+
+        //noinspection ConstantConditions
         Preconditions.checkState( singleNode.isPresent() && nodes().size() == 1,
                                   "you can only have one node there is a node of type " + NodeType.STANDALONE.name() +
                                       " in the node list" );
@@ -117,9 +119,9 @@ public abstract class XpDeploymentResourceSpec
             Preconditions.checkState( e.getValue().size() == 1, "Two nodes have the same alias: " + e.getValue().get( 0 ).alias() );
         }
 
-        for ( Vhost vhost : vHosts() )
+        for ( VHost vhost : vHosts() )
         {
-            for ( VhostPath path : vhost.vhostPaths() )
+            for ( VHostPath path : vhost.vHostPaths() )
             {
                 Preconditions.checkState( path.nodes().size() == 1,
                                           "Cannot define same vHost path '" + path.path() + "' on same host '" + vhost.host() +

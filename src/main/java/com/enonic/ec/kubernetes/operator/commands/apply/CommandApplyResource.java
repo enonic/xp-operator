@@ -13,14 +13,15 @@ import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 
-import com.enonic.ec.kubernetes.common.commands.ImmutableKubeCommandSummary;
-import com.enonic.ec.kubernetes.common.commands.KubeCommand;
-import com.enonic.ec.kubernetes.common.commands.KubeCommandSummary;
+import com.enonic.ec.kubernetes.common.commands.ImmutableKubernetesCommandSummary;
+import com.enonic.ec.kubernetes.common.commands.KubernetesCommand;
+import com.enonic.ec.kubernetes.common.commands.KubernetesCommandSummary;
 
+@SuppressWarnings("OptionalGetWithoutIsPresent")
 public abstract class CommandApplyResource<T extends HasMetadata>
-    extends KubeCommand<T>
+    extends KubernetesCommand<T>
 {
-    private KubeCommandSummary summary;
+    private KubernetesCommandSummary summary;
 
     protected abstract String name();
 
@@ -44,7 +45,7 @@ public abstract class CommandApplyResource<T extends HasMetadata>
         Preconditions.checkState( ownerReference().isPresent() || canSkipOwnerReference(), "ownerReference missing" );
     }
 
-    void checkValidityAgainstOld( HasMetadata oldResource )
+    private void checkValidityAgainstOld( HasMetadata oldResource )
     {
         if ( !( oldResource instanceof Namespace ) )
         {
@@ -59,7 +60,7 @@ public abstract class CommandApplyResource<T extends HasMetadata>
     {
         Optional<T> oldResource = fetchResource();
         Optional<T> newResource = Optional.empty();
-        KubeCommandSummary.Action action = KubeCommandSummary.Action.CREATE;
+        KubernetesCommandSummary.Action action = KubernetesCommandSummary.Action.CREATE;
 
         if ( oldResource.isEmpty() )
         {
@@ -83,10 +84,10 @@ public abstract class CommandApplyResource<T extends HasMetadata>
             newMetadata.setResourceVersion( null );
 
             newResource = Optional.of( build( newMetadata ) );
-            action = KubeCommandSummary.Action.UPDATE;
+            action = KubernetesCommandSummary.Action.UPDATE;
         }
 
-        summary = ImmutableKubeCommandSummary.builder().
+        summary = ImmutableKubernetesCommandSummary.builder().
             namespace( newResource.get() instanceof Namespace ? Optional.empty() : namespace() ).
             name( newResource.get().getMetadata().getName() ).
             kind( newResource.get().getKind() ).
@@ -110,7 +111,7 @@ public abstract class CommandApplyResource<T extends HasMetadata>
     protected abstract T apply( T resource );
 
     @Override
-    public KubeCommandSummary summary()
+    public KubernetesCommandSummary summary()
     {
         return summary;
     }

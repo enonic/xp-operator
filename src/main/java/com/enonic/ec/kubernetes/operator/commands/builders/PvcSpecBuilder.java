@@ -17,7 +17,6 @@ public abstract class PvcSpecBuilder
     extends Configuration
     implements Command<PersistentVolumeClaimSpec>
 {
-
     protected abstract List<String> accessMode();
 
     protected abstract Quantity size();

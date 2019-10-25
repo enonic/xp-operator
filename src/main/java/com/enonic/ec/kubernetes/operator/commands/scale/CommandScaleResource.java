@@ -2,12 +2,12 @@ package com.enonic.ec.kubernetes.operator.commands.scale;
 
 import org.immutables.value.Value;
 
-import com.enonic.ec.kubernetes.common.commands.ImmutableKubeCommandSummary;
-import com.enonic.ec.kubernetes.common.commands.KubeCommand;
-import com.enonic.ec.kubernetes.common.commands.KubeCommandSummary;
+import com.enonic.ec.kubernetes.common.commands.ImmutableKubernetesCommandSummary;
+import com.enonic.ec.kubernetes.common.commands.KubernetesCommand;
+import com.enonic.ec.kubernetes.common.commands.KubernetesCommandSummary;
 
 public abstract class CommandScaleResource<T>
-    extends KubeCommand<T>
+    extends KubernetesCommand<T>
 {
     protected abstract String name();
 
@@ -18,6 +18,7 @@ public abstract class CommandScaleResource<T>
     @Value.Derived
     protected abstract String resourceKind();
 
+    @SuppressWarnings("WeakerAccess")
     protected T applyScale()
     {
         throw new RuntimeException( "Subclass should override this" );
@@ -30,13 +31,13 @@ public abstract class CommandScaleResource<T>
     }
 
     @Override
-    public KubeCommandSummary summary()
+    public KubernetesCommandSummary summary()
     {
-        return ImmutableKubeCommandSummary.builder().
+        return ImmutableKubernetesCommandSummary.builder().
             namespace( namespace() ).
             name( name() ).
             kind( resourceKind() ).
-            action( KubeCommandSummary.Action.SCALE ).
+            action( KubernetesCommandSummary.Action.SCALE ).
             info( Integer.toString( scale() ) ).
             build();
     }

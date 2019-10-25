@@ -14,61 +14,61 @@ import org.immutables.value.Value;
 import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.commands.Command;
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceSpecNode;
-import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceSpecVhostCertificate;
+import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceSpecVHostCertificate;
 
 @Value.Immutable
-public abstract class VhostBuilder
+public abstract class VHostBuilder
     extends Configuration
-    implements Command<List<Vhost>>
+    implements Command<List<VHost>>
 {
 
     protected abstract List<XpDeploymentResourceSpecNode> nodes();
 
-    protected abstract Map<String, XpDeploymentResourceSpecVhostCertificate> certificates();
+    protected abstract Map<String, XpDeploymentResourceSpecVHostCertificate> certificates();
 
     @Override
-    public List<Vhost> execute()
+    public List<VHost> execute()
     {
-        Set<VhostConfig> vhostConfigs = extractVhostsAndPaths();
-        List<Vhost> vhosts = new LinkedList<>();
-        for ( VhostConfig cfg : vhostConfigs )
+        Set<VHostConfig> vHostConfigs = extractVHostsAndPaths();
+        List<VHost> VHosts = new LinkedList<>();
+        for ( VHostConfig cfg : vHostConfigs )
         {
-            ImmutableVhost.Builder builder = ImmutableVhost.builder().
+            ImmutableVHost.Builder builder = ImmutableVHost.builder().
                 host( cfg.host ).
                 certificate( Optional.ofNullable( certificates().get( cfg.host ) ) );
 
             for ( Map.Entry<String, Set<XpDeploymentResourceSpecNode>> e : cfg.paths.entrySet() )
             {
-                builder.addVhostPaths( ImmutableVhostPath.builder().
+                builder.addVHostPaths( ImmutableVHostPath.builder().
                     nodes( e.getValue() ).
                     path( e.getKey() ).
                     build() );
             }
-            vhosts.add( builder.build() );
+            VHosts.add( builder.build() );
         }
-        return vhosts;
+        return VHosts;
     }
 
-    private static class VhostConfig
+    private static class VHostConfig
     {
-        String host;
+        final String host;
 
-        Map<String, Set<XpDeploymentResourceSpecNode>> paths;
+        final Map<String, Set<XpDeploymentResourceSpecNode>> paths;
 
-        public VhostConfig( final String host )
+        VHostConfig( final String host )
         {
             this.host = host;
             this.paths = new HashMap<>();
         }
     }
 
-    private Set<VhostConfig> extractVhostsAndPaths()
+    private Set<VHostConfig> extractVHostsAndPaths()
     {
-        Map<String, VhostConfig> tmp = new HashMap<>();
+        Map<String, VHostConfig> tmp = new HashMap<>();
 
         for ( XpDeploymentResourceSpecNode node : nodes() )
         {
-            Optional<Properties> p = node.configAsProperties( cfgStr( "operator.deployment.xp.vhost.configFile" ) );
+            Optional<Properties> p = node.configAsProperties( cfgStr( "operator.deployment.xp.vHost.configFile" ) );
             if ( p.isPresent() )
             {
                 if ( !p.get().containsKey( "enabled" ) || p.get().getProperty( "enabled" ).equals( "true" ) )
@@ -82,7 +82,7 @@ public abstract class VhostBuilder
                             Optional<String> source = Optional.ofNullable( p.get().getProperty( key.replace( ".host", ".source" ) ) );
                             if ( source.isPresent() )
                             {
-                                VhostConfig cfg = tmp.getOrDefault( host, new VhostConfig( host ) );
+                                VHostConfig cfg = tmp.getOrDefault( host, new VHostConfig( host ) );
                                 Set<XpDeploymentResourceSpecNode> nodes = cfg.paths.getOrDefault( source.get(), new HashSet<>() );
                                 nodes.add( node );
                                 cfg.paths.put( source.get(), nodes );
@@ -93,8 +93,6 @@ public abstract class VhostBuilder
                 }
             }
         }
-        Set<VhostConfig> res = new HashSet<>();
-        tmp.values().stream().forEach( c -> res.add( c ) );
-        return res;
+        return new HashSet<>( tmp.values() );
     }
 }

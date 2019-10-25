@@ -8,12 +8,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Value.Immutable
-public abstract class CombinedKubeCommand
+public abstract class CombinedKubernetesCommand
     implements Command<Void>
 {
-    private final static Logger log = LoggerFactory.getLogger( CombinedKubeCommand.class );
+    private final static Logger log = LoggerFactory.getLogger( CombinedKubernetesCommand.class );
 
-    protected abstract List<KubeCommand> command();
+    protected abstract List<KubernetesCommand> command();
 
     @Override
     public Void execute()
@@ -22,7 +22,7 @@ public abstract class CombinedKubeCommand
         log.info( "Running " + command().size() + " commands" );
         for ( int i = 0; i < command().size(); i++ )
         {
-            KubeCommand c = command().get( i );
+            KubernetesCommand c = command().get( i );
             log.info( String.format( "%2s: %s", i + 1, c.summary() ) );
             c.execute();
         }
@@ -30,9 +30,8 @@ public abstract class CombinedKubeCommand
     }
 
     @Value.Derived
-    public List<KubeCommandSummary> summary()
+    public List<KubernetesCommandSummary> summary()
     {
-        return command().stream().map( c -> c.summary() ).collect( Collectors.toList() );
+        return command().stream().map( KubernetesCommand::summary ).collect( Collectors.toList() );
     }
-
 }

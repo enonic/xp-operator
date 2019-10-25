@@ -17,5 +17,4 @@ public abstract class XpDeploymentResourceSpecNodeResources
     public abstract Quantity memory();
 
     public abstract Map<String, Quantity> disks();
-
 }

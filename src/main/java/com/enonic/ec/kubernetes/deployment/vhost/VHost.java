@@ -6,16 +6,16 @@ import java.util.Optional;
 import org.immutables.value.Value;
 
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResource;
-import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceSpecVhostCertificate;
+import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceSpecVHostCertificate;
 
 @Value.Immutable
-public abstract class Vhost
+public abstract class VHost
 {
     public abstract String host();
 
-    public abstract Optional<XpDeploymentResourceSpecVhostCertificate> certificate();
+    public abstract Optional<XpDeploymentResourceSpecVHostCertificate> certificate();
 
-    public abstract List<VhostPath> vhostPaths();
+    public abstract List<VHostPath> vHostPaths();
 
     public String getVHostResourceName( final XpDeploymentResource resource )
     {

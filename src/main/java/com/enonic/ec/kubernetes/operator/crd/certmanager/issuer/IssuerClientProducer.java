@@ -12,7 +12,7 @@ import static com.enonic.ec.kubernetes.deployment.CrdClientsProducer.createCrdCl
 @Singleton
 public class IssuerClientProducer
 {
-    private IssuerClient issuerClient;
+    private final IssuerClient issuerClient;
 
     @Inject
     public IssuerClientProducer( DefaultClientProducer defaultClientProducer,

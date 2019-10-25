@@ -120,8 +120,7 @@ public abstract class StatefulSetSpecBuilder
         exp.setImagePullPolicy( cfgStr( "operator.deployment.xp.pod.imagePullPolicy" ) );
 
         // Environment
-        List<EnvVar> envVars = new LinkedList<>();
-        envVars.addAll( podEnv() );
+        List<EnvVar> envVars = new LinkedList<>( podEnv() );
 
         EnvVar envNodeName = new EnvVar();
         envNodeName.setName( "XP_NODE_NAME" );
@@ -178,6 +177,7 @@ public abstract class StatefulSetSpecBuilder
         return Collections.singletonList( exp );
     }
 
+    @SuppressWarnings("SameParameterValue")
     static PersistentVolumeClaim standard( String name, Map<String, String> labels, String storageClassName, String accessMode,
                                            Quantity size )
     {

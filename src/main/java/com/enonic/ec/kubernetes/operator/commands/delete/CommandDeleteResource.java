@@ -1,18 +1,14 @@
 package com.enonic.ec.kubernetes.operator.commands.delete;
 
 import org.immutables.value.Value;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import com.enonic.ec.kubernetes.common.commands.ImmutableKubeCommandSummary;
-import com.enonic.ec.kubernetes.common.commands.KubeCommand;
-import com.enonic.ec.kubernetes.common.commands.KubeCommandSummary;
+import com.enonic.ec.kubernetes.common.commands.ImmutableKubernetesCommandSummary;
+import com.enonic.ec.kubernetes.common.commands.KubernetesCommand;
+import com.enonic.ec.kubernetes.common.commands.KubernetesCommandSummary;
 
 public abstract class CommandDeleteResource
-    extends KubeCommand<Boolean>
+    extends KubernetesCommand<Boolean>
 {
-    private final static Logger log = LoggerFactory.getLogger( CommandDeleteResource.class );
-
     protected abstract String name();
 
     protected abstract String namespace();
@@ -20,6 +16,7 @@ public abstract class CommandDeleteResource
     @Value.Derived
     protected abstract String resourceKind();
 
+    @SuppressWarnings("WeakerAccess")
     protected Boolean delete()
     {
         throw new RuntimeException( "Subclass should override this" );
@@ -32,13 +29,13 @@ public abstract class CommandDeleteResource
     }
 
     @Override
-    public KubeCommandSummary summary()
+    public KubernetesCommandSummary summary()
     {
-        return ImmutableKubeCommandSummary.builder().
+        return ImmutableKubernetesCommandSummary.builder().
             namespace( namespace() ).
             name( name() ).
             kind( resourceKind() ).
-            action( KubeCommandSummary.Action.DELETE ).
+            action( KubernetesCommandSummary.Action.DELETE ).
             build();
     }
 }

@@ -22,5 +22,4 @@ public class XpDeploymentClient
     {
         return client;
     }
-
 }

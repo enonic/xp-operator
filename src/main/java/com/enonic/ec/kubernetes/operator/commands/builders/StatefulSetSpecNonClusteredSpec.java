@@ -62,8 +62,10 @@ public abstract class StatefulSetSpecNonClusteredSpec
 
     protected List<PersistentVolumeClaim> createVolumeClaimTemplates()
     {
-        return Arrays.asList(
-            standard( cfgStr( "operator.deployment.xp.volume.index.name" ), podLabels(), cfgStr( "operator.deployment.xp.volume.defaultStorageClass" ), "ReadWriteOnce", indexDiskSize() ),
-            standard( cfgStr( "operator.deployment.xp.volume.snapshots.name" ), podLabels(), cfgStr( "operator.deployment.xp.volume.defaultStorageClass" ), "ReadWriteOnce", snapshotDiskSize() ) );
+        return Arrays.asList( standard( cfgStr( "operator.deployment.xp.volume.index.name" ), podLabels(),
+                                        cfgStr( "operator.deployment.xp.volume.defaultStorageClass" ), "ReadWriteOnce", indexDiskSize() ),
+                              standard( cfgStr( "operator.deployment.xp.volume.snapshots.name" ), podLabels(),
+                                        cfgStr( "operator.deployment.xp.volume.defaultStorageClass" ), "ReadWriteOnce",
+                                        snapshotDiskSize() ) );
     }
 }

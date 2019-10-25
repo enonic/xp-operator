@@ -9,6 +9,7 @@ import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import io.fabric8.kubernetes.api.model.apps.StatefulSetSpec;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
+@SuppressWarnings("OptionalGetWithoutIsPresent")
 @Value.Immutable
 public abstract class CommandApplyStatefulSet
     extends CommandApplyResource<StatefulSet>
@@ -37,5 +38,4 @@ public abstract class CommandApplyStatefulSet
     {
         return client().apps().statefulSets().inNamespace( namespace().get() ).createOrReplace( resource );
     }
-
 }

@@ -5,7 +5,7 @@ import java.util.Collections;
 import org.immutables.value.Value;
 
 import com.enonic.ec.kubernetes.common.commands.Command;
-import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceSpecVhostCertificate;
+import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceSpecVHostCertificate;
 import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.ImmutableIssuerResourceSpec;
 import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerResourceSpec;
 
@@ -13,8 +13,7 @@ import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerResourceSp
 public abstract class IssuerSpecBuilder
     implements Command<IssuerResourceSpec>
 {
-
-    protected abstract XpDeploymentResourceSpecVhostCertificate certificate();
+    protected abstract XpDeploymentResourceSpecVHostCertificate certificate();
 
     @Override
     public IssuerResourceSpec execute()

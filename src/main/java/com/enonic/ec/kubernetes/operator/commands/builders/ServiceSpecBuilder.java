@@ -16,7 +16,6 @@ public abstract class ServiceSpecBuilder
     extends Configuration
     implements Command<ServiceSpec>
 {
-
     protected abstract Map<String, String> selector();
 
     @Override

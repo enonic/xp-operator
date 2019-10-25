@@ -9,6 +9,7 @@ import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaimSpec;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
+@SuppressWarnings("OptionalGetWithoutIsPresent")
 @Value.Immutable
 public abstract class CommandApplyPvc
     extends CommandApplyResource<PersistentVolumeClaim>
@@ -37,5 +38,4 @@ public abstract class CommandApplyPvc
     {
         return client().persistentVolumeClaims().inNamespace( namespace().get() ).createOrReplace( resource );
     }
-
 }

@@ -14,13 +14,14 @@ import io.fabric8.kubernetes.client.Watcher;
 import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.ec.kubernetes.common.client.DefaultClientProducer;
-import com.enonic.ec.kubernetes.common.commands.CombinedKubeCommand;
+import com.enonic.ec.kubernetes.common.commands.CombinedKubernetesCommand;
 import com.enonic.ec.kubernetes.deployment.XpDeploymentCache;
 import com.enonic.ec.kubernetes.deployment.XpDeploymentClientProducer;
 import com.enonic.ec.kubernetes.operator.commands.ImmutableCreateXpDeployment;
 import com.enonic.ec.kubernetes.operator.commands.ImmutablePrePullImages;
 import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerClientProducer;
 
+@SuppressWarnings("OptionalGetWithoutIsPresent")
 @ApplicationScoped
 public class Operator
 {
@@ -57,7 +58,7 @@ public class Operator
                     try
                     {
                         // TODO: What to do if cloud+project of 2 different people have the same name??
-                        CombinedKubeCommand command = ImmutableCreateXpDeployment.builder().
+                        CombinedKubernetesCommand command = ImmutableCreateXpDeployment.builder().
                             defaultClient( defaultClientProducer.client() ).
                             issuerClient( issuerClient.produce() ).
                             oldResource( oldResource ).

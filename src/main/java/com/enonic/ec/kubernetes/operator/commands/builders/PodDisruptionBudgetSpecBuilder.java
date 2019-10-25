@@ -26,5 +26,4 @@ public abstract class PodDisruptionBudgetSpecBuilder
         spec.setSelector( new LabelSelector( null, matchLabels() ) );
         return spec;
     }
-
 }

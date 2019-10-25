@@ -14,6 +14,7 @@ import io.fabric8.kubernetes.api.model.OwnerReference;
 
 import com.enonic.ec.kubernetes.common.commands.Command;
 
+@SuppressWarnings("unchecked")
 @Value.Immutable
 public abstract class CommandMergeMetadata
     implements Command<ObjectMeta>
@@ -65,14 +66,14 @@ public abstract class CommandMergeMetadata
     private static Map<String, String> mergeMap( String kind, String name, String mapType, final Map<String, String> oldMap,
                                                  final Optional<Map<String, String>> newMap )
     {
-        if ( oldMap == null )
+        if ( oldMap == null || oldMap.size() == 0 )
         {
             return newMap.orElse( Collections.EMPTY_MAP );
         }
 
-        if ( newMap.isPresent() || newMap.get().size() == 0 )
+        if ( newMap.isEmpty() )
         {
-            return Collections.EMPTY_MAP;
+            return oldMap;
         }
 
         for ( Map.Entry<String, String> e : newMap.get().entrySet() )

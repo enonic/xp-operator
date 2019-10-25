@@ -15,7 +15,6 @@ import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResource;
 public class XpDeploymentCache
     extends ResourceCache<XpDeploymentResource>
 {
-
     private final XpDeploymentClient client;
 
     @Inject

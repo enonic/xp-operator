@@ -9,6 +9,7 @@ import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
+@SuppressWarnings("OptionalGetWithoutIsPresent")
 @Value.Immutable
 public abstract class CommandApplyConfigMap
     extends CommandApplyResource<ConfigMap>
@@ -37,5 +38,4 @@ public abstract class CommandApplyConfigMap
     {
         return client().configMaps().inNamespace( namespace().get() ).createOrReplace( resource );
     }
-
 }

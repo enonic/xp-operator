@@ -30,7 +30,6 @@ import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentSpecChangeVa
 @Path("/api")
 public class DeploymentService
 {
-
     @Inject
     XpDeploymentClientProducer xpDeploymentClientProducer;
 
@@ -55,10 +54,7 @@ public class DeploymentService
             filter( d -> d.getSpec().deploymentName().equals( deployment.spec().deploymentName() ) ).
             findAny();
 
-        if ( old.isPresent() )
-        {
-            XpDeploymentSpecChangeValidation.checkSpec( old.get().getSpec(), deployment.spec() );
-        }
+        old.ifPresent( resource -> XpDeploymentSpecChangeValidation.checkSpec( resource.getSpec(), deployment.spec() ) );
 
         XpDeploymentResource resource = ImmutableCommandCreateXpDeployment.builder().
             client( xpDeploymentClientProducer.produce() ).
@@ -137,5 +133,4 @@ public class DeploymentService
             spec( r.getSpec() ).
             build();
     }
-
 }
