@@ -27,7 +27,7 @@ public abstract class XpNodeDeploymentDiff
     abstract XpDeploymentResource newDeployment();
 
     @Value.Derived
-    boolean enabledDisabledChanged()
+    boolean isChangingEnabledDisabled()
     {
         if ( oldDeployment().isEmpty() )
         {
@@ -37,7 +37,7 @@ public abstract class XpNodeDeploymentDiff
     }
 
     @Value.Derived
-    boolean updateXp()
+    boolean isUpdatingXp()
     {
         if ( oldDeployment().isEmpty() )
         {
@@ -65,14 +65,19 @@ public abstract class XpNodeDeploymentDiff
         List<XpNodeDeploymentPlan> res = new LinkedList<>();
         nodesAdded().forEach( n -> res.add( ImmutableXpNodeDeploymentPlan.builder().
             nodeTuple( NodeTuple.of( null, n ) ).
-            newDeployment( true ).
+            isEnabled( newDeployment().getSpec().enabled() ).
+            isNewDeployment( true ).
+            isUpdatingXp( false ).
+            isChangingEnabledDisabled( false ).
+            xpVersion( newDeployment().getSpec().xpVersion() ).
             build() ) );
         nodesChanged().forEach( n -> res.add( ImmutableXpNodeDeploymentPlan.builder().
             nodeTuple( n ).
-            newDeployment( false ).
-            enabled( newDeployment().getSpec().enabled() ).
-            enabledDisabledChanged( enabledDisabledChanged() ).
-            updateXp( updateXp() ).
+            isEnabled( newDeployment().getSpec().enabled() ).
+            isNewDeployment( false ).
+            isUpdatingXp( isUpdatingXp() ).
+            isChangingEnabledDisabled( isChangingEnabledDisabled() ).
+            xpVersion( newDeployment().getSpec().xpVersion() ).
             build() ) );
         return res;
     }
@@ -106,7 +111,7 @@ public abstract class XpNodeDeploymentDiff
         for ( NodeTuple t : nodeTuples() )
         {
             Preconditions.checkState( t.oldNode.isPresent(), "oldNode must be present" );
-            if ( !t.oldNode.get().equals( t.newNode ) || enabledDisabledChanged() )
+            if ( !t.oldNode.get().equals( t.newNode ) || isChangingEnabledDisabled() || isUpdatingXp() )
             {
                 changes.add( t );
             }
@@ -140,8 +145,8 @@ public abstract class XpNodeDeploymentDiff
             XpDeploymentSpecChangeValidation.checkSpec( oldDeployment().get().getSpec(), newDeployment().getSpec() );
         }
 
-        log.debug( "Deployment enabled/disabled: " + enabledDisabledChanged() );
-        log.debug( "Deployment xp version change: " + updateXp() );
+        log.debug( "Deployment enabled/disabled: " + isChangingEnabledDisabled() );
+        log.debug( "Deployment xp version change: " + isUpdatingXp() );
         log.debug( "Nodes added: " + nodesAdded() );
         log.debug( "Nodes removed: " + nodesRemoved() );
         log.debug( "Nodes changed: " + nodesChanged() );

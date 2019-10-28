@@ -22,6 +22,11 @@ public class Configuration
         return config().getOptionalValue( key, String.class ).get();
     }
 
+    protected String cfgStrFmt( String key, Object... args )
+    {
+        return String.format( config().getOptionalValue( key, String.class ).get(), args );
+    }
+
     protected int cfgInt( String key )
     {
         return config().getOptionalValue( key, Integer.class ).get();

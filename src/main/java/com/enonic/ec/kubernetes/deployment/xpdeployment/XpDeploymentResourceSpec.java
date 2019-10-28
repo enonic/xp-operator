@@ -109,10 +109,6 @@ public abstract class XpDeploymentResourceSpec
                                   "you can only have one node there is a node of type " + NodeType.STANDALONE.name() +
                                       " in the node list" );
 
-        singleNode.ifPresent( xpDeploymentResourceSpecNode -> Preconditions.checkState( xpDeploymentResourceSpecNode.replicas() <= 1,
-                                                                                        "field replicas on node type " +
-                                                                                            NodeType.STANDALONE.name() +
-                                                                                            " has to be less than 2" ) );
         for ( Map.Entry<String, List<XpDeploymentResourceSpecNode>> e : nodes().stream().
             collect( Collectors.groupingBy( XpDeploymentResourceSpecNode::alias ) ).entrySet() )
         {

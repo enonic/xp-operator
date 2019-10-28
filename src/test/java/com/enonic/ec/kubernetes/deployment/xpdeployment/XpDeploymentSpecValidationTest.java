@@ -92,7 +92,7 @@ class XpDeploymentSpecValidationTest
     public void specInvalidVHost()
     {
         loadSpecExpectIllegalState( "specInvalidVHost.yaml",
-                                    "Cannot build XpDeploymentResourceSpecVhostCertificate, some of required attributes are not set [selfSigned]" );
+                                    "Cannot build XpDeploymentResourceSpecVHostCertificate, some of required attributes are not set [selfSigned]" );
     }
 
     // TODO: When cluster is implemented, test for same vhost + path on multiple nodes

@@ -14,7 +14,7 @@ import io.fabric8.kubernetes.client.Watcher;
 import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.ec.kubernetes.common.client.DefaultClientProducer;
-import com.enonic.ec.kubernetes.common.commands.CombinedKubernetesCommand;
+import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedKubernetesCommand;
 import com.enonic.ec.kubernetes.deployment.XpDeploymentCache;
 import com.enonic.ec.kubernetes.deployment.XpDeploymentClientProducer;
 import com.enonic.ec.kubernetes.operator.commands.ImmutableCreateXpDeployment;
@@ -58,15 +58,17 @@ public class Operator
                     try
                     {
                         // TODO: What to do if cloud+project of 2 different people have the same name??
-                        CombinedKubernetesCommand command = ImmutableCreateXpDeployment.builder().
+                        ImmutableCombinedKubernetesCommand.Builder commandBuilder = ImmutableCombinedKubernetesCommand.builder();
+
+                        ImmutableCreateXpDeployment.builder().
                             defaultClient( defaultClientProducer.client() ).
                             issuerClient( issuerClient.produce() ).
                             oldResource( oldResource ).
                             newResource( newResource.get() ).
                             build().
-                            execute();
+                            addCommands( commandBuilder );
 
-                        command.execute();
+                        commandBuilder.build().execute();
                     }
                     catch ( Exception e )
                     {
@@ -90,11 +92,15 @@ public class Operator
             log.info( "Pre-Pulling images in cluster for versions: " + imageVersionPrePull );
             try
             {
+                ImmutableCombinedKubernetesCommand.Builder commandBuilder = ImmutableCombinedKubernetesCommand.builder();
+
                 ImmutablePrePullImages.builder().
                     defaultClient( defaultClientProducer.client() ).
                     addAllVersions( imageVersionPrePull ).
                     build().
-                    execute();
+                    addCommands( commandBuilder );
+
+                commandBuilder.build().execute();
             }
             catch ( Exception e )
             {

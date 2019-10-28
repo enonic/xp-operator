@@ -23,14 +23,13 @@ import io.fabric8.kubernetes.api.model.apps.DaemonSetSpec;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
 import com.enonic.ec.kubernetes.common.Configuration;
-import com.enonic.ec.kubernetes.common.commands.Command;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedKubernetesCommand;
-import com.enonic.ec.kubernetes.operator.commands.apply.ImmutableCommandApplyDaemonSet;
+import com.enonic.ec.kubernetes.operator.commands.kubectl.apply.ImmutableCommandApplyDaemonSet;
 
 @Value.Immutable
 public abstract class PrePullImages
     extends Configuration
-    implements Command<Void>
+    implements CommandBuilder
 {
     protected abstract KubernetesClient defaultClient();
 
@@ -50,12 +49,12 @@ public abstract class PrePullImages
     }
 
     @Override
-    public Void execute()
+    public void addCommands( ImmutableCombinedKubernetesCommand.Builder commandBuilder )
         throws Exception
     {
         if ( versions().size() < 1 )
         {
-            return null;
+            return;
         }
 
         String name = "ec-pre-pull-images";
@@ -102,16 +101,12 @@ public abstract class PrePullImages
         vol.setName( mountName );
         vol.setHostPath( new HostPathVolumeSource( mountPath, null ) );
 
-        ImmutableCombinedKubernetesCommand.builder().addCommand( ImmutableCommandApplyDaemonSet.builder().
+        commandBuilder.addCommand( ImmutableCommandApplyDaemonSet.builder().
             client( defaultClient() ).
             namespace( getOperatorNamespace() ).
             name( name ).
             canSkipOwnerReference( true ).
             spec( spec ).
-            build() ).
-            build().
-            execute();
-
-        return null;
+            build() );
     }
 }

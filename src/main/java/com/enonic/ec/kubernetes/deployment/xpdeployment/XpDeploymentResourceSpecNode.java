@@ -2,6 +2,7 @@ package com.enonic.ec.kubernetes.deployment.xpdeployment;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
@@ -39,8 +40,34 @@ public abstract class XpDeploymentResourceSpecNode
     @Value.Derived
     public Map<String, String> nodeAliasLabel()
     {
-        // Do not add more labels here, it will brake service mapping to pods
+        // Do not add more labels here, it will brake service mapping for vHosts to pods
         return Map.of( cfgStr( "operator.deployment.xp.pod.label.aliasPrefix" ) + alias(), alias() );
+    }
+
+    @JsonIgnore
+    @Value.Derived
+    public Map<String, String> nodeExtraLabels( Map<String, String> defaultLabels )
+    {
+        Map<String, String> res = new HashMap<>( defaultLabels );
+        res.putAll( nodeAliasLabel() );
+        switch ( type() )
+        {
+            case STANDALONE:
+                res.put( cfgStr( "operator.deployment.xp.labels.nodeType.master" ), "true" );
+                res.put( cfgStr( "operator.deployment.xp.labels.nodeType.data" ), "true" );
+                res.put( cfgStr( "operator.deployment.xp.labels.nodeType.frontend" ), "true" );
+                break;
+            case MASTER:
+                res.put( cfgStr( "operator.deployment.xp.labels.nodeType.master" ), "true" );
+                break;
+            case DATA:
+                res.put( cfgStr( "operator.deployment.xp.labels.nodeType.data" ), "true" );
+                break;
+            case FRONT:
+                res.put( cfgStr( "operator.deployment.xp.labels.nodeType.frontend" ), "true" );
+                break;
+        }
+        return res;
     }
 
     @JsonIgnore

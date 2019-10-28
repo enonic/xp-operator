@@ -16,29 +16,15 @@ public abstract class XpNodeDeploymentPlan
 {
     protected abstract XpNodeDeploymentDiff.NodeTuple nodeTuple();
 
-    @Value.Default
-    protected boolean enabled()
-    {
-        return true;
-    }
+    protected abstract boolean isEnabled();
 
-    @Value.Default
-    protected boolean newDeployment()
-    {
-        return false;
-    }
+    protected abstract boolean isNewDeployment();
 
-    @Value.Default
-    protected boolean enabledDisabledChanged()
-    {
-        return false;
-    }
+    protected abstract boolean isChangingEnabledDisabled();
 
-    @Value.Default
-    protected boolean updateXp()
-    {
-        return false;
-    }
+    protected abstract boolean isUpdatingXp();
+
+    public abstract String xpVersion();
 
     @Value.Derived
     public XpDeploymentResourceSpecNode node()
@@ -49,7 +35,7 @@ public abstract class XpNodeDeploymentPlan
     @Value.Derived
     public int scale()
     {
-        return enabled() ? nodeTuple().getNewNode().replicas() : 0;
+        return isEnabled() ? nodeTuple().getNewNode().replicas() : 0;
     }
 
     @Value.Derived
@@ -59,7 +45,7 @@ public abstract class XpNodeDeploymentPlan
         {
             return false;
         }
-        return enabledDisabledChanged() || !nodeTuple().getOldNode().get().replicas().equals( nodeTuple().getNewNode().replicas() );
+        return isChangingEnabledDisabled() || !nodeTuple().getOldNode().get().replicas().equals( nodeTuple().getNewNode().replicas() );
     }
 
     @Value.Derived
@@ -75,13 +61,13 @@ public abstract class XpNodeDeploymentPlan
     @Value.Derived
     public boolean changeConfigMap()
     {
-        return newDeployment() || !nodeTuple().getOldNode().get().config().equals( nodeTuple().getNewNode().config() );
+        return isNewDeployment() || !nodeTuple().getOldNode().get().config().equals( nodeTuple().getNewNode().config() );
     }
 
     @Value.Derived
     public boolean changeStatefulSet()
     {
-        if ( newDeployment() || updateXp() )
+        if ( isNewDeployment() || isUpdatingXp() )
         {
             return true;
         }
@@ -118,7 +104,7 @@ public abstract class XpNodeDeploymentPlan
         {
             XpDeploymentSpecChangeValidation.checkNode( nodeTuple().getOldNode(), nodeTuple().getNewNode() );
         }
-        if ( newDeployment() )
+        if ( isNewDeployment() )
         {
             Preconditions.checkState( !changeScale(), "Scale should never be true on new deployments" );
         }

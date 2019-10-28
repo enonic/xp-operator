@@ -44,7 +44,7 @@ class XpVHostDeploymentPlanTest
     {
         IllegalStateException e =
             Assertions.assertThrows( IllegalStateException.class, () -> ImmutableXpVHostDeploymentDiff.builder().build() );
-        Assertions.assertEquals( "Cannot build XpVhostDeploymentDiff, some of required attributes are not set [newDeployment]",
+        Assertions.assertEquals( "Cannot build XpVHostDeploymentDiff, some of required attributes are not set [newDeployment]",
                                  e.getMessage() );
     }
 
@@ -61,13 +61,10 @@ class XpVHostDeploymentPlanTest
     public void planAddVHost1()
     {
         ImmutableXpVHostDeploymentDiff diff = loadDiff( "planFull_old.yaml", "planFull_newVHost1.yaml" );
-        Assertions.assertEquals( 2, diff.deploymentPlans().size() );
+        Assertions.assertEquals( 1, diff.deploymentPlans().size() );
 
         XpVHostDeploymentPlan plan1 = diff.deploymentPlans().get( 0 );
         assertVHostPlan( plan1, "company1.com", false, Arrays.asList( "/asdf" ), Arrays.asList(), false, true );
-
-        XpVHostDeploymentPlan plan2 = diff.deploymentPlans().get( 1 );
-        assertVHostPlan( plan2, "company.com", true, Arrays.asList( "/admin" ), Arrays.asList(), false, false );
     }
 
     @Test
