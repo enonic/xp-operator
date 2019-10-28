@@ -1,5 +1,6 @@
 package com.enonic.ec.kubernetes.operator.commands;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -14,9 +15,12 @@ import com.enonic.ec.kubernetes.common.Tuple;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedKubernetesCommand;
 import com.enonic.ec.kubernetes.deployment.vhost.VHost;
 import com.enonic.ec.kubernetes.deployment.vhost.VHostPath;
+import com.enonic.ec.kubernetes.deployment.xpdeployment.NodeType;
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResource;
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceSpecNode;
-import com.enonic.ec.kubernetes.operator.commands.builders.config.ConfigBuilderCluster;
+import com.enonic.ec.kubernetes.operator.commands.builders.config.ConfigBuilder;
+import com.enonic.ec.kubernetes.operator.commands.builders.config.ImmutableConfigBuilderCluster;
+import com.enonic.ec.kubernetes.operator.commands.builders.config.ImmutableConfigBuilderNonClustered;
 import com.enonic.ec.kubernetes.operator.commands.plan.ImmutableXpNodeDeploymentDiff;
 import com.enonic.ec.kubernetes.operator.commands.plan.ImmutableXpVHostDeploymentDiff;
 import com.enonic.ec.kubernetes.operator.commands.plan.XpNodeDeploymentDiff;
@@ -83,7 +87,37 @@ public abstract class CreateXpDeployment
         Function<VHost, String> vHostResourceName = vHost -> vHost.getVHostResourceName( resource() );
         Function<Tuple<VHost, VHostPath>, String> pathResourceName = t -> t.b().getPathResourceName( resource(), t.a() );
 
-        ConfigBuilderCluster configBuilder = null;
+        ConfigBuilder configBuilder;
+
+        // TODO: If not clustered
+        // Skip NFS
+        // Skip Pod disruption budget
+        // Skip discovery service
+
+        if ( !resource().getSpec().clustered() )
+        {
+            configBuilder = ImmutableConfigBuilderNonClustered.
+                builder().
+                build();
+        }
+        else
+        {
+            Integer masterCount = resource().getSpec().nodes().stream().
+                filter( n -> Arrays.asList( NodeType.STANDALONE, NodeType.MASTER ).contains( n.type() ) ).
+                mapToInt( node -> node.replicas() ).
+                sum();
+            Integer dataCount = resource().getSpec().nodes().stream().
+                filter( n -> Arrays.asList( NodeType.STANDALONE, NodeType.COMBINED, NodeType.DATA ).contains( n.type() ) ).
+                mapToInt( node -> node.replicas() ).
+                sum();
+            configBuilder = ImmutableConfigBuilderCluster.builder().
+                namespace( namespaceName ).
+                esDiscoveryService( esDiscoveryServiceName ).
+                clusterName( resource().getSpec().deploymentName() ).
+                minimumMasterNodes( ( masterCount / 2 ) + 1 ).
+                minimumDataNodes( ( dataCount / 2 ) + 1 ).
+                build();
+        }
 
         if ( newDeployment() )
         {

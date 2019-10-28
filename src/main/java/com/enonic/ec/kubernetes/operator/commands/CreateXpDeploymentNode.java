@@ -51,7 +51,6 @@ public abstract class CreateXpDeploymentNode
     public void addCommands( ImmutableCombinedKubernetesCommand.Builder commandBuilder )
     {
         Map<String, String> nodeLabels = nodePlan().node().nodeExtraLabels( defaultLabels() );
-        Integer minAvailable = nodePlan().scale() / 2; // TODO: Reconsider
 
         if ( nodePlan().changeDisruptionBudget() )
         {
@@ -62,7 +61,7 @@ public abstract class CreateXpDeploymentNode
                 name( nodeName() ).
                 labels( nodeLabels ).
                 spec( ImmutablePodDisruptionBudgetSpecBuilder.builder().
-                    minAvailable( minAvailable ).
+                    minAvailable( nodePlan().node().minimumAvailable() ).
                     matchLabels( nodeLabels ).
                     build().
                     spec() ).
@@ -77,7 +76,7 @@ public abstract class CreateXpDeploymentNode
                 namespace( namespace() ).
                 name( nodeName() ).
                 labels( nodeLabels ).
-                data( configBuilder().create( nodePlan().node().config() ) ).
+                data( configBuilder().create( nodePlan().node() ) ).
                 build() );
         }
 

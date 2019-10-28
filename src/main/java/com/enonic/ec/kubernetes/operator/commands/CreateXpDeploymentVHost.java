@@ -23,6 +23,7 @@ import com.enonic.ec.kubernetes.operator.commands.builders.spec.ImmutableService
 import com.enonic.ec.kubernetes.operator.commands.kubectl.apply.ImmutableCommandApplyIngress;
 import com.enonic.ec.kubernetes.operator.commands.kubectl.apply.ImmutableCommandApplyIssuer;
 import com.enonic.ec.kubernetes.operator.commands.kubectl.apply.ImmutableCommandApplyService;
+import com.enonic.ec.kubernetes.operator.commands.kubectl.delete.ImmutableCommandDeleteIssuer;
 import com.enonic.ec.kubernetes.operator.commands.kubectl.delete.ImmutableCommandDeleteService;
 import com.enonic.ec.kubernetes.operator.commands.plan.XpVHostDeploymentPlan;
 import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerClient;
@@ -71,7 +72,14 @@ public abstract class CreateXpDeploymentVHost
                 build() );
         }
 
-        // TODO: Delete issuer
+        if ( vHostPlan().deleteIssuer() )
+        {
+            commandBuilder.addCommand( ImmutableCommandDeleteIssuer.builder().
+                client( issuerClient() ).
+                namespace( namespace() ).
+                name( vHostResourceName ).
+                build() );
+        }
 
         if ( vHostPlan().changeIngress() )
         {

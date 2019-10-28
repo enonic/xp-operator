@@ -1,11 +1,15 @@
 package com.enonic.ec.kubernetes.deployment.vhost;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+
+import javax.xml.bind.DatatypeConverter;
 
 import org.immutables.value.Value;
 
@@ -48,9 +52,17 @@ public abstract class VHostPath
 
     public String getPathResourceName( XpDeploymentResource resource, VHost vhost )
     {
-        // TODO: Fix hash
-        return resource.getSpec().defaultResourceNameWithPostFix( vhost.host().replace( ".", "-" ),
-                                                                  Integer.toString( Math.abs( path().hashCode() ) ) );
+        try
+        {
+            MessageDigest md = MessageDigest.getInstance( "MD5" );
+            md.update( path().getBytes() );
+            String hash = DatatypeConverter.printHexBinary( md.digest() );
+            return resource.getSpec().defaultResourceNameWithPostFix( vhost.host().replace( ".", "-" ), hash );
+        }
+        catch ( NoSuchAlgorithmException e )
+        {
+            throw new RuntimeException( e );
+        }
     }
 
     @Override

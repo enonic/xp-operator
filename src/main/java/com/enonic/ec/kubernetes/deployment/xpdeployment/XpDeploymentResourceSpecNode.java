@@ -2,6 +2,7 @@ package com.enonic.ec.kubernetes.deployment.xpdeployment;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -72,6 +73,26 @@ public abstract class XpDeploymentResourceSpecNode
 
     @JsonIgnore
     @Value.Derived
+    public Integer minimumAvailable()
+    {
+        // TODO: Reconsider
+        Integer min = replicas() / 2 + 1;
+
+        if ( min >= replicas() )
+        {
+            min = replicas() - 1;
+        }
+
+        if ( min != null )
+        {
+            Preconditions.checkState( min % 2 == 1, "minimum available should be an odd number" );
+        }
+
+        return min;
+    }
+
+    @JsonIgnore
+    @Value.Derived
     public Optional<Properties> configAsProperties( String key )
     {
         Optional<String> file = Optional.ofNullable( config().get( key ) );
@@ -98,6 +119,12 @@ public abstract class XpDeploymentResourceSpecNode
     {
         Preconditions.checkState( resources().disks().containsKey( "index" ), "field resources.disks.index on node has to be set" );
         Preconditions.checkState( resources().disks().containsKey( "snapshots" ), "field resources.disks.snapshots on node has to be set" );
+
+        if ( type() == NodeType.STANDALONE || type() == NodeType.MASTER )
+        {
+            Preconditions.checkState( replicas() % 2 == 0, "field replicas has to be a odd number on node types: " +
+                Arrays.asList( NodeType.MASTER, NodeType.STANDALONE ) );
+        }
     }
 
     @Override

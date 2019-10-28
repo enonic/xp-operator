@@ -94,6 +94,13 @@ public abstract class XpDeploymentResourceSpec
             execute();
     }
 
+    @Value.Derived
+    @JsonIgnore
+    public boolean clustered()
+    {
+        return nodes().size() == 1 && nodes().get( 0 ).type() == NodeType.STANDALONE && nodes().get( 0 ).replicas() == 1;
+    }
+
     @Value.Check
     protected void check()
     {
@@ -101,8 +108,6 @@ public abstract class XpDeploymentResourceSpec
         Preconditions.checkState( nodes().size() > 0, "field 'nodes' has to contain more than 0 nodes" );
 
         Optional<XpDeploymentResourceSpecNode> singleNode = nodes().stream().filter( n -> n.type() == NodeType.STANDALONE ).findAny();
-
-        Preconditions.checkState( singleNode.isPresent(), "Operator only supports nodes of type " + NodeType.STANDALONE.name() );
 
         //noinspection ConstantConditions
         Preconditions.checkState( singleNode.isPresent() && nodes().size() == 1,

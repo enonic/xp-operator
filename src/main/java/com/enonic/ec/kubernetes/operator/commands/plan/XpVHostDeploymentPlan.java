@@ -53,6 +53,15 @@ public abstract class XpVHostDeploymentPlan
         return !vHostTuple().getNewVHost().certificate().equals( vHostTuple().getOldVHost().get().certificate() );
     }
 
+    @Value.Derived
+    public boolean deleteIssuer()
+    {
+        if ( vHostTuple().getOldVHost().isEmpty() )
+        {
+            return false;
+        }
+        return vHostTuple().getNewVHost().certificate().isEmpty() && vHostTuple().getOldVHost().get().certificate().isPresent();
+    }
 
     @Value.Derived
     public boolean changeIngress()
