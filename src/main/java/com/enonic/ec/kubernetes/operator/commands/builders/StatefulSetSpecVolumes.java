@@ -15,7 +15,7 @@ import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 
 @Value.Immutable
-public abstract class StatefulSetSpecNonClusteredSpec
+public abstract class StatefulSetSpecVolumes
     extends StatefulSetSpecBuilder
 {
     protected abstract Quantity indexDiskSize();

@@ -139,10 +139,14 @@ public abstract class StatefulSetSpecBuilder
         exp.setSecurityContext( podSecurityContext );
 
         // Ports
-        exp.setPorts( Arrays.asList( new ContainerPort( cfgInt( "operator.deployment.xp.port.main.number" ), null, null,
+        exp.setPorts( Arrays.asList( new ContainerPort( cfgInt( "operator.deployment.xp.port.stats.number" ), null, null,
+                                                        cfgStr( "operator.deployment.xp.port.stats.name" ), null ),
+                                     new ContainerPort( cfgInt( "operator.deployment.xp.port.main.number" ), null, null,
                                                         cfgStr( "operator.deployment.xp.port.main.name" ), null ),
-                                     new ContainerPort( cfgInt( "operator.deployment.xp.port.stats.number" ), null, null,
-                                                        cfgStr( "operator.deployment.xp.port.stats.name" ), null ) ) );
+                                     new ContainerPort( cfgInt( "operator.deployment.xp.port.es.http.number" ), null, null,
+                                                        cfgStr( "operator.deployment.xp.port.es.http.name" ), null ),
+                                     new ContainerPort( cfgInt( "operator.deployment.xp.port.es.discovery.number" ), null, null,
+                                                        cfgStr( "operator.deployment.xp.port.es.discovery.name" ), null ) ) );
 
         // Probes
         Probe readinessProbe = new Probe();

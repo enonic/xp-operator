@@ -33,7 +33,7 @@ import com.enonic.ec.kubernetes.operator.commands.builders.ImmutableIssuerSpecBu
 import com.enonic.ec.kubernetes.operator.commands.builders.ImmutablePodDisruptionBudgetSpecBuilder;
 import com.enonic.ec.kubernetes.operator.commands.builders.ImmutablePvcSpecBuilder;
 import com.enonic.ec.kubernetes.operator.commands.builders.ImmutableServiceSpecBuilder;
-import com.enonic.ec.kubernetes.operator.commands.builders.ImmutableStatefulSetSpecNonClusteredSpec;
+import com.enonic.ec.kubernetes.operator.commands.builders.ImmutableStatefulSetSpecVolumes;
 import com.enonic.ec.kubernetes.operator.commands.delete.ImmutableCommandDeleteConfigMap;
 import com.enonic.ec.kubernetes.operator.commands.delete.ImmutableCommandDeleteIngress;
 import com.enonic.ec.kubernetes.operator.commands.delete.ImmutableCommandDeleteIssuer;
@@ -138,6 +138,22 @@ public abstract class CreateXpDeployment
                     execute() ).
                 build() );
 
+            // Create es discovery service
+            commandBuilder.addCommand( ImmutableCommandApplyService.builder().
+                client( defaultClient() ).
+                ownerReference( ownerReference() ).
+                namespace( namespaceName ).
+                name( resource().getSpec().defaultResourceNameWithPostFix( "es", "discovery" ) ).
+                labels( defaultLabels ).
+                spec( ImmutableServiceSpecBuilder.builder().
+                    selector( defaultLabels ).
+                    putPorts( cfgStr( "operator.deployment.xp.port.es.discovery.name" ),
+                              cfgInt( "operator.deployment.xp.port.es.discovery.number" ) ).
+                    publishNotReadyAddresses( true ).
+                    build().
+                    execute() ).
+                build() );
+
             // TODO: Create network policy
         }
 
@@ -197,7 +213,7 @@ public abstract class CreateXpDeployment
                 namespace( namespaceName ).
                 name( nodeName ).
                 labels( nodeLabels ).
-                data( nodePlan.node().config() ).
+                data( enhanceConfig( nodePlan ) ).
                 build() );
         }
 
@@ -216,7 +232,7 @@ public abstract class CreateXpDeployment
                 namespace( namespaceName ).
                 name( nodeName ).
                 labels( nodeLabels ).
-                spec( ImmutableStatefulSetSpecNonClusteredSpec.builder().
+                spec( ImmutableStatefulSetSpecVolumes.builder().
                     podLabels( nodeLabels ).
                     replicas( nodePlan.scale() ).
                     podImage( podImageName() ).
@@ -241,6 +257,11 @@ public abstract class CreateXpDeployment
                 scale( nodePlan.scale() ).
                 build() );
         }
+    }
+
+    private Map<String, String> enhanceConfig( final XpNodeDeploymentPlan nodePlan )
+    {
+        return nodePlan.node().config();
     }
 
     private void createDeleteNodeCommands( final ImmutableCombinedKubernetesCommand.Builder commandBuilder, final String namespaceName,
@@ -304,6 +325,7 @@ public abstract class CreateXpDeployment
                     labels( serviceLabels ).
                     spec( ImmutableServiceSpecBuilder.builder().
                         selector( path.getServiceSelectorLabels() ).
+                        putPorts( cfgStr( "operator.deployment.xp.port.main.name" ), cfgInt( "operator.deployment.xp.port.main.number" ) ).
                         build().
                         execute() ).
                     build() );

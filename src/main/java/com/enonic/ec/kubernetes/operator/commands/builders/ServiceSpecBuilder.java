@@ -1,7 +1,7 @@
 package com.enonic.ec.kubernetes.operator.commands.builders;
 
-import java.util.Collections;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.immutables.value.Value;
 
@@ -18,15 +18,29 @@ public abstract class ServiceSpecBuilder
 {
     protected abstract Map<String, String> selector();
 
+    protected abstract Map<String, Integer> ports();
+
+    @Value.Default
+    protected String clusterIP()
+    {
+        return "None";
+    }
+
+    @Value.Default
+    protected Boolean publishNotReadyAddresses()
+    {
+        return false;
+    }
+
     @Override
     public ServiceSpec execute()
     {
         ServiceSpec spec = new ServiceSpec();
-        spec.setPorts( Collections.singletonList(
-            new ServicePort( cfgStr( "operator.deployment.xp.port.main.name" ), null, cfgInt( "operator.deployment.xp.port.main.number" ),
-                             null, null ) ) );
-        spec.setClusterIP( "None" );
+        spec.setPorts( ports().entrySet().stream().map( e -> new ServicePort( e.getKey(), null, e.getValue(), null, null ) ).collect(
+            Collectors.toList() ) );
+        spec.setClusterIP( clusterIP() );
         spec.setSelector( selector() );
+        spec.setPublishNotReadyAddresses( publishNotReadyAddresses() );
         return spec;
     }
 }
