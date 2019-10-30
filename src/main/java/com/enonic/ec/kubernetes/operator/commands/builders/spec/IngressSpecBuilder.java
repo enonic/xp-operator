@@ -18,17 +18,14 @@ import io.fabric8.kubernetes.api.model.extensions.IngressTLS;
 import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.deployment.vhost.VHost;
 import com.enonic.ec.kubernetes.deployment.vhost.VHostPath;
-import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResource;
 
 @Value.Immutable
 public abstract class IngressSpecBuilder
     extends Configuration
 {
-    protected abstract Optional<String> certificateSecretName();
-
     protected abstract VHost vhost();
 
-    protected abstract XpDeploymentResource resource();
+    protected abstract Optional<String> certificateSecretName();
 
     @Value.Derived
     public IngressSpec spec()
@@ -53,9 +50,9 @@ public abstract class IngressSpecBuilder
         List<HTTPIngressPath> paths = new LinkedList<>();
         for ( VHostPath path : vhost().vHostPaths() )
         {
-            paths.add( new HTTPIngressPath( new IngressBackend( path.getPathResourceName( resource(), vhost() ),
-                                                                new IntOrString( cfgInt( "operator.deployment.xp.port.main.number" ) ) ),
-                                            path.path() ) );
+            paths.add( new HTTPIngressPath(
+                new IngressBackend( path.pathResourceName(), new IntOrString( cfgInt( "operator.deployment.xp.port.main.number" ) ) ),
+                path.path() ) );
         }
         http.setPaths( paths );
 

@@ -23,8 +23,8 @@ import com.enonic.ec.kubernetes.deployment.ImmutableCommandCreateXpDeployment;
 import com.enonic.ec.kubernetes.deployment.ImmutableCommandDeleteXpDeployment;
 import com.enonic.ec.kubernetes.deployment.XpDeploymentCache;
 import com.enonic.ec.kubernetes.deployment.XpDeploymentClientProducer;
+import com.enonic.ec.kubernetes.deployment.diff.ImmutableDiffSpec;
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResource;
-import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentSpecChangeValidation;
 
 @ApplicationScoped
 @Path("/api")
@@ -50,12 +50,18 @@ public class DeploymentService
     @Produces("application/json")
     public Response createXpDeployment( XpDeploymentJson deployment, @Context UriInfo uriInfo )
     {
+        // Check if there is and old one present
         Optional<XpDeploymentResource> old = xpDeploymentCache.stream().
             filter( d -> d.getSpec().deploymentName().equals( deployment.spec().deploymentName() ) ).
             findAny();
 
-        old.ifPresent( resource -> XpDeploymentSpecChangeValidation.checkSpec( resource.getSpec(), deployment.spec() ) );
+        // Just to validate the changes
+        old.ifPresent( o -> ImmutableDiffSpec.builder().
+            oldValue( o.getSpec() ).
+            newValue( deployment.spec() ).
+            build() );
 
+        // Send the new resource to kubernetes
         XpDeploymentResource resource = ImmutableCommandCreateXpDeployment.builder().
             client( xpDeploymentClientProducer.produce() ).
             apiVersion( deployment.apiVersion() ).
@@ -63,9 +69,9 @@ public class DeploymentService
             build().
             execute();
 
+        // Create response
         UriBuilder builder = uriInfo.getAbsolutePathBuilder();
         builder.path( resource.getMetadata().getUid() );
-
         return Response.created( builder.build() ).entity( resourceToJson( resource ) ).build();
     }
 
@@ -86,19 +92,24 @@ public class DeploymentService
     @Path("/{uid}")
     public Response editXpDeployment( @PathParam("uid") String uid, XpDeploymentJson deployment )
     {
+        // Get old one
         Optional<XpDeploymentResource> resource = xpDeploymentCache.get( uid );
         if ( resource.isEmpty() )
         {
             return Response.status( 404 ).build();
         }
 
+        // Validate the changes
         if ( !resource.get().getApiVersion().equals( deployment.apiVersion() ) )
         {
             return Response.status( 400, "cannot update deployment to a different apiVersion" ).build();
         }
+        ImmutableDiffSpec.builder().
+            oldValue( resource.get().getSpec() ).
+            newValue( deployment.spec() ).
+            build();
 
-        XpDeploymentSpecChangeValidation.checkSpec( resource.get().getSpec(), deployment.spec() );
-
+        // Update
         resource.get().setSpec( deployment.spec() );
         xpDeploymentClientProducer.produce().client().
             createOrReplace( resource.get() );
@@ -110,12 +121,14 @@ public class DeploymentService
     @Path("/{uid}")
     public Response deleteXpDeployment( @PathParam("uid") String uid )
     {
+        // Get old one
         Optional<XpDeploymentResource> resource = xpDeploymentCache.get( uid );
         if ( resource.isEmpty() )
         {
             return Response.status( 404 ).build();
         }
 
+        // Delete it
         ImmutableCommandDeleteXpDeployment.builder().
             client( xpDeploymentClientProducer.produce() ).
             resource( resource.get() ).

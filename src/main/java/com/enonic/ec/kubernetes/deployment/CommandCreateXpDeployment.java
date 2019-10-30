@@ -7,7 +7,8 @@ import com.google.common.base.Preconditions;
 import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.commands.Command;
 import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResource;
-import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceSpec;
+import com.enonic.ec.kubernetes.deployment.xpdeployment.spec.Spec;
+
 
 @Value.Immutable
 public abstract class CommandCreateXpDeployment
@@ -18,7 +19,7 @@ public abstract class CommandCreateXpDeployment
 
     public abstract String apiVersion();
 
-    public abstract XpDeploymentResourceSpec spec();
+    public abstract Spec spec();
 
     @Value.Check
     protected void check()

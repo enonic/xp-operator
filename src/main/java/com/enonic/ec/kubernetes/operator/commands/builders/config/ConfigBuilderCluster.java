@@ -6,8 +6,7 @@ import java.util.Properties;
 
 import org.immutables.value.Value;
 
-import com.enonic.ec.kubernetes.deployment.xpdeployment.NodeType;
-import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceSpecNode;
+import com.enonic.ec.kubernetes.deployment.xpdeployment.spec.SpecNode;
 
 @Value.Immutable
 public abstract class ConfigBuilderCluster
@@ -24,7 +23,7 @@ public abstract class ConfigBuilderCluster
     protected abstract Integer minimumDataNodes();
 
     @Override
-    public Map<String, String> create( XpDeploymentResourceSpecNode node )
+    public Map<String, String> create( SpecNode node )
     {
         Map<String, String> config = new HashMap<>( node.config() );
 
@@ -45,7 +44,7 @@ public abstract class ConfigBuilderCluster
         // Create elastic config
         Properties elasticCfg = new Properties();
 
-        setNodeType( elasticCfg, node.type() );
+        setNodeType( elasticCfg, node );
         elasticCfg.put( "cluster.name", clusterName() );
 
         elasticCfg.put( "gateway.expected_master_nodes", minimumMasterNodes() );
@@ -63,35 +62,19 @@ public abstract class ConfigBuilderCluster
         return config;
     }
 
-    private static void setNodeType( Properties elasticCfg, NodeType type )
+    private static void setNodeType( Properties elasticCfg, SpecNode node )
     {
-        switch ( type )
+        if ( node.isMasterNode() )
         {
-            case STANDALONE:
-                elasticCfg.put( "node.client", "false" );
-                elasticCfg.put( "node.master", "true" );
-                elasticCfg.put( "node.data", "true" );
-                break;
-            case COMBINED:
-                elasticCfg.put( "node.client", "true" );
-                elasticCfg.put( "node.master", "false" );
-                elasticCfg.put( "node.data", "true" );
-                break;
-            case MASTER:
-                elasticCfg.put( "node.client", "false" );
-                elasticCfg.put( "node.master", "true" );
-                elasticCfg.put( "node.data", "false" );
-                break;
-            case DATA:
-                elasticCfg.put( "node.client", "false" );
-                elasticCfg.put( "node.master", "false" );
-                elasticCfg.put( "node.data", "true" );
-                break;
-            case FRONT:
-                elasticCfg.put( "node.client", "true" );
-                elasticCfg.put( "node.master", "false" );
-                elasticCfg.put( "node.data", "false" );
-                break;
+            elasticCfg.put( "node.master", "true" );
+        }
+        if ( node.isDataNode() )
+        {
+            elasticCfg.put( "node.data", "true" );
+        }
+        if ( node.isFrontendNode() )
+        {
+            elasticCfg.put( "node.client", "true" );
         }
     }
 

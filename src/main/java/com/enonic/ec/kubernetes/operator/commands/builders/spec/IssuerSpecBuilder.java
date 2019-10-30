@@ -4,14 +4,14 @@ import java.util.Collections;
 
 import org.immutables.value.Value;
 
-import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceSpecVHostCertificate;
+import com.enonic.ec.kubernetes.deployment.xpdeployment.spec.SpecVHostCertificate;
 import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.ImmutableIssuerResourceSpec;
 import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerResourceSpec;
 
 @Value.Immutable
 public abstract class IssuerSpecBuilder
 {
-    protected abstract XpDeploymentResourceSpecVHostCertificate certificate();
+    protected abstract SpecVHostCertificate certificate();
 
     @Value.Derived
     public IssuerResourceSpec spec()

@@ -3,6 +3,7 @@ package com.enonic.ec.kubernetes.operator.commands;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.immutables.value.Value;
 
@@ -12,6 +13,9 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 
 import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedKubernetesCommand;
+import com.enonic.ec.kubernetes.deployment.diff.DiffSpec;
+import com.enonic.ec.kubernetes.deployment.diff.DiffSpecNode;
+import com.enonic.ec.kubernetes.deployment.xpdeployment.spec.SpecNode;
 import com.enonic.ec.kubernetes.operator.commands.builders.config.ConfigBuilder;
 import com.enonic.ec.kubernetes.operator.commands.builders.spec.ImmutablePodDisruptionBudgetSpecBuilder;
 import com.enonic.ec.kubernetes.operator.commands.builders.spec.ImmutableStatefulSetSpecVolumes;
@@ -19,7 +23,6 @@ import com.enonic.ec.kubernetes.operator.commands.kubectl.apply.ImmutableCommand
 import com.enonic.ec.kubernetes.operator.commands.kubectl.apply.ImmutableCommandApplyPodDisruptionBudget;
 import com.enonic.ec.kubernetes.operator.commands.kubectl.apply.ImmutableCommandApplyStatefulSet;
 import com.enonic.ec.kubernetes.operator.commands.kubectl.scale.ImmutableCommandScaleStatefulSet;
-import com.enonic.ec.kubernetes.operator.commands.plan.XpNodeDeploymentPlan;
 
 @Value.Immutable
 public abstract class CreateXpDeploymentNode
@@ -34,7 +37,9 @@ public abstract class CreateXpDeploymentNode
 
     protected abstract String nodeName();
 
-    protected abstract XpNodeDeploymentPlan nodePlan();
+    protected abstract DiffSpec diffSpec();
+
+    protected abstract DiffSpecNode diffSpecNode();
 
     protected abstract Map<String, String> defaultLabels();
 
@@ -42,17 +47,23 @@ public abstract class CreateXpDeploymentNode
 
     protected abstract String blobStorageName();
 
+    protected abstract String snapshotsStorageName();
+
     private String podImageName()
     {
-        return cfgStrFmt( "operator.deployment.xp.pod.imageTemplate", nodePlan().xpVersion() );
+        return cfgStrFmt( "operator.deployment.xp.pod.imageTemplate", diffSpec().newValue().get().xpVersion() );
     }
 
     @Override
     public void addCommands( ImmutableCombinedKubernetesCommand.Builder commandBuilder )
     {
-        Map<String, String> nodeLabels = nodePlan().node().nodeExtraLabels( defaultLabels() );
+        SpecNode newNode = diffSpecNode().newValue().get();
+        Map<String, String> nodeLabels = newNode.nodeExtraLabels( defaultLabels() );
 
-        if ( nodePlan().changeDisruptionBudget() )
+        int effectiveScale = diffSpec().newValue().get().enabled() ? newNode.replicas() : 0;
+        boolean changeScale = diffSpec().enabledChanged() || diffSpecNode().replicasChanged();
+
+        if ( changeScale )
         {
             commandBuilder.addCommand( ImmutableCommandApplyPodDisruptionBudget.builder().
                 client( defaultClient() ).
@@ -61,14 +72,15 @@ public abstract class CreateXpDeploymentNode
                 name( nodeName() ).
                 labels( nodeLabels ).
                 spec( ImmutablePodDisruptionBudgetSpecBuilder.builder().
-                    minAvailable( nodePlan().node().minimumAvailable() ).
+                    minAvailable( newNode.minimumAvailable() ).
                     matchLabels( nodeLabels ).
                     build().
                     spec() ).
                 build() );
         }
 
-        if ( nodePlan().changeConfigMap() )
+        boolean changeConfig = diffSpecNode().configChanged();
+        if ( changeConfig )
         {
             commandBuilder.addCommand( ImmutableCommandApplyConfigMap.builder().
                 client( defaultClient() ).
@@ -76,15 +88,16 @@ public abstract class CreateXpDeploymentNode
                 namespace( namespace() ).
                 name( nodeName() ).
                 labels( nodeLabels ).
-                data( configBuilder().create( nodePlan().node() ) ).
+                data( configBuilder().create( newNode ) ).
                 build() );
         }
 
-        if ( nodePlan().changeStatefulSet() )
+        boolean changeStatefulSet = diffSpecNode().envChanged() || diffSpecNode().resourcesChanged();
+        if ( changeStatefulSet )
         {
             List<EnvVar> podEnv = new LinkedList<>();
 
-            for ( Map.Entry<String, String> e : nodePlan().node().env().entrySet() )
+            for ( Map.Entry<String, String> e : newNode.env().entrySet() )
             {
                 podEnv.add( new EnvVar( e.getKey(), e.getValue(), null ) );
             }
@@ -97,12 +110,12 @@ public abstract class CreateXpDeploymentNode
                 labels( nodeLabels ).
                 spec( ImmutableStatefulSetSpecVolumes.builder().
                     podLabels( nodeLabels ).
-                    replicas( nodePlan().scale() ).
+                    replicas( effectiveScale ).
                     podImage( podImageName() ).
                     podEnv( podEnv ).
-                    podResources( Map.of( "cpu", nodePlan().node().resources().cpu(), "memory", nodePlan().node().resources().memory() ) ).
-                    indexDiskSize( nodePlan().node().resources().disks().get( "index" ) ).
-                    snapshotDiskSize( nodePlan().node().resources().disks().get( "snapshots" ) ).
+                    podResources( Map.of( "cpu", newNode.resources().cpu(), "memory", newNode.resources().memory() ) ).
+                    indexDiskSize( Optional.ofNullable( newNode.resources().disks().get( "index" ) ) ).
+                    snapshotsPvcName( Optional.ofNullable( newNode.isDataNode() ? snapshotsStorageName() : null ) ).
                     blobDiskPvcName( blobStorageName() ).
                     serviceName( nodeName() ).
                     configMapName( nodeName() ).
@@ -111,13 +124,13 @@ public abstract class CreateXpDeploymentNode
                 build() );
         }
 
-        if ( nodePlan().changeScale() )
+        if ( !changeStatefulSet && changeScale )
         {
             commandBuilder.addCommand( ImmutableCommandScaleStatefulSet.builder().
                 client( defaultClient() ).
                 namespace( namespace() ).
                 name( nodeName() ).
-                scale( nodePlan().scale() ).
+                scale( effectiveScale ).
                 build() );
         }
     }

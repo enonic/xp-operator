@@ -1,5 +1,7 @@
 package com.enonic.ec.kubernetes.deployment.vhost;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -9,39 +11,40 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 
+import javax.xml.bind.DatatypeConverter;
+
 import org.immutables.value.Value;
 
 import com.enonic.ec.kubernetes.common.Configuration;
-import com.enonic.ec.kubernetes.common.commands.Command;
-import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceSpecNode;
-import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceSpecVHostCertificate;
+import com.enonic.ec.kubernetes.deployment.xpdeployment.spec.Spec;
+import com.enonic.ec.kubernetes.deployment.xpdeployment.spec.SpecNode;
 
 @Value.Immutable
 public abstract class VHostBuilder
     extends Configuration
-    implements Command<List<VHost>>
 {
+    protected abstract Spec spec();
 
-    protected abstract List<XpDeploymentResourceSpecNode> nodes();
-
-    protected abstract Map<String, XpDeploymentResourceSpecVHostCertificate> certificates();
-
-    @Override
-    public List<VHost> execute()
+    @Value.Derived
+    public List<VHost> vHosts()
     {
         Set<VHostConfig> vHostConfigs = extractVHostsAndPaths();
         List<VHost> VHosts = new LinkedList<>();
         for ( VHostConfig cfg : vHostConfigs )
         {
+
             ImmutableVHost.Builder builder = ImmutableVHost.builder().
                 host( cfg.host ).
-                certificate( Optional.ofNullable( certificates().get( cfg.host ) ) );
+                vHostResourceName( vHostResourceName( spec(), cfg.host ) ).
+                certificate( Optional.ofNullable( spec().vHostCertificates().get( cfg.host ) ) );
 
-            for ( Map.Entry<String, Set<XpDeploymentResourceSpecNode>> e : cfg.paths.entrySet() )
+            for ( Map.Entry<String, Set<SpecNode>> e : cfg.paths.entrySet() )
             {
                 builder.addVHostPaths( ImmutableVHostPath.builder().
                     nodes( e.getValue() ).
                     path( e.getKey() ).
+                    pathResourceName( vHostPathResourceName( spec(), cfg.host, e.getKey() ) ).
+                    vHostLabels( vHostPathLabels( cfg.host, e.getKey() ) ).
                     build() );
             }
             VHosts.add( builder.build() );
@@ -49,11 +52,48 @@ public abstract class VHostBuilder
         return VHosts;
     }
 
+    private String vHostResourceName( Spec spec, String host )
+    {
+        return spec.defaultResourceNameWithPostFix( host.replace( ".", "-" ) );
+    }
+
+    private String vHostPathResourceName( Spec spec, String host, String path )
+    {
+        try
+        {
+            MessageDigest md = MessageDigest.getInstance( "MD5" );
+            md.update( path.getBytes() );
+            String hash = DatatypeConverter.printHexBinary( md.digest() );
+            return spec.defaultResourceNameWithPostFix( host.replace( ".", "-" ), hash );
+        }
+        catch ( NoSuchAlgorithmException e )
+        {
+            throw new RuntimeException( e );
+        }
+    }
+
+    private Map<String, String> vHostPathLabels( String host, String path )
+    {
+        String pathLabel = path.replace( "/", "_" );
+        if ( pathLabel.equals( "_" ) )
+        {
+            pathLabel = "root";
+        }
+        else
+        {
+            pathLabel = pathLabel.substring( 1 );
+        }
+        Map<String, String> res = new HashMap<>();
+        res.put( cfgStr( "operator.deployment.xp.vHost.label.vHost" ), host );
+        res.put( cfgStr( "operator.deployment.xp.vHost.label.path" ), pathLabel );
+        return res;
+    }
+
     private static class VHostConfig
     {
         final String host;
 
-        final Map<String, Set<XpDeploymentResourceSpecNode>> paths;
+        final Map<String, Set<SpecNode>> paths;
 
         VHostConfig( final String host )
         {
@@ -66,9 +106,9 @@ public abstract class VHostBuilder
     {
         Map<String, VHostConfig> tmp = new HashMap<>();
 
-        for ( XpDeploymentResourceSpecNode node : nodes() )
+        for ( SpecNode node : spec().nodes() )
         {
-            Optional<Properties> p = node.configAsProperties( cfgStr( "operator.deployment.xp.vHost.configFile" ) );
+            Optional<Properties> p = node.config().getAsProperties( cfgStr( "operator.deployment.xp.vHost.configFile" ) );
             if ( p.isPresent() )
             {
                 if ( !p.get().containsKey( "enabled" ) || p.get().getProperty( "enabled" ).equals( "true" ) )
@@ -83,7 +123,7 @@ public abstract class VHostBuilder
                             if ( source.isPresent() )
                             {
                                 VHostConfig cfg = tmp.getOrDefault( host, new VHostConfig( host ) );
-                                Set<XpDeploymentResourceSpecNode> nodes = cfg.paths.getOrDefault( source.get(), new HashSet<>() );
+                                Set<SpecNode> nodes = cfg.paths.getOrDefault( source.get(), new HashSet<>() );
                                 nodes.add( node );
                                 cfg.paths.put( source.get(), nodes );
                                 tmp.put( host, cfg );

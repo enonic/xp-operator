@@ -24,7 +24,7 @@ class XpDeploymentSpecValidationTest
     public void specInvalid()
     {
         loadSpecExpectIllegalState( "specInvalid.yaml",
-                                    "Cannot build XpDeploymentResourceSpec, some of required attributes are not set [xpVersion, cloud, project, name, sharedDisks]" );
+                                    "Cannot build Spec, some of required attributes are not set [xpVersion, cloud, project, name, enabled, sharedDisks]" );
     }
 
     @Test
@@ -50,7 +50,7 @@ class XpDeploymentSpecValidationTest
     public void specInvalidNodesDoubleStandalone()
     {
         loadSpecExpectIllegalState( "specInvalidNodesDoubleStandalone.yaml",
-                                    "you can only have one node there is a node of type " + NodeType.STANDALONE.name() +
+                                    "you can only have one node there is a node of type " + " " +
                                         " in the node list" );
     }
 
@@ -60,7 +60,7 @@ class XpDeploymentSpecValidationTest
     public void specInvalidNodesUnsupported()
     {
         loadSpecExpectIllegalState( "specInvalidNodesUnsupported.yaml",
-                                    "Operator only supports nodes of type " + NodeType.STANDALONE.name() );
+                                    "Operator only supports nodes of type " + " " );
     }
 
     @Test

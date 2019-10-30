@@ -35,6 +35,10 @@ public abstract class CreateXpDeploymentBase
 
     protected abstract Quantity blobStorageSize();
 
+    protected abstract String snapshotsStorageName();
+
+    protected abstract Quantity snapshotsStorageSize();
+
     @Override
     public void addCommands( ImmutableCombinedKubernetesCommand.Builder commandBuilder )
     {
@@ -54,6 +58,20 @@ public abstract class CreateXpDeploymentBase
             labels( defaultLabels() ).
             spec( ImmutablePvcSpecBuilder.builder().
                 size( blobStorageSize() ).
+                addAccessMode( "ReadWriteMany" ).
+                build().
+                spec() ).
+            build() );
+
+        // Create snapshots storage
+        commandBuilder.addCommand( ImmutableCommandApplyPvc.builder().
+            client( defaultClient() ).
+            ownerReference( ownerReference() ).
+            namespace( namespace() ).
+            name( snapshotsStorageName() ).
+            labels( defaultLabels() ).
+            spec( ImmutablePvcSpecBuilder.builder().
+                size( snapshotsStorageSize() ).
                 addAccessMode( "ReadWriteMany" ).
                 build().
                 spec() ).

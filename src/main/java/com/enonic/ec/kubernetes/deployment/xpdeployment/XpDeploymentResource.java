@@ -2,17 +2,19 @@ package com.enonic.ec.kubernetes.deployment.xpdeployment;
 
 import io.fabric8.kubernetes.client.CustomResource;
 
+import com.enonic.ec.kubernetes.deployment.xpdeployment.spec.Spec;
+
 public class XpDeploymentResource
     extends CustomResource
 {
-    private XpDeploymentResourceSpec spec;
+    private Spec spec;
 
-    public XpDeploymentResourceSpec getSpec()
+    public Spec getSpec()
     {
         return spec;
     }
 
-    public void setSpec( XpDeploymentResourceSpec spec )
+    public void setSpec( Spec spec )
     {
         this.spec = spec;
     }

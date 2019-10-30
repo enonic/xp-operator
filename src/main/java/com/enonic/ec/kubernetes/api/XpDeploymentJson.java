@@ -6,7 +6,7 @@ import org.immutables.value.Value;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceSpec;
+import com.enonic.ec.kubernetes.deployment.xpdeployment.spec.Spec;
 
 @JsonDeserialize(builder = ImmutableXpDeploymentJson.Builder.class)
 @Value.Immutable
@@ -16,5 +16,5 @@ public interface XpDeploymentJson
 
     String apiVersion();
 
-    XpDeploymentResourceSpec spec();
+    Spec spec();
 }

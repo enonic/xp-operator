@@ -3,6 +3,7 @@ package com.enonic.ec.kubernetes.operator.commands.builders.spec;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 import org.immutables.value.Value;
 
@@ -18,13 +19,13 @@ import io.fabric8.kubernetes.api.model.VolumeMount;
 public abstract class StatefulSetSpecVolumes
     extends StatefulSetSpecBase
 {
-    protected abstract Quantity indexDiskSize();
-
-    protected abstract Quantity snapshotDiskSize();
-
     protected abstract String blobDiskPvcName();
 
     protected abstract String configMapName();
+
+    protected abstract Optional<Quantity> indexDiskSize();
+
+    protected abstract Optional<String> snapshotsPvcName();
 
     private VolumeMount createVolumeMount( String pathConfigKey, String nameConfigKey )
     {
@@ -35,37 +36,61 @@ public abstract class StatefulSetSpecVolumes
     {
         List<VolumeMount> volumeMounts = new LinkedList<>();
         volumeMounts.add( createVolumeMount( "operator.deployment.xp.volume.blob.path", "operator.deployment.xp.volume.blob.name" ) );
-        volumeMounts.add( createVolumeMount( "operator.deployment.xp.volume.index.path", "operator.deployment.xp.volume.index.name" ) );
-        volumeMounts.add(
-            createVolumeMount( "operator.deployment.xp.volume.snapshots.path", "operator.deployment.xp.volume.snapshots.name" ) );
         volumeMounts.add( createVolumeMount( "operator.deployment.xp.volume.config.path", "operator.deployment.xp.volume.config.name" ) );
         volumeMounts.add( createVolumeMount( "operator.deployment.xp.volume.deploy.path", "operator.deployment.xp.volume.deploy.name" ) );
+
+        if ( indexDiskSize().isPresent() )
+        {
+            volumeMounts.add( createVolumeMount( "operator.deployment.xp.volume.index.path", "operator.deployment.xp.volume.index.name" ) );
+        }
+
+        if ( snapshotsPvcName().isPresent() )
+        {
+            volumeMounts.add(
+                createVolumeMount( "operator.deployment.xp.volume.snapshots.path", "operator.deployment.xp.volume.snapshots.name" ) );
+        }
+
         return volumeMounts;
     }
 
     protected List<Volume> createVolumes()
     {
-        Volume configMap = new Volume();
-        configMap.setName( cfgStr( "operator.deployment.xp.volume.config.name" ) );
-        configMap.setConfigMap( new ConfigMapVolumeSource( null, null, configMapName(), null ) );
-
-        Volume deploy = new Volume();
-        deploy.setName( cfgStr( "operator.deployment.xp.volume.deploy.name" ) );
-        deploy.setEmptyDir( new EmptyDirVolumeSource( null, null ) );
+        List<Volume> res = new LinkedList<>();
 
         Volume blob = new Volume();
         blob.setName( cfgStr( "operator.deployment.xp.volume.blob.name" ) );
         blob.setPersistentVolumeClaim( new PersistentVolumeClaimVolumeSource( blobDiskPvcName(), false ) );
+        res.add( blob );
+
+        Volume configMap = new Volume();
+        configMap.setName( cfgStr( "operator.deployment.xp.volume.config.name" ) );
+        configMap.setConfigMap( new ConfigMapVolumeSource( null, null, configMapName(), null ) );
+        res.add( configMap );
+
+        Volume deploy = new Volume();
+        deploy.setName( cfgStr( "operator.deployment.xp.volume.deploy.name" ) );
+        deploy.setEmptyDir( new EmptyDirVolumeSource( null, null ) );
+        res.add( deploy );
+
+        if ( snapshotsPvcName().isPresent() )
+        {
+            Volume snapshots = new Volume();
+            snapshots.setName( cfgStr( "operator.deployment.xp.volume.snapshots.name" ) );
+            snapshots.setPersistentVolumeClaim( new PersistentVolumeClaimVolumeSource( snapshotsPvcName().get(), false ) );
+            res.add( snapshots );
+        }
 
         return Arrays.asList( configMap, deploy, blob );
     }
 
     protected List<PersistentVolumeClaim> createVolumeClaimTemplates()
     {
-        return Arrays.asList( standard( cfgStr( "operator.deployment.xp.volume.index.name" ), podLabels(),
-                                        cfgStr( "operator.deployment.xp.volume.defaultStorageClass" ), "ReadWriteOnce", indexDiskSize() ),
-                              standard( cfgStr( "operator.deployment.xp.volume.snapshots.name" ), podLabels(),
-                                        cfgStr( "operator.deployment.xp.volume.defaultStorageClass" ), "ReadWriteOnce",
-                                        snapshotDiskSize() ) );
+        List<PersistentVolumeClaim> res = new LinkedList<>();
+        if ( indexDiskSize().isPresent() )
+        {
+            res.add( standard( cfgStr( "operator.deployment.xp.volume.index.name" ), podLabels(),
+                               cfgStr( "operator.deployment.xp.volume.defaultStorageClass" ), "ReadWriteOnce", indexDiskSize().get() ) );
+        }
+        return res;
     }
 }

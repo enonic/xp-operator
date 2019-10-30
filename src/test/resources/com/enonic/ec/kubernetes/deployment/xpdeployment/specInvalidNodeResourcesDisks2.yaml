@@ -6,6 +6,7 @@ spec:
 
   sharedDisks:
     blob: 1Gi
+    snapshots: 1Gi
 
   nodes:
     - alias: xp

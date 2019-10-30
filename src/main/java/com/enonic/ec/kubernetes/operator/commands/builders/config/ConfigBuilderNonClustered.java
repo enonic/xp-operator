@@ -6,14 +6,14 @@ import java.util.Properties;
 
 import org.immutables.value.Value;
 
-import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceSpecNode;
+import com.enonic.ec.kubernetes.deployment.xpdeployment.spec.SpecNode;
 
 @Value.Immutable
 public abstract class ConfigBuilderNonClustered
     extends ConfigBuilder
 {
     @Override
-    public Map<String, String> create( XpDeploymentResourceSpecNode node )
+    public Map<String, String> create( SpecNode node )
     {
         Map<String, String> config = new HashMap<>( node.config() );
         Properties clusterCfg = new Properties();
