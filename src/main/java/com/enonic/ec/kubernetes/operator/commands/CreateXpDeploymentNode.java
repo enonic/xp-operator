@@ -15,7 +15,7 @@ import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedKubernetesCommand;
 import com.enonic.ec.kubernetes.deployment.diff.DiffSpec;
 import com.enonic.ec.kubernetes.deployment.diff.DiffSpecNode;
-import com.enonic.ec.kubernetes.deployment.xpdeployment.spec.SpecNode;
+import com.enonic.ec.kubernetes.deployment.spec.SpecNode;
 import com.enonic.ec.kubernetes.operator.commands.builders.config.ConfigBuilder;
 import com.enonic.ec.kubernetes.operator.commands.builders.spec.ImmutablePodDisruptionBudgetSpecBuilder;
 import com.enonic.ec.kubernetes.operator.commands.builders.spec.ImmutableStatefulSetSpecVolumes;
@@ -24,6 +24,7 @@ import com.enonic.ec.kubernetes.operator.commands.kubectl.apply.ImmutableCommand
 import com.enonic.ec.kubernetes.operator.commands.kubectl.apply.ImmutableCommandApplyStatefulSet;
 import com.enonic.ec.kubernetes.operator.commands.kubectl.scale.ImmutableCommandScaleStatefulSet;
 
+@SuppressWarnings("OptionalGetWithoutIsPresent")
 @Value.Immutable
 public abstract class CreateXpDeploymentNode
     extends Configuration
@@ -92,7 +93,7 @@ public abstract class CreateXpDeploymentNode
                 build() );
         }
 
-        boolean changeStatefulSet = diffSpecNode().envChanged() || diffSpecNode().resourcesChanged();
+        boolean changeStatefulSet = diffSpec().versionChanged() || diffSpecNode().envChanged() || diffSpecNode().resourcesChanged();
         if ( changeStatefulSet )
         {
             List<EnvVar> podEnv = new LinkedList<>();

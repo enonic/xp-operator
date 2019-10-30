@@ -1,8 +1,9 @@
-package com.enonic.ec.kubernetes.deployment.xpdeployment;
+package com.enonic.ec.kubernetes.deployment;
 
 import io.fabric8.kubernetes.api.builder.Function;
 import io.fabric8.kubernetes.client.CustomResourceDoneable;
 
+@SuppressWarnings("WeakerAccess")
 public class XpDeploymentResourceDoneable
     extends CustomResourceDoneable<XpDeploymentResource>
 {

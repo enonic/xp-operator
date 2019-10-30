@@ -8,17 +8,17 @@ spec:
 
   sharedDisks:
     blob: 1Gi
+    snapshots: 1Gi
 
   nodes:
     - alias: xp
       replicas: 1
-      type: STANDALONE
+      type: ["MASTER", "DATA", "FRONTEND"]
       resources:
         cpu: "1"
         memory: 1Gi
         disks:
           index: 1Gi
-          snapshots: 1Gi
       config:
         com.enonic.xp.app.main.cfg: |
           tourDisabled = true

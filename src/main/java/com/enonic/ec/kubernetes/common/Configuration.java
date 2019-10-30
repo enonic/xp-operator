@@ -22,6 +22,7 @@ public class Configuration
         return config().getOptionalValue( key, String.class ).get();
     }
 
+    @SuppressWarnings("SameParameterValue")
     protected String cfgStrFmt( String key, Object... args )
     {
         return String.format( config().getOptionalValue( key, String.class ).get(), args );

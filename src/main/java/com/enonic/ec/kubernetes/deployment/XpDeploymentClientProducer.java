@@ -6,9 +6,6 @@ import javax.inject.Singleton;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import com.enonic.ec.kubernetes.common.client.DefaultClientProducer;
-import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResource;
-import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceDoneable;
-import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResourceList;
 
 import static com.enonic.ec.kubernetes.deployment.CrdClientsProducer.createCrdClient;
 
@@ -17,6 +14,7 @@ public class XpDeploymentClientProducer
 {
     private final XpDeploymentClient xpDeploymentClient;
 
+    @SuppressWarnings("CdiInjectionPointsInspection")
     @Inject
     public XpDeploymentClientProducer( DefaultClientProducer defaultClientProducer,
                                        @ConfigProperty(name = "operator.crd.xp.apiVersion") String apiVersion,

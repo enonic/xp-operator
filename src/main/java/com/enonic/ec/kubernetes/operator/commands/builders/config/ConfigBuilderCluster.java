@@ -6,7 +6,7 @@ import java.util.Properties;
 
 import org.immutables.value.Value;
 
-import com.enonic.ec.kubernetes.deployment.xpdeployment.spec.SpecNode;
+import com.enonic.ec.kubernetes.deployment.spec.SpecNode;
 
 @Value.Immutable
 public abstract class ConfigBuilderCluster
@@ -83,6 +83,7 @@ public abstract class ConfigBuilderCluster
         return String.join( ".", service, namespace, "svc.cluster.local" );
     }
 
+    @SuppressWarnings("SameParameterValue")
     private static String dnsRecord( String pod, String service, String namespace )
     {
         return dnsRecord( String.join( ".", pod, service ), namespace );

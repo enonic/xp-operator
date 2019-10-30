@@ -6,7 +6,7 @@ import org.immutables.value.Value;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-import com.enonic.ec.kubernetes.deployment.xpdeployment.spec.Spec;
+import com.enonic.ec.kubernetes.deployment.spec.Spec;
 
 @JsonDeserialize(builder = ImmutableXpDeploymentJson.Builder.class)
 @Value.Immutable

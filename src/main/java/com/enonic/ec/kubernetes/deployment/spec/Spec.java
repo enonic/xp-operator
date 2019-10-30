@@ -1,4 +1,4 @@
-package com.enonic.ec.kubernetes.deployment.xpdeployment.spec;
+package com.enonic.ec.kubernetes.deployment.spec;
 
 import java.util.List;
 import java.util.Map;
@@ -24,7 +24,7 @@ public abstract class Spec
 
     public abstract String project();
 
-    @Value.Derived
+    @Value.Default
     public String app()
     {
         return "xp";
@@ -48,11 +48,11 @@ public abstract class Spec
         Preconditions.checkState( app().equals( "xp" ), "field 'app' has to be 'xp' for xp deployments" );
         Preconditions.checkState( nodes().size() > 0, "field 'nodes' has to contain more than 0 nodes" );
 
-        Preconditions.checkState( nodes().stream().filter( n -> n.isMasterNode() ).count() == 1,
+        Preconditions.checkState( nodes().stream().filter( SpecNode::isMasterNode ).count() == 1,
                                   "1 and only 1 node has be of type master" );
-        Preconditions.checkState( nodes().stream().filter( n -> n.isDataNode() ).count() == 1, "1 and only node has be of type data" );
+        Preconditions.checkState( nodes().stream().filter( SpecNode::isDataNode ).count() == 1, "1 and only node has be of type data" );
 
-        Set<String> aliases = nodes().stream().map( n -> n.alias() ).collect( Collectors.toSet() );
+        Set<String> aliases = nodes().stream().map( SpecNode::alias ).collect( Collectors.toSet() );
         Preconditions.checkState( aliases.size() == nodes().size(), "nodes cannot have the same alias" );
     }
 

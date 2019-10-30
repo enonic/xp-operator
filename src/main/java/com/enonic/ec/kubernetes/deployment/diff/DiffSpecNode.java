@@ -7,7 +7,7 @@ import org.immutables.value.Value;
 
 import com.google.common.base.Preconditions;
 
-import com.enonic.ec.kubernetes.deployment.xpdeployment.spec.SpecNode;
+import com.enonic.ec.kubernetes.deployment.spec.SpecNode;
 
 @Value.Immutable
 public abstract class DiffSpecNode
@@ -54,10 +54,10 @@ public abstract class DiffSpecNode
     @Value.Check
     protected void check()
     {
-        if ( !shouldDoSomeChange() )
+        if ( !shouldModify() )
         {
             return;
         }
-        Preconditions.checkState( !equals( r -> r.resources().disks() ), "cannot change 'resources.disk'" );
+        Preconditions.checkState( equals( r -> r.resources().disks() ), "cannot change 'resources.disk'" );
     }
 }

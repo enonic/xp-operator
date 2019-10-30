@@ -2,6 +2,7 @@ package com.enonic.ec.kubernetes.operator.commands;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import org.immutables.value.Value;
 
@@ -10,15 +11,17 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 
 import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedKubernetesCommand;
+import com.enonic.ec.kubernetes.deployment.XpDeploymentResource;
 import com.enonic.ec.kubernetes.deployment.diff.Diff;
 import com.enonic.ec.kubernetes.deployment.diff.DiffSpec;
+import com.enonic.ec.kubernetes.deployment.diff.DiffSpecNode;
 import com.enonic.ec.kubernetes.deployment.diff.ImmutableDiffSpec;
-import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResource;
 import com.enonic.ec.kubernetes.operator.commands.builders.config.ConfigBuilder;
 import com.enonic.ec.kubernetes.operator.commands.builders.config.ImmutableConfigBuilderCluster;
 import com.enonic.ec.kubernetes.operator.commands.builders.config.ImmutableConfigBuilderNonClustered;
 import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerClient;
 
+@SuppressWarnings("OptionalGetWithoutIsPresent")
 @Value.Immutable
 public abstract class CreateXpDeployment
     extends Configuration
@@ -46,7 +49,6 @@ public abstract class CreateXpDeployment
 
     @Override
     public void addCommands( ImmutableCombinedKubernetesCommand.Builder commandBuilder )
-        throws Exception
     {
         String namespaceName = resource().getSpec().defaultNamespaceName();
         String defaultBlobStorageName = resource().getSpec().defaultResourceNameWithPreFix( "blob" );
@@ -56,7 +58,7 @@ public abstract class CreateXpDeployment
         String esDiscoveryServiceName = resource().getSpec().defaultResourceNameWithPostFix( "es", "discovery" );
 
         DiffSpec diffSpec = ImmutableDiffSpec.builder().
-            oldValue( oldResource().map( r -> r.getSpec() ) ).
+            oldValue( oldResource().map( XpDeploymentResource::getSpec ) ).
             newValue( newResource().getSpec() ).
             build();
 
@@ -100,15 +102,18 @@ public abstract class CreateXpDeployment
                 addCommands( commandBuilder );
         }
 
+        Predicate<DiffSpecNode> createOrUpdate = n -> diffSpec.versionChanged() || diffSpec.enabledChanged() || n.shouldAddOrModify();
+
         // Create / Update Nodes
         diffSpec.nodesChanged().stream().
-            filter( Diff::shouldAddOrModify ).
-            forEach( diff -> ImmutableCreateXpDeploymentNode.builder().
+            filter( createOrUpdate ).
+            forEach( diffSpecNode -> ImmutableCreateXpDeploymentNode.builder().
                 defaultClient( defaultClient() ).
                 ownerReference( ownerReference() ).
                 namespace( namespaceName ).
-                nodeName( resource().getSpec().defaultResourceNameWithPostFix( diff.newValue().get().alias() ) ). // TODO: Move this
-                diffSpecNode( diff ).
+                nodeName( resource().getSpec().defaultResourceNameWithPostFix( diffSpecNode.newValue().get().alias() ) ). // TODO: Move this
+                diffSpec( diffSpec ).
+                diffSpecNode( diffSpecNode ).
                 defaultLabels( defaultLabels ).
                 configBuilder( configBuilder ).
                 blobStorageName( defaultBlobStorageName ).

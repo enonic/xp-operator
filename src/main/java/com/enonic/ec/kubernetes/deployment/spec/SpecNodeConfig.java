@@ -1,4 +1,4 @@
-package com.enonic.ec.kubernetes.deployment.xpdeployment.spec;
+package com.enonic.ec.kubernetes.deployment.spec;
 
 import java.io.IOException;
 import java.io.StringReader;

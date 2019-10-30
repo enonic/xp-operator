@@ -14,6 +14,7 @@ public class IssuerClientProducer
 {
     private final IssuerClient issuerClient;
 
+    @SuppressWarnings("CdiInjectionPointsInspection")
     @Inject
     public IssuerClientProducer( DefaultClientProducer defaultClientProducer,
                                  @ConfigProperty(name = "operator.crd.certManager.issuer.apiVersion") String apiVersion,

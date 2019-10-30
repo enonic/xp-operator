@@ -28,11 +28,13 @@ public abstract class Diff<T>
     @Value.Derived
     public boolean shouldAddOrModify()
     {
-        if ( isNew() )
-        {
-            return true;
-        }
-        return !oldValue().equals( newValue() );
+        return ( oldValue().isEmpty() && newValue().isPresent() ) || shouldModify();
+    }
+
+    @Value.Derived
+    public boolean shouldModify()
+    {
+        return oldValue().isPresent() && newValue().isPresent() && !oldValue().equals( newValue() );
     }
 
     @Value.Derived
@@ -42,34 +44,35 @@ public abstract class Diff<T>
     }
 
     @Value.Derived
-    public boolean shouldDoSomeChange()
+    public boolean shouldAddOrModifyOrRemove()
     {
         return shouldAddOrModify() || shouldRemove();
     }
-    
+
     @Value.Check
     protected void checkNotBothNull()
     {
-        Preconditions.checkState( oldValue().isEmpty() && newValue().isEmpty(), "both old and new value can't be empty" );
+        Preconditions.checkState( oldValue().isPresent() || newValue().isPresent(), "both old and new value can't be empty" );
     }
 
     //region helper functions
 
-    protected <B> boolean equals( Function<T, B> func )
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    <B> boolean equals( Function<T, B> func )
     {
-        if ( !shouldAddOrModify() )
+        if ( !shouldModify() )
         {
-            throw new RuntimeException( "Invalid state" );
+            return false;
         }
         B v1 = func.apply( oldValue().get() );
         B v2 = func.apply( newValue().get() );
         return v1.equals( v2 );
     }
 
-    protected <C, D extends Diff<C>> List<D> mergeMaps( Map<String, C> oldMap, Map<String, C> newMap,
-                                                        BiFunction<Optional<C>, Optional<C>, D> creator )
+    <C, D extends Diff<C>> List<D> mergeMaps( Map<String, C> oldMap, Map<String, C> newMap,
+                                              BiFunction<Optional<C>, Optional<C>, D> creator )
     {
-        Set<String> inBoth = oldMap.keySet().stream().filter( k -> newMap.keySet().contains( k ) ).collect( Collectors.toSet() );
+        Set<String> inBoth = oldMap.keySet().stream().filter( newMap::containsKey ).collect( Collectors.toSet() );
         Set<String> onlyInOld = oldMap.keySet().stream().filter( k -> !inBoth.contains( k ) ).collect( Collectors.toSet() );
         Set<String> onlyInNew = newMap.keySet().stream().filter( k -> !inBoth.contains( k ) ).collect( Collectors.toSet() );
 

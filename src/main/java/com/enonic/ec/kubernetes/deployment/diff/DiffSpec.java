@@ -8,9 +8,9 @@ import org.immutables.value.Value;
 
 import com.google.common.base.Preconditions;
 
+import com.enonic.ec.kubernetes.deployment.spec.Spec;
+import com.enonic.ec.kubernetes.deployment.spec.SpecNode;
 import com.enonic.ec.kubernetes.deployment.vhost.VHost;
-import com.enonic.ec.kubernetes.deployment.xpdeployment.spec.Spec;
-import com.enonic.ec.kubernetes.deployment.xpdeployment.spec.SpecNode;
 
 @Value.Immutable
 public abstract class DiffSpec
@@ -62,15 +62,15 @@ public abstract class DiffSpec
     @Value.Check
     protected void check()
     {
-        if ( !shouldDoSomeChange() )
+        if ( !shouldModify() )
         {
             return;
         }
-        Preconditions.checkState( !equals( Spec::cloud ), "cannot change 'cloud'" );
-        Preconditions.checkState( !equals( Spec::project ), "cannot change 'project'" );
-        Preconditions.checkState( !equals( Spec::app ), "cannot change 'app'" );
-        Preconditions.checkState( !equals( Spec::name ), "cannot change 'name'" );
-        Preconditions.checkState( !equals( Spec::sharedDisks ), "cannot change 'sharedDisks'" );
+        Preconditions.checkState( equals( Spec::cloud ), "cannot change 'cloud'" );
+        Preconditions.checkState( equals( Spec::project ), "cannot change 'project'" );
+        Preconditions.checkState( equals( Spec::app ), "cannot change 'app'" );
+        Preconditions.checkState( equals( Spec::name ), "cannot change 'name'" );
+        Preconditions.checkState( equals( Spec::sharedDisks ), "cannot change 'sharedDisks'" );
     }
 
 }

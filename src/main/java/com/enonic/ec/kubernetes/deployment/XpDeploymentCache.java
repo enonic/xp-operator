@@ -9,7 +9,6 @@ import io.fabric8.kubernetes.client.Watcher;
 import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.ec.kubernetes.common.cache.ResourceCache;
-import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResource;
 
 @Singleton
 public class XpDeploymentCache

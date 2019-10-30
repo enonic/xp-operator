@@ -5,6 +5,8 @@ spec:
   name: myname
   xpVersion: 7.1.0
 
+  enabled: true
+
   sharedDisks:
     blob: 1Gi
     snapshots: 1Gi
@@ -12,10 +14,10 @@ spec:
   nodes:
     - alias: xp
       replicas: 1
-      type: STANDALONE
+      type: ["MASTER", "DATA", "FRONTEND"]
       resources:
         cpu: "1"
         memory: 1Gi
         disks:
           index: 1Gi
-          snapshots: 1Gi
+      config: {}

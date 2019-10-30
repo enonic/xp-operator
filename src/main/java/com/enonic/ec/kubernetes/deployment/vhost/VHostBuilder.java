@@ -16,8 +16,8 @@ import javax.xml.bind.DatatypeConverter;
 import org.immutables.value.Value;
 
 import com.enonic.ec.kubernetes.common.Configuration;
-import com.enonic.ec.kubernetes.deployment.xpdeployment.spec.Spec;
-import com.enonic.ec.kubernetes.deployment.xpdeployment.spec.SpecNode;
+import com.enonic.ec.kubernetes.deployment.spec.Spec;
+import com.enonic.ec.kubernetes.deployment.spec.SpecNode;
 
 @Value.Immutable
 public abstract class VHostBuilder
@@ -63,7 +63,7 @@ public abstract class VHostBuilder
         {
             MessageDigest md = MessageDigest.getInstance( "MD5" );
             md.update( path.getBytes() );
-            String hash = DatatypeConverter.printHexBinary( md.digest() );
+            String hash = DatatypeConverter.printHexBinary( md.digest() ).toLowerCase();
             return spec.defaultResourceNameWithPostFix( host.replace( ".", "-" ), hash );
         }
         catch ( NoSuchAlgorithmException e )

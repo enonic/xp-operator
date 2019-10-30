@@ -1,6 +1,5 @@
 package com.enonic.ec.kubernetes.operator.commands.builders.spec;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -80,7 +79,7 @@ public abstract class StatefulSetSpecVolumes
             res.add( snapshots );
         }
 
-        return Arrays.asList( configMap, deploy, blob );
+        return res;
     }
 
     protected List<PersistentVolumeClaim> createVolumeClaimTemplates()

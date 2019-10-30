@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Assertions;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
-import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResource;
+import com.enonic.ec.kubernetes.deployment.XpDeploymentResource;
 
 public class DeploymentFileTest
 {

@@ -10,7 +10,7 @@ import java.util.Set;
 import org.immutables.value.Value;
 
 import com.enonic.ec.kubernetes.common.Configuration;
-import com.enonic.ec.kubernetes.deployment.xpdeployment.spec.SpecNode;
+import com.enonic.ec.kubernetes.deployment.spec.SpecNode;
 
 @Value.Immutable
 public abstract class VHostPath

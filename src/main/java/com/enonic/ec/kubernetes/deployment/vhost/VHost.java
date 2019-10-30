@@ -5,7 +5,7 @@ import java.util.Optional;
 
 import org.immutables.value.Value;
 
-import com.enonic.ec.kubernetes.deployment.xpdeployment.spec.SpecVHostCertificate;
+import com.enonic.ec.kubernetes.deployment.spec.SpecVHostCertificate;
 
 @Value.Immutable
 public abstract class VHost

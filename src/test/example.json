@@ -4,16 +4,20 @@
     "cloud": "mycloud",
     "project": "myproject",
     "name": "myname",
+
     "xpVersion": "7.1.0",
     "enabled": true,
+
     "sharedDisks": {
-      "blob": "1Gi"
+      "blob": "1Gi",
+      "snapshots": "1Gi"
     },
+
     "nodes": [
       {
         "alias": "woop",
         "replicas": 1,
-        "type": "STANDALONE",
+        "type": ["MASTER", "DATA", "FRONTEND"],
         "resources": {
           "cpu": "1",
           "memory": "1Gi",
@@ -33,6 +37,7 @@
         }
       }
     ],
+
     "vHostCertificates": {
       "company.com": {
         "selfSigned": true

@@ -1,8 +1,8 @@
-package com.enonic.ec.kubernetes.deployment.xpdeployment;
+package com.enonic.ec.kubernetes.deployment;
 
 import io.fabric8.kubernetes.client.CustomResource;
 
-import com.enonic.ec.kubernetes.deployment.xpdeployment.spec.Spec;
+import com.enonic.ec.kubernetes.deployment.spec.Spec;
 
 public class XpDeploymentResource
     extends CustomResource

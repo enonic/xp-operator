@@ -2,6 +2,7 @@ package com.enonic.ec.kubernetes.operator.crd.certmanager.issuer;
 
 import io.fabric8.kubernetes.client.CustomResource;
 
+@SuppressWarnings("unused")
 public class IssuerResource
     extends CustomResource
 {

@@ -1,9 +1,10 @@
-package com.enonic.ec.kubernetes.deployment;
+package com.enonic.ec.kubernetes.deployment.commands;
 
 import org.immutables.value.Value;
 
 import com.enonic.ec.kubernetes.common.commands.Command;
-import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResource;
+import com.enonic.ec.kubernetes.deployment.XpDeploymentClient;
+import com.enonic.ec.kubernetes.deployment.XpDeploymentResource;
 
 @Value.Immutable
 public abstract class CommandDeleteXpDeployment

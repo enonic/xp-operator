@@ -50,7 +50,6 @@ public abstract class PrePullImages
 
     @Override
     public void addCommands( ImmutableCombinedKubernetesCommand.Builder commandBuilder )
-        throws Exception
     {
         if ( versions().size() < 1 )
         {

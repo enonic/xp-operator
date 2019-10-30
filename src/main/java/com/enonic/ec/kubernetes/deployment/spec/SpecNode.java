@@ -1,4 +1,4 @@
-package com.enonic.ec.kubernetes.deployment.xpdeployment.spec;
+package com.enonic.ec.kubernetes.deployment.spec;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -55,7 +55,7 @@ public abstract class SpecNode
 
     //region derived functions
 
-    public boolean isType( Type... type )
+    private boolean isType( Type... type )
     {
         for ( Type t : type )
         {

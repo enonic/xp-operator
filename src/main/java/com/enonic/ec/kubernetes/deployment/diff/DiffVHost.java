@@ -29,7 +29,7 @@ public abstract class DiffVHost
         oldValue().ifPresent( s -> s.vHostPaths().forEach( p -> oldPaths.put( p.path(), p ) ) );
         newValue().ifPresent( s -> s.vHostPaths().forEach( p -> newPaths.put( p.path(), p ) ) );
 
-        return mergeMaps( oldPaths, oldPaths, ( o, n ) -> ImmutableDiffVHostPath.builder().
+        return mergeMaps( oldPaths, newPaths, ( o, n ) -> ImmutableDiffVHostPath.builder().
             oldValue( o ).
             newValue( n ).
             build() );

@@ -1,4 +1,4 @@
-package com.enonic.ec.kubernetes.deployment;
+package com.enonic.ec.kubernetes.deployment.commands;
 
 import org.immutables.value.Value;
 
@@ -6,8 +6,9 @@ import com.google.common.base.Preconditions;
 
 import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.commands.Command;
-import com.enonic.ec.kubernetes.deployment.xpdeployment.XpDeploymentResource;
-import com.enonic.ec.kubernetes.deployment.xpdeployment.spec.Spec;
+import com.enonic.ec.kubernetes.deployment.XpDeploymentClient;
+import com.enonic.ec.kubernetes.deployment.XpDeploymentResource;
+import com.enonic.ec.kubernetes.deployment.spec.Spec;
 
 
 @Value.Immutable

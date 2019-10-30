@@ -23,6 +23,7 @@ import com.enonic.ec.kubernetes.operator.commands.kubectl.delete.ImmutableComman
 import com.enonic.ec.kubernetes.operator.commands.kubectl.delete.ImmutableCommandDeleteService;
 import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerClient;
 
+@SuppressWarnings("OptionalGetWithoutIsPresent")
 @Value.Immutable
 public abstract class CreateXpDeploymentVHost
     extends Configuration
@@ -74,7 +75,7 @@ public abstract class CreateXpDeploymentVHost
             }
         }
 
-        boolean changePaths = diffVHost().pathsChanged().stream().filter( Diff::shouldDoSomeChange ).count() > 0;
+        boolean changePaths = diffVHost().pathsChanged().stream().anyMatch( Diff::shouldAddOrModifyOrRemove );
 
         if ( changePaths )
         {
@@ -101,13 +102,11 @@ public abstract class CreateXpDeploymentVHost
             } );
 
             diffVHost().pathsChanged().stream().
-                filter( Diff::shouldRemove ).forEach( p -> {
-                commandBuilder.addCommand( ImmutableCommandDeleteService.builder().
-                    client( defaultClient() ).
-                    namespace( namespace() ).
-                    name( p.oldValue().get().pathResourceName() ).
-                    build() );
-            } );
+                filter( Diff::shouldRemove ).forEach( p -> commandBuilder.addCommand( ImmutableCommandDeleteService.builder().
+                client( defaultClient() ).
+                namespace( namespace() ).
+                name( p.oldValue().get().pathResourceName() ).
+                build() ) );
 
         }
 

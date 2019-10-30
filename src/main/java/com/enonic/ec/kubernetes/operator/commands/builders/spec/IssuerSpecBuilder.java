@@ -4,7 +4,7 @@ import java.util.Collections;
 
 import org.immutables.value.Value;
 
-import com.enonic.ec.kubernetes.deployment.xpdeployment.spec.SpecVHostCertificate;
+import com.enonic.ec.kubernetes.deployment.spec.SpecVHostCertificate;
 import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.ImmutableIssuerResourceSpec;
 import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerResourceSpec;
 
