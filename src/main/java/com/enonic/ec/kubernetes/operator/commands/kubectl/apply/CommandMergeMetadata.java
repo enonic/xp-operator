@@ -63,6 +63,7 @@ public abstract class CommandMergeMetadata
         metadata().getOwnerReferences().add( ownerReference().get() );
     }
 
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private static Map<String, String> mergeMap( String kind, String name, String mapType, final Map<String, String> oldMap,
                                                  final Optional<Map<String, String>> newMap )
     {

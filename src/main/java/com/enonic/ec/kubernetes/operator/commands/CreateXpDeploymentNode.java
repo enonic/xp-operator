@@ -1,5 +1,6 @@
 package com.enonic.ec.kubernetes.operator.commands;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,8 @@ public abstract class CreateXpDeploymentNode
 
     protected abstract String nodeName();
 
+    protected abstract String serviceName();
+
     protected abstract DiffSpec diffSpec();
 
     protected abstract DiffSpecNode diffSpecNode();
@@ -45,6 +48,8 @@ public abstract class CreateXpDeploymentNode
     protected abstract Map<String, String> defaultLabels();
 
     protected abstract ConfigBuilder configBuilder();
+
+    protected abstract int minimumAvailable();
 
     protected abstract String blobStorageName();
 
@@ -55,11 +60,34 @@ public abstract class CreateXpDeploymentNode
         return cfgStrFmt( "operator.deployment.xp.pod.imageTemplate", diffSpec().newValue().get().xpVersion() );
     }
 
+    private static Map<String, String> nodeExtraLabels( SpecNode node, Map<String, String> defaultLabels )
+    {
+        Map<String, String> res = new HashMap<>( defaultLabels );
+        res.putAll( node.nodeAliasLabel() );
+
+        if ( node.isMasterNode() )
+        {
+            res.put( cfgStr( "operator.deployment.xp.labels.nodeType.master" ), "true" );
+        }
+
+        if ( node.isDataNode() )
+        {
+            res.put( cfgStr( "operator.deployment.xp.labels.nodeType.data" ), "true" );
+        }
+
+        if ( node.isFrontendNode() )
+        {
+            res.put( cfgStr( "operator.deployment.xp.labels.nodeType.frontend" ), "true" );
+        }
+
+        return res;
+    }
+
     @Override
     public void addCommands( ImmutableCombinedKubernetesCommand.Builder commandBuilder )
     {
         SpecNode newNode = diffSpecNode().newValue().get();
-        Map<String, String> nodeLabels = newNode.nodeExtraLabels( defaultLabels() );
+        Map<String, String> nodeLabels = nodeExtraLabels( newNode, defaultLabels() );
 
         int effectiveScale = diffSpec().newValue().get().enabled() ? newNode.replicas() : 0;
         boolean changeScale = diffSpec().enabledChanged() || diffSpecNode().replicasChanged();
@@ -73,14 +101,14 @@ public abstract class CreateXpDeploymentNode
                 name( nodeName() ).
                 labels( nodeLabels ).
                 spec( ImmutablePodDisruptionBudgetSpecBuilder.builder().
-                    minAvailable( newNode.minimumAvailable() ).
+                    minAvailable( minimumAvailable() ).
                     matchLabels( nodeLabels ).
                     build().
                     spec() ).
                 build() );
         }
 
-        boolean changeConfig = diffSpecNode().configChanged();
+        boolean changeConfig = diffSpecNode().configChanged() || diffSpecNode().replicasChanged();
         if ( changeConfig )
         {
             commandBuilder.addCommand( ImmutableCommandApplyConfigMap.builder().
@@ -89,7 +117,7 @@ public abstract class CreateXpDeploymentNode
                 namespace( namespace() ).
                 name( nodeName() ).
                 labels( nodeLabels ).
-                data( configBuilder().create( newNode ) ).
+                data( configBuilder().create( nodeName(), newNode ) ).
                 build() );
         }
 
@@ -102,6 +130,20 @@ public abstract class CreateXpDeploymentNode
             {
                 podEnv.add( new EnvVar( e.getKey(), e.getValue(), null ) );
             }
+
+//            commandBuilder.addCommand( ImmutableCommandApplyService.builder().
+//                client( defaultClient() ).
+//                ownerReference( ownerReference() ).
+//                namespace( namespace() ).
+//                name( nodeName() ).
+//                labels( nodeLabels ).
+//                spec( ImmutableServiceSpecBuilder.builder().
+//                    selector( nodeLabels ).
+//                    putPorts( cfgStr( "operator.deployment.xp.port.main.name" ), cfgInt( "operator.deployment.xp.port.main.number" ) ).
+//                    publishNotReadyAddresses( true ).
+//                    build().
+//                    spec() ).
+//                build() );
 
             commandBuilder.addCommand( ImmutableCommandApplyStatefulSet.builder().
                 client( defaultClient() ).
@@ -118,7 +160,7 @@ public abstract class CreateXpDeploymentNode
                     indexDiskSize( Optional.ofNullable( newNode.resources().disks().get( "index" ) ) ).
                     snapshotsPvcName( Optional.ofNullable( newNode.isDataNode() ? snapshotsStorageName() : null ) ).
                     blobDiskPvcName( blobStorageName() ).
-                    serviceName( nodeName() ).
+                    serviceName( serviceName() ).
                     configMapName( nodeName() ).
                     build().
                     spec() ).

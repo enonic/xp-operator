@@ -27,9 +27,9 @@ public abstract class CreateXpDeploymentBase
 
     protected abstract String namespace();
 
-    protected abstract Map<String, String> defaultLabels();
+    protected abstract String serviceName();
 
-    protected abstract String esDiscoveryService();
+    protected abstract Map<String, String> defaultLabels();
 
     protected abstract String blobStorageName();
 
@@ -82,7 +82,7 @@ public abstract class CreateXpDeploymentBase
             client( defaultClient() ).
             ownerReference( ownerReference() ).
             namespace( namespace() ).
-            name( esDiscoveryService() ).
+            name( serviceName() ).
             labels( defaultLabels() ).
             spec( ImmutableServiceSpecBuilder.builder().
                 selector( defaultLabels() ).

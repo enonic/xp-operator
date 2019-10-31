@@ -8,5 +8,6 @@ import io.fabric8.kubernetes.client.Watcher;
 @FunctionalInterface
 public interface OnAction<T extends HasMetadata>
 {
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     void accept( Watcher.Action action, String id, Optional<T> oldResource, Optional<T> newResource );
 }

@@ -24,6 +24,12 @@ public abstract class DeleteXpDeploymentNode
     @Override
     public void addCommands( ImmutableCombinedKubernetesCommand.Builder commandBuilder )
     {
+//        commandBuilder.addCommand( ImmutableCommandDeleteService.builder().
+//            client( defaultClient() ).
+//            namespace( namespace() ).
+//            name( serviceName() ).
+//            build() );
+
         commandBuilder.addCommand( ImmutableCommandDeleteStatefulSet.builder().
             client( defaultClient() ).
             namespace( namespace() ).

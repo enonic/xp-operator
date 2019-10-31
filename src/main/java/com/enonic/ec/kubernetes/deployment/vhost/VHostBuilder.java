@@ -16,6 +16,8 @@ import javax.xml.bind.DatatypeConverter;
 import org.immutables.value.Value;
 
 import com.enonic.ec.kubernetes.common.Configuration;
+import com.enonic.ec.kubernetes.deployment.ImmutableXpDeploymentNamingHelper;
+import com.enonic.ec.kubernetes.deployment.XpDeploymentNamingHelper;
 import com.enonic.ec.kubernetes.deployment.spec.Spec;
 import com.enonic.ec.kubernetes.deployment.spec.SpecNode;
 
@@ -24,6 +26,12 @@ public abstract class VHostBuilder
     extends Configuration
 {
     protected abstract Spec spec();
+
+    @Value.Derived
+    protected XpDeploymentNamingHelper namingHelper()
+    {
+        return ImmutableXpDeploymentNamingHelper.builder().spec( spec() ).build();
+    }
 
     @Value.Derived
     public List<VHost> vHosts()
@@ -35,7 +43,7 @@ public abstract class VHostBuilder
 
             ImmutableVHost.Builder builder = ImmutableVHost.builder().
                 host( cfg.host ).
-                vHostResourceName( vHostResourceName( spec(), cfg.host ) ).
+                vHostResourceName( vHostResourceName( cfg.host ) ).
                 certificate( Optional.ofNullable( spec().vHostCertificates().get( cfg.host ) ) );
 
             for ( Map.Entry<String, Set<SpecNode>> e : cfg.paths.entrySet() )
@@ -43,7 +51,7 @@ public abstract class VHostBuilder
                 builder.addVHostPaths( ImmutableVHostPath.builder().
                     nodes( e.getValue() ).
                     path( e.getKey() ).
-                    pathResourceName( vHostPathResourceName( spec(), cfg.host, e.getKey() ) ).
+                    pathResourceName( vHostPathResourceName( cfg.host, e.getKey() ) ).
                     vHostLabels( vHostPathLabels( cfg.host, e.getKey() ) ).
                     build() );
             }
@@ -52,19 +60,19 @@ public abstract class VHostBuilder
         return VHosts;
     }
 
-    private String vHostResourceName( Spec spec, String host )
+    private String vHostResourceName( String host )
     {
-        return spec.defaultResourceNameWithPostFix( host.replace( ".", "-" ) );
+        return namingHelper().defaultResourceNameWithPostFix( host.replace( ".", "-" ) );
     }
 
-    private String vHostPathResourceName( Spec spec, String host, String path )
+    private String vHostPathResourceName( String host, String path )
     {
         try
         {
             MessageDigest md = MessageDigest.getInstance( "MD5" );
             md.update( path.getBytes() );
             String hash = DatatypeConverter.printHexBinary( md.digest() ).toLowerCase();
-            return spec.defaultResourceNameWithPostFix( host.replace( ".", "-" ), hash );
+            return namingHelper().defaultResourceNameWithPostFix( host.replace( ".", "-" ), hash );
         }
         catch ( NoSuchAlgorithmException e )
         {

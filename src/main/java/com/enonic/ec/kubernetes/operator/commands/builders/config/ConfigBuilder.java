@@ -1,7 +1,5 @@
 package com.enonic.ec.kubernetes.operator.commands.builders.config;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.Map;
 import java.util.Properties;
 
@@ -11,20 +9,19 @@ import com.enonic.ec.kubernetes.deployment.spec.SpecNode;
 public abstract class ConfigBuilder
     extends Configuration
 {
-    public abstract Map<String, String> create( SpecNode node );
+    public abstract Map<String, String> create( String nodeResourceName, SpecNode node );
 
     void apply( SpecNode node, String propertiesName, Properties properties, Map<String, String> config )
     {
         // Always override default values with user input
-        node.config().getAsProperties( propertiesName ).ifPresent(
-            p -> p.forEach( properties::put ) );
+        node.config().getAsProperties( propertiesName ).ifPresent( p -> p.forEach( properties::put ) );
         config.put( propertiesName, getPropertyAsString( properties ) );
     }
 
     private static String getPropertyAsString( Properties prop )
     {
-        StringWriter writer = new StringWriter();
-        prop.list( new PrintWriter( writer ) );
-        return writer.getBuffer().toString();
+        StringBuilder sb = new StringBuilder();
+        prop.forEach( ( k, v ) -> sb.append( k.toString() ).append( " = " ).append( v.toString() ).append( "\n" ) );
+        return sb.toString();
     }
 }

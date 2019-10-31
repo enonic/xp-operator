@@ -13,7 +13,7 @@ public abstract class ConfigBuilderNonClustered
     extends ConfigBuilder
 {
     @Override
-    public Map<String, String> create( SpecNode node )
+    public Map<String, String> create( String nodeResourceName, SpecNode node )
     {
         Map<String, String> config = new HashMap<>( node.config() );
         Properties clusterCfg = new Properties();

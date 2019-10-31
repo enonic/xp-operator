@@ -17,24 +17,34 @@ public class Configuration
         return _cfg;
     }
 
-    protected String cfgStr( String key )
+    protected static String cfgStr( String key )
     {
         return config().getOptionalValue( key, String.class ).get();
     }
 
     @SuppressWarnings("SameParameterValue")
-    protected String cfgStrFmt( String key, Object... args )
+    protected static String cfgStrFmt( String key, Object... args )
     {
         return String.format( config().getOptionalValue( key, String.class ).get(), args );
     }
 
-    protected int cfgInt( String key )
+    protected static int cfgInt( String key )
     {
         return config().getOptionalValue( key, Integer.class ).get();
     }
 
-    protected long cfgLong( String key )
+    protected static long cfgLong( String key )
     {
         return config().getOptionalValue( key, Long.class ).get();
+    }
+
+    protected static String dnsRecord( String service, String namespace )
+    {
+        return String.join( ".", service, namespace, "svc.cluster.local" );
+    }
+
+    protected static String dnsRecord( String pod, String service, String namespace )
+    {
+        return dnsRecord( String.join( ".", pod, service ), namespace );
     }
 }

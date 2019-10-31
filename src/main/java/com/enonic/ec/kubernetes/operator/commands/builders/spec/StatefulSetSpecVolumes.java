@@ -37,11 +37,7 @@ public abstract class StatefulSetSpecVolumes
         volumeMounts.add( createVolumeMount( "operator.deployment.xp.volume.blob.path", "operator.deployment.xp.volume.blob.name" ) );
         volumeMounts.add( createVolumeMount( "operator.deployment.xp.volume.config.path", "operator.deployment.xp.volume.config.name" ) );
         volumeMounts.add( createVolumeMount( "operator.deployment.xp.volume.deploy.path", "operator.deployment.xp.volume.deploy.name" ) );
-
-        if ( indexDiskSize().isPresent() )
-        {
-            volumeMounts.add( createVolumeMount( "operator.deployment.xp.volume.index.path", "operator.deployment.xp.volume.index.name" ) );
-        }
+        volumeMounts.add( createVolumeMount( "operator.deployment.xp.volume.index.path", "operator.deployment.xp.volume.index.name" ) );
 
         if ( snapshotsPvcName().isPresent() )
         {
@@ -70,6 +66,14 @@ public abstract class StatefulSetSpecVolumes
         deploy.setName( cfgStr( "operator.deployment.xp.volume.deploy.name" ) );
         deploy.setEmptyDir( new EmptyDirVolumeSource( null, null ) );
         res.add( deploy );
+
+        if ( indexDiskSize().isEmpty() )
+        { // Index is not persisted, just mount to node
+            Volume index = new Volume();
+            index.setName( cfgStr( "operator.deployment.xp.volume.index.name" ) );
+            index.setEmptyDir( new EmptyDirVolumeSource( null, null ) );
+            res.add( index );
+        }
 
         if ( snapshotsPvcName().isPresent() )
         {

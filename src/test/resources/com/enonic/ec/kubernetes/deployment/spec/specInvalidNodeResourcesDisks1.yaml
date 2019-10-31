@@ -2,7 +2,7 @@ spec:
   cloud: mycloud
   project: myproject
   name: myname
-  xpVersion: 7.1.0
+  xpVersion: 7.0.3
 
   sharedDisks:
     blob: 1Gi

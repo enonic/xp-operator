@@ -1,6 +1,5 @@
 package com.enonic.ec.kubernetes.deployment.spec;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -32,7 +31,11 @@ public abstract class SpecNode
 
     public abstract Map<String, String> env();
 
-    public abstract SpecNodeConfig config();
+    @Value.Default
+    public SpecNodeConfig config()
+    {
+        return new SpecNodeConfig();
+    }
 
     //region class consistency check
 
@@ -90,40 +93,17 @@ public abstract class SpecNode
 
     @JsonIgnore
     @Value.Derived
-    public Map<String, String> nodeAliasLabel()
+    public boolean isOnlyFrontend()
     {
-        // Do not add more labels here, it will brake service mapping for vHosts to pods
-        return Map.of( cfgStr( "operator.deployment.xp.pod.label.aliasPrefix" ) + alias(), alias() );
+        return isType( Type.FRONTEND ) && type().size() == 1;
     }
 
     @JsonIgnore
     @Value.Derived
-    public Integer minimumAvailable()
+    public Map<String, String> nodeAliasLabel()
     {
-        return 0; // TODO: Fix
-    }
-
-    public Map<String, String> nodeExtraLabels( Map<String, String> defaultLabels )
-    {
-        Map<String, String> res = new HashMap<>( defaultLabels );
-        res.putAll( nodeAliasLabel() );
-
-        if ( isMasterNode() )
-        {
-            res.put( cfgStr( "operator.deployment.xp.labels.nodeType.master" ), "true" );
-        }
-
-        if ( isDataNode() )
-        {
-            res.put( cfgStr( "operator.deployment.xp.labels.nodeType.data" ), "true" );
-        }
-
-        if ( isFrontendNode() )
-        {
-            res.put( cfgStr( "operator.deployment.xp.labels.nodeType.frontend" ), "true" );
-        }
-
-        return res;
+        // Do not add more labels here, it will brake service mapping for vHosts to pods
+        return Map.of( cfgStr( "operator.deployment.xp.pod.label.aliasPrefix" ) + alias(), alias() );
     }
 
     //endregion

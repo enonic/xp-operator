@@ -100,6 +100,8 @@ public abstract class StatefulSetSpecBase
 
     private List<Container> createPodInitContainers()
     {
+        List<Container> res = new LinkedList<>();
+
         Container init = new Container();
         init.setName( "configure-sysctl" );
         init.setImage( podImage() );
@@ -109,7 +111,16 @@ public abstract class StatefulSetSpecBase
         initSecurityContext.setPrivileged( true );
         init.setSecurityContext( initSecurityContext );
         init.setCommand( Arrays.asList( "sysctl", "-w", "vm.max_map_count=262144" ) );
-        return Collections.singletonList( init );
+        res.add( init );
+
+        Container dnsWait = new Container();
+        dnsWait.setName( "dns-wait" );
+        dnsWait.setImage( "tutum/dnsutils" );
+        dnsWait.setCommand( Arrays.asList( "bash", "-c", "while [ -n \"$(" + serviceName() + " | grep -E 't find " + serviceName() +
+            "')\" ]; do echo \"Waiting for DNS\"; sleep 1; done" ) );
+        res.add( dnsWait );
+
+        return res;
     }
 
     private List<Container> createPodContainers()
@@ -127,6 +138,11 @@ public abstract class StatefulSetSpecBase
         envNodeName.setName( "XP_NODE_NAME" );
         envNodeName.setValueFrom( new EnvVarSource( null, new ObjectFieldSelector( null, "metadata.name" ), null, null ) );
         envVars.add( envNodeName );
+
+        EnvVar envNodeIp = new EnvVar();
+        envNodeIp.setName( "XP_NODE_IP" );
+        envNodeIp.setValueFrom( new EnvVarSource( null, new ObjectFieldSelector( null, "status.podIP" ), null, null ) );
+        envVars.add( envNodeIp );
 
         exp.setEnv( envVars );
 
@@ -152,7 +168,7 @@ public abstract class StatefulSetSpecBase
         // Probes
         Probe readinessProbe = new Probe();
         exp.setReadinessProbe( readinessProbe );
-        readinessProbe.setFailureThreshold( 3 );
+        readinessProbe.setFailureThreshold( 10 );
         readinessProbe.setInitialDelaySeconds( 10 );
         readinessProbe.setPeriodSeconds( 5 );
         readinessProbe.setSuccessThreshold( 1 );
@@ -161,7 +177,7 @@ public abstract class StatefulSetSpecBase
 
         Probe livelinessProbe = new Probe();
         exp.setLivenessProbe( livelinessProbe );
-        livelinessProbe.setFailureThreshold( 3 );
+        livelinessProbe.setFailureThreshold( 10 );
         livelinessProbe.setInitialDelaySeconds( 5 );
         livelinessProbe.setPeriodSeconds( 20 );
         livelinessProbe.setSuccessThreshold( 1 );

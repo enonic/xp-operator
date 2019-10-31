@@ -3,7 +3,7 @@ spec:
   project: myproject
   app: fail
   name: myname
-  xpVersion: 7.1.0
+  xpVersion: 7.0.3
 
   enabled: true
 

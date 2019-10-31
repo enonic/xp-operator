@@ -1,6 +1,7 @@
 package com.enonic.ec.kubernetes.operator.commands.builders.config;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -14,7 +15,7 @@ public abstract class ConfigBuilderCluster
 {
     protected abstract String namespace();
 
-    protected abstract String esDiscoveryService();
+    protected abstract String serviceName();
 
     protected abstract String clusterName();
 
@@ -22,22 +23,22 @@ public abstract class ConfigBuilderCluster
 
     protected abstract Integer minimumDataNodes();
 
+    protected abstract List<String> discoveryHosts();
+
     @Override
-    public Map<String, String> create( SpecNode node )
+    public Map<String, String> create( String nodeResourceName, SpecNode node )
     {
         Map<String, String> config = new HashMap<>( node.config() );
 
-        String podDnsRecord = dnsRecord( "${env.XP_NODE_NAME}", esDiscoveryService(), namespace() );
-        String discoveryService = dnsRecord( esDiscoveryService(), namespace() );
+        String podHost = "${env.XP_NODE_NAME}." + serviceName();
 
         // Create cluster config
         Properties clusterCfg = new Properties();
-
         clusterCfg.put( "cluster.enabled", "true" );
         clusterCfg.put( "node.name", "${env.XP_NODE_NAME}" );
-        clusterCfg.put( "discovery.unicast.hosts", discoveryService );
-        clusterCfg.put( "network.host", podDnsRecord );
-        clusterCfg.put( "network.publish.host", podDnsRecord );
+        clusterCfg.put( "discovery.unicast.hosts", String.join( ",", discoveryHosts() ) );
+        clusterCfg.put( "network.host", podHost );
+        clusterCfg.put( "network.publish.host", podHost );
 
         apply( node, "com.enonic.xp.cluster.cfg", clusterCfg, config );
 
@@ -47,15 +48,15 @@ public abstract class ConfigBuilderCluster
         setNodeType( elasticCfg, node );
         elasticCfg.put( "cluster.name", clusterName() );
 
-        elasticCfg.put( "gateway.expected_master_nodes", minimumMasterNodes() );
-        elasticCfg.put( "gateway.expected_data_nodes", minimumDataNodes() );
+//        elasticCfg.put( "gateway.expected_master_nodes", minimumMasterNodes().toString() );
+//        elasticCfg.put( "gateway.expected_data_nodes", minimumDataNodes().toString() );
         elasticCfg.put( "discovery.zen.minimum_master_nodes", minimumMasterNodes() );
 
         elasticCfg.put( "network.tcp.keep_alive", "true" );
 
-        elasticCfg.put( "discovery.zen.fd.ping_timeout", "5s" );
-        elasticCfg.put( "discovery.zen.fd.ping_retries", "3" );
-        elasticCfg.put( "discovery.zen.fd.ping_interval", "1s" );
+//        elasticCfg.put( "discovery.zen.fd.ping_timeout", "5s" );
+//        elasticCfg.put( "discovery.zen.fd.ping_retries", "3" );
+//        elasticCfg.put( "discovery.zen.fd.ping_interval", "1s" );
 
         apply( node, "com.enonic.xp.elasticsearch.cfg", elasticCfg, config );
 
@@ -72,20 +73,11 @@ public abstract class ConfigBuilderCluster
         {
             elasticCfg.put( "node.data", "true" );
         }
-        if ( node.isFrontendNode() )
+        if ( node.isOnlyFrontend() )
         {
             elasticCfg.put( "node.client", "true" );
+            elasticCfg.put( "node.master", "false" );
+            elasticCfg.put( "node.data", "false" );
         }
-    }
-
-    private static String dnsRecord( String service, String namespace )
-    {
-        return String.join( ".", service, namespace, "svc.cluster.local" );
-    }
-
-    @SuppressWarnings("SameParameterValue")
-    private static String dnsRecord( String pod, String service, String namespace )
-    {
-        return dnsRecord( String.join( ".", pod, service ), namespace );
     }
 }

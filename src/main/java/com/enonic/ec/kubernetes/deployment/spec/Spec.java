@@ -62,54 +62,9 @@ public abstract class Spec
 
     @Value.Derived
     @JsonIgnore
-    public boolean isClusteredDeployment()
-    {
-        return nodes().size() > 1;
-    }
-
-    @Value.Derived
-    @JsonIgnore
-    public int minimumDataNodes()
-    {
-        return 0; // TODO: FIX
-    }
-
-    @Value.Derived
-    @JsonIgnore
-    public int minimumMasterNodes()
-    {
-        return 0; // TODO: FIX
-    }
-
-    @Value.Derived
-    @JsonIgnore
-    public String defaultNamespaceName()
-    {
-        return String.join( "-", cloud(), project() );
-    }
-
-    @Value.Derived
-    @JsonIgnore
-    public String defaultResourceName()
-    {
-        return String.join( "-", app(), name() );
-    }
-
-    public String defaultResourceNameWithPostFix( String... postfix )
-    {
-        return String.join( "-", defaultResourceName(), String.join( "-", postfix ) );
-    }
-
-    public String defaultResourceNameWithPreFix( String... prefix )
-    {
-        return String.join( "-", String.join( "-", prefix ), defaultResourceName() );
-    }
-
-    @Value.Derived
-    @JsonIgnore
     public String deploymentName()
     {
-        return String.join( "-", defaultNamespaceName(), defaultResourceName() );
+        return String.join( "-", cloud(), project(), app(), name() );
     }
 
     @Value.Derived

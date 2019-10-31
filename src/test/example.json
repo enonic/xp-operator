@@ -5,7 +5,7 @@
     "project": "myproject",
     "name": "myname",
 
-    "xpVersion": "7.1.0",
+    "xpVersion": "7.1.1",
     "enabled": true,
 
     "sharedDisks": {
@@ -16,11 +16,11 @@
     "nodes": [
       {
         "alias": "woop",
-        "replicas": 1,
+        "replicas": 3,
         "type": ["MASTER", "DATA", "FRONTEND"],
         "resources": {
-          "cpu": "1",
-          "memory": "1Gi",
+          "cpu": "0.5",
+          "memory": "512GMi",
           "disks": {
             "index": "1Gi",
             "snapshots": "1Gi"
