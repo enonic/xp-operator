@@ -22,12 +22,10 @@
           "cpu": "0.5",
           "memory": "512GMi",
           "disks": {
-            "index": "1Gi",
-            "snapshots": "1Gi"
+            "index": "200Mi"
           }
         },
         "env": {
-          "JAVA_OPTS": "-Dcom.sun.management.jmxremote\n-Dcom.sun.management.jmxremote.port=3000\n-Dcom.sun.management.jmxremote.rmi.port=3001\n-Dcom.sun.management.jmxremote.ssl=false\n-Dcom.sun.management.jmxremote.authenticate=false\n-Djava.rmi.server.hostname=127.0.0.1\n-Xdebug\n-Xnoagent\n-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=*:5005\n",
           "XP_APPS": "com.enonic.app.snapshotter:2.1.1\n"
         },
         "config": {

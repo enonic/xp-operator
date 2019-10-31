@@ -1,5 +1,5 @@
 CERT_MANAGER_VERSION:=v0.10.1
-LOCAL_OPERATOR_PORT:=8081
+LOCAL_OPERATOR_PORT:=8080
 
 mvn-dependencies:
 	mvn versions:display-plugin-updates
