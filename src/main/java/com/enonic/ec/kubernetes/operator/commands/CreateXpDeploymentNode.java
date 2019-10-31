@@ -131,20 +131,6 @@ public abstract class CreateXpDeploymentNode
                 podEnv.add( new EnvVar( e.getKey(), e.getValue(), null ) );
             }
 
-//            commandBuilder.addCommand( ImmutableCommandApplyService.builder().
-//                client( defaultClient() ).
-//                ownerReference( ownerReference() ).
-//                namespace( namespace() ).
-//                name( nodeName() ).
-//                labels( nodeLabels ).
-//                spec( ImmutableServiceSpecBuilder.builder().
-//                    selector( nodeLabels ).
-//                    putPorts( cfgStr( "operator.deployment.xp.port.main.name" ), cfgInt( "operator.deployment.xp.port.main.number" ) ).
-//                    publishNotReadyAddresses( true ).
-//                    build().
-//                    spec() ).
-//                build() );
-
             commandBuilder.addCommand( ImmutableCommandApplyStatefulSet.builder().
                 client( defaultClient() ).
                 ownerReference( ownerReference() ).

@@ -3,7 +3,7 @@
   "spec": {
     "cloud": "mycloud",
     "project": "myproject",
-    "name": "myname",
+    "name": "qa",
 
     "xpVersion": "7.1.1",
     "enabled": true,
@@ -15,12 +15,12 @@
 
     "nodes": [
       {
-        "alias": "woop",
+        "alias": "main",
         "replicas": 3,
         "type": ["MASTER", "DATA", "FRONTEND"],
         "resources": {
-          "cpu": "0.5",
-          "memory": "512GMi",
+          "cpu": "1",
+          "memory": "512Mi",
           "disks": {
             "index": "200Mi"
           }

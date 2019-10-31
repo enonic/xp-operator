@@ -24,6 +24,7 @@ import com.enonic.ec.kubernetes.deployment.diff.ImmutableDiffSpec;
 import com.enonic.ec.kubernetes.deployment.spec.SpecNode;
 import com.enonic.ec.kubernetes.operator.commands.builders.config.ConfigBuilder;
 import com.enonic.ec.kubernetes.operator.commands.builders.config.ImmutableConfigBuilderCluster;
+import com.enonic.ec.kubernetes.operator.commands.builders.config.ImmutableConfigBuilderNonClustered;
 import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerClient;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
@@ -40,7 +41,6 @@ public abstract class CreateXpDeployment
 
     protected abstract XpDeploymentResource newResource();
 
-    // TODO: Remove
     private XpDeploymentResource resource()
     {
         return newResource();
@@ -56,20 +56,6 @@ public abstract class CreateXpDeployment
     protected XpDeploymentNamingHelper namingHelper()
     {
         return ImmutableXpDeploymentNamingHelper.builder().spec( resource().getSpec() ).build();
-    }
-
-    private List<String> getAllNodeDNS( String serviceName )
-    {
-        List<String> res = new LinkedList<>();
-        for ( SpecNode node : resource().getSpec().nodes() )
-        {
-            String tmp = namingHelper().defaultResourceName( node );
-            for ( int i = 0; i < node.replicas(); i++ )
-            {
-                res.add( tmp + "-" + i + "." + serviceName );
-            }
-        }
-        return res;
     }
 
     @Override
@@ -88,28 +74,38 @@ public abstract class CreateXpDeployment
             newValue( newResource().getSpec() ).
             build();
 
-        Function<SpecNode, Integer> defaultMinimumAvailable = ( n ) -> ( n.replicas() / 2 ) + 1;
+        boolean isClustered = resource().getSpec().isClustered();
 
-        SpecNode masterNode = resource().getSpec().nodes().stream().filter( SpecNode::isMasterNode ).findAny().get();
-        int minimumMasterNodes = defaultMinimumAvailable.apply( masterNode );
+        Function<SpecNode, Integer> defaultMinimumAvailable;
+        ConfigBuilder configBuilder;
 
-        SpecNode dataNode = resource().getSpec().nodes().stream().filter( SpecNode::isDataNode ).findAny().get();
-        int minimumDataNodes = defaultMinimumAvailable.apply( dataNode );
+        if ( resource().getSpec().isClustered() )
+        {
+            defaultMinimumAvailable = ( n ) -> ( n.replicas() / 2 ) + 1;
 
-        ConfigBuilder configBuilder = ImmutableConfigBuilderCluster.builder().
-            namespace( namespaceName ).
-            serviceName( serviceName ).
-            clusterName( resource().getSpec().deploymentName() ).
-            minimumMasterNodes( minimumMasterNodes ).
-            minimumDataNodes( minimumDataNodes ).
-//            discoveryHosts( Arrays.asList( String.join( ".", serviceName, namespaceName, "svc.cluster.local" ) ) ). // TODO: XP is not happy with this
-    discoveryHosts( getAllNodeDNS( serviceName ) ).
-                build();
+            SpecNode masterNode = resource().getSpec().nodes().stream().filter( SpecNode::isMasterNode ).findAny().get();
+            int minimumMasterNodes = defaultMinimumAvailable.apply( masterNode );
 
-        // TODO: If not clustered
-        // Skip NFS
-        // Skip Pod disruption budget
-        // Skip discovery service
+            SpecNode dataNode = resource().getSpec().nodes().stream().filter( SpecNode::isDataNode ).findAny().get();
+            int minimumDataNodes = defaultMinimumAvailable.apply( dataNode );
+
+            configBuilder = ImmutableConfigBuilderCluster.builder().
+                namespace( namespaceName ).
+                serviceName( serviceName ).
+                clusterName( resource().getSpec().deploymentName() ).
+                minimumMasterNodes( Math.max( 1, minimumMasterNodes ) ).
+                minimumDataNodes( Math.max( 1, minimumDataNodes ) ).
+                // TODO: XP is not happy with this, do some research
+                // discoveryHosts( Arrays.asList( String.join( ".", serviceName, namespaceName, "svc.cluster.local" ) ) ).
+                    discoveryHosts( getAllNodeDNS( serviceName ) ).
+                    build();
+
+        }
+        else
+        {
+            defaultMinimumAvailable = ( n ) -> 0; // This has to be 0 to be able to update XP
+            configBuilder = ImmutableConfigBuilderNonClustered.builder().build();
+        }
 
         if ( diffSpec.isNew() )
         {
@@ -117,6 +113,7 @@ public abstract class CreateXpDeployment
                 defaultClient( defaultClient() ).
                 ownerReference( ownerReference() ).
                 namespace( namespaceName ).
+                isClustered( isClustered ).
                 serviceName( serviceName ).
                 blobStorageName( defaultBlobStorageName ).
                 blobStorageSize( resource().getSpec().sharedDisks().blob() ).
@@ -182,4 +179,19 @@ public abstract class CreateXpDeployment
                 build().
                 addCommands( commandBuilder ) );
     }
+
+    private List<String> getAllNodeDNS( String serviceName )
+    {
+        List<String> res = new LinkedList<>();
+        for ( SpecNode node : resource().getSpec().nodes() )
+        {
+            String tmp = namingHelper().defaultResourceName( node );
+            for ( int i = 0; i < node.replicas(); i++ )
+            {
+                res.add( tmp + "-" + i + "." + serviceName );
+            }
+        }
+        return res;
+    }
+
 }

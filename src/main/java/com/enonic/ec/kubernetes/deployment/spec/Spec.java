@@ -60,6 +60,13 @@ public abstract class Spec
 
     //region derived functions
 
+    @Value.Default
+    @JsonIgnore
+    public boolean isClustered()
+    {
+        return nodes().stream().mapToInt( SpecNode::replicas ).sum() > 1;
+    }
+
     @Value.Derived
     @JsonIgnore
     public String deploymentName()

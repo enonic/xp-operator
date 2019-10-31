@@ -32,6 +32,8 @@ public abstract class CommandCreateXpDeployment
     @Override
     public XpDeploymentResource execute()
     {
+        // TODO: Check if namespace is terminating....from old deployment
+
         XpDeploymentResource newDeployment = new XpDeploymentResource();
         newDeployment.setApiVersion( apiVersion() );
         newDeployment.setKind( cfgStr( "operator.crd.xp.kind" ) );

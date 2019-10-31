@@ -68,7 +68,7 @@ public abstract class StatefulSetSpecVolumes
         res.add( deploy );
 
         if ( indexDiskSize().isEmpty() )
-        { // Index is not persisted, just mount to node
+        { // Index is not persisted, just mount empty directory
             Volume index = new Volume();
             index.setName( cfgStr( "operator.deployment.xp.volume.index.name" ) );
             index.setEmptyDir( new EmptyDirVolumeSource( null, null ) );

@@ -80,11 +80,14 @@ public class DeploymentService
     @Produces("application/json")
     public Response getXpDeployment( @PathParam("uid") String uid )
     {
+        // Fetch from cache
         Optional<XpDeploymentResource> resource = xpDeploymentCache.get( uid );
         if ( resource.isEmpty() )
         {
             return Response.status( 404 ).build();
         }
+
+        // Create response
         return Response.ok( resourceToJson( resource.get() ) ).build();
     }
 
@@ -92,18 +95,20 @@ public class DeploymentService
     @Path("/{uid}")
     public Response editXpDeployment( @PathParam("uid") String uid, XpDeploymentJson deployment )
     {
-        // Get old one
+        // Fetch from cache
         Optional<XpDeploymentResource> resource = xpDeploymentCache.get( uid );
         if ( resource.isEmpty() )
         {
             return Response.status( 404 ).build();
         }
 
-        // Validate the changes
+        // Validate apiVersion
         if ( !resource.get().getApiVersion().equals( deployment.apiVersion() ) )
         {
             return Response.status( 400, "cannot update deployment to a different apiVersion" ).build();
         }
+
+        // Validate the changes
         ImmutableDiffSpec.builder().
             oldValue( resource.get().getSpec() ).
             newValue( deployment.spec() ).
@@ -114,6 +119,7 @@ public class DeploymentService
         xpDeploymentClientProducer.produce().client().
             createOrReplace( resource.get() );
 
+        // Create response
         return Response.ok( resourceToJson( resource.get() ) ).build();
     }
 
@@ -135,6 +141,7 @@ public class DeploymentService
             build().
             execute();
 
+        // Create response
         return Response.ok().build();
     }
 

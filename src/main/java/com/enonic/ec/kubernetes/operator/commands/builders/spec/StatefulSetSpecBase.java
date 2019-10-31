@@ -113,11 +113,13 @@ public abstract class StatefulSetSpecBase
         init.setCommand( Arrays.asList( "sysctl", "-w", "vm.max_map_count=262144" ) );
         res.add( init );
 
+        // This container makes sure that the dns records for the cluster are created
+        // before xp tries to setup the cluster
         Container dnsWait = new Container();
         dnsWait.setName( "dns-wait" );
-        dnsWait.setImage( "tutum/dnsutils" );
-        dnsWait.setCommand( Arrays.asList( "bash", "-c", "while [ -n \"$(" + serviceName() + " | grep -E 't find " + serviceName() +
-            "')\" ]; do echo \"Waiting for DNS\"; sleep 1; done" ) );
+        dnsWait.setImage( "alpine:3.10" );
+        dnsWait.setCommand( Arrays.asList( "ash", "-c", "while [ -z \"$(nslookup " + serviceName() +
+            " | grep Name)\" ]; do echo \"Waiting for DNS\"; sleep 1; done" ) );
         res.add( dnsWait );
 
         return res;
@@ -165,6 +167,7 @@ public abstract class StatefulSetSpecBase
                                      new ContainerPort( cfgInt( "operator.deployment.xp.port.es.discovery.number" ), null, null,
                                                         cfgStr( "operator.deployment.xp.port.es.discovery.name" ), null ) ) );
 
+        // TODO: Add probe parameters to properties
         // Probes
         Probe readinessProbe = new Probe();
         exp.setReadinessProbe( readinessProbe );

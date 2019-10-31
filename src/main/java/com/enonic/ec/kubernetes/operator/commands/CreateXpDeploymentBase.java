@@ -39,6 +39,8 @@ public abstract class CreateXpDeploymentBase
 
     protected abstract Quantity snapshotsStorageSize();
 
+    protected abstract boolean isClustered();
+
     @Override
     public void addCommands( ImmutableCombinedKubernetesCommand.Builder commandBuilder )
     {
@@ -58,7 +60,7 @@ public abstract class CreateXpDeploymentBase
             labels( defaultLabels() ).
             spec( ImmutablePvcSpecBuilder.builder().
                 size( blobStorageSize() ).
-                addAccessMode( "ReadWriteMany" ).
+                addAccessMode( isClustered() ? "ReadWriteMany" : "ReadWriteOnce" ). // TODO: This only works on minikube
                 build().
                 spec() ).
             build() );
@@ -72,7 +74,7 @@ public abstract class CreateXpDeploymentBase
             labels( defaultLabels() ).
             spec( ImmutablePvcSpecBuilder.builder().
                 size( snapshotsStorageSize() ).
-                addAccessMode( "ReadWriteMany" ).
+                addAccessMode( isClustered() ? "ReadWriteMany" : "ReadWriteOnce" ). // TODO: This only works on minikube
                 build().
                 spec() ).
             build() );

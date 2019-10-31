@@ -2,8 +2,9 @@
 
 ## TODO
 
+* This project assumes that cloud+project is always unique, is that the case?
 * Create admission endpoint in operator for validation
-* "cloud-project" string must be unique, else people can override deployments
+* Fix tests
 
 ## Debug with minikube
 

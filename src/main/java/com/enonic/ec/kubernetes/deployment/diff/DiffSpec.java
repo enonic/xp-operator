@@ -71,6 +71,8 @@ public abstract class DiffSpec
         Preconditions.checkState( equals( Spec::app ), "cannot change 'app'" );
         Preconditions.checkState( equals( Spec::name ), "cannot change 'name'" );
         Preconditions.checkState( equals( Spec::sharedDisks ), "cannot change 'sharedDisks'" );
+        Preconditions.checkState( equals( Spec::isClustered ),
+                                  "cannot change from a non clustered deployment to a clustered one and visa versa" );
     }
 
 }

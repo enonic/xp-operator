@@ -48,8 +48,8 @@ public abstract class ConfigBuilderCluster
         setNodeType( elasticCfg, node );
         elasticCfg.put( "cluster.name", clusterName() );
 
-//        elasticCfg.put( "gateway.expected_master_nodes", minimumMasterNodes().toString() );
-//        elasticCfg.put( "gateway.expected_data_nodes", minimumDataNodes().toString() );
+        elasticCfg.put( "gateway.expected_master_nodes", minimumMasterNodes() );
+        elasticCfg.put( "gateway.expected_data_nodes", minimumDataNodes() );
         elasticCfg.put( "discovery.zen.minimum_master_nodes", minimumMasterNodes() );
 
         elasticCfg.put( "network.tcp.keep_alive", "true" );

@@ -57,7 +57,6 @@ public class Operator
                 {
                     try
                     {
-                        // TODO: What to do if cloud+project of 2 different people have the same name??
                         ImmutableCombinedKubernetesCommand.Builder commandBuilder = ImmutableCombinedKubernetesCommand.builder();
 
                         ImmutableCreateXpDeployment.builder().
