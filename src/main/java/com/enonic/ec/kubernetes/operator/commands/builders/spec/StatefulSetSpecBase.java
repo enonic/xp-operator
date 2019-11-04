@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.immutables.value.Value;
 
@@ -27,7 +28,6 @@ import io.fabric8.kubernetes.api.model.Probe;
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.ResourceRequirements;
 import io.fabric8.kubernetes.api.model.SecurityContext;
-import io.fabric8.kubernetes.api.model.TCPSocketAction;
 import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 import io.fabric8.kubernetes.api.model.apps.StatefulSetSpec;
@@ -167,25 +167,9 @@ public abstract class StatefulSetSpecBase
                                      new ContainerPort( cfgInt( "operator.deployment.xp.port.es.discovery.number" ), null, null,
                                                         cfgStr( "operator.deployment.xp.port.es.discovery.name" ), null ) ) );
 
-        // TODO: Add probe parameters to properties
         // Probes
-        Probe readinessProbe = new Probe();
-        exp.setReadinessProbe( readinessProbe );
-        readinessProbe.setFailureThreshold( 10 );
-        readinessProbe.setInitialDelaySeconds( 10 );
-        readinessProbe.setPeriodSeconds( 5 );
-        readinessProbe.setSuccessThreshold( 1 );
-        readinessProbe.setTimeoutSeconds( 1 );
-        readinessProbe.setTcpSocket( new TCPSocketAction( null, new IntOrString( cfgInt( "operator.deployment.xp.port.main.number" ) ) ) );
-
-        Probe livelinessProbe = new Probe();
-        exp.setLivenessProbe( livelinessProbe );
-        livelinessProbe.setFailureThreshold( 10 );
-        livelinessProbe.setInitialDelaySeconds( 5 );
-        livelinessProbe.setPeriodSeconds( 20 );
-        livelinessProbe.setSuccessThreshold( 1 );
-        livelinessProbe.setTimeoutSeconds( 1 );
-        livelinessProbe.setHttpGet( new HTTPGetAction( null, null, "/server", new IntOrString( "xp-stats" ), null ) );
+        exp.setReadinessProbe( createProbe( "readiness" ) );
+        exp.setLivenessProbe( createProbe( "liveliness" ) );
 
         // Resources
         ResourceRequirements resourceRequirements = new ResourceRequirements();
@@ -199,6 +183,20 @@ public abstract class StatefulSetSpecBase
         exp.setVolumeMounts( createVolumeMounts() );
 
         return Collections.singletonList( exp );
+    }
+
+    static Probe createProbe( String name )
+    {
+        Function<String, String> ck = k -> String.format( "operator.deployment.xp.probe.%s.%s", name, k );
+        Probe p = new Probe();
+        p.setHttpGet(
+            new HTTPGetAction( null, null, cfgStr( ck.apply( "path" ) ), new IntOrString( cfgInt( ck.apply( "port" ) ) ), null ) );
+        p.setInitialDelaySeconds( cfgInt( ck.apply( "initialDelaySeconds" ) ) );
+        p.setPeriodSeconds( cfgInt( ck.apply( "periodSeconds" ) ) );
+        p.setFailureThreshold( cfgInt( ck.apply( "failureThreshold" ) ) );
+        p.setSuccessThreshold( cfgInt( ck.apply( "successThreshold" ) ) );
+        p.setTimeoutSeconds( cfgInt( ck.apply( "timeoutSeconds" ) ) );
+        return p;
     }
 
     @SuppressWarnings("SameParameterValue")

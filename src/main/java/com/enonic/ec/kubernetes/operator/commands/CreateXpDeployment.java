@@ -97,7 +97,7 @@ public abstract class CreateXpDeployment
                 minimumDataNodes( Math.max( 1, minimumDataNodes ) ).
                 // TODO: XP is not happy with this, do some research
                 // discoveryHosts( Arrays.asList( String.join( ".", serviceName, namespaceName, "svc.cluster.local" ) ) ).
-                    discoveryHosts( getAllNodeDNS( serviceName ) ).
+                    discoveryHosts( getAllMasterNodeDNS( serviceName ) ).
                     build();
 
         }
@@ -180,15 +180,18 @@ public abstract class CreateXpDeployment
                 addCommands( commandBuilder ) );
     }
 
-    private List<String> getAllNodeDNS( String serviceName )
+    private List<String> getAllMasterNodeDNS( String serviceName )
     {
         List<String> res = new LinkedList<>();
         for ( SpecNode node : resource().getSpec().nodes() )
         {
-            String tmp = namingHelper().defaultResourceName( node );
-            for ( int i = 0; i < node.replicas(); i++ )
+            if ( node.isMasterNode() )
             {
-                res.add( tmp + "-" + i + "." + serviceName );
+                String tmp = namingHelper().defaultResourceName( node );
+                for ( int i = 0; i < node.replicas(); i++ )
+                {
+                    res.add( tmp + "-" + i + "." + serviceName );
+                }
             }
         }
         return res;

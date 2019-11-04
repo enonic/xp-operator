@@ -64,6 +64,7 @@ public class ResourceCache<T extends HasMetadata>
                 int receivedResourceVersion = Integer.parseInt( resource.getMetadata().getResourceVersion() );
                 if ( knownResourceVersion > receivedResourceVersion )
                 {
+                    // This is an old event
                     return;
                 }
             }
@@ -82,6 +83,7 @@ public class ResourceCache<T extends HasMetadata>
             }
             else
             {
+                // Best just to let kubernetes restart the operator
                 log.error(
                     "Received unexpected event " + action + " for " + resource.getMetadata().getUid() + " " + resource.getKind() + ": " +
                         resource.getMetadata().getName() );
@@ -90,7 +92,7 @@ public class ResourceCache<T extends HasMetadata>
         }
         catch ( Exception e )
         {
-            // Better just to let kubernetes restart the operator
+            // Best just to let kubernetes restart the operator
             log.error( "Something when terribly wrong", e );
             System.exit( -1 );
         }

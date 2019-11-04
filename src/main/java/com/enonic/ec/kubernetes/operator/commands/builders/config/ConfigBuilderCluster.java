@@ -57,6 +57,7 @@ public abstract class ConfigBuilderCluster
 
         setNodeType( elasticCfg, node );
         elasticCfg.put( "cluster.name", clusterName() );
+        elasticCfg.put( "http.enabled", "true" ); // For health checks
 
         elasticCfg.put( "gateway.expected_master_nodes", minimumMasterNodes() );
         elasticCfg.put( "gateway.expected_data_nodes", minimumDataNodes() );
