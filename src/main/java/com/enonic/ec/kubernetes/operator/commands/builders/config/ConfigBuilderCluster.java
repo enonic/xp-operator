@@ -37,7 +37,17 @@ public abstract class ConfigBuilderCluster
         clusterCfg.put( "cluster.enabled", "true" );
         clusterCfg.put( "node.name", "${env.XP_NODE_NAME}" );
         clusterCfg.put( "discovery.unicast.hosts", String.join( ",", discoveryHosts() ) );
-        clusterCfg.put( "network.host", podHost );
+
+        // If Linkerd is enabled, bind to localhost for envy proxy
+        if ( cfgBool( "operator.extensions.linkerd.enabled" ) )
+        {
+            clusterCfg.put( "network.host", "127.0.0.1" );
+        }
+        else
+        {
+            clusterCfg.put( "network.host", podHost );
+        }
+
         clusterCfg.put( "network.publish.host", podHost );
 
         apply( node, "com.enonic.xp.cluster.cfg", clusterCfg, config );

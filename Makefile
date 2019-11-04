@@ -4,16 +4,29 @@ LOCAL_OPERATOR_PORT:=8080
 mvn-dependencies:
 	mvn versions:display-plugin-updates
 
-minikube-setup:
+minikube-start:
 	minikube start
 	minikube addons enable ingress
+
+minikube-certmanager:
+	kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/${CERT_MANAGER_VERSION}/cert-manager.yaml
+
+minikube-operator-setup:
 	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.namespace.yaml
 	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.clusterrole.yaml
 	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.serviceaccount.yaml
 	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.clusterrolebinding.yaml
 	kubectl apply -f src/main/kubernetes/operator/crd/ec-operator.crd.xpdeployment.yaml
-	kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/${CERT_MANAGER_VERSION}/cert-manager.yaml
+
+minikube-ingress-patch:
 	./src/test/minikube/minikube.sh
+
+minikube-linkerd:
+	linkerd install | kubectl apply -f -
+	bash -c 'until linkerd check; do echo "Waiting for linkerd..."; sleep 5; done'
+
+minikube-setup-linkerd: minikube-start minikube-linkerd minikube-operator-setup minikube-certmanager minikube-ingress-patch
+minikube-setup: minikube-start minikube-operator-setup minikube-certmanager minikube-ingress-patch
 
 minikube-operator-deploy:
 	kubectl apply -f src/main/kubernetes/operator/crd/ec-operator.crd.xpdeployment.yaml

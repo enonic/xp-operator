@@ -8,6 +8,8 @@ import java.util.Optional;
 
 import org.immutables.value.Value;
 
+import com.google.common.collect.ImmutableMap;
+
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -131,6 +133,11 @@ public abstract class CreateXpDeploymentNode
                 podEnv.add( new EnvVar( e.getKey(), e.getValue(), null ) );
             }
 
+            ImmutableMap.Builder<String, String> podAnnotations = new ImmutableMap.Builder<>();
+            cfgIfBool( "operator.extensions.linkerd.enabled", () -> {
+                podAnnotations.put( "linkerd.io/inject", "enabled" );
+            } );
+
             commandBuilder.addCommand( ImmutableCommandApplyStatefulSet.builder().
                 client( defaultClient() ).
                 ownerReference( ownerReference() ).
@@ -142,6 +149,7 @@ public abstract class CreateXpDeploymentNode
                     replicas( effectiveScale ).
                     podImage( podImageName() ).
                     podEnv( podEnv ).
+                    podAnnotations( podAnnotations.build() ).
                     podResources( Map.of( "cpu", newNode.resources().cpu(), "memory", newNode.resources().memory() ) ).
                     indexDiskSize( Optional.ofNullable( newNode.resources().disks().get( "index" ) ) ).
                     snapshotsPvcName( Optional.ofNullable( newNode.isDataNode() ? snapshotsStorageName() : null ) ).

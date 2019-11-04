@@ -38,6 +38,19 @@ public class Configuration
         return config().getOptionalValue( key, Long.class ).get();
     }
 
+    protected static boolean cfgBool( String key )
+    {
+        return config().getOptionalValue( key, Boolean.class ).get();
+    }
+
+    protected static void cfgIfBool( String key, Runnable func )
+    {
+        if ( cfgBool( key ) )
+        {
+            func.run();
+        }
+    }
+
     protected static String dnsRecord( String service, String namespace )
     {
         return String.join( ".", service, namespace, "svc.cluster.local" );

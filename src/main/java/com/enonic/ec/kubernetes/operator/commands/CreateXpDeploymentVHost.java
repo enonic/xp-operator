@@ -6,6 +6,8 @@ import java.util.Optional;
 
 import org.immutables.value.Value;
 
+import com.google.common.collect.ImmutableMap;
+
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
@@ -13,6 +15,7 @@ import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedKubernetesCommand;
 import com.enonic.ec.kubernetes.deployment.diff.Diff;
 import com.enonic.ec.kubernetes.deployment.diff.DiffVHost;
+import com.enonic.ec.kubernetes.deployment.vhost.VHostPath;
 import com.enonic.ec.kubernetes.operator.commands.builders.spec.ImmutableIngressSpecBuilder;
 import com.enonic.ec.kubernetes.operator.commands.builders.spec.ImmutableIssuerSpecBuilder;
 import com.enonic.ec.kubernetes.operator.commands.builders.spec.ImmutableServiceSpecBuilder;
@@ -112,12 +115,58 @@ public abstract class CreateXpDeploymentVHost
 
         if ( changePaths || changeCert )
         {
-            Map<String, String> serviceAnnotations = new HashMap<>();
-            serviceAnnotations.put( "kubernetes.io/ingress.class", "nginx" );
-            serviceAnnotations.put( "ingress.kubernetes.io/rewrite-target", "/" );
-            serviceAnnotations.put( "nginx.ingress.kubernetes.io/configuration-snippet",
-                                    "proxy_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;\n" +
-                                        "      proxy_hide_header l5d-remote-ip;\n" + "      proxy_hide_header l5d-server-id;" );
+            ImmutableMap.Builder<String, String> serviceAnnotations = ImmutableMap.builder();
+            StringBuilder nginxConfigSnippet = new StringBuilder();
+
+            // Linkerd config
+            cfgIfBool( "operator.extensions.linkerd.enabled", () -> {
+                nginxConfigSnippet.
+                    append( "proxy_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;" ).append( "\n" ).
+                    append( "proxy_hide_header l5d-remote-ip;" ).append( "\n" ).
+                    append( "proxy_hide_header l5d-server-id;" ).append( "\n" );
+            } );
+
+            // Caching
+            cfgIfBool( "operator.extensions.ingress.caching.enabled", () -> {
+                nginxConfigSnippet.
+                    append( "proxy_cache static-cache;" ).append( "\n" ).
+                    append( "proxy_cache_valid 404 1m;" ).append( "\n" ).
+                    append( "proxy_cache_valid 301 1m;" ).append( "\n" ).
+                    append( "proxy_cache_valid 303 1m;" ).append( "\n" ).
+                    append( "proxy_cache_valid 303 1m;" ).append( "\n" ).
+                    append( "proxy_cache_use_stale error timeout updating http_404 http_500 http_502 http_503 http_504;" ).append( "\n" ).
+                    append( "proxy_cache_bypass $http_x_purge;" ).append( "\n" ).
+                    append( "add_header X-Cache-Status $upstream_cache_status;" ).append( "\n" );
+
+                serviceAnnotations.
+                    put( "nginx.ingress.kubernetes.io/proxy-buffering", "on" );
+            } );
+
+            // DDOS mitigation
+            cfgIfBool( "operator.extensions.ingress.ddos.enabled", () -> {
+                serviceAnnotations.
+                    put( "nginx.ingress.kubernetes.io/limit-connections", "20" ).
+                    put( "nginx.ingress.kubernetes.io/limit-rpm", "240" );
+            } );
+
+            // Sticky session
+            Optional<VHostPath> adminPath =
+                diffVHost().newValue().get().vHostPaths().stream().filter( p -> p.path().startsWith( "/admin" ) ).findAny();
+            if ( adminPath.isPresent() )
+            {
+                cfgIfBool( "operator.extensions.ingress.adminStickySession.enabled", () -> {
+                    serviceAnnotations.
+                        put( "nginx.ingress.kubernetes.io/affinity", "cookie" ).
+                        put( "nginx.ingress.kubernetes.io/session-cookie-name", "XPADMINCOOKIE" ).
+                        put( "nginx.ingress.kubernetes.io/session-cookie-path", "/admin" );
+                } );
+            }
+
+            // Regular ingress
+            serviceAnnotations.
+                put( "kubernetes.io/ingress.class", "nginx" ).
+                put( "ingress.kubernetes.io/rewrite-target", "/" ).
+                put( "nginx.ingress.kubernetes.io/configuration-snippet", nginxConfigSnippet.toString() );
 
             if ( hasCert )
             {
@@ -131,7 +180,7 @@ public abstract class CreateXpDeploymentVHost
                 namespace( namespace() ).
                 name( vHostResourceName ).
                 labels( defaultLabels() ).
-                annotations( serviceAnnotations ).
+                annotations( serviceAnnotations.build() ).
                 spec( ImmutableIngressSpecBuilder.builder().
                     certificateSecretName( Optional.ofNullable( hasCert ? vHostResourceName : null ) ).
                     vhost( diffVHost().newValue().get() ).
