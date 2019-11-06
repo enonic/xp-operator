@@ -15,8 +15,8 @@ import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.ec.kubernetes.common.client.DefaultClientProducer;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedKubernetesCommand;
-import com.enonic.ec.kubernetes.deployment.XpDeploymentCache;
-import com.enonic.ec.kubernetes.deployment.XpDeploymentClientProducer;
+import com.enonic.ec.kubernetes.crd.deployment.client.XpDeploymentCache;
+import com.enonic.ec.kubernetes.crd.deployment.client.XpDeploymentClientProducer;
 import com.enonic.ec.kubernetes.operator.commands.ImmutableCreateXpDeployment;
 import com.enonic.ec.kubernetes.operator.commands.ImmutablePrePullImages;
 import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerClientProducer;

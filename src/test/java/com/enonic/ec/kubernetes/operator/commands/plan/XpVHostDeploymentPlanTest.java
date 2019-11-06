@@ -9,7 +9,7 @@
 //import org.junit.jupiter.api.Test;
 //
 //import com.enonic.ec.kubernetes.DeploymentFileTest;
-//import com.enonic.ec.kubernetes.deployment.vhost.VHostPath;
+//import com.enonic.ec.kubernetes.crd.deployment.vhost.VHostPath;
 //
 //class XpVHostDeploymentPlanTest
 //    extends DeploymentFileTest

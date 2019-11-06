@@ -16,8 +16,8 @@ import io.fabric8.kubernetes.api.model.extensions.IngressSpec;
 import io.fabric8.kubernetes.api.model.extensions.IngressTLS;
 
 import com.enonic.ec.kubernetes.common.Configuration;
-import com.enonic.ec.kubernetes.deployment.vhost.VHost;
-import com.enonic.ec.kubernetes.deployment.vhost.VHostPath;
+import com.enonic.ec.kubernetes.crd.deployment.vhost.VHost;
+import com.enonic.ec.kubernetes.crd.deployment.vhost.VHostPath;
 
 @Value.Immutable
 public abstract class IngressSpecBuilder

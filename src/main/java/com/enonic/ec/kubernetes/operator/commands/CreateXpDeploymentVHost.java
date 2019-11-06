@@ -13,9 +13,9 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 
 import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedKubernetesCommand;
-import com.enonic.ec.kubernetes.deployment.diff.Diff;
-import com.enonic.ec.kubernetes.deployment.diff.DiffVHost;
-import com.enonic.ec.kubernetes.deployment.vhost.VHostPath;
+import com.enonic.ec.kubernetes.crd.deployment.diff.Diff;
+import com.enonic.ec.kubernetes.crd.deployment.diff.DiffVHost;
+import com.enonic.ec.kubernetes.crd.deployment.vhost.VHostPath;
 import com.enonic.ec.kubernetes.operator.commands.builders.spec.ImmutableIngressSpecBuilder;
 import com.enonic.ec.kubernetes.operator.commands.builders.spec.ImmutableIssuerSpecBuilder;
 import com.enonic.ec.kubernetes.operator.commands.builders.spec.ImmutableServiceSpecBuilder;

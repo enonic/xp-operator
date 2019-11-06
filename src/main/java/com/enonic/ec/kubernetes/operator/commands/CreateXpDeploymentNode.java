@@ -16,9 +16,9 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 
 import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedKubernetesCommand;
-import com.enonic.ec.kubernetes.deployment.diff.DiffSpec;
-import com.enonic.ec.kubernetes.deployment.diff.DiffSpecNode;
-import com.enonic.ec.kubernetes.deployment.spec.SpecNode;
+import com.enonic.ec.kubernetes.crd.deployment.diff.DiffSpec;
+import com.enonic.ec.kubernetes.crd.deployment.diff.DiffSpecNode;
+import com.enonic.ec.kubernetes.crd.deployment.spec.SpecNode;
 import com.enonic.ec.kubernetes.operator.commands.builders.config.ConfigBuilder;
 import com.enonic.ec.kubernetes.operator.commands.builders.spec.ImmutablePodDisruptionBudgetSpecBuilder;
 import com.enonic.ec.kubernetes.operator.commands.builders.spec.ImmutableStatefulSetSpecBuilder;

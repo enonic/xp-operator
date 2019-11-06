@@ -6,7 +6,7 @@ import java.util.Properties;
 
 import org.immutables.value.Value;
 
-import com.enonic.ec.kubernetes.deployment.spec.SpecNode;
+import com.enonic.ec.kubernetes.crd.deployment.spec.SpecNode;
 
 @Value.Immutable
 public abstract class ConfigBuilderNonClustered

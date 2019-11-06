@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import com.enonic.ec.kubernetes.common.Configuration;
-import com.enonic.ec.kubernetes.deployment.spec.SpecNode;
+import com.enonic.ec.kubernetes.crd.deployment.spec.SpecNode;
 
 public abstract class ConfigBuilder
     extends Configuration

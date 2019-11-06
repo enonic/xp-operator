@@ -6,8 +6,8 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 
 import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedKubernetesCommand;
-import com.enonic.ec.kubernetes.deployment.vhost.VHost;
-import com.enonic.ec.kubernetes.deployment.vhost.VHostPath;
+import com.enonic.ec.kubernetes.crd.deployment.vhost.VHost;
+import com.enonic.ec.kubernetes.crd.deployment.vhost.VHostPath;
 import com.enonic.ec.kubernetes.operator.commands.kubectl.delete.ImmutableCommandDeleteIngress;
 import com.enonic.ec.kubernetes.operator.commands.kubectl.delete.ImmutableCommandDeleteIssuer;
 import com.enonic.ec.kubernetes.operator.commands.kubectl.delete.ImmutableCommandDeleteService;

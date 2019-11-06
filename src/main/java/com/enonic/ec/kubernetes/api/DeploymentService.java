@@ -19,12 +19,12 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
-import com.enonic.ec.kubernetes.deployment.XpDeploymentCache;
-import com.enonic.ec.kubernetes.deployment.XpDeploymentClientProducer;
-import com.enonic.ec.kubernetes.deployment.XpDeploymentResource;
-import com.enonic.ec.kubernetes.deployment.commands.ImmutableCommandCreateXpDeployment;
-import com.enonic.ec.kubernetes.deployment.commands.ImmutableCommandDeleteXpDeployment;
-import com.enonic.ec.kubernetes.deployment.diff.ImmutableDiffSpec;
+import com.enonic.ec.kubernetes.crd.commands.ImmutableCommandCreateXpDeployment;
+import com.enonic.ec.kubernetes.crd.commands.ImmutableCommandDeleteXpDeployment;
+import com.enonic.ec.kubernetes.crd.deployment.XpDeploymentResource;
+import com.enonic.ec.kubernetes.crd.deployment.client.XpDeploymentCache;
+import com.enonic.ec.kubernetes.crd.deployment.client.XpDeploymentClientProducer;
+import com.enonic.ec.kubernetes.crd.deployment.diff.ImmutableDiffSpec;
 
 @ApplicationScoped
 @Path("/api")

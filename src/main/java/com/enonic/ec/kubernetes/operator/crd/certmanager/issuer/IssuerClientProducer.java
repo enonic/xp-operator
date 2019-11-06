@@ -7,7 +7,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import com.enonic.ec.kubernetes.common.client.DefaultClientProducer;
 
-import static com.enonic.ec.kubernetes.deployment.CrdClientsProducer.createCrdClient;
+import static com.enonic.ec.kubernetes.crd.CrdClientsProducer.createCrdClient;
 
 @Singleton
 public class IssuerClientProducer
