@@ -36,7 +36,7 @@ public abstract class CommandCreateXpDeployment
 
         XpDeploymentResource newDeployment = new XpDeploymentResource();
         newDeployment.setApiVersion( apiVersion() );
-        newDeployment.setKind( cfgStr( "operator.crd.xp.kind" ) );
+        newDeployment.setKind( cfgStr( "operator.crd.xp.deployments.kind" ) );
         newDeployment.getMetadata().setName( spec().deploymentName() );
         newDeployment.getMetadata().setLabels( spec().defaultLabels() );
         newDeployment.setSpec( spec() );

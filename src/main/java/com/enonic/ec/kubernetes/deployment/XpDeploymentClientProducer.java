@@ -18,8 +18,8 @@ public class XpDeploymentClientProducer
     @Inject
     public XpDeploymentClientProducer( DefaultClientProducer defaultClientProducer,
                                        @ConfigProperty(name = "operator.crd.xp.apiVersion") String apiVersion,
-                                       @ConfigProperty(name = "operator.crd.xp.kind") String kind,
-                                       @ConfigProperty(name = "operator.crd.xp.name") String name )
+                                       @ConfigProperty(name = "operator.crd.xp.deployments.kind") String kind,
+                                       @ConfigProperty(name = "operator.crd.xp.deployments.name") String name )
     {
         xpDeploymentClient = new XpDeploymentClient(
             createCrdClient( defaultClientProducer.client(), apiVersion, kind, name, XpDeploymentResource.class,

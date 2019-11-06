@@ -16,7 +16,8 @@ minikube-operator-setup:
 	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.clusterrole.yaml
 	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.serviceaccount.yaml
 	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.clusterrolebinding.yaml
-	kubectl apply -f src/main/kubernetes/operator/crd/ec-operator.crd.xpdeployment.yaml
+	kubectl apply -f src/main/kubernetes/operator/crd/ec-operator.crd.xp.deployments.yaml
+	kubectl apply -f src/main/kubernetes/operator/crd/ec-operator.crd.xp.vhosts.yaml
 
 minikube-ingress-patch:
 	./src/test/minikube/minikube.sh
