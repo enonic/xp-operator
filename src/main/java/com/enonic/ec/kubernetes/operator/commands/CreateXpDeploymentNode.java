@@ -21,7 +21,9 @@ import com.enonic.ec.kubernetes.deployment.diff.DiffSpecNode;
 import com.enonic.ec.kubernetes.deployment.spec.SpecNode;
 import com.enonic.ec.kubernetes.operator.commands.builders.config.ConfigBuilder;
 import com.enonic.ec.kubernetes.operator.commands.builders.spec.ImmutablePodDisruptionBudgetSpecBuilder;
-import com.enonic.ec.kubernetes.operator.commands.builders.spec.ImmutableStatefulSetSpecVolumes;
+import com.enonic.ec.kubernetes.operator.commands.builders.spec.ImmutableStatefulSetSpecBuilder;
+import com.enonic.ec.kubernetes.operator.commands.builders.spec.volumes.VolumeBuilder;
+import com.enonic.ec.kubernetes.operator.commands.builders.spec.volumes.VolumeTripletList;
 import com.enonic.ec.kubernetes.operator.commands.kubectl.apply.ImmutableCommandApplyConfigMap;
 import com.enonic.ec.kubernetes.operator.commands.kubectl.apply.ImmutableCommandApplyPodDisruptionBudget;
 import com.enonic.ec.kubernetes.operator.commands.kubectl.apply.ImmutableCommandApplyStatefulSet;
@@ -36,6 +38,8 @@ public abstract class CreateXpDeploymentNode
     protected abstract KubernetesClient defaultClient();
 
     protected abstract OwnerReference ownerReference();
+
+    protected abstract String deploymentName();
 
     protected abstract String namespace();
 
@@ -53,9 +57,9 @@ public abstract class CreateXpDeploymentNode
 
     protected abstract int minimumAvailable();
 
-    protected abstract String blobStorageName();
+    protected abstract VolumeBuilder volumeBuilder();
 
-    protected abstract String snapshotsStorageName();
+//    protected abstract Optional<String> sharedStorageName();
 
     private String podImageName()
     {
@@ -138,24 +142,24 @@ public abstract class CreateXpDeploymentNode
                 podAnnotations.put( "linkerd.io/inject", "enabled" );
             } );
 
+            VolumeTripletList volumeList =
+                volumeBuilder().getVolumeTriplets( nodeName(), Optional.ofNullable( newNode.resources().disks().get( "index" ) ) );
+
             commandBuilder.addCommand( ImmutableCommandApplyStatefulSet.builder().
                 client( defaultClient() ).
                 ownerReference( ownerReference() ).
                 namespace( namespace() ).
                 name( nodeName() ).
                 labels( nodeLabels ).
-                spec( ImmutableStatefulSetSpecVolumes.builder().
+                spec( ImmutableStatefulSetSpecBuilder.builder().
                     podLabels( nodeLabels ).
                     replicas( effectiveScale ).
                     podImage( podImageName() ).
                     podEnv( podEnv ).
                     podAnnotations( podAnnotations.build() ).
                     podResources( Map.of( "cpu", newNode.resources().cpu(), "memory", newNode.resources().memory() ) ).
-                    indexDiskSize( Optional.ofNullable( newNode.resources().disks().get( "index" ) ) ).
-                    snapshotsPvcName( Optional.ofNullable( newNode.isDataNode() ? snapshotsStorageName() : null ) ).
-                    blobDiskPvcName( blobStorageName() ).
+                    volumeList( volumeList ).
                     serviceName( serviceName() ).
-                    configMapName( nodeName() ).
                     build().
                     spec() ).
                 build() );

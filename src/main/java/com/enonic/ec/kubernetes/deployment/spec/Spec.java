@@ -11,6 +11,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.base.Preconditions;
 
+import io.fabric8.kubernetes.api.model.Quantity;
+
 import com.enonic.ec.kubernetes.deployment.vhost.ImmutableVHostBuilder;
 import com.enonic.ec.kubernetes.deployment.vhost.VHost;
 
@@ -34,7 +36,7 @@ public abstract class Spec
 
     public abstract Boolean enabled();
 
-    public abstract SpecSharedDisks sharedDisks();
+    public abstract Quantity sharedDisk();
 
     public abstract List<SpecNode> nodes();
 

@@ -5,7 +5,9 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.immutables.value.Value;
 
@@ -19,8 +21,6 @@ import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.LabelSelector;
 import io.fabric8.kubernetes.api.model.ObjectFieldSelector;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
-import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
-import io.fabric8.kubernetes.api.model.PersistentVolumeClaimSpec;
 import io.fabric8.kubernetes.api.model.PodSecurityContext;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.PodTemplateSpec;
@@ -30,12 +30,13 @@ import io.fabric8.kubernetes.api.model.ResourceRequirements;
 import io.fabric8.kubernetes.api.model.SecurityContext;
 import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeMount;
-import io.fabric8.kubernetes.api.model.apps.StatefulSetSpec;
 import io.fabric8.kubernetes.api.model.apps.StatefulSetUpdateStrategy;
 
 import com.enonic.ec.kubernetes.common.Configuration;
+import com.enonic.ec.kubernetes.operator.commands.builders.spec.volumes.VolumeTripletList;
 
-public abstract class StatefulSetSpecBase
+@Value.Immutable
+public abstract class StatefulSetSpecBuilder
     extends Configuration
 
 {
@@ -53,10 +54,18 @@ public abstract class StatefulSetSpecBase
 
     protected abstract Map<String, Quantity> podResources();
 
+    protected abstract VolumeTripletList volumeList();
+
     @Value.Derived
-    public StatefulSetSpec spec()
+    protected Long runAsUser()
     {
-        StatefulSetSpec spec = new StatefulSetSpec();
+        return cfgLong( "operator.deployment.xp.pod.runAsUser" );
+    }
+
+    @Value.Derived
+    public io.fabric8.kubernetes.api.model.apps.StatefulSetSpec spec()
+    {
+        io.fabric8.kubernetes.api.model.apps.StatefulSetSpec spec = new io.fabric8.kubernetes.api.model.apps.StatefulSetSpec();
 
         spec.setSelector( new LabelSelector( null, podLabels() ) );
         spec.setServiceName( serviceName() );
@@ -64,7 +73,7 @@ public abstract class StatefulSetSpecBase
         spec.setPodManagementPolicy( cfgStr( "operator.deployment.xp.pod.managementPolicy" ) );
         spec.setUpdateStrategy( new StatefulSetUpdateStrategy( null, cfgStr( "operator.deployment.xp.pod.updateStrategy" ) ) );
         spec.setTemplate( createPodTemplateSpec() );
-        spec.setVolumeClaimTemplates( createVolumeClaimTemplates() );
+        spec.setVolumeClaimTemplates( volumeList().volumeClaimTemplates() );
 
         return spec;
     }
@@ -93,7 +102,7 @@ public abstract class StatefulSetSpecBase
         podSpec.setTerminationGracePeriodSeconds( cfgLong( "operator.deployment.xp.pod.gracePeriodSeconds" ) );
         podSpec.setInitContainers( createPodInitContainers() );
         podSpec.setContainers( createPodContainers() );
-        podSpec.setVolumes( createVolumes() );
+        podSpec.setVolumes( volumeList().volumes() );
 
         return podTemplateSpec;
     }
@@ -102,6 +111,8 @@ public abstract class StatefulSetSpecBase
     {
         List<Container> res = new LinkedList<>();
 
+        // Set virtual memory for elastic
+        // https://www.elastic.co/guide/en/elasticsearch/reference/2.4/setup-configuration.html#vm-max-map-count
         Container init = new Container();
         init.setName( "configure-sysctl" );
         init.setImage( podImage() );
@@ -121,6 +132,29 @@ public abstract class StatefulSetSpecBase
         dnsWait.setCommand( Arrays.asList( "ash", "-c", "while [ -z \"$(nslookup " + serviceName() +
             " | grep Name)\" ]; do echo \"Waiting for DNS\"; sleep 1; done" ) );
         res.add( dnsWait );
+
+        // Set permissions for NFS shares
+        List<Volume> volumes = volumeList().volumes();
+        Optional<Volume> nfs = volumes.stream().filter( v -> v.getNfs() != null ).findFirst();
+        if ( nfs.isPresent() )
+        {
+            List<VolumeMount> nfsMounts = volumeList().volumeMounts().stream().
+                filter( m -> m.getName().equals( nfs.get().getName() ) ).
+                collect( Collectors.toList() );
+
+            Container nfsPermissions = new Container();
+            nfsPermissions.setName( "nfs-permissions" );
+            nfsPermissions.setImage( "alpine:3.10" );
+            nfsPermissions.setSecurityContext( initSecurityContext );
+            nfsPermissions.setVolumeMounts( nfsMounts );
+
+            List<String> chownCommands = nfsMounts.stream().
+                map( m -> String.format( "chown %s:0 %s", runAsUser(), m.getMountPath() ) ).
+                collect( Collectors.toList() );
+
+            nfsPermissions.setCommand( Arrays.asList( "ash", "-c", String.join( " && ", chownCommands ) ) );
+            res.add( nfsPermissions );
+        }
 
         return res;
     }
@@ -153,7 +187,7 @@ public abstract class StatefulSetSpecBase
         Capabilities capabilities = new Capabilities();
         capabilities.setDrop( Collections.singletonList( "ALL" ) );
         podSecurityContext.setRunAsNonRoot( true );
-        podSecurityContext.setRunAsUser( cfgLong( "operator.deployment.xp.pod.runAsUser" ) );
+        podSecurityContext.setRunAsUser( runAsUser() );
         podSecurityContext.setCapabilities( capabilities );
         exp.setSecurityContext( podSecurityContext );
 
@@ -180,7 +214,7 @@ public abstract class StatefulSetSpecBase
         // TODO: Lifecycle
 
         // Volume mounts
-        exp.setVolumeMounts( createVolumeMounts() );
+        exp.setVolumeMounts( volumeList().volumeMounts() );
 
         return Collections.singletonList( exp );
     }
@@ -198,29 +232,4 @@ public abstract class StatefulSetSpecBase
         p.setTimeoutSeconds( cfgInt( ck.apply( "timeoutSeconds" ) ) );
         return p;
     }
-
-    @SuppressWarnings("SameParameterValue")
-    static PersistentVolumeClaim standard( String name, Map<String, String> labels, String storageClassName, String accessMode,
-                                           Quantity size )
-    {
-        PersistentVolumeClaim claim = new PersistentVolumeClaim();
-        ObjectMeta meta = new ObjectMeta();
-        claim.setMetadata( meta );
-        meta.setName( name );
-        meta.setLabels( labels );
-
-        PersistentVolumeClaimSpec spec = new PersistentVolumeClaimSpec();
-        claim.setSpec( spec );
-        spec.setAccessModes( Collections.singletonList( accessMode ) );
-        spec.setStorageClassName( storageClassName );
-        spec.setResources( new ResourceRequirements( null, Map.of( "storage", size ) ) );
-
-        return claim;
-    }
-
-    protected abstract List<VolumeMount> createVolumeMounts();
-
-    protected abstract List<Volume> createVolumes();
-
-    protected abstract List<PersistentVolumeClaim> createVolumeClaimTemplates();
 }

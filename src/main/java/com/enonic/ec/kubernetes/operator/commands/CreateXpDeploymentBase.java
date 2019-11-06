@@ -1,6 +1,7 @@
 package com.enonic.ec.kubernetes.operator.commands;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.immutables.value.Value;
 
@@ -31,13 +32,9 @@ public abstract class CreateXpDeploymentBase
 
     protected abstract Map<String, String> defaultLabels();
 
-    protected abstract String blobStorageName();
+    protected abstract Optional<String> sharedStorageName();
 
-    protected abstract Quantity blobStorageSize();
-
-    protected abstract String snapshotsStorageName();
-
-    protected abstract Quantity snapshotsStorageSize();
+    protected abstract Optional<Quantity> sharedStorageSize();
 
     protected abstract boolean isClustered();
 
@@ -51,33 +48,21 @@ public abstract class CreateXpDeploymentBase
             name( namespace() ).
             build() );
 
-        // Create blob storage
-        commandBuilder.addCommand( ImmutableCommandApplyPvc.builder().
-            client( defaultClient() ).
-            ownerReference( ownerReference() ).
-            namespace( namespace() ).
-            name( blobStorageName() ).
-            labels( defaultLabels() ).
-            spec( ImmutablePvcSpecBuilder.builder().
-                size( blobStorageSize() ).
-                addAccessMode( isClustered() ? "ReadWriteMany" : "ReadWriteOnce" ). // TODO: This only works on minikube
-                build().
-                spec() ).
-            build() );
-
-        // Create snapshots storage
-        commandBuilder.addCommand( ImmutableCommandApplyPvc.builder().
-            client( defaultClient() ).
-            ownerReference( ownerReference() ).
-            namespace( namespace() ).
-            name( snapshotsStorageName() ).
-            labels( defaultLabels() ).
-            spec( ImmutablePvcSpecBuilder.builder().
-                size( snapshotsStorageSize() ).
-                addAccessMode( isClustered() ? "ReadWriteMany" : "ReadWriteOnce" ). // TODO: This only works on minikube
-                build().
-                spec() ).
-            build() );
+        if ( sharedStorageName().isPresent() )
+        {
+            commandBuilder.addCommand( ImmutableCommandApplyPvc.builder().
+                client( defaultClient() ).
+                ownerReference( ownerReference() ).
+                namespace( namespace() ).
+                name( sharedStorageName().get() ).
+                labels( defaultLabels() ).
+                spec( ImmutablePvcSpecBuilder.builder().
+                    size( sharedStorageSize().get() ).
+                    addAccessMode( isClustered() ? "ReadWriteMany" : "ReadWriteOnce" ). // TODO: This only works on minikube
+                    build().
+                    spec() ).
+                build() );
+        }
 
         // Create es discovery service
         commandBuilder.addCommand( ImmutableCommandApplyService.builder().

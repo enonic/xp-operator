@@ -10,6 +10,7 @@ import java.util.function.Predicate;
 import org.immutables.value.Value;
 
 import io.fabric8.kubernetes.api.model.OwnerReference;
+import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
 import com.enonic.ec.kubernetes.common.Configuration;
@@ -25,6 +26,9 @@ import com.enonic.ec.kubernetes.deployment.spec.SpecNode;
 import com.enonic.ec.kubernetes.operator.commands.builders.config.ConfigBuilder;
 import com.enonic.ec.kubernetes.operator.commands.builders.config.ImmutableConfigBuilderCluster;
 import com.enonic.ec.kubernetes.operator.commands.builders.config.ImmutableConfigBuilderNonClustered;
+import com.enonic.ec.kubernetes.operator.commands.builders.spec.volumes.ImmutableVolumeBuilderNfs;
+import com.enonic.ec.kubernetes.operator.commands.builders.spec.volumes.ImmutableVolumeBuilderStd;
+import com.enonic.ec.kubernetes.operator.commands.builders.spec.volumes.VolumeBuilder;
 import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerClient;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
@@ -61,13 +65,36 @@ public abstract class CreateXpDeployment
     @Override
     public void addCommands( ImmutableCombinedKubernetesCommand.Builder commandBuilder )
     {
+        String deploymentName = resource().getSpec().deploymentName();
         String namespaceName = namingHelper().defaultNamespaceName();
         String serviceName = namingHelper().defaultResourceName();
-
-        String defaultBlobStorageName = namingHelper().defaultResourceNameWithPreFix( "blob" );
-        String defaultSnapshotsStorageName = namingHelper().defaultResourceNameWithPreFix( "snapshots" );
-
         Map<String, String> defaultLabels = resource().getSpec().defaultLabels();
+
+        boolean useNfs = cfgBool( "operator.deployment.xp.volume.shared.nfs.enabled" );
+
+        VolumeBuilder volumeBuilder;
+        Optional<String> defaultSharedStorageName;
+        Optional<Quantity> defaultSharedStorageSize;
+
+        if ( useNfs )
+        {
+            defaultSharedStorageName = Optional.empty();
+            defaultSharedStorageSize = Optional.empty();
+            volumeBuilder = ImmutableVolumeBuilderNfs.builder().
+                deploymentName( deploymentName ).
+                nfsServer( cfgStr( "operator.deployment.xp.volume.shared.nfs.server" ) ).
+                nfsPath( cfgStr( "operator.deployment.xp.volume.shared.nfs.path" ) ).
+                build();
+        }
+        else
+        {
+            defaultSharedStorageName = Optional.of( namingHelper().defaultResourceNameWithPreFix( "shared" ) );
+            defaultSharedStorageSize = Optional.of( resource().getSpec().sharedDisk() );
+            volumeBuilder = ImmutableVolumeBuilderStd.builder().
+                deploymentName( deploymentName ).
+                sharedStoragePVCName( defaultSharedStorageName.get() ).
+                build();
+        }
 
         DiffSpec diffSpec = ImmutableDiffSpec.builder().
             oldValue( oldResource().map( XpDeploymentResource::getSpec ) ).
@@ -115,10 +142,8 @@ public abstract class CreateXpDeployment
                 namespace( namespaceName ).
                 isClustered( isClustered ).
                 serviceName( serviceName ).
-                blobStorageName( defaultBlobStorageName ).
-                blobStorageSize( resource().getSpec().sharedDisks().blob() ).
-                snapshotsStorageName( defaultSnapshotsStorageName ).
-                snapshotsStorageSize( resource().getSpec().sharedDisks().snapshots() ).
+                sharedStorageName( defaultSharedStorageName ).
+                sharedStorageSize( defaultSharedStorageSize ).
                 defaultLabels( defaultLabels ).
                 build().
                 addCommands( commandBuilder );
@@ -139,8 +164,8 @@ public abstract class CreateXpDeployment
                 diffSpecNode( diffSpecNode ).
                 defaultLabels( defaultLabels ).
                 configBuilder( configBuilder ).
-                blobStorageName( defaultBlobStorageName ).
-                snapshotsStorageName( defaultSnapshotsStorageName ).
+                deploymentName( deploymentName ).
+                volumeBuilder( volumeBuilder ).
                 minimumAvailable( defaultMinimumAvailable.apply( diffSpecNode.newValue().get() ) ).
                 build().
                 addCommands( commandBuilder ) );

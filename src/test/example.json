@@ -8,10 +8,7 @@
     "xpVersion": "7.1.1",
     "enabled": true,
 
-    "sharedDisks": {
-      "blob": "1Gi",
-      "snapshots": "1Gi"
-    },
+    "sharedDisk": "1Gi",
 
     "nodes": [
       {
@@ -30,7 +27,7 @@
         },
         "config": {
           "com.enonic.xp.app.main.cfg": "tourDisabled = true\n",
-          "com.enonic.xp.web.vhost.cfg": "mapping.admin.host = company.com\nmapping.admin.source = /admin\nmapping.admin.target = /admin\nmapping.admin.idProvider.system = default\n",
+          "com.enonic.xp.web.vhost.cfg": "enabled = true\n\nmapping.superhero.host = company.com\nmapping.superhero.source = /\nmapping.superhero.target = /site/default/master/superhero\nmapping.superhero.idProvider.system = default\n\nmapping.admin.host = company.com\nmapping.admin.source = /admin\nmapping.admin.target = /admin\nmapping.admin.idProvider.system = default",
           "system.properties": "xp.suPassword = {sha512}5b722b307fce6c944905d132691d5e4a2214b7fe92b738920eb3fce3a90420a19511c3010a0e7712b054daef5b57bad59ecbd93b3280f210578f547f4aed4d25\nxp.init.adminUserCreation = false"
         }
       }
