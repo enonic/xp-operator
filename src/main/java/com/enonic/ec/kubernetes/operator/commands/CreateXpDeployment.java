@@ -18,7 +18,7 @@ import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedKubernetesComma
 import com.enonic.ec.kubernetes.crd.deployment.ImmutableXpDeploymentNamingHelper;
 import com.enonic.ec.kubernetes.crd.deployment.XpDeploymentNamingHelper;
 import com.enonic.ec.kubernetes.crd.deployment.XpDeploymentResource;
-import com.enonic.ec.kubernetes.crd.deployment.diff.Diff;
+import com.enonic.ec.kubernetes.common.Diff;
 import com.enonic.ec.kubernetes.crd.deployment.diff.DiffSpec;
 import com.enonic.ec.kubernetes.crd.deployment.diff.DiffSpecNode;
 import com.enonic.ec.kubernetes.crd.deployment.diff.ImmutableDiffSpec;
@@ -29,7 +29,7 @@ import com.enonic.ec.kubernetes.operator.commands.builders.config.ImmutableConfi
 import com.enonic.ec.kubernetes.operator.commands.builders.spec.volumes.ImmutableVolumeBuilderNfs;
 import com.enonic.ec.kubernetes.operator.commands.builders.spec.volumes.ImmutableVolumeBuilderStd;
 import com.enonic.ec.kubernetes.operator.commands.builders.spec.volumes.VolumeBuilder;
-import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerClient;
+import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.client.IssuerClient;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @Value.Immutable

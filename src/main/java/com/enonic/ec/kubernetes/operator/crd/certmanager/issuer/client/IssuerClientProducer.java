@@ -1,4 +1,4 @@
-package com.enonic.ec.kubernetes.operator.crd.certmanager.issuer;
+package com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.client;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -6,6 +6,9 @@ import javax.inject.Singleton;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import com.enonic.ec.kubernetes.common.client.DefaultClientProducer;
+import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerResource;
+import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerResourceDoneable;
+import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerResourceList;
 
 import static com.enonic.ec.kubernetes.crd.CrdClientsProducer.createCrdClient;
 

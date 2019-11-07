@@ -8,6 +8,7 @@ import org.immutables.value.Value;
 
 import com.google.common.base.Preconditions;
 
+import com.enonic.ec.kubernetes.common.Diff;
 import com.enonic.ec.kubernetes.crd.deployment.spec.Spec;
 import com.enonic.ec.kubernetes.crd.deployment.spec.SpecNode;
 import com.enonic.ec.kubernetes.crd.deployment.vhost.VHost;

@@ -11,7 +11,7 @@ import com.enonic.ec.kubernetes.crd.deployment.vhost.VHostPath;
 import com.enonic.ec.kubernetes.operator.commands.kubectl.delete.ImmutableCommandDeleteIngress;
 import com.enonic.ec.kubernetes.operator.commands.kubectl.delete.ImmutableCommandDeleteIssuer;
 import com.enonic.ec.kubernetes.operator.commands.kubectl.delete.ImmutableCommandDeleteService;
-import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerClient;
+import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.client.IssuerClient;
 
 @Value.Immutable
 public abstract class DeleteXpDeploymentVHost

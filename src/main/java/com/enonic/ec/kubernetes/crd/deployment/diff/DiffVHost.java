@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.immutables.value.Value;
 
+import com.enonic.ec.kubernetes.common.Diff;
 import com.enonic.ec.kubernetes.crd.deployment.vhost.VHost;
 import com.enonic.ec.kubernetes.crd.deployment.vhost.VHostPath;
 

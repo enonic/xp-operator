@@ -2,7 +2,7 @@ package com.enonic.ec.kubernetes.operator.commands.kubectl.delete;
 
 import org.immutables.value.Value;
 
-import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerClient;
+import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.client.IssuerClient;
 
 @Value.Immutable
 public abstract class CommandDeleteIssuer

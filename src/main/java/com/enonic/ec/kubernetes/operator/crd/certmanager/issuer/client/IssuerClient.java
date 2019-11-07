@@ -1,7 +1,11 @@
-package com.enonic.ec.kubernetes.operator.crd.certmanager.issuer;
+package com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.client;
 
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
+
+import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerResource;
+import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerResourceDoneable;
+import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerResourceList;
 
 public class IssuerClient
 {

@@ -10,9 +10,7 @@ spec:
   xpVersion: 7.1.1
   enabled: true
 
-  sharedDisks:
-    blob: 1Gi
-    snapshots: 1Gi
+  sharedDisks: 1Gi
 
   nodes:
     - alias: main

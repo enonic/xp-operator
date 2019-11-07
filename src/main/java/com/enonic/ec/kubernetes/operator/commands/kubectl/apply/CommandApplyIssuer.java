@@ -6,7 +6,7 @@ import org.immutables.value.Value;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 
-import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerClient;
+import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.client.IssuerClient;
 import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerResource;
 import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerResourceSpec;
 

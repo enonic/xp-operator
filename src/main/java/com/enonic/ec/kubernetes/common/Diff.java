@@ -1,4 +1,4 @@
-package com.enonic.ec.kubernetes.crd.deployment.diff;
+package com.enonic.ec.kubernetes.common;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -55,10 +55,8 @@ public abstract class Diff<T>
         Preconditions.checkState( oldValue().isPresent() || newValue().isPresent(), "both old and new value can't be empty" );
     }
 
-    //region helper functions
-
     @SuppressWarnings("OptionalGetWithoutIsPresent")
-    <B> boolean equals( Function<T, B> func )
+    protected <B> boolean equals( Function<T, B> func )
     {
         if ( !shouldModify() )
         {
@@ -69,7 +67,7 @@ public abstract class Diff<T>
         return v1.equals( v2 );
     }
 
-    <C, D extends Diff<C>> List<D> mergeMaps( Map<String, C> oldMap, Map<String, C> newMap,
+    protected <C, D extends Diff<C>> List<D> mergeMaps( Map<String, C> oldMap, Map<String, C> newMap,
                                               BiFunction<Optional<C>, Optional<C>, D> creator )
     {
         Set<String> inBoth = oldMap.keySet().stream().filter( newMap::containsKey ).collect( Collectors.toSet() );
@@ -82,6 +80,4 @@ public abstract class Diff<T>
         onlyInNew.forEach( s -> res.add( creator.apply( Optional.empty(), Optional.of( newMap.get( s ) ) ) ) );
         return res;
     }
-
-    //endregion
 }
