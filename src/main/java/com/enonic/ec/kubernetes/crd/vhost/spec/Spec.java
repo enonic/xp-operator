@@ -8,8 +8,6 @@ import org.immutables.value.Value;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-import io.fabric8.kubernetes.api.model.ConfigMap;
-
 import com.enonic.ec.kubernetes.common.Configuration;
 
 @JsonDeserialize(builder = ImmutableSpec.Builder.class)
@@ -19,23 +17,23 @@ public abstract class Spec
 {
     public abstract String host();
 
-    public abstract SpecCertificate certificate();
+    public abstract Optional<SpecCertificate> certificate();
 
     public abstract List<SpecMapping> mappings();
 
-    public boolean doesModify( ConfigMap configMap ) // TODO: Change to alias
-    {
-        String alias = configMap.getMetadata().
-            getLabels().
-            get( cfgStrFmt( "operator.deployment.xp.pod.label.aliasPrefix", "main" ) ); // TODO: FIX
-
-        if ( alias == null )
-        {
-            return false;
-        }
-
-        return mappings().stream().filter( m -> m.nodeAlias().equals( alias ) ).findAny().isPresent();
-    }
+//    public boolean doesModify( ConfigMap configMap ) // TODO: Change to alias
+//    {
+//        String alias = configMap.getMetadata().
+//            getLabels().
+//            get( cfgStrFmt( "operator.deployment.xp.pod.label.aliasPrefix", "main" ) ); // TODO: FIX
+//
+//        if ( alias == null )
+//        {
+//            return false;
+//        }
+//
+//        return mappings().stream().filter( m -> m.nodeAlias().equals( alias ) ).findAny().isPresent();
+//    }
 
     public Optional<Spec> relevantSpec( String nodeAlias )
     {

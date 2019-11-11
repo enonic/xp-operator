@@ -68,7 +68,7 @@ public abstract class Diff<T>
     }
 
     protected <C, D extends Diff<C>> List<D> mergeMaps( Map<String, C> oldMap, Map<String, C> newMap,
-                                              BiFunction<Optional<C>, Optional<C>, D> creator )
+                                                        BiFunction<Optional<C>, Optional<C>, D> creator )
     {
         Set<String> inBoth = oldMap.keySet().stream().filter( newMap::containsKey ).collect( Collectors.toSet() );
         Set<String> onlyInOld = oldMap.keySet().stream().filter( k -> !inBoth.contains( k ) ).collect( Collectors.toSet() );

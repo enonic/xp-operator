@@ -1,6 +1,7 @@
-package com.enonic.ec.kubernetes.operator.commands;
+package com.enonic.ec.kubernetes.operator.vhosts;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -11,13 +12,12 @@ import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
-import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.Diff;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedKubernetesCommand;
-import com.enonic.ec.kubernetes.crd.deployment.diff.DiffVHost;
-import com.enonic.ec.kubernetes.crd.deployment.vhost.VHostPath;
-import com.enonic.ec.kubernetes.operator.commands.builders.spec.ImmutableIngressSpecBuilder;
-import com.enonic.ec.kubernetes.operator.commands.builders.spec.ImmutableIssuerSpecBuilder;
+import com.enonic.ec.kubernetes.crd.vhost.diff.DiffSpec;
+import com.enonic.ec.kubernetes.crd.vhost.spec.Spec;
+import com.enonic.ec.kubernetes.crd.vhost.spec.SpecMapping;
+import com.enonic.ec.kubernetes.operator.commands.CommandBuilder;
 import com.enonic.ec.kubernetes.operator.commands.builders.spec.ImmutableServiceSpecBuilder;
 import com.enonic.ec.kubernetes.operator.commands.kubectl.apply.ImmutableCommandApplyIngress;
 import com.enonic.ec.kubernetes.operator.commands.kubectl.apply.ImmutableCommandApplyIssuer;
@@ -25,11 +25,12 @@ import com.enonic.ec.kubernetes.operator.commands.kubectl.apply.ImmutableCommand
 import com.enonic.ec.kubernetes.operator.commands.kubectl.delete.ImmutableCommandDeleteIssuer;
 import com.enonic.ec.kubernetes.operator.commands.kubectl.delete.ImmutableCommandDeleteService;
 import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.client.IssuerClient;
+import com.enonic.ec.kubernetes.operator.vhosts.spec.ImmutableIngressSpec;
+import com.enonic.ec.kubernetes.operator.vhosts.spec.ImmutableIssuerSpec;
 
-@SuppressWarnings("OptionalGetWithoutIsPresent")
 @Value.Immutable
-public abstract class CreateXpDeploymentVHost
-    extends Configuration
+public abstract class XpVHostApplyIngress
+    extends XpVHostApply
     implements CommandBuilder
 {
     protected abstract KubernetesClient defaultClient();
@@ -40,17 +41,22 @@ public abstract class CreateXpDeploymentVHost
 
     protected abstract String namespace();
 
-    protected abstract DiffVHost diffVHost();
+    protected abstract Map<String, String> defaultLabels(); // TODO: HANDLE
 
-    protected abstract Map<String, String> defaultLabels();
+    protected abstract List<DiffSpec> diffs();
 
     @Override
-    public void addCommands( ImmutableCombinedKubernetesCommand.Builder commandBuilder )
+    public void addCommands( final ImmutableCombinedKubernetesCommand.Builder commandBuilder )
     {
-        String vHostResourceName = diffVHost().newValue().get().vHostResourceName();
+        diffs().stream().filter( d -> d.shouldAddOrModify() ).forEach( d -> applyDiff( commandBuilder, d ) );
+    }
 
-        boolean hasCert = diffVHost().newValue().get().certificate().isPresent();
-        boolean changeCert = diffVHost().shouldAddOrModify() && diffVHost().certificateChanged();
+    private void applyDiff( final ImmutableCombinedKubernetesCommand.Builder commandBuilder, final DiffSpec diffSpec )
+    {
+        String vHostResourceName = vHostResourceName( diffSpec.newValue().get() );
+
+        boolean hasCert = diffSpec.newValue().get().certificate().isPresent();
+        boolean changeCert = diffSpec.shouldAddOrModify() && diffSpec.certificateChanged();
 
         if ( changeCert )
         {
@@ -62,8 +68,8 @@ public abstract class CreateXpDeploymentVHost
                     namespace( namespace() ).
                     name( vHostResourceName ).
                     labels( defaultLabels() ).
-                    spec( ImmutableIssuerSpecBuilder.builder().
-                        certificate( diffVHost().newValue().get().certificate().get() ).
+                    spec( ImmutableIssuerSpec.builder().
+                        certificate( diffSpec.newValue().get().certificate().get() ).
                         build().
                         spec() ).
                     build() );
@@ -78,42 +84,44 @@ public abstract class CreateXpDeploymentVHost
             }
         }
 
-        boolean changePaths = diffVHost().pathsChanged().stream().anyMatch( Diff::shouldAddOrModifyOrRemove );
+        boolean changeMappings = diffSpec.mappingsChanged().stream().anyMatch( Diff::shouldAddOrModifyOrRemove );
 
-        if ( changePaths )
+        if ( changeMappings )
         {
 
-            diffVHost().pathsChanged().stream().
-                filter( Diff::shouldAddOrModify ).forEach( p -> {
+            diffSpec.mappingsChanged().stream().
+                filter( Diff::shouldAddOrModify ).forEach( m -> {
+
                 Map<String, String> serviceLabels = new HashMap<>();
                 serviceLabels.putAll( defaultLabels() );
-                serviceLabels.putAll( p.newValue().get().getServiceSelectorLabels() );
-                serviceLabels.putAll( p.newValue().get().vHostLabels() );
+
+                Map<String, String> serviceSelector = new HashMap<>();
+                serviceSelector.put( aliasLabelKey(), m.newValue().get().nodeAlias() );
 
                 commandBuilder.addCommand( ImmutableCommandApplyService.builder().
                     client( defaultClient() ).
                     ownerReference( ownerReference() ).
                     namespace( namespace() ).
-                    name( p.newValue().get().pathResourceName() ).
+                    name( mappingResourceName( vHostResourceName, m.newValue().get() ) ).
                     labels( serviceLabels ).
                     spec( ImmutableServiceSpecBuilder.builder().
-                        selector( p.newValue().get().getServiceSelectorLabels() ).
+                        selector( serviceSelector ).
                         putPorts( cfgStr( "operator.deployment.xp.port.main.name" ), cfgInt( "operator.deployment.xp.port.main.number" ) ).
                         build().
                         spec() ).
                     build() );
             } );
 
-            diffVHost().pathsChanged().stream().
-                filter( Diff::shouldRemove ).forEach( p -> commandBuilder.addCommand( ImmutableCommandDeleteService.builder().
+            diffSpec.mappingsChanged().stream().
+                filter( Diff::shouldRemove ).forEach( m -> commandBuilder.addCommand( ImmutableCommandDeleteService.builder().
                 client( defaultClient() ).
                 namespace( namespace() ).
-                name( p.oldValue().get().pathResourceName() ).
+                name( mappingResourceName( vHostResourceName, m.oldValue().get() ) ).
                 build() ) );
 
         }
 
-        if ( changePaths || changeCert )
+        if ( changeMappings || changeCert )
         {
             ImmutableMap.Builder<String, String> serviceAnnotations = ImmutableMap.builder();
             StringBuilder nginxConfigSnippet = new StringBuilder();
@@ -150,8 +158,8 @@ public abstract class CreateXpDeploymentVHost
             } );
 
             // Sticky session
-            Optional<VHostPath> adminPath =
-                diffVHost().newValue().get().vHostPaths().stream().filter( p -> p.path().startsWith( "/admin" ) ).findAny();
+            Optional<SpecMapping> adminPath =
+                diffSpec.newValue().get().mappings().stream().filter( m -> m.target().startsWith( "/admin" ) ).findAny();
             if ( adminPath.isPresent() )
             {
                 cfgIfBool( "operator.extensions.ingress.adminStickySession.enabled", () -> {
@@ -181,12 +189,23 @@ public abstract class CreateXpDeploymentVHost
                 name( vHostResourceName ).
                 labels( defaultLabels() ).
                 annotations( serviceAnnotations.build() ).
-                spec( ImmutableIngressSpecBuilder.builder().
+                spec( ImmutableIngressSpec.builder().
                     certificateSecretName( Optional.ofNullable( hasCert ? vHostResourceName : null ) ).
-                    vhost( diffVHost().newValue().get() ).
+                    mappingResourceName( m -> mappingResourceName( vHostResourceName, m ) ).
+                    vHostSpec( diffSpec.newValue().get() ).
                     build().
                     spec() ).
                 build() );
         }
+    }
+
+    private String vHostResourceName( final Spec spec )
+    {
+        return "vhost-" + spec.host().replace( ".", "-" );
+    }
+
+    private String mappingResourceName( final String vHostResourceName, final SpecMapping mapping )
+    {
+        return vHostResourceName + "-" + mapping.name();
     }
 }

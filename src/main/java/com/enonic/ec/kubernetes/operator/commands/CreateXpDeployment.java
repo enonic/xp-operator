@@ -14,11 +14,11 @@ import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
 import com.enonic.ec.kubernetes.common.Configuration;
+import com.enonic.ec.kubernetes.common.Diff;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedKubernetesCommand;
 import com.enonic.ec.kubernetes.crd.deployment.ImmutableXpDeploymentNamingHelper;
 import com.enonic.ec.kubernetes.crd.deployment.XpDeploymentNamingHelper;
 import com.enonic.ec.kubernetes.crd.deployment.XpDeploymentResource;
-import com.enonic.ec.kubernetes.common.Diff;
 import com.enonic.ec.kubernetes.crd.deployment.diff.DiffSpec;
 import com.enonic.ec.kubernetes.crd.deployment.diff.DiffSpecNode;
 import com.enonic.ec.kubernetes.crd.deployment.diff.ImmutableDiffSpec;
