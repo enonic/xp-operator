@@ -50,14 +50,4 @@ public class Configuration
             func.run();
         }
     }
-
-    protected static String dnsRecord( String service, String namespace )
-    {
-        return String.join( ".", service, namespace, "svc.cluster.local" );
-    }
-
-    protected static String dnsRecord( String pod, String service, String namespace )
-    {
-        return dnsRecord( String.join( ".", pod, service ), namespace );
-    }
 }

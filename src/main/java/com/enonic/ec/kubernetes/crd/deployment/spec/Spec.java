@@ -13,9 +13,6 @@ import com.google.common.base.Preconditions;
 
 import io.fabric8.kubernetes.api.model.Quantity;
 
-import com.enonic.ec.kubernetes.crd.deployment.vhost.ImmutableVHostBuilder;
-import com.enonic.ec.kubernetes.crd.deployment.vhost.VHost;
-
 @JsonDeserialize(builder = ImmutableSpec.Builder.class)
 @Value.Immutable
 public abstract class Spec
@@ -42,8 +39,6 @@ public abstract class Spec
 
     public abstract Map<String, SpecVHostCertificate> vHostCertificates();
 
-    //region class consistency check
-
     @Value.Check
     protected void check()
     {
@@ -57,10 +52,6 @@ public abstract class Spec
         Set<String> aliases = nodes().stream().map( SpecNode::alias ).collect( Collectors.toSet() );
         Preconditions.checkState( aliases.size() == nodes().size(), "nodes cannot have the same alias" );
     }
-
-    //endregion
-
-    //region derived functions
 
     @Value.Default
     @JsonIgnore
@@ -82,16 +73,4 @@ public abstract class Spec
     {
         return Map.of( "cloud", cloud(), "project", project(), "app", app(), "name", name() );
     }
-
-    @Value.Derived
-    @JsonIgnore
-    public List<VHost> vHosts()
-    {
-        return ImmutableVHostBuilder.builder().
-            spec( this ).
-            build().
-            vHosts();
-    }
-
-    //endregion
 }

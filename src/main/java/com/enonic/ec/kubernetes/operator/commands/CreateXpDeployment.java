@@ -170,19 +170,6 @@ public abstract class CreateXpDeployment
                 build().
                 addCommands( commandBuilder ) );
 
-        // Create / Update vHosts
-//        diffSpec.vHostsChanged().stream().
-//            filter( Diff::shouldAddOrModify ).
-//            forEach( diff -> ImmutableCreateXpDeploymentVHost.builder().
-//                defaultClient( defaultClient() ).
-//                issuerClient( issuerClient() ).
-//                ownerReference( ownerReference() ).
-//                namespace( namespaceName ).
-//                diffVHost( diff ).
-//                defaultLabels( defaultLabels ).
-//                build().
-//                addCommands( commandBuilder ) );
-
         // Remove old nodes
         diffSpec.nodesChanged().stream().
             filter( Diff::shouldRemove ).
@@ -192,17 +179,6 @@ public abstract class CreateXpDeployment
                 nodeName( namingHelper().defaultResourceName( diff.oldValue().get() ) ).
                 build().
                 addCommands( commandBuilder ) );
-
-        // Remove old vHosts
-//        diffSpec.vHostsChanged().stream().
-//            filter( Diff::shouldRemove ).
-//            forEach( diff -> ImmutableDeleteXpDeploymentVHost.builder().
-//                defaultClient( defaultClient() ).
-//                issuerClient( issuerClient() ).
-//                namespace( namespaceName ).
-//                vHost( diff.oldValue().get() ).
-//                build().
-//                addCommands( commandBuilder ) );
     }
 
     private List<String> getAllMasterNodeDNS( String serviceName )

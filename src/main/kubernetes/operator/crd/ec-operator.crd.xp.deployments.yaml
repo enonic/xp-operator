@@ -11,3 +11,24 @@ spec:
     singular: deployment
   scope: Cluster
   version: v1alpha1
+  additionalPrinterColumns:
+    - name: Enabled
+      type: boolean
+      description: XP enabled or not
+      JSONPath: .spec.enabled
+    - name: Version
+      type: string
+      description: XP version running
+      JSONPath: .spec.xpVersion
+    - name: Shared Disk
+      type: string
+      description: Size of XP shared disk
+      JSONPath: .spec.sharedDisk
+    - name: Node Aliases
+      type: string
+      description: List of Aliases
+      JSONPath: .spec.nodes[*].alias
+    - name: Node Replicas
+      type: string
+      description: List of Aliases
+      JSONPath: .spec.nodes[*].replicas

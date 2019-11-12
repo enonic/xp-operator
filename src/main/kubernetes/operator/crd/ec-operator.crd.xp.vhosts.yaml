@@ -11,3 +11,20 @@ spec:
     singular: vhost
   scope: Namespaced
   version: v1alpha1
+  additionalPrinterColumns:
+    - name: Host
+      type: string
+      description: Host
+      JSONPath: .spec.host
+    - name: Mapping sources
+      type: string
+      description: Mapping Sources
+      JSONPath: .spec.mappings[*].source
+    - name: Mapping targets
+      type: string
+      description: Mapping Sources
+      JSONPath: .spec.mappings[*].target
+    - name: Cert Self Signed
+      type: boolean
+      description: Certificate Self Signed
+      JSONPath: .spec.certificate.selfSigned

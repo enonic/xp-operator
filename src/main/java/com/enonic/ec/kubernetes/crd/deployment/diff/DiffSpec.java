@@ -11,13 +11,11 @@ import com.google.common.base.Preconditions;
 import com.enonic.ec.kubernetes.common.Diff;
 import com.enonic.ec.kubernetes.crd.deployment.spec.Spec;
 import com.enonic.ec.kubernetes.crd.deployment.spec.SpecNode;
-import com.enonic.ec.kubernetes.crd.deployment.vhost.VHost;
 
 @Value.Immutable
 public abstract class DiffSpec
     extends Diff<Spec>
 {
-
     @Value.Derived
     public boolean versionChanged()
     {
@@ -40,21 +38,6 @@ public abstract class DiffSpec
         newValue().ifPresent( s -> s.nodes().forEach( n -> newNodes.put( n.alias(), n ) ) );
 
         return mergeMaps( oldNodes, newNodes, ( o, n ) -> ImmutableDiffSpecNode.builder().
-            oldValue( o ).
-            newValue( n ).
-            build() );
-    }
-
-    @Value.Derived
-    public List<DiffVHost> vHostsChanged()
-    {
-        Map<String, VHost> oldVHosts = new HashMap<>();
-        Map<String, VHost> newVHosts = new HashMap<>();
-
-        oldValue().ifPresent( s -> s.vHosts().forEach( h -> oldVHosts.put( h.host(), h ) ) );
-        newValue().ifPresent( s -> s.vHosts().forEach( h -> newVHosts.put( h.host(), h ) ) );
-
-        return mergeMaps( oldVHosts, newVHosts, ( o, n ) -> ImmutableDiffVHost.builder().
             oldValue( o ).
             newValue( n ).
             build() );

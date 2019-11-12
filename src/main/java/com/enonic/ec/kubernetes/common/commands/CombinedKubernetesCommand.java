@@ -26,6 +26,7 @@ public abstract class CombinedKubernetesCommand
             log.info( String.format( "%2s: %s", i + 1, c.summary() ) );
             c.execute();
         }
+        log.info( "Finished" );
         return null;
     }
 
