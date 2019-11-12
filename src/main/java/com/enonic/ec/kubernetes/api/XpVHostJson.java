@@ -6,11 +6,12 @@ import org.immutables.value.Value;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-import com.enonic.ec.kubernetes.crd.deployment.spec.Spec;
+import com.enonic.ec.kubernetes.crd.vhost.spec.Spec;
 
-@JsonDeserialize(builder = ImmutableXpDeploymentJson.Builder.class)
+
+@JsonDeserialize(builder = ImmutableXpVHostJson.Builder.class)
 @Value.Immutable
-public interface XpDeploymentJson
+public interface XpVHostJson
 {
     String apiVersion();
 

@@ -1,0 +1,19 @@
+{
+  "apiVersion": "enonic.cloud/v1alpha1",
+  "spec": {
+    "host": "company.com",
+    "certificate": {
+      "selfSigned": true
+    },
+    "mappings": [
+      {
+        "nodeAlias": "main",
+        "name": "admin",
+        "source": "/admin",
+        "target": "/admin",
+        "idProvider": "system"
+      }
+    ]
+  }
+}
+

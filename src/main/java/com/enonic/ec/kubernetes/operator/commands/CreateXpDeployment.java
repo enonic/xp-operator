@@ -171,17 +171,17 @@ public abstract class CreateXpDeployment
                 addCommands( commandBuilder ) );
 
         // Create / Update vHosts
-        diffSpec.vHostsChanged().stream().
-            filter( Diff::shouldAddOrModify ).
-            forEach( diff -> ImmutableCreateXpDeploymentVHost.builder().
-                defaultClient( defaultClient() ).
-                issuerClient( issuerClient() ).
-                ownerReference( ownerReference() ).
-                namespace( namespaceName ).
-                diffVHost( diff ).
-                defaultLabels( defaultLabels ).
-                build().
-                addCommands( commandBuilder ) );
+//        diffSpec.vHostsChanged().stream().
+//            filter( Diff::shouldAddOrModify ).
+//            forEach( diff -> ImmutableCreateXpDeploymentVHost.builder().
+//                defaultClient( defaultClient() ).
+//                issuerClient( issuerClient() ).
+//                ownerReference( ownerReference() ).
+//                namespace( namespaceName ).
+//                diffVHost( diff ).
+//                defaultLabels( defaultLabels ).
+//                build().
+//                addCommands( commandBuilder ) );
 
         // Remove old nodes
         diffSpec.nodesChanged().stream().
@@ -194,15 +194,15 @@ public abstract class CreateXpDeployment
                 addCommands( commandBuilder ) );
 
         // Remove old vHosts
-        diffSpec.vHostsChanged().stream().
-            filter( Diff::shouldRemove ).
-            forEach( diff -> ImmutableDeleteXpDeploymentVHost.builder().
-                defaultClient( defaultClient() ).
-                issuerClient( issuerClient() ).
-                namespace( namespaceName ).
-                vHost( diff.oldValue().get() ).
-                build().
-                addCommands( commandBuilder ) );
+//        diffSpec.vHostsChanged().stream().
+//            filter( Diff::shouldRemove ).
+//            forEach( diff -> ImmutableDeleteXpDeploymentVHost.builder().
+//                defaultClient( defaultClient() ).
+//                issuerClient( issuerClient() ).
+//                namespace( namespaceName ).
+//                vHost( diff.oldValue().get() ).
+//                build().
+//                addCommands( commandBuilder ) );
     }
 
     private List<String> getAllMasterNodeDNS( String serviceName )

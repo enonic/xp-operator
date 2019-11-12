@@ -60,7 +60,7 @@ public abstract class Diff<T>
     {
         if ( !shouldModify() )
         {
-            return false;
+            return true;
         }
         B v1 = func.apply( oldValue().get() );
         B v2 = func.apply( newValue().get() );

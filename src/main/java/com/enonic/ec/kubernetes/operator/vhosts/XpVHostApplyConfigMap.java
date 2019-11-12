@@ -50,10 +50,12 @@ public abstract class XpVHostApplyConfigMap
             {
                 commandBuilder.addCommand( ImmutableCommandApplyConfigMap.builder().
                     client( client() ).
+                    ownerReference( configMap.getMetadata().getOwnerReferences().get( 0 ) ).
                     namespace( configMap.getMetadata().getNamespace() ).
                     name( configMap.getMetadata().getName() ).
                     labels( configMap.getMetadata().getLabels() ).
-                    annotations( configMap.getMetadata().getAnnotations() ).
+                    annotations(
+                        configMap.getMetadata().getAnnotations() != null ? configMap.getMetadata().getAnnotations() : new HashMap<>() ).
                     data( newConfig ).
                     build() );
             }
@@ -92,7 +94,7 @@ public abstract class XpVHostApplyConfigMap
             sb = new StringBuilder( "enabled = false" );
         }
 
-        newConfig.put( configFile, sb.toString() );
+        newConfig.put( configFile, sb.toString().trim() );
     }
 
     private static void addToConfig( final Spec spec, final StringBuilder sb )
@@ -101,8 +103,11 @@ public abstract class XpVHostApplyConfigMap
             sb.append( "mapping." ).append( m.name() ).append( ".host" ).append( "=" ).append( spec.host() ).append( "\n" );
             sb.append( "mapping." ).append( m.name() ).append( ".source" ).append( "=" ).append( m.source() ).append( "\n" );
             sb.append( "mapping." ).append( m.name() ).append( ".target" ).append( "=" ).append( m.target() ).append( "\n" );
-            m.idProvider().ifPresent(
-                i -> sb.append( "mapping." ).append( m.name() ).append( ".idProvider." ).append( i ).append( "=" ).append( "default\n" ) );
+            if ( m.idProvider() != null )
+            {
+                sb.append( "mapping." ).append( m.name() ).append( ".idProvider." ).append( m.idProvider() ).append( "=" ).append(
+                    "default\n" );
+            }
             sb.append( "\n" );
         } );
     }

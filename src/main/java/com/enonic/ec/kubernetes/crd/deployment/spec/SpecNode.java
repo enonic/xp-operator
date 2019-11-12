@@ -103,7 +103,7 @@ public abstract class SpecNode
     public Map<String, String> nodeAliasLabel()
     {
         // Do not add more labels here, it will brake service mapping for vHosts to pods
-        return Map.of( cfgStrFmt( "operator.deployment.xp.pod.label.aliasPrefix", alias() ), alias() ); // TODO: Change this label
+        return Map.of( cfgStr( "operator.deployment.xp.pod.label.alias" ), alias() );
     }
 
     //endregion

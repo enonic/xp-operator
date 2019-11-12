@@ -4,17 +4,18 @@
     "cloud": "mycloud",
     "project": "myproject",
     "name": "qa",
-
-    "xpVersion": "7.1.1",
+    "xpVersion": "7.0.3",
     "enabled": true,
-
     "sharedDisk": "1Gi",
-
     "nodes": [
       {
         "alias": "main",
         "replicas": 3,
-        "type": ["MASTER", "DATA", "FRONTEND"],
+        "type": [
+          "MASTER",
+          "DATA",
+          "FRONTEND"
+        ],
         "resources": {
           "cpu": "1",
           "memory": "512Mi",
@@ -23,21 +24,14 @@
           }
         },
         "env": {
-          "XP_APPS": "com.enonic.app.snapshotter:2.1.1\n"
+          "XP_APPS": "com.enonic.app.snapshotter:2.1.1"
         },
         "config": {
-          "com.enonic.xp.app.main.cfg": "tourDisabled = true\n",
-          "com.enonic.xp.web.vhost.cfg": "enabled = true\n\nmapping.superhero.host = company.com\nmapping.superhero.source = /\nmapping.superhero.target = /site/default/master/superhero\nmapping.superhero.idProvider.system = default\n\nmapping.admin.host = company.com\nmapping.admin.source = /admin\nmapping.admin.target = /admin\nmapping.admin.idProvider.system = default",
+          "com.enonic.xp.app.main.cfg": "tourDisabled = true",
           "system.properties": "xp.suPassword = {sha512}5b722b307fce6c944905d132691d5e4a2214b7fe92b738920eb3fce3a90420a19511c3010a0e7712b054daef5b57bad59ecbd93b3280f210578f547f4aed4d25\nxp.init.adminUserCreation = false"
         }
       }
-    ],
-
-    "vHostCertificates": {
-      "company.com": {
-        "selfSigned": true
-      }
-    }
+    ]
   }
 }
 

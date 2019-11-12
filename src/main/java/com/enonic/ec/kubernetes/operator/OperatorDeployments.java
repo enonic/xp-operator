@@ -52,8 +52,10 @@ public class OperatorDeployments
         {
             log.info( "XpDeployment with id '" + oldResource.get().getMetadata().getUid() + "' and name '" +
                           oldResource.get().getMetadata().getName() + "' DELETED" );
+
             // Note that we do not have to do anything on DELETE events because the
             // Kubernetes garbage collector cleans up the deployment for us.
+            return;
         }
 
         try

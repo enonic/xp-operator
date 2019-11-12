@@ -1,8 +1,7 @@
 package com.enonic.ec.kubernetes.crd.vhost.spec;
 
-import java.util.Optional;
-
 import org.immutables.value.Value;
+import org.wildfly.common.annotation.Nullable;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
@@ -18,5 +17,6 @@ public abstract class SpecMapping
 
     public abstract String target();
 
-    public abstract Optional<String> idProvider();
+    @Nullable
+    public abstract String idProvider(); // TODO: Fix Nullable
 }

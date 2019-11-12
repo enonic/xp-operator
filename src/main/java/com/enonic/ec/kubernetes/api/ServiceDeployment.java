@@ -10,7 +10,6 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -28,7 +27,7 @@ import com.enonic.ec.kubernetes.crd.deployment.diff.ImmutableDiffSpec;
 
 @ApplicationScoped
 @Path("/api")
-public class DeploymentService
+public class ServiceDeployment
 {
     @Inject
     XpDeploymentClientProducer xpDeploymentClientProducer;
@@ -86,38 +85,6 @@ public class DeploymentService
         {
             return Response.status( 404 ).build();
         }
-
-        // Create response
-        return Response.ok( resourceToJson( resource.get() ) ).build();
-    }
-
-    @PUT
-    @Path("/{uid}")
-    public Response editXpDeployment( @PathParam("uid") String uid, XpDeploymentJson deployment )
-    {
-        // Fetch from cache
-        Optional<XpDeploymentResource> resource = xpDeploymentCache.get( uid );
-        if ( resource.isEmpty() )
-        {
-            return Response.status( 404 ).build();
-        }
-
-        // Validate apiVersion
-        if ( !resource.get().getApiVersion().equals( deployment.apiVersion() ) )
-        {
-            return Response.status( 400, "cannot update deployment to a different apiVersion" ).build();
-        }
-
-        // Validate the changes
-        ImmutableDiffSpec.builder().
-            oldValue( resource.get().getSpec() ).
-            newValue( deployment.spec() ).
-            build();
-
-        // Update
-        resource.get().setSpec( deployment.spec() );
-        xpDeploymentClientProducer.produce().client().
-            createOrReplace( resource.get() );
 
         // Create response
         return Response.ok( resourceToJson( resource.get() ) ).build();

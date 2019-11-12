@@ -55,8 +55,8 @@ public abstract class XpVHostApplyIngress
     {
         String vHostResourceName = vHostResourceName( diffSpec.newValue().get() );
 
-        boolean hasCert = diffSpec.newValue().get().certificate().isPresent();
-        boolean changeCert = diffSpec.shouldAddOrModify() && diffSpec.certificateChanged();
+        boolean hasCert = diffSpec.newValue().get().certificate() != null;
+        boolean changeCert = diffSpec.isNew() || diffSpec.certificateChanged();
 
         if ( changeCert )
         {
@@ -69,7 +69,7 @@ public abstract class XpVHostApplyIngress
                     name( vHostResourceName ).
                     labels( defaultLabels() ).
                     spec( ImmutableIssuerSpec.builder().
-                        certificate( diffSpec.newValue().get().certificate().get() ).
+                        certificate( diffSpec.newValue().get().certificate() ).
                         build().
                         spec() ).
                     build() );
@@ -88,7 +88,7 @@ public abstract class XpVHostApplyIngress
 
         if ( changeMappings )
         {
-
+            // TODO: If only target was changed in mapping ignore
             diffSpec.mappingsChanged().stream().
                 filter( Diff::shouldAddOrModify ).forEach( m -> {
 

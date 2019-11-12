@@ -96,7 +96,7 @@ public abstract class CreateXpDeploymentNode
         Map<String, String> nodeLabels = nodeExtraLabels( newNode, defaultLabels() );
 
         int effectiveScale = diffSpec().newValue().get().enabled() ? newNode.replicas() : 0;
-        boolean changeScale = diffSpec().enabledChanged() || diffSpecNode().replicasChanged();
+        boolean changeScale = diffSpec().enabledChanged() || diffSpecNode().replicasChanged() || diffSpec().isNew();
 
         if ( changeScale )
         {
@@ -114,7 +114,7 @@ public abstract class CreateXpDeploymentNode
                 build() );
         }
 
-        boolean changeConfig = diffSpecNode().configChanged() || diffSpecNode().replicasChanged();
+        boolean changeConfig = diffSpecNode().configChanged() || diffSpecNode().replicasChanged() || diffSpec().isNew();
         if ( changeConfig )
         {
             commandBuilder.addCommand( ImmutableCommandApplyConfigMap.builder().
@@ -127,7 +127,8 @@ public abstract class CreateXpDeploymentNode
                 build() );
         }
 
-        boolean changeStatefulSet = diffSpec().versionChanged() || diffSpecNode().envChanged() || diffSpecNode().resourcesChanged();
+        boolean changeStatefulSet =
+            diffSpec().versionChanged() || diffSpecNode().envChanged() || diffSpecNode().resourcesChanged() || diffSpec().isNew();
         if ( changeStatefulSet )
         {
             List<EnvVar> podEnv = new LinkedList<>();

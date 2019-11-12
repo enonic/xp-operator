@@ -109,7 +109,7 @@ public class OperatorVHosts
                 build().
                 addCommands( commandBuilder );
 
-            if ( action == Watcher.Action.MODIFIED )
+            if ( !( action == Watcher.Action.DELETED ) )
             {
                 ImmutableXpVHostApplyIngress.builder().
                     defaultClient( defaultClientProducer.client() ).
@@ -117,8 +117,8 @@ public class OperatorVHosts
                     namespace( namespace ).
                     ownerReference( createOwnerReference( newVHost.get() ) ).
                     addDiffs( ImmutableDiffSpec.builder().
-                        oldValue( oldVHost.map( ov -> ov.getSpec() ).orElse( null ) ).
-                        newValue( newVHost.map( nv -> nv.getSpec() ).orElse( null ) ).
+                        oldValue( Optional.ofNullable( oldVHost.map( XpVHostResource::getSpec ).orElse( null ) ) ).
+                        newValue( Optional.ofNullable( newVHost.map( XpVHostResource::getSpec ).orElse( null ) ) ).
                         build() ).
                     build().
                     addCommands( commandBuilder );
