@@ -48,7 +48,7 @@ public abstract class XpVHostApplyIngress
     @Override
     public void addCommands( final ImmutableCombinedKubernetesCommand.Builder commandBuilder )
     {
-        diffs().stream().filter( d -> d.shouldAddOrModify() ).forEach( d -> applyDiff( commandBuilder, d ) );
+        diffs().stream().filter( Diff::shouldAddOrModify ).forEach( d -> applyDiff( commandBuilder, d ) );
     }
 
     private void applyDiff( final ImmutableCombinedKubernetesCommand.Builder commandBuilder, final DiffSpec diffSpec )
@@ -92,8 +92,7 @@ public abstract class XpVHostApplyIngress
             diffSpec.mappingsChanged().stream().
                 filter( Diff::shouldAddOrModify ).forEach( m -> {
 
-                Map<String, String> serviceLabels = new HashMap<>();
-                serviceLabels.putAll( defaultLabels() );
+                Map<String, String> serviceLabels = new HashMap<>( defaultLabels() );
 
                 Map<String, String> serviceSelector = new HashMap<>();
                 serviceSelector.put( aliasLabelKey(), m.newValue().get().nodeAlias() );
@@ -127,12 +126,10 @@ public abstract class XpVHostApplyIngress
             StringBuilder nginxConfigSnippet = new StringBuilder();
 
             // Linkerd config
-            cfgIfBool( "operator.extensions.linkerd.enabled", () -> {
-                nginxConfigSnippet.
-                    append( "proxy_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;" ).append( "\n" ).
-                    append( "proxy_hide_header l5d-remote-ip;" ).append( "\n" ).
-                    append( "proxy_hide_header l5d-server-id;" ).append( "\n" );
-            } );
+            cfgIfBool( "operator.extensions.linkerd.enabled", () -> nginxConfigSnippet.
+                append( "proxy_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;" ).append( "\n" ).
+                append( "proxy_hide_header l5d-remote-ip;" ).append( "\n" ).
+                append( "proxy_hide_header l5d-server-id;" ).append( "\n" ) );
 
             // Caching
             cfgIfBool( "operator.extensions.ingress.caching.enabled", () -> {
@@ -151,23 +148,19 @@ public abstract class XpVHostApplyIngress
             } );
 
             // DDOS mitigation
-            cfgIfBool( "operator.extensions.ingress.ddos.enabled", () -> {
-                serviceAnnotations.
-                    put( "nginx.ingress.kubernetes.io/limit-connections", "20" ).
-                    put( "nginx.ingress.kubernetes.io/limit-rpm", "240" );
-            } );
+            cfgIfBool( "operator.extensions.ingress.ddos.enabled", () -> serviceAnnotations.
+                put( "nginx.ingress.kubernetes.io/limit-connections", "20" ).
+                put( "nginx.ingress.kubernetes.io/limit-rpm", "240" ) );
 
             // Sticky session
             Optional<SpecMapping> adminPath =
                 diffSpec.newValue().get().mappings().stream().filter( m -> m.target().startsWith( "/admin" ) ).findAny();
             if ( adminPath.isPresent() )
             {
-                cfgIfBool( "operator.extensions.ingress.adminStickySession.enabled", () -> {
-                    serviceAnnotations.
-                        put( "nginx.ingress.kubernetes.io/affinity", "cookie" ).
-                        put( "nginx.ingress.kubernetes.io/session-cookie-name", "XPADMINCOOKIE" ).
-                        put( "nginx.ingress.kubernetes.io/session-cookie-path", "/admin" );
-                } );
+                cfgIfBool( "operator.extensions.ingress.adminStickySession.enabled", () -> serviceAnnotations.
+                    put( "nginx.ingress.kubernetes.io/affinity", "cookie" ).
+                    put( "nginx.ingress.kubernetes.io/session-cookie-name", "XPADMINCOOKIE" ).
+                    put( "nginx.ingress.kubernetes.io/session-cookie-path", "/admin" ) );
             }
 
             // Regular ingress

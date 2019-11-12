@@ -27,7 +27,10 @@ public class ConfigMapCache
 
     protected void onStartup( @Observes StartupEvent _ev )
     {
+        // Set initial state of config maps
         initialize( client.configMaps().inAnyNamespace().list().getItems() );
+
+        // Only watch XP config maps
         client.configMaps().inAnyNamespace().withLabel( "app", "xp" ).watch( new Watcher<>()
         {
             @Override
@@ -39,10 +42,13 @@ public class ConfigMapCache
             @Override
             public void onClose( final KubernetesClientException cause )
             {
-                // This means the socket closed and we have a problem, best to let kubernetes
-                // just restart the controller pod.
-                cause.printStackTrace();
-                System.exit( -1 );
+                if ( cause != null )
+                {
+                    // This means the socket closed and we have a problem, best to
+                    // let kubernetes just restart the operator pod.
+                    cause.printStackTrace();
+                    System.exit( -1 );
+                }
             }
         } );
     }

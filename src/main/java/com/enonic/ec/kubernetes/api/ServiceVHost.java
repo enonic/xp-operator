@@ -17,6 +17,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
+import io.fabric8.kubernetes.api.model.OwnerReference;
+
 import com.enonic.ec.kubernetes.crd.commands.ImmutableCommandCreateXpVHost;
 import com.enonic.ec.kubernetes.crd.commands.ImmutableCommandDeleteXpVHost;
 import com.enonic.ec.kubernetes.crd.deployment.XpDeploymentResource;
@@ -55,13 +57,14 @@ public class ServiceVHost
                 getOwnerReferences().
                 stream().
                 filter( o -> o.getUid().equals( depId ) ).
-                map( o -> o.getUid() ).
+                map( OwnerReference::getUid ).
                 collect( Collectors.toList() ).
                 contains( depId ) ).
             collect( Collectors.toList() ) ).
             build();
     }
 
+    @SuppressWarnings("DuplicatedCode")
     @GET
     @Path("/{depId}/vhosts/{vId}")
     @Produces("application/json")
@@ -78,7 +81,7 @@ public class ServiceVHost
                 getOwnerReferences().
                 stream().
                 filter( o -> o.getUid().equals( depId ) ).
-                map( o -> o.getUid() ).
+                map( OwnerReference::getUid ).
                 collect( Collectors.toList() ).
                 contains( depId ) ).
             filter( v -> v.getMetadata().getUid().equals( vId ) ).
@@ -110,7 +113,7 @@ public class ServiceVHost
                 getOwnerReferences().
                 stream().
                 filter( o -> o.getUid().equals( depId ) ).
-                map( o -> o.getUid() ).
+                map( OwnerReference::getUid ).
                 collect( Collectors.toList() ).
                 contains( depId ) ).
             filter( v -> v.getSpec().host().equals( deployment.spec().host() ) ).
@@ -138,6 +141,7 @@ public class ServiceVHost
         return Response.created( builder.build() ).entity( resourceToJson( resource ) ).build();
     }
 
+    @SuppressWarnings("DuplicatedCode")
     @DELETE
     @Path("/{depId}/vhosts/{vId}")
     public Response deleteXpDeployment( @PathParam("depId") String depId, @PathParam("vId") String vId )
@@ -153,7 +157,7 @@ public class ServiceVHost
                 getOwnerReferences().
                 stream().
                 filter( o -> o.getUid().equals( depId ) ).
-                map( o -> o.getUid() ).
+                map( OwnerReference::getUid ).
                 collect( Collectors.toList() ).
                 contains( depId ) ).
             filter( v -> v.getMetadata().getUid().equals( vId ) ).

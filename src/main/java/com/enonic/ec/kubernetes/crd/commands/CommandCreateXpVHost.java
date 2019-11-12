@@ -1,6 +1,6 @@
 package com.enonic.ec.kubernetes.crd.commands;
 
-import java.util.Arrays;
+import java.util.Collections;
 
 import org.immutables.value.Value;
 
@@ -37,7 +37,6 @@ public abstract class CommandCreateXpVHost
         return ImmutableXpDeploymentNamingHelper.builder().spec( owner().getSpec() ).build();
     }
 
-
     @Value.Check
     protected void check()
     {
@@ -52,7 +51,7 @@ public abstract class CommandCreateXpVHost
         resource.setApiVersion( apiVersion() );
         resource.setKind( cfgStr( "operator.crd.xp.vhosts.kind" ) );
         resource.getMetadata().setName( spec().host().replace( ".", "-" ) );
-        resource.getMetadata().setOwnerReferences( Arrays.asList( createOwnerReference() ) );
+        resource.getMetadata().setOwnerReferences( Collections.singletonList( createOwnerReference() ) );
         resource.setSpec( spec() );
         return client().client().inNamespace( namingHelper().defaultNamespaceName() ).createOrReplace( resource );
     }

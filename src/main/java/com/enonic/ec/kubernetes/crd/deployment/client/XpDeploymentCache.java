@@ -26,7 +26,9 @@ public class XpDeploymentCache
 
     protected void onStartup( @Observes StartupEvent _ev )
     {
+        // Set initial state of XP deployments
         initialize( client.client().inAnyNamespace().list().getItems() );
+
         client.client().inAnyNamespace().watch( new Watcher<>()
         {
             @Override
@@ -38,10 +40,13 @@ public class XpDeploymentCache
             @Override
             public void onClose( final KubernetesClientException cause )
             {
-                // This means the socket closed and we have a problem, best to let kubernetes
-                // just restart the controller pod.
-                cause.printStackTrace();
-                System.exit( -1 );
+                if ( cause != null )
+                {
+                    // This means the socket closed and we have a problem, best to
+                    // let kubernetes just restart the operator pod.
+                    cause.printStackTrace();
+                    System.exit( -1 );
+                }
             }
         } );
     }

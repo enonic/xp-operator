@@ -58,8 +58,10 @@ public class ResourceCache<T extends HasMetadata>
         {
             String uid = resource.getMetadata().getUid();
             final Optional<T> oldResource = Optional.ofNullable( cache.get( uid ) );
+
             if ( oldResource.isPresent() )
             {
+                // This is an update
                 int knownResourceVersion = Integer.parseInt( oldResource.get().getMetadata().getResourceVersion() );
                 int receivedResourceVersion = Integer.parseInt( resource.getMetadata().getResourceVersion() );
                 if ( knownResourceVersion > receivedResourceVersion )
@@ -68,6 +70,7 @@ public class ResourceCache<T extends HasMetadata>
                     return;
                 }
             }
+
             log.debug( "Resource " + uid + " " + action + " " + resource.getKind() + ": " + resource.getMetadata().getName() );
             if ( action == Watcher.Action.ADDED || action == Watcher.Action.MODIFIED )
             {
@@ -83,7 +86,7 @@ public class ResourceCache<T extends HasMetadata>
             }
             else
             {
-                // Best just to let kubernetes restart the operator
+                // This should never happen, best just to let kubernetes restart the operator
                 log.error(
                     "Received unexpected event " + action + " for " + resource.getMetadata().getUid() + " " + resource.getKind() + ": " +
                         resource.getMetadata().getName() );

@@ -46,8 +46,8 @@ public class OperatorDeployments
                         final Optional<XpDeploymentResource> newResource )
     {
         DiffSpec diffSpec = ImmutableDiffSpec.builder().
-            oldValue( Optional.ofNullable( oldResource.map( XpDeploymentResource::getSpec ).orElse( null ) ) ).
-            newValue( Optional.ofNullable( newResource.map( XpDeploymentResource::getSpec ).orElse( null ) ) ).
+            oldValue( oldResource.map( XpDeploymentResource::getSpec ) ).
+            newValue( newResource.map( XpDeploymentResource::getSpec ) ).
             build();
 
         if ( diffSpec.shouldAddOrModify() )

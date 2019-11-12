@@ -35,11 +35,13 @@ public abstract class CommandCreateXpDeployment
         // TODO: Check if namespace is terminating....from old deployment
 
         XpDeploymentResource newDeployment = new XpDeploymentResource();
+
         newDeployment.setApiVersion( apiVersion() );
         newDeployment.setKind( cfgStr( "operator.crd.xp.deployments.kind" ) );
         newDeployment.getMetadata().setName( spec().deploymentName() );
         newDeployment.getMetadata().setLabels( spec().defaultLabels() );
         newDeployment.setSpec( spec() );
+
         return client().client().createOrReplace( newDeployment );
     }
 }

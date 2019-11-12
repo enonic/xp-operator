@@ -140,9 +140,7 @@ public abstract class CreateXpDeploymentNode
             }
 
             ImmutableMap.Builder<String, String> podAnnotations = new ImmutableMap.Builder<>();
-            cfgIfBool( "operator.extensions.linkerd.enabled", () -> {
-                podAnnotations.put( "linkerd.io/inject", "enabled" );
-            } );
+            cfgIfBool( "operator.extensions.linkerd.enabled", () -> podAnnotations.put( "linkerd.io/inject", "enabled" ) );
 
             VolumeTripletList volumeList =
                 volumeBuilder().getVolumeTriplets( nodeName(), Optional.ofNullable( newNode.resources().disks().get( "index" ) ) );

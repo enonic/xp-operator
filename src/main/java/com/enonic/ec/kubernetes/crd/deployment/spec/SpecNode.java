@@ -37,8 +37,6 @@ public abstract class SpecNode
         return new SpecNodeConfig();
     }
 
-    //region class consistency check
-
     @Value.Check
     protected void check()
     {
@@ -53,10 +51,6 @@ public abstract class SpecNode
 
         Preconditions.checkState( !isMasterNode() || replicas() % 2 == 1, "master node replica number has to be an odd number" );
     }
-
-    //endregion
-
-    //region derived functions
 
     private boolean isType( Type... type )
     {
@@ -105,6 +99,4 @@ public abstract class SpecNode
         // Do not add more labels here, it will brake service mapping for vHosts to pods
         return Map.of( cfgStr( "operator.deployment.xp.pod.label.alias" ), alias() );
     }
-
-    //endregion
 }

@@ -87,8 +87,8 @@ public class OperatorVHosts
         String namespace = newVHost.isPresent() ? newVHost.get().getMetadata().getNamespace() : oldVHost.get().getMetadata().getNamespace();
 
         DiffSpec diffSpec = ImmutableDiffSpec.builder().
-            oldValue( Optional.ofNullable( oldVHost.map( XpVHostResource::getSpec ).orElse( null ) ) ).
-            newValue( Optional.ofNullable( newVHost.map( XpVHostResource::getSpec ).orElse( null ) ) ).
+            oldValue( oldVHost.map( XpVHostResource::getSpec ) ).
+            newValue( newVHost.map( XpVHostResource::getSpec ) ).
             build();
 
         ImmutableCombinedKubernetesCommand.Builder commandBuilder = ImmutableCombinedKubernetesCommand.builder();
@@ -117,8 +117,8 @@ public class OperatorVHosts
                 namespace( namespace ).
                 ownerReference( createOwnerReference( newVHost.get() ) ).
                 addDiffs( ImmutableDiffSpec.builder().
-                    oldValue( Optional.ofNullable( oldVHost.map( XpVHostResource::getSpec ).orElse( null ) ) ).
-                    newValue( Optional.ofNullable( newVHost.map( XpVHostResource::getSpec ).orElse( null ) ) ).
+                    oldValue( oldVHost.map( XpVHostResource::getSpec ) ).
+                    newValue( newVHost.map( XpVHostResource::getSpec ) ).
                     build() ).
                 build().
                 addCommands( commandBuilder );
