@@ -4,9 +4,9 @@ import java.util.Collections;
 
 import org.immutables.value.Value;
 
+import com.enonic.ec.kubernetes.crd.issuer.ImmutableIssuerResourceSpec;
+import com.enonic.ec.kubernetes.crd.issuer.IssuerResourceSpec;
 import com.enonic.ec.kubernetes.crd.vhost.spec.SpecCertificate;
-import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.ImmutableIssuerResourceSpec;
-import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.IssuerResourceSpec;
 
 @Value.Immutable
 public abstract class IssuerSpec

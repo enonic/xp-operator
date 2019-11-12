@@ -13,25 +13,25 @@ import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
 import com.enonic.ec.kubernetes.common.Diff;
+import com.enonic.ec.kubernetes.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedKubernetesCommand;
+import com.enonic.ec.kubernetes.crd.issuer.client.IssuerClient;
 import com.enonic.ec.kubernetes.crd.vhost.diff.DiffSpec;
 import com.enonic.ec.kubernetes.crd.vhost.spec.Spec;
 import com.enonic.ec.kubernetes.crd.vhost.spec.SpecMapping;
-import com.enonic.ec.kubernetes.operator.commands.CommandBuilder;
-import com.enonic.ec.kubernetes.operator.commands.builders.spec.ImmutableServiceSpecBuilder;
-import com.enonic.ec.kubernetes.operator.commands.kubectl.apply.ImmutableCommandApplyIngress;
-import com.enonic.ec.kubernetes.operator.commands.kubectl.apply.ImmutableCommandApplyIssuer;
-import com.enonic.ec.kubernetes.operator.commands.kubectl.apply.ImmutableCommandApplyService;
-import com.enonic.ec.kubernetes.operator.commands.kubectl.delete.ImmutableCommandDeleteIssuer;
-import com.enonic.ec.kubernetes.operator.commands.kubectl.delete.ImmutableCommandDeleteService;
-import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.client.IssuerClient;
+import com.enonic.ec.kubernetes.operator.deployments.spec.ImmutableServiceSpecBuilder;
+import com.enonic.ec.kubernetes.operator.kubectl.apply.ImmutableCommandApplyIngress;
+import com.enonic.ec.kubernetes.operator.kubectl.apply.ImmutableCommandApplyIssuer;
+import com.enonic.ec.kubernetes.operator.kubectl.apply.ImmutableCommandApplyService;
+import com.enonic.ec.kubernetes.operator.kubectl.delete.ImmutableCommandDeleteIssuer;
+import com.enonic.ec.kubernetes.operator.kubectl.delete.ImmutableCommandDeleteService;
 import com.enonic.ec.kubernetes.operator.vhosts.spec.ImmutableIngressSpec;
 import com.enonic.ec.kubernetes.operator.vhosts.spec.ImmutableIssuerSpec;
 
 @Value.Immutable
 public abstract class XpVHostApplyIngress
     extends XpVHostApply
-    implements CommandBuilder
+    implements CombinedCommandBuilder
 {
     protected abstract KubernetesClient defaultClient();
 

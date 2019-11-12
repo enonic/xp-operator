@@ -14,7 +14,7 @@ import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.ec.kubernetes.common.client.DefaultClientProducer;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedKubernetesCommand;
-import com.enonic.ec.kubernetes.operator.commands.ImmutablePrePullImages;
+import com.enonic.ec.kubernetes.operator.prepull.ImmutablePrePullImages;
 
 @ApplicationScoped
 public class OperatorPrePull

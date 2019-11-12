@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.client.Watcher;
 import io.quarkus.runtime.StartupEvent;
 
@@ -16,8 +17,10 @@ import com.enonic.ec.kubernetes.common.client.DefaultClientProducer;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedKubernetesCommand;
 import com.enonic.ec.kubernetes.crd.deployment.XpDeploymentResource;
 import com.enonic.ec.kubernetes.crd.deployment.client.XpDeploymentCache;
-import com.enonic.ec.kubernetes.operator.commands.ImmutableCreateXpDeployment;
-import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.client.IssuerClientProducer;
+import com.enonic.ec.kubernetes.crd.deployment.diff.DiffSpec;
+import com.enonic.ec.kubernetes.crd.deployment.diff.ImmutableDiffSpec;
+import com.enonic.ec.kubernetes.crd.issuer.client.IssuerClientProducer;
+import com.enonic.ec.kubernetes.operator.deployments.ImmutableCreateXpDeployment;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @ApplicationScoped
@@ -42,40 +45,38 @@ public class OperatorDeployments
     private void watch( final Watcher.Action action, final String id, final Optional<XpDeploymentResource> oldResource,
                         final Optional<XpDeploymentResource> newResource )
     {
-        if ( action == Watcher.Action.MODIFIED && oldResource.get().equals( newResource.get() ) )
+        DiffSpec diffSpec = ImmutableDiffSpec.builder().
+            oldValue( Optional.ofNullable( oldResource.map( XpDeploymentResource::getSpec ).orElse( null ) ) ).
+            newValue( Optional.ofNullable( newResource.map( XpDeploymentResource::getSpec ).orElse( null ) ) ).
+            build();
+
+        if ( diffSpec.shouldAddOrModify() )
         {
-            log.debug( "No change detected" );
-            return;
+            try
+            {
+                ImmutableCombinedKubernetesCommand.Builder commandBuilder = ImmutableCombinedKubernetesCommand.builder();
+
+                ImmutableCreateXpDeployment.builder().
+                    defaultClient( defaultClientProducer.client() ).
+                    issuerClient( issuerClient.produce() ).
+                    diffSpec( diffSpec ).
+                    ownerReference( createOwnerReference( newResource.get() ) ).
+                    build().
+                    addCommands( commandBuilder );
+
+                commandBuilder.build().execute();
+            }
+            catch ( Exception e )
+            {
+                // TODO: What to do in this case? Update XP deployment with info maybe?
+                log.error( "Failed creating XP deployment", e );
+            }
         }
+    }
 
-        if ( action == Watcher.Action.DELETED )
-        {
-            log.info( "XpDeployment with id '" + oldResource.get().getMetadata().getUid() + "' and name '" +
-                          oldResource.get().getMetadata().getName() + "' DELETED" );
-
-            // Note that we do not have to do anything on DELETE events because the
-            // Kubernetes garbage collector cleans up the deployment for us.
-            return;
-        }
-
-        try
-        {
-            ImmutableCombinedKubernetesCommand.Builder commandBuilder = ImmutableCombinedKubernetesCommand.builder();
-
-            ImmutableCreateXpDeployment.builder().
-                defaultClient( defaultClientProducer.client() ).
-                issuerClient( issuerClient.produce() ).
-                oldResource( oldResource ).
-                newResource( newResource.get() ).
-                build().
-                addCommands( commandBuilder );
-
-            commandBuilder.build().execute();
-        }
-        catch ( Exception e )
-        {
-            // TODO: What to do in this case? Update XP deployment with info maybe?
-            log.error( "Failed creating XP deployment", e );
-        }
+    private OwnerReference createOwnerReference( final XpDeploymentResource resource )
+    {
+        return new OwnerReference( resource.getApiVersion(), true, true, resource.getKind(), resource.getMetadata().getName(),
+                                   resource.getMetadata().getUid() );
     }
 }

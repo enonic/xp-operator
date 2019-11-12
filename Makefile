@@ -32,7 +32,7 @@ minikube-setup: minikube-start minikube-operator-setup minikube-certmanager mini
 minikube-operator-deploy:
 	kubectl apply -f src/main/kubernetes/operator/crd/ec-operator.crd.xp.deployments.yaml
 	kubectl apply -f src/main/kubernetes/operator/crd/ec-operator.crd.xp.vhosts.yaml
-	./mvnw -DskipTests=true clean package
+	./mvnw clean package
 	bash -c 'eval $$(minikube docker-env) && docker build -f src/main/docker/Dockerfile.jvm -t enonic/kubernetes-operator .'
 	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.deployment.yaml
 	-kubectl -n ec-system get pods | grep ec-operator | awk '{print $$1}' | xargs -I % kubectl -n ec-system delete pod %

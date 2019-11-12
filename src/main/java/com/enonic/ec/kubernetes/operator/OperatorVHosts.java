@@ -19,10 +19,11 @@ import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.cache.ConfigMapCache;
 import com.enonic.ec.kubernetes.common.client.DefaultClientProducer;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedKubernetesCommand;
+import com.enonic.ec.kubernetes.crd.issuer.client.IssuerClientProducer;
 import com.enonic.ec.kubernetes.crd.vhost.XpVHostResource;
 import com.enonic.ec.kubernetes.crd.vhost.client.XpVHostCache;
+import com.enonic.ec.kubernetes.crd.vhost.diff.DiffSpec;
 import com.enonic.ec.kubernetes.crd.vhost.diff.ImmutableDiffSpec;
-import com.enonic.ec.kubernetes.operator.crd.certmanager.issuer.client.IssuerClientProducer;
 import com.enonic.ec.kubernetes.operator.vhosts.ImmutableXpVHostApplyConfigMap;
 import com.enonic.ec.kubernetes.operator.vhosts.ImmutableXpVHostApplyIngress;
 
@@ -54,9 +55,8 @@ public class OperatorVHosts
     private void watchConfigMap( final Watcher.Action action, final String s, final Optional<ConfigMap> oldConfigMap,
                                  final Optional<ConfigMap> newConfigMap )
     {
-        if ( newConfigMap.isEmpty() )
+        if ( action == Watcher.Action.DELETED )
         {
-            log.debug( "ConfigMap being deleted" );
             return;
         }
 
@@ -84,19 +84,18 @@ public class OperatorVHosts
     private void watchVHosts( final Watcher.Action action, final String s, final Optional<XpVHostResource> oldVHost,
                               final Optional<XpVHostResource> newVHost )
     {
-        if ( action == Watcher.Action.MODIFIED && oldVHost.get().equals( newVHost.get() ) )
+        String namespace = newVHost.isPresent() ? newVHost.get().getMetadata().getNamespace() : oldVHost.get().getMetadata().getNamespace();
+
+        DiffSpec diffSpec = ImmutableDiffSpec.builder().
+            oldValue( Optional.ofNullable( oldVHost.map( XpVHostResource::getSpec ).orElse( null ) ) ).
+            newValue( Optional.ofNullable( newVHost.map( XpVHostResource::getSpec ).orElse( null ) ) ).
+            build();
+
+        ImmutableCombinedKubernetesCommand.Builder commandBuilder = ImmutableCombinedKubernetesCommand.builder();
+
+        if ( diffSpec.shouldAddOrModifyOrRemove() )
         {
-            log.debug( "No change detected" );
-            return;
-        }
-
-        try
-        {
-            String namespace =
-                newVHost.isPresent() ? newVHost.get().getMetadata().getNamespace() : oldVHost.get().getMetadata().getNamespace();
-
-            ImmutableCombinedKubernetesCommand.Builder commandBuilder = ImmutableCombinedKubernetesCommand.builder();
-
+            // On any change we have to modify config map
             ImmutableXpVHostApplyConfigMap.builder().
                 client( defaultClientProducer.client() ).
                 configMaps( configMapCache.stream().
@@ -108,24 +107,25 @@ public class OperatorVHosts
                     collect( Collectors.toList() ) ).
                 build().
                 addCommands( commandBuilder );
+        }
 
-            if ( !( action == Watcher.Action.DELETED ) )
-            {
-                ImmutableXpVHostApplyIngress.builder().
-                    defaultClient( defaultClientProducer.client() ).
-                    issuerClient( issuerClientProducer.produce() ).
-                    namespace( namespace ).
-                    ownerReference( createOwnerReference( newVHost.get() ) ).
-                    addDiffs( ImmutableDiffSpec.builder().
-                        oldValue( Optional.ofNullable( oldVHost.map( XpVHostResource::getSpec ).orElse( null ) ) ).
-                        newValue( Optional.ofNullable( newVHost.map( XpVHostResource::getSpec ).orElse( null ) ) ).
-                        build() ).
-                    build().
-                    addCommands( commandBuilder );
-            }
+        if ( diffSpec.shouldAddOrModify() )
+        {
+            ImmutableXpVHostApplyIngress.builder().
+                defaultClient( defaultClientProducer.client() ).
+                issuerClient( issuerClientProducer.produce() ).
+                namespace( namespace ).
+                ownerReference( createOwnerReference( newVHost.get() ) ).
+                addDiffs( ImmutableDiffSpec.builder().
+                    oldValue( Optional.ofNullable( oldVHost.map( XpVHostResource::getSpec ).orElse( null ) ) ).
+                    newValue( Optional.ofNullable( newVHost.map( XpVHostResource::getSpec ).orElse( null ) ) ).
+                    build() ).
+                build().
+                addCommands( commandBuilder );
+        }
 
-            // Note: Kubernetes garbage collector will cleanup old ingress, service and issuers
-
+        try
+        {
             commandBuilder.build().execute();
         }
         catch ( Exception e )

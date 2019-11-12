@@ -11,18 +11,18 @@ import org.immutables.value.Value;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
+import com.enonic.ec.kubernetes.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedKubernetesCommand;
 import com.enonic.ec.kubernetes.crd.vhost.diff.DiffSpec;
 import com.enonic.ec.kubernetes.crd.vhost.spec.ImmutableSpec;
 import com.enonic.ec.kubernetes.crd.vhost.spec.Spec;
 import com.enonic.ec.kubernetes.crd.vhost.spec.SpecMapping;
-import com.enonic.ec.kubernetes.operator.commands.CommandBuilder;
-import com.enonic.ec.kubernetes.operator.commands.kubectl.apply.ImmutableCommandApplyConfigMap;
+import com.enonic.ec.kubernetes.operator.kubectl.apply.ImmutableCommandApplyConfigMap;
 
 @Value.Immutable
 public abstract class XpVHostApplyConfigMap
     extends XpVHostApply
-    implements CommandBuilder
+    implements CombinedCommandBuilder
 {
     protected abstract KubernetesClient client();
 
