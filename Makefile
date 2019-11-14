@@ -1,4 +1,4 @@
-CERT_MANAGER_VERSION:=v0.10.1
+CERT_MANAGER_VERSION:=v0.11.0
 LOCAL_OPERATOR_PORT:=8080
 
 mvn-dependencies:
@@ -9,7 +9,7 @@ minikube-start:
 	minikube addons enable ingress
 
 minikube-certmanager:
-	kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/${CERT_MANAGER_VERSION}/cert-manager.yaml
+	kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/${CERT_MANAGER_VERSION}/cert-manager.yaml --validate=false
 
 minikube-operator-setup:
 	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.namespace.yaml
