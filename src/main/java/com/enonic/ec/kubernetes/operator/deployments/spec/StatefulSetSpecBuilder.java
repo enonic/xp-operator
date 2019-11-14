@@ -95,6 +95,7 @@ public abstract class StatefulSetSpecBuilder
 
         PodSecurityContext securityContext = new PodSecurityContext();
         securityContext.setRunAsUser( cfgLong( "operator.deployment.xp.pod.runAsUser" ) );
+        securityContext.setFsGroup( cfgLong( "operator.deployment.xp.pod.fsGroup" ) );
         podSpec.setSecurityContext( securityContext );
 
         // TODO: Set pod affinity
