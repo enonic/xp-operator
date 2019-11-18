@@ -64,7 +64,7 @@ public abstract class XpVHostApplyConfigMap
 
     private static void applyDiffs( final List<DiffSpec> diffs, final String alias, final Map<String, String> newConfig )
     {
-        String configFile = "com.enonic.xp.web.vhost.cfg";
+        String configFile = cfgStr( "operator.deployment.xp.vHost.configFile" );
         boolean addedVHosts = false;
         StringBuilder sb = new StringBuilder( "enabled = true" ).append( "\n" );
         for ( DiffSpec diff : diffs )

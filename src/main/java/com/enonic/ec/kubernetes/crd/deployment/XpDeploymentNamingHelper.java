@@ -2,24 +2,23 @@ package com.enonic.ec.kubernetes.crd.deployment;
 
 import org.immutables.value.Value;
 
-import com.enonic.ec.kubernetes.crd.deployment.spec.Spec;
 import com.enonic.ec.kubernetes.crd.deployment.spec.SpecNode;
 
 @Value.Immutable
 public abstract class XpDeploymentNamingHelper
 {
-    protected abstract Spec spec();
+    protected abstract XpDeploymentResource resource();
 
     @Value.Derived
     public String defaultNamespaceName()
     {
-        return String.join( "-", spec().cloud(), spec().project() );
+        return resource().getMetadata().getName();
     }
 
     @Value.Derived
     public String defaultResourceName()
     {
-        return String.join( "-", spec().app(), spec().name() );
+        return String.join( "-", resource().getEcType(), resource().getEcName() );
     }
 
     public String defaultResourceNameWithPostFix( String... postfix )

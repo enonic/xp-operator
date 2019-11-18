@@ -19,18 +19,6 @@ public abstract class Spec
 {
     public abstract String xpVersion();
 
-    public abstract String cloud();
-
-    public abstract String project();
-
-    @Value.Default
-    public String app()
-    {
-        return "xp";
-    }
-
-    public abstract String name();
-
     public abstract Boolean enabled();
 
     public abstract Quantity sharedDisk();
@@ -42,7 +30,6 @@ public abstract class Spec
     @Value.Check
     protected void check()
     {
-        Preconditions.checkState( app().equals( "xp" ), "field 'app' has to be 'xp' for xp deployments" );
         Preconditions.checkState( nodes().size() > 0, "field 'nodes' has to contain more than 0 nodes" );
 
         Preconditions.checkState( nodes().stream().filter( SpecNode::isMasterNode ).count() == 1,
@@ -58,19 +45,5 @@ public abstract class Spec
     public boolean isClustered()
     {
         return nodes().stream().mapToInt( SpecNode::replicas ).sum() > 1;
-    }
-
-    @Value.Derived
-    @JsonIgnore
-    public String deploymentName()
-    {
-        return String.join( "-", cloud(), project(), app(), name() );
-    }
-
-    @Value.Derived
-    @JsonIgnore
-    public Map<String, String> defaultLabels()
-    {
-        return Map.of( "cloud", cloud(), "project", project(), "app", app(), "name", name() );
-    }
+    } // TODO: REMOVE
 }

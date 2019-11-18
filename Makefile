@@ -44,8 +44,8 @@ minikube-operator-logs:
 minikube-operator-port-forward:
 	kubectl -n ec-system get pods | grep ec-operator | awk '{print $$1}' | xargs -I % kubectl -n ec-system port-forward % ${LOCAL_OPERATOR_PORT}:8080
 
-post-deployment:
-	cat src/test/example-deployment.json | http -v -j POST :${LOCAL_OPERATOR_PORT}/api
+create-deployment:
+	kubectl apply -f src/test/example-deployment.yaml
 
 post-vhost:
 	cat src/test/example-vhost.json | http -v -j POST :${LOCAL_OPERATOR_PORT}/api/$(shell http :${LOCAL_OPERATOR_PORT}/api | jq -r '.[0]')/vhosts

@@ -15,10 +15,11 @@ import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.ec.kubernetes.common.client.DefaultClientProducer;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedKubernetesCommand;
+import com.enonic.ec.kubernetes.crd.deployment.ImmutableXpDeploymentNamingHelper;
 import com.enonic.ec.kubernetes.crd.deployment.XpDeploymentResource;
 import com.enonic.ec.kubernetes.crd.deployment.client.XpDeploymentCache;
-import com.enonic.ec.kubernetes.crd.deployment.diff.DiffSpec;
-import com.enonic.ec.kubernetes.crd.deployment.diff.ImmutableDiffSpec;
+import com.enonic.ec.kubernetes.crd.deployment.diff.DiffResource;
+import com.enonic.ec.kubernetes.crd.deployment.diff.ImmutableDiffResource;
 import com.enonic.ec.kubernetes.crd.issuer.client.IssuerClientProducer;
 import com.enonic.ec.kubernetes.operator.deployments.ImmutableCreateXpDeployment;
 
@@ -45,12 +46,12 @@ public class OperatorDeployments
     private void watch( final Watcher.Action action, final String id, final Optional<XpDeploymentResource> oldResource,
                         final Optional<XpDeploymentResource> newResource )
     {
-        DiffSpec diffSpec = ImmutableDiffSpec.builder().
-            oldValue( oldResource.map( XpDeploymentResource::getSpec ) ).
-            newValue( newResource.map( XpDeploymentResource::getSpec ) ).
+        DiffResource diffResource = ImmutableDiffResource.builder().
+            oldValue( oldResource ).
+            newValue( newResource ).
             build();
 
-        if ( diffSpec.shouldAddOrModify() )
+        if ( diffResource.diffSpec().shouldAddOrModify() )
         {
             try
             {
@@ -59,7 +60,10 @@ public class OperatorDeployments
                 ImmutableCreateXpDeployment.builder().
                     defaultClient( defaultClientProducer.client() ).
                     issuerClient( issuerClient.produce() ).
-                    diffSpec( diffSpec ).
+                    deploymentName( newResource.get().getMetadata().getName() ).
+                    defaultLabels( newResource.get().getMetadata().getLabels() ).
+                    namingHelper( ImmutableXpDeploymentNamingHelper.builder().resource( newResource.get() ).build() ).
+                    diffSpec( diffResource.diffSpec() ).
                     ownerReference( createOwnerReference( newResource.get() ) ).
                     build().
                     addCommands( commandBuilder );

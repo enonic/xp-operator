@@ -3,7 +3,7 @@ package com.enonic.ec.kubernetes.operator.admission.reviews;
 import org.immutables.value.Value;
 
 import com.enonic.ec.kubernetes.crd.deployment.XpDeploymentResource;
-import com.enonic.ec.kubernetes.crd.deployment.diff.ImmutableDiffSpec;
+import com.enonic.ec.kubernetes.crd.deployment.diff.ImmutableDiffResource;
 import com.enonic.ec.kubernetes.operator.admission.model.AdmissionReviewDeployment;
 import com.enonic.ec.kubernetes.operator.admission.model.AdmissionReviewExtended;
 
@@ -20,9 +20,9 @@ public abstract class ReviewerDeployment
     protected void createDiff( AdmissionReviewExtended<XpDeploymentResource> review )
         throws IllegalStateException
     {
-        ImmutableDiffSpec.builder().
-            oldValue( review.getRequest().getOldObject() != null ? review.getRealRequest().getRealOldObject().getSpec() : null ).
-            newValue( review.getRequest().getObject() != null ? review.getRealRequest().getRealObject().getSpec() : null ).
+        ImmutableDiffResource.builder().
+            oldValue( review.getRequest().getOldObject() != null ? review.getRealRequest().getRealOldObject() : null ).
+            newValue( review.getRequest().getObject() != null ? review.getRealRequest().getRealObject() : null ).
             build();
     }
 }

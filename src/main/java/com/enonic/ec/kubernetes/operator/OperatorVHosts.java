@@ -22,7 +22,8 @@ import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedKubernetesComma
 import com.enonic.ec.kubernetes.crd.issuer.client.IssuerClientProducer;
 import com.enonic.ec.kubernetes.crd.vhost.XpVHostResource;
 import com.enonic.ec.kubernetes.crd.vhost.client.XpVHostCache;
-import com.enonic.ec.kubernetes.crd.vhost.diff.DiffSpec;
+import com.enonic.ec.kubernetes.crd.vhost.diff.DiffResource;
+import com.enonic.ec.kubernetes.crd.vhost.diff.ImmutableDiffResource;
 import com.enonic.ec.kubernetes.crd.vhost.diff.ImmutableDiffSpec;
 import com.enonic.ec.kubernetes.operator.vhosts.ImmutableXpVHostApplyConfigMap;
 import com.enonic.ec.kubernetes.operator.vhosts.ImmutableXpVHostApplyIngress;
@@ -86,14 +87,14 @@ public class OperatorVHosts
     {
         String namespace = newVHost.isPresent() ? newVHost.get().getMetadata().getNamespace() : oldVHost.get().getMetadata().getNamespace();
 
-        DiffSpec diffSpec = ImmutableDiffSpec.builder().
-            oldValue( oldVHost.map( XpVHostResource::getSpec ) ).
-            newValue( newVHost.map( XpVHostResource::getSpec ) ).
+        DiffResource diffResource = ImmutableDiffResource.builder().
+            oldValue( oldVHost ).
+            newValue( newVHost ).
             build();
 
         ImmutableCombinedKubernetesCommand.Builder commandBuilder = ImmutableCombinedKubernetesCommand.builder();
 
-        if ( diffSpec.shouldAddOrModifyOrRemove() )
+        if ( diffResource.diffSpec().shouldAddOrModifyOrRemove() )
         {
             // On any change we have to modify config map
             ImmutableXpVHostApplyConfigMap.builder().
@@ -109,7 +110,7 @@ public class OperatorVHosts
                 addCommands( commandBuilder );
         }
 
-        if ( diffSpec.shouldAddOrModify() )
+        if ( diffResource.diffSpec().shouldAddOrModify() )
         {
             ImmutableXpVHostApplyIngress.builder().
                 defaultClient( defaultClientProducer.client() ).

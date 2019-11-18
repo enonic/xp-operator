@@ -9,6 +9,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +26,9 @@ import com.enonic.ec.kubernetes.operator.admission.reviews.Reviewer;
 public class AdmissionApi
 {
     private final static Logger log = LoggerFactory.getLogger( AdmissionApi.class );
+
+    @ConfigProperty(name = "operator.deployment.xp.validation.strict", defaultValue = "true")
+    Boolean strictValidation;
 
     @Inject
     ObjectMapper mapper;

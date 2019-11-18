@@ -1,7 +1,5 @@
 package com.enonic.ec.kubernetes.operator.admission.reviews;
 
-import java.io.IOException;
-
 import org.immutables.value.Value;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,22 +25,14 @@ public abstract class Reviewer<T>
         try
         {
             review = objectMapper().readValue( body(), getReviewClass() );
+            createDiff( review );
         }
-        catch ( IOException ex )
+        catch ( Exception ex )
         {
             if ( ex.getCause() != null )
             {
                 return createReview( uid(), ex.getCause() );
             }
-            return createReview( uid(), ex );
-        }
-
-        try
-        {
-            createDiff( review );
-        }
-        catch ( IllegalStateException ex )
-        {
             return createReview( uid(), ex );
         }
 

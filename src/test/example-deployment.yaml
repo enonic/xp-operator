@@ -2,17 +2,15 @@ apiVersion: enonic.cloud/v1alpha1
 kind: Deployment
 metadata:
   name: mycloud-myproject-xp-qa
+  labels:
+    ec-cloud: mycloud
+    ec-project: myproject
+    ec-type: xp    # Solution type
+    ec-name: qa    # Solution name
 spec:
-  cloud: mycloud
-  project: myproject
-  app: xp
-  name: qa
-
   enabled: true
   xpVersion: 7.0.3
-
   sharedDisk: 1Gi   # For blob and snapshots
-
   nodes:
   - alias: main
     type: ["FRONTEND", "DATA", "MASTER"]

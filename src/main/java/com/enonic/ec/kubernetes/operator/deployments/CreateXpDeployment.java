@@ -17,7 +17,6 @@ import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.Diff;
 import com.enonic.ec.kubernetes.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedKubernetesCommand;
-import com.enonic.ec.kubernetes.crd.deployment.ImmutableXpDeploymentNamingHelper;
 import com.enonic.ec.kubernetes.crd.deployment.XpDeploymentNamingHelper;
 import com.enonic.ec.kubernetes.crd.deployment.diff.DiffSpec;
 import com.enonic.ec.kubernetes.crd.deployment.diff.DiffSpecNode;
@@ -41,9 +40,15 @@ public abstract class CreateXpDeployment
 
     protected abstract IssuerClient issuerClient();
 
+    protected abstract String deploymentName();
+
+    protected abstract Map<String, String> defaultLabels();
+
     protected abstract DiffSpec diffSpec();
 
     protected abstract OwnerReference ownerReference();
+
+    protected abstract XpDeploymentNamingHelper namingHelper();
 
     @Value.Derived
     protected Spec spec()
@@ -51,19 +56,13 @@ public abstract class CreateXpDeployment
         return diffSpec().newValue().get();
     }
 
-    @Value.Derived
-    protected XpDeploymentNamingHelper namingHelper()
-    {
-        return ImmutableXpDeploymentNamingHelper.builder().spec( spec() ).build();
-    }
-
     @Override
     public void addCommands( ImmutableCombinedKubernetesCommand.Builder commandBuilder )
     {
-        String deploymentName = spec().deploymentName();
+        String deploymentName = deploymentName();
         String namespaceName = namingHelper().defaultNamespaceName();
         String serviceName = namingHelper().defaultResourceName();
-        Map<String, String> defaultLabels = spec().defaultLabels();
+        Map<String, String> defaultLabels = defaultLabels();
 
         boolean useNfs = cfgBool( "operator.deployment.xp.volume.shared.nfs.enabled" );
 
@@ -109,7 +108,7 @@ public abstract class CreateXpDeployment
             configBuilder = ImmutableConfigBuilderCluster.builder().
                 namespace( namespaceName ).
                 serviceName( serviceName ).
-                clusterName( spec().deploymentName() ).
+                clusterName( deploymentName() ).
                 minimumMasterNodes( Math.max( 1, minimumMasterNodes ) ).
                 minimumDataNodes( Math.max( 1, minimumDataNodes ) ).
                 // TODO: XP is not happy with this, do some research

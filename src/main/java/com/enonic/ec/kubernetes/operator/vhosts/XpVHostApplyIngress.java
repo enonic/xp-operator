@@ -172,7 +172,7 @@ public abstract class XpVHostApplyIngress
             if ( hasCert )
             {
                 serviceAnnotations.put( "nginx.ingress.kubernetes.io/ssl-redirect", "true" );
-                serviceAnnotations.put( "certmanager.k8s.io/issuer", vHostResourceName );
+                serviceAnnotations.put( "cert-manager.io/issuer", vHostResourceName );
             }
 
             commandBuilder.addCommand( ImmutableCommandApplyIngress.builder().
