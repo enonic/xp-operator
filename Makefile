@@ -6,6 +6,7 @@ mvn-dependencies:
 
 minikube-start:
 	minikube start
+	kubectl config use-context minikube
 	minikube addons enable ingress
 
 minikube-certmanager:
