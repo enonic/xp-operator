@@ -31,7 +31,7 @@ public class ConfigMapCache
         initialize( client.configMaps().inAnyNamespace().list().getItems() );
 
         // Only watch XP config maps
-        client.configMaps().inAnyNamespace().withLabel( "app", "xp" ).watch( new Watcher<>()
+        client.configMaps().inAnyNamespace().withLabel( cfgStr( "operator.deployment.xp.labels.ec.type" ), "xp" ).watch( new Watcher<>()
         {
             @Override
             public void eventReceived( final Action action, final ConfigMap configMap )

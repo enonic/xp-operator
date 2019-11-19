@@ -11,7 +11,7 @@ public abstract class SpecMapping
 {
     public abstract String name();
 
-    public abstract String nodeAlias();
+    public abstract String node();
 
     public abstract String source();
 

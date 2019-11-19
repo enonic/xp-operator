@@ -71,14 +71,20 @@ public abstract class Diff<T>
     protected <C, D extends Diff<C>> List<D> mergeMaps( Map<String, C> oldMap, Map<String, C> newMap,
                                                         BiFunction<Optional<C>, Optional<C>, D> creator )
     {
+        return mergeMaps( oldMap, newMap, ( s, o, n ) -> creator.apply( o, n ) );
+    }
+
+    protected <C, D extends Diff<C>> List<D> mergeMaps( Map<String, C> oldMap, Map<String, C> newMap,
+                                                        TriFunction<String, Optional<C>, Optional<C>, D> creator )
+    {
         Set<String> inBoth = oldMap.keySet().stream().filter( newMap::containsKey ).collect( Collectors.toSet() );
         Set<String> onlyInOld = oldMap.keySet().stream().filter( k -> !inBoth.contains( k ) ).collect( Collectors.toSet() );
         Set<String> onlyInNew = newMap.keySet().stream().filter( k -> !inBoth.contains( k ) ).collect( Collectors.toSet() );
 
         List<D> res = new LinkedList<>();
-        inBoth.forEach( s -> res.add( creator.apply( Optional.of( oldMap.get( s ) ), Optional.of( newMap.get( s ) ) ) ) );
-        onlyInOld.forEach( s -> res.add( creator.apply( Optional.of( oldMap.get( s ) ), Optional.empty() ) ) );
-        onlyInNew.forEach( s -> res.add( creator.apply( Optional.empty(), Optional.of( newMap.get( s ) ) ) ) );
+        inBoth.forEach( s -> res.add( creator.apply( s, Optional.of( oldMap.get( s ) ), Optional.of( newMap.get( s ) ) ) ) );
+        onlyInOld.forEach( s -> res.add( creator.apply( s, Optional.of( oldMap.get( s ) ), Optional.empty() ) ) );
+        onlyInNew.forEach( s -> res.add( creator.apply( s, Optional.empty(), Optional.of( newMap.get( s ) ) ) ) );
         return res;
     }
 }

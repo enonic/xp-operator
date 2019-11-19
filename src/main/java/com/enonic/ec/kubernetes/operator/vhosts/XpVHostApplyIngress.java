@@ -95,7 +95,7 @@ public abstract class XpVHostApplyIngress
                 Map<String, String> serviceLabels = new HashMap<>( defaultLabels() );
 
                 Map<String, String> serviceSelector = new HashMap<>();
-                serviceSelector.put( aliasLabelKey(), m.newValue().get().nodeAlias() );
+                serviceSelector.put( aliasLabelKey(), m.newValue().get().node() );
 
                 commandBuilder.addCommand( ImmutableCommandApplyService.builder().
                     client( defaultClient() ).

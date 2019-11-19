@@ -14,6 +14,8 @@ import com.enonic.ec.kubernetes.crd.deployment.spec.SpecNode;
 public abstract class DiffSpecNode
     extends Diff<SpecNode>
 {
+    public abstract String name();
+
     @Value.Derived
     public boolean replicasChanged()
     {

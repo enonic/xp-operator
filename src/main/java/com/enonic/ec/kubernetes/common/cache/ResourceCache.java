@@ -15,7 +15,9 @@ import org.slf4j.LoggerFactory;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.client.Watcher;
 
-public class ResourceCache<T extends HasMetadata>
+import com.enonic.ec.kubernetes.common.Configuration;
+
+public class ResourceCache<T extends HasMetadata> extends Configuration
 {
     private final static Logger log = LoggerFactory.getLogger( ResourceCache.class );
 

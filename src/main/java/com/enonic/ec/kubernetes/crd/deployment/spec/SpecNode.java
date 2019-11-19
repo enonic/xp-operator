@@ -21,8 +21,6 @@ public abstract class SpecNode
         FRONTEND, DATA, MASTER
     }
 
-    public abstract String alias();
-
     public abstract Integer replicas();
 
     public abstract Set<Type> type();
@@ -92,11 +90,11 @@ public abstract class SpecNode
         return isType( Type.FRONTEND ) && type().size() == 1;
     }
 
-    @JsonIgnore
-    @Value.Derived
-    public Map<String, String> nodeAliasLabel()
-    {
-        // Do not add more labels here, it will brake service mapping for vHosts to pods
-        return Map.of( cfgStr( "operator.deployment.xp.pod.label.alias" ), alias() );
-    }
+//    @JsonIgnore
+//    @Value.Derived
+//    public Map<String, String> nodeAliasLabel()
+//    {
+//        // Do not add more labels here, it will brake service mapping for vHosts to pods
+//        return Map.of( cfgStr( "operator.deployment.xp.pod.label.alias" ), alias() );
+//    }
 }

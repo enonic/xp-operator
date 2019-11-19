@@ -44,7 +44,9 @@ public abstract class CreateXpDeploymentNode
 
     protected abstract String namespace();
 
-    protected abstract String nodeName();
+    protected abstract String nodeShortName();
+
+    protected abstract String nodeFullName();
 
     protected abstract String serviceName();
 
@@ -67,10 +69,10 @@ public abstract class CreateXpDeploymentNode
         return cfgStrFmt( "operator.deployment.xp.pod.imageTemplate", diffSpec().newValue().get().xpVersion() );
     }
 
-    private static Map<String, String> nodeExtraLabels( SpecNode node, Map<String, String> defaultLabels )
+    private static Map<String, String> nodeExtraLabels( String name, SpecNode node, Map<String, String> defaultLabels )
     {
         Map<String, String> res = new HashMap<>( defaultLabels );
-        res.putAll( node.nodeAliasLabel() );
+        res.put( cfgStr( "operator.deployment.xp.pod.label.alias" ), name );
 
         if ( node.isMasterNode() )
         {
@@ -94,7 +96,7 @@ public abstract class CreateXpDeploymentNode
     public void addCommands( ImmutableCombinedKubernetesCommand.Builder commandBuilder )
     {
         SpecNode newNode = diffSpecNode().newValue().get();
-        Map<String, String> nodeLabels = nodeExtraLabels( newNode, defaultLabels() );
+        Map<String, String> nodeLabels = nodeExtraLabels( nodeShortName(), newNode, defaultLabels() );
 
         int effectiveScale = diffSpec().newValue().get().enabled() ? newNode.replicas() : 0;
         boolean changeScale = diffSpec().enabledChanged() || diffSpecNode().replicasChanged() || diffSpec().isNew();
@@ -105,7 +107,7 @@ public abstract class CreateXpDeploymentNode
                 client( defaultClient() ).
                 ownerReference( ownerReference() ).
                 namespace( namespace() ).
-                name( nodeName() ).
+                name( nodeFullName() ).
                 labels( nodeLabels ).
                 spec( ImmutablePodDisruptionBudgetSpecBuilder.builder().
                     minAvailable( minimumAvailable() ).
@@ -122,9 +124,9 @@ public abstract class CreateXpDeploymentNode
                 client( defaultClient() ).
                 ownerReference( ownerReference() ).
                 namespace( namespace() ).
-                name( nodeName() ).
+                name( nodeFullName() ).
                 labels( nodeLabels ).
-                data( configBuilder().create( nodeName(), newNode ) ).
+                data( configBuilder().create( nodeFullName(), newNode ) ).
                 build() );
         }
 
@@ -143,13 +145,13 @@ public abstract class CreateXpDeploymentNode
             cfgIfBool( "operator.extensions.linkerd.enabled", () -> podAnnotations.put( "linkerd.io/inject", "enabled" ) );
 
             VolumeTripletList volumeList =
-                volumeBuilder().getVolumeTriplets( nodeName(), Optional.ofNullable( newNode.resources().disks().get( "index" ) ) );
+                volumeBuilder().getVolumeTriplets( nodeFullName(), Optional.ofNullable( newNode.resources().disks().get( "index" ) ) );
 
             commandBuilder.addCommand( ImmutableCommandApplyStatefulSet.builder().
                 client( defaultClient() ).
                 ownerReference( ownerReference() ).
                 namespace( namespace() ).
-                name( nodeName() ).
+                name( nodeFullName() ).
                 labels( nodeLabels ).
                 spec( ImmutableStatefulSetSpecBuilder.builder().
                     podLabels( nodeLabels ).
@@ -170,7 +172,7 @@ public abstract class CreateXpDeploymentNode
             commandBuilder.addCommand( ImmutableCommandScaleStatefulSet.builder().
                 client( defaultClient() ).
                 namespace( namespace() ).
-                name( nodeName() ).
+                name( nodeFullName() ).
                 scale( effectiveScale ).
                 build() );
         }

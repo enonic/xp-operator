@@ -1,6 +1,6 @@
 package com.enonic.ec.kubernetes.crd.deployment.diff;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -31,13 +31,10 @@ public abstract class DiffSpec
     @Value.Derived
     public List<DiffSpecNode> nodesChanged()
     {
-        Map<String, SpecNode> oldNodes = new HashMap<>();
-        Map<String, SpecNode> newNodes = new HashMap<>();
-
-        oldValue().ifPresent( s -> s.nodes().forEach( n -> oldNodes.put( n.alias(), n ) ) );
-        newValue().ifPresent( s -> s.nodes().forEach( n -> newNodes.put( n.alias(), n ) ) );
-
-        return mergeMaps( oldNodes, newNodes, ( o, n ) -> ImmutableDiffSpecNode.builder().
+        Map<String, SpecNode> oldNodes = oldValue().map( Spec::nodes ).orElse( Collections.EMPTY_MAP );
+        Map<String, SpecNode> newNodes = newValue().map( Spec::nodes ).orElse( Collections.EMPTY_MAP );
+        return mergeMaps( oldNodes, newNodes, ( s, o, n ) -> ImmutableDiffSpecNode.builder().
+            name( s ).
             oldValue( o ).
             newValue( n ).
             build() );

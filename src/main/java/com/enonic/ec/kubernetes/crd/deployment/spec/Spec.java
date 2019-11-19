@@ -1,9 +1,6 @@
 package com.enonic.ec.kubernetes.crd.deployment.spec;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.immutables.value.Value;
 
@@ -23,27 +20,23 @@ public abstract class Spec
 
     public abstract Quantity sharedDisk();
 
-    public abstract List<SpecNode> nodes();
-
-    public abstract Map<String, SpecVHostCertificate> vHostCertificates();
+    public abstract Map<String, SpecNode> nodes();
 
     @Value.Check
     protected void check()
     {
         Preconditions.checkState( nodes().size() > 0, "field 'nodes' has to contain more than 0 nodes" );
 
-        Preconditions.checkState( nodes().stream().filter( SpecNode::isMasterNode ).count() == 1,
+        Preconditions.checkState( nodes().values().stream().filter( SpecNode::isMasterNode ).count() == 1,
                                   "1 and only 1 node has be of type master" );
-        Preconditions.checkState( nodes().stream().filter( SpecNode::isDataNode ).count() == 1, "1 and only node has be of type data" );
-
-        Set<String> aliases = nodes().stream().map( SpecNode::alias ).collect( Collectors.toSet() );
-        Preconditions.checkState( aliases.size() == nodes().size(), "nodes cannot have the same alias" );
+        Preconditions.checkState( nodes().values().stream().filter( SpecNode::isDataNode ).count() == 1,
+                                  "1 and only node has be of type data" );
     }
 
     @Value.Default
     @JsonIgnore
     public boolean isClustered()
     {
-        return nodes().stream().mapToInt( SpecNode::replicas ).sum() > 1;
+        return nodes().values().stream().mapToInt( SpecNode::replicas ).sum() > 1;
     } // TODO: REMOVE
 }

@@ -115,7 +115,7 @@ public abstract class XpVHostApplyConfigMap
     public static Optional<Spec> relevantSpec( Spec spec, String alias )
     {
         List<SpecMapping> relevantMappings =
-            spec.mappings().stream().filter( m -> m.nodeAlias().equals( alias ) ).collect( Collectors.toList() );
+            spec.mappings().stream().filter( m -> m.node().equals( alias ) ).collect( Collectors.toList() );
         if ( relevantMappings.size() < 1 )
         {
             return Optional.empty();

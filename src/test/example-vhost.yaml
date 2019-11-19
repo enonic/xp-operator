@@ -8,7 +8,7 @@ spec:
   certificate:
     selfSigned: true
   mappings:
-    - nodeAlias: main
+    - node: main
       name: admin
       source: /admin
       target: /admin

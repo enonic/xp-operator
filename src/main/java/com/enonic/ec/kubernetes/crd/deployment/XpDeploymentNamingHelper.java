@@ -5,7 +5,6 @@ import org.immutables.value.Value;
 import com.google.common.base.Preconditions;
 
 import com.enonic.ec.kubernetes.common.Configuration;
-import com.enonic.ec.kubernetes.crd.deployment.spec.SpecNode;
 
 @Value.Immutable
 public abstract class XpDeploymentNamingHelper
@@ -39,8 +38,13 @@ public abstract class XpDeploymentNamingHelper
         return String.join( "-", String.join( "-", prefix ), defaultResourceName() );
     }
 
-    public String defaultResourceName( SpecNode node )
+    public String defaultResourceName( String name )
     {
-        return defaultResourceNameWithPostFix( node.alias() );
+        return defaultResourceNameWithPostFix( name );
     }
+
+//    public String defaultResourceName( SpecNode node )
+//    {
+//        return defaultResourceNameWithPostFix( node.alias() );
+//    }
 }

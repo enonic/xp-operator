@@ -99,10 +99,10 @@ public abstract class CreateXpDeployment
         {
             defaultMinimumAvailable = ( n ) -> ( n.replicas() / 2 ) + 1;
 
-            SpecNode masterNode = spec().nodes().stream().filter( SpecNode::isMasterNode ).findAny().get();
+            SpecNode masterNode = spec().nodes().values().stream().filter( SpecNode::isMasterNode ).findAny().get();
             int minimumMasterNodes = defaultMinimumAvailable.apply( masterNode );
 
-            SpecNode dataNode = spec().nodes().stream().filter( SpecNode::isDataNode ).findAny().get();
+            SpecNode dataNode = spec().nodes().values().stream().filter( SpecNode::isDataNode ).findAny().get();
             int minimumDataNodes = defaultMinimumAvailable.apply( dataNode );
 
             configBuilder = ImmutableConfigBuilderCluster.builder().
@@ -148,7 +148,8 @@ public abstract class CreateXpDeployment
                 ownerReference( ownerReference() ).
                 namespace( namespaceName ).
                 serviceName( serviceName ).
-                nodeName( namingHelper().defaultResourceName( diffSpecNode.newValue().get() ) ).
+                nodeShortName( diffSpecNode.name() ).
+                nodeFullName( namingHelper().defaultResourceName( diffSpecNode.name() ) ).
                 diffSpec( diffSpec() ).
                 diffSpecNode( diffSpecNode ).
                 defaultLabels( defaultLabels ).
@@ -165,7 +166,7 @@ public abstract class CreateXpDeployment
             forEach( diff -> ImmutableDeleteXpDeploymentNode.builder().
                 defaultClient( defaultClient() ).
                 namespace( namespaceName ).
-                nodeName( namingHelper().defaultResourceName( diff.oldValue().get() ) ).
+                nodeName( namingHelper().defaultResourceName( diff.name() ) ).
                 build().
                 addCommands( commandBuilder ) );
     }
@@ -173,12 +174,12 @@ public abstract class CreateXpDeployment
     private List<String> getAllMasterNodeDNS( String serviceName )
     {
         List<String> res = new LinkedList<>();
-        for ( SpecNode node : spec().nodes() )
+        for ( Map.Entry<String, SpecNode> node : spec().nodes().entrySet() )
         {
-            if ( node.isMasterNode() )
+            if ( node.getValue().isMasterNode() )
             {
-                String tmp = namingHelper().defaultResourceName( node );
-                for ( int i = 0; i < node.replicas(); i++ )
+                String tmp = namingHelper().defaultResourceName( node.getKey() );
+                for ( int i = 0; i < node.getValue().replicas(); i++ )
                 {
                     res.add( tmp + "-" + i + "." + serviceName );
                 }

@@ -12,7 +12,7 @@ spec:
   xpVersion: 7.0.3
   sharedDisk: 1Gi # For blob and snapshots
   nodes:
-    - alias: masters
+    main:
       type: ["MASTER", "FRONTEND", "DATA"]
       replicas: 1
       resources:
