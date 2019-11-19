@@ -1,5 +1,5 @@
 apiVersion: enonic.cloud/v1alpha1
-kind: VHost
+kind: XpVHost
 metadata:
   name: company-com
   namespace: mycloud-myproject-xp-qa
@@ -8,8 +8,8 @@ spec:
   certificate:
     selfSigned: true
   mappings:
-  - nodeAlias: main
-    name: admin
-    source: /admin
-    target: /admin
-    idProvider: system
+    - nodeAlias: main
+      name: admin
+      source: /admin
+      target: /admin
+      idProvider: system

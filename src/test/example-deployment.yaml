@@ -1,28 +1,28 @@
 apiVersion: enonic.cloud/v1alpha1
-kind: Deployment
+kind: XpSolution
 metadata:
   name: mycloud-myproject-xp-qa
   labels:
-    ec-cloud: mycloud
-    ec-project: myproject
-    ec-type: xp    # Solution type
-    ec-name: qa    # Solution name
+    cloud: mycloud
+    project: myproject
+    type: xp # Solution type
+    name: qa # Solution name
 spec:
   enabled: true
   xpVersion: 7.0.3
-  sharedDisk: 1Gi   # For blob and snapshots
+  sharedDisk: 1Gi # For blob and snapshots
   nodes:
-  - alias: main
-    type: ["FRONTEND", "DATA", "MASTER"]
-    replicas: 3
-    resources:
-      cpu: "1"
-      memory: 512Mi
-      disks:
-        index: 200Mi
-    config:
-      com.enonic.xp.app.main.cfg: |
-        tourDisabled = true
-      system.properties: |
-        xp.suPassword = {sha512}5b722b307fce6c944905d132691d5e4a2214b7fe92b738920eb3fce3a90420a19511c3010a0e7712b054daef5b57bad59ecbd93b3280f210578f547f4aed4d25
-        xp.init.adminUserCreation = false
+    - alias: masters
+      type: ["MASTER", "FRONTEND", "DATA"]
+      replicas: 1
+      resources:
+        cpu: "1"
+        memory: 512Mi
+        disks:
+          index: 200Mi
+      config:
+        com.enonic.xp.app.main.cfg: |
+          tourDisabled = true
+        system.properties: |
+          xp.suPassword = {sha512}5b722b307fce6c944905d132691d5e4a2214b7fe92b738920eb3fce3a90420a19511c3010a0e7712b054daef5b57bad59ecbd93b3280f210578f547f4aed4d25
+          xp.init.adminUserCreation = false

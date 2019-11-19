@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import org.immutables.value.Value;
 
+import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 
 import com.enonic.ec.kubernetes.common.Diff;
@@ -25,9 +26,21 @@ public abstract class DiffResource
     @Value.Check
     protected void check()
     {
+        Function<XpDeploymentResource, String> getCloud = labelFunc( cfgStr( "operator.deployment.xp.labels.ec.cloud" ) );
+        Function<XpDeploymentResource, String> getProject = labelFunc( cfgStr( "operator.deployment.xp.labels.ec.project" ) );
+        Function<XpDeploymentResource, String> getType = labelFunc( cfgStr( "operator.deployment.xp.labels.ec.type" ) );
+        Function<XpDeploymentResource, String> getName = labelFunc( cfgStr( "operator.deployment.xp.labels.ec.name" ) );
+
         if ( shouldAddOrModify() )
         {
-            checkNew( newValue().get() );
+            String cloud = getCloud.apply( newValue().get() );
+            String project = getProject.apply( newValue().get() );
+            String type = getType.apply( newValue().get() );
+            String name = getName.apply( newValue().get() );
+
+            String fullName = String.join( "-", cloud, project, type, name );
+            Preconditions.checkState( fullName.equals( newValue().get().getMetadata().getName() ),
+                                      "Deployment name must be equal to <Cloud>-<Project>-<Type>-<Name>, i.e: '" + fullName + "'" );
         }
 
         if ( !shouldModify() )
@@ -35,36 +48,21 @@ public abstract class DiffResource
             return;
         }
 
-        Preconditions.checkState( equals( XpDeploymentResource::getEcCloud ), "Cannot change deployment cloud" );
-        Preconditions.checkState( equals( XpDeploymentResource::getEcProject ), "Cannot change deployment project" );
-        Preconditions.checkState( equals( XpDeploymentResource::getEcType ), "Cannot change deployment type" );
-        Preconditions.checkState( equals( XpDeploymentResource::getEcName ), "Cannot change deployment name" );
+        Preconditions.checkState( equals( getCloud ), "Cannot change deployment cloud" );
+        Preconditions.checkState( equals( getProject ), "Cannot change deployment project" );
+        Preconditions.checkState( equals( getType ), "Cannot change deployment type" );
+        Preconditions.checkState( equals( getName ), "Cannot change deployment name" );
     }
 
-    private void checkNew( XpDeploymentResource resource )
+    private Function<XpDeploymentResource, String> labelFunc( String key )
     {
         String regex = "^\\w+$";
-
-        Preconditions.checkState( resource.getMetadata().getLabels() != null, "Deployment is missing labels" );
-
-        String cloud = checkLabel( resource, regex, "ec-cloud" );
-        String project = checkLabel( resource, regex, "ec-project" );
-        String type = checkLabel( resource, regex, "ec-type" );
-        Preconditions.checkState( type.equals( "xp" ), "Deployment label 'ec-type' must be 'xp'" );
-        String name = checkLabel( resource, regex, "ec-name" );
-
-        String fullName = String.join( "-", cloud, project, type, name );
-        Preconditions.checkState( fullName.equals( resource.getMetadata().getName() ),
-                                  "Deployment name must be equal to <Cloud>-<Project>-<Type>-<Name>, i.e: '" + fullName + "'" );
+        return r -> {
+            Preconditions.checkState( r.getMetadata().getLabels() != null, "XpSolution labels cannot be null" );
+            String val = r.getMetadata().getLabels().get( key );
+            Preconditions.checkState( val != null, "XpSolution label '" + key + "' cannot be null" );
+            Preconditions.checkState( val.matches( regex ), "XpSolution label '" + key + "' must match regex '" + regex + "'" );
+            return val;
+        };
     }
-
-    private String checkLabel( XpDeploymentResource resource, String regex, String key )
-    {
-
-        String label = resource.getMetadata().getLabels().get( key );
-        Preconditions.checkState( label != null, "Deployment is missing label '" + key + "'" );
-        Preconditions.checkState( label.matches( regex ), "Deployment label '" + key + "' must match regex '" + regex + "'" );
-        return label;
-    }
-
 }

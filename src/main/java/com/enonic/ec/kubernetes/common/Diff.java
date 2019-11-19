@@ -14,6 +14,7 @@ import org.immutables.value.Value;
 import com.google.common.base.Preconditions;
 
 public abstract class Diff<T>
+    extends Configuration
 {
     public abstract Optional<T> oldValue();
 

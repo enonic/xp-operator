@@ -51,8 +51,6 @@ public abstract class DiffSpec
             return;
         }
         Preconditions.checkState( equals( Spec::sharedDisk ), "cannot change 'sharedDisks'" );
-        Preconditions.checkState( equals( Spec::isClustered ),
-                                  "cannot change from a non clustered deployment to a clustered one and visa versa" );
     }
 
 }

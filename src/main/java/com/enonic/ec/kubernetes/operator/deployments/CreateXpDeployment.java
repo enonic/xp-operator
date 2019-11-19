@@ -95,7 +95,7 @@ public abstract class CreateXpDeployment
         Function<SpecNode, Integer> defaultMinimumAvailable;
         ConfigBuilder configBuilder;
 
-        if ( spec().isClustered() )
+        if ( isClustered )
         {
             defaultMinimumAvailable = ( n ) -> ( n.replicas() / 2 ) + 1;
 
