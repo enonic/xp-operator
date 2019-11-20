@@ -1,5 +1,5 @@
 apiVersion: enonic.cloud/v1alpha1
-kind: XpSolution
+kind: Xp7Solution
 metadata:
   name: mycloud-myproject-xp-qa
   labels:
@@ -12,7 +12,8 @@ spec:
   xpVersion: 7.0.3
   sharedDisk: 1Gi # For blob and snapshots
   nodes:
-    main:
+    62524054-0f15-4319-84e3-d6cbb086cbbf:
+      name: main
       type: ["MASTER", "FRONTEND", "DATA"]
       replicas: 1
       resources:

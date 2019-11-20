@@ -16,6 +16,8 @@ import com.enonic.ec.kubernetes.common.Configuration;
 public abstract class SpecNode
     extends Configuration
 {
+    public abstract String name();
+
     public enum Type
     {
         FRONTEND, DATA, MASTER

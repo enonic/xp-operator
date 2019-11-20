@@ -1,5 +1,5 @@
 apiVersion: enonic.cloud/v1alpha1
-kind: XpVHost
+kind: Xp7VHost
 metadata:
   name: company-com
   namespace: mycloud-myproject-xp-qa
@@ -8,7 +8,7 @@ spec:
   certificate:
     selfSigned: true
   mappings:
-    - node: main
+    - node: 62524054-0f15-4319-84e3-d6cbb086cbbf
       name: admin
       source: /admin
       target: /admin

@@ -1,14 +1,14 @@
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: xpsolutions.enonic.cloud
+  name: xp7solutions.enonic.cloud
 spec:
   group: enonic.cloud
   names:
-    kind: XpSolution
-    listKind: XpSolutionList
-    plural: xpsolutions
-    singular: xpsolution
+    kind: Xp7Solution
+    listKind: Xp7SolutionList
+    plural: xp7solutions
+    singular: xp7solution
   scope: Cluster
   version: v1alpha1
   additionalPrinterColumns:
@@ -24,11 +24,3 @@ spec:
       type: string
       description: Size of XP shared disk
       JSONPath: .spec.sharedDisk
-    - name: Node Aliases
-      type: string
-      description: List of Aliases
-      JSONPath: .spec.nodes[*].alias
-    - name: Node Replicas
-      type: string
-      description: List of Aliases
-      JSONPath: .spec.nodes[*].replicas
