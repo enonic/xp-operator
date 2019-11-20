@@ -1,0 +1,20 @@
+apiVersion: cert-manager.io/v1alpha2
+kind: Issuer
+metadata:
+  name: ec-operator-admission-cert-issuer
+  namespace: ec-system
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: ec-operator-admission-cert
+  namespace: ec-system
+spec:
+  secretName: ec-operator-admission-cert
+  commonName: "ec-operator.ec-system.svc"
+  isCA: true
+  issuerRef:
+    name: ec-operator-admission-cert-issuer
+    kind: Issuer

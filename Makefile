@@ -13,10 +13,6 @@ minikube-certmanager:
 	kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/${CERT_MANAGER_VERSION}/cert-manager.yaml --validate=false
 
 minikube-operator-setup:
-	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.namespace.yaml
-	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.clusterrole.yaml
-	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.serviceaccount.yaml
-	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.clusterrolebinding.yaml
 	kubectl apply -f src/main/kubernetes/operator/crd/ec-operator.crd.xp7.deployments.yaml
 	kubectl apply -f src/main/kubernetes/operator/crd/ec-operator.crd.xp7.vhosts.yaml
 
@@ -27,15 +23,18 @@ minikube-linkerd:
 	linkerd install | kubectl apply -f -
 	bash -c 'until linkerd check; do echo "Waiting for linkerd..."; sleep 5; done'
 
-minikube-setup-linkerd: minikube-start minikube-linkerd minikube-operator-setup minikube-certmanager minikube-ingress-patch
-minikube-setup: minikube-start minikube-operator-setup minikube-certmanager minikube-ingress-patch
+minikube-setup-linkerd: minikube-start minikube-linkerd minikube-certmanager minikube-operator-setup minikube-ingress-patch
+minikube-setup: minikube-start minikube-certmanager minikube-operator-setup minikube-ingress-patch
 
 minikube-operator-deploy:
-	kubectl apply -f src/main/kubernetes/operator/crd/ec-operator.crd.xp.deployments.yaml
-	kubectl apply -f src/main/kubernetes/operator/crd/ec-operator.crd.xp.vhosts.yaml
 	./mvnw clean package
 	bash -c 'eval $$(minikube docker-env) && docker build -f src/main/docker/Dockerfile.jvm -t enonic/kubernetes-operator .'
-	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.deployment.yaml
+	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.dep.namespace.yaml
+	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.dep.serviceaccount.yaml
+	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.dep.configmap.yaml
+	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.dep.admission.cert.yaml
+	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.dep.deployment.yaml
+	kubectl -n ec-system get secrets ec-operator-admission-cert -o jsonpath='{.data.ca\.crt}' | xargs -I % sed s#{CA_CERT}#%#g src/main/kubernetes/operator/deployment/ec-operator.dep.admission.endpoint.yaml | kubectl apply -f -
 	-kubectl -n ec-system get pods | grep ec-operator | awk '{print $$1}' | xargs -I % kubectl -n ec-system delete pod %
 
 minikube-operator-logs:
@@ -47,5 +46,8 @@ minikube-operator-port-forward:
 create-deployment:
 	kubectl apply -f src/test/example-deployment.yaml
 
-post-vhost:
-	cat src/test/example-vhost.json | http -v -j POST :${LOCAL_OPERATOR_PORT}/api/$(shell http :${LOCAL_OPERATOR_PORT}/api | jq -r '.[0]')/vhosts
+post-admission-success:
+	cat src/test/admission-success.json | http -v -j POST :${LOCAL_OPERATOR_PORT}/admission/validate
+
+post-admission-fail:
+	cat src/test/admission-fail.json | http -v -j POST :${LOCAL_OPERATOR_PORT}/admission/validate

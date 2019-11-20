@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import com.enonic.ec.kubernetes.crd.deployment.XpDeploymentResource;
+import com.enonic.ec.kubernetes.operator.admission.ExceptionHandler;
 
 public class DeploymentFileTest
 {
@@ -24,15 +25,15 @@ public class DeploymentFileTest
         {
             return mapper.readValue( klass.getResourceAsStream( file ), XpDeploymentResource.class );
         }
-        catch ( IOException ioex )
+        catch ( IOException ex )
         {
-            throw new RuntimeException( ioex );
+            throw new RuntimeException( ExceptionHandler.extractJacksonMessage( ex ) );
         }
     }
 
     protected void loadSpecExpectIllegalState( String file, String expectedMessage )
     {
         RuntimeException e = Assertions.assertThrows( RuntimeException.class, () -> loadResource( file ) );
-        Assertions.assertEquals( expectedMessage, e.getCause().getCause().getMessage() );
+        Assertions.assertEquals( expectedMessage, e.getMessage() );
     }
 }

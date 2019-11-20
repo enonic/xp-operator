@@ -10,9 +10,11 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.base.Preconditions;
 
 import com.enonic.ec.kubernetes.common.Configuration;
+import com.enonic.ec.kubernetes.crd.BuilderException;
 
 @JsonDeserialize(builder = ImmutableSpecNode.Builder.class)
 @Value.Immutable
+@Value.Style(throwForInvalidImmutableState = SpecNode.ExceptionMissing.class, throwForNullPointer = SpecNode.ExceptionMissing.class)
 public abstract class SpecNode
     extends Configuration
 {
@@ -92,11 +94,19 @@ public abstract class SpecNode
         return isType( Type.FRONTEND ) && type().size() == 1;
     }
 
-//    @JsonIgnore
-//    @Value.Derived
-//    public Map<String, String> nodeAliasLabel()
-//    {
-//        // Do not add more labels here, it will brake service mapping for vHosts to pods
-//        return Map.of( cfgStr( "operator.deployment.xp.pod.label.alias" ), alias() );
-//    }
+    public static class ExceptionMissing
+        extends BuilderException
+    {
+
+        public ExceptionMissing( final String... missingAttributes )
+        {
+            super( missingAttributes );
+        }
+
+        @Override
+        protected String getFieldPath()
+        {
+            return "spec.nodes";
+        }
+    }
 }

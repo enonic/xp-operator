@@ -19,14 +19,14 @@ public class XpVHostClientProducer
 
     @SuppressWarnings("CdiInjectionPointsInspection")
     @Inject
-    public XpVHostClientProducer( DefaultClientProducer defaultClientProducer,
+    public XpVHostClientProducer( DefaultClientProducer defaultClientProducer, @ConfigProperty(name = "operator.crd.xp.group") String group,
                                   @ConfigProperty(name = "operator.crd.xp.apiVersion") String apiVersion,
                                   @ConfigProperty(name = "operator.crd.xp.vhosts.kind") String kind,
                                   @ConfigProperty(name = "operator.crd.xp.vhosts.name") String name )
     {
         xpVHostClient = new XpVHostClient(
-            createCrdClient( defaultClientProducer.client(), apiVersion, kind, name, XpVHostResource.class, XpVHostResourceList.class,
-                             XpVHostResourceDoneable.class ) );
+            createCrdClient( defaultClientProducer.client(), group + "/" + apiVersion, kind, name, XpVHostResource.class,
+                             XpVHostResourceList.class, XpVHostResourceDoneable.class ) );
     }
 
     public XpVHostClient produce()

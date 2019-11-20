@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ec-operator
+  namespace: ec-system
+data:
+  application.properties: |
+    quarkus.log.min-level=DEBUG
+    quarkus.http.ssl.certificate.file=/deployments/ssl/tls.crt
+    quarkus.http.ssl.certificate.key-file=/deployments/ssl/tls.key

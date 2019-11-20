@@ -1,17 +1,12 @@
 spec:
-  cloud: mycloud
-  project: myproject
-  name: myname
-
   xpVersion: 7.0.3
   enabled: true
 
-  sharedDisks:
-    blob: 1Gi
-    snapshots: 1Gi
+  sharedDisk: 1Gi
 
   nodes:
-    - alias: xp
+    xp:
+      name: xp
       replicas: 1
       type: ["MASTER", "DATA", "FRONTEND"]
       resources:
@@ -43,7 +38,3 @@ spec:
           -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=*:5005
         XP_APPS: |
           com.enonic.app.snapshotter:2.1.1
-
-  vHostCertificates:
-    company.com:
-      selfSigned: true

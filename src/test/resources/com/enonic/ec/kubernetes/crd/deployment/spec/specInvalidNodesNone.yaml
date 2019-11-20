@@ -1,8 +1,4 @@
 spec:
-  cloud: mycloud
-  project: myproject
-  name: myname
+  enabled: true
   xpVersion: 7.0.3
-
-  sharedDisks:
-    blob: 1Gi
+  sharedDisk: 1Gi

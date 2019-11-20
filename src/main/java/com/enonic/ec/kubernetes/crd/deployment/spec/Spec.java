@@ -10,8 +10,11 @@ import com.google.common.base.Preconditions;
 
 import io.fabric8.kubernetes.api.model.Quantity;
 
+import com.enonic.ec.kubernetes.crd.BuilderException;
+
 @JsonDeserialize(builder = ImmutableSpec.Builder.class)
 @Value.Immutable
+@Value.Style(throwForInvalidImmutableState = Spec.ExceptionMissing.class, throwForNullPointer = Spec.ExceptionMissing.class)
 public abstract class Spec
 {
     public abstract String xpVersion();
@@ -25,7 +28,7 @@ public abstract class Spec
     @Value.Check
     protected void check()
     {
-        Preconditions.checkState( nodes().size() > 0, "field 'nodes' has to contain more than 0 nodes" );
+        Preconditions.checkState( nodes().size() > 0, "Field 'spec.nodes' has to contain more than 0 nodes" );
 
         Preconditions.checkState( nodes().values().stream().filter( SpecNode::isMasterNode ).count() == 1,
                                   "1 and only 1 node has be of type master" );
@@ -39,4 +42,20 @@ public abstract class Spec
     {
         return nodes().values().stream().mapToInt( SpecNode::replicas ).sum() > 1;
     } // TODO: REMOVE
+
+    public static class ExceptionMissing
+        extends BuilderException
+    {
+
+        public ExceptionMissing( final String... missingAttributes )
+        {
+            super( missingAttributes );
+        }
+
+        @Override
+        protected String getFieldPath()
+        {
+            return "spec";
+        }
+    }
 }

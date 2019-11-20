@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ec-operator
+  namespace: ec-system
+spec:
+  selector:
+    matchLabels:
+      app: ec-operator
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: ec-operator
+    spec:
+      serviceAccountName: ec-operator
+      containers:
+        - image: enonic/kubernetes-operator:latest
+          name: ec-operator
+          imagePullPolicy: Never
+          volumeMounts:
+            - name: config
+              mountPath: /deployments/config
+              readOnly: true
+            - name: ssl
+              mountPath: /deployments/ssl
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: ec-operator
+        - name: ssl
+          secret:
+            secretName: ec-operator-admission-cert
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ec-operator
+  namespace: ec-system
+spec:
+  selector:
+    app: ec-operator
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 8080
+    - name: https
+      protocol: TCP
+      port: 443
+      targetPort: 8443

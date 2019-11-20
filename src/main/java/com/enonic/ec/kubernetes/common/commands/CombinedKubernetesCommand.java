@@ -19,6 +19,11 @@ public abstract class CombinedKubernetesCommand
     public Void execute()
         throws Exception
     {
+        if ( command().size() == 0 )
+        {
+            log.debug( "No commands to run" );
+            return null;
+        }
         log.info( "Running " + command().size() + " commands" );
         for ( int i = 0; i < command().size(); i++ )
         {

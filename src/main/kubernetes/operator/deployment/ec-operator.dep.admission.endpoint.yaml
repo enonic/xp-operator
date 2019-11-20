@@ -1,0 +1,22 @@
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: ec-operator-admission
+webhooks:
+  - name: "admission.enonic.cloud"
+    rules:
+      - apiGroups:   ["enonic.cloud"]
+        operations: ["*"]
+        apiVersions: ["*"]
+        resources: ["xp7solutions", "xp7vhosts"]
+        scope: "*"
+    clientConfig:
+      caBundle: "{CA_CERT}"
+      service:
+        namespace: "ec-system"
+        name: "ec-operator"
+        path: /admission/validate
+    admissionReviewVersions: ["v1", "v1beta1"]
+    failurePolicy: Fail
+    sideEffects: None
+    timeoutSeconds: 5

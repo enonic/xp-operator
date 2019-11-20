@@ -9,5 +9,4 @@ import com.enonic.ec.kubernetes.crd.vhost.spec.SpecMapping;
 public abstract class DiffSpecMapping
     extends Diff<SpecMapping>
 {
-
 }

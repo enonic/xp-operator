@@ -1,18 +1,11 @@
 spec:
-  cloud: mycloud
-  project: myproject
-  app: fail
-  name: myname
   xpVersion: 7.0.3
-
   enabled: true
-
-  sharedDisks:
-    blob: 1Gi
-    snapshots: 1Gi
+  sharedDisk: 1Gi
 
   nodes:
-    - alias: xp
+    xp:
+      name: xp
       replicas: 1
       type: ["MASTER", "DATA", "FRONTEND"]
       resources:
@@ -21,3 +14,4 @@ spec:
         disks:
           index: 1Gi
       config: {}
+  asdf: asd

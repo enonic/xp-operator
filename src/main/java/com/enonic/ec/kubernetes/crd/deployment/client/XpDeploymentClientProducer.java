@@ -20,12 +20,13 @@ public class XpDeploymentClientProducer
     @SuppressWarnings("CdiInjectionPointsInspection")
     @Inject
     public XpDeploymentClientProducer( DefaultClientProducer defaultClientProducer,
+                                       @ConfigProperty(name = "operator.crd.xp.group") String group,
                                        @ConfigProperty(name = "operator.crd.xp.apiVersion") String apiVersion,
                                        @ConfigProperty(name = "operator.crd.xp.deployments.kind") String kind,
                                        @ConfigProperty(name = "operator.crd.xp.deployments.name") String name )
     {
         xpDeploymentClient = new XpDeploymentClient(
-            createCrdClient( defaultClientProducer.client(), apiVersion, kind, name, XpDeploymentResource.class,
+            createCrdClient( defaultClientProducer.client(), group + "/" + apiVersion, kind, name, XpDeploymentResource.class,
                              XpDeploymentResourceList.class, XpDeploymentResourceDoneable.class ) );
     }
 
