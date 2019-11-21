@@ -1,14 +1,14 @@
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: xp7solutions.enonic.cloud
+  name: xp7deployments.enonic.cloud
 spec:
   group: enonic.cloud
   names:
-    kind: Xp7Solution
-    listKind: Xp7SolutionList
-    plural: xp7solutions
-    singular: xp7solution
+    kind: Xp7Deployment
+    listKind: Xp7DeploymentList
+    plural: xp7deployments
+    singular: xp7deployment
   scope: Cluster
   version: v1alpha1
   additionalPrinterColumns:

@@ -1,5 +1,5 @@
 apiVersion: enonic.cloud/v1alpha1
-kind: Xp7Solution
+kind: Xp7Deployment
 metadata:
   name: mycloud-myproject-xp-qa
   labels:
