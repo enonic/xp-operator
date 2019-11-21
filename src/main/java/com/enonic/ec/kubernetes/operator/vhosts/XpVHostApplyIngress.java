@@ -138,7 +138,6 @@ public abstract class XpVHostApplyIngress
                     append( "proxy_cache_valid 404 1m;" ).append( "\n" ).
                     append( "proxy_cache_valid 301 1m;" ).append( "\n" ).
                     append( "proxy_cache_valid 303 1m;" ).append( "\n" ).
-                    append( "proxy_cache_valid 303 1m;" ).append( "\n" ).
                     append( "proxy_cache_use_stale error timeout updating http_404 http_500 http_502 http_503 http_504;" ).append( "\n" ).
                     append( "proxy_cache_bypass $http_x_purge;" ).append( "\n" ).
                     append( "add_header X-Cache-Status $upstream_cache_status;" ).append( "\n" );
