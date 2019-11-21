@@ -35,7 +35,7 @@ minikube-operator-deploy:
 	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.dep.admission.cert.yaml
 	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.dep.deployment.yaml
 	sleep 5 # Let certmanager create the certificate
-	kubectl -n ec-system get secrets ec-operator-webhook-tls -o jsonpath='{.data.ca\.crt}' | xargs -I % sed s#{CA_CERT}#%#g src/main/kubernetes/operator/deployment/ec-operator.dep.admission.endpoint.yaml | kubectl apply -f -
+	kubectl -n ec-system get secrets ec-operator-webhook-tls -o jsonpath='{.data.ca\.crt}' | xargs -I % sed s#{CA_CERT}#%#g src/main/kubernetes/operator/deployment/ec-operator.dep.api.yaml | kubectl apply -f -
 	-kubectl -n ec-system get pods | grep ec-operator | awk '{print $$1}' | xargs -I % kubectl -n ec-system delete pod %
 
 minikube-operator-logs:
