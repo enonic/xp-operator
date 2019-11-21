@@ -54,9 +54,11 @@ public class AdmissionApi
         try
         {
             AdmissionReview review = mapper.readValue( body, AdmissionReview.class );
-            Consumer<AdmissionReview> reviewer = getReviewConsumers().
-                getOrDefault( review.getRequest().getKind().getKind(), this::defaultReviewConsumers );
-            reviewer.accept( review );
+            if(review.getRequest().getOperation().equals( "CREATE" ) || review.getRequest().getOperation().equals( "UPDATE" )) {
+                Consumer<AdmissionReview> reviewer = getReviewConsumers().
+                    getOrDefault( review.getRequest().getKind().getKind(), this::defaultReviewConsumers );
+                reviewer.accept( review );
+            }
         }
         catch ( IOException ex )
         {
