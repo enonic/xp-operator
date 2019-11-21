@@ -1,4 +1,4 @@
-package com.enonic.ec.kubernetes.operator.webhook;
+package com.enonic.ec.kubernetes.operator.api.admission;
 
 import java.io.IOException;
 import java.util.HashMap;

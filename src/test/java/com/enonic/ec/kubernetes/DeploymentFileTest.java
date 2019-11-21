@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import com.enonic.ec.kubernetes.crd.deployment.XpDeploymentResource;
-import com.enonic.ec.kubernetes.operator.webhook.AdmissionExceptionHandler;
+import com.enonic.ec.kubernetes.operator.api.admission.AdmissionExceptionHandler;
 
 public class DeploymentFileTest
 {

@@ -19,6 +19,7 @@
     <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
     <surefire-plugin.version>3.0.0-M3</surefire-plugin.version>
     <versions-maven-plugin.version>2.7</versions-maven-plugin.version>
+    <git-plugin.version>3.0.1</git-plugin.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -117,6 +118,32 @@
               <version>${org.immutables.version}</version>
             </dependency>
           </annotationProcessorPaths>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>pl.project13.maven</groupId>
+        <artifactId>git-commit-id-plugin</artifactId>
+        <version>${git-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>get-the-git-infos</id>
+            <goals>
+              <goal>revision</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
+          <prefix>git</prefix>
+          <verbose>false</verbose>
+          <generateGitPropertiesFile>true</generateGitPropertiesFile>
+          <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
+          <format>properties</format>
+          <gitDescribe>
+            <skip>false</skip>
+            <always>false</always>
+            <dirty>-dirty</dirty>
+          </gitDescribe>
         </configuration>
       </plugin>
     </plugins>
