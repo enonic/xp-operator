@@ -1,22 +1,36 @@
+apiVersion: apiregistration.k8s.io/v1beta1
+kind: APIService
+metadata:
+  name: v1alpha1.operator.enonic.cloud
+spec:
+  group: operator.enonic.cloud
+  groupPriorityMinimum: 1000
+  versionPriority: 15
+  caBundle: "{CA_CERT}"
+  service:
+    name: ec-operator
+    namespace: ec-system
+  version: v1alpha1
+---
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingWebhookConfiguration
 metadata:
-  name: ec-operator-admission
+  name: ec-operator-webhook
 webhooks:
-  - name: "admission.enonic.cloud"
+  - name: operator.enonic.cloud
     rules:
-      - apiGroups:   ["enonic.cloud"]
+      - apiGroups: ["enonic.cloud"]
         operations: ["*"]
         apiVersions: ["*"]
         resources: ["xp7solutions", "xp7vhosts"]
         scope: "*"
-    clientConfig:
-      caBundle: "{CA_CERT}"
-      service:
-        namespace: "ec-system"
-        name: "ec-operator"
-        path: /admission/validate
     admissionReviewVersions: ["v1", "v1beta1"]
     failurePolicy: Fail
     sideEffects: None
     timeoutSeconds: 5
+    clientConfig:
+      caBundle: "{CA_CERT}"
+      service:
+        name: kubernetes
+        namespace: default
+        path: /apis/operator.enonic.cloud/v1alpha1/admission/validate

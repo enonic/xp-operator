@@ -1,4 +1,4 @@
-package com.enonic.ec.kubernetes.operator.admission;
+package com.enonic.ec.kubernetes.operator.webhook;
 
 import java.io.IOException;
 
@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 
 import com.enonic.ec.kubernetes.crd.BuilderException;
 
-public class ExceptionHandler
+public class AdmissionExceptionHandler
 {
     public static String extractJacksonMessage( IOException ex )
     {

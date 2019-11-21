@@ -31,7 +31,7 @@ spec:
             name: ec-operator
         - name: ssl
           secret:
-            secretName: ec-operator-admission-cert
+            secretName: ec-operator-webhook-tls
 ---
 apiVersion: v1
 kind: Service

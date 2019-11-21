@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import com.enonic.ec.kubernetes.crd.deployment.XpDeploymentResource;
-import com.enonic.ec.kubernetes.operator.admission.ExceptionHandler;
+import com.enonic.ec.kubernetes.operator.webhook.AdmissionExceptionHandler;
 
 public class DeploymentFileTest
 {
@@ -27,7 +27,7 @@ public class DeploymentFileTest
         }
         catch ( IOException ex )
         {
-            throw new RuntimeException( ExceptionHandler.extractJacksonMessage( ex ) );
+            throw new RuntimeException( AdmissionExceptionHandler.extractJacksonMessage( ex ) );
         }
     }
 

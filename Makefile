@@ -13,11 +13,12 @@ minikube-certmanager:
 	kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/${CERT_MANAGER_VERSION}/cert-manager.yaml --validate=false
 
 minikube-operator-setup:
+	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.dep.namespace.yaml
 	kubectl apply -f src/main/kubernetes/operator/crd/ec-operator.crd.xp7.deployments.yaml
 	kubectl apply -f src/main/kubernetes/operator/crd/ec-operator.crd.xp7.vhosts.yaml
 
 minikube-ingress-patch:
-	./src/test/minikube/minikube.sh
+	-./src/test/minikube/minikube.sh
 
 minikube-linkerd:
 	linkerd install | kubectl apply -f -
@@ -29,12 +30,11 @@ minikube-setup: minikube-start minikube-certmanager minikube-operator-setup mini
 minikube-operator-deploy:
 	./mvnw clean package
 	bash -c 'eval $$(minikube docker-env) && docker build -f src/main/docker/Dockerfile.jvm -t enonic/kubernetes-operator .'
-	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.dep.namespace.yaml
 	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.dep.serviceaccount.yaml
 	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.dep.configmap.yaml
 	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.dep.admission.cert.yaml
 	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.dep.deployment.yaml
-	kubectl -n ec-system get secrets ec-operator-admission-cert -o jsonpath='{.data.ca\.crt}' | xargs -I % sed s#{CA_CERT}#%#g src/main/kubernetes/operator/deployment/ec-operator.dep.admission.endpoint.yaml | kubectl apply -f -
+	kubectl -n ec-system get secrets ec-operator-webhook-tls -o jsonpath='{.data.ca\.crt}' | xargs -I % sed s#{CA_CERT}#%#g src/main/kubernetes/operator/deployment/ec-operator.dep.admission.endpoint.yaml | kubectl apply -f -
 	-kubectl -n ec-system get pods | grep ec-operator | awk '{print $$1}' | xargs -I % kubectl -n ec-system delete pod %
 
 minikube-operator-logs:

@@ -1,4 +1,4 @@
-package com.enonic.ec.kubernetes.operator.admission;
+package com.enonic.ec.kubernetes.operator.webhook;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -27,7 +27,7 @@ import com.enonic.ec.kubernetes.crd.deployment.XpDeploymentResource;
 import com.enonic.ec.kubernetes.crd.vhost.XpVHostResource;
 
 @ApplicationScoped
-@Path("/admission")
+@Path("/apis/operator.enonic.cloud/v1alpha1/admission")
 public class AdmissionApi
 {
     private final static Logger log = LoggerFactory.getLogger( AdmissionApi.class );
@@ -48,7 +48,7 @@ public class AdmissionApi
     public AdmissionReview validate( String body )
         throws IOException
     {
-        log.info( "Admission review started" );
+        log.info( "AdmissionReview started" );
         Map<String, Object> admission = mapper.readValue( body, Map.class );
         String uid = (String) ( (Map) admission.get( "request" ) ).get( "uid" );
         try
@@ -61,9 +61,9 @@ public class AdmissionApi
         catch ( IOException ex )
         {
             log.error( "AdmissionReview failed", ex );
-            return createReview( uid, ExceptionHandler.extractJacksonMessage( ex ), ex.getClass().getSimpleName() );
+            return createReview( uid, AdmissionExceptionHandler.extractJacksonMessage( ex ), ex.getClass().getSimpleName() );
         }
-        log.info( "Admission review success" );
+        log.info( "AdmissionReview success" );
         return createReview( uid, null, null );
     }
 
