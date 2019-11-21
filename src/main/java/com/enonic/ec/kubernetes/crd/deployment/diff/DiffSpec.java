@@ -47,7 +47,7 @@ public abstract class DiffSpec
         {
             return;
         }
-        Preconditions.checkState( equals( Spec::sharedDisk ), "cannot change 'sharedDisks'" );
+        Preconditions.checkState( equals( Spec::sharedDisk ), "Field 'spec.sharedDisk' cannot be changed" );
     }
 
 }

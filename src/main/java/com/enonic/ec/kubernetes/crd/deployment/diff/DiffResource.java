@@ -40,7 +40,7 @@ public abstract class DiffResource
 
             String fullName = String.join( "-", cloud, project, type, name );
             Preconditions.checkState( fullName.equals( newValue().get().getMetadata().getName() ),
-                                      "Deployment name must be equal to <Cloud>-<Project>-<Type>-<Name>, i.e: '" + fullName + "'" );
+                                      "Xp7Deployment name must be equal to <Cloud>-<Project>-<Type>-<Name> according to labels, i.e: '" + fullName + "'" );
         }
 
         if ( !shouldModify() )
@@ -48,20 +48,20 @@ public abstract class DiffResource
             return;
         }
 
-        Preconditions.checkState( equals( getCloud ), "Cannot change deployment cloud" );
-        Preconditions.checkState( equals( getProject ), "Cannot change deployment project" );
-        Preconditions.checkState( equals( getType ), "Cannot change deployment type" );
-        Preconditions.checkState( equals( getName ), "Cannot change deployment name" );
+        Preconditions.checkState( equals( getCloud ), "Cannot change deployment label 'cloud'" );
+        Preconditions.checkState( equals( getProject ), "Cannot change deployment label 'project'" );
+        Preconditions.checkState( equals( getType ), "Cannot change deployment label 'type'" );
+        Preconditions.checkState( equals( getName ), "Cannot change deployment label 'name'" );
     }
 
     private Function<XpDeploymentResource, String> labelFunc( String key )
     {
         String regex = "^\\w+$";
         return r -> {
-            Preconditions.checkState( r.getMetadata().getLabels() != null, "XpSolution labels cannot be null" );
+            Preconditions.checkState( r.getMetadata().getLabels() != null, "Xp7Deployment labels cannot be empty" );
             String val = r.getMetadata().getLabels().get( key );
-            Preconditions.checkState( val != null, "XpSolution label '" + key + "' cannot be null" );
-            Preconditions.checkState( val.matches( regex ), "XpSolution label '" + key + "' must match regex '" + regex + "'" );
+            Preconditions.checkState( val != null, "Xp7Deployment label '" + key + "' cannot be null" );
+            Preconditions.checkState( val.matches( regex ), "Xp7Deployment label '" + key + "' must match regex '" + regex + "'" );
             return val;
         };
     }

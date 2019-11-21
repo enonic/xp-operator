@@ -42,16 +42,18 @@ public abstract class SpecNode
     @Value.Check
     protected void check()
     {
-        Preconditions.checkState( type().size() > 0, "node 'type' has to be set" );
-        Preconditions.checkState( replicas() > 0, "node 'replicas' has to be > 0" );
+        Preconditions.checkState( type().size() > 0, "Field 'spec.nodes.type' has to be set" );
+        Preconditions.checkState( replicas() > 0, "Field 'spec.nodes.replicas' has to be > 0" );
 
         Preconditions.checkState( !isDataNode() || resources().disks().containsKey( "index" ),
-                                  "data nodes must have 'index' disk defined" );
-        Preconditions.checkState( !isDataNode() || resources().disks().size() == 1, "data node should only have 'index' disk defined" );
+                                  "Nodes with type " + Type.DATA + " must have disk 'index' defined" );
+        Preconditions.checkState( !isDataNode() || resources().disks().size() == 1,
+                                  "Nodes with type " + Type.DATA + " should only have 'index' disk defined" );
         Preconditions.checkState( isDataNode() || resources().disks().size() == 0,
-                                  "master and frontend nodes should not have any disk defined" );
+                                  "Nodes with type " + Type.MASTER + " and " + Type.FRONTEND + " should not have any disk defined" );
 
-        Preconditions.checkState( !isMasterNode() || replicas() % 2 == 1, "master node replica number has to be an odd number" );
+        Preconditions.checkState( !isMasterNode() || replicas() % 2 == 1,
+                                  "Nodes with type " + Type.MASTER + " replicas has to be an odd number" );
     }
 
     private boolean isType( Type... type )
