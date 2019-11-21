@@ -54,13 +54,14 @@ public class AdmissionApi
         try
         {
             AdmissionReview review = mapper.readValue( body, AdmissionReview.class );
-            if(review.getRequest().getOperation().equals( "CREATE" ) || review.getRequest().getOperation().equals( "UPDATE" )) {
+            if ( review.getRequest().getOperation().equals( "CREATE" ) || review.getRequest().getOperation().equals( "UPDATE" ) )
+            {
                 Consumer<AdmissionReview> reviewer = getReviewConsumers().
                     getOrDefault( review.getRequest().getKind().getKind(), this::defaultReviewConsumers );
                 reviewer.accept( review );
             }
         }
-        catch ( IOException ex )
+        catch ( Exception ex )
         {
             log.error( "AdmissionReview failed", ex );
             return createReview( uid, AdmissionExceptionHandler.extractJacksonMessage( ex ), ex.getClass().getSimpleName() );

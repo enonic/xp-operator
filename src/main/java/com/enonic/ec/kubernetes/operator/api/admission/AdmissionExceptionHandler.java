@@ -1,7 +1,5 @@
 package com.enonic.ec.kubernetes.operator.api.admission;
 
-import java.io.IOException;
-
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 
@@ -9,7 +7,7 @@ import com.enonic.ec.kubernetes.crd.BuilderException;
 
 public class AdmissionExceptionHandler
 {
-    public static String extractJacksonMessage( IOException ex )
+    public static String extractJacksonMessage( Exception ex )
     {
         if ( ex instanceof InvalidDefinitionException && ex.getCause() != null && ex.getCause() instanceof BuilderException )
         {
@@ -18,6 +16,10 @@ public class AdmissionExceptionHandler
         if ( ex instanceof InvalidDefinitionException && ex.getCause() != null && ex.getCause() instanceof IllegalStateException )
         {
             return ex.getCause().getMessage();
+        }
+        if ( ex instanceof IllegalStateException )
+        {
+            return ex.getMessage();
         }
         if ( ex instanceof UnrecognizedPropertyException )
         {
