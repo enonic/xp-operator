@@ -21,7 +21,7 @@ public abstract class ConfigBuilderNonClustered
         apply( node, "com.enonic.xp.cluster.cfg", clusterCfg, config );
 
         Properties elasticCfg = new Properties();
-        elasticCfg.put( "http.enabled", "true" ); // For health checks
+        elasticCfg.put( "http.enabled", "true" );
         apply( node, "com.enonic.xp.elasticsearch.cfg", elasticCfg, config );
 
         return config;

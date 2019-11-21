@@ -55,40 +55,22 @@ public abstract class ConfigBuilderCluster
         // Create elastic config
         Properties elasticCfg = new Properties();
 
-        setNodeType( elasticCfg, node );
+        elasticCfg.put( "node.master", node.isMasterNode() ? "true" : "false" );
+        elasticCfg.put( "node.data", node.isDataNode() ? "true" : "false" );
         elasticCfg.put( "cluster.name", clusterName() );
-        elasticCfg.put( "http.enabled", "true" ); // For health checks
+
+        //elasticCfg.put( "http.enabled", node.isMasterNode() || node.isDataNode() ? "true" : "false" );
+        elasticCfg.put( "http.enabled", "true" ); // TODO: Use alive app for health checks
 
         elasticCfg.put( "gateway.expected_master_nodes", minimumMasterNodes() );
         elasticCfg.put( "gateway.expected_data_nodes", minimumDataNodes() );
+        elasticCfg.put( "gateway.recover_after_time", "5m" );
         elasticCfg.put( "discovery.zen.minimum_master_nodes", minimumMasterNodes() );
 
         elasticCfg.put( "network.tcp.keep_alive", "true" );
 
-//        elasticCfg.put( "discovery.zen.fd.ping_timeout", "5s" );
-//        elasticCfg.put( "discovery.zen.fd.ping_retries", "3" );
-//        elasticCfg.put( "discovery.zen.fd.ping_interval", "1s" );
-
         apply( node, "com.enonic.xp.elasticsearch.cfg", elasticCfg, config );
 
         return config;
-    }
-
-    private static void setNodeType( Properties elasticCfg, SpecNode node )
-    {
-        if ( node.isMasterNode() )
-        {
-            elasticCfg.put( "node.master", "true" );
-        }
-        if ( node.isDataNode() )
-        {
-            elasticCfg.put( "node.data", "true" );
-        }
-        if ( node.isOnlyFrontend() )
-        {
-            elasticCfg.put( "node.client", "true" );
-            elasticCfg.put( "node.master", "false" );
-            elasticCfg.put( "node.data", "false" );
-        }
     }
 }
