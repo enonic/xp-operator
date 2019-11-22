@@ -122,7 +122,7 @@ public abstract class XpVHostApplyIngress
 
         if ( changeMappings || changeCert )
         {
-            ImmutableMap.Builder<String, String> serviceAnnotations = ImmutableMap.builder();
+            ImmutableMap.Builder<String, String> ingressAnnotations = ImmutableMap.builder();
             StringBuilder nginxConfigSnippet = new StringBuilder();
 
             // Linkerd config
@@ -142,12 +142,12 @@ public abstract class XpVHostApplyIngress
                     append( "proxy_cache_bypass $http_x_purge;" ).append( "\n" ).
                     append( "add_header X-Cache-Status $upstream_cache_status;" ).append( "\n" );
 
-                serviceAnnotations.
+                ingressAnnotations.
                     put( "nginx.ingress.kubernetes.io/proxy-buffering", "on" );
             } );
 
             // DDOS mitigation
-            cfgIfBool( "operator.extensions.ingress.ddos.enabled", () -> serviceAnnotations.
+            cfgIfBool( "operator.extensions.ingress.ddos.enabled", () -> ingressAnnotations.
                 put( "nginx.ingress.kubernetes.io/limit-connections", "20" ).
                 put( "nginx.ingress.kubernetes.io/limit-rpm", "240" ) );
 
@@ -156,22 +156,27 @@ public abstract class XpVHostApplyIngress
                 diffSpec.newValue().get().mappings().stream().filter( m -> m.target().startsWith( "/admin" ) ).findAny();
             if ( adminPath.isPresent() )
             {
-                cfgIfBool( "operator.extensions.ingress.adminStickySession.enabled", () -> serviceAnnotations.
+                cfgIfBool( "operator.extensions.ingress.adminStickySession.enabled", () -> ingressAnnotations.
                     put( "nginx.ingress.kubernetes.io/affinity", "cookie" ).
                     put( "nginx.ingress.kubernetes.io/session-cookie-name", "XPADMINCOOKIE" ).
                     put( "nginx.ingress.kubernetes.io/session-cookie-path", "/admin" ) );
             }
 
+            // TODO: Set a default host list that creates external DNS records
+            cfgIfBool( "operator.extensions.ingress.externalDns.enabled", () -> ingressAnnotations.
+                put( "external-dns.alpha.kubernetes.io/hostname", diffSpec.newValue().get().host() ). // TODO: Only allow subdomains
+                put( "external-dns.alpha.kubernetes.io/ttl", cfgStr( "operator.extensions.ingress.externalDns.recordTTL" ) ) );
+
             // Regular ingress
-            serviceAnnotations.
+            ingressAnnotations.
                 put( "kubernetes.io/ingress.class", "nginx" ).
                 put( "ingress.kubernetes.io/rewrite-target", "/" ).
                 put( "nginx.ingress.kubernetes.io/configuration-snippet", nginxConfigSnippet.toString() );
 
             if ( hasCert )
             {
-                serviceAnnotations.put( "nginx.ingress.kubernetes.io/ssl-redirect", "true" );
-                serviceAnnotations.put( "cert-manager.io/issuer", vHostResourceName );
+                ingressAnnotations.put( "nginx.ingress.kubernetes.io/ssl-redirect", "true" );
+                ingressAnnotations.put( "cert-manager.io/issuer", vHostResourceName );
             }
 
             commandBuilder.addCommand( ImmutableCommandApplyIngress.builder().
@@ -180,7 +185,7 @@ public abstract class XpVHostApplyIngress
                 namespace( namespace() ).
                 name( vHostResourceName ).
                 labels( defaultLabels() ).
-                annotations( serviceAnnotations.build() ).
+                annotations( ingressAnnotations.build() ).
                 spec( ImmutableIngressSpec.builder().
                     certificateSecretName( Optional.ofNullable( hasCert ? vHostResourceName : null ) ).
                     mappingResourceName( m -> mappingResourceName( vHostResourceName, m ) ).
