@@ -7,6 +7,6 @@ public abstract class XpVHostApply
 {
     protected String aliasLabelKey()
     {
-        return cfgStr( "operator.deployment.xp.pod.label.alias" );
+        return cfgStr( "operator.deployment.xp.labels.pod.name" );
     }
 }

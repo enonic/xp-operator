@@ -5,9 +5,12 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.ConfigMapList;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
+import io.fabric8.kubernetes.client.dsl.FilterWatchListDeletable;
 import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.ec.kubernetes.common.client.DefaultClientProducer;
@@ -25,13 +28,18 @@ public class ConfigMapCache
         this.client = defaultClientProducer.client();
     }
 
+    private FilterWatchListDeletable<ConfigMap, ConfigMapList, Boolean, Watch, Watcher<ConfigMap>> getResourceFilter()
+    {
+        return client.configMaps().inAnyNamespace().withLabel( cfgStr( "operator.deployment.xp.labels.config.managed" ), "true" );
+    }
+
     protected void onStartup( @Observes StartupEvent _ev )
     {
         // Set initial state of config maps
-        initialize( client.configMaps().inAnyNamespace().list().getItems() );
+        initialize( getResourceFilter().list().getItems() );
 
         // Only watch XP config maps
-        client.configMaps().inAnyNamespace().withLabel( cfgStr( "operator.deployment.xp.labels.ec.type" ), "xp" ).watch( new Watcher<>()
+        getResourceFilter().watch( new Watcher<>()
         {
             @Override
             public void eventReceived( final Action action, final ConfigMap configMap )

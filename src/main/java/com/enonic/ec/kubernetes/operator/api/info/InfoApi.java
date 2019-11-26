@@ -3,7 +3,6 @@ package com.enonic.ec.kubernetes.operator.api.info;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -12,17 +11,39 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+
 @ApplicationScoped
 @Path("/apis/operator.enonic.cloud/v1alpha1")
 public class InfoApi
 {
 
+    @ConfigProperty(name = "operator.api.group")
+    String group;
+
+    @ConfigProperty(name = "operator.api.apiVersion")
+    String apiVersion;
+
     @GET
     @Path("/")
     @Produces("application/json")
-    public List<String> paths()
+    public Map<String, Object> api()
     {
-        return Arrays.asList( "/version" );
+        Map<String, Object> admissionResource = new HashMap<>();
+        admissionResource.put( "group", "admission.k8s.io" );
+        admissionResource.put( "kind", "AdmissionReview" );
+        admissionResource.put( "name", "validations" );
+        admissionResource.put( "namespaced", false );
+        admissionResource.put( "singularName", "" );
+        admissionResource.put( "verbs", Arrays.asList( "create" ) );
+        admissionResource.put( "version", apiVersion );
+
+        Map<String, Object> res = new HashMap<>();
+        res.put( "apiVersion", "v1" );
+        res.put( "groupVersion", group + "/" + apiVersion );
+        res.put( "kind", "APIResourceList" );
+        res.put( "resources", Arrays.asList( admissionResource ) );
+        return res;
     }
 
     @GET

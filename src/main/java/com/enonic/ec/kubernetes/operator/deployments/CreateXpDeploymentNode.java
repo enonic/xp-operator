@@ -72,23 +72,31 @@ public abstract class CreateXpDeploymentNode
     private static Map<String, String> nodeExtraLabels( String name, SpecNode node, Map<String, String> defaultLabels )
     {
         Map<String, String> res = new HashMap<>( defaultLabels );
-        res.put( cfgStr( "operator.deployment.xp.pod.label.alias" ), name );
+        res.put( cfgStr( "operator.deployment.xp.labels.pod.name" ), name );
+        res.put( cfgStr( "operator.deployment.xp.labels.pod.managed" ), "true" );
 
         if ( node.isMasterNode() )
         {
-            res.put( cfgStr( "operator.deployment.xp.labels.nodeType.master" ), "true" );
+            res.put( cfgStr( "operator.deployment.xp.labels.pod.type.master" ), "true" );
         }
 
         if ( node.isDataNode() )
         {
-            res.put( cfgStr( "operator.deployment.xp.labels.nodeType.data" ), "true" );
+            res.put( cfgStr( "operator.deployment.xp.labels.pod.type.data" ), "true" );
         }
 
         if ( node.isFrontendNode() )
         {
-            res.put( cfgStr( "operator.deployment.xp.labels.nodeType.frontend" ), "true" );
+            res.put( cfgStr( "operator.deployment.xp.labels.pod.type.frontend" ), "true" );
         }
 
+        return res;
+    }
+
+    private static Map<String, String> configMapExtraLabels( Map<String, String> defaultLabels )
+    {
+        Map<String, String> res = new HashMap<>( defaultLabels );
+        res.put( cfgStr( "operator.deployment.xp.labels.config.managed" ), "true" );
         return res;
     }
 
@@ -125,7 +133,7 @@ public abstract class CreateXpDeploymentNode
                 ownerReference( ownerReference() ).
                 namespace( namespace() ).
                 name( nodeFullName() ).
-                labels( nodeLabels ).
+                labels( configMapExtraLabels( nodeLabels ) ).
                 data( configBuilder().create( nodeFullName(), newNode ) ).
                 build() );
         }

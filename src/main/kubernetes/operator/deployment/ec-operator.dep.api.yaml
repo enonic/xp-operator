@@ -33,4 +33,4 @@ webhooks:
       service:
         name: kubernetes
         namespace: default
-        path: /apis/operator.enonic.cloud/v1alpha1/admission/validate
+        path: /apis/operator.enonic.cloud/v1alpha1/validations
