@@ -47,7 +47,7 @@ public class InfoApi
     }
 
     @GET
-    @Path("/version")
+    @Path("/internal/version")
     @Produces("application/json")
     public Map<String, String> info()
         throws IOException
