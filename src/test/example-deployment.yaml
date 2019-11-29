@@ -9,7 +9,7 @@ metadata:
     name: qa # Solution name
 spec:
   enabled: true
-  xpVersion: 7.0.3
+  xpVersion: 7.1.2
   sharedDisk: 1Gi # For blob and snapshots
   nodes:
     62524054-0f15-4319-84e3-d6cbb086cbbf:

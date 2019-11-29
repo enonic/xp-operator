@@ -1,6 +1,13 @@
 CERT_MANAGER_VERSION:=v0.11.0
 LOCAL_OPERATOR_PORT:=8080
 
+docker-build:
+	docker build -f src/main/docker/Dockerfile.jvm -t operatortmp .
+
+docker-push: docker-build
+	docker tag operatortmp gbbirkisson/ec-operator:$(shell ./get-version.sh)
+	docker push gbbirkisson/ec-operator:$(shell ./get-version.sh)
+
 mvn-dependencies:
 	mvn versions:display-plugin-updates
 
