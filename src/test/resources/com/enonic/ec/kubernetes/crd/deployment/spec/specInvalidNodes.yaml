@@ -2,7 +2,7 @@ spec:
   xpVersion: 7.0.3
   enabled: true
 
-  sharedDisk: 1Gi
+  nodesSharedDisk: 1Gi
 
   nodes:
     asd:

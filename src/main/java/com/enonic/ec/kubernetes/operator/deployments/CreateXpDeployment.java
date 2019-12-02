@@ -23,7 +23,7 @@ import com.enonic.ec.kubernetes.crd.deployment.diff.DiffSpecNode;
 import com.enonic.ec.kubernetes.crd.deployment.spec.Spec;
 import com.enonic.ec.kubernetes.crd.deployment.spec.SpecNode;
 import com.enonic.ec.kubernetes.crd.issuer.client.IssuerClient;
-import com.enonic.ec.kubernetes.operator.deployments.config.ConfigBuilder;
+import com.enonic.ec.kubernetes.operator.deployments.config.ConfigBuilderNode;
 import com.enonic.ec.kubernetes.operator.deployments.config.ImmutableConfigBuilderCluster;
 import com.enonic.ec.kubernetes.operator.deployments.config.ImmutableConfigBuilderNonClustered;
 import com.enonic.ec.kubernetes.operator.deployments.volumes.ImmutableVolumeBuilderNfs;
@@ -83,7 +83,7 @@ public abstract class CreateXpDeployment
         else
         {
             defaultSharedStorageName = Optional.of( namingHelper().defaultResourceNameWithPreFix( "shared" ) );
-            defaultSharedStorageSize = Optional.of( spec().sharedDisk() );
+            defaultSharedStorageSize = Optional.of( spec().nodesSharedDisk() );
             volumeBuilder = ImmutableVolumeBuilderStd.builder().
                 deploymentName( deploymentName ).
                 sharedStoragePVCName( defaultSharedStorageName.get() ).
@@ -93,7 +93,7 @@ public abstract class CreateXpDeployment
         boolean isClustered = spec().isClustered();
 
         Function<SpecNode, Integer> defaultMinimumAvailable;
-        ConfigBuilder configBuilder;
+        ConfigBuilderNode configBuilder;
 
         if ( isClustered )
         {
@@ -106,6 +106,7 @@ public abstract class CreateXpDeployment
             int minimumDataNodes = defaultMinimumAvailable.apply( dataNode );
 
             configBuilder = ImmutableConfigBuilderCluster.builder().
+                baseConfig( diffSpec().newValue().get().nodesSharedConfig() ).
                 namespace( namespaceName ).
                 serviceName( serviceName ).
                 clusterName( deploymentName() ).
@@ -120,7 +121,9 @@ public abstract class CreateXpDeployment
         else
         {
             defaultMinimumAvailable = ( n ) -> 0; // This has to be 0 to be able to update XP
-            configBuilder = ImmutableConfigBuilderNonClustered.builder().build();
+            configBuilder = ImmutableConfigBuilderNonClustered.builder().
+                baseConfig( diffSpec().newValue().get().nodesSharedConfig() ).
+                build();
         }
 
         if ( diffSpec().isNew() )
@@ -157,6 +160,7 @@ public abstract class CreateXpDeployment
                 deploymentName( deploymentName ).
                 volumeBuilder( volumeBuilder ).
                 minimumAvailable( defaultMinimumAvailable.apply( diffSpecNode.newValue().get() ) ).
+                nodeSharedConfigChanged( diffSpec().nodeSharedConfigChanged() ).
                 build().
                 addCommands( commandBuilder ) );
 

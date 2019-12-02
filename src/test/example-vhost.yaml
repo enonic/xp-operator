@@ -9,7 +9,6 @@ spec:
     selfSigned: true
   mappings:
     - node: 62524054-0f15-4319-84e3-d6cbb086cbbf
-      name: admin
       source: /admin
       target: /admin
       idProvider: system

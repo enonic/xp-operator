@@ -33,11 +33,7 @@ public abstract class SpecNode
 
     public abstract Map<String, String> env();
 
-    @Value.Default
-    public SpecNodeConfig config()
-    {
-        return new SpecNodeConfig();
-    }
+    public abstract Map<String, String> config();
 
     @Value.Check
     protected void check()

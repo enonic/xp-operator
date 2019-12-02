@@ -1,8 +1,6 @@
 package com.enonic.ec.kubernetes.operator.deployments.config;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 import org.immutables.value.Value;
 
@@ -10,20 +8,23 @@ import com.enonic.ec.kubernetes.crd.deployment.spec.SpecNode;
 
 @Value.Immutable
 public abstract class ConfigBuilderNonClustered
-    extends ConfigBuilder
+    extends ConfigBuilderNode
 {
     @Override
-    public Map<String, String> create( String nodeResourceName, SpecNode node )
+    public Map<String, String> create( SpecNode node )
     {
-        Map<String, String> config = new HashMap<>( node.config() );
-        Properties clusterCfg = new Properties();
-        clusterCfg.put( "cluster.enabled", "false" );
-        apply( node, "com.enonic.xp.cluster.cfg", clusterCfg, config );
+        Map<String, String> newConfig = overrideWithValues( node.config() );
 
-        Properties elasticCfg = new Properties();
-        elasticCfg.put( "http.enabled", "true" );
-        apply( node, "com.enonic.xp.elasticsearch.cfg", elasticCfg, config );
+        // Create cluster config
+        setIfNotSet( newConfig, "com.enonic.xp.cluster.cfg", setFunc -> {
+            setFunc.apply( "cluster.enabled", "false" );
+        } );
 
-        return config;
+        // Create elastic config
+        setIfNotSet( newConfig, "com.enonic.xp.elasticsearch.cfg", setFunc -> {
+            setFunc.apply( "http.enabled", "true" ); // TODO: Use alive app for health checks
+        } );
+
+        return newConfig;
     }
 }

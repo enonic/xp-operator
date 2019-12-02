@@ -29,6 +29,12 @@ public abstract class DiffSpec
     }
 
     @Value.Derived
+    public boolean nodeSharedConfigChanged()
+    {
+        return !equals( Spec::nodesSharedConfig );
+    }
+
+    @Value.Derived
     public List<DiffSpecNode> nodesChanged()
     {
         Map<String, SpecNode> oldNodes = oldValue().map( Spec::nodes ).orElse( Collections.EMPTY_MAP );
@@ -47,7 +53,7 @@ public abstract class DiffSpec
         {
             return;
         }
-        Preconditions.checkState( equals( Spec::sharedDisk ), "Field 'spec.sharedDisk' cannot be changed" );
+        Preconditions.checkState( equals( Spec::nodesSharedDisk ), "Field 'spec.nodesSharedDisk' cannot be changed" );
     }
 
 }

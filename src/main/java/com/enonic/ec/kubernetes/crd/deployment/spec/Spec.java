@@ -21,7 +21,9 @@ public abstract class Spec
 
     public abstract Boolean enabled();
 
-    public abstract Quantity sharedDisk();
+    public abstract Quantity nodesSharedDisk();
+
+    public abstract Map<String, String> nodesSharedConfig();
 
     public abstract Map<String, SpecNode> nodes();
 

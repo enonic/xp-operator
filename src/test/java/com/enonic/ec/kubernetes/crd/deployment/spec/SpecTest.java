@@ -23,7 +23,7 @@ class SpecTest
     @Test
     public void specInvalid()
     {
-        loadSpecExpectIllegalState( "specInvalid.yaml", "Some fields in 'spec' are missing: [xpVersion, enabled, sharedDisk]" );
+        loadSpecExpectIllegalState( "specInvalid.yaml", "Some fields in 'spec' are missing: [xpVersion, enabled, nodesSharedDisk]" );
     }
 
     @Test

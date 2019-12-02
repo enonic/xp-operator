@@ -20,7 +20,7 @@ import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedKubernetesComma
 import com.enonic.ec.kubernetes.crd.deployment.diff.DiffSpec;
 import com.enonic.ec.kubernetes.crd.deployment.diff.DiffSpecNode;
 import com.enonic.ec.kubernetes.crd.deployment.spec.SpecNode;
-import com.enonic.ec.kubernetes.operator.deployments.config.ConfigBuilder;
+import com.enonic.ec.kubernetes.operator.deployments.config.ConfigBuilderNode;
 import com.enonic.ec.kubernetes.operator.deployments.spec.ImmutablePodDisruptionBudgetSpecBuilder;
 import com.enonic.ec.kubernetes.operator.deployments.spec.ImmutableStatefulSetSpecBuilder;
 import com.enonic.ec.kubernetes.operator.deployments.volumes.VolumeBuilder;
@@ -56,11 +56,13 @@ public abstract class CreateXpDeploymentNode
 
     protected abstract Map<String, String> defaultLabels();
 
-    protected abstract ConfigBuilder configBuilder();
+    protected abstract ConfigBuilderNode configBuilder();
 
     protected abstract int minimumAvailable();
 
     protected abstract VolumeBuilder volumeBuilder();
+
+    protected abstract boolean nodeSharedConfigChanged();
 
 //    protected abstract Optional<String> sharedStorageName();
 
@@ -125,7 +127,8 @@ public abstract class CreateXpDeploymentNode
                 build() );
         }
 
-        boolean changeConfig = diffSpecNode().configChanged() || diffSpecNode().replicasChanged() || diffSpec().isNew();
+        boolean changeConfig =
+            nodeSharedConfigChanged() || diffSpecNode().configChanged() || diffSpecNode().replicasChanged() || diffSpec().isNew();
         if ( changeConfig )
         {
             commandBuilder.addCommand( ImmutableCommandApplyConfigMap.builder().
@@ -134,7 +137,7 @@ public abstract class CreateXpDeploymentNode
                 namespace( namespace() ).
                 name( nodeFullName() ).
                 labels( configMapExtraLabels( nodeLabels ) ).
-                data( configBuilder().create( nodeFullName(), newNode ) ).
+                data( configBuilder().create( newNode ) ).
                 build() );
         }
 
