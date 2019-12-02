@@ -1,4 +1,4 @@
-package com.enonic.ec.kubernetes.operator.dns;
+package com.enonic.ec.kubernetes.operator.dns.model;
 
 import org.immutables.value.Value;
 

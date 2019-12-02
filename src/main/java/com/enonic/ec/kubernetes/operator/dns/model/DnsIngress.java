@@ -1,4 +1,4 @@
-package com.enonic.ec.kubernetes.operator.dns;
+package com.enonic.ec.kubernetes.operator.dns.model;
 
 import java.util.Collections;
 import java.util.List;

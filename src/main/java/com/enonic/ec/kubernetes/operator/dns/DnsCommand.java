@@ -1,4 +1,4 @@
-package com.enonic.ec.kubernetes.operator.dns.commands;
+package com.enonic.ec.kubernetes.operator.dns;
 
 import java.util.List;
 
@@ -11,8 +11,8 @@ import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.apis.cloudflare.DnsRecords;
 import com.enonic.ec.kubernetes.apis.cloudflare.model.DnsRecord;
 import com.enonic.ec.kubernetes.apis.cloudflare.model.ImmutableDnsRecord;
-import com.enonic.ec.kubernetes.operator.dns.AllowedDomain;
-import com.enonic.ec.kubernetes.operator.dns.DnsIngress;
+import com.enonic.ec.kubernetes.operator.dns.model.AllowedDomain;
+import com.enonic.ec.kubernetes.operator.dns.model.DnsIngress;
 import com.enonic.ec.kubernetes.operator.dns.cloudflare.ImmutableDnsCreate;
 import com.enonic.ec.kubernetes.operator.dns.cloudflare.ImmutableDnsDelete;
 import com.enonic.ec.kubernetes.operator.dns.cloudflare.ImmutableDnsUpdate;

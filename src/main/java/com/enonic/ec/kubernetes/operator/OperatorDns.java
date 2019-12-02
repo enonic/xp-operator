@@ -22,14 +22,14 @@ import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.cache.IngressCache;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.apis.cloudflare.DnsRecords;
-import com.enonic.ec.kubernetes.operator.dns.AllowedDomain;
-import com.enonic.ec.kubernetes.operator.dns.DiffDnsIngress;
-import com.enonic.ec.kubernetes.operator.dns.DnsIngress;
-import com.enonic.ec.kubernetes.operator.dns.ImmutableAllowedDomain;
-import com.enonic.ec.kubernetes.operator.dns.ImmutableDiffDnsIngress;
-import com.enonic.ec.kubernetes.operator.dns.ImmutableDnsIngress;
-import com.enonic.ec.kubernetes.operator.dns.commands.ImmutableDnsApplyIngress;
-import com.enonic.ec.kubernetes.operator.dns.commands.ImmutableDnsDeleteIngress;
+import com.enonic.ec.kubernetes.operator.dns.model.AllowedDomain;
+import com.enonic.ec.kubernetes.operator.dns.model.DiffDnsIngress;
+import com.enonic.ec.kubernetes.operator.dns.model.DnsIngress;
+import com.enonic.ec.kubernetes.operator.dns.model.ImmutableAllowedDomain;
+import com.enonic.ec.kubernetes.operator.dns.model.ImmutableDiffDnsIngress;
+import com.enonic.ec.kubernetes.operator.dns.model.ImmutableDnsIngress;
+import com.enonic.ec.kubernetes.operator.dns.ImmutableDnsApplyIngress;
+import com.enonic.ec.kubernetes.operator.dns.ImmutableDnsDeleteIngress;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @ApplicationScoped

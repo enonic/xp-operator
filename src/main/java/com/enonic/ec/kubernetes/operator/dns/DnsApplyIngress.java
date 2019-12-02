@@ -1,4 +1,4 @@
-package com.enonic.ec.kubernetes.operator.dns.commands;
+package com.enonic.ec.kubernetes.operator.dns;
 
 import java.util.List;
 import java.util.stream.Collectors;
