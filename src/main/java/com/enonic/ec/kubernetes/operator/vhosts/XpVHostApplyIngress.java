@@ -54,6 +54,7 @@ public abstract class XpVHostApplyIngress
     private void applyDiff( final ImmutableCombinedKubernetesCommand.Builder commandBuilder, final DiffSpec diffSpec )
     {
         String vHostResourceName = vHostResourceName( diffSpec.newValue().get() );
+        String host = diffSpec.newValue().get().host();
 
         boolean hasCert = diffSpec.newValue().get().certificate() != null;
         boolean changeCert = diffSpec.isNew() || diffSpec.certificateChanged();
@@ -101,7 +102,7 @@ public abstract class XpVHostApplyIngress
                     client( defaultClient() ).
                     ownerReference( ownerReference() ).
                     namespace( namespace() ).
-                    name( mappingResourceName( vHostResourceName, m.newValue().get() ) ).
+                    name( mappingResourceName( vHostResourceName, host, m.newValue().get() ) ).
                     labels( serviceLabels ).
                     spec( ImmutableServiceSpecBuilder.builder().
                         selector( serviceSelector ).
@@ -115,7 +116,7 @@ public abstract class XpVHostApplyIngress
                 filter( Diff::shouldRemove ).forEach( m -> commandBuilder.addCommand( ImmutableCommandDeleteService.builder().
                 client( defaultClient() ).
                 namespace( namespace() ).
-                name( mappingResourceName( vHostResourceName, m.oldValue().get() ) ).
+                name( mappingResourceName( vHostResourceName, host, m.oldValue().get() ) ).
                 build() ) );
 
         }
@@ -188,7 +189,7 @@ public abstract class XpVHostApplyIngress
                 annotations( ingressAnnotations.build() ).
                 spec( ImmutableIngressSpec.builder().
                     certificateSecretName( Optional.ofNullable( hasCert ? vHostResourceName : null ) ).
-                    mappingResourceName( m -> mappingResourceName( vHostResourceName, m ) ).
+                    mappingResourceName( m -> mappingResourceName( vHostResourceName, host, m ) ).
                     vHostSpec( diffSpec.newValue().get() ).
                     build().
                     spec() ).
@@ -201,8 +202,8 @@ public abstract class XpVHostApplyIngress
         return "vhost-" + spec.host().replace( ".", "-" );
     }
 
-    private String mappingResourceName( final String vHostResourceName, final SpecMapping mapping )
+    private String mappingResourceName( final String vHostResourceName, String host, final SpecMapping mapping )
     {
-        return vHostResourceName + "-" + mapping.name();
+        return vHostResourceName + "-" + mapping.name( host );
     }
 }

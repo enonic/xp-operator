@@ -100,12 +100,13 @@ public abstract class XpVHostApplyConfigMap
     private static void addToConfig( final Spec spec, final StringBuilder sb )
     {
         spec.mappings().forEach( m -> {
-            sb.append( "mapping." ).append( m.name() ).append( ".host" ).append( "=" ).append( spec.host() ).append( "\n" );
-            sb.append( "mapping." ).append( m.name() ).append( ".source" ).append( "=" ).append( m.source() ).append( "\n" );
-            sb.append( "mapping." ).append( m.name() ).append( ".target" ).append( "=" ).append( m.target() ).append( "\n" );
+            String name = m.name( spec.host() );
+            sb.append( "mapping." ).append( name ).append( ".host" ).append( "=" ).append( spec.host() ).append( "\n" );
+            sb.append( "mapping." ).append( name ).append( ".source" ).append( "=" ).append( m.source() ).append( "\n" );
+            sb.append( "mapping." ).append( name ).append( ".target" ).append( "=" ).append( m.target() ).append( "\n" );
             if ( m.idProvider() != null )
             {
-                sb.append( "mapping." ).append( m.name() ).append( ".idProvider." ).append( m.idProvider() ).append( "=" ).append(
+                sb.append( "mapping." ).append( name ).append( ".idProvider." ).append( m.idProvider() ).append( "=" ).append(
                     "default\n" );
             }
             sb.append( "\n" );
