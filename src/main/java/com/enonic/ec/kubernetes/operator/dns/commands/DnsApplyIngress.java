@@ -7,7 +7,7 @@ import org.immutables.value.Value;
 
 import com.enonic.ec.kubernetes.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
-import com.enonic.ec.kubernetes.dns.cloudflare.model.DnsRecord;
+import com.enonic.ec.kubernetes.apis.cloudflare.model.DnsRecord;
 
 @Value.Immutable
 public abstract class DnsApplyIngress

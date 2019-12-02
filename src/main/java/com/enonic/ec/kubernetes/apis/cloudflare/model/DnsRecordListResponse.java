@@ -1,4 +1,4 @@
-package com.enonic.ec.kubernetes.dns.cloudflare.model;
+package com.enonic.ec.kubernetes.apis.cloudflare.model;
 
 import java.util.List;
 

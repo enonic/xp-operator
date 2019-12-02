@@ -21,7 +21,7 @@ import io.quarkus.runtime.StartupEvent;
 import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.cache.IngressCache;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
-import com.enonic.ec.kubernetes.dns.cloudflare.DnsRecords;
+import com.enonic.ec.kubernetes.apis.cloudflare.DnsRecords;
 import com.enonic.ec.kubernetes.operator.dns.AllowedDomain;
 import com.enonic.ec.kubernetes.operator.dns.DiffDnsIngress;
 import com.enonic.ec.kubernetes.operator.dns.DnsIngress;

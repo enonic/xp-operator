@@ -1,4 +1,4 @@
-package com.enonic.ec.kubernetes.dns.cloudflare;
+package com.enonic.ec.kubernetes.apis.cloudflare;
 
 import javax.enterprise.event.Observes;
 

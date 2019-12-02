@@ -8,9 +8,9 @@ import org.slf4j.LoggerFactory;
 
 import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
-import com.enonic.ec.kubernetes.dns.cloudflare.DnsRecords;
-import com.enonic.ec.kubernetes.dns.cloudflare.model.DnsRecord;
-import com.enonic.ec.kubernetes.dns.cloudflare.model.ImmutableDnsRecord;
+import com.enonic.ec.kubernetes.apis.cloudflare.DnsRecords;
+import com.enonic.ec.kubernetes.apis.cloudflare.model.DnsRecord;
+import com.enonic.ec.kubernetes.apis.cloudflare.model.ImmutableDnsRecord;
 import com.enonic.ec.kubernetes.operator.dns.AllowedDomain;
 import com.enonic.ec.kubernetes.operator.dns.DnsIngress;
 import com.enonic.ec.kubernetes.operator.dns.cloudflare.ImmutableDnsCreate;
