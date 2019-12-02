@@ -12,6 +12,7 @@ import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
+import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.Diff;
 import com.enonic.ec.kubernetes.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedKubernetesCommand;
@@ -30,7 +31,7 @@ import com.enonic.ec.kubernetes.operator.vhosts.spec.ImmutableIssuerSpec;
 
 @Value.Immutable
 public abstract class XpVHostApplyIngress
-    extends XpVHostApply
+    extends Configuration
     implements CombinedCommandBuilder
 {
     protected abstract KubernetesClient defaultClient();
@@ -96,7 +97,7 @@ public abstract class XpVHostApplyIngress
                 Map<String, String> serviceLabels = new HashMap<>( defaultLabels() );
 
                 Map<String, String> serviceSelector = new HashMap<>();
-                serviceSelector.put( aliasLabelKey(), m.newValue().get().node() );
+                serviceSelector.put( cfgStr( "operator.deployment.xp.labels.pod.name" ), m.newValue().get().node() );
 
                 commandBuilder.addCommand( ImmutableCommandApplyService.builder().
                     client( defaultClient() ).

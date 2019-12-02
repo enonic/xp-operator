@@ -14,7 +14,7 @@ import com.enonic.ec.kubernetes.common.Configuration;
 public abstract class ConfigBuilder
     extends Configuration
 {
-    protected abstract Map<String, String> baseConfig();
+    public abstract Map<String, String> baseConfig();
 
     protected Map<String, String> overrideWithValues( Map<String, String> newConfig )
     {
