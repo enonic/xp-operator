@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.ec.kubernetes.common.client.DefaultClientProducer;
-import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedKubernetesCommand;
+import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.operator.prepull.ImmutablePrePullImages;
 
 @ApplicationScoped
@@ -34,7 +34,7 @@ public class OperatorPrePull
             log.info( "Pre-Pulling images in cluster for versions: " + imageVersionPrePull );
             try
             {
-                ImmutableCombinedKubernetesCommand.Builder commandBuilder = ImmutableCombinedKubernetesCommand.builder();
+                ImmutableCombinedCommand.Builder commandBuilder = ImmutableCombinedCommand.builder();
 
                 ImmutablePrePullImages.builder().
                     defaultClient( defaultClientProducer.client() ).

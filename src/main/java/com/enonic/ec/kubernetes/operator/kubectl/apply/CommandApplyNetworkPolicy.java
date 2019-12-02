@@ -38,4 +38,10 @@ public abstract class CommandApplyNetworkPolicy
     {
         return client().network().networkPolicies().inNamespace( namespace().get() ).createOrReplace( resource );
     }
+
+    @Override
+    public String toString()
+    {
+        return super.toString();
+    }
 }

@@ -38,4 +38,10 @@ public abstract class CommandApplyDaemonSet
     {
         return client().apps().daemonSets().inNamespace( namespace().get() ).createOrReplace( resource );
     }
+
+    @Override
+    public String toString()
+    {
+        return super.toString();
+    }
 }

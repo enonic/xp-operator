@@ -14,7 +14,7 @@ import io.fabric8.kubernetes.client.Watcher;
 import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.ec.kubernetes.common.client.DefaultClientProducer;
-import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedKubernetesCommand;
+import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.crd.deployment.ImmutableXpDeploymentNamingHelper;
 import com.enonic.ec.kubernetes.crd.deployment.XpDeploymentResource;
 import com.enonic.ec.kubernetes.crd.deployment.client.XpDeploymentCache;
@@ -55,7 +55,7 @@ public class OperatorDeployments
         {
             try
             {
-                ImmutableCombinedKubernetesCommand.Builder commandBuilder = ImmutableCombinedKubernetesCommand.builder();
+                ImmutableCombinedCommand.Builder commandBuilder = ImmutableCombinedCommand.builder();
 
                 ImmutableCreateXpDeployment.builder().
                     defaultClient( defaultClientProducer.client() ).

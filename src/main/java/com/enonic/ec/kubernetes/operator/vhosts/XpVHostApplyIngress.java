@@ -15,7 +15,7 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.Diff;
 import com.enonic.ec.kubernetes.common.commands.CombinedCommandBuilder;
-import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedKubernetesCommand;
+import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.crd.issuer.client.IssuerClient;
 import com.enonic.ec.kubernetes.crd.vhost.diff.DiffSpec;
 import com.enonic.ec.kubernetes.crd.vhost.spec.Spec;
@@ -47,12 +47,12 @@ public abstract class XpVHostApplyIngress
     protected abstract List<DiffSpec> diffs();
 
     @Override
-    public void addCommands( final ImmutableCombinedKubernetesCommand.Builder commandBuilder )
+    public void addCommands( final ImmutableCombinedCommand.Builder commandBuilder )
     {
         diffs().stream().filter( Diff::shouldAddOrModify ).forEach( d -> applyDiff( commandBuilder, d ) );
     }
 
-    private void applyDiff( final ImmutableCombinedKubernetesCommand.Builder commandBuilder, final DiffSpec diffSpec )
+    private void applyDiff( final ImmutableCombinedCommand.Builder commandBuilder, final DiffSpec diffSpec )
     {
         String vHostResourceName = vHostResourceName( diffSpec.newValue().get() );
         String host = diffSpec.newValue().get().host();
@@ -164,10 +164,11 @@ public abstract class XpVHostApplyIngress
                     put( "nginx.ingress.kubernetes.io/session-cookie-path", "/admin" ) );
             }
 
-            // TODO: Set a default host list that creates external DNS records
             cfgIfBool( "operator.extensions.ingress.externalDns.enabled", () -> ingressAnnotations.
                 put( "external-dns.alpha.kubernetes.io/hostname", diffSpec.newValue().get().host() ). // TODO: Only allow subdomains
                 put( "external-dns.alpha.kubernetes.io/ttl", cfgStr( "operator.extensions.ingress.externalDns.recordTTL" ) ) );
+
+            ingressAnnotations.put( cfgStr( "dns.annotations.enable" ), diffSpec.newValue().get().host() );
 
             // Regular ingress
             ingressAnnotations.

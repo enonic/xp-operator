@@ -22,4 +22,10 @@ public abstract class CommandDeleteService
     {
         return client().services().inNamespace( namespace() ).withName( name() ).delete();
     }
+
+    @Override
+    public String toString()
+    {
+        return super.toString();
+    }
 }

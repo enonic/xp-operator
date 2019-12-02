@@ -1,10 +1,10 @@
 apiVersion: enonic.cloud/v1alpha1
 kind: Xp7VHost
 metadata:
-  name: company-com
+  name: test-purplejs-io
   namespace: mycloud-myproject-xp-qa
 spec:
-  host: company.com
+  host: test.purplejs.io
   certificate:
     selfSigned: true
   mappings:

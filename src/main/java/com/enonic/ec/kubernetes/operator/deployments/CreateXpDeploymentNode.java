@@ -16,7 +16,7 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 
 import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.commands.CombinedCommandBuilder;
-import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedKubernetesCommand;
+import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.crd.deployment.diff.DiffSpec;
 import com.enonic.ec.kubernetes.crd.deployment.diff.DiffSpecNode;
 import com.enonic.ec.kubernetes.crd.deployment.spec.SpecNode;
@@ -103,7 +103,7 @@ public abstract class CreateXpDeploymentNode
     }
 
     @Override
-    public void addCommands( ImmutableCombinedKubernetesCommand.Builder commandBuilder )
+    public void addCommands( ImmutableCombinedCommand.Builder commandBuilder )
     {
         SpecNode newNode = diffSpecNode().newValue().get();
         Map<String, String> nodeLabels = nodeExtraLabels( nodeShortName(), newNode, defaultLabels() );

@@ -6,7 +6,7 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 
 import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.commands.CombinedCommandBuilder;
-import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedKubernetesCommand;
+import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.operator.kubectl.delete.ImmutableCommandDeleteConfigMap;
 import com.enonic.ec.kubernetes.operator.kubectl.delete.ImmutableCommandDeletePodDisruptionBudget;
 import com.enonic.ec.kubernetes.operator.kubectl.delete.ImmutableCommandDeleteStatefulSet;
@@ -23,7 +23,7 @@ public abstract class DeleteXpDeploymentNode
     protected abstract String nodeName();
 
     @Override
-    public void addCommands( ImmutableCombinedKubernetesCommand.Builder commandBuilder )
+    public void addCommands( ImmutableCombinedCommand.Builder commandBuilder )
     {
         commandBuilder.addCommand( ImmutableCommandDeleteStatefulSet.builder().
             client( defaultClient() ).

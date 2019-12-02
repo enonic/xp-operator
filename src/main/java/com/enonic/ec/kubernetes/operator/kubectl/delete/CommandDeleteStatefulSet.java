@@ -22,4 +22,10 @@ public abstract class CommandDeleteStatefulSet
     {
         return client().apps().statefulSets().inNamespace( namespace() ).withName( name() ).delete();
     }
+
+    @Override
+    public String toString()
+    {
+        return super.toString();
+    }
 }

@@ -25,4 +25,10 @@ public abstract class CommandScaleStatefulSet
             withName( name() ).
             scale( scale() );
     }
+
+    @Override
+    public String toString()
+    {
+        return super.toString();
+    }
 }

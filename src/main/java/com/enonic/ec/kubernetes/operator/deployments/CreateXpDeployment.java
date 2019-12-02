@@ -16,7 +16,7 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.Diff;
 import com.enonic.ec.kubernetes.common.commands.CombinedCommandBuilder;
-import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedKubernetesCommand;
+import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.crd.deployment.XpDeploymentNamingHelper;
 import com.enonic.ec.kubernetes.crd.deployment.diff.DiffSpec;
 import com.enonic.ec.kubernetes.crd.deployment.diff.DiffSpecNode;
@@ -57,7 +57,7 @@ public abstract class CreateXpDeployment
     }
 
     @Override
-    public void addCommands( ImmutableCombinedKubernetesCommand.Builder commandBuilder )
+    public void addCommands( ImmutableCombinedCommand.Builder commandBuilder )
     {
         String deploymentName = deploymentName();
         String namespaceName = namingHelper().defaultNamespaceName();

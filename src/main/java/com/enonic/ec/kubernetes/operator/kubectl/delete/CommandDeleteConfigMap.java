@@ -22,4 +22,10 @@ public abstract class CommandDeleteConfigMap
     {
         return client().configMaps().inNamespace( namespace() ).withName( name() ).delete();
     }
+
+    @Override
+    public String toString()
+    {
+        return super.toString();
+    }
 }

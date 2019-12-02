@@ -38,4 +38,10 @@ public abstract class CommandApplyIngress
     {
         return client().extensions().ingresses().inNamespace( namespace().get() ).createOrReplace( resource );
     }
+
+    @Override
+    public String toString()
+    {
+        return super.toString();
+    }
 }

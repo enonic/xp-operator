@@ -38,4 +38,10 @@ public abstract class CommandApplyConfigMap
     {
         return client().configMaps().inNamespace( namespace().get() ).createOrReplace( resource );
     }
+
+    @Override
+    public String toString()
+    {
+        return super.toString();
+    }
 }

@@ -38,4 +38,10 @@ public abstract class CommandApplyStatefulSet
     {
         return client().apps().statefulSets().inNamespace( namespace().get() ).createOrReplace( resource );
     }
+
+    @Override
+    public String toString()
+    {
+        return super.toString();
+    }
 }

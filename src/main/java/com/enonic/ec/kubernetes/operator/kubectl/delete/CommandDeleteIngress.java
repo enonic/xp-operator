@@ -22,4 +22,10 @@ public abstract class CommandDeleteIngress
     {
         return client().extensions().ingresses().inNamespace( namespace() ).withName( name() ).delete();
     }
+
+    @Override
+    public String toString()
+    {
+        return super.toString();
+    }
 }

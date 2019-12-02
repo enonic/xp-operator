@@ -38,4 +38,10 @@ public abstract class CommandApplyPodDisruptionBudget
     {
         return client().policy().podDisruptionBudget().inNamespace( namespace().get() ).createOrReplace( resource );
     }
+
+    @Override
+    public String toString()
+    {
+        return super.toString();
+    }
 }

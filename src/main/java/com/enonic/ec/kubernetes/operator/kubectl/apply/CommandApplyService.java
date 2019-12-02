@@ -38,4 +38,10 @@ public abstract class CommandApplyService
     {
         return client().services().inNamespace( namespace().get() ).createOrReplace( resource );
     }
+
+    @Override
+    public String toString()
+    {
+        return super.toString();
+    }
 }

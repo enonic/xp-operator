@@ -18,7 +18,7 @@ import io.quarkus.runtime.StartupEvent;
 import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.cache.ConfigMapCache;
 import com.enonic.ec.kubernetes.common.client.DefaultClientProducer;
-import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedKubernetesCommand;
+import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.crd.issuer.client.IssuerClientProducer;
 import com.enonic.ec.kubernetes.crd.vhost.XpVHostResource;
 import com.enonic.ec.kubernetes.crd.vhost.client.XpVHostCache;
@@ -63,7 +63,7 @@ public class OperatorVHosts
 
         try
         {
-            ImmutableCombinedKubernetesCommand.Builder commandBuilder = ImmutableCombinedKubernetesCommand.builder();
+            ImmutableCombinedCommand.Builder commandBuilder = ImmutableCombinedCommand.builder();
             ImmutableXpVHostApplyConfigMap.builder().
                 client( defaultClientProducer.client() ).
                 addConfigMaps( newConfigMap.get() ).
@@ -92,7 +92,7 @@ public class OperatorVHosts
             newValue( newVHost ).
             build();
 
-        ImmutableCombinedKubernetesCommand.Builder commandBuilder = ImmutableCombinedKubernetesCommand.builder();
+        ImmutableCombinedCommand.Builder commandBuilder = ImmutableCombinedCommand.builder();
 
         if ( diffResource.diffSpec().shouldAddOrModifyOrRemove() )
         {

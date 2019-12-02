@@ -7,4 +7,10 @@ public abstract class KubernetesCommand<T>
     implements Command<T>
 {
     public abstract KubernetesCommandSummary summary();
+
+    @Override
+    public String toString()
+    {
+        return summary().toString();
+    }
 }
