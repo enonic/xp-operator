@@ -2,14 +2,14 @@ package com.enonic.ec.kubernetes.operator.dns.cloudflare;
 
 import org.immutables.value.Value;
 
-import com.enonic.ec.kubernetes.apis.cloudflare.DnsRecords;
+import com.enonic.ec.kubernetes.apis.cloudflare.DnsRecordService;
 import com.enonic.ec.kubernetes.apis.cloudflare.model.DnsRecord;
 
 @Value.Immutable
 public abstract class DnsCreate
     extends DnsCommand
 {
-    protected abstract DnsRecords dnsRecordsService();
+    protected abstract DnsRecordService dnsRecordsService();
 
     protected abstract String zoneId();
 

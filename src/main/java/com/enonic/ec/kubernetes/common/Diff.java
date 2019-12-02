@@ -1,5 +1,6 @@
 package com.enonic.ec.kubernetes.common;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -66,6 +67,46 @@ public abstract class Diff<T>
         B v1 = func.apply( oldValue().get() );
         B v2 = func.apply( newValue().get() );
         return v1.equals( v2 );
+    }
+
+    protected <C, D extends Diff<C>> List<D> mergeLists( List<C> oldList, List<C> newList, BiFunction<Optional<C>, Optional<C>, D> creator )
+    {
+        Map<Integer, Integer> commonIndexOld = new HashMap<>();
+        Map<Integer, Integer> commonIndexNew = new HashMap<>();
+        for ( int i = 0; i < oldList.size(); i++ )
+        {
+            for ( int j = 0; j < newList.size(); j++ )
+            {
+                if ( oldList.get( i ).equals( newList.get( j ) ) )
+                {
+                    commonIndexOld.put( i, j );
+                    commonIndexNew.put( i, j );
+                }
+            }
+        }
+
+        List<D> res = new LinkedList<>();
+
+        commonIndexOld.entrySet().forEach(
+            e -> res.add( creator.apply( Optional.of( oldList.get( e.getKey() ) ), Optional.of( newList.get( e.getValue() ) ) ) ) );
+
+        for ( int i = 0; i < oldList.size(); i++ )
+        {
+            if ( !commonIndexOld.containsKey( i ) )
+            {
+                res.add( creator.apply( Optional.of( oldList.get( i ) ), Optional.empty() ) );
+            }
+        }
+
+        for ( int j = 0; j < newList.size(); j++ )
+        {
+            if ( !commonIndexNew.containsKey( j ) )
+            {
+                res.add( creator.apply( Optional.empty(), Optional.of( newList.get( j ) ) ) );
+            }
+        }
+
+        return res;
     }
 
     protected <C, D extends Diff<C>> List<D> mergeMaps( Map<String, C> oldMap, Map<String, C> newMap,

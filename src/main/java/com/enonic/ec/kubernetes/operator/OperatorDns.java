@@ -18,18 +18,16 @@ import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.kubernetes.client.Watcher;
 import io.quarkus.runtime.StartupEvent;
 
+import com.enonic.ec.kubernetes.apis.cloudflare.DnsRecordService;
 import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.cache.IngressCache;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
-import com.enonic.ec.kubernetes.apis.cloudflare.DnsRecords;
-import com.enonic.ec.kubernetes.operator.dns.model.AllowedDomain;
+import com.enonic.ec.kubernetes.operator.dns.ImmutableDnsApplyIngress;
 import com.enonic.ec.kubernetes.operator.dns.model.DiffDnsIngress;
-import com.enonic.ec.kubernetes.operator.dns.model.DnsIngress;
-import com.enonic.ec.kubernetes.operator.dns.model.ImmutableAllowedDomain;
+import com.enonic.ec.kubernetes.operator.dns.model.Domain;
 import com.enonic.ec.kubernetes.operator.dns.model.ImmutableDiffDnsIngress;
 import com.enonic.ec.kubernetes.operator.dns.model.ImmutableDnsIngress;
-import com.enonic.ec.kubernetes.operator.dns.ImmutableDnsApplyIngress;
-import com.enonic.ec.kubernetes.operator.dns.ImmutableDnsDeleteIngress;
+import com.enonic.ec.kubernetes.operator.dns.model.ImmutableDomain;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @ApplicationScoped
@@ -43,16 +41,19 @@ public class OperatorDns
 
     @RestClient
     @Inject
-    DnsRecords dnsRecords;
+    DnsRecordService dnsRecordService;
 
-    @ConfigProperty(name = "dns.allowedDomains.keys", defaultValue = "")
+    @ConfigProperty(name = "dns.enabled")
+    Boolean enabled;
+
+    @ConfigProperty(name = "dns.allowedDomains.keys")
     List<String> allowedDomainKeys;
 
-    List<AllowedDomain> allowedDomains;
+    List<Domain> allowedDomains;
 
     void onStartup( @Observes StartupEvent _ev )
     {
-        allowedDomains = allowedDomainKeys.stream().map( k -> ImmutableAllowedDomain.builder().
+        allowedDomains = allowedDomainKeys.stream().map( k -> ImmutableDomain.builder().
             zoneId( cfgStr( "dns.zoneId." + k ) ).
             domain( cfgStr( "dns.domain." + k ) ).
             build() ).collect( Collectors.toList() );
@@ -63,6 +64,11 @@ public class OperatorDns
     private void watchIngress( final Watcher.Action action, final String s, final Optional<Ingress> oldIngress,
                                final Optional<Ingress> newIngress )
     {
+        if ( !enabled )
+        {
+            return;
+        }
+
         DiffDnsIngress diff = ImmutableDiffDnsIngress.builder().
             oldValue( Optional.ofNullable( oldIngress.map( o -> ImmutableDnsIngress.builder().
                 ingress( o ).
@@ -76,35 +82,15 @@ public class OperatorDns
                 orElse( null ) ) ).
             build();
 
+        ImmutableCombinedCommand.Builder commandBuilder = ImmutableCombinedCommand.builder();
+
         try
         {
-            ImmutableCombinedCommand.Builder commandBuilder = ImmutableCombinedCommand.builder();
-
-            boolean addOrModify = diff.shouldAddOrModify();
-            addOrModify = addOrModify && isOk( diff.newValue().get() );
-            addOrModify = addOrModify && isOk( diff.newValue().get() );
-            addOrModify = addOrModify && diff.ipChanged();
-            addOrModify = addOrModify && diff.newValue().get().ips().size() > 0;
-            boolean remove = diff.shouldRemove() && isOk( diff.oldValue().get() );
-
-            if ( addOrModify )
-            {
-                ImmutableDnsApplyIngress.builder().
-                    dnsRecords( dnsRecords ).
-                    dnsIngress( diff.newValue().get() ).
-                    build().
-                    addCommands( commandBuilder );
-            }
-
-            if ( remove )
-            {
-                ImmutableDnsDeleteIngress.builder().
-                    dnsRecords( dnsRecords ).
-                    dnsIngress( diff.oldValue().get() ).
-                    build().
-                    addCommands( commandBuilder );
-            }
-
+            ImmutableDnsApplyIngress.builder().
+                dnsRecordService( dnsRecordService ).
+                diff( diff ).
+                build().
+                addCommands( commandBuilder );
             commandBuilder.build().execute();
         }
         catch ( WebApplicationException e )
@@ -115,10 +101,5 @@ public class OperatorDns
         {
             e.printStackTrace(); // TODO: Do something
         }
-    }
-
-    private boolean isOk( DnsIngress dns )
-    {
-        return dns.allowedDomain().isPresent() && dns.subDomain().isPresent();
     }
 }

@@ -21,7 +21,7 @@ import com.enonic.ec.kubernetes.apis.cloudflare.model.DnsRecordListResponse;
 @SuppressWarnings("CdiManagedBeanInconsistencyInspection")
 @Path("/zones/{zone_identifier}/dns_records")
 @RegisterRestClient(configKey = "dns.cloudflare")
-public interface DnsRecords
+public interface DnsRecordService
 {
     @GET
     @Path("/")

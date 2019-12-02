@@ -1,61 +1,141 @@
 package com.enonic.ec.kubernetes.operator.dns;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.immutables.value.Value;
 
+import com.enonic.ec.kubernetes.apis.cloudflare.DnsRecordService;
+import com.enonic.ec.kubernetes.apis.cloudflare.model.DnsRecord;
+import com.enonic.ec.kubernetes.apis.cloudflare.model.ImmutableDnsRecord;
+import com.enonic.ec.kubernetes.common.Configuration;
+import com.enonic.ec.kubernetes.common.Diff;
 import com.enonic.ec.kubernetes.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
-import com.enonic.ec.kubernetes.apis.cloudflare.model.DnsRecord;
+import com.enonic.ec.kubernetes.operator.dns.cloudflare.ImmutableDnsCreate;
+import com.enonic.ec.kubernetes.operator.dns.cloudflare.ImmutableDnsDelete;
+import com.enonic.ec.kubernetes.operator.dns.model.DiffDnsIngress;
+import com.enonic.ec.kubernetes.operator.dns.model.DiffDnsIngressDomains;
+import com.enonic.ec.kubernetes.operator.dns.model.DiffDnsIngressIps;
+import com.enonic.ec.kubernetes.operator.dns.model.DnsIngress;
+import com.enonic.ec.kubernetes.operator.dns.model.Domain;
 
 @Value.Immutable
 public abstract class DnsApplyIngress
-    extends DnsCommand
+    extends Configuration
     implements CombinedCommandBuilder
 {
+    protected abstract DnsRecordService dnsRecordService();
+
+    protected abstract DiffDnsIngress diff();
+
+    @Value.Derived
+    protected String heritageRecord()
+    {
+        return "heritage=ec-operator";
+    }
+
     @Override
     public void addCommands( final ImmutableCombinedCommand.Builder commandBuilder )
     {
-        if ( !areManaged() )
+        if ( !diff().newValue().map( DnsIngress::shouldModify ).orElse(
+            diff().oldValue().map( DnsIngress::shouldModify ).orElse( false ) ) )
         {
             return;
         }
 
-        // Create a new record
-        if ( records().size() == 0 )
+        for ( DiffDnsIngressDomains diffDomain : diff().diffDomains() )
         {
-            create( commandBuilder, "TXT", Integer.MAX_VALUE, heritageRecord(), null );
-        }
-
-        // Create/Update records
-        List<DnsRecord> existingRecords = records().stream().filter( r -> r.type().equals( "A" ) ).collect( Collectors.toList() );
-        List<String> existingIps = existingRecords.stream().map( r -> r.content() ).collect( Collectors.toList() );
-
-        // If there is only 1 A record
-        if ( existingRecords.size() == ips().size() && existingRecords.size() > 1 )
-        {
-            DnsRecord record = existingRecords.get( 0 );
-            if ( !record.content().equals( ips().get( 0 ) ) )
+            if ( !diffDomain.shouldRemove() )
             {
-                update( commandBuilder, record.id(), record.type(), record.ttl(), ips().get( 0 ) );
+                addOrModify( commandBuilder, diffDomain.newValue().get(), diff().newValue().get().ttl(), diff().diffIps() );
+            } else {
+                delete( commandBuilder, diffDomain.oldValue().get() );
             }
+        }
+    }
+
+    private void addOrModify( final ImmutableCombinedCommand.Builder commandBuilder, final Domain domain, final Integer ttl,
+                              final List<DiffDnsIngressIps> ipsChanged )
+    {
+        List<DnsRecord> records = dnsRecordService().list( domain.zoneId(), domain.domain(), null ).result();
+        Optional<DnsRecord> heritageRecord = getHeritageRecord( records );
+
+        if ( records.size() > 0 && heritageRecord.isEmpty() )
+        {
             return;
         }
 
-        for ( String ip : ips() )
+        if ( heritageRecord.isEmpty() )
         {
-            if ( !existingIps.contains( ip ) )
-            {
-                create( commandBuilder, "A", ttl(), ip, false );
-            }
+            commandBuilder.addCommand( ImmutableDnsCreate.builder().
+                dnsRecordsService( dnsRecordService() ).
+                zoneId( domain.zoneId() ).
+                dnsRecord( ImmutableDnsRecord.builder().
+                    name( domain.domain() ).
+                    type( "TXT" ).
+                    content( heritageRecord() ).
+                    proxied( false ).
+                    ttl( Integer.MAX_VALUE ).
+                    build() ).
+                build() );
         }
-        for ( DnsRecord record : existingRecords )
+
+        List<String> dnsRecords =
+            records.stream().filter( r -> r.type().equals( "A" ) ).map( DnsRecord::content ).collect( Collectors.toList() );
+        ipsChanged.stream().
+            filter( Diff::isNew ).
+            filter( d -> !dnsRecords.contains( d.ip() ) ).
+            forEach( diffIp -> commandBuilder.addCommand( ImmutableDnsCreate.builder().
+                dnsRecordsService( dnsRecordService() ).
+                zoneId( domain.zoneId() ).
+                dnsRecord( ImmutableDnsRecord.builder().
+                    name( domain.domain() ).
+                    type( "A" ).
+                    content( diffIp.ip() ).
+                    proxied( false ).
+                    ttl( ttl ).
+                    build() ).
+                build() ) );
+
+        List<String> ipsToRemove =
+            ipsChanged.stream().filter( Diff::shouldRemove ).map( DiffDnsIngressIps::ip ).collect( Collectors.toList() );
+        records.stream().filter( r -> ipsToRemove.contains( r.content() ) ).forEach(
+            r -> commandBuilder.addCommand( ImmutableDnsDelete.builder().
+                dnsRecordsService( dnsRecordService() ).
+                zoneId( domain.zoneId() ).
+                dnsRecord( r ).
+                build() ) );
+
+    }
+
+    private void delete( final ImmutableCombinedCommand.Builder commandBuilder, final Domain domain )
+    {
+        List<DnsRecord> records = dnsRecordService().list( domain.zoneId(), domain.domain(), null ).result();
+        Optional<DnsRecord> heritageRecord = getHeritageRecord( records );
+        if ( heritageRecord.isEmpty() )
         {
-            if ( !ips().contains( record.content() ) )
-            {
-                delete( commandBuilder, record );
-            }
+            return;
         }
+        for ( DnsRecord record : records )
+        {
+            commandBuilder.addCommand( ImmutableDnsDelete.builder().
+                dnsRecordsService( dnsRecordService() ).
+                zoneId( domain.zoneId() ).
+                dnsRecord( record ).
+                build() );
+        }
+    }
+
+    protected Optional<DnsRecord> getHeritageRecord( List<DnsRecord> records )
+    {
+        if ( records.size() == 0 )
+        {
+            return Optional.empty();
+        }
+        return records.stream().
+            filter( r -> r.type().equals( "TXT" ) && r.content().equals( heritageRecord() ) ).
+            findFirst();
     }
 }
