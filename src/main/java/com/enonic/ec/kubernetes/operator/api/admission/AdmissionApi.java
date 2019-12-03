@@ -54,7 +54,6 @@ public class AdmissionApi
     public AdmissionReview validate( String body )
         throws IOException
     {
-        log.info( "AdmissionReview started" );
         Map<String, Object> admission = mapper.readValue( body, Map.class );
         String uid = (String) ( (Map) admission.get( "request" ) ).get( "uid" );
         try
@@ -69,10 +68,10 @@ public class AdmissionApi
         }
         catch ( Exception ex )
         {
-            log.error( "AdmissionReview failed", ex );
-            return createReview( uid, AdmissionExceptionHandler.extractJacksonMessage( ex ), ex.getClass().getSimpleName() );
+            String message = AdmissionExceptionHandler.extractJacksonMessage( ex );
+            log.warn( "AdmissionReview failed: " + message );
+            return createReview( uid, message, ex.getClass().getSimpleName() );
         }
-        log.info( "AdmissionReview success" );
         return createReview( uid, null, null );
     }
 

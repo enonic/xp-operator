@@ -52,4 +52,10 @@ public abstract class DnsRecord
 
     @Nullable
     public abstract Map<String, Object> meta();
+
+    @Override
+    public String toString()
+    {
+        return String.format( "%s {%s, %s}", name(), type(), content() );
+    }
 }

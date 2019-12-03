@@ -1,5 +1,8 @@
 package com.enonic.ec.kubernetes.operator.api.admission;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 
@@ -7,6 +10,8 @@ import com.enonic.ec.kubernetes.crd.BuilderException;
 
 public class AdmissionExceptionHandler
 {
+    private final static Logger log = LoggerFactory.getLogger( AdmissionExceptionHandler.class );
+
     public static String extractJacksonMessage( Exception ex )
     {
         if ( ex instanceof InvalidDefinitionException && ex.getCause() != null && ex.getCause() instanceof BuilderException )
@@ -25,6 +30,8 @@ public class AdmissionExceptionHandler
         {
             return "Field unrecognized: " + ( (UnrecognizedPropertyException) ex ).getPropertyName();
         }
+
+        log.error( "Unknown exception in admission api", ex );
 
         return ex.getMessage().replace( "\n", " " );
     }

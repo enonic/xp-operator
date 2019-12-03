@@ -30,7 +30,6 @@ public abstract class CombinedCommand
             log.info( String.format( "%2s: %s", i + 1, c ) );
             c.execute();
         }
-        log.info( "Finished" );
         return null;
     }
 
