@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 
-import com.enonic.ec.kubernetes.crd.BuilderException;
+import com.enonic.ec.kubernetes.operator.crd.BuilderException;
 
 public class AdmissionExceptionHandler
 {

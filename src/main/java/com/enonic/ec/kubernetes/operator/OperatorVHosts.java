@@ -16,13 +16,13 @@ import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.cache.ConfigMapCache;
 import com.enonic.ec.kubernetes.common.client.DefaultClientProducer;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
-import com.enonic.ec.kubernetes.crd.vhost.XpVHostResource;
-import com.enonic.ec.kubernetes.crd.vhost.client.XpVHostCache;
-import com.enonic.ec.kubernetes.crd.vhost.diff.DiffResource;
-import com.enonic.ec.kubernetes.crd.vhost.diff.ImmutableDiffResource;
-import com.enonic.ec.kubernetes.crd.vhost.diff.ImmutableDiffSpec;
-import com.enonic.ec.kubernetes.operator.vhosts.ImmutableXpVHostApplyConfigMap;
-import com.enonic.ec.kubernetes.operator.vhosts.ImmutableXpVHostApplyIngress;
+import com.enonic.ec.kubernetes.operator.commands.vhosts.ImmutableXpVHostApplyConfigMap;
+import com.enonic.ec.kubernetes.operator.commands.vhosts.ImmutableXpVHostApplyIngress;
+import com.enonic.ec.kubernetes.operator.crd.vhost.XpVHostResource;
+import com.enonic.ec.kubernetes.operator.crd.vhost.client.XpVHostCache;
+import com.enonic.ec.kubernetes.operator.crd.vhost.diff.DiffResource;
+import com.enonic.ec.kubernetes.operator.crd.vhost.diff.ImmutableDiffResource;
+import com.enonic.ec.kubernetes.operator.crd.vhost.diff.ImmutableDiffSpec;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @ApplicationScoped

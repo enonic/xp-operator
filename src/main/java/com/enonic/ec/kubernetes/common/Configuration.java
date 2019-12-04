@@ -1,7 +1,5 @@
 package com.enonic.ec.kubernetes.common;
 
-import java.util.List;
-
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
 
@@ -38,11 +36,6 @@ public class Configuration
     protected static long cfgLong( String key )
     {
         return config().getOptionalValue( key, Long.class ).get();
-    }
-
-    protected static List<String> cfgList( String key )
-    {
-        return config().getOptionalValue( key, List.class ).get();
     }
 
     protected static boolean cfgBool( String key )

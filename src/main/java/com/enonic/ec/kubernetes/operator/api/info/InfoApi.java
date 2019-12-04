@@ -1,7 +1,7 @@
 package com.enonic.ec.kubernetes.operator.api.info;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -35,14 +35,14 @@ public class InfoApi
         admissionResource.put( "name", "validations" );
         admissionResource.put( "namespaced", false );
         admissionResource.put( "singularName", "" );
-        admissionResource.put( "verbs", Arrays.asList( "create" ) );
+        admissionResource.put( "verbs", Collections.singletonList( "create" ) );
         admissionResource.put( "version", apiVersion );
 
         Map<String, Object> res = new HashMap<>();
         res.put( "apiVersion", "v1" );
         res.put( "groupVersion", group + "/" + apiVersion );
         res.put( "kind", "APIResourceList" );
-        res.put( "resources", Arrays.asList( admissionResource ) );
+        res.put( "resources", Collections.singletonList( admissionResource ) );
         return res;
     }
 

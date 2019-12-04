@@ -24,10 +24,10 @@ import io.fabric8.kubernetes.api.model.Status;
 import io.fabric8.kubernetes.api.model.admission.AdmissionResponse;
 import io.fabric8.kubernetes.api.model.admission.AdmissionReview;
 
-import com.enonic.ec.kubernetes.crd.deployment.XpDeploymentResource;
-import com.enonic.ec.kubernetes.crd.deployment.client.XpDeploymentCache;
-import com.enonic.ec.kubernetes.crd.vhost.XpVHostResource;
-import com.enonic.ec.kubernetes.crd.vhost.spec.SpecMapping;
+import com.enonic.ec.kubernetes.operator.crd.deployment.XpDeploymentResource;
+import com.enonic.ec.kubernetes.operator.crd.deployment.client.XpDeploymentCache;
+import com.enonic.ec.kubernetes.operator.crd.vhost.XpVHostResource;
+import com.enonic.ec.kubernetes.operator.crd.vhost.spec.SpecMapping;
 
 @ApplicationScoped
 @Path("/apis/operator.enonic.cloud/v1alpha1")
@@ -54,7 +54,8 @@ public class AdmissionApi
     public AdmissionReview validate( String body )
         throws IOException
     {
-        Map<String, Object> admission = mapper.readValue( body, Map.class );
+        @SuppressWarnings("unchecked") Map<String, Object> admission = mapper.readValue( body, Map.class );
+
         String uid = (String) ( (Map) admission.get( "request" ) ).get( "uid" );
         try
         {
@@ -110,7 +111,7 @@ public class AdmissionApi
 
     private void xpDeploymentReview( final AdmissionReview review )
     {
-        com.enonic.ec.kubernetes.crd.deployment.diff.ImmutableDiffResource.builder().
+        com.enonic.ec.kubernetes.operator.crd.deployment.diff.ImmutableDiffResource.builder().
             oldValue( Optional.ofNullable(
                 review.getRequest().getOldObject() != null ? (XpDeploymentResource) review.getRequest().getOldObject() : null ) ).
             newValue( Optional.ofNullable(
@@ -120,8 +121,8 @@ public class AdmissionApi
 
     private void xpVHostReview( final AdmissionReview review )
     {
-        com.enonic.ec.kubernetes.crd.vhost.diff.ImmutableDiffResource diff =
-            com.enonic.ec.kubernetes.crd.vhost.diff.ImmutableDiffResource.builder().
+        com.enonic.ec.kubernetes.operator.crd.vhost.diff.ImmutableDiffResource diff =
+            com.enonic.ec.kubernetes.operator.crd.vhost.diff.ImmutableDiffResource.builder().
                 oldValue( Optional.ofNullable(
                     review.getRequest().getOldObject() != null ? (XpVHostResource) review.getRequest().getOldObject() : null ) ).
                 newValue( Optional.ofNullable(
@@ -142,7 +143,7 @@ public class AdmissionApi
             xpDeploymentCache.stream().filter( r -> r.getMetadata().getName().equals( namespace ) ).findFirst();
         Preconditions.checkState( deployment.isPresent(),
                                   xp7vHostKind + " can only be created in namespaces that are created by " + xp7DeploymentKind );
-        Preconditions.checkState( deployment.get().getSpec().nodes().keySet().contains( node ),
+        Preconditions.checkState( deployment.get().getSpec().nodes().containsKey( node ),
                                   "Field 'spec.mappings.node' with value '" + node + "' has to match a node in a " + xp7DeploymentKind );
     }
 

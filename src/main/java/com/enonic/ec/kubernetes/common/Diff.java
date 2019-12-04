@@ -87,8 +87,8 @@ public abstract class Diff<T>
 
         List<D> res = new LinkedList<>();
 
-        commonIndexOld.entrySet().forEach(
-            e -> res.add( creator.apply( Optional.of( oldList.get( e.getKey() ) ), Optional.of( newList.get( e.getValue() ) ) ) ) );
+        commonIndexOld.forEach(
+            ( key, value ) -> res.add( creator.apply( Optional.of( oldList.get( key ) ), Optional.of( newList.get( value ) ) ) ) );
 
         for ( int i = 0; i < oldList.size(); i++ )
         {

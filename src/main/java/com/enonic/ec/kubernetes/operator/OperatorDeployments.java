@@ -15,12 +15,12 @@ import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.ec.kubernetes.common.client.DefaultClientProducer;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
-import com.enonic.ec.kubernetes.crd.deployment.ImmutableXpDeploymentNamingHelper;
-import com.enonic.ec.kubernetes.crd.deployment.XpDeploymentResource;
-import com.enonic.ec.kubernetes.crd.deployment.client.XpDeploymentCache;
-import com.enonic.ec.kubernetes.crd.deployment.diff.DiffResource;
-import com.enonic.ec.kubernetes.crd.deployment.diff.ImmutableDiffResource;
-import com.enonic.ec.kubernetes.operator.deployments.ImmutableCreateXpDeployment;
+import com.enonic.ec.kubernetes.operator.commands.deployments.ImmutableCreateXpDeployment;
+import com.enonic.ec.kubernetes.operator.crd.deployment.ImmutableXpDeploymentNamingHelper;
+import com.enonic.ec.kubernetes.operator.crd.deployment.XpDeploymentResource;
+import com.enonic.ec.kubernetes.operator.crd.deployment.client.XpDeploymentCache;
+import com.enonic.ec.kubernetes.operator.crd.deployment.diff.DiffResource;
+import com.enonic.ec.kubernetes.operator.crd.deployment.diff.ImmutableDiffResource;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @ApplicationScoped
