@@ -28,6 +28,8 @@ minikube-operator-setup:
 	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.dep.namespace.yaml
 	kubectl apply -f src/main/kubernetes/operator/crd/ec-operator.crd.xp7.deployments.yaml
 	kubectl apply -f src/main/kubernetes/operator/crd/ec-operator.crd.xp7.vhosts.yaml
+	kubectl apply -f src/main/kubernetes/operator/crd/ec-operator.crd.xp7.configs.yaml
+	kubectl apply -f src/main/kubernetes/operator/crd/ec-operator.crd.xp7.apps.yaml
 
 minikube-ingress-patch:
 	-./src/test/minikube/minikube.sh
