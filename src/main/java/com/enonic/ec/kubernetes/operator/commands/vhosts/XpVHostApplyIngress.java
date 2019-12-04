@@ -24,7 +24,7 @@ import com.enonic.ec.kubernetes.operator.commands.vhosts.spec.ImmutableIngressSp
 import com.enonic.ec.kubernetes.operator.crd.vhost.diff.DiffSpec;
 import com.enonic.ec.kubernetes.operator.crd.vhost.spec.Spec;
 import com.enonic.ec.kubernetes.operator.crd.vhost.spec.SpecCertificate;
-import com.enonic.ec.kubernetes.operator.crd.vhost.spec.SpecCertificateLetEncryptType;
+import com.enonic.ec.kubernetes.operator.crd.vhost.spec.SpecCertificateAuthority;
 import com.enonic.ec.kubernetes.operator.crd.vhost.spec.SpecMapping;
 
 @Value.Immutable
@@ -149,22 +149,7 @@ public abstract class XpVHostApplyIngress
             if ( cert != null )
             {
                 ingressAnnotations.put( "nginx.ingress.kubernetes.io/ssl-redirect", "true" );
-                if ( cert.selfSigned() != null && cert.selfSigned() )
-                {
-                    ingressAnnotations.put( "cert-manager.io/cluster-issuer", cfgStr( "operator.certissuer.selfsigned" ) );
-                }
-
-                if ( cert.letsEncrypt() != null )
-                {
-                    if ( cert.letsEncrypt() == SpecCertificateLetEncryptType.STAGING )
-                    {
-                        ingressAnnotations.put( "cert-manager.io/cluster-issuer", cfgStr( "operator.certissuer.letsencrypt.staging" ) );
-                    }
-                    if ( cert.letsEncrypt() == SpecCertificateLetEncryptType.PROD )
-                    {
-                        ingressAnnotations.put( "cert-manager.io/cluster-issuer", cfgStr( "operator.certissuer.letsencrypt.prod" ) );
-                    }
-                }
+                ingressAnnotations.put( "cert-manager.io/cluster-issuer", getIssuer( cert.authority() ) );
             }
 
             commandBuilder.addCommand( ImmutableCommandApplyIngress.builder().
@@ -182,6 +167,20 @@ public abstract class XpVHostApplyIngress
                     spec() ).
                 build() );
         }
+    }
+
+    private String getIssuer( SpecCertificateAuthority authority )
+    {
+        switch ( authority )
+        {
+            case SELF_SIGNED:
+                return cfgStr( "operator.certissuer.selfsigned" );
+            case LETS_ENCRYPT_STAGING:
+                return cfgStr( "operator.certissuer.letsencrypt.staging" );
+            case LETS_ENCRYPT_PROD:
+                return cfgStr( "operator.certissuer.letsencrypt.prod" );
+        }
+        return "none";
     }
 
     private String vHostResourceName( final Spec spec )
