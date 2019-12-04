@@ -16,19 +16,16 @@ import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.Diff;
 import com.enonic.ec.kubernetes.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
-import com.enonic.ec.kubernetes.crd.issuer.client.IssuerClient;
 import com.enonic.ec.kubernetes.crd.vhost.diff.DiffSpec;
 import com.enonic.ec.kubernetes.crd.vhost.spec.Spec;
 import com.enonic.ec.kubernetes.crd.vhost.spec.SpecCertificate;
+import com.enonic.ec.kubernetes.crd.vhost.spec.SpecCertificateLetEncryptType;
 import com.enonic.ec.kubernetes.crd.vhost.spec.SpecMapping;
 import com.enonic.ec.kubernetes.operator.deployments.spec.ImmutableServiceSpecBuilder;
 import com.enonic.ec.kubernetes.operator.kubectl.apply.ImmutableCommandApplyIngress;
-import com.enonic.ec.kubernetes.operator.kubectl.apply.ImmutableCommandApplyIssuer;
 import com.enonic.ec.kubernetes.operator.kubectl.apply.ImmutableCommandApplyService;
-import com.enonic.ec.kubernetes.operator.kubectl.delete.ImmutableCommandDeleteIssuer;
 import com.enonic.ec.kubernetes.operator.kubectl.delete.ImmutableCommandDeleteService;
 import com.enonic.ec.kubernetes.operator.vhosts.spec.ImmutableIngressSpec;
-import com.enonic.ec.kubernetes.operator.vhosts.spec.ImmutableIssuerSpec;
 
 @Value.Immutable
 public abstract class XpVHostApplyIngress
@@ -36,8 +33,6 @@ public abstract class XpVHostApplyIngress
     implements CombinedCommandBuilder
 {
     protected abstract KubernetesClient defaultClient();
-
-    protected abstract IssuerClient issuerClient();
 
     protected abstract OwnerReference ownerReference();
 
@@ -57,35 +52,6 @@ public abstract class XpVHostApplyIngress
     {
         String vHostResourceName = vHostResourceName( diffSpec.newValue().get() );
         String host = diffSpec.newValue().get().host();
-
-        SpecCertificate cert = diffSpec.newValue().get().certificate();
-        boolean changeCert = diffSpec.isNew() || diffSpec.certificateChanged();
-
-        if ( changeCert )
-        {
-            if ( cert != null && diffSpec.newValue().get().certificate().selfSigned() )
-            {
-                commandBuilder.addCommand( ImmutableCommandApplyIssuer.builder().
-                    client( issuerClient() ).
-                    ownerReference( ownerReference() ).
-                    namespace( namespace() ).
-                    name( vHostResourceName ).
-                    labels( defaultLabels() ).
-                    spec( ImmutableIssuerSpec.builder().
-                        certificate( diffSpec.newValue().get().certificate() ).
-                        build().
-                        spec() ).
-                    build() );
-            }
-            else if ( diffSpec.oldValue().map( s -> s.certificate().selfSigned() ).orElse( false ) )
-            {
-                commandBuilder.addCommand( ImmutableCommandDeleteIssuer.builder().
-                    client( issuerClient() ).
-                    namespace( namespace() ).
-                    name( vHostResourceName ).
-                    build() );
-            }
-        }
 
         boolean changeMappings = diffSpec.mappingsChanged().stream().anyMatch( Diff::shouldAddOrModifyOrRemove );
 
@@ -122,6 +88,8 @@ public abstract class XpVHostApplyIngress
                 build() ) );
 
         }
+
+        boolean changeCert = diffSpec.isNew() || diffSpec.certificateChanged();
 
         if ( changeMappings || changeCert )
         {
@@ -177,16 +145,25 @@ public abstract class XpVHostApplyIngress
                 put( "ingress.kubernetes.io/rewrite-target", "/" ).
                 put( "nginx.ingress.kubernetes.io/configuration-snippet", nginxConfigSnippet.toString() );
 
+            SpecCertificate cert = diffSpec.newValue().get().certificate();
             if ( cert != null )
             {
                 ingressAnnotations.put( "nginx.ingress.kubernetes.io/ssl-redirect", "true" );
-                if ( cert.selfSigned() )
+                if ( cert.selfSigned() != null && cert.selfSigned() )
                 {
-                    ingressAnnotations.put( "cert-manager.io/issuer", vHostResourceName );
+                    ingressAnnotations.put( "cert-manager.io/cluster-issuer", cfgStr( "operator.certissuer.selfsigned" ) );
                 }
-                else
+
+                if ( cert.letsEncrypt() != null )
                 {
-                    ingressAnnotations.put( "cert-manager.io/cluster-issuer", cfgStr( "operator.letsencrypt.issuer" ) );
+                    if ( cert.letsEncrypt() == SpecCertificateLetEncryptType.STAGING )
+                    {
+                        ingressAnnotations.put( "cert-manager.io/cluster-issuer", cfgStr( "operator.certissuer.letsencrypt.staging" ) );
+                    }
+                    if ( cert.letsEncrypt() == SpecCertificateLetEncryptType.PROD )
+                    {
+                        ingressAnnotations.put( "cert-manager.io/cluster-issuer", cfgStr( "operator.certissuer.letsencrypt.prod" ) );
+                    }
                 }
             }
 
@@ -209,7 +186,7 @@ public abstract class XpVHostApplyIngress
 
     private String vHostResourceName( final Spec spec )
     {
-        return "vhost-" + spec.host().replace( ".", "-" );
+        return spec.host().replace( "-", "--" ).replace( ".", "-" );
     }
 
     private String mappingResourceName( final String vHostResourceName, String host, final SpecMapping mapping )

@@ -20,7 +20,6 @@ import com.enonic.ec.kubernetes.crd.deployment.XpDeploymentResource;
 import com.enonic.ec.kubernetes.crd.deployment.client.XpDeploymentCache;
 import com.enonic.ec.kubernetes.crd.deployment.diff.DiffResource;
 import com.enonic.ec.kubernetes.crd.deployment.diff.ImmutableDiffResource;
-import com.enonic.ec.kubernetes.crd.issuer.client.IssuerClientProducer;
 import com.enonic.ec.kubernetes.operator.deployments.ImmutableCreateXpDeployment;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
@@ -31,9 +30,6 @@ public class OperatorDeployments
 
     @Inject
     DefaultClientProducer defaultClientProducer;
-
-    @Inject
-    IssuerClientProducer issuerClient;
 
     @Inject
     XpDeploymentCache xpDeploymentCache;
@@ -59,7 +55,6 @@ public class OperatorDeployments
 
                 ImmutableCreateXpDeployment.builder().
                     defaultClient( defaultClientProducer.client() ).
-                    issuerClient( issuerClient.produce() ).
                     deploymentName( newResource.get().getMetadata().getName() ).
                     defaultLabels( newResource.get().getMetadata().getLabels() ).
                     namingHelper( ImmutableXpDeploymentNamingHelper.builder().resource( newResource.get() ).build() ).

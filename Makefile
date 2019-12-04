@@ -21,6 +21,9 @@ minikube-start:
 minikube-certmanager:
 	kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/${CERT_MANAGER_VERSION}/cert-manager.yaml --validate=false
 
+minikube-certmanager-issuers:
+	kubectl apply -f src/main/kubernetes/certmanager/certmanager.clusterissuers.yaml
+
 minikube-operator-setup:
 	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.dep.namespace.yaml
 	kubectl apply -f src/main/kubernetes/operator/crd/ec-operator.crd.xp7.deployments.yaml
@@ -33,8 +36,8 @@ minikube-linkerd:
 	linkerd install | kubectl apply -f -
 	bash -c 'until linkerd check; do echo "Waiting for linkerd..."; sleep 5; done'
 
-minikube-setup-linkerd: minikube-start minikube-linkerd minikube-certmanager minikube-operator-setup minikube-ingress-patch
-minikube-setup: minikube-start minikube-certmanager minikube-operator-setup minikube-ingress-patch
+minikube-setup-linkerd: minikube-start minikube-certmanager minikube-linkerd minikube-operator-setup minikube-ingress-patch minikube-certmanager-issuers
+minikube-setup: minikube-start minikube-certmanager minikube-operator-setup minikube-ingress-patch minikube-certmanager-issuers
 
 minikube-operator-deploy:
 	./mvnw clean package

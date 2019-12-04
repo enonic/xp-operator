@@ -7,9 +7,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.client.Watcher;
@@ -19,7 +16,6 @@ import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.cache.ConfigMapCache;
 import com.enonic.ec.kubernetes.common.client.DefaultClientProducer;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
-import com.enonic.ec.kubernetes.crd.issuer.client.IssuerClientProducer;
 import com.enonic.ec.kubernetes.crd.vhost.XpVHostResource;
 import com.enonic.ec.kubernetes.crd.vhost.client.XpVHostCache;
 import com.enonic.ec.kubernetes.crd.vhost.diff.DiffResource;
@@ -33,13 +29,8 @@ import com.enonic.ec.kubernetes.operator.vhosts.ImmutableXpVHostApplyIngress;
 public class OperatorVHosts
     extends Configuration
 {
-    private final static Logger log = LoggerFactory.getLogger( OperatorVHosts.class );
-
     @Inject
     DefaultClientProducer defaultClientProducer;
-
-    @Inject
-    IssuerClientProducer issuerClientProducer;
 
     @Inject
     XpVHostCache xpVHostCache;
@@ -114,7 +105,6 @@ public class OperatorVHosts
         {
             ImmutableXpVHostApplyIngress.builder().
                 defaultClient( defaultClientProducer.client() ).
-                issuerClient( issuerClientProducer.produce() ).
                 namespace( namespace ).
                 ownerReference( createOwnerReference( newVHost.get() ) ).
                 addDiffs( ImmutableDiffSpec.builder().

@@ -6,7 +6,7 @@ metadata:
 spec:
   host: test.purplejs.io
   certificate:
-    selfSigned: true
+    letsEncrypt: PROD
   mappings:
     - node: 62524054-0f15-4319-84e3-d6cbb086cbbf
       source: /admin

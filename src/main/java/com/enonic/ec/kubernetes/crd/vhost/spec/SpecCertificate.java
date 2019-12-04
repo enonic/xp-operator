@@ -1,6 +1,7 @@
 package com.enonic.ec.kubernetes.crd.vhost.spec;
 
 import org.immutables.value.Value;
+import org.wildfly.common.annotation.Nullable;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.base.Preconditions;
@@ -12,23 +13,19 @@ import com.enonic.ec.kubernetes.crd.BuilderException;
 @Value.Style(throwForInvalidImmutableState = SpecCertificate.ExceptionMissing.class, throwForNullPointer = SpecCertificate.ExceptionMissing.class)
 public abstract class SpecCertificate
 {
-    @Value.Default
-    public Boolean selfSigned()
-    {
-        return false;
-    }
+    @Nullable
+    public abstract Boolean selfSigned();
 
-    @Value.Default
-    public Boolean letsEncrypt()
-    {
-        return false;
-    }
+    @Nullable
+    public abstract SpecCertificateLetEncryptType letsEncrypt();
 
     @Value.Check
     protected void check()
     {
-        Preconditions.checkState( selfSigned() || letsEncrypt(),
-                                  "Some fields in 'spec.certificate' have to be set to true: [selfSigned or letsEncrypt]" );
+        boolean selfSigned = selfSigned() != null && selfSigned();
+        boolean letsEncrypt = letsEncrypt() != null;
+        Preconditions.checkState( selfSigned || letsEncrypt,
+                                  "Some fields in 'spec.certificate' have to be set: [selfSigned or letsEncrypt]" );
     }
 
     public static class ExceptionMissing

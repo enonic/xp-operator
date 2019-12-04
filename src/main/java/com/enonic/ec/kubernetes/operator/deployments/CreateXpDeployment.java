@@ -22,7 +22,6 @@ import com.enonic.ec.kubernetes.crd.deployment.diff.DiffSpec;
 import com.enonic.ec.kubernetes.crd.deployment.diff.DiffSpecNode;
 import com.enonic.ec.kubernetes.crd.deployment.spec.Spec;
 import com.enonic.ec.kubernetes.crd.deployment.spec.SpecNode;
-import com.enonic.ec.kubernetes.crd.issuer.client.IssuerClient;
 import com.enonic.ec.kubernetes.operator.deployments.config.ConfigBuilderNode;
 import com.enonic.ec.kubernetes.operator.deployments.config.ImmutableConfigBuilderCluster;
 import com.enonic.ec.kubernetes.operator.deployments.config.ImmutableConfigBuilderNonClustered;
@@ -37,8 +36,6 @@ public abstract class CreateXpDeployment
     implements CombinedCommandBuilder
 {
     protected abstract KubernetesClient defaultClient();
-
-    protected abstract IssuerClient issuerClient();
 
     protected abstract String deploymentName();
 
