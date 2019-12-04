@@ -22,7 +22,7 @@ minikube-certmanager:
 	kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/${CERT_MANAGER_VERSION}/cert-manager.yaml --validate=false
 
 minikube-certmanager-issuers:
-	kubectl apply -f src/main/kubernetes/certmanager/certmanager.clusterissuers.yaml
+	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.dep.clusterissuers.yaml
 
 minikube-operator-setup:
 	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.dep.namespace.yaml
