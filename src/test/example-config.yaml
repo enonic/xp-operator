@@ -1,0 +1,9 @@
+apiVersion: enonic.cloud/v1alpha1
+kind: Xp7Config
+metadata:
+  name: test
+  namespace: mycloud-myproject-qaxp
+spec:
+  file: mytest.cfg
+  data: |
+    hello

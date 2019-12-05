@@ -21,11 +21,9 @@ public abstract class XpDeploymentNamingHelper
     @Value.Derived
     public String defaultResourceName()
     {
-        String type = resource().getMetadata().getLabels().get( cfgStr( "operator.deployment.xp.labels.ec.type" ) );
         String name = resource().getMetadata().getLabels().get( cfgStr( "operator.deployment.xp.labels.ec.name" ) );
-        Preconditions.checkState( type != null, "Type cannot be null" );
         Preconditions.checkState( name != null, "Name cannot be null" );
-        return String.join( "-", type, name );
+        return name;
     }
 
     public String defaultResourceNameWithPostFix( String... postfix )

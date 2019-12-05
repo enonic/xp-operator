@@ -20,14 +20,15 @@ import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.Diff;
 import com.enonic.ec.kubernetes.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
-import com.enonic.ec.kubernetes.operator.commands.deployments.config.ConfigBuilderNode;
-import com.enonic.ec.kubernetes.operator.commands.deployments.config.ImmutableConfigBuilderCluster;
-import com.enonic.ec.kubernetes.operator.commands.deployments.config.ImmutableConfigBuilderNonClustered;
+import com.enonic.ec.kubernetes.operator.commands.deployments.config.ClusterConfigurator;
+import com.enonic.ec.kubernetes.operator.commands.deployments.config.ImmutableClusterConfig;
+import com.enonic.ec.kubernetes.operator.commands.deployments.config.ImmutableNonClusteredConfig;
 import com.enonic.ec.kubernetes.operator.commands.deployments.volumes.ImmutableVolumeBuilderNfs;
 import com.enonic.ec.kubernetes.operator.commands.deployments.volumes.ImmutableVolumeBuilderStd;
 import com.enonic.ec.kubernetes.operator.commands.deployments.volumes.VolumeBuilder;
 import com.enonic.ec.kubernetes.operator.crd.config.client.XpConfigClient;
 import com.enonic.ec.kubernetes.operator.crd.deployment.XpDeploymentNamingHelper;
+import com.enonic.ec.kubernetes.operator.crd.deployment.XpDeploymentResource;
 import com.enonic.ec.kubernetes.operator.crd.deployment.diff.DiffSpec;
 import com.enonic.ec.kubernetes.operator.crd.deployment.diff.DiffSpecNode;
 import com.enonic.ec.kubernetes.operator.crd.deployment.spec.Spec;
@@ -46,6 +47,8 @@ public abstract class CreateXpDeployment
     protected abstract String deploymentName();
 
     protected abstract Map<String, String> defaultLabels();
+
+    protected abstract XpDeploymentResource resource();
 
     protected abstract DiffSpec diffSpec();
 
@@ -96,7 +99,7 @@ public abstract class CreateXpDeployment
         boolean isClustered = spec().isClustered();
 
         Function<SpecNode, Integer> defaultMinimumAvailable;
-        ConfigBuilderNode configBuilder;
+        ClusterConfigurator clusterConfigurator;
 
         if ( isClustered )
         {
@@ -108,8 +111,8 @@ public abstract class CreateXpDeployment
             SpecNode dataNode = spec().nodes().values().stream().filter( SpecNode::isDataNode ).findAny().get();
             int minimumDataNodes = defaultMinimumAvailable.apply( dataNode );
 
-            configBuilder = ImmutableConfigBuilderCluster.builder().
-                baseConfig( diffSpec().newValue().get().nodesSharedConfig() ).
+            clusterConfigurator = ImmutableClusterConfig.builder().
+                client( configClient() ).
                 namespace( namespaceName ).
                 serviceName( serviceName ).
                 clusterName( deploymentName() ).
@@ -119,19 +122,19 @@ public abstract class CreateXpDeployment
                 // discoveryHosts( Arrays.asList( String.join( ".", serviceName, namespaceName, "svc.cluster.local" ) ) ).
                     discoveryHosts( getAllMasterNodeDNS( serviceName ) ).
                     build();
-
         }
         else
         {
             defaultMinimumAvailable = ( n ) -> 0; // This has to be 0 to be able to update XP
-            configBuilder = ImmutableConfigBuilderNonClustered.builder().
-                baseConfig( diffSpec().newValue().get().nodesSharedConfig() ).
+            clusterConfigurator = ImmutableNonClusteredConfig.builder().
+                client( configClient() ).
+                namespace( namespaceName ).
                 build();
         }
 
         // Setup default su pass env var
         EnvVarSource suPassSource = new EnvVarSource();
-        suPassSource.setSecretKeyRef( new SecretKeySelector( "suPassHash", namingHelper().defaultResourceName( "su" ), false ) );
+        suPassSource.setSecretKeyRef( new SecretKeySelector( "suPassHash", namingHelper().defaultResourceNameWithPreFix( "su" ), false ) );
         EnvVar suPassHash = new EnvVar();
         suPassHash.setName( "SU_PASS_HASH" );
         suPassHash.setValueFrom( suPassSource );
@@ -163,13 +166,14 @@ public abstract class CreateXpDeployment
                 ownerReference( ownerReference() ).
                 namespace( namespaceName ).
                 serviceName( serviceName ).
+                nodeId( getNodeId( diffSpecNode ) ).
                 nodeShortName( diffSpecNode.name() ).
                 nodeFullName( namingHelper().defaultResourceName( diffSpecNode.name() ) ).
                 diffSpec( diffSpec() ).
                 diffSpecNode( diffSpecNode ).
                 suPassHash( suPassHash ).
                 defaultLabels( defaultLabels ).
-                configBuilder( configBuilder ).
+                clusterConfigurator( clusterConfigurator ).
                 deploymentName( deploymentName ).
                 volumeBuilder( volumeBuilder ).
                 minimumAvailable( defaultMinimumAvailable.apply( diffSpecNode.newValue().get() ) ).
@@ -183,9 +187,18 @@ public abstract class CreateXpDeployment
             forEach( diff -> ImmutableDeleteXpDeploymentNode.builder().
                 defaultClient( defaultClient() ).
                 namespace( namespaceName ).
-                nodeName( namingHelper().defaultResourceName( diff.name() ) ).
+                nodeId( getNodeId( diff ) ).
                 build().
                 addCommands( commandBuilder ) );
+    }
+
+    private String getNodeId( final DiffSpecNode diffSpecNode )
+    {
+        return resource().getSpec().nodes().entrySet().stream().
+            filter( e -> e.getValue().equals( diffSpecNode.newValue().get() ) ).
+            map( e -> e.getKey() ).
+            findFirst().
+            get();
     }
 
     private List<String> getAllMasterNodeDNS( String serviceName )

@@ -60,6 +60,7 @@ public class OperatorDeployments
                 ImmutableCreateXpDeployment.builder().
                     defaultClient( defaultClientProducer.client() ).
                     configClient( xpConfigClientProducer.produce() ).
+                    resource( newResource.get() ).
                     deploymentName( newResource.get().getMetadata().getName() ).
                     defaultLabels( newResource.get().getMetadata().getLabels() ).
                     namingHelper( ImmutableXpDeploymentNamingHelper.builder().resource( newResource.get() ).build() ).

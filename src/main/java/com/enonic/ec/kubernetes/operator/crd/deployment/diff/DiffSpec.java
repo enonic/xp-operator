@@ -9,6 +9,7 @@ import org.immutables.value.Value;
 import com.google.common.base.Preconditions;
 
 import com.enonic.ec.kubernetes.common.Diff;
+import com.enonic.ec.kubernetes.common.Validator;
 import com.enonic.ec.kubernetes.operator.crd.deployment.spec.Spec;
 import com.enonic.ec.kubernetes.operator.crd.deployment.spec.SpecNode;
 
@@ -53,6 +54,10 @@ public abstract class DiffSpec
         {
             return;
         }
+        newValue().get().nodes().keySet().forEach( k -> {
+            Validator.dnsName( "nodeId", k );
+        } );
+
         Preconditions.checkState( equals( Spec::nodesSharedDisk ), "Field 'spec.nodesSharedDisk' cannot be changed" );
     }
 

@@ -1,7 +1,5 @@
 package com.enonic.ec.kubernetes.operator.crd.config.spec;
 
-import java.util.List;
-
 import org.immutables.value.Value;
 import org.wildfly.common.annotation.Nullable;
 

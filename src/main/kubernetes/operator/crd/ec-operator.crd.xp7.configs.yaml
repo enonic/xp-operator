@@ -12,11 +12,11 @@ spec:
   scope: Namespaced
   version: v1alpha1
   additionalPrinterColumns:
-    - name: File
-      type: string
-      description: Config file name
-      JSONPath: .spec.file
     - name: Node
       type: string
       description: Node running the config
       JSONPath: .spec.node
+    - name: File
+      type: string
+      description: Config file name
+      JSONPath: .spec.file

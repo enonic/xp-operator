@@ -23,4 +23,4 @@ spec:
     - name: Shared Disk
       type: string
       description: Size of XP shared disk
-      JSONPath: .spec.sharedDisk
+      JSONPath: .spec.nodesSharedDisk

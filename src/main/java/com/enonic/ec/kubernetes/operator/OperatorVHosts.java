@@ -1,5 +1,8 @@
 package com.enonic.ec.kubernetes.operator;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -7,128 +10,135 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
-import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.api.model.OwnerReference;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.fabric8.kubernetes.client.Watcher;
 import io.quarkus.runtime.StartupEvent;
 
-import com.enonic.ec.kubernetes.common.Configuration;
-import com.enonic.ec.kubernetes.common.cache.ConfigMapCache;
 import com.enonic.ec.kubernetes.common.client.DefaultClientProducer;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
-import com.enonic.ec.kubernetes.operator.commands.vhosts.ImmutableXpVHostApplyConfigMap;
 import com.enonic.ec.kubernetes.operator.commands.vhosts.ImmutableXpVHostApplyIngress;
+import com.enonic.ec.kubernetes.operator.commands.vhosts.ImmutableXpVHostApplyXpConfig;
+import com.enonic.ec.kubernetes.operator.commands.vhosts.ImmutableXpVHostDeleteIngress;
+import com.enonic.ec.kubernetes.operator.commands.vhosts.helpers.ImmutableMapping;
+import com.enonic.ec.kubernetes.operator.commands.vhosts.helpers.Mapping;
+import com.enonic.ec.kubernetes.operator.crd.config.XpConfigResource;
+import com.enonic.ec.kubernetes.operator.crd.config.client.XpConfigCache;
+import com.enonic.ec.kubernetes.operator.crd.config.client.XpConfigClientProducer;
 import com.enonic.ec.kubernetes.operator.crd.vhost.XpVHostResource;
 import com.enonic.ec.kubernetes.operator.crd.vhost.client.XpVHostCache;
-import com.enonic.ec.kubernetes.operator.crd.vhost.diff.DiffResource;
-import com.enonic.ec.kubernetes.operator.crd.vhost.diff.ImmutableDiffResource;
-import com.enonic.ec.kubernetes.operator.crd.vhost.diff.ImmutableDiffSpec;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @ApplicationScoped
 public class OperatorVHosts
-    extends Configuration
+    extends OperatorStall
 {
+    private final static Logger log = LoggerFactory.getLogger( OperatorVHosts.class );
+
     @Inject
     DefaultClientProducer defaultClientProducer;
+
+    @Inject
+    XpConfigClientProducer configClientProducer;
 
     @Inject
     XpVHostCache xpVHostCache;
 
     @Inject
-    ConfigMapCache configMapCache;
+    XpConfigCache xpConfigCache;
+
+    @ConfigProperty(name = "operator.config.xp.vhosts.file")
+    String xp7ConfigFile;
 
     void onStartup( @Observes StartupEvent _ev )
     {
-        configMapCache.addWatcher( this::watchConfigMap );
         xpVHostCache.addWatcher( this::watchVHosts );
-    }
-
-    private void watchConfigMap( final Watcher.Action action, final String s, final Optional<ConfigMap> oldConfigMap,
-                                 final Optional<ConfigMap> newConfigMap )
-    {
-        if ( action == Watcher.Action.DELETED )
-        {
-            return;
-        }
-
-        try
-        {
-            ImmutableCombinedCommand.Builder commandBuilder = ImmutableCombinedCommand.builder();
-            ImmutableXpVHostApplyConfigMap.builder().
-                client( defaultClientProducer.client() ).
-                addConfigMaps( newConfigMap.get() ).
-                diffs( xpVHostCache.stream().
-                    filter( v -> v.getMetadata().getNamespace().equals( newConfigMap.get().getMetadata().getNamespace() ) ).
-                    map( v -> ImmutableDiffSpec.builder().newValue( v.getSpec() ).build() ).
-                    collect( Collectors.toList() ) ).
-                build().
-                addCommands( commandBuilder );
-            commandBuilder.build().execute();
-        }
-        catch ( Exception e )
-        {
-            e.printStackTrace();
-            // TODO: Something
-        }
     }
 
     private void watchVHosts( final Watcher.Action action, final String s, final Optional<XpVHostResource> oldVHost,
                               final Optional<XpVHostResource> newVHost )
     {
-        String namespace = newVHost.isPresent() ? newVHost.get().getMetadata().getNamespace() : oldVHost.get().getMetadata().getNamespace();
-
-        DiffResource diffResource = ImmutableDiffResource.builder().
-            oldValue( oldVHost ).
-            newValue( newVHost ).
-            build();
-
         ImmutableCombinedCommand.Builder commandBuilder = ImmutableCombinedCommand.builder();
 
-        if ( diffResource.diffSpec().shouldAddOrModifyOrRemove() )
+        // Get namespace
+        String namespace = newVHost.map( m -> m.getMetadata().getNamespace() ).orElse(
+            oldVHost.map( m -> m.getMetadata().getNamespace() ).orElse( null ) );
+
+        if ( action == Watcher.Action.DELETED )
         {
-            // On any change we have to modify config map
-            ImmutableXpVHostApplyConfigMap.builder().
-                client( defaultClientProducer.client() ).
-                configMaps( configMapCache.stream().
-                    filter( c -> c.getMetadata().getNamespace().equals( namespace ) ).
-                    collect( Collectors.toList() ) ).
-                diffs( xpVHostCache.stream().
-                    filter( v -> v.getMetadata().getNamespace().equals( namespace ) ).
-                    map( v -> ImmutableDiffSpec.builder().newValue( v.getSpec() ).build() ).
-                    collect( Collectors.toList() ) ).
+            ImmutableXpVHostDeleteIngress.builder().
+                defaultClient( defaultClientProducer.client() ).
+                resource( oldVHost.get() ).
                 build().
                 addCommands( commandBuilder );
         }
-
-        if ( diffResource.diffSpec().shouldAddOrModify() )
+        else
         {
             ImmutableXpVHostApplyIngress.builder().
                 defaultClient( defaultClientProducer.client() ).
-                namespace( namespace ).
-                ownerReference( createOwnerReference( newVHost.get() ) ).
-                addDiffs( ImmutableDiffSpec.builder().
-                    oldValue( oldVHost.map( XpVHostResource::getSpec ) ).
-                    newValue( newVHost.map( XpVHostResource::getSpec ) ).
-                    build() ).
+                resource( newVHost.get() ).
                 build().
                 addCommands( commandBuilder );
         }
 
-        try
-        {
-            commandBuilder.build().execute();
-        }
-        catch ( Exception e )
-        {
-            e.printStackTrace();
-            // TODO: Something
-        }
+        // Because multiple vHosts could potentially be deployed at the same time,
+        // lets use the stall function to let them accumulate before we update config
+        stall( () -> {
+            for ( Map.Entry<String, List<Mapping>> e : getNodeMappings( namespace ).entrySet() )
+            {
+                String node = e.getKey();
+                String xp7ConfigName = cfgStrFmt( "operator.config.xp.vhosts.name", node );
+
+                // Find old vHost config for node
+                Optional<XpConfigResource> config = xpConfigCache.stream().
+                    filter( c -> c.getMetadata().getNamespace().equals( namespace ) ).
+                    filter( c -> c.getMetadata().getName().equals( xp7ConfigName ) ).
+                    filter( c -> node.equals( c.getSpec().node() ) ).
+                    findAny();
+
+                // Create / Update config
+                ImmutableXpVHostApplyXpConfig.builder().
+                    client( configClientProducer.produce() ).
+                    namespace( namespace ).
+                    name( xp7ConfigName ).
+                    file( xp7ConfigFile ).
+                    xpConfigResource( config ).
+                    node( node ).
+                    mappings( e.getValue() ).
+                    build().
+                    addCommands( commandBuilder );
+            }
+            try
+            {
+                commandBuilder.build().execute();
+            }
+            catch ( Exception e )
+            {
+                log.error( "Unable to update apps", e );
+            }
+        } );
     }
 
-    private OwnerReference createOwnerReference( final XpVHostResource resource )
+    private Map<String, List<Mapping>> getNodeMappings( String namespace )
     {
-        return new OwnerReference( resource.getApiVersion(), true, true, resource.getKind(), resource.getMetadata().getName(),
-                                   resource.getMetadata().getUid() );
+        // Get all vHosts in this namespace
+        List<XpVHostResource> allVHosts = xpVHostCache.stream().
+            filter( a -> a.getMetadata().getNamespace().equals( namespace ) ).
+            collect( Collectors.toList() );
+
+        // Get all mappings in one place
+        List<Mapping> mappings = new LinkedList<>();
+        allVHosts.forEach( v -> v.getSpec().mappings().forEach( m -> mappings.add( ImmutableMapping.builder().
+            host( v.getSpec().host() ).
+            node( m.node() ).
+            source( m.source() ).
+            target( m.target() ).
+            idProvider( Optional.ofNullable( m.idProvider() ) ).
+            build() ) ) );
+
+        // Group mappings by node
+        return mappings.stream().collect( Collectors.groupingBy( Mapping::node ) );
     }
 }

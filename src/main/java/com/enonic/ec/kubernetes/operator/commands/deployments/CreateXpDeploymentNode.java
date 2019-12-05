@@ -1,5 +1,6 @@
 package com.enonic.ec.kubernetes.operator.commands.deployments;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,10 +20,12 @@ import com.enonic.ec.kubernetes.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.kubectl.apply.ImmutableCommandApplyConfigMap;
 import com.enonic.ec.kubernetes.kubectl.apply.ImmutableCommandApplyPodDisruptionBudget;
+import com.enonic.ec.kubernetes.kubectl.apply.ImmutableCommandApplyService;
 import com.enonic.ec.kubernetes.kubectl.apply.ImmutableCommandApplyStatefulSet;
 import com.enonic.ec.kubernetes.kubectl.scale.ImmutableCommandScaleStatefulSet;
-import com.enonic.ec.kubernetes.operator.commands.deployments.config.ConfigBuilderNode;
+import com.enonic.ec.kubernetes.operator.commands.deployments.config.ClusterConfigurator;
 import com.enonic.ec.kubernetes.operator.commands.deployments.spec.ImmutablePodDisruptionBudgetSpecBuilder;
+import com.enonic.ec.kubernetes.operator.commands.deployments.spec.ImmutableServiceSpecBuilder;
 import com.enonic.ec.kubernetes.operator.commands.deployments.spec.ImmutableStatefulSetSpecBuilder;
 import com.enonic.ec.kubernetes.operator.commands.deployments.volumes.VolumeBuilder;
 import com.enonic.ec.kubernetes.operator.commands.deployments.volumes.VolumeTripletList;
@@ -44,6 +47,8 @@ public abstract class CreateXpDeploymentNode
 
     protected abstract String namespace();
 
+    protected abstract String nodeId();
+
     protected abstract String nodeShortName();
 
     protected abstract String nodeFullName();
@@ -56,7 +61,7 @@ public abstract class CreateXpDeploymentNode
 
     protected abstract Map<String, String> defaultLabels();
 
-    protected abstract ConfigBuilderNode configBuilder();
+    protected abstract ClusterConfigurator clusterConfigurator();
 
     protected abstract int minimumAvailable();
 
@@ -66,17 +71,15 @@ public abstract class CreateXpDeploymentNode
 
     protected abstract EnvVar suPassHash();
 
-//    protected abstract Optional<String> sharedStorageName();
-
     private String podImageName()
     {
         return cfgStrFmt( "operator.deployment.xp.pod.imageTemplate", diffSpec().newValue().get().xpVersion() );
     }
 
-    private static Map<String, String> nodeExtraLabels( String name, SpecNode node, Map<String, String> defaultLabels )
+    private static Map<String, String> nodeExtraLabels( String nodeId, SpecNode node, Map<String, String> defaultLabels )
     {
         Map<String, String> res = new HashMap<>( defaultLabels );
-        res.put( cfgStr( "operator.deployment.xp.labels.pod.name" ), name );
+        res.put( cfgStr( "operator.deployment.xp.labels.pod.id" ), nodeId );
         res.put( cfgStr( "operator.deployment.xp.labels.pod.managed" ), "true" );
 
         if ( node.isMasterNode() )
@@ -97,10 +100,11 @@ public abstract class CreateXpDeploymentNode
         return res;
     }
 
-    private static Map<String, String> configMapExtraLabels( Map<String, String> defaultLabels )
+    private static Map<String, String> configMapExtraLabels( String nodeId, Map<String, String> defaultLabels )
     {
         Map<String, String> res = new HashMap<>( defaultLabels );
         res.put( cfgStr( "operator.deployment.xp.labels.config.managed" ), "true" );
+        res.put( cfgStr( "operator.deployment.xp.labels.config.node" ), nodeId );
         return res;
     }
 
@@ -108,7 +112,22 @@ public abstract class CreateXpDeploymentNode
     public void addCommands( ImmutableCombinedCommand.Builder commandBuilder )
     {
         SpecNode newNode = diffSpecNode().newValue().get();
-        Map<String, String> nodeLabels = nodeExtraLabels( nodeShortName(), newNode, defaultLabels() );
+        Map<String, String> nodeLabels = nodeExtraLabels( nodeId(), newNode, defaultLabels() );
+
+        if ( diffSpec().isNew() )
+        {
+            commandBuilder.addCommand( ImmutableCommandApplyService.builder().
+                client( defaultClient() ).
+                ownerReference( ownerReference() ).
+                namespace( namespace() ).
+                name( nodeId() ).
+                spec( ImmutableServiceSpecBuilder.builder().
+                    selector( nodeLabels ).
+                    putPorts( cfgStr( "operator.deployment.xp.port.main.name" ), cfgInt( "operator.deployment.xp.port.main.number" ) ).
+                    build().
+                    spec() ).
+                build() );
+        }
 
         int effectiveScale = diffSpec().newValue().get().enabled() ? newNode.replicas() : 0;
         boolean changeScale = diffSpec().enabledChanged() || diffSpecNode().replicasChanged() || diffSpec().isNew();
@@ -119,7 +138,7 @@ public abstract class CreateXpDeploymentNode
                 client( defaultClient() ).
                 ownerReference( ownerReference() ).
                 namespace( namespace() ).
-                name( nodeFullName() ).
+                name( nodeId() ).
                 labels( nodeLabels ).
                 spec( ImmutablePodDisruptionBudgetSpecBuilder.builder().
                     minAvailable( minimumAvailable() ).
@@ -137,10 +156,12 @@ public abstract class CreateXpDeploymentNode
                 client( defaultClient() ).
                 ownerReference( ownerReference() ).
                 namespace( namespace() ).
-                name( nodeFullName() ).
-                labels( configMapExtraLabels( nodeLabels ) ).
-                data( configBuilder().create( newNode ) ).
+                name( nodeId() ).
+                labels( configMapExtraLabels( nodeId(), nodeLabels ) ).
+                data( Collections.EMPTY_MAP ).
                 build() );
+
+            clusterConfigurator().addCommands( commandBuilder, nodeId(), newNode );
         }
 
         boolean changeStatefulSet =
@@ -165,7 +186,7 @@ public abstract class CreateXpDeploymentNode
                 client( defaultClient() ).
                 ownerReference( ownerReference() ).
                 namespace( namespace() ).
-                name( nodeFullName() ).
+                name( nodeId() ).
                 labels( nodeLabels ).
                 spec( ImmutableStatefulSetSpecBuilder.builder().
                     podLabels( nodeLabels ).
@@ -186,7 +207,7 @@ public abstract class CreateXpDeploymentNode
             commandBuilder.addCommand( ImmutableCommandScaleStatefulSet.builder().
                 client( defaultClient() ).
                 namespace( namespace() ).
-                name( nodeFullName() ).
+                name( nodeId() ).
                 scale( effectiveScale ).
                 build() );
         }

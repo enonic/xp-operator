@@ -34,12 +34,11 @@ public abstract class DiffResource
         {
             String cloud = getCloud.apply( newValue().get() );
             String project = getProject.apply( newValue().get() );
-            String type = getType.apply( newValue().get() );
             String name = getName.apply( newValue().get() );
 
-            String fullName = String.join( "-", cloud, project, type, name );
+            String fullName = String.join( "-", cloud, project, name );
             Preconditions.checkState( fullName.equals( newValue().get().getMetadata().getName() ),
-                                      "Xp7Deployment name must be equal to <Cloud>-<Project>-<Type>-<Name> according to labels, i.e: '" +
+                                      "Xp7Deployment name must be equal to <Cloud>-<Project>-<Name> according to labels, i.e: '" +
                                           fullName + "'" );
         }
 

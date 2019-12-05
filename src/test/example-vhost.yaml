@@ -2,13 +2,13 @@ apiVersion: enonic.cloud/v1alpha1
 kind: Xp7VHost
 metadata:
   name: test-purplejs-io
-  namespace: mycloud-myproject-xp-qa
+  namespace: mycloud-myproject-qaxp
 spec:
   host: test.purplejs.io
   certificate:
     authority: selfSigned
   mappings:
-    - node: 62524054-0f15-4319-84e3-d6cbb086cbbf
+    - node: main
       source: /admin
       target: /admin
       idProvider: system

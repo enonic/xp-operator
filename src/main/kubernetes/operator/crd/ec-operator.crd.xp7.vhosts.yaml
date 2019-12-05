@@ -16,3 +16,19 @@ spec:
       type: string
       description: Host
       JSONPath: .spec.host
+    - name: Nodes
+      type: string
+      description: Nodes
+      JSONPath: .spec.mappings[*].node
+    - name: Sources
+      type: string
+      description: Sources
+      JSONPath: .spec.mappings[*].source
+    - name: Targets
+      type: string
+      description: Targets
+      JSONPath: .spec.mappings[*].target
+    - name: IdProviders
+      type: string
+      description: IdProviders
+      JSONPath: .spec.mappings[*].idProvider
