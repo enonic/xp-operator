@@ -16,6 +16,7 @@ import io.quarkus.runtime.StartupEvent;
 import com.enonic.ec.kubernetes.common.client.DefaultClientProducer;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.operator.commands.deployments.ImmutableCreateXpDeployment;
+import com.enonic.ec.kubernetes.operator.crd.config.client.XpConfigClientProducer;
 import com.enonic.ec.kubernetes.operator.crd.deployment.ImmutableXpDeploymentNamingHelper;
 import com.enonic.ec.kubernetes.operator.crd.deployment.XpDeploymentResource;
 import com.enonic.ec.kubernetes.operator.crd.deployment.client.XpDeploymentCache;
@@ -30,6 +31,9 @@ public class OperatorDeployments
 
     @Inject
     DefaultClientProducer defaultClientProducer;
+
+    @Inject
+    XpConfigClientProducer xpConfigClientProducer;
 
     @Inject
     XpDeploymentCache xpDeploymentCache;
@@ -55,6 +59,7 @@ public class OperatorDeployments
 
                 ImmutableCreateXpDeployment.builder().
                     defaultClient( defaultClientProducer.client() ).
+                    configClient( xpConfigClientProducer.produce() ).
                     deploymentName( newResource.get().getMetadata().getName() ).
                     defaultLabels( newResource.get().getMetadata().getLabels() ).
                     namingHelper( ImmutableXpDeploymentNamingHelper.builder().resource( newResource.get() ).build() ).

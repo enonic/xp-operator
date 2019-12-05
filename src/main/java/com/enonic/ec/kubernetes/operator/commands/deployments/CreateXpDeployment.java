@@ -9,8 +9,11 @@ import java.util.function.Predicate;
 
 import org.immutables.value.Value;
 
+import io.fabric8.kubernetes.api.model.EnvVar;
+import io.fabric8.kubernetes.api.model.EnvVarSource;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.Quantity;
+import io.fabric8.kubernetes.api.model.SecretKeySelector;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
 import com.enonic.ec.kubernetes.common.Configuration;
@@ -23,6 +26,7 @@ import com.enonic.ec.kubernetes.operator.commands.deployments.config.ImmutableCo
 import com.enonic.ec.kubernetes.operator.commands.deployments.volumes.ImmutableVolumeBuilderNfs;
 import com.enonic.ec.kubernetes.operator.commands.deployments.volumes.ImmutableVolumeBuilderStd;
 import com.enonic.ec.kubernetes.operator.commands.deployments.volumes.VolumeBuilder;
+import com.enonic.ec.kubernetes.operator.crd.config.client.XpConfigClient;
 import com.enonic.ec.kubernetes.operator.crd.deployment.XpDeploymentNamingHelper;
 import com.enonic.ec.kubernetes.operator.crd.deployment.diff.DiffSpec;
 import com.enonic.ec.kubernetes.operator.crd.deployment.diff.DiffSpecNode;
@@ -36,6 +40,8 @@ public abstract class CreateXpDeployment
     implements CombinedCommandBuilder
 {
     protected abstract KubernetesClient defaultClient();
+
+    protected abstract XpConfigClient configClient();
 
     protected abstract String deploymentName();
 
@@ -123,14 +129,23 @@ public abstract class CreateXpDeployment
                 build();
         }
 
+        // Setup default su pass env var
+        EnvVarSource suPassSource = new EnvVarSource();
+        suPassSource.setSecretKeyRef( new SecretKeySelector( "suPassHash", namingHelper().defaultResourceName( "su" ), false ) );
+        EnvVar suPassHash = new EnvVar();
+        suPassHash.setName( "SU_PASS_HASH" );
+        suPassHash.setValueFrom( suPassSource );
+
         if ( diffSpec().isNew() )
         {
             ImmutableCreateXpDeploymentBase.builder().
                 defaultClient( defaultClient() ).
+                configClient( configClient() ).
                 ownerReference( ownerReference() ).
                 namespace( namespaceName ).
                 isClustered( isClustered ).
-                serviceName( serviceName ).
+                discoveryServiceName( serviceName ).
+                suPassHash( suPassHash ).
                 sharedStorageName( defaultSharedStorageName ).
                 sharedStorageSize( defaultSharedStorageSize ).
                 defaultLabels( defaultLabels ).
@@ -152,6 +167,7 @@ public abstract class CreateXpDeployment
                 nodeFullName( namingHelper().defaultResourceName( diffSpecNode.name() ) ).
                 diffSpec( diffSpec() ).
                 diffSpecNode( diffSpecNode ).
+                suPassHash( suPassHash ).
                 defaultLabels( defaultLabels ).
                 configBuilder( configBuilder ).
                 deploymentName( deploymentName ).

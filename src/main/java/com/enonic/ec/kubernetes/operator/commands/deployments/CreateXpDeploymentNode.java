@@ -64,6 +64,8 @@ public abstract class CreateXpDeploymentNode
 
     protected abstract boolean nodeSharedConfigChanged();
 
+    protected abstract EnvVar suPassHash();
+
 //    protected abstract Optional<String> sharedStorageName();
 
     private String podImageName()
@@ -146,6 +148,7 @@ public abstract class CreateXpDeploymentNode
         if ( changeStatefulSet )
         {
             List<EnvVar> podEnv = new LinkedList<>();
+            podEnv.add( suPassHash() );
 
             for ( Map.Entry<String, String> e : newNode.env().entrySet() )
             {
