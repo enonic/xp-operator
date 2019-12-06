@@ -5,48 +5,45 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
+import io.fabric8.kubernetes.client.dsl.FilterWatchListDeletable;
 import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.ec.kubernetes.common.cache.ResourceCache;
 import com.enonic.ec.kubernetes.operator.crd.vhost.XpVHostResource;
+import com.enonic.ec.kubernetes.operator.crd.vhost.XpVHostResourceList;
 
 @Singleton
 public class XpVHostCache
-    extends ResourceCache<XpVHostResource>
+    extends ResourceCache<XpVHostResource, XpVHostResourceList>
 {
-    private final XpVHostClient client;
-
     @Inject
-    public XpVHostCache( XpVHostClientProducer XpVHostClientProducer )
+    public XpVHostCache( XpVHostClientProducer xpVHostClientProducer )
     {
-        super();
-        this.client = XpVHostClientProducer.produce();
+        super( getResourceFilter( xpVHostClientProducer.produce() ) );
+    }
+
+    private static FilterWatchListDeletable<XpVHostResource, XpVHostResourceList, Boolean, Watch, Watcher<XpVHostResource>> getResourceFilter(
+        XpVHostClient client )
+    {
+        return client.client().inAnyNamespace();
     }
 
     protected void onStartup( @Observes StartupEvent _ev )
     {
-        // Set initial state of XP vHosts
-        initialize( client.client().inAnyNamespace().list().getItems() );
-
-        client.client().inAnyNamespace().watch( new Watcher<>()
+        startWatcher( new Watcher<XpVHostResource>()
         {
             @Override
-            public void eventReceived( final Action action, final XpVHostResource deployment )
+            public void eventReceived( final Action action, final XpVHostResource resource )
             {
-                handleEvent( action, deployment );
+                watcherHandleEvent( action, resource );
             }
 
             @Override
-            public void onClose( final KubernetesClientException cause )
+            public void onClose( final KubernetesClientException e )
             {
-                if ( cause != null )
-                {
-                    // This means the socket closed and we have a problem, best to
-                    // let kubernetes just restart the operator pod.
-                    cause.printStackTrace();
-                    System.exit( -1 );
-                }
+                watcherOnClose( e );
             }
         } );
     }

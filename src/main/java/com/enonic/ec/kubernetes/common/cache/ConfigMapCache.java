@@ -17,46 +17,34 @@ import com.enonic.ec.kubernetes.common.client.DefaultClientProducer;
 
 @Singleton
 public class ConfigMapCache
-    extends ResourceCache<ConfigMap>
+    extends ResourceCache<ConfigMap, ConfigMapList>
 {
-    private final KubernetesClient client;
-
     @Inject
     public ConfigMapCache( DefaultClientProducer defaultClientProducer )
     {
-        super();
-        this.client = defaultClientProducer.client();
+        super( getResourceFilter( defaultClientProducer.client() ) );
     }
 
-    private FilterWatchListDeletable<ConfigMap, ConfigMapList, Boolean, Watch, Watcher<ConfigMap>> getResourceFilter()
+    private static FilterWatchListDeletable<ConfigMap, ConfigMapList, Boolean, Watch, Watcher<ConfigMap>> getResourceFilter(
+        KubernetesClient client )
     {
         return client.configMaps().inAnyNamespace().withLabel( cfgStr( "operator.deployment.xp.labels.config.managed" ), "true" );
     }
 
     protected void onStartup( @Observes StartupEvent _ev )
     {
-        // Set initial state of config maps
-        initialize( getResourceFilter().list().getItems() );
-
-        // Only watch XP config maps
-        getResourceFilter().watch( new Watcher<>()
+        startWatcher( new Watcher<>()
         {
             @Override
-            public void eventReceived( final Action action, final ConfigMap configMap )
+            public void eventReceived( final Action action, final ConfigMap resource )
             {
-                handleEvent( action, configMap );
+                watcherHandleEvent( action, resource );
             }
 
             @Override
-            public void onClose( final KubernetesClientException cause )
+            public void onClose( final KubernetesClientException e )
             {
-                if ( cause != null )
-                {
-                    // This means the socket closed and we have a problem, best to
-                    // let kubernetes just restart the operator pod.
-                    cause.printStackTrace();
-                    System.exit( -1 );
-                }
+                watcherOnClose( e );
             }
         } );
     }

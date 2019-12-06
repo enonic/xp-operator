@@ -13,11 +13,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.KubernetesResourceList;
+import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
+import io.fabric8.kubernetes.client.dsl.FilterWatchListDeletable;
 
 import com.enonic.ec.kubernetes.common.Configuration;
 
-public class ResourceCache<T extends HasMetadata>
+public class ResourceCache<T extends HasMetadata, L extends KubernetesResourceList<T>>
     extends Configuration
 {
     private final static Logger log = LoggerFactory.getLogger( ResourceCache.class );
@@ -28,11 +32,14 @@ public class ResourceCache<T extends HasMetadata>
 
     private final Executor executor;
 
-    protected ResourceCache()
+    private final FilterWatchListDeletable<T, L, Boolean, Watch, Watcher<T>> filter;
+
+    protected ResourceCache( FilterWatchListDeletable<T, L, Boolean, Watch, Watcher<T>> filter )
     {
         this.cache = new ConcurrentHashMap<>();
         this.eventListeners = new LinkedList<>();
         this.executor = Executors.newSingleThreadExecutor();
+        this.filter = filter;
     }
 
     public Stream<T> stream()
@@ -50,12 +57,13 @@ public class ResourceCache<T extends HasMetadata>
         eventListeners.add( event );
     }
 
-    public void initialize( List<T> initialState )
+    protected void startWatcher( Watcher<T> watcher )
     {
-        initialState.forEach( resource -> cache.put( resource.getMetadata().getUid(), resource ) );
+        filter.list().getItems().forEach( resource -> cache.put( resource.getMetadata().getUid(), resource ) );
+        filter.watch( watcher );
     }
 
-    protected void handleEvent( final Watcher.Action action, final T resource )
+    protected void watcherHandleEvent( final Watcher.Action action, final T resource )
     {
         try
         {
@@ -100,6 +108,17 @@ public class ResourceCache<T extends HasMetadata>
         {
             // Best just to let kubernetes restart the operator
             log.error( "Something when terribly wrong", e );
+            System.exit( -1 );
+        }
+    }
+
+    protected void watcherOnClose( final KubernetesClientException cause )
+    {
+        if ( cause != null )
+        {
+            // This means the socket closed and we have a problem, best to
+            // let kubernetes just restart the operator pod.
+            cause.printStackTrace();
             System.exit( -1 );
         }
     }

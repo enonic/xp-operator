@@ -17,46 +17,34 @@ import com.enonic.ec.kubernetes.common.client.DefaultClientProducer;
 
 @Singleton
 public class IngressCache
-    extends ResourceCache<Ingress>
+    extends ResourceCache<Ingress, IngressList>
 {
-    private final KubernetesClient client;
-
     @Inject
     public IngressCache( DefaultClientProducer defaultClientProducer )
     {
-        super();
-        this.client = defaultClientProducer.client();
+        super( getResourceFilter( defaultClientProducer.client() ) );
     }
 
-    private FilterWatchListMultiDeletable<Ingress, IngressList, Boolean, Watch, Watcher<Ingress>> getResourceFilter()
+    private static FilterWatchListMultiDeletable<Ingress, IngressList, Boolean, Watch, Watcher<Ingress>> getResourceFilter(
+        KubernetesClient client )
     {
         return client.extensions().ingresses().inAnyNamespace();
     }
 
     protected void onStartup( @Observes StartupEvent _ev )
     {
-        // Set initial state of config maps
-        initialize( getResourceFilter().list().getItems() );
-
-        // Only watch XP config maps
-        getResourceFilter().watch( new Watcher<>()
+        startWatcher( new Watcher<>()
         {
             @Override
-            public void eventReceived( final Action action, final Ingress ingress )
+            public void eventReceived( final Action action, final Ingress resource )
             {
-                handleEvent( action, ingress );
+                watcherHandleEvent( action, resource );
             }
 
             @Override
-            public void onClose( final KubernetesClientException cause )
+            public void onClose( final KubernetesClientException e )
             {
-                if ( cause != null )
-                {
-                    // This means the socket closed and we have a problem, best to
-                    // let kubernetes just restart the operator pod.
-                    cause.printStackTrace();
-                    System.exit( -1 );
-                }
+                watcherOnClose( e );
             }
         } );
     }

@@ -17,46 +17,33 @@ import com.enonic.ec.kubernetes.common.client.DefaultClientProducer;
 
 @Singleton
 public class PodCache
-    extends ResourceCache<Pod>
+    extends ResourceCache<Pod, PodList>
 {
-    private final KubernetesClient client;
-
     @Inject
     public PodCache( DefaultClientProducer defaultClientProducer )
     {
-        super();
-        this.client = defaultClientProducer.client();
+        super( getResourceFilter( defaultClientProducer.client() ) );
     }
 
-    private FilterWatchListDeletable<Pod, PodList, Boolean, Watch, Watcher<Pod>> getResourceFilter()
+    private static FilterWatchListDeletable<Pod, PodList, Boolean, Watch, Watcher<Pod>> getResourceFilter( KubernetesClient client )
     {
         return client.pods().inAnyNamespace().withLabel( cfgStr( "operator.deployment.xp.labels.pod.managed" ), "true" );
     }
 
     protected void onStartup( @Observes StartupEvent _ev )
     {
-        // Set initial state of pods
-        initialize( getResourceFilter().list().getItems() );
-
-        // Only watch XP config maps
-        getResourceFilter().watch( new Watcher<>()
+        startWatcher( new Watcher<>()
         {
             @Override
-            public void eventReceived( final Action action, final Pod pod )
+            public void eventReceived( final Action action, final Pod resource )
             {
-                handleEvent( action, pod );
+                watcherHandleEvent( action, resource );
             }
 
             @Override
-            public void onClose( final KubernetesClientException cause )
+            public void onClose( final KubernetesClientException e )
             {
-                if ( cause != null )
-                {
-                    // This means the socket closed and we have a problem, best to
-                    // let kubernetes just restart the operator pod.
-                    cause.printStackTrace();
-                    System.exit( -1 );
-                }
+                watcherOnClose( e );
             }
         } );
     }
