@@ -26,6 +26,8 @@ public abstract class IngressSpec
 
     protected abstract Optional<String> certificateSecretName();
 
+    protected abstract String allService();
+
     @Value.Derived
     public io.fabric8.kubernetes.api.model.extensions.IngressSpec spec()
     {
@@ -49,9 +51,9 @@ public abstract class IngressSpec
         List<HTTPIngressPath> paths = new LinkedList<>();
         for ( SpecMapping m : vHostSpec().mappings() )
         {
-            paths.add(
-                new HTTPIngressPath( new IngressBackend( m.node(), new IntOrString( cfgInt( "operator.deployment.xp.port.main.number" ) ) ),
-                                     m.source() ) );
+            paths.add( new HTTPIngressPath( new IngressBackend( m.node() != null ? m.node() : allService(),
+                                                                new IntOrString( cfgInt( "operator.deployment.xp.port.main.number" ) ) ),
+                                            m.source() ) );
         }
         http.setPaths( paths );
 

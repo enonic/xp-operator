@@ -20,12 +20,16 @@ import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.Diff;
 import com.enonic.ec.kubernetes.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
+import com.enonic.ec.kubernetes.kubectl.apply.ImmutableCommandApplyXp7App;
+import com.enonic.ec.kubernetes.kubectl.apply.ImmutableCommandApplyXp7VHost;
 import com.enonic.ec.kubernetes.operator.commands.deployments.config.ClusterConfigurator;
 import com.enonic.ec.kubernetes.operator.commands.deployments.config.ImmutableClusterConfig;
 import com.enonic.ec.kubernetes.operator.commands.deployments.config.ImmutableNonClusteredConfig;
 import com.enonic.ec.kubernetes.operator.commands.deployments.volumes.ImmutableVolumeBuilderNfs;
 import com.enonic.ec.kubernetes.operator.commands.deployments.volumes.ImmutableVolumeBuilderStd;
 import com.enonic.ec.kubernetes.operator.commands.deployments.volumes.VolumeBuilder;
+import com.enonic.ec.kubernetes.operator.crd.app.client.XpAppClient;
+import com.enonic.ec.kubernetes.operator.crd.app.spec.ImmutableSpec;
 import com.enonic.ec.kubernetes.operator.crd.config.client.XpConfigClient;
 import com.enonic.ec.kubernetes.operator.crd.deployment.XpDeploymentNamingHelper;
 import com.enonic.ec.kubernetes.operator.crd.deployment.XpDeploymentResource;
@@ -33,6 +37,8 @@ import com.enonic.ec.kubernetes.operator.crd.deployment.diff.DiffSpec;
 import com.enonic.ec.kubernetes.operator.crd.deployment.diff.DiffSpecNode;
 import com.enonic.ec.kubernetes.operator.crd.deployment.spec.Spec;
 import com.enonic.ec.kubernetes.operator.crd.deployment.spec.SpecNode;
+import com.enonic.ec.kubernetes.operator.crd.vhost.client.XpVHostClient;
+import com.enonic.ec.kubernetes.operator.crd.vhost.spec.ImmutableSpecMapping;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @Value.Immutable
@@ -43,6 +49,10 @@ public abstract class CreateXpDeployment
     protected abstract KubernetesClient defaultClient();
 
     protected abstract XpConfigClient configClient();
+
+    protected abstract XpVHostClient vHostClient();
+
+    protected abstract XpAppClient appClient();
 
     protected abstract String deploymentName();
 
@@ -56,6 +66,8 @@ public abstract class CreateXpDeployment
 
     protected abstract XpDeploymentNamingHelper namingHelper();
 
+    protected abstract Map<String, String> preInstallApps();
+
     @Value.Derived
     protected Spec spec()
     {
@@ -67,7 +79,7 @@ public abstract class CreateXpDeployment
     {
         String deploymentName = deploymentName();
         String namespaceName = namingHelper().defaultNamespaceName();
-        String serviceName = namingHelper().defaultResourceName();
+        String serviceName = namespaceName;
         Map<String, String> defaultLabels = defaultLabels();
 
         boolean useNfs = cfgBool( "operator.deployment.xp.volume.shared.nfs.enabled" );
@@ -154,6 +166,29 @@ public abstract class CreateXpDeployment
                 defaultLabels( defaultLabels ).
                 build().
                 addCommands( commandBuilder );
+            preInstallApps().forEach( ( name, uri ) -> commandBuilder.addCommand( ImmutableCommandApplyXp7App.builder().
+                client( appClient() ).
+                namespace( namespaceName ).
+                canSkipOwnerReference( true ).
+                name( name ).
+                spec( ImmutableSpec.builder().uri( uri ).build() ).
+                build() ) );
+            String healthCheckHost = cfgStr( "operator.deployment.xp.probe.healthcheck.host" );
+            String healthCheckPath = cfgStr( "operator.deployment.xp.probe.healthcheck.target" );
+            commandBuilder.addCommand( ImmutableCommandApplyXp7VHost.builder().
+                client( vHostClient() ).
+                namespace( namespaceName ).
+                canSkipOwnerReference( true ).
+                name( healthCheckHost ).
+                spec( com.enonic.ec.kubernetes.operator.crd.vhost.spec.ImmutableSpec.builder().
+                    createIngress( false ).
+                    host( healthCheckHost ).
+                    addMappings( ImmutableSpecMapping.builder().
+                        source( "/" ).
+                        target( healthCheckPath ).
+                        build() ).
+                    build() ).
+                build() );
         }
 
         Predicate<DiffSpecNode> createOrUpdate = n -> diffSpec().versionChanged() || diffSpec().enabledChanged() || n.shouldAddOrModify();
@@ -208,10 +243,9 @@ public abstract class CreateXpDeployment
         {
             if ( node.getValue().isMasterNode() )
             {
-                String tmp = namingHelper().defaultResourceName( node.getKey() );
                 for ( int i = 0; i < node.getValue().replicas(); i++ )
                 {
-                    res.add( tmp + "-" + i + "." + serviceName );
+                    res.add( node.getKey() + "-" + i + "." + serviceName );
                 }
             }
         }

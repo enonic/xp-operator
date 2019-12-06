@@ -12,6 +12,10 @@ spec:
   scope: Namespaced
   version: v1alpha1
   additionalPrinterColumns:
+    - name: Ingress
+      type: boolean
+      description: Ingress
+      JSONPath: .spec.createIngress
     - name: Host
       type: string
       description: Host

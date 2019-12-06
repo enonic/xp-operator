@@ -19,10 +19,13 @@ public abstract class XpVHostDeleteIngress
     @Override
     public void addCommands( final ImmutableCombinedCommand.Builder commandBuilder )
     {
-        commandBuilder.addCommand( ImmutableCommandDeleteIngress.builder().
-            client( defaultClient() ).
-            namespace( resource().getMetadata().getNamespace() ).
-            name( getIngressName( resource() ) ).
-            build() );
+        if ( resource().getSpec().createIngress() )
+        {
+            commandBuilder.addCommand( ImmutableCommandDeleteIngress.builder().
+                client( defaultClient() ).
+                namespace( resource().getMetadata().getNamespace() ).
+                name( getIngressName( resource() ) ).
+                build() );
+        }
     }
 }

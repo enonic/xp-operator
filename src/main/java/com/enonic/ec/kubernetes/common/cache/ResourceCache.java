@@ -52,6 +52,11 @@ public class ResourceCache<T extends HasMetadata, L extends KubernetesResourceLi
         return Optional.ofNullable( cache.get( id ) );
     }
 
+    public Optional<T> getByName( String name )
+    {
+        return stream().filter( r -> r.getMetadata().getName().equals( name ) ).findFirst();
+    }
+
     public void addWatcher( OnAction<T> event )
     {
         eventListeners.add( event );

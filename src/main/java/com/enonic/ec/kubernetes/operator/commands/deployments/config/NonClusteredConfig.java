@@ -17,6 +17,6 @@ public abstract class NonClusteredConfig
     @Override
     protected void setElasticSearchConfig( final StringBuilder sb, SpecNode node )
     {
-        sb.append( "http.enabled=" ).append( "true" ).append( "\n" ); // TODO: Use alive app for health checks
+        sb.append( "http.enabled=" ).append( "false" ).append( "\n" );
     }
 }

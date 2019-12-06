@@ -142,7 +142,10 @@ public class AdmissionApi
         {
             for ( SpecMapping mapping : diff.newValue().get().getSpec().mappings() )
             {
-                checkIfNodeExists( diff.newValue().get().getMetadata().getNamespace(), mapping.node(), "spec.mappings.node" );
+                if ( mapping.node() != null )
+                {
+                    checkIfNodeExists( diff.newValue().get().getMetadata().getNamespace(), mapping.node(), "spec.mappings.node" );
+                }
             }
         }
     }

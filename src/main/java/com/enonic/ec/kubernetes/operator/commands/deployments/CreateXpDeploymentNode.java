@@ -180,7 +180,7 @@ public abstract class CreateXpDeploymentNode
             cfgIfBool( "operator.extensions.linkerd.enabled", () -> podAnnotations.put( "linkerd.io/inject", "enabled" ) );
 
             VolumeTripletList volumeList =
-                volumeBuilder().getVolumeTriplets( nodeFullName(), Optional.ofNullable( newNode.resources().disks().get( "index" ) ) );
+                volumeBuilder().getVolumeTriplets( nodeId(), Optional.ofNullable( newNode.resources().disks().get( "index" ) ) );
 
             commandBuilder.addCommand( ImmutableCommandApplyStatefulSet.builder().
                 client( defaultClient() ).

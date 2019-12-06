@@ -14,6 +14,7 @@ import com.enonic.ec.kubernetes.operator.crd.BuilderException;
 @Value.Style(throwForInvalidImmutableState = SpecMapping.ExceptionMissing.class, throwForNullPointer = SpecMapping.ExceptionMissing.class)
 public abstract class SpecMapping
 {
+    @Nullable
     public abstract String node();
 
     public abstract String source();

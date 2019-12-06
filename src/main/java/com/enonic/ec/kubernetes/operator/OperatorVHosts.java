@@ -27,6 +27,7 @@ import com.enonic.ec.kubernetes.operator.commands.vhosts.helpers.Mapping;
 import com.enonic.ec.kubernetes.operator.crd.config.XpConfigResource;
 import com.enonic.ec.kubernetes.operator.crd.config.client.XpConfigCache;
 import com.enonic.ec.kubernetes.operator.crd.config.client.XpConfigClientProducer;
+import com.enonic.ec.kubernetes.operator.crd.deployment.client.XpDeploymentCache;
 import com.enonic.ec.kubernetes.operator.crd.vhost.XpVHostResource;
 import com.enonic.ec.kubernetes.operator.crd.vhost.client.XpVHostCache;
 
@@ -42,6 +43,9 @@ public class OperatorVHosts
 
     @Inject
     XpConfigClientProducer configClientProducer;
+
+    @Inject
+    XpDeploymentCache xpDeploymentCache;
 
     @Inject
     XpVHostCache xpVHostCache;
@@ -138,7 +142,24 @@ public class OperatorVHosts
             idProvider( Optional.ofNullable( m.idProvider() ) ).
             build() ) ) );
 
+        // Get with no node
+        List<Mapping> withNoNode = mappings.stream().filter( n -> n.node() == null ).collect( Collectors.toList() );
+
         // Group mappings by node
-        return mappings.stream().collect( Collectors.groupingBy( Mapping::node ) );
+        Map<String, List<Mapping>> map =
+            mappings.stream().filter( n -> n.node() != null ).collect( Collectors.groupingBy( Mapping::node ) );
+
+        // Add missing nodes to map
+        xpDeploymentCache.getByName( namespace ).get().getSpec().nodes().keySet().forEach( k -> {
+            if ( !map.containsKey( k ) )
+            {
+                map.put( k, new LinkedList<>() );
+            }
+        } );
+
+        // Add no node mappings to all other nodes
+        map.forEach( ( node, m ) -> m.addAll( withNoNode ) );
+
+        return map;
     }
 }

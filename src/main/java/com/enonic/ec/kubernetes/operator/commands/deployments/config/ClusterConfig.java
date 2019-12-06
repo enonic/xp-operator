@@ -45,7 +45,7 @@ public abstract class ClusterConfig
         sb.append( "node.master=" ).append( node.isMasterNode() ? "true" : "false" ).append( "\n" );
         sb.append( "node.data=" ).append( node.isDataNode() ? "true" : "false" ).append( "\n" );
         sb.append( "cluster.name=" ).append( clusterName() ).append( "\n" );
-        sb.append( "http.enabled=" ).append( "true" ).append( "\n" ); // TODO: Use alive app for health checks
+        sb.append( "http.enabled=" ).append( "false" ).append( "\n" );
         sb.append( "gateway.expected_master_nodes=" ).append( minimumMasterNodes() ).append( "\n" );
         sb.append( "gateway.expected_data_nodes=" ).append( minimumDataNodes() ).append( "\n" );
         sb.append( "gateway.recover_after_time=" ).append( "5m" ).append( "\n" );

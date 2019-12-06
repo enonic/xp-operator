@@ -17,15 +17,17 @@ public abstract class XpVHostApplyXpConfig
     @Override
     protected void setData( final StringBuilder sb )
     {
+        sb.append( "enabled = true\n" );
         for ( Mapping m : mappings() )
         {
+            sb.append( "\n" );
             sb.append( String.format( "mapping.%s.host=%s\n", m.name(), m.host() ) );
             sb.append( String.format( "mapping.%s.source=%s\n", m.name(), m.source() ) );
-            sb.append( String.format( "mapping.%s.target=%s\n", m.name(), m.target() ) );
-            if ( m.idProvider() != null )
-            {
-                sb.append( String.format( "mapping.%s.idProvider.%s=default", m.name(), m.idProvider() ) );
-            }
+            sb.append( String.format( "mapping.%s.target=%s", m.name(), m.target() ) );
+            m.idProvider().ifPresent( p -> {
+                sb.append( "\n" );
+                sb.append( String.format( "mapping.%s.idProvider.%s=default", m.name(), p ) );
+            } );
         }
     }
 }

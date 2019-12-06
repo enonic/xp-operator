@@ -18,6 +18,12 @@ public abstract class Spec
 {
     public abstract String host();
 
+    @Value.Default
+    public Boolean createIngress()
+    {
+        return true;
+    }
+
     @Nullable
     public abstract SpecCertificate certificate();
 

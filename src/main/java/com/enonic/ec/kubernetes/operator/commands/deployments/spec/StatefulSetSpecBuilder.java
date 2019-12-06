@@ -17,6 +17,7 @@ import io.fabric8.kubernetes.api.model.ContainerPort;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.EnvVarSource;
 import io.fabric8.kubernetes.api.model.HTTPGetAction;
+import io.fabric8.kubernetes.api.model.HTTPHeader;
 import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.LabelSelector;
 import io.fabric8.kubernetes.api.model.ObjectFieldSelector;
@@ -224,8 +225,9 @@ public abstract class StatefulSetSpecBuilder
     {
         Function<String, String> ck = k -> String.format( "operator.deployment.xp.probe.%s.%s", name, k );
         Probe p = new Probe();
-        p.setHttpGet(
-            new HTTPGetAction( null, null, cfgStr( ck.apply( "path" ) ), new IntOrString( cfgInt( ck.apply( "port" ) ) ), null ) );
+        p.setHttpGet( new HTTPGetAction( null, Collections.singletonList(
+            new HTTPHeader( "Host", cfgStr( "operator.deployment.xp.probe.healthcheck.host" ) ) ), cfgStr( ck.apply( "path" ) ),
+                                         new IntOrString( cfgInt( ck.apply( "port" ) ) ), null ) );
         p.setInitialDelaySeconds( cfgInt( ck.apply( "initialDelaySeconds" ) ) );
         p.setPeriodSeconds( cfgInt( ck.apply( "periodSeconds" ) ) );
         p.setFailureThreshold( cfgInt( ck.apply( "failureThreshold" ) ) );

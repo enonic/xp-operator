@@ -27,6 +27,11 @@ public abstract class XpVHostApplyIngress
     @Override
     public void addCommands( final ImmutableCombinedCommand.Builder commandBuilder )
     {
+        if ( !resource().getSpec().createIngress() )
+        {
+            return;
+        }
+
         String name = resource().getMetadata().getName();
         String host = resource().getSpec().host();
 
@@ -97,6 +102,7 @@ public abstract class XpVHostApplyIngress
             annotations( ingressAnnotations.build() ).
             spec( ImmutableIngressSpec.builder().
                 certificateSecretName( Optional.ofNullable( cert != null ? name : null ) ).
+                allService( resource().getMetadata().getNamespace() ).
                 vHostSpec( resource().getSpec() ).
                 build().
                 spec() ).
