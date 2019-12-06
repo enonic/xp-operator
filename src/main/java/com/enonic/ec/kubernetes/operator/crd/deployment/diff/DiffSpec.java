@@ -38,8 +38,8 @@ public abstract class DiffSpec
     @Value.Derived
     public List<DiffSpecNode> nodesChanged()
     {
-        @SuppressWarnings("unchecked") Map<String, SpecNode> oldNodes = oldValue().map( Spec::nodes ).orElse( Collections.EMPTY_MAP );
-        @SuppressWarnings("unchecked") Map<String, SpecNode> newNodes = newValue().map( Spec::nodes ).orElse( Collections.EMPTY_MAP );
+        Map<String, SpecNode> oldNodes = oldValue().map( Spec::nodes ).orElse( Collections.emptyMap() );
+        Map<String, SpecNode> newNodes = newValue().map( Spec::nodes ).orElse( Collections.emptyMap() );
         return mergeMaps( oldNodes, newNodes, ( s, o, n ) -> ImmutableDiffSpecNode.builder().
             name( s ).
             oldValue( o ).

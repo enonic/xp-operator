@@ -158,7 +158,7 @@ public abstract class CreateXpDeploymentNode
                 namespace( namespace() ).
                 name( nodeId() ).
                 labels( configMapExtraLabels( nodeId(), nodeLabels ) ).
-                data( Collections.EMPTY_MAP ).
+                data( Collections.emptyMap() ).
                 build() );
 
             clusterConfigurator().addCommands( commandBuilder, nodeId(), newNode );

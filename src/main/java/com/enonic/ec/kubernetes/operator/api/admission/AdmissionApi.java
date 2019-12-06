@@ -24,6 +24,8 @@ import io.fabric8.kubernetes.api.model.Status;
 import io.fabric8.kubernetes.api.model.admission.AdmissionResponse;
 import io.fabric8.kubernetes.api.model.admission.AdmissionReview;
 
+import com.enonic.ec.kubernetes.operator.crd.app.XpAppResource;
+import com.enonic.ec.kubernetes.operator.crd.config.XpConfigResource;
 import com.enonic.ec.kubernetes.operator.crd.deployment.XpDeploymentResource;
 import com.enonic.ec.kubernetes.operator.crd.deployment.client.XpDeploymentCache;
 import com.enonic.ec.kubernetes.operator.crd.vhost.XpVHostResource;
@@ -40,6 +42,12 @@ public class AdmissionApi
 
     @ConfigProperty(name = "operator.crd.xp.vhosts.kind")
     String xp7vHostKind;
+
+    @ConfigProperty(name = "operator.crd.xp.configs.kind")
+    String xp7ConfigKind;
+
+    @ConfigProperty(name = "operator.crd.xp.apps.kind")
+    String xp7AppKind;
 
     @Inject
     ObjectMapper mapper;
@@ -106,6 +114,8 @@ public class AdmissionApi
         Map<String, Consumer<AdmissionReview>> res = new HashMap<>();
         res.put( xp7DeploymentKind, this::xpDeploymentReview );
         res.put( xp7vHostKind, this::xpVHostReview );
+        res.put( xp7ConfigKind, this::xpConfigReview );
+        res.put( xp7AppKind, this::xpAppReview );
         return res;
     }
 
@@ -132,19 +142,45 @@ public class AdmissionApi
         {
             for ( SpecMapping mapping : diff.newValue().get().getSpec().mappings() )
             {
-                checkIfNodeExists( diff.newValue().get().getMetadata().getNamespace(), mapping.node() );
+                checkIfNodeExists( diff.newValue().get().getMetadata().getNamespace(), mapping.node(), "spec.mappings.node" );
             }
         }
     }
 
-    private void checkIfNodeExists( final String namespace, final String node )
+    private void xpConfigReview( final AdmissionReview review )
+    {
+        com.enonic.ec.kubernetes.operator.crd.config.diff.ImmutableDiffResource diff =
+            com.enonic.ec.kubernetes.operator.crd.config.diff.ImmutableDiffResource.builder().
+                oldValue( Optional.ofNullable(
+                    review.getRequest().getOldObject() != null ? (XpConfigResource) review.getRequest().getOldObject() : null ) ).
+                newValue( Optional.ofNullable(
+                    review.getRequest().getObject() != null ? (XpConfigResource) review.getRequest().getObject() : null ) ).
+                build();
+        if ( diff.newValue().isPresent() && diff.newValue().get().getSpec().node() != null )
+        {
+            checkIfNodeExists( diff.newValue().get().getMetadata().getNamespace(), diff.newValue().get().getSpec().node(), "spec.node" );
+        }
+    }
+
+    private void xpAppReview( final AdmissionReview review )
+    {
+        com.enonic.ec.kubernetes.operator.crd.app.diff.ImmutableDiffResource diff =
+            com.enonic.ec.kubernetes.operator.crd.app.diff.ImmutableDiffResource.builder().
+                oldValue( Optional.ofNullable(
+                    review.getRequest().getOldObject() != null ? (XpAppResource) review.getRequest().getOldObject() : null ) ).
+                newValue( Optional.ofNullable(
+                    review.getRequest().getObject() != null ? (XpAppResource) review.getRequest().getObject() : null ) ).
+                build();
+    }
+
+    private void checkIfNodeExists( final String namespace, final String node, final String field )
     {
         Optional<XpDeploymentResource> deployment =
             xpDeploymentCache.stream().filter( r -> r.getMetadata().getName().equals( namespace ) ).findFirst();
         Preconditions.checkState( deployment.isPresent(),
                                   xp7vHostKind + " can only be created in namespaces that are created by " + xp7DeploymentKind );
         Preconditions.checkState( deployment.get().getSpec().nodes().containsKey( node ),
-                                  "Field 'spec.mappings.node' with value '" + node + "' has to match a node in a " + xp7DeploymentKind );
+                                  "Field '" + field + "' with value '" + node + "' has to match a node in a " + xp7DeploymentKind );
     }
 
     private void defaultReviewConsumers( AdmissionReview r )

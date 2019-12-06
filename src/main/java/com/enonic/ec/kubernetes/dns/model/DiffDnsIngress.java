@@ -15,8 +15,8 @@ public abstract class DiffDnsIngress
     @Value.Derived
     public List<DiffDnsIngressDomains> diffDomains()
     {
-        @SuppressWarnings("unchecked") List<Domain> oldDomains = oldValue().map( DnsIngress::domains ).orElse( Collections.EMPTY_LIST );
-        @SuppressWarnings("unchecked") List<Domain> newDomains = newValue().map( DnsIngress::domains ).orElse( Collections.EMPTY_LIST );
+        List<Domain> oldDomains = oldValue().map( DnsIngress::domains ).orElse( Collections.emptyList() );
+        List<Domain> newDomains = newValue().map( DnsIngress::domains ).orElse( Collections.emptyList() );
 
         List<DiffDnsIngressDomains> res = mergeLists( oldDomains, newDomains, ( o, n ) -> ImmutableDiffDnsIngressDomains.builder().
             oldValue( o ).

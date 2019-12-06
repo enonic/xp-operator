@@ -40,7 +40,6 @@ public class OperatorConfig
 
     void onStartup( @Observes StartupEvent _ev )
     {
-//        configMapCache.addWatcher( this::watchConfigMap );
         xpConfigCache.addWatcher( this::watchXpConfig );
     }
 
@@ -68,22 +67,6 @@ public class OperatorConfig
         } );
     }
 
-//    private void watchConfigMap( final Watcher.Action action, final String s, final Optional<ConfigMap> oldConfigMap,
-//                                 final Optional<ConfigMap> newConfigMap )
-//    {
-//        if ( action == Watcher.Action.DELETED )
-//        {
-//            // Ignore
-//            return;
-//        }
-//
-//        // Get all relevant XpConfig for this config map
-//        List<XpConfigResource> allXpConfigs = getRelevantXpConfig( newConfigMap.get() );
-//
-//        // Update
-//        apply( newConfigMap.get(), allXpConfigs );
-//    }
-
     private synchronized void apply( final ConfigMap configMap, final List<XpConfigResource> xpConfigs )
     {
         try
@@ -109,8 +92,7 @@ public class OperatorConfig
                 filter( c -> c.getMetadata().getNamespace().equals( configResource.getMetadata().getNamespace() ) ).
             // Filter by XpConfig node if any
                 filter( c -> configResource.getSpec().node() == null ||
-                c.getMetadata().getLabels().get( cfgStr( "operator.deployment.xp.labels.config.node" ) ).equals(
-                    configResource.getSpec().node() ) ).collect( Collectors.toList() );
+                configResource.getSpec().node().equals( c.getMetadata().getName() ) ).collect( Collectors.toList() );
     }
 
     private List<XpConfigResource> getRelevantXpConfig( final ConfigMap configMap )
@@ -119,9 +101,7 @@ public class OperatorConfig
             // Filter by namespace
                 filter( c -> c.getMetadata().getNamespace().equals( configMap.getMetadata().getNamespace() ) ).
             // Filter by XpConfig node if any
-                filter( c -> c.getSpec().node() == null ||
-                configMap.getMetadata().getLabels().get( cfgStr( "operator.deployment.xp.labels.config.node" ) ).equals(
-                    c.getSpec().node() ) ).
+                filter( c -> c.getSpec().node() == null || configMap.getMetadata().getName().equals( c.getSpec().node() ) ).
                 collect( Collectors.toList() );
     }
 }

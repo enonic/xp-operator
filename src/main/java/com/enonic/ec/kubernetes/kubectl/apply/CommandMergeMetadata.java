@@ -14,7 +14,7 @@ import io.fabric8.kubernetes.api.model.OwnerReference;
 
 import com.enonic.ec.kubernetes.common.commands.Command;
 
-@SuppressWarnings("unchecked")
+
 @Value.Immutable
 public abstract class CommandMergeMetadata
     implements Command<ObjectMeta>
@@ -69,7 +69,7 @@ public abstract class CommandMergeMetadata
     {
         if ( oldMap == null || oldMap.size() == 0 )
         {
-            return newMap.orElse( Collections.EMPTY_MAP );
+            return newMap.orElse( Collections.emptyMap() );
         }
 
         if ( newMap.isEmpty() )

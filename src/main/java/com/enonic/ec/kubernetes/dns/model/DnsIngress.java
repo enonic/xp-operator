@@ -49,12 +49,11 @@ public abstract class DnsIngress
         return res;
     }
 
-    @SuppressWarnings("unchecked")
     @Value.Derived
     protected List<String> annotatedDomains()
     {
         Optional<String> annotation = getAnnotation( cfgStr( "dns.annotations.enable" ) );
-        return annotation.map( s -> Arrays.asList( s.split( "," ) ) ).orElse( Collections.EMPTY_LIST );
+        return annotation.map( s -> Arrays.asList( s.split( "," ) ) ).orElse( Collections.emptyList() );
     }
 
     @Value.Derived
@@ -69,7 +68,6 @@ public abstract class DnsIngress
         return Integer.parseInt( getAnnotation( cfgStr( "dns.annotations.ttl" ) ).orElse( cfgStr( "dns.default.ttl" ) ) );
     }
 
-    @SuppressWarnings("unchecked")
     @Value.Derived
     public List<String> ips()
     {
@@ -84,7 +82,7 @@ public abstract class DnsIngress
                 }
             }
         }
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     private Optional<String> getAnnotation( String key )

@@ -30,7 +30,7 @@ public abstract class XpConfigApply
     @Override
     public void addCommands( final ImmutableCombinedCommand.Builder commandBuilder )
     {
-        Map<String, String> oldData = configMap().getData() != null ? configMap().getData() : Collections.EMPTY_MAP;
+        Map<String, String> oldData = configMap().getData() != null ? configMap().getData() : Collections.emptyMap();
         Map<String, String> newData = new HashMap<>( oldData );
         for ( XpConfigResource resource : xpConfigResources() )
         {
