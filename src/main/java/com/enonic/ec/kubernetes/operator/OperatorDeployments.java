@@ -13,14 +13,14 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.client.Watcher;
 import io.quarkus.runtime.StartupEvent;
 
-import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.client.DefaultClientProducer;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.operator.commands.deployments.ImmutableCreateXpDeployment;
+import com.enonic.ec.kubernetes.operator.crd.ImmutableXpCrdInfo;
+import com.enonic.ec.kubernetes.operator.crd.XpCrdInfo;
 import com.enonic.ec.kubernetes.operator.crd.app.client.XpAppClientProducer;
 import com.enonic.ec.kubernetes.operator.crd.config.client.XpConfigClientProducer;
 import com.enonic.ec.kubernetes.operator.crd.deployment.ImmutableXpDeploymentNamingHelper;
@@ -33,7 +33,7 @@ import com.enonic.ec.kubernetes.operator.crd.vhost.client.XpVHostClientProducer;
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @ApplicationScoped
 public class OperatorDeployments
-    extends Configuration
+    extends OperatorStall
 {
     private final static Logger log = LoggerFactory.getLogger( OperatorDeployments.class );
 
@@ -67,6 +67,12 @@ public class OperatorDeployments
     private void watch( final Watcher.Action action, final String id, final Optional<XpDeploymentResource> oldResource,
                         final Optional<XpDeploymentResource> newResource )
     {
+
+        XpCrdInfo info = ImmutableXpCrdInfo.builder().
+            oldResource( oldResource ).
+            newResource( newResource ).
+            build();
+
         DiffResource diffResource = ImmutableDiffResource.builder().
             oldValue( oldResource ).
             newValue( newResource ).
@@ -88,7 +94,7 @@ public class OperatorDeployments
                     defaultLabels( newResource.get().getMetadata().getLabels() ).
                     namingHelper( ImmutableXpDeploymentNamingHelper.builder().resource( newResource.get() ).build() ).
                     diffSpec( diffResource.diffSpec() ).
-                    ownerReference( createOwnerReference( newResource.get() ) ).
+                    ownerReference( info.xpDeploymentOwnerReference() ).
                     preInstallApps( preInstallApps ).
                     build().
                     addCommands( commandBuilder );
@@ -103,9 +109,5 @@ public class OperatorDeployments
         }
     }
 
-    private OwnerReference createOwnerReference( final XpDeploymentResource resource )
-    {
-        return new OwnerReference( resource.getApiVersion(), true, true, resource.getKind(), resource.getMetadata().getName(),
-                                   resource.getMetadata().getUid() );
-    }
+
 }

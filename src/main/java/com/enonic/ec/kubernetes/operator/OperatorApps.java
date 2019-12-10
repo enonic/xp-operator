@@ -17,11 +17,14 @@ import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.operator.commands.apps.ImmutableXpAppsApply;
+import com.enonic.ec.kubernetes.operator.crd.ImmutableXpCrdInfo;
+import com.enonic.ec.kubernetes.operator.crd.XpCrdInfo;
 import com.enonic.ec.kubernetes.operator.crd.app.XpAppResource;
 import com.enonic.ec.kubernetes.operator.crd.app.client.XpAppCache;
 import com.enonic.ec.kubernetes.operator.crd.config.XpConfigResource;
 import com.enonic.ec.kubernetes.operator.crd.config.client.XpConfigCache;
 import com.enonic.ec.kubernetes.operator.crd.config.client.XpConfigClientProducer;
+import com.enonic.ec.kubernetes.operator.crd.deployment.client.XpDeploymentCache;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @ApplicationScoped
@@ -32,6 +35,9 @@ public class OperatorApps
 
     @Inject
     XpConfigClientProducer configClientProducer;
+
+    @Inject
+    XpDeploymentCache xpDeploymentCache;
 
     @Inject
     XpConfigCache xpConfigCache;
@@ -53,23 +59,19 @@ public class OperatorApps
     private void watchApps( final Watcher.Action action, final String s, final Optional<XpAppResource> oldApp,
                             final Optional<XpAppResource> newApp )
     {
+        XpCrdInfo info = ImmutableXpCrdInfo.builder().
+            cache( xpDeploymentCache ).
+            oldResource( oldApp ).
+            newResource( newApp ).
+            build();
+
         // Because multiple apps could potentially be deployed at the same time,
         // lets use the stall function to let them accumulate before we update config
         stall( () -> {
-            // Get current namespace
-            String namespace = newApp.map( m -> m.getMetadata().getNamespace() ).orElse(
-                oldApp.map( m -> m.getMetadata().getNamespace() ).orElse( null ) );
 
             // Get all apps in namespace
-            List<XpAppResource> apps = xpAppCache.stream().
-                filter( a -> a.getMetadata().getNamespace().equals( namespace ) ).
-                collect( Collectors.toList() );
+            List<XpAppResource> allApps = xpAppCache.getByNamespace( info.namespace() );
 
-            // Get XpConfig for apps in this namespace
-            Optional<XpConfigResource> config = xpConfigCache.stream().
-                filter( c -> c.getMetadata().getNamespace().equals( namespace ) ).
-                filter( c -> c.getMetadata().getName().equals( xp7ConfigName ) ).
-                findAny();
             try
             {
                 ImmutableCombinedCommand.Builder commandBuilder = ImmutableCombinedCommand.builder();
@@ -77,11 +79,11 @@ public class OperatorApps
                 // Create / Update apps config
                 ImmutableXpAppsApply.builder().
                     client( configClientProducer.produce() ).
-                    namespace( namespace ).
+                    xpConfigCache( xpConfigCache ).
+                    info( info ).
                     name( xp7ConfigName ).
                     file( xp7ConfigFile ).
-                    xpConfigResource( config ).
-                    xpAppResources( apps ).
+                    xpAppResources( allApps ).
                     build().
                     addCommands( commandBuilder );
 

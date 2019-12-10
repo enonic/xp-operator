@@ -7,10 +7,13 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Preconditions;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesResourceList;
@@ -54,7 +57,29 @@ public class ResourceCache<T extends HasMetadata, L extends KubernetesResourceLi
 
     public Optional<T> getByName( String name )
     {
-        return stream().filter( r -> r.getMetadata().getName().equals( name ) ).findFirst();
+        Optional<T> res = filterName( stream(), name ).findFirst();
+        res.ifPresent(
+            r -> Preconditions.checkState( r.getMetadata().getNamespace() == null, "Do not filter only by name on namespaced resources" ) );
+        return res;
+    }
+
+    public Optional<T> get( String namespace, String name )
+    {
+        return filterNamespace( filterName( stream(), name ), namespace ).findFirst();
+    }
+
+    public List<T> getByNamespace( String namespace) {
+        return filterNamespace( stream(), namespace ).collect( Collectors.toList());
+    }
+
+    private Stream<T> filterName( final Stream<T> stream, String name )
+    {
+        return stream.filter( r -> name.equals( r.getMetadata().getName() ) );
+    }
+
+    private Stream<T> filterNamespace( final Stream<T> stream, String namespace )
+    {
+        return stream.filter( r -> namespace.equals( r.getMetadata().getNamespace() ) );
     }
 
     public void addWatcher( OnAction<T> event )

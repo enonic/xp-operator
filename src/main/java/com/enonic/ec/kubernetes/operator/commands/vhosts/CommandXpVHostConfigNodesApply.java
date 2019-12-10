@@ -8,10 +8,9 @@ import com.enonic.ec.kubernetes.operator.commands.config.XpConfigModifyData;
 import com.enonic.ec.kubernetes.operator.commands.vhosts.helpers.Mapping;
 
 @Value.Immutable
-public abstract class XpVHostApplyXpConfig
+public abstract class CommandXpVHostConfigNodesApply
     extends XpConfigModifyData
 {
-
     protected abstract List<Mapping> mappings();
 
     @Override

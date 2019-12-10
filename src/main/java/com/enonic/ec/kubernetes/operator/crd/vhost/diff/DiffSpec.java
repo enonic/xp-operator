@@ -21,6 +21,12 @@ public abstract class DiffSpec
     }
 
     @Value.Derived
+    public boolean createIngressChanged()
+    {
+        return !equals( Spec::createIngress );
+    }
+
+    @Value.Derived
     public List<DiffSpecMapping> mappingsChanged()
     {
         Map<String, SpecMapping> oldMappings = new HashMap<>();

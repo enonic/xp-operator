@@ -5,7 +5,6 @@ import com.enonic.ec.kubernetes.common.Configuration;
 public class OperatorStall
     extends Configuration
 {
-
     protected synchronized void stall( Runnable r )
     {
         waitSome();

@@ -4,34 +4,62 @@ import java.util.Optional;
 
 import org.immutables.value.Value;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
 
+import com.enonic.ec.kubernetes.common.Configuration;
+import com.enonic.ec.kubernetes.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.kubectl.apply.ImmutableCommandApplyIngress;
+import com.enonic.ec.kubernetes.kubectl.delete.ImmutableCommandDeleteIngress;
 import com.enonic.ec.kubernetes.operator.commands.vhosts.spec.ImmutableIngressSpec;
+import com.enonic.ec.kubernetes.operator.crd.XpCrdInfo;
 import com.enonic.ec.kubernetes.operator.crd.vhost.XpVHostResource;
+import com.enonic.ec.kubernetes.operator.crd.vhost.diff.DiffResource;
 import com.enonic.ec.kubernetes.operator.crd.vhost.spec.SpecCertificate;
 import com.enonic.ec.kubernetes.operator.crd.vhost.spec.SpecCertificateAuthority;
 import com.enonic.ec.kubernetes.operator.crd.vhost.spec.SpecMapping;
 
 @Value.Immutable
-public abstract class XpVHostApplyIngress
-    extends XpVHostCommand
+public abstract class CommandXpVHostIngressApply
+    extends Configuration
+    implements CombinedCommandBuilder
 {
     protected abstract KubernetesClient defaultClient();
 
-    protected abstract XpVHostResource resource();
+    protected abstract XpCrdInfo info();
+
+    protected abstract DiffResource diff();
+
+    @Value.Derived
+    protected XpVHostResource resource()
+    {
+        return diff().newValue().get();
+    }
+
+    @Value.Check
+    protected void check()
+    {
+        Preconditions.checkState( resource() != null, "New resource cannot be null" );
+    }
 
     @Override
     public void addCommands( final ImmutableCombinedCommand.Builder commandBuilder )
     {
-        if ( !resource().getSpec().createIngress() )
+        if ( !resource().getSpec().createIngress() && diff().diffSpec().createIngressChanged() )
         {
-            return;
+            deleteIngress( commandBuilder );
         }
+        else
+        {
+            applyIngress( commandBuilder );
+        }
+    }
 
+    protected void applyIngress( final ImmutableCombinedCommand.Builder commandBuilder )
+    {
         String name = resource().getMetadata().getName();
         String host = resource().getSpec().host();
 
@@ -96,8 +124,8 @@ public abstract class XpVHostApplyIngress
 
         commandBuilder.addCommand( ImmutableCommandApplyIngress.builder().
             client( defaultClient() ).
-            canSkipOwnerReference( true ).
-            namespace( resource().getMetadata().getNamespace() ).
+            ownerReference( info().resourceOwnerReference() ).
+            namespace( info().namespace() ).
             name( getIngressName( resource() ) ).
             annotations( ingressAnnotations.build() ).
             spec( ImmutableIngressSpec.builder().
@@ -106,6 +134,15 @@ public abstract class XpVHostApplyIngress
                 vHostSpec( resource().getSpec() ).
                 build().
                 spec() ).
+            build() );
+    }
+
+    private void deleteIngress( final ImmutableCombinedCommand.Builder commandBuilder )
+    {
+        commandBuilder.addCommand( ImmutableCommandDeleteIngress.builder().
+            client( defaultClient() ).
+            namespace( info().namespace() ).
+            name( getIngressName( resource() ) ).
             build() );
     }
 
@@ -121,5 +158,10 @@ public abstract class XpVHostApplyIngress
                 return cfgStr( "operator.certissuer.letsencrypt.prod" );
         }
         return "none";
+    }
+
+    private static String getIngressName( XpVHostResource resource )
+    {
+        return resource.getMetadata().getName();
     }
 }
