@@ -4,7 +4,6 @@ import java.util.Optional;
 
 import org.immutables.value.Value;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -15,12 +14,12 @@ import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.kubectl.apply.ImmutableCommandApplyIngress;
 import com.enonic.ec.kubernetes.kubectl.delete.ImmutableCommandDeleteIngress;
 import com.enonic.ec.kubernetes.operator.commands.vhosts.spec.ImmutableIngressSpec;
-import com.enonic.ec.kubernetes.operator.crd.XpCrdInfo;
 import com.enonic.ec.kubernetes.operator.crd.vhost.XpVHostResource;
 import com.enonic.ec.kubernetes.operator.crd.vhost.diff.DiffResource;
 import com.enonic.ec.kubernetes.operator.crd.vhost.spec.SpecCertificate;
 import com.enonic.ec.kubernetes.operator.crd.vhost.spec.SpecCertificateAuthority;
 import com.enonic.ec.kubernetes.operator.crd.vhost.spec.SpecMapping;
+import com.enonic.ec.kubernetes.operator.info.ResourceInfoNamespaced;
 
 @Value.Immutable
 public abstract class CommandXpVHostIngressApply
@@ -29,26 +28,12 @@ public abstract class CommandXpVHostIngressApply
 {
     protected abstract KubernetesClient defaultClient();
 
-    protected abstract XpCrdInfo info();
-
-    protected abstract DiffResource diff();
-
-    @Value.Derived
-    protected XpVHostResource resource()
-    {
-        return diff().newValue().get();
-    }
-
-    @Value.Check
-    protected void check()
-    {
-        Preconditions.checkState( resource() != null, "New resource cannot be null" );
-    }
+    protected abstract ResourceInfoNamespaced<XpVHostResource, DiffResource> info();
 
     @Override
     public void addCommands( final ImmutableCombinedCommand.Builder commandBuilder )
     {
-        if ( !resource().getSpec().createIngress() && diff().diffSpec().createIngressChanged() )
+        if ( info().diff().diffSpec().createIngressChanged() && !info().resource().getSpec().createIngress() )
         {
             deleteIngress( commandBuilder );
         }
@@ -60,8 +45,8 @@ public abstract class CommandXpVHostIngressApply
 
     protected void applyIngress( final ImmutableCombinedCommand.Builder commandBuilder )
     {
-        String name = resource().getMetadata().getName();
-        String host = resource().getSpec().host();
+        String name = info().resource().getMetadata().getName();
+        String host = info().resource().getSpec().host();
 
         ImmutableMap.Builder<String, String> ingressAnnotations = ImmutableMap.builder();
         StringBuilder nginxConfigSnippet = new StringBuilder();
@@ -94,7 +79,7 @@ public abstract class CommandXpVHostIngressApply
 
         // Sticky session
         Optional<SpecMapping> adminPath =
-            resource().getSpec().mappings().stream().filter( m -> m.target().startsWith( "/admin" ) ).findAny();
+            info().resource().getSpec().mappings().stream().filter( m -> m.target().startsWith( "/admin" ) ).findAny();
         if ( adminPath.isPresent() )
         {
             cfgIfBool( "operator.extensions.ingress.adminStickySession.enabled", () -> ingressAnnotations.
@@ -115,7 +100,7 @@ public abstract class CommandXpVHostIngressApply
             put( "ingress.kubernetes.io/rewrite-target", "/" ).
             put( "nginx.ingress.kubernetes.io/configuration-snippet", nginxConfigSnippet.toString() );
 
-        SpecCertificate cert = resource().getSpec().certificate();
+        SpecCertificate cert = info().resource().getSpec().certificate();
         if ( cert != null )
         {
             ingressAnnotations.put( "nginx.ingress.kubernetes.io/ssl-redirect", "true" );
@@ -124,14 +109,14 @@ public abstract class CommandXpVHostIngressApply
 
         commandBuilder.addCommand( ImmutableCommandApplyIngress.builder().
             client( defaultClient() ).
-            ownerReference( info().resourceOwnerReference() ).
+            ownerReference( info().ownerReference() ).
             namespace( info().namespace() ).
-            name( getIngressName( resource() ) ).
+            name( getIngressName( info().resource() ) ).
             annotations( ingressAnnotations.build() ).
             spec( ImmutableIngressSpec.builder().
                 certificateSecretName( Optional.ofNullable( cert != null ? name : null ) ).
-                allService( resource().getMetadata().getNamespace() ).
-                vHostSpec( resource().getSpec() ).
+                allService( info().resource().getMetadata().getNamespace() ).
+                vHostSpec( info().resource().getSpec() ).
                 build().
                 spec() ).
             build() );
@@ -142,7 +127,7 @@ public abstract class CommandXpVHostIngressApply
         commandBuilder.addCommand( ImmutableCommandDeleteIngress.builder().
             client( defaultClient() ).
             namespace( info().namespace() ).
-            name( getIngressName( resource() ) ).
+            name( getIngressName( info().resource() ) ).
             build() );
     }
 

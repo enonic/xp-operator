@@ -17,7 +17,7 @@ import com.enonic.ec.kubernetes.kubectl.apply.ImmutableCommandApplyConfigMap;
 import com.enonic.ec.kubernetes.operator.crd.config.XpConfigResource;
 
 @Value.Immutable
-public abstract class XpConfigApply
+public abstract class CommandXpConfigApply
     extends Configuration
     implements CombinedCommandBuilder
 {
@@ -41,7 +41,7 @@ public abstract class XpConfigApply
             configMap().setData( newData );
             commandBuilder.addCommand( ImmutableCommandApplyConfigMap.builder().
                 client( defaultClient() ).
-                canSkipOwnerReference( true ).
+                canSkipOwnerReference( true ). // Config map is owned by the XpDeployment
                 namespace( configMap().getMetadata().getNamespace() ).
                 name( configMap().getMetadata().getName() ).
                 data( newData ).

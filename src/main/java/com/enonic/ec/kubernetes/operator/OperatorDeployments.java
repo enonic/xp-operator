@@ -19,21 +19,20 @@ import io.quarkus.runtime.StartupEvent;
 import com.enonic.ec.kubernetes.common.client.DefaultClientProducer;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.operator.commands.deployments.ImmutableCreateXpDeployment;
-import com.enonic.ec.kubernetes.operator.crd.ImmutableXpCrdInfo;
-import com.enonic.ec.kubernetes.operator.crd.XpCrdInfo;
 import com.enonic.ec.kubernetes.operator.crd.app.client.XpAppClientProducer;
 import com.enonic.ec.kubernetes.operator.crd.config.client.XpConfigClientProducer;
 import com.enonic.ec.kubernetes.operator.crd.deployment.ImmutableXpDeploymentNamingHelper;
 import com.enonic.ec.kubernetes.operator.crd.deployment.XpDeploymentResource;
 import com.enonic.ec.kubernetes.operator.crd.deployment.client.XpDeploymentCache;
 import com.enonic.ec.kubernetes.operator.crd.deployment.diff.DiffResource;
-import com.enonic.ec.kubernetes.operator.crd.deployment.diff.ImmutableDiffResource;
+import com.enonic.ec.kubernetes.operator.crd.deployment.diff.ImmutableInfoDeployment;
 import com.enonic.ec.kubernetes.operator.crd.vhost.client.XpVHostClientProducer;
+import com.enonic.ec.kubernetes.operator.info.ResourceInfo;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @ApplicationScoped
 public class OperatorDeployments
-    extends OperatorStall
+    extends OperatorNamespaced
 {
     private final static Logger log = LoggerFactory.getLogger( OperatorDeployments.class );
 
@@ -67,18 +66,12 @@ public class OperatorDeployments
     private void watch( final Watcher.Action action, final String id, final Optional<XpDeploymentResource> oldResource,
                         final Optional<XpDeploymentResource> newResource )
     {
-
-        XpCrdInfo info = ImmutableXpCrdInfo.builder().
+        ResourceInfo<XpDeploymentResource, DiffResource> info = ImmutableInfoDeployment.builder().
             oldResource( oldResource ).
             newResource( newResource ).
             build();
 
-        DiffResource diffResource = ImmutableDiffResource.builder().
-            oldValue( oldResource ).
-            newValue( newResource ).
-            build();
-
-        if ( diffResource.diffSpec().shouldAddOrModify() )
+        if ( info.diff().diffSpec().shouldAddOrModify() )
         {
             try
             {
@@ -93,8 +86,8 @@ public class OperatorDeployments
                     deploymentName( newResource.get().getMetadata().getName() ).
                     defaultLabels( newResource.get().getMetadata().getLabels() ).
                     namingHelper( ImmutableXpDeploymentNamingHelper.builder().resource( newResource.get() ).build() ).
-                    diffSpec( diffResource.diffSpec() ).
-                    ownerReference( info.xpDeploymentOwnerReference() ).
+                    diffSpec( info.diff().diffSpec() ).
+                    ownerReference( info.ownerReference() ).
                     preInstallApps( preInstallApps ).
                     build().
                     addCommands( commandBuilder );

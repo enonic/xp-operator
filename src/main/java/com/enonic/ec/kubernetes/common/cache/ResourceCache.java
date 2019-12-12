@@ -68,8 +68,8 @@ public class ResourceCache<T extends HasMetadata, L extends KubernetesResourceLi
         return filterNamespace( filterName( stream(), name ), namespace ).findFirst();
     }
 
-    public List<T> getByNamespace( String namespace) {
-        return filterNamespace( stream(), namespace ).collect( Collectors.toList());
+    public Stream<T> getByNamespace( String namespace) {
+        return filterNamespace( stream(), namespace );
     }
 
     private Stream<T> filterName( final Stream<T> stream, String name )

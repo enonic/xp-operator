@@ -4,12 +4,12 @@ import java.util.List;
 
 import org.immutables.value.Value;
 
-import com.enonic.ec.kubernetes.operator.commands.config.XpConfigModifyData;
+import com.enonic.ec.kubernetes.operator.commands.config.CommandXpConfigModifyData;
 import com.enonic.ec.kubernetes.operator.crd.app.XpAppResource;
 
 @Value.Immutable
-public abstract class XpAppsApply
-    extends XpConfigModifyData
+public abstract class CommandXpAppApply
+    extends CommandXpConfigModifyData
 {
     protected abstract List<XpAppResource> xpAppResources();
 

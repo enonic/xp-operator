@@ -13,11 +13,12 @@ import com.enonic.ec.kubernetes.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.operator.commands.vhosts.helpers.ImmutableMapping;
 import com.enonic.ec.kubernetes.operator.commands.vhosts.helpers.Mapping;
-import com.enonic.ec.kubernetes.operator.crd.XpCrdInfo;
 import com.enonic.ec.kubernetes.operator.crd.config.client.XpConfigCache;
 import com.enonic.ec.kubernetes.operator.crd.config.client.XpConfigClient;
 import com.enonic.ec.kubernetes.operator.crd.vhost.XpVHostResource;
 import com.enonic.ec.kubernetes.operator.crd.vhost.client.XpVHostCache;
+import com.enonic.ec.kubernetes.operator.crd.vhost.diff.DiffResource;
+import com.enonic.ec.kubernetes.operator.info.ResourceInfoNamespaced;
 
 @Value.Immutable
 public abstract class CommandXpVHostConfigApply
@@ -30,11 +31,12 @@ public abstract class CommandXpVHostConfigApply
 
     protected abstract XpVHostCache vHostCache();
 
-    protected abstract XpCrdInfo info();
+    protected abstract ResourceInfoNamespaced<XpVHostResource, DiffResource> info();
 
     @Override
     public void addCommands( final ImmutableCombinedCommand.Builder commandBuilder )
     {
+        // Iterate over each node mapping
         for ( Map.Entry<String, List<Mapping>> e : getNodeMappings( info() ).entrySet() )
         {
             String nodeName = e.getKey();
@@ -54,10 +56,10 @@ public abstract class CommandXpVHostConfigApply
         }
     }
 
-    private Map<String, List<Mapping>> getNodeMappings( XpCrdInfo info )
+    private Map<String, List<Mapping>> getNodeMappings( ResourceInfoNamespaced<XpVHostResource, DiffResource> info )
     {
         // Get all vHosts in this namespace
-        List<XpVHostResource> allVHosts = vHostCache().getByNamespace( info.namespace() );
+        List<XpVHostResource> allVHosts = vHostCache().getByNamespace( info.namespace() ).collect( Collectors.toList());
 
         // Get all mappings in one place
         List<Mapping> mappings = new LinkedList<>();
@@ -69,7 +71,7 @@ public abstract class CommandXpVHostConfigApply
             idProvider( Optional.ofNullable( m.idProvider() ) ).
             build() ) ) );
 
-        // Get with no node
+        // Get mappings with no node
         List<Mapping> withNoNode = mappings.stream().filter( n -> n.node() == null ).collect( Collectors.toList() );
 
         // Group mappings by node
@@ -77,7 +79,7 @@ public abstract class CommandXpVHostConfigApply
             mappings.stream().filter( n -> n.node() != null ).collect( Collectors.groupingBy( Mapping::node ) );
 
         // Add missing nodes to map
-        info.xpDeployment().getSpec().nodes().keySet().forEach( k -> {
+        info.xpDeploymentResource().getSpec().nodes().keySet().forEach( k -> {
             if ( !map.containsKey( k ) )
             {
                 map.put( k, new LinkedList<>() );

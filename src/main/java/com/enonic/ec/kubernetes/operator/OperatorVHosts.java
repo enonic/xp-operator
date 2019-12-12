@@ -6,7 +6,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,21 +16,19 @@ import com.enonic.ec.kubernetes.common.client.DefaultClientProducer;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.operator.commands.vhosts.ImmutableCommandXpVHostConfigApply;
 import com.enonic.ec.kubernetes.operator.commands.vhosts.ImmutableCommandXpVHostIngressApply;
-import com.enonic.ec.kubernetes.operator.crd.ImmutableXpCrdInfo;
-import com.enonic.ec.kubernetes.operator.crd.XpCrdInfo;
-import com.enonic.ec.kubernetes.operator.crd.config.XpConfigResource;
 import com.enonic.ec.kubernetes.operator.crd.config.client.XpConfigCache;
 import com.enonic.ec.kubernetes.operator.crd.config.client.XpConfigClientProducer;
 import com.enonic.ec.kubernetes.operator.crd.deployment.client.XpDeploymentCache;
 import com.enonic.ec.kubernetes.operator.crd.vhost.XpVHostResource;
 import com.enonic.ec.kubernetes.operator.crd.vhost.client.XpVHostCache;
 import com.enonic.ec.kubernetes.operator.crd.vhost.diff.DiffResource;
-import com.enonic.ec.kubernetes.operator.crd.vhost.diff.ImmutableDiffResource;
+import com.enonic.ec.kubernetes.operator.crd.vhost.diff.ImmutableInfoVHost;
+import com.enonic.ec.kubernetes.operator.info.ResourceInfoNamespaced;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @ApplicationScoped
 public class OperatorVHosts
-    extends OperatorStall
+    extends OperatorNamespaced
 {
     private final static Logger log = LoggerFactory.getLogger( OperatorVHosts.class );
 
@@ -50,9 +47,6 @@ public class OperatorVHosts
     @Inject
     XpConfigCache xpConfigCache;
 
-    @ConfigProperty(name = "operator.config.xp.vhosts.file")
-    String xp7ConfigFile;
-
     void onStartup( @Observes StartupEvent _ev )
     {
         xpVHostCache.addWatcher( this::watchVHosts );
@@ -61,58 +55,36 @@ public class OperatorVHosts
     private void watchVHosts( final Watcher.Action action, final String s, final Optional<XpVHostResource> oldVHost,
                               final Optional<XpVHostResource> newVHost )
     {
-        XpCrdInfo info = ImmutableXpCrdInfo.builder().
-            cache( xpDeploymentCache ).
+        Optional<ResourceInfoNamespaced<XpVHostResource, DiffResource>> i = getInfo( action, () -> ImmutableInfoVHost.builder().
+            xpDeploymentCache( xpDeploymentCache ).
             oldResource( oldVHost ).
             newResource( newVHost ).
-            build();
+            build() );
 
-        DiffResource diff = ImmutableDiffResource.builder().
-            oldValue( oldVHost ).
-            newValue( newVHost ).
-            build();
+        i.ifPresent( info -> {
+            ImmutableCombinedCommand.Builder commandBuilder = ImmutableCombinedCommand.builder();
 
-        ImmutableCombinedCommand.Builder commandBuilder = ImmutableCombinedCommand.builder();
-
-        if ( action != Watcher.Action.DELETED )
-        {
-            // Only apply ingress on ADD/MODIFY
-            ImmutableCommandXpVHostIngressApply.builder().
-                defaultClient( defaultClientProducer.client() ).
-                info( info ).
-                diff( diff ).
-                build().
-                addCommands( commandBuilder );
-        }
-
-        // Because multiple vHosts could potentially be deployed at the same time,
-        // lets use the stall function to let them accumulate before we update config
-        stall( () -> {
-            ImmutableCommandXpVHostConfigApply.builder().
-                client( configClientProducer.produce() ).
-                xpConfigCache( xpConfigCache ).
-                vHostCache( xpVHostCache ).
-                info( info ).
-                build().
-                addCommands( commandBuilder );
-            try
+            if ( action != Watcher.Action.DELETED )
             {
-                commandBuilder.build().execute();
+                // Only apply ingress on ADD/MODIFY
+                ImmutableCommandXpVHostIngressApply.builder().
+                    defaultClient( defaultClientProducer.client() ).
+                    info( info ).
+                    build().
+                    addCommands( commandBuilder );
             }
-            catch ( Exception e )
-            {
-                log.error( "Unable to update apps", e );
-            }
+
+            // Because multiple vHosts could potentially be deployed at the same time,
+            // lets use the stall function to let them accumulate before we update config
+            stallAndRunCommands( commandBuilder, () -> {
+                ImmutableCommandXpVHostConfigApply.builder().
+                    client( configClientProducer.produce() ).
+                    xpConfigCache( xpConfigCache ).
+                    vHostCache( xpVHostCache ).
+                    info( info ).
+                    build().
+                    addCommands( commandBuilder );
+            } );
         } );
     }
-
-    private Optional<XpConfigResource> getNodeVHostConfig( XpCrdInfo info, String node, String nodeVHostConfigName )
-    {
-        return xpConfigCache.stream().
-            filter( c -> c.getMetadata().getNamespace().equals( info.namespace() ) ).
-            filter( c -> c.getMetadata().getName().equals( nodeVHostConfigName ) ).
-            filter( c -> node.equals( c.getSpec().node() ) ).
-            findAny();
-    }
-
 }

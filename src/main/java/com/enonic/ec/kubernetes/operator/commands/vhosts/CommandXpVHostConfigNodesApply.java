@@ -4,12 +4,12 @@ import java.util.List;
 
 import org.immutables.value.Value;
 
-import com.enonic.ec.kubernetes.operator.commands.config.XpConfigModifyData;
+import com.enonic.ec.kubernetes.operator.commands.config.CommandXpConfigModifyData;
 import com.enonic.ec.kubernetes.operator.commands.vhosts.helpers.Mapping;
 
 @Value.Immutable
 public abstract class CommandXpVHostConfigNodesApply
-    extends XpConfigModifyData
+    extends CommandXpConfigModifyData
 {
     protected abstract List<Mapping> mappings();
 
