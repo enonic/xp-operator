@@ -35,7 +35,7 @@ class SpecTest
     @Test
     public void specInvalidNodes()
     {
-        loadSpecExpectIllegalState( "specInvalidNodes.yaml", "Some fields in 'spec.nodes' are missing: [name, replicas, resources]" );
+        loadSpecExpectIllegalState( "specInvalidNodes.yaml", "Some fields in 'spec.nodes' are missing: [replicas, resources]" );
     }
 
     @Test

@@ -5,7 +5,6 @@ spec:
 
   nodes:
     xp:
-      name: xp
       replicas: 1
       type: ["MASTER", "DATA", "FRONTEND"]
       resources:
