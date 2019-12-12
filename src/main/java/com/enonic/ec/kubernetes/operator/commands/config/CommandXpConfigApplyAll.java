@@ -53,7 +53,7 @@ public abstract class CommandXpConfigApplyAll
     {
         // Filter by node
         Predicate<ConfigMap> filter = c -> {
-            if ( configResource.getSpec().node() == null )
+            if ( configResource.getSpec().node().equals( cfgStr( "operator.deployment.xp.allNodes" ) ) )
             {
                 // Apply to all nodes
                 return true;
@@ -70,7 +70,7 @@ public abstract class CommandXpConfigApplyAll
     private List<XpConfigResource> getRelevantXpConfig( final ConfigMap configMap )
     {
         Predicate<XpConfigResource> filter = c -> {
-            if ( c.getSpec().node() == null )
+            if ( c.getSpec().node().equals( cfgStr( "operator.deployment.xp.allNodes" ) ) )
             {
                 // Apply to all nodes
                 return true;

@@ -10,18 +10,18 @@ import org.slf4j.LoggerFactory;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.client.Watcher;
 
-import com.enonic.ec.kubernetes.common.Configuration;
+import com.enonic.ec.kubernetes.Operator;
 import com.enonic.ec.kubernetes.common.Diff;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.operator.info.ResourceInfoNamespaced;
 import com.enonic.ec.kubernetes.operator.info.XpDeploymentNotFound;
 
-public class OperatorNamespaced
-    extends Configuration
+public abstract class OperatorNamespaced
+    extends Operator
 {
     private final static Logger log = LoggerFactory.getLogger( OperatorNamespaced.class );
 
-    protected synchronized void stallAndRunCommands( Consumer<ImmutableCombinedCommand.Builder> c )
+    protected void stallAndRunCommands( Consumer<ImmutableCombinedCommand.Builder> c )
     {
         ImmutableCombinedCommand.Builder commandBuilder = ImmutableCombinedCommand.builder();
         stallAndRunCommands( commandBuilder, () -> c.accept( commandBuilder ) );
@@ -30,15 +30,7 @@ public class OperatorNamespaced
     protected synchronized void stallAndRunCommands( ImmutableCombinedCommand.Builder commandBuilder, Runnable r )
     {
         waitSome();
-        r.run();
-        try
-        {
-            commandBuilder.build().execute();
-        }
-        catch ( Exception e )
-        {
-            log.error( "Failed running commands", e );
-        }
+        runCommands( commandBuilder, r );
     }
 
     protected void waitSome()

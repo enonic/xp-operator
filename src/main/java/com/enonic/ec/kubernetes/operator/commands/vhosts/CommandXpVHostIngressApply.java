@@ -33,11 +33,12 @@ public abstract class CommandXpVHostIngressApply
     @Override
     public void addCommands( final ImmutableCombinedCommand.Builder commandBuilder )
     {
-        if ( info().diff().diffSpec().createIngressChanged() && !info().resource().getSpec().createIngress() )
+        boolean skipIngress = info().resource().getSpec().skipIngress();
+        if ( info().diff().diffSpec().skipIngressChanged() && skipIngress )
         {
             deleteIngress( commandBuilder );
         }
-        else
+        else if ( !skipIngress )
         {
             applyIngress( commandBuilder );
         }

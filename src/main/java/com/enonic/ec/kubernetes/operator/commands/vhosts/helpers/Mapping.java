@@ -13,7 +13,6 @@ public abstract class Mapping
 {
     public abstract String host();
 
-    @Nullable
     public abstract String node();
 
     public abstract String source();

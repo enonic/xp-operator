@@ -19,9 +19,9 @@ public abstract class Spec
     public abstract String host();
 
     @Value.Default
-    public Boolean createIngress()
+    public Boolean skipIngress()
     {
-        return true;
+        return false;
     }
 
     @Nullable

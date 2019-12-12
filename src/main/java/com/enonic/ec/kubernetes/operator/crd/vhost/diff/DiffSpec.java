@@ -21,9 +21,9 @@ public abstract class DiffSpec
     }
 
     @Value.Derived
-    public boolean createIngressChanged()
+    public boolean skipIngressChanged()
     {
-        return !equals( Spec::createIngress );
+        return !equals( Spec::skipIngress );
     }
 
     @Value.Derived

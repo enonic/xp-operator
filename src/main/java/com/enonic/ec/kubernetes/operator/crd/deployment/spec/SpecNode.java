@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.immutables.value.Value;
+import org.wildfly.common.annotation.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -18,7 +19,8 @@ import com.enonic.ec.kubernetes.operator.crd.BuilderException;
 public abstract class SpecNode
     extends Configuration
 {
-    public abstract String name();
+    @Nullable
+    public abstract String displayName();
 
     public enum Type
     {

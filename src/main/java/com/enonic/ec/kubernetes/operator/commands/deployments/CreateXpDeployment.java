@@ -181,7 +181,7 @@ public abstract class CreateXpDeployment
                 canSkipOwnerReference( true ).
                 name( healthCheckHost ).
                 spec( com.enonic.ec.kubernetes.operator.crd.vhost.spec.ImmutableSpec.builder().
-                    createIngress( false ).
+                    skipIngress( true ).
                     host( healthCheckHost ).
                     addMappings( ImmutableSpecMapping.builder().
                         source( "/" ).

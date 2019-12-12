@@ -17,7 +17,6 @@ import io.fabric8.kubernetes.client.Watcher;
 import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.ec.kubernetes.common.client.DefaultClientProducer;
-import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.operator.commands.deployments.ImmutableCreateXpDeployment;
 import com.enonic.ec.kubernetes.operator.crd.app.client.XpAppClientProducer;
 import com.enonic.ec.kubernetes.operator.crd.config.client.XpConfigClientProducer;
@@ -66,41 +65,32 @@ public class OperatorDeployments
     private void watch( final Watcher.Action action, final String id, final Optional<XpDeploymentResource> oldResource,
                         final Optional<XpDeploymentResource> newResource )
     {
+        if ( action == Watcher.Action.DELETED )
+        {
+            // Do nothing
+            return;
+        }
+
         ResourceInfo<XpDeploymentResource, DiffResource> info = ImmutableInfoDeployment.builder().
             oldResource( oldResource ).
             newResource( newResource ).
             build();
 
-        if ( info.diff().diffSpec().shouldAddOrModify() )
-        {
-            try
-            {
-                ImmutableCombinedCommand.Builder commandBuilder = ImmutableCombinedCommand.builder();
-
-                ImmutableCreateXpDeployment.builder().
-                    defaultClient( defaultClientProducer.client() ).
-                    configClient( xpConfigClientProducer.produce() ).
-                    appClient( xpAppClientProducer.produce() ).
-                    vHostClient( xpVHostClientProducer.produce() ).
-                    resource( newResource.get() ).
-                    deploymentName( newResource.get().getMetadata().getName() ).
-                    defaultLabels( newResource.get().getMetadata().getLabels() ).
-                    namingHelper( ImmutableXpDeploymentNamingHelper.builder().resource( newResource.get() ).build() ).
-                    diffSpec( info.diff().diffSpec() ).
-                    ownerReference( info.ownerReference() ).
-                    preInstallApps( preInstallApps ).
-                    build().
-                    addCommands( commandBuilder );
-
-                commandBuilder.build().execute();
-            }
-            catch ( Exception e )
-            {
-                // TODO: What to do in this case? Update XP deployment with info maybe?
-                log.error( "Failed creating XP deployment", e );
-            }
-        }
+        runCommands( commandBuilder -> {
+            ImmutableCreateXpDeployment.builder().
+                defaultClient( defaultClientProducer.client() ).
+                configClient( xpConfigClientProducer.produce() ).
+                appClient( xpAppClientProducer.produce() ).
+                vHostClient( xpVHostClientProducer.produce() ).
+                resource( newResource.get() ).
+                deploymentName( newResource.get().getMetadata().getName() ).
+                defaultLabels( newResource.get().getMetadata().getLabels() ).
+                namingHelper( ImmutableXpDeploymentNamingHelper.builder().resource( newResource.get() ).build() ).
+                diffSpec( info.diff().diffSpec() ).
+                ownerReference( info.ownerReference() ).
+                preInstallApps( preInstallApps ).
+                build().
+                addCommands( commandBuilder );
+        } );
     }
-
-
 }

@@ -9,6 +9,6 @@ spec:
     authority: selfSigned
   mappings:
     - node: main
-      source: /admin
+      source: /
       target: /admin
       idProvider: system

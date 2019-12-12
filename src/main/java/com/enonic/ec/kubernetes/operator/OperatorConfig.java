@@ -6,9 +6,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.fabric8.kubernetes.client.Watcher;
 import io.quarkus.runtime.StartupEvent;
 
@@ -27,8 +24,6 @@ import com.enonic.ec.kubernetes.operator.info.ResourceInfoNamespaced;
 public class OperatorConfig
     extends OperatorNamespaced
 {
-    private final static Logger log = LoggerFactory.getLogger( OperatorConfig.class );
-
     @Inject
     DefaultClientProducer defaultClientProducer;
 
@@ -46,13 +41,13 @@ public class OperatorConfig
         xpConfigCache.addWatcher( this::watchXpConfig );
     }
 
-    private void watchXpConfig( final Watcher.Action action, final String s, final Optional<XpConfigResource> oldXpConfig,
-                                final Optional<XpConfigResource> newXpConfig )
+    private void watchXpConfig( final Watcher.Action action, final String s, final Optional<XpConfigResource> oldResource,
+                                final Optional<XpConfigResource> newResource )
     {
         Optional<ResourceInfoNamespaced<XpConfigResource, DiffResource>> i = getInfo( action, () -> ImmutableInfoConfig.builder().
             xpDeploymentCache( xpDeploymentCache ).
-            oldResource( oldXpConfig ).
-            newResource( newXpConfig ).
+            oldResource( oldResource ).
+            newResource( newResource ).
             build() );
 
         i.ifPresent( info -> {

@@ -58,8 +58,11 @@ minikube-operator-logs:
 minikube-operator-port-forward:
 	kubectl -n ec-system get pods | grep ec-operator | awk '{print $$1}' | xargs -I % kubectl -n ec-system port-forward % ${LOCAL_OPERATOR_PORT}:8080
 
-create-deployment:
+deployment-create:
 	kubectl apply -f src/test/example-deployment.yaml
+
+deployment-supass:
+	kubectl -n mycloud-myproject-qaxp get secrets su-qaxp -o jsonpath={.data.suPass} | base64 -d
 
 post-admission-success:
 	cat src/test/admission-success.json | http -v -j POST :${LOCAL_OPERATOR_PORT}/admission/validate

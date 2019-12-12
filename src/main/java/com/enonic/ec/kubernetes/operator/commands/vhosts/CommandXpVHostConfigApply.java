@@ -25,7 +25,7 @@ public abstract class CommandXpVHostConfigApply
     extends Configuration
     implements CombinedCommandBuilder
 {
-    protected abstract XpConfigClient client();
+    protected abstract XpConfigClient xpConfigClient();
 
     protected abstract XpConfigCache xpConfigCache();
 
@@ -44,7 +44,7 @@ public abstract class CommandXpVHostConfigApply
 
             // Create / Update config
             ImmutableCommandXpVHostConfigNodesApply.builder().
-                client( client() ).
+                xpConfigClient( xpConfigClient() ).
                 xpConfigCache( xpConfigCache() ).
                 info( info() ).
                 name( cfgStrFmt( "operator.config.xp.vhosts.name", nodeName ) ).
@@ -58,37 +58,18 @@ public abstract class CommandXpVHostConfigApply
 
     private Map<String, List<Mapping>> getNodeMappings( ResourceInfoNamespaced<XpVHostResource, DiffResource> info )
     {
-        // Get all vHosts in this namespace
-        List<XpVHostResource> allVHosts = vHostCache().getByNamespace( info.namespace() ).collect( Collectors.toList());
-
-        // Get all mappings in one place
         List<Mapping> mappings = new LinkedList<>();
-        allVHosts.forEach( v -> v.getSpec().mappings().forEach( m -> mappings.add( ImmutableMapping.builder().
-            host( v.getSpec().host() ).
-            node( m.node() ).
-            source( m.source() ).
-            target( m.target() ).
-            idProvider( Optional.ofNullable( m.idProvider() ) ).
-            build() ) ) );
 
-        // Get mappings with no node
-        List<Mapping> withNoNode = mappings.stream().filter( n -> n.node() == null ).collect( Collectors.toList() );
+        vHostCache().getByNamespace( info.namespace() ).
+            forEach( v -> v.getSpec().mappings().
+                forEach( m -> mappings.add( ImmutableMapping.builder().
+                    host( v.getSpec().host() ).
+                    node( m.node() ).
+                    source( m.source() ).
+                    target( m.target() ).
+                    idProvider( Optional.ofNullable( m.idProvider() ) ).
+                    build() ) ) );
 
-        // Group mappings by node
-        Map<String, List<Mapping>> map =
-            mappings.stream().filter( n -> n.node() != null ).collect( Collectors.groupingBy( Mapping::node ) );
-
-        // Add missing nodes to map
-        info.xpDeploymentResource().getSpec().nodes().keySet().forEach( k -> {
-            if ( !map.containsKey( k ) )
-            {
-                map.put( k, new LinkedList<>() );
-            }
-        } );
-
-        // Add no node mappings to all other nodes
-        map.forEach( ( node, m ) -> m.addAll( withNoNode ) );
-
-        return map;
+        return mappings.stream().collect( Collectors.groupingBy( Mapping::node ) );
     }
 }

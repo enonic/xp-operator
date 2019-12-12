@@ -1,7 +1,6 @@
 package com.enonic.ec.kubernetes.operator.crd.config.spec;
 
 import org.immutables.value.Value;
-import org.wildfly.common.annotation.Nullable;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
@@ -16,7 +15,6 @@ public abstract class Spec
 {
     public abstract String file();
 
-    @Nullable
     public abstract String node();
 
     public abstract String data();

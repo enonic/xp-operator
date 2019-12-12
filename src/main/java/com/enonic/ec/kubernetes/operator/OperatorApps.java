@@ -6,9 +6,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.fabric8.kubernetes.client.Watcher;
 import io.quarkus.runtime.StartupEvent;
 
@@ -27,8 +24,6 @@ import com.enonic.ec.kubernetes.operator.info.ResourceInfoNamespaced;
 public class OperatorApps
     extends OperatorNamespaced
 {
-    private final static Logger log = LoggerFactory.getLogger( OperatorApps.class );
-
     @Inject
     XpConfigClientProducer configClientProducer;
 
@@ -46,13 +41,13 @@ public class OperatorApps
         xpAppCache.addWatcher( this::watchApps );
     }
 
-    private void watchApps( final Watcher.Action action, final String s, final Optional<XpAppResource> oldApp,
-                            final Optional<XpAppResource> newApp )
+    private void watchApps( final Watcher.Action action, final String s, final Optional<XpAppResource> oldResource,
+                            final Optional<XpAppResource> newResource )
     {
         Optional<ResourceInfoNamespaced<XpAppResource, DiffResource>> i = getInfo( action, () -> ImmutableInfoApp.builder().
             xpDeploymentCache( xpDeploymentCache ).
-            oldResource( oldApp ).
-            newResource( newApp ).
+            oldResource( oldResource ).
+            newResource( newResource ).
             build() );
 
         i.ifPresent( info -> {
@@ -60,7 +55,7 @@ public class OperatorApps
             // lets use the stall function to let them accumulate before we update config
             stallAndRunCommands( ( commandBuilder ) -> {
                 ImmutableCommandXpAppApplyAll.builder().
-                    client( configClientProducer.produce() ).
+                    xpConfigClient( configClientProducer.produce() ).
                     xpConfigCache( xpConfigCache ).
                     xpAppCache( xpAppCache ).
                     info( info ).

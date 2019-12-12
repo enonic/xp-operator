@@ -28,7 +28,7 @@ import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.kubectl.apply.ImmutableCommandApplyDaemonSet;
 
 @Value.Immutable
-public abstract class PrePullImages
+public abstract class CommandPrePullImages
     extends Configuration
     implements CombinedCommandBuilder
 {

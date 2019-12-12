@@ -20,7 +20,7 @@ public abstract class CommandXpAppApplyAll
     extends Configuration
     implements CombinedCommandBuilder
 {
-    public abstract XpConfigClient client();
+    public abstract XpConfigClient xpConfigClient();
 
     public abstract XpConfigCache xpConfigCache();
 
@@ -36,7 +36,7 @@ public abstract class CommandXpAppApplyAll
 
         // Apply them to the config file
         ImmutableCommandXpAppApply.builder().
-            client( client() ).
+            xpConfigClient( xpConfigClient() ).
             xpConfigCache( xpConfigCache() ).
             info( info() ).
             name( cfgStr( "operator.config.xp.deploy.name" ) ).

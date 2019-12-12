@@ -49,6 +49,9 @@ public class AdmissionApi
     @ConfigProperty(name = "operator.crd.xp.apps.kind")
     String xp7AppKind;
 
+    @ConfigProperty(name = "operator.deployment.xp.allNodes")
+    String allNodesPicker;
+
     @Inject
     ObjectMapper mapper;
 
@@ -142,7 +145,7 @@ public class AdmissionApi
         {
             for ( SpecMapping mapping : diff.newValue().get().getSpec().mappings() )
             {
-                if ( mapping.node() != null )
+                if ( !mapping.node().equals( allNodesPicker ) )
                 {
                     checkIfNodeExists( diff.newValue().get().getMetadata().getNamespace(), mapping.node(), "spec.mappings.node" );
                 }
@@ -159,7 +162,7 @@ public class AdmissionApi
                 newValue( Optional.ofNullable(
                     review.getRequest().getObject() != null ? (XpConfigResource) review.getRequest().getObject() : null ) ).
                 build();
-        if ( diff.newValue().isPresent() && diff.newValue().get().getSpec().node() != null )
+        if ( diff.newValue().isPresent() && !diff.newValue().get().getSpec().node().equals( allNodesPicker ) )
         {
             checkIfNodeExists( diff.newValue().get().getMetadata().getNamespace(), diff.newValue().get().getSpec().node(), "spec.node" );
         }

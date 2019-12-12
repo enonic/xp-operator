@@ -19,7 +19,7 @@ public abstract class CommandXpConfigModifyData
     extends Configuration
     implements CombinedCommandBuilder
 {
-    public abstract XpConfigClient client();
+    public abstract XpConfigClient xpConfigClient();
 
     public abstract XpConfigCache xpConfigCache();
 
@@ -29,7 +29,7 @@ public abstract class CommandXpConfigModifyData
 
     public abstract String file();
 
-    public abstract Optional<String> node();
+    public abstract String node();
 
     @Value.Derived
     protected Optional<XpConfigResource> xpConfigResource()
@@ -54,7 +54,7 @@ public abstract class CommandXpConfigModifyData
         {
             // The config is empty, delete the config
             commandBuilder.addCommand( ImmutableCommandDeleteXp7Config.builder().
-                client( client() ).
+                client( xpConfigClient() ).
                 namespace( info().namespace() ).
                 name( name() ).
                 build() );
@@ -63,14 +63,14 @@ public abstract class CommandXpConfigModifyData
         {
             // Apply the config
             commandBuilder.addCommand( ImmutableCommandApplyXp7Config.builder().
-                client( client() ).
-                ownerReference( info().ownerReference() ).
+                client( xpConfigClient() ).
+                canSkipOwnerReference( true ). // TODO: Look at this
                 namespace( info().namespace() ).
                 name( name() ).
                 spec( ImmutableSpec.builder().
                     file( file() ).
                     data( data ).
-                    node( node().orElse( null ) ).
+                    node( node() ).
                     build() ).
                 build() );
         }

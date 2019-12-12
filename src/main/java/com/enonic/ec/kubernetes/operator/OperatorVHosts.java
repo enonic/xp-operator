@@ -6,9 +6,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.fabric8.kubernetes.client.Watcher;
 import io.quarkus.runtime.StartupEvent;
 
@@ -30,8 +27,6 @@ import com.enonic.ec.kubernetes.operator.info.ResourceInfoNamespaced;
 public class OperatorVHosts
     extends OperatorNamespaced
 {
-    private final static Logger log = LoggerFactory.getLogger( OperatorVHosts.class );
-
     @Inject
     DefaultClientProducer defaultClientProducer;
 
@@ -52,13 +47,13 @@ public class OperatorVHosts
         xpVHostCache.addWatcher( this::watchVHosts );
     }
 
-    private void watchVHosts( final Watcher.Action action, final String s, final Optional<XpVHostResource> oldVHost,
-                              final Optional<XpVHostResource> newVHost )
+    private void watchVHosts( final Watcher.Action action, final String s, final Optional<XpVHostResource> oldResource,
+                              final Optional<XpVHostResource> newResource )
     {
         Optional<ResourceInfoNamespaced<XpVHostResource, DiffResource>> i = getInfo( action, () -> ImmutableInfoVHost.builder().
             xpDeploymentCache( xpDeploymentCache ).
-            oldResource( oldVHost ).
-            newResource( newVHost ).
+            oldResource( oldResource ).
+            newResource( newResource ).
             build() );
 
         i.ifPresent( info -> {
@@ -78,7 +73,7 @@ public class OperatorVHosts
             // lets use the stall function to let them accumulate before we update config
             stallAndRunCommands( commandBuilder, () -> {
                 ImmutableCommandXpVHostConfigApply.builder().
-                    client( configClientProducer.produce() ).
+                    xpConfigClient( configClientProducer.produce() ).
                     xpConfigCache( xpConfigCache ).
                     vHostCache( xpVHostCache ).
                     info( info ).
