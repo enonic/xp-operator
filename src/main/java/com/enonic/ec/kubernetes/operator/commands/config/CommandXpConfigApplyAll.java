@@ -34,17 +34,18 @@ public abstract class CommandXpConfigApplyAll
     @Override
     public void addCommands( final ImmutableCombinedCommand.Builder commandBuilder )
     {
-        // Iterate over config maps relevant to this XpConfig
+        // Iterate over config maps relevant to this XpConfig change
         for ( ConfigMap configMap : getRelevantConfigMaps( info().resource() ) )
         {
-            // Get all relevant XpConfig for this config map
+            // Get all relevant XpConfig for this ConfigMap
             List<XpConfigResource> allXpConfigs = getRelevantXpConfig( configMap );
 
-            // Update
+            // Update ConfigMap
             ImmutableCommandXpConfigApply.builder().
                 defaultClient( defaultClient() ).
                 configMap( configMap ).
-                xpConfigResources( allXpConfigs ).build().
+                xpConfigResources( allXpConfigs ).
+                build().
                 addCommands( commandBuilder );
         }
     }
