@@ -12,6 +12,7 @@ spec:
   nodesSharedDisk: 1Gi
   nodes:
     main:
+      displayName: "My Node"
       type: ["MASTER", "DATA", "FRONTEND"]
       replicas: 1
       resources:
