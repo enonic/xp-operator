@@ -1,11 +1,5 @@
 # ec-operator
 
-## TODO
-
-* This project assumes that cloud+project is always unique, is that the case?
-* Create admission endpoint in operator for validation
-* Fix tests
-
 ## Debug with minikube
 
 ### Run operator locally
