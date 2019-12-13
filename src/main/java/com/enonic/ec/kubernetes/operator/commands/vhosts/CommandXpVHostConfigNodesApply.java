@@ -16,10 +16,10 @@ public abstract class CommandXpVHostConfigNodesApply
     @Override
     protected void setData( final StringBuilder sb )
     {
-        sb.append( "enabled = true\n" );
+        sb.append( "enabled = true" );
         for ( Mapping m : mappings() )
         {
-            sb.append( "\n" );
+            sb.append( "\n\n" );
             sb.append( String.format( "mapping.%s.host=%s\n", m.name(), m.host() ) );
             sb.append( String.format( "mapping.%s.source=%s\n", m.name(), m.source() ) );
             sb.append( String.format( "mapping.%s.target=%s", m.name(), m.target() ) );

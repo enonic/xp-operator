@@ -49,7 +49,6 @@ public abstract class DiffResource
 
         Preconditions.checkState( equals( getCloud ), "Cannot change deployment label 'cloud'" );
         Preconditions.checkState( equals( getProject ), "Cannot change deployment label 'project'" );
-        Preconditions.checkState( equals( getType ), "Cannot change deployment label 'type'" );
         Preconditions.checkState( equals( getName ), "Cannot change deployment label 'name'" );
     }
 

@@ -12,25 +12,23 @@ import org.immutables.value.Value;
 import com.google.common.collect.ImmutableMap;
 
 import io.fabric8.kubernetes.api.model.EnvVar;
-import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
 import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.kubectl.apply.ImmutableCommandApplyConfigMap;
-import com.enonic.ec.kubernetes.kubectl.apply.ImmutableCommandApplyPodDisruptionBudget;
 import com.enonic.ec.kubernetes.kubectl.apply.ImmutableCommandApplyService;
 import com.enonic.ec.kubernetes.kubectl.apply.ImmutableCommandApplyStatefulSet;
 import com.enonic.ec.kubernetes.kubectl.scale.ImmutableCommandScaleStatefulSet;
 import com.enonic.ec.kubernetes.operator.commands.deployments.config.ClusterConfigurator;
-import com.enonic.ec.kubernetes.operator.commands.deployments.spec.ImmutablePodDisruptionBudgetSpecBuilder;
 import com.enonic.ec.kubernetes.operator.commands.deployments.spec.ImmutableServiceSpecBuilder;
 import com.enonic.ec.kubernetes.operator.commands.deployments.spec.ImmutableStatefulSetSpecBuilder;
 import com.enonic.ec.kubernetes.operator.commands.deployments.volumes.VolumeBuilder;
 import com.enonic.ec.kubernetes.operator.commands.deployments.volumes.VolumeTripletList;
 import com.enonic.ec.kubernetes.operator.crd.deployment.diff.DiffSpec;
 import com.enonic.ec.kubernetes.operator.crd.deployment.diff.DiffSpecNode;
+import com.enonic.ec.kubernetes.operator.crd.deployment.diff.InfoDeployment;
 import com.enonic.ec.kubernetes.operator.crd.deployment.spec.SpecNode;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
@@ -41,29 +39,15 @@ public abstract class CreateXpDeploymentNode
 {
     protected abstract KubernetesClient defaultClient();
 
-    protected abstract OwnerReference ownerReference();
-
-    protected abstract String deploymentName();
-
-    protected abstract String namespace();
+    protected abstract InfoDeployment info();
 
     protected abstract String nodeId();
-
-    protected abstract String nodeShortName();
-
-    protected abstract String nodeFullName();
-
-    protected abstract String serviceName();
 
     protected abstract DiffSpec diffSpec();
 
     protected abstract DiffSpecNode diffSpecNode();
 
-    protected abstract Map<String, String> defaultLabels();
-
     protected abstract ClusterConfigurator clusterConfigurator();
-
-    protected abstract int minimumAvailable();
 
     protected abstract VolumeBuilder volumeBuilder();
 
@@ -111,15 +95,16 @@ public abstract class CreateXpDeploymentNode
     @Override
     public void addCommands( ImmutableCombinedCommand.Builder commandBuilder )
     {
-        SpecNode newNode = diffSpecNode().newValue().get();
-        Map<String, String> nodeLabels = nodeExtraLabels( nodeId(), newNode, defaultLabels() );
+        SpecNode node = diffSpecNode().newValue().get();
+        Map<String, String> nodeLabels = nodeExtraLabels( nodeId(), node, info().defaultLabels() );
 
+        // If this is new node, create a service pointing to it
         if ( diffSpec().isNew() )
         {
             commandBuilder.addCommand( ImmutableCommandApplyService.builder().
                 client( defaultClient() ).
-                ownerReference( ownerReference() ).
-                namespace( namespace() ).
+                ownerReference( info().ownerReference() ).
+                namespace( info().namespaceName() ).
                 name( nodeId() ).
                 spec( ImmutableServiceSpecBuilder.builder().
                     selector( nodeLabels ).
@@ -129,41 +114,43 @@ public abstract class CreateXpDeploymentNode
                 build() );
         }
 
-        int effectiveScale = diffSpec().newValue().get().enabled() ? newNode.replicas() : 0;
+        int effectiveScale = diffSpec().newValue().get().enabled() ? node.replicas() : 0;
         boolean changeScale = diffSpec().enabledChanged() || diffSpecNode().replicasChanged() || diffSpec().isNew();
 
-        if ( changeScale )
-        {
-            commandBuilder.addCommand( ImmutableCommandApplyPodDisruptionBudget.builder().
-                client( defaultClient() ).
-                ownerReference( ownerReference() ).
-                namespace( namespace() ).
-                name( nodeId() ).
-                labels( nodeLabels ).
-                spec( ImmutablePodDisruptionBudgetSpecBuilder.builder().
-                    minAvailable( minimumAvailable() ).
-                    matchLabels( nodeLabels ).
-                    build().
-                    spec() ).
-                build() );
-        }
+//        if ( changeScale )
+//        {
+//            Integer minimumAvailable = info().defaultMinimumAvailable( node );
+//            // TODO: Delete pod disruption budget if minimumAvailable == 0
+//            commandBuilder.addCommand( ImmutableCommandApplyPodDisruptionBudget.builder().
+//                client( defaultClient() ).
+//                ownerReference( info().ownerReference() ).
+//                namespace( info().namespaceName() ).
+//                name( nodeId() ).
+//                labels( nodeLabels ).
+//                spec( ImmutablePodDisruptionBudgetSpecBuilder.builder().
+//                    minAvailable( minimumAvailable ).
+//                    matchLabels( nodeLabels ).
+//                    build().
+//                    spec() ).
+//                build() );
+//        }
 
-        boolean changeConfig =
-            nodeSharedConfigChanged() || diffSpecNode().configChanged() || diffSpecNode().replicasChanged() || diffSpec().isNew();
-        if ( changeConfig )
+        // If node is new or replicas have changed, update cluster config
+        if ( diffSpec().isNew() || diffSpecNode().replicasChanged() )
         {
             commandBuilder.addCommand( ImmutableCommandApplyConfigMap.builder().
                 client( defaultClient() ).
-                ownerReference( ownerReference() ).
-                namespace( namespace() ).
+                ownerReference( info().ownerReference() ).
+                namespace( info().namespaceName() ).
                 name( nodeId() ).
                 labels( configMapExtraLabels( nodeId(), nodeLabels ) ).
                 data( Collections.emptyMap() ).
                 build() );
 
-            clusterConfigurator().addCommands( commandBuilder, nodeId(), newNode );
+            clusterConfigurator().addCommands( commandBuilder, nodeId(), node );
         }
 
+        // Create / Update stateful set if needed
         boolean changeStatefulSet =
             diffSpec().versionChanged() || diffSpecNode().envChanged() || diffSpecNode().resourcesChanged() || diffSpec().isNew();
         if ( changeStatefulSet )
@@ -171,7 +158,7 @@ public abstract class CreateXpDeploymentNode
             List<EnvVar> podEnv = new LinkedList<>();
             podEnv.add( suPassHash() );
 
-            for ( Map.Entry<String, String> e : newNode.env().entrySet() )
+            for ( Map.Entry<String, String> e : node.env().entrySet() )
             {
                 podEnv.add( new EnvVar( e.getKey(), e.getValue(), null ) );
             }
@@ -180,12 +167,12 @@ public abstract class CreateXpDeploymentNode
             cfgIfBool( "operator.extensions.linkerd.enabled", () -> podAnnotations.put( "linkerd.io/inject", "enabled" ) );
 
             VolumeTripletList volumeList =
-                volumeBuilder().getVolumeTriplets( nodeId(), Optional.ofNullable( newNode.resources().disks().get( "index" ) ) );
+                volumeBuilder().getVolumeTriplets( nodeId(), Optional.ofNullable( node.resources().disks().get( "index" ) ) );
 
             commandBuilder.addCommand( ImmutableCommandApplyStatefulSet.builder().
                 client( defaultClient() ).
-                ownerReference( ownerReference() ).
-                namespace( namespace() ).
+                ownerReference( info().ownerReference() ).
+                namespace( info().namespaceName() ).
                 name( nodeId() ).
                 labels( nodeLabels ).
                 spec( ImmutableStatefulSetSpecBuilder.builder().
@@ -194,19 +181,21 @@ public abstract class CreateXpDeploymentNode
                     podImage( podImageName() ).
                     podEnv( podEnv ).
                     podAnnotations( podAnnotations.build() ).
-                    podResources( Map.of( "cpu", newNode.resources().cpu(), "memory", newNode.resources().memory() ) ).
+                    podResources( Map.of( "cpu", node.resources().cpu(), "memory", node.resources().memory() ) ).
                     volumeList( volumeList ).
-                    serviceName( serviceName() ).
+                    serviceName( info().allNodesServiceName() ).
+                    clusterConfigurator( clusterConfigurator() ).
                     build().
                     spec() ).
                 build() );
         }
 
+        // If there is only a scale change, just update the scale
         if ( !changeStatefulSet && changeScale )
         {
             commandBuilder.addCommand( ImmutableCommandScaleStatefulSet.builder().
                 client( defaultClient() ).
-                namespace( namespace() ).
+                namespace( info().namespaceName() ).
                 name( nodeId() ).
                 scale( effectiveScale ).
                 build() );

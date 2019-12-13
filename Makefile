@@ -62,7 +62,7 @@ deployment-create:
 	kubectl apply -f src/test/example-deployment.yaml
 
 deployment-supass:
-	kubectl -n mycloud-myproject-qaxp get secrets su-qaxp -o jsonpath={.data.suPass} | base64 -d
+	kubectl -n mycloud-myproject-qaxp get secrets su-pass -o jsonpath={.data.suPass} | base64 -d
 
 post-admission-success:
 	cat src/test/admission-success.json | http -v -j POST :${LOCAL_OPERATOR_PORT}/admission/validate

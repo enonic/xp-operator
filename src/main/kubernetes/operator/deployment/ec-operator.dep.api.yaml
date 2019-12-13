@@ -22,7 +22,7 @@ webhooks:
       - apiGroups: ["enonic.cloud"]
         operations: ["*"]
         apiVersions: ["*"]
-        resources: ["xp7deployments", "xp7vhosts"]
+        resources: ["xp7deployments", "xp7vhosts", "xp7apps", "xp7configs"]
         scope: "*"
     admissionReviewVersions: ["v1", "v1beta1"]
     failurePolicy: Fail

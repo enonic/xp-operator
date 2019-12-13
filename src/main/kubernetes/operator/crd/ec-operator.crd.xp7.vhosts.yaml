@@ -12,14 +12,14 @@ spec:
   scope: Namespaced
   version: v1alpha1
   additionalPrinterColumns:
-    - name: Ingress
-      type: boolean
-      description: Ingress
-      JSONPath: .spec.createIngress
     - name: Host
       type: string
       description: Host
       JSONPath: .spec.host
+    - name: Skip Ingress
+      type: boolean
+      description: Skip Ingress
+      JSONPath: .spec.skipIngress
     - name: Nodes
       type: string
       description: Nodes

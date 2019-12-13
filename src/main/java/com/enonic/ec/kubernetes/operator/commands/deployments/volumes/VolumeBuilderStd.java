@@ -9,14 +9,12 @@ import io.fabric8.kubernetes.api.model.Volume;
 public abstract class VolumeBuilderStd
     extends VolumeBuilder
 {
-    protected abstract String sharedStoragePVCName();
-
     @Override
     protected Volume sharedVolume( final String name )
     {
         Volume volume = new Volume();
         volume.setName( name );
-        volume.setPersistentVolumeClaim( new PersistentVolumeClaimVolumeSource( sharedStoragePVCName(), false ) );
+        volume.setPersistentVolumeClaim( new PersistentVolumeClaimVolumeSource( info().sharedStorageName(), false ) );
         return volume;
     }
 

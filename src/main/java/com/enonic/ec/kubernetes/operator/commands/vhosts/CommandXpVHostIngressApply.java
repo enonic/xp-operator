@@ -111,7 +111,7 @@ public abstract class CommandXpVHostIngressApply
         commandBuilder.addCommand( ImmutableCommandApplyIngress.builder().
             client( defaultClient() ).
             ownerReference( info().ownerReference() ).
-            namespace( info().namespace() ).
+            namespace( info().deploymentInfo().namespaceName() ).
             name( getIngressName( info().resource() ) ).
             annotations( ingressAnnotations.build() ).
             spec( ImmutableIngressSpec.builder().
@@ -127,7 +127,7 @@ public abstract class CommandXpVHostIngressApply
     {
         commandBuilder.addCommand( ImmutableCommandDeleteIngress.builder().
             client( defaultClient() ).
-            namespace( info().namespace() ).
+            namespace( info().deploymentInfo().namespaceName() ).
             name( getIngressName( info().resource() ) ).
             build() );
     }

@@ -12,6 +12,8 @@ import io.fabric8.kubernetes.api.model.HasMetadata;
 import com.enonic.ec.kubernetes.common.Diff;
 import com.enonic.ec.kubernetes.operator.crd.deployment.XpDeploymentResource;
 import com.enonic.ec.kubernetes.operator.crd.deployment.client.XpDeploymentCache;
+import com.enonic.ec.kubernetes.operator.crd.deployment.diff.ImmutableInfoDeployment;
+import com.enonic.ec.kubernetes.operator.crd.deployment.diff.InfoDeployment;
 
 public abstract class ResourceInfoNamespaced<T extends HasMetadata, D extends Diff<T>>
     extends ResourceInfo<T, D>
@@ -32,13 +34,16 @@ public abstract class ResourceInfoNamespaced<T extends HasMetadata, D extends Di
     }
 
     @Value.Derived
-    public String namespace()
+    public InfoDeployment deploymentInfo()
     {
-        return resource().getMetadata().getNamespace();
+        return ImmutableInfoDeployment.builder().
+            oldResource( xpDeploymentResource() ).
+            newResource( xpDeploymentResource() ).
+            build();
     }
 
     private String getXpDeploymentName()
     {
-        return namespace();
+        return resource().getMetadata().getNamespace();
     }
 }

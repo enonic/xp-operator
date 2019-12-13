@@ -7,7 +7,6 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
@@ -68,7 +67,8 @@ public class ResourceCache<T extends HasMetadata, L extends KubernetesResourceLi
         return filterNamespace( filterName( stream(), name ), namespace ).findFirst();
     }
 
-    public Stream<T> getByNamespace( String namespace) {
+    public Stream<T> getByNamespace( String namespace )
+    {
         return filterNamespace( stream(), namespace );
     }
 

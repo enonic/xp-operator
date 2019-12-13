@@ -31,7 +31,7 @@ public abstract class CommandXpConfigApply
     public void addCommands( final ImmutableCombinedCommand.Builder commandBuilder )
     {
         Map<String, String> oldData = configMap().getData() != null ? configMap().getData() : Collections.emptyMap();
-        Map<String, String> newData = new HashMap<>( oldData );
+        Map<String, String> newData = new HashMap<>();
         for ( XpConfigResource resource : xpConfigResources() )
         {
             newData.put( resource.getSpec().file(), resource.getSpec().data() );

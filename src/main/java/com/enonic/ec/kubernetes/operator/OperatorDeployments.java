@@ -10,8 +10,6 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.fabric8.kubernetes.client.Watcher;
 import io.quarkus.runtime.StartupEvent;
@@ -20,21 +18,17 @@ import com.enonic.ec.kubernetes.common.client.DefaultClientProducer;
 import com.enonic.ec.kubernetes.operator.commands.deployments.ImmutableCreateXpDeployment;
 import com.enonic.ec.kubernetes.operator.crd.app.client.XpAppClientProducer;
 import com.enonic.ec.kubernetes.operator.crd.config.client.XpConfigClientProducer;
-import com.enonic.ec.kubernetes.operator.crd.deployment.ImmutableXpDeploymentNamingHelper;
 import com.enonic.ec.kubernetes.operator.crd.deployment.XpDeploymentResource;
 import com.enonic.ec.kubernetes.operator.crd.deployment.client.XpDeploymentCache;
-import com.enonic.ec.kubernetes.operator.crd.deployment.diff.DiffResource;
 import com.enonic.ec.kubernetes.operator.crd.deployment.diff.ImmutableInfoDeployment;
+import com.enonic.ec.kubernetes.operator.crd.deployment.diff.InfoDeployment;
 import com.enonic.ec.kubernetes.operator.crd.vhost.client.XpVHostClientProducer;
-import com.enonic.ec.kubernetes.operator.info.ResourceInfo;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @ApplicationScoped
 public class OperatorDeployments
     extends OperatorNamespaced
 {
-    private final static Logger log = LoggerFactory.getLogger( OperatorDeployments.class );
-
     @Inject
     DefaultClientProducer defaultClientProducer;
 
@@ -71,7 +65,7 @@ public class OperatorDeployments
             return;
         }
 
-        ResourceInfo<XpDeploymentResource, DiffResource> info = ImmutableInfoDeployment.builder().
+        InfoDeployment info = ImmutableInfoDeployment.builder().
             oldResource( oldResource ).
             newResource( newResource ).
             build();
@@ -82,12 +76,7 @@ public class OperatorDeployments
                 configClient( xpConfigClientProducer.produce() ).
                 appClient( xpAppClientProducer.produce() ).
                 vHostClient( xpVHostClientProducer.produce() ).
-                resource( newResource.get() ).
-                deploymentName( newResource.get().getMetadata().getName() ).
-                defaultLabels( newResource.get().getMetadata().getLabels() ).
-                namingHelper( ImmutableXpDeploymentNamingHelper.builder().resource( newResource.get() ).build() ).
-                diffSpec( info.diff().diffSpec() ).
-                ownerReference( info.ownerReference() ).
+                info( info ).
                 preInstallApps( preInstallApps ).
                 build().
                 addCommands( commandBuilder );

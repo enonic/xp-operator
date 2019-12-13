@@ -32,14 +32,15 @@ public abstract class CommandXpAppApplyAll
     public void addCommands( final ImmutableCombinedCommand.Builder commandBuilder )
     {
         // Get all apps in namespace
-        List<XpAppResource> allApps = xpAppCache().getByNamespace( info().namespace() ).collect( Collectors.toList());
+        List<XpAppResource> allApps = xpAppCache().getByNamespace( info().deploymentInfo().namespaceName() ).collect( Collectors.toList() );
 
         // Apply them to the config file
         ImmutableCommandXpAppApply.builder().
             xpConfigClient( xpConfigClient() ).
             xpConfigCache( xpConfigCache() ).
             info( info() ).
-            name( cfgStr( "operator.config.xp.deploy.name" ) ).
+            node( cfgStr( "operator.deployment.xp.allNodes" ) ).
+            name( cfgStrFmt( "operator.config.xp.deploy.name", cfgStr( "operator.deployment.xp.allNodes" ) ) ).
             file( cfgStr( "operator.config.xp.deploy.file" ) ).
             xpAppResources( allApps ).
             build().

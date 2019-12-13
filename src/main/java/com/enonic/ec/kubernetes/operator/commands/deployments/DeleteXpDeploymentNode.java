@@ -11,6 +11,7 @@ import com.enonic.ec.kubernetes.kubectl.delete.ImmutableCommandDeleteConfigMap;
 import com.enonic.ec.kubernetes.kubectl.delete.ImmutableCommandDeletePodDisruptionBudget;
 import com.enonic.ec.kubernetes.kubectl.delete.ImmutableCommandDeleteService;
 import com.enonic.ec.kubernetes.kubectl.delete.ImmutableCommandDeleteStatefulSet;
+import com.enonic.ec.kubernetes.operator.crd.deployment.diff.InfoDeployment;
 
 @Value.Immutable
 public abstract class DeleteXpDeploymentNode
@@ -19,7 +20,7 @@ public abstract class DeleteXpDeploymentNode
 {
     protected abstract KubernetesClient defaultClient();
 
-    protected abstract String namespace();
+    protected abstract InfoDeployment info();
 
     protected abstract String nodeId();
 
@@ -28,25 +29,25 @@ public abstract class DeleteXpDeploymentNode
     {
         commandBuilder.addCommand( ImmutableCommandDeleteService.builder().
             client( defaultClient() ).
-            namespace( namespace() ).
+            namespace( info().namespaceName() ).
             name( nodeId() ).
             build() );
 
         commandBuilder.addCommand( ImmutableCommandDeleteStatefulSet.builder().
             client( defaultClient() ).
-            namespace( namespace() ).
+            namespace( info().namespaceName() ).
             name( nodeId() ).
             build() );
 
         commandBuilder.addCommand( ImmutableCommandDeletePodDisruptionBudget.builder().
             client( defaultClient() ).
-            namespace( namespace() ).
+            namespace( info().namespaceName() ).
             name( nodeId() ).
             build() );
 
         commandBuilder.addCommand( ImmutableCommandDeleteConfigMap.builder().
             client( defaultClient() ).
-            namespace( namespace() ).
+            namespace( info().namespaceName() ).
             name( nodeId() ).
             build() );
     }

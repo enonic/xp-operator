@@ -11,7 +11,6 @@ import com.google.common.hash.Hashing;
 import com.google.common.io.BaseEncoding;
 
 import io.fabric8.kubernetes.api.model.EnvVar;
-import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
@@ -22,11 +21,17 @@ import com.enonic.ec.kubernetes.kubectl.apply.ImmutableCommandApplyNamespace;
 import com.enonic.ec.kubernetes.kubectl.apply.ImmutableCommandApplyPvc;
 import com.enonic.ec.kubernetes.kubectl.apply.ImmutableCommandApplySecret;
 import com.enonic.ec.kubernetes.kubectl.apply.ImmutableCommandApplyService;
+import com.enonic.ec.kubernetes.kubectl.apply.ImmutableCommandApplyXp7App;
 import com.enonic.ec.kubernetes.kubectl.apply.ImmutableCommandApplyXp7Config;
+import com.enonic.ec.kubernetes.kubectl.apply.ImmutableCommandApplyXp7VHost;
 import com.enonic.ec.kubernetes.operator.commands.deployments.spec.ImmutablePvcSpecBuilder;
 import com.enonic.ec.kubernetes.operator.commands.deployments.spec.ImmutableServiceSpecBuilder;
+import com.enonic.ec.kubernetes.operator.crd.app.client.XpAppClient;
 import com.enonic.ec.kubernetes.operator.crd.config.client.XpConfigClient;
 import com.enonic.ec.kubernetes.operator.crd.config.spec.ImmutableSpec;
+import com.enonic.ec.kubernetes.operator.crd.deployment.diff.InfoDeployment;
+import com.enonic.ec.kubernetes.operator.crd.vhost.client.XpVHostClient;
+import com.enonic.ec.kubernetes.operator.crd.vhost.spec.ImmutableSpecMapping;
 
 @Value.Immutable
 public abstract class CreateXpDeploymentBase
@@ -37,21 +42,21 @@ public abstract class CreateXpDeploymentBase
 
     protected abstract XpConfigClient configClient();
 
-    protected abstract OwnerReference ownerReference();
+    protected abstract XpVHostClient vHostClient();
 
-    protected abstract String namespace();
+    protected abstract XpAppClient appClient();
 
-    protected abstract String discoveryServiceName();
+    protected abstract InfoDeployment info();
 
     protected abstract EnvVar suPassHash();
 
-    protected abstract Map<String, String> defaultLabels();
-
-    protected abstract Optional<String> sharedStorageName();
+    protected abstract boolean createSharedStorage();
 
     protected abstract Optional<Quantity> sharedStorageSize();
 
     protected abstract boolean isClustered();
+
+    protected abstract Map<String, String> preInstallApps();
 
     private String generateSuPassword()
     {
@@ -67,8 +72,8 @@ public abstract class CreateXpDeploymentBase
         // Create namespace
         commandBuilder.addCommand( ImmutableCommandApplyNamespace.builder().
             client( defaultClient() ).
-            ownerReference( ownerReference() ).
-            name( namespace() ).
+            ownerReference( info().ownerReference() ).
+            name( info().namespaceName() ).
             build() );
 
         // Create su pass
@@ -78,21 +83,24 @@ public abstract class CreateXpDeploymentBase
         String passBase64 = BaseEncoding.base64().encode( pass.getBytes() );
         String passHashBase64 = BaseEncoding.base64().encode( passHash.getBytes() );
 
+        // Create secret with password
         commandBuilder.addCommand( ImmutableCommandApplySecret.builder().
             client( defaultClient() ).
-            ownerReference( ownerReference() ).
-            namespace( namespace() ).
+            ownerReference( info().ownerReference() ).
+            namespace( info().namespaceName() ).
             name( suPassHash().getValueFrom().getSecretKeyRef().getName() ).
             data( Map.of( "suPass", passBase64, suPassHash().getValueFrom().getSecretKeyRef().getKey(), passHashBase64 ) ).
             build() );
 
+        // Create system config
         commandBuilder.addCommand( ImmutableCommandApplyXp7Config.builder().
             client( configClient() ).
-            ownerReference( ownerReference() ).
-            namespace( namespace() ).
-            name( "system" ).
+            ownerReference( info().ownerReference() ).
+            namespace( info().namespaceName() ).
+            name( cfgStrFmt( "operator.config.xp.system.name", cfgStr( "operator.deployment.xp.allNodes" ) ) ).
             spec( ImmutableSpec.builder().
-                file( "system.properties" ).
+                node( cfgStr( "operator.deployment.xp.allNodes" ) ).
+                file( cfgStr( "operator.config.xp.system.file" ) ).
                 data( new StringBuilder().
                     append( "xp.suPassword = {sha512}${env." ).append( suPassHash().getName() ).append( "}" ).append( "\n" ).
                     append( "xp.init.adminUserCreation = false" ).
@@ -100,36 +108,65 @@ public abstract class CreateXpDeploymentBase
                 build() ).
             build() );
 
-        if ( sharedStorageName().isPresent() )
+        if ( createSharedStorage() )
         {
+            // Create PVC
             commandBuilder.addCommand( ImmutableCommandApplyPvc.builder().
                 client( defaultClient() ).
-                ownerReference( ownerReference() ).
-                namespace( namespace() ).
-                name( sharedStorageName().get() ).
-                labels( defaultLabels() ).
+                ownerReference( info().ownerReference() ).
+                namespace( info().namespaceName() ).
+                name( info().sharedStorageName() ).
+                labels( info().defaultLabels() ).
                 spec( ImmutablePvcSpecBuilder.builder().
                     size( sharedStorageSize().get() ).
-                    addAccessMode( isClustered() ? "ReadWriteMany" : "ReadWriteOnce" ). // TODO: This only works on minikube
+                    addAccessMode( cfgStr( "operator.deplyoment.xp.volume.shared.accessMode" ) ).
                     build().
                     spec() ).
                 build() );
         }
 
-        // Create es discovery service
+        // Create service pointing to all nodes
         commandBuilder.addCommand( ImmutableCommandApplyService.builder().
             client( defaultClient() ).
-            ownerReference( ownerReference() ).
-            namespace( namespace() ).
-            name( discoveryServiceName() ).
-            labels( defaultLabels() ).
+            ownerReference( info().ownerReference() ).
+            namespace( info().namespaceName() ).
+            name( info().allNodesServiceName() ).
+            labels( info().defaultLabels() ).
             spec( ImmutableServiceSpecBuilder.builder().
-                selector( defaultLabels() ).
+                selector( info().defaultLabels() ).
                 putPorts( cfgStr( "operator.deployment.xp.port.es.discovery.name" ),
                           cfgInt( "operator.deployment.xp.port.es.discovery.number" ) ).
                 publishNotReadyAddresses( true ).
                 build().
                 spec() ).
+            build() );
+
+        // Pre Install Apps
+        preInstallApps().forEach( ( name, uri ) -> commandBuilder.addCommand( ImmutableCommandApplyXp7App.builder().
+            client( appClient() ).
+            namespace( info().namespaceName() ).
+            canSkipOwnerReference( true ).
+            name( name ).
+            spec( com.enonic.ec.kubernetes.operator.crd.app.spec.ImmutableSpec.builder().uri( uri ).build() ).
+            build() ) );
+
+        // Setup vHost for node health checks
+        String healthCheckHost = cfgStr( "operator.deployment.xp.probe.healthcheck.host" );
+        String healthCheckPath = cfgStr( "operator.deployment.xp.probe.healthcheck.target" );
+        commandBuilder.addCommand( ImmutableCommandApplyXp7VHost.builder().
+            client( vHostClient() ).
+            namespace( info().namespaceName() ).
+            canSkipOwnerReference( true ).
+            name( healthCheckHost ).
+            spec( com.enonic.ec.kubernetes.operator.crd.vhost.spec.ImmutableSpec.builder().
+                skipIngress( true ).
+                host( healthCheckHost ).
+                addMappings( ImmutableSpecMapping.builder().
+                    node( cfgStr( "operator.deployment.xp.allNodes" ) ).
+                    source( "/" ).
+                    target( healthCheckPath ).
+                    build() ).
+                build() ).
             build() );
 
         // TODO: Create network policy

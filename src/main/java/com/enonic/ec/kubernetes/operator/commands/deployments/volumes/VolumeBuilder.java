@@ -15,11 +15,12 @@ import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 
 import com.enonic.ec.kubernetes.common.Configuration;
+import com.enonic.ec.kubernetes.operator.crd.deployment.diff.InfoDeployment;
 
 public abstract class VolumeBuilder
     extends Configuration
 {
-    protected abstract String deploymentName();
+    protected abstract InfoDeployment info();
 
     public VolumeTripletList getVolumeTriplets( final String configMapName, final Optional<Quantity> persistIndexSize )
     {
@@ -130,12 +131,12 @@ public abstract class VolumeBuilder
         VolumeMount blobVolumeMount = new VolumeMount();
         blobVolumeMount.setName( name );
         blobVolumeMount.setMountPath( cfgStr( "operator.deployment.xp.volume.shared.blob.path" ) );
-        blobVolumeMount.setSubPath( cfgStrFmt( "operator.deployment.xp.volume.shared.blob.pvcSubPath", deploymentName() ) );
+        blobVolumeMount.setSubPath( cfgStrFmt( "operator.deployment.xp.volume.shared.blob.pvcSubPath", info().deploymentName() ) );
 
         VolumeMount snapshotVolumeMount = new VolumeMount();
         snapshotVolumeMount.setName( name );
         snapshotVolumeMount.setMountPath( cfgStr( "operator.deployment.xp.volume.shared.snapshots.path" ) );
-        snapshotVolumeMount.setSubPath( cfgStrFmt( "operator.deployment.xp.volume.shared.snapshots.pvcSubPath", deploymentName() ) );
+        snapshotVolumeMount.setSubPath( cfgStrFmt( "operator.deployment.xp.volume.shared.snapshots.pvcSubPath", info().deploymentName() ) );
 
         return ImmutableVolumeTriplet.builder().
             addVolumeMount( blobVolumeMount ).

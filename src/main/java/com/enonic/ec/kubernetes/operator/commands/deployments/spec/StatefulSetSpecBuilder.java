@@ -34,6 +34,7 @@ import io.fabric8.kubernetes.api.model.VolumeMount;
 import io.fabric8.kubernetes.api.model.apps.StatefulSetUpdateStrategy;
 
 import com.enonic.ec.kubernetes.common.Configuration;
+import com.enonic.ec.kubernetes.operator.commands.deployments.config.ClusterConfigurator;
 import com.enonic.ec.kubernetes.operator.commands.deployments.volumes.VolumeTripletList;
 
 @Value.Immutable
@@ -56,6 +57,8 @@ public abstract class StatefulSetSpecBuilder
     protected abstract Map<String, Quantity> podResources();
 
     protected abstract VolumeTripletList volumeList();
+
+    protected abstract ClusterConfigurator clusterConfigurator();
 
     @Value.Derived
     protected Long runAsUser()
@@ -128,12 +131,17 @@ public abstract class StatefulSetSpecBuilder
 
         // This container makes sure that the dns records for the cluster are created
         // before xp tries to setup the cluster
-        Container dnsWait = new Container();
-        dnsWait.setName( "dns-wait" );
-        dnsWait.setImage( "alpine:3.10" );
-        dnsWait.setCommand( Arrays.asList( "ash", "-c", "while [ -z \"$(nslookup " + serviceName() +
-            " | grep Name)\" ]; do echo \"Waiting for DNS\"; sleep 1; done" ) );
-        res.add( dnsWait );
+        // TODO: Only use 1 container
+        for ( int i = 0; i < clusterConfigurator().waitForDnsRecords().size(); i++ )
+        {
+            String host = clusterConfigurator().waitForDnsRecords().get( i );
+            Container dnsWait = new Container();
+            dnsWait.setName( "dns-wait-" + i );
+            dnsWait.setImage( "alpine:3.10" );
+            dnsWait.setCommand( Arrays.asList( "ash", "-c", "while [ -z \"$(nslookup " + host +
+                " | grep Name)\" ]; do echo \"Waiting for DNS\"; sleep 1; done" ) );
+            res.add( dnsWait );
+        }
 
         // Set permissions for NFS shares
         List<Volume> volumes = volumeList().volumes();

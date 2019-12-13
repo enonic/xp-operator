@@ -63,7 +63,7 @@ public abstract class CommandXpConfigApplyAll
             return configResource.getSpec().node().equals( c.getMetadata().getName() );
         };
 
-        return configMapCache().getByNamespace( info().namespace() ).
+        return configMapCache().getByNamespace( info().deploymentInfo().namespaceName() ).
             filter( filter ).
             collect( Collectors.toList() );
     }
@@ -80,7 +80,7 @@ public abstract class CommandXpConfigApplyAll
             return c.getSpec().node().equals( configMap.getMetadata().getName() );
         };
 
-        return xpConfigCache().getByNamespace( info().namespace() ).
+        return xpConfigCache().getByNamespace( info().deploymentInfo().namespaceName() ).
             filter( filter ).
             collect( Collectors.toList() );
     }

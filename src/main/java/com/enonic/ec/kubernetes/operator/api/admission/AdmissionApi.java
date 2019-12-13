@@ -66,7 +66,7 @@ public class AdmissionApi
         throws IOException
     {
         @SuppressWarnings("unchecked") Map<String, Object> admission = mapper.readValue( body, Map.class );
-
+        log.debug( "Admission review: " + body );
         String uid = (String) ( (Map) admission.get( "request" ) ).get( "uid" );
         try
         {

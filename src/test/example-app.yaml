@@ -1,16 +1,7 @@
 apiVersion: enonic.cloud/v1alpha1
 kind: Xp7App
 metadata:
-  name: snapshotter
+  name: contentstudio
   namespace: mycloud-myproject-qaxp
 spec:
-  uri: https://repo.enonic.com/public/com/enonic/app/snapshotter/2.1.1/snapshotter-2.1.1.jar
-
----
-apiVersion: enonic.cloud/v1alpha1
-kind: Xp7App
-metadata:
-  name: alive
-  namespace: mycloud-myproject-qaxp
-spec:
-  uri: https://repo.enonic.com/public/com/enonic/app/alive/2.0.0/alive-2.0.0.jar
+  uri: https://repo.enonic.com/public/com/enonic/app/contentstudio/2.2.3/contentstudio-2.2.3.jar

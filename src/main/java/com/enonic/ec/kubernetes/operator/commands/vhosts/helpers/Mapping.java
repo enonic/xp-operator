@@ -3,7 +3,6 @@ package com.enonic.ec.kubernetes.operator.commands.vhosts.helpers;
 import java.util.Optional;
 
 import org.immutables.value.Value;
-import org.wildfly.common.annotation.Nullable;
 
 import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;

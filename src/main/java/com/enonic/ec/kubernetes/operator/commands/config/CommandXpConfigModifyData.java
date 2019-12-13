@@ -34,7 +34,7 @@ public abstract class CommandXpConfigModifyData
     @Value.Derived
     protected Optional<XpConfigResource> xpConfigResource()
     {
-        return xpConfigCache().get( info().namespace(), name() );
+        return xpConfigCache().get( info().deploymentInfo().namespaceName(), name() );
     }
 
     @Override
@@ -55,7 +55,7 @@ public abstract class CommandXpConfigModifyData
             // The config is empty, delete the config
             commandBuilder.addCommand( ImmutableCommandDeleteXp7Config.builder().
                 client( xpConfigClient() ).
-                namespace( info().namespace() ).
+                namespace( info().deploymentInfo().namespaceName() ).
                 name( name() ).
                 build() );
         }
@@ -65,7 +65,7 @@ public abstract class CommandXpConfigModifyData
             commandBuilder.addCommand( ImmutableCommandApplyXp7Config.builder().
                 client( xpConfigClient() ).
                 canSkipOwnerReference( true ). // TODO: Look at this
-                namespace( info().namespace() ).
+                namespace( info().deploymentInfo().namespaceName() ).
                 name( name() ).
                 spec( ImmutableSpec.builder().
                     file( file() ).
