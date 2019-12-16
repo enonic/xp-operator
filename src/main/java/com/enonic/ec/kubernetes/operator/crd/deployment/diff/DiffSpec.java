@@ -50,13 +50,14 @@ public abstract class DiffSpec
     @Value.Check
     protected void check()
     {
+        newValue().get().nodes().keySet().forEach( k -> {
+            Validator.dnsName( "nodeId", k );
+        } );
+
         if ( !shouldModify() )
         {
             return;
         }
-        newValue().get().nodes().keySet().forEach( k -> {
-            Validator.dnsName( "nodeId", k );
-        } );
 
         Preconditions.checkState( equals( Spec::nodesSharedDisk ), "Field 'spec.nodesSharedDisk' cannot be changed" );
     }

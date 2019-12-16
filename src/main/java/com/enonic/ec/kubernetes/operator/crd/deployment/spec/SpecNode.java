@@ -43,7 +43,7 @@ public abstract class SpecNode
         Preconditions.checkState( !isDataNode() || resources().disks().size() == 1,
                                   "Nodes with type " + Type.DATA + " should only have 'index' disk defined" );
         Preconditions.checkState( isDataNode() || resources().disks().size() == 0,
-                                  "Nodes with type " + Type.MASTER + " and " + Type.FRONTEND + " should not have any disk defined" );
+                                  "Nodes with type " + Type.MASTER + " or " + Type.FRONTEND + " should not have any disks defined" );
 
         Preconditions.checkState( !isMasterNode() || replicas() % 2 == 1,
                                   "Nodes with type " + Type.MASTER + " replicas has to be an odd number" );

@@ -11,6 +11,7 @@ import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.ec.kubernetes.common.cache.ConfigMapCache;
 import com.enonic.ec.kubernetes.common.client.DefaultClientProducer;
+import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.operator.commands.config.ImmutableCommandXpConfigApplyAll;
 import com.enonic.ec.kubernetes.operator.crd.config.XpConfigResource;
 import com.enonic.ec.kubernetes.operator.crd.config.client.XpConfigCache;
@@ -53,15 +54,19 @@ public class OperatorConfig
         i.ifPresent( info -> {
             // Because multiple configs could potentially be deployed at the same time,
             // lets use the stall function to let them accumulate before we update config
-            stallAndRunCommands( ( commandBuilder ) -> {
-                ImmutableCommandXpConfigApplyAll.builder().
-                    defaultClient( defaultClientProducer.client() ).
-                    configMapCache( configMapCache ).
-                    xpConfigCache( xpConfigCache ).
-                    info( info ).
-                    build().
-                    addCommands( commandBuilder );
-            } );
+            stallAndRunCommands( ( commandBuilder ) -> createCommands( commandBuilder, info ) );
         } );
+    }
+
+    protected void createCommands( ImmutableCombinedCommand.Builder commandBuilder,
+                                   ResourceInfoNamespaced<XpConfigResource, DiffResource> info )
+    {
+        ImmutableCommandXpConfigApplyAll.builder().
+            defaultClient( defaultClientProducer.client() ).
+            configMapCache( configMapCache ).
+            xpConfigCache( xpConfigCache ).
+            info( info ).
+            build().
+            addCommands( commandBuilder );
     }
 }

@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import io.fabric8.kubernetes.client.Watcher;
 import io.quarkus.runtime.StartupEvent;
 
+import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.operator.commands.apps.ImmutableCommandXpAppApplyAll;
 import com.enonic.ec.kubernetes.operator.crd.app.XpAppResource;
 import com.enonic.ec.kubernetes.operator.crd.app.client.XpAppCache;
@@ -53,15 +54,19 @@ public class OperatorApps
         i.ifPresent( info -> {
             // Because multiple apps could potentially be deployed at the same time,
             // lets use the stall function to let them accumulate before we update config
-            stallAndRunCommands( ( commandBuilder ) -> {
-                ImmutableCommandXpAppApplyAll.builder().
-                    xpConfigClient( configClientProducer.produce() ).
-                    xpConfigCache( xpConfigCache ).
-                    xpAppCache( xpAppCache ).
-                    info( info ).
-                    build().
-                    addCommands( commandBuilder );
-            } );
+            stallAndRunCommands( ( commandBuilder ) -> createCommands( commandBuilder, info ) );
         } );
+    }
+
+    protected void createCommands( ImmutableCombinedCommand.Builder commandBuilder,
+                                   ResourceInfoNamespaced<XpAppResource, DiffResource> info )
+    {
+        ImmutableCommandXpAppApplyAll.builder().
+            xpConfigClient( configClientProducer.produce() ).
+            xpConfigCache( xpConfigCache ).
+            xpAppCache( xpAppCache ).
+            info( info ).
+            build().
+            addCommands( commandBuilder );
     }
 }

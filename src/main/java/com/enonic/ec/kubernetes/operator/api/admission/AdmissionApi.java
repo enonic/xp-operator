@@ -1,7 +1,6 @@
 package com.enonic.ec.kubernetes.operator.api.admission;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -20,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 
+import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.Status;
 import io.fabric8.kubernetes.api.model.admission.AdmissionResponse;
 import io.fabric8.kubernetes.api.model.admission.AdmissionReview;
@@ -66,21 +66,52 @@ public class AdmissionApi
 
         response.setUid( uid );
 
+        Status status = new Status();
+        response.setStatus( status );
+
         if ( errorMessage == null )
         {
             response.setAllowed( true );
             return review;
         }
 
-        Status status = new Status();
+        response.setAllowed( false );
         status.setCode( 400 );
         status.setMessage( errorMessage );
         status.setReason( errorCause );
 
-        response.setAllowed( false );
-        response.setStatus( status );
-
         return review;
+    }
+
+    private Consumer<AdmissionReview> getReviewConsumer( final AdmissionReview review )
+    {
+        HasMetadata obj = review.getRequest().getOldObject();
+        if ( review.getRequest().getObject() != null )
+        {
+            obj = review.getRequest().getObject();
+        }
+
+        if ( obj instanceof XpDeploymentResource )
+        {
+            return this::xpDeploymentReview;
+        }
+
+        if ( obj instanceof XpVHostResource )
+        {
+            return this::xpVHostReview;
+        }
+
+        if ( obj instanceof XpConfigResource )
+        {
+            return this::xpConfigReview;
+        }
+
+        if ( obj instanceof XpAppResource )
+        {
+            return this::xpAppReview;
+        }
+
+        return this::defaultReviewConsumers;
     }
 
     @POST
@@ -90,17 +121,21 @@ public class AdmissionApi
     public AdmissionReview validate( String body )
         throws IOException
     {
-        @SuppressWarnings("unchecked") Map<String, Object> admission = mapper.readValue( body, Map.class );
         log.debug( "Admission review: " + body );
+        @SuppressWarnings("unchecked") Map<String, Object> admission = mapper.readValue( body, Map.class );
+
+        // We have to extract the uid this way if there is a validation error during
+        // mapping of the actual objects.
         String uid = (String) ( (Map) admission.get( "request" ) ).get( "uid" );
+
+        AdmissionReview review = null;
+
         try
         {
-            AdmissionReview review = mapper.readValue( body, AdmissionReview.class );
+            review = mapper.readValue( body, AdmissionReview.class );
             if ( review.getRequest().getOperation().equals( "CREATE" ) || review.getRequest().getOperation().equals( "UPDATE" ) )
             {
-                Consumer<AdmissionReview> reviewer = getReviewConsumers().
-                    getOrDefault( review.getRequest().getKind().getKind(), this::defaultReviewConsumers );
-                reviewer.accept( review );
+                getReviewConsumer( review ).accept( review );
             }
         }
         catch ( Exception ex )
@@ -110,16 +145,6 @@ public class AdmissionApi
             return createReview( uid, message, ex.getClass().getSimpleName() );
         }
         return createReview( uid, null, null );
-    }
-
-    private Map<String, Consumer<AdmissionReview>> getReviewConsumers()
-    {
-        Map<String, Consumer<AdmissionReview>> res = new HashMap<>();
-        res.put( xp7DeploymentKind, this::xpDeploymentReview );
-        res.put( xp7vHostKind, this::xpVHostReview );
-        res.put( xp7ConfigKind, this::xpConfigReview );
-        res.put( xp7AppKind, this::xpAppReview );
-        return res;
     }
 
     private void xpDeploymentReview( final AdmissionReview review )

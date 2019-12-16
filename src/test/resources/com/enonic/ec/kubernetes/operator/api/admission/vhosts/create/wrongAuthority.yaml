@@ -1,0 +1,20 @@
+request:
+  operation: CREATE
+  kind:
+    kind: Xp7Deployment
+  object:
+    apiVersion: enonic.cloud/v1alpha1
+    kind: Xp7VHost
+    metadata:
+      name: test-purplejs-io
+      namespace: mycloud-myproject-qaxp
+    spec:
+      host: test.purplejs.io
+      certificate:
+        authority: wrong
+      skipIngress: false
+      mappings:
+        - node: main
+          source: /
+          target: /admin
+          idProvider: system

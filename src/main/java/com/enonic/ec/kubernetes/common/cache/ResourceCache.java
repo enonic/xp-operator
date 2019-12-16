@@ -28,19 +28,24 @@ public class ResourceCache<T extends HasMetadata, L extends KubernetesResourceLi
 {
     private final static Logger log = LoggerFactory.getLogger( ResourceCache.class );
 
-    private final Map<String, T> cache;
+    protected final Map<String, T> cache;
 
     private final List<OnAction<T>> eventListeners;
 
     private final Executor executor;
 
-    private final FilterWatchListDeletable<T, L, Boolean, Watch, Watcher<T>> filter;
+    private FilterWatchListDeletable<T, L, Boolean, Watch, Watcher<T>> filter;
 
-    protected ResourceCache( FilterWatchListDeletable<T, L, Boolean, Watch, Watcher<T>> filter )
+    protected ResourceCache()
     {
         this.cache = new ConcurrentHashMap<>();
         this.eventListeners = new LinkedList<>();
         this.executor = Executors.newSingleThreadExecutor();
+    }
+
+    protected ResourceCache( FilterWatchListDeletable<T, L, Boolean, Watch, Watcher<T>> filter )
+    {
+        this();
         this.filter = filter;
     }
 

@@ -56,30 +56,32 @@ public class OperatorVHosts
             newResource( newResource ).
             build() );
 
-        i.ifPresent( info -> {
-            ImmutableCombinedCommand.Builder commandBuilder = ImmutableCombinedCommand.builder();
+        i.ifPresent( info -> createCommands( ImmutableCombinedCommand.builder(), info ) );
+    }
 
-            if ( action != Watcher.Action.DELETED )
-            {
-                // Only apply ingress on ADD/MODIFY
-                ImmutableCommandXpVHostIngressApply.builder().
-                    defaultClient( defaultClientProducer.client() ).
-                    info( info ).
-                    build().
-                    addCommands( commandBuilder );
-            }
+    protected void createCommands( ImmutableCombinedCommand.Builder commandBuilder,
+                                   ResourceInfoNamespaced<XpVHostResource, DiffResource> info )
+    {
+        if ( !info.resourceDeleted() )
+        {
+            // Only apply ingress on ADD/MODIFY
+            ImmutableCommandXpVHostIngressApply.builder().
+                defaultClient( defaultClientProducer.client() ).
+                info( info ).
+                build().
+                addCommands( commandBuilder );
+        }
 
-            // Because multiple vHosts could potentially be deployed at the same time,
-            // lets use the stall function to let them accumulate before we update config
-            stallAndRunCommands( commandBuilder, () -> {
-                ImmutableCommandXpVHostConfigApply.builder().
-                    xpConfigClient( configClientProducer.produce() ).
-                    xpConfigCache( xpConfigCache ).
-                    vHostCache( xpVHostCache ).
-                    info( info ).
-                    build().
-                    addCommands( commandBuilder );
-            } );
+        // Because multiple vHosts could potentially be deployed at the same time,
+        // lets use the stall function to let them accumulate before we update config
+        stallAndRunCommands( commandBuilder, () -> {
+            ImmutableCommandXpVHostConfigApply.builder().
+                xpConfigClient( configClientProducer.produce() ).
+                xpConfigCache( xpConfigCache ).
+                vHostCache( xpVHostCache ).
+                info( info ).
+                build().
+                addCommands( commandBuilder );
         } );
     }
 }

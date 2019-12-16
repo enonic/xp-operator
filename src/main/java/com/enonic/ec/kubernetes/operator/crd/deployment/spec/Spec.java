@@ -33,9 +33,9 @@ public abstract class Spec
         Preconditions.checkState( nodes().size() > 0, "Field 'spec.nodes' has to contain more than 0 nodes" );
 
         Preconditions.checkState( nodes().values().stream().filter( SpecNode::isMasterNode ).count() == 1,
-                                  "1 and only 1 node has be of type master" );
+                                  "1 and only 1 node has be of type " + SpecNode.Type.MASTER );
         Preconditions.checkState( nodes().values().stream().filter( SpecNode::isDataNode ).count() == 1,
-                                  "1 and only node has be of type data" );
+                                  "1 and only 1 node has be of type " + SpecNode.Type.DATA );
     }
 
     @Value.Default

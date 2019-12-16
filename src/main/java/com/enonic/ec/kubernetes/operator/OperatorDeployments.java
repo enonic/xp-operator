@@ -15,6 +15,7 @@ import io.fabric8.kubernetes.client.Watcher;
 import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.ec.kubernetes.common.client.DefaultClientProducer;
+import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.operator.commands.deployments.ImmutableCreateXpDeployment;
 import com.enonic.ec.kubernetes.operator.crd.app.client.XpAppClientProducer;
 import com.enonic.ec.kubernetes.operator.crd.config.client.XpConfigClientProducer;
@@ -70,16 +71,19 @@ public class OperatorDeployments
             newResource( newResource ).
             build();
 
-        runCommands( commandBuilder -> {
-            ImmutableCreateXpDeployment.builder().
-                defaultClient( defaultClientProducer.client() ).
-                configClient( xpConfigClientProducer.produce() ).
-                appClient( xpAppClientProducer.produce() ).
-                vHostClient( xpVHostClientProducer.produce() ).
-                info( info ).
-                preInstallApps( preInstallApps ).
-                build().
-                addCommands( commandBuilder );
-        } );
+        runCommands( commandBuilder -> createCommands( commandBuilder, info ) );
+    }
+
+    protected void createCommands( ImmutableCombinedCommand.Builder commandBuilder, InfoDeployment info )
+    {
+        ImmutableCreateXpDeployment.builder().
+            defaultClient( defaultClientProducer.client() ).
+            configClient( xpConfigClientProducer.produce() ).
+            appClient( xpAppClientProducer.produce() ).
+            vHostClient( xpVHostClientProducer.produce() ).
+            info( info ).
+            preInstallApps( preInstallApps ).
+            build().
+            addCommands( commandBuilder );
     }
 }

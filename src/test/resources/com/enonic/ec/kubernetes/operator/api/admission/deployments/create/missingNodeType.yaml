@@ -1,0 +1,26 @@
+request:
+  operation: CREATE
+  kind:
+    kind: Xp7Deployment
+  object:
+    apiVersion: enonic.cloud/v1alpha1
+    kind: Xp7Deployment
+    metadata:
+      name: mycloud-myproject-qaxp
+      labels:
+        cloud: mycloud
+        project: myproject
+        name: qaxp
+    spec:
+      enabled: true
+      xpVersion: 7.1.2
+      nodesSharedDisk: 1Gi
+      nodes:
+        main:
+          #type: ["MASTER", "DATA", "FRONTEND"]
+          replicas: 1
+          resources:
+            cpu: "1"
+            memory: 512Mi
+            disks:
+              index: 200Mi

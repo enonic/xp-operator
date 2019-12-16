@@ -18,6 +18,13 @@ import com.enonic.ec.kubernetes.operator.crd.deployment.XpDeploymentResourceList
 public class XpDeploymentCache
     extends ResourceCache<XpDeploymentResource, XpDeploymentResourceList>
 {
+
+    protected XpDeploymentCache()
+    {
+        // Only for testing
+        super();
+    }
+
     @Inject
     public XpDeploymentCache( XpDeploymentClientProducer xpDeploymentClientProducer )
     {

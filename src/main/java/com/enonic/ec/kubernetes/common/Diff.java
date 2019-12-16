@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
@@ -66,7 +67,7 @@ public abstract class Diff<T>
         }
         B v1 = func.apply( oldValue().get() );
         B v2 = func.apply( newValue().get() );
-        return v1.equals( v2 );
+        return Objects.equals( v1, v2 );
     }
 
     protected <C, D extends Diff<C>> List<D> mergeLists( List<C> oldList, List<C> newList, BiFunction<Optional<C>, Optional<C>, D> creator )
