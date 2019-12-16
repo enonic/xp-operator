@@ -17,11 +17,6 @@ public abstract class KubernetesCommandSummary
 
     public abstract Optional<String> info();
 
-    public enum Action
-    {
-        CREATE, UPDATE, SCALE, DELETE
-    }
-
     @Override
     public String toString()
     {
@@ -43,5 +38,10 @@ public abstract class KubernetesCommandSummary
             sb.append( ": " ).append( info().get() );
         }
         return sb.toString();
+    }
+
+    public enum Action
+    {
+        CREATE, UPDATE, SCALE, DELETE
     }
 }

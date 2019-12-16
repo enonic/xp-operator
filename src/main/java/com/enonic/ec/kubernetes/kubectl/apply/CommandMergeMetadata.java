@@ -21,6 +21,33 @@ public abstract class CommandMergeMetadata
 {
     private final static Logger log = LoggerFactory.getLogger( CommandMergeMetadata.class );
 
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    private static Map<String, String> mergeMap( String kind, String name, String mapType, final Map<String, String> oldMap,
+                                                 final Optional<Map<String, String>> newMap )
+    {
+        if ( oldMap == null || oldMap.size() == 0 )
+        {
+            return newMap.orElse( Collections.emptyMap() );
+        }
+
+        if ( newMap.isEmpty() )
+        {
+            return oldMap;
+        }
+
+        for ( Map.Entry<String, String> e : newMap.get().entrySet() )
+        {
+            Optional<String> tmp = Optional.ofNullable( oldMap.get( e.getKey() ) );
+            if ( tmp.isPresent() && !e.getValue().equals( tmp.get() ) )
+            {
+                log.warn( "Changing " + mapType + " on " + kind + " '" + name + "' from '" + tmp.get() + "' to '" + e.getValue() + "'" );
+            }
+            oldMap.put( e.getKey(), e.getValue() );
+        }
+
+        return oldMap;
+    }
+
     protected abstract String kind();
 
     protected abstract ObjectMeta metadata();
@@ -61,32 +88,5 @@ public abstract class CommandMergeMetadata
             }
         }
         metadata().getOwnerReferences().add( ownerReference().get() );
-    }
-
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private static Map<String, String> mergeMap( String kind, String name, String mapType, final Map<String, String> oldMap,
-                                                 final Optional<Map<String, String>> newMap )
-    {
-        if ( oldMap == null || oldMap.size() == 0 )
-        {
-            return newMap.orElse( Collections.emptyMap() );
-        }
-
-        if ( newMap.isEmpty() )
-        {
-            return oldMap;
-        }
-
-        for ( Map.Entry<String, String> e : newMap.get().entrySet() )
-        {
-            Optional<String> tmp = Optional.ofNullable( oldMap.get( e.getKey() ) );
-            if ( tmp.isPresent() && !e.getValue().equals( tmp.get() ) )
-            {
-                log.warn( "Changing " + mapType + " on " + kind + " '" + name + "' from '" + tmp.get() + "' to '" + e.getValue() + "'" );
-            }
-            oldMap.put( e.getKey(), e.getValue() );
-        }
-
-        return oldMap;
     }
 }

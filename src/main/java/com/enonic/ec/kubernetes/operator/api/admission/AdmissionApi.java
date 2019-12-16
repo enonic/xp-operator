@@ -58,6 +58,31 @@ public class AdmissionApi
     @Inject
     XpDeploymentCache xpDeploymentCache;
 
+    public static AdmissionReview createReview( String uid, String errorCause, String errorMessage )
+    {
+        AdmissionReview review = new AdmissionReview();
+        AdmissionResponse response = new AdmissionResponse();
+        review.setResponse( response );
+
+        response.setUid( uid );
+
+        if ( errorMessage == null )
+        {
+            response.setAllowed( true );
+            return review;
+        }
+
+        Status status = new Status();
+        status.setCode( 400 );
+        status.setMessage( errorMessage );
+        status.setReason( errorCause );
+
+        response.setAllowed( false );
+        response.setStatus( status );
+
+        return review;
+    }
+
     @POST
     @Path("/validations")
     @Consumes("application/json")
@@ -85,31 +110,6 @@ public class AdmissionApi
             return createReview( uid, message, ex.getClass().getSimpleName() );
         }
         return createReview( uid, null, null );
-    }
-
-    public static AdmissionReview createReview( String uid, String errorCause, String errorMessage )
-    {
-        AdmissionReview review = new AdmissionReview();
-        AdmissionResponse response = new AdmissionResponse();
-        review.setResponse( response );
-
-        response.setUid( uid );
-
-        if ( errorMessage == null )
-        {
-            response.setAllowed( true );
-            return review;
-        }
-
-        Status status = new Status();
-        status.setCode( 400 );
-        status.setMessage( errorMessage );
-        status.setReason( errorCause );
-
-        response.setAllowed( false );
-        response.setStatus( status );
-
-        return review;
     }
 
     private Map<String, Consumer<AdmissionReview>> getReviewConsumers()

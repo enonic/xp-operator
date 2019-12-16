@@ -10,18 +10,18 @@ public class Auth
 {
     private static String apiToken;
 
-    public static void setApiToken( final String apiToken )
-    {
-        Auth.apiToken = apiToken;
-    }
+    @ConfigProperty(name = "dns.cloudflare.apiToken", defaultValue = "not_set")
+    String token;
 
     public static String getApiToken()
     {
         return "Bearer " + apiToken;
     }
 
-    @ConfigProperty(name = "dns.cloudflare.apiToken", defaultValue = "not_set")
-    String token;
+    public static void setApiToken( final String apiToken )
+    {
+        Auth.apiToken = apiToken;
+    }
 
     void onStart( @Observes StartupEvent ev )
     {

@@ -22,11 +22,6 @@ public abstract class SpecNode
     @Nullable
     public abstract String displayName();
 
-    public enum Type
-    {
-        FRONTEND, DATA, MASTER
-    }
-
     public abstract Integer replicas();
 
     public abstract Set<Type> type();
@@ -92,6 +87,11 @@ public abstract class SpecNode
     public boolean isOnlyFrontend()
     {
         return isType( Type.FRONTEND ) && type().size() == 1;
+    }
+
+    public enum Type
+    {
+        FRONTEND, DATA, MASTER
     }
 
     public static class ExceptionMissing

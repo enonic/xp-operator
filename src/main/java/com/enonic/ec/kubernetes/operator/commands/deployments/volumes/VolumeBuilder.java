@@ -20,18 +20,6 @@ import com.enonic.ec.kubernetes.operator.crd.deployment.diff.InfoDeployment;
 public abstract class VolumeBuilder
     extends Configuration
 {
-    protected abstract InfoDeployment info();
-
-    public VolumeTripletList getVolumeTriplets( final String configMapName, final Optional<Quantity> persistIndexSize )
-    {
-        VolumeTripletList list = new VolumeTripletList();
-        list.add( xpConfig( configMapName ) );
-        list.add( xpDeploy() );
-        list.add( xpIndex( persistIndexSize ) );
-        list.add( xpShared() );
-        return list;
-    }
-
     static PersistentVolumeClaim standard( String name, Map<String, String> labels, String storageClassName, String accessMode,
                                            Quantity size )
     {
@@ -50,6 +38,17 @@ public abstract class VolumeBuilder
         return claim;
     }
 
+    protected abstract InfoDeployment info();
+
+    public VolumeTripletList getVolumeTriplets( final String configMapName, final Optional<Quantity> persistIndexSize )
+    {
+        VolumeTripletList list = new VolumeTripletList();
+        list.add( xpConfig( configMapName ) );
+        list.add( xpDeploy() );
+        list.add( xpIndex( persistIndexSize ) );
+        list.add( xpShared() );
+        return list;
+    }
 
     private VolumeTriplet xpConfig( final String configMapName )
     {

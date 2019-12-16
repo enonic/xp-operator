@@ -26,6 +26,11 @@ public abstract class CommandXpVHostIngressApply
     extends Configuration
     implements CombinedCommandBuilder
 {
+    private static String getIngressName( XpVHostResource resource )
+    {
+        return resource.getMetadata().getName();
+    }
+
     protected abstract KubernetesClient defaultClient();
 
     protected abstract ResourceInfoNamespaced<XpVHostResource, DiffResource> info();
@@ -144,10 +149,5 @@ public abstract class CommandXpVHostIngressApply
                 return cfgStr( "operator.certissuer.letsencrypt.prod" );
         }
         return "none";
-    }
-
-    private static String getIngressName( XpVHostResource resource )
-    {
-        return resource.getMetadata().getName();
     }
 }

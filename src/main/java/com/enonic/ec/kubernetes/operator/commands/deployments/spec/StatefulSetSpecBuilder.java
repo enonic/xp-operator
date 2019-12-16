@@ -42,6 +42,21 @@ public abstract class StatefulSetSpecBuilder
     extends Configuration
 
 {
+    static Probe createProbe( String name )
+    {
+        Function<String, String> ck = k -> String.format( "operator.deployment.xp.probe.%s.%s", name, k );
+        Probe p = new Probe();
+        p.setHttpGet( new HTTPGetAction( null, Collections.singletonList(
+            new HTTPHeader( "Host", cfgStr( "operator.deployment.xp.probe.healthcheck.host" ) ) ), cfgStr( ck.apply( "path" ) ),
+                                         new IntOrString( cfgInt( ck.apply( "port" ) ) ), null ) );
+        p.setInitialDelaySeconds( cfgInt( ck.apply( "initialDelaySeconds" ) ) );
+        p.setPeriodSeconds( cfgInt( ck.apply( "periodSeconds" ) ) );
+        p.setFailureThreshold( cfgInt( ck.apply( "failureThreshold" ) ) );
+        p.setSuccessThreshold( cfgInt( ck.apply( "successThreshold" ) ) );
+        p.setTimeoutSeconds( cfgInt( ck.apply( "timeoutSeconds" ) ) );
+        return p;
+    }
+
     protected abstract Map<String, String> podLabels();
 
     protected abstract Map<String, String> podAnnotations();
@@ -227,20 +242,5 @@ public abstract class StatefulSetSpecBuilder
         exp.setVolumeMounts( volumeList().volumeMounts() );
 
         return Collections.singletonList( exp );
-    }
-
-    static Probe createProbe( String name )
-    {
-        Function<String, String> ck = k -> String.format( "operator.deployment.xp.probe.%s.%s", name, k );
-        Probe p = new Probe();
-        p.setHttpGet( new HTTPGetAction( null, Collections.singletonList(
-            new HTTPHeader( "Host", cfgStr( "operator.deployment.xp.probe.healthcheck.host" ) ) ), cfgStr( ck.apply( "path" ) ),
-                                         new IntOrString( cfgInt( ck.apply( "port" ) ) ), null ) );
-        p.setInitialDelaySeconds( cfgInt( ck.apply( "initialDelaySeconds" ) ) );
-        p.setPeriodSeconds( cfgInt( ck.apply( "periodSeconds" ) ) );
-        p.setFailureThreshold( cfgInt( ck.apply( "failureThreshold" ) ) );
-        p.setSuccessThreshold( cfgInt( ck.apply( "successThreshold" ) ) );
-        p.setTimeoutSeconds( cfgInt( ck.apply( "timeoutSeconds" ) ) );
-        return p;
     }
 }

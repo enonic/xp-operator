@@ -43,7 +43,7 @@ public abstract class CommandXpVHostConfigApply
             String nodeName = e.getKey();
             List<Mapping> mappings = e.getValue();
             mappings.sort( Comparator.comparing( Mapping::host ) );
-            
+
             // TODO: Setup owner references to Xp7Config to garbage collect
 
             // Create / Update config

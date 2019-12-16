@@ -37,29 +37,6 @@ public abstract class CreateXpDeploymentNode
     extends Configuration
     implements CombinedCommandBuilder
 {
-    protected abstract KubernetesClient defaultClient();
-
-    protected abstract InfoDeployment info();
-
-    protected abstract String nodeId();
-
-    protected abstract DiffSpec diffSpec();
-
-    protected abstract DiffSpecNode diffSpecNode();
-
-    protected abstract ClusterConfigurator clusterConfigurator();
-
-    protected abstract VolumeBuilder volumeBuilder();
-
-    protected abstract boolean nodeSharedConfigChanged();
-
-    protected abstract EnvVar suPassHash();
-
-    private String podImageName()
-    {
-        return cfgStrFmt( "operator.deployment.xp.pod.imageTemplate", diffSpec().newValue().get().xpVersion() );
-    }
-
     private static Map<String, String> nodeExtraLabels( String nodeId, SpecNode node, Map<String, String> defaultLabels )
     {
         Map<String, String> res = new HashMap<>( defaultLabels );
@@ -90,6 +67,29 @@ public abstract class CreateXpDeploymentNode
         res.put( cfgStr( "operator.deployment.xp.labels.config.managed" ), "true" );
         res.put( cfgStr( "operator.deployment.xp.labels.config.node" ), nodeId );
         return res;
+    }
+
+    protected abstract KubernetesClient defaultClient();
+
+    protected abstract InfoDeployment info();
+
+    protected abstract String nodeId();
+
+    protected abstract DiffSpec diffSpec();
+
+    protected abstract DiffSpecNode diffSpecNode();
+
+    protected abstract ClusterConfigurator clusterConfigurator();
+
+    protected abstract VolumeBuilder volumeBuilder();
+
+    protected abstract boolean nodeSharedConfigChanged();
+
+    protected abstract EnvVar suPassHash();
+
+    private String podImageName()
+    {
+        return cfgStrFmt( "operator.deployment.xp.pod.imageTemplate", diffSpec().newValue().get().xpVersion() );
     }
 
     @Override
