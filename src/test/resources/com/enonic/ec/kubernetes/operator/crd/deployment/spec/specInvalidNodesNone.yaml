@@ -1,4 +1,0 @@
-spec:
-  enabled: true
-  xpVersion: 7.0.3
-  nodesSharedDisk: 1Gi
