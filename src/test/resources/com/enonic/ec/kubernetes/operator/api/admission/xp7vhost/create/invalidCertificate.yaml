@@ -1,18 +1,20 @@
-request:
-  operation: CREATE
-  object:
-    apiVersion: enonic.cloud/v1alpha1
-    kind: Xp7VHost
-    metadata:
-      name: test-purplejs-io
-      namespace: mycloud-myproject-qaxp
-    spec:
-      host: test.purplejs.io
-      certificate:
-        authority: selfSigned
-      skipIngress: true
-      mappings:
-        - node: main
-          source: /
-          target: /admin
-          idProvider: system
+testResult: "Field 'spec.certificate' cannot be set if ingress is skipped"
+testReview:
+  request:
+    operation: CREATE
+    object:
+      apiVersion: enonic.cloud/v1alpha1
+      kind: Xp7VHost
+      metadata:
+        name: test-purplejs-io
+        namespace: mycloud-myproject-qaxp
+      spec:
+        host: test.purplejs.io
+        certificate:
+          authority: selfSigned
+        skipIngress: true
+        mappings:
+          - node: main
+            source: /
+            target: /admin
+            idProvider: system

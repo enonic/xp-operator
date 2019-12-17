@@ -1,15 +1,17 @@
-request:
-  operation: CREATE
-  object:
-    apiVersion: enonic.cloud/v1alpha1
-    kind: Xp7VHost
-    metadata:
-      name: test-purplejs-io
-      namespace: mycloud-myproject-qaxp
-    #spec:
-    #  host: test.purplejs.io
-    #  mappings:
-    #    - node: main
-    #      source: /
-    #      target: /admin
-    #      idProvider: system
+testResult: "Old and new resource can not be empty, is 'spec' missing?"
+testReview:
+  request:
+    operation: CREATE
+    object:
+      apiVersion: enonic.cloud/v1alpha1
+      kind: Xp7VHost
+      metadata:
+        name: test-purplejs-io
+        namespace: mycloud-myproject-qaxp
+      #spec:
+      #  host: test.purplejs.io
+      #  mappings:
+      #    - node: main
+      #      source: /
+      #      target: /admin
+      #      idProvider: system
