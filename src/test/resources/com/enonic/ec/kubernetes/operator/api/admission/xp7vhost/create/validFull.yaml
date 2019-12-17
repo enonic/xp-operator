@@ -1,18 +1,20 @@
-request:
-  operation: CREATE
-  object:
-    apiVersion: enonic.cloud/v1alpha1
-    kind: Xp7VHost
-    metadata:
-      name: test-purplejs-io
-      namespace: mycloud-myproject-qaxp
-    spec:
-      host: test.purplejs.io
-      certificate:
-        authority: selfSigned
-      skipIngress: false
-      mappings:
-        - node: main
-          source: /
-          target: /admin
-          idProvider: system
+testResult: ""
+testReview:
+  request:
+    operation: CREATE
+    object:
+      apiVersion: enonic.cloud/v1alpha1
+      kind: Xp7VHost
+      metadata:
+        name: test-purplejs-io
+        namespace: mycloud-myproject-qaxp
+      spec:
+        host: test.purplejs.io
+        certificate:
+          authority: selfSigned
+        skipIngress: false
+        mappings:
+          - node: main
+            source: /
+            target: /admin
+            idProvider: system
