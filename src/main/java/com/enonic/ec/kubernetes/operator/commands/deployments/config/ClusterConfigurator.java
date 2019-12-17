@@ -7,19 +7,19 @@ import org.immutables.value.Value;
 import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.kubectl.apply.ImmutableCommandApplyXp7Config;
-import com.enonic.ec.kubernetes.operator.crd.config.client.XpConfigClient;
-import com.enonic.ec.kubernetes.operator.crd.config.spec.ImmutableSpec;
-import com.enonic.ec.kubernetes.operator.crd.deployment.diff.InfoDeployment;
-import com.enonic.ec.kubernetes.operator.crd.deployment.spec.SpecNode;
+import com.enonic.ec.kubernetes.operator.crd.xp7config.client.Xp7ConfigClient;
+import com.enonic.ec.kubernetes.operator.info.xp7deployment.InfoXp7Deployment;
+import com.enonic.ec.kubernetes.operator.crd.xp7deployment.spec.Xp7DeploymentSpecNode;
+import com.enonic.ec.kubernetes.operator.crd.xp7config.spec.ImmutableXp7ConfigSpec;
 
 public abstract class ClusterConfigurator
     extends Configuration
 {
-    public abstract XpConfigClient client();
+    public abstract Xp7ConfigClient client();
 
-    protected abstract InfoDeployment info();
+    protected abstract InfoXp7Deployment info();
 
-    public void addCommands( final ImmutableCombinedCommand.Builder commandBuilder, String nodeId, SpecNode node )
+    public void addCommands( final ImmutableCombinedCommand.Builder commandBuilder, String nodeId, Xp7DeploymentSpecNode node )
     {
         StringBuilder elasticSearchConfig = new StringBuilder();
         setElasticSearchConfig( elasticSearchConfig, node );
@@ -29,7 +29,7 @@ public abstract class ClusterConfigurator
             canSkipOwnerReference( true ).
             namespace( info().namespaceName() ).
             name( cfgStrFmt( "operator.config.xp.elasticsearch.name", nodeId ) ).
-            spec( ImmutableSpec.builder().
+            spec( ImmutableXp7ConfigSpec.builder().
                 file( cfgStr( "operator.config.xp.elasticsearch.file" ) ).
                 data( elasticSearchConfig.toString() ).
                 node( nodeId ).
@@ -44,7 +44,7 @@ public abstract class ClusterConfigurator
             canSkipOwnerReference( true ).
             namespace( info().namespaceName() ).
             name( cfgStrFmt( "operator.config.xp.cluster.name", nodeId ) ).
-            spec( ImmutableSpec.builder().
+            spec( ImmutableXp7ConfigSpec.builder().
                 file( cfgStr( "operator.config.xp.cluster.file" ) ).
                 data( clusterConfig.toString() ).
                 node( nodeId ).
@@ -58,9 +58,9 @@ public abstract class ClusterConfigurator
         return createWaitForDnsRecordsList( info() );
     }
 
-    protected abstract List<String> createWaitForDnsRecordsList( InfoDeployment info );
+    protected abstract List<String> createWaitForDnsRecordsList( InfoXp7Deployment info );
 
-    protected abstract void setElasticSearchConfig( final StringBuilder sb, SpecNode node );
+    protected abstract void setElasticSearchConfig( final StringBuilder sb, Xp7DeploymentSpecNode node );
 
     protected abstract void setClusterConfig( final StringBuilder sb );
 }

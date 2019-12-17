@@ -14,7 +14,7 @@ import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.kubectl.apply.ImmutableCommandApplyConfigMap;
-import com.enonic.ec.kubernetes.operator.crd.config.XpConfigResource;
+import com.enonic.ec.kubernetes.operator.crd.xp7config.Xp7ConfigResource;
 
 @Value.Immutable
 public abstract class CommandXpConfigApply
@@ -25,14 +25,14 @@ public abstract class CommandXpConfigApply
 
     protected abstract ConfigMap configMap();
 
-    protected abstract List<XpConfigResource> xpConfigResources();
+    protected abstract List<Xp7ConfigResource> xpConfigResources();
 
     @Override
     public void addCommands( final ImmutableCombinedCommand.Builder commandBuilder )
     {
         Map<String, String> oldData = configMap().getData() != null ? configMap().getData() : Collections.emptyMap();
         Map<String, String> newData = new HashMap<>();
-        for ( XpConfigResource resource : xpConfigResources() )
+        for ( Xp7ConfigResource resource : xpConfigResources() )
         {
             newData.put( resource.getSpec().file(), resource.getSpec().data() );
         }

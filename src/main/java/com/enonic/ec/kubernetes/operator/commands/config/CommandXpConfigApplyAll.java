@@ -13,9 +13,9 @@ import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.cache.ConfigMapCache;
 import com.enonic.ec.kubernetes.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
-import com.enonic.ec.kubernetes.operator.crd.config.XpConfigResource;
-import com.enonic.ec.kubernetes.operator.crd.config.client.XpConfigCache;
-import com.enonic.ec.kubernetes.operator.crd.config.diff.DiffResource;
+import com.enonic.ec.kubernetes.operator.crd.xp7config.Xp7ConfigResource;
+import com.enonic.ec.kubernetes.operator.crd.xp7config.client.Xp7ConfigCache;
+import com.enonic.ec.kubernetes.operator.info.xp7config.DiffXp7Config;
 import com.enonic.ec.kubernetes.operator.info.ResourceInfoNamespaced;
 
 @Value.Immutable
@@ -27,9 +27,9 @@ public abstract class CommandXpConfigApplyAll
 
     protected abstract ConfigMapCache configMapCache();
 
-    protected abstract XpConfigCache xpConfigCache();
+    protected abstract Xp7ConfigCache xpConfigCache();
 
-    protected abstract ResourceInfoNamespaced<XpConfigResource, DiffResource> info();
+    protected abstract ResourceInfoNamespaced<Xp7ConfigResource, DiffXp7Config> info();
 
     @Override
     public void addCommands( final ImmutableCombinedCommand.Builder commandBuilder )
@@ -38,7 +38,7 @@ public abstract class CommandXpConfigApplyAll
         for ( ConfigMap configMap : getRelevantConfigMaps( info().resource() ) )
         {
             // Get all relevant XpConfig for this ConfigMap
-            List<XpConfigResource> allXpConfigs = getRelevantXpConfig( configMap );
+            List<Xp7ConfigResource> allXpConfigs = getRelevantXpConfig( configMap );
 
             // Update ConfigMap
             ImmutableCommandXpConfigApply.builder().
@@ -50,7 +50,7 @@ public abstract class CommandXpConfigApplyAll
         }
     }
 
-    private List<ConfigMap> getRelevantConfigMaps( final XpConfigResource configResource )
+    private List<ConfigMap> getRelevantConfigMaps( final Xp7ConfigResource configResource )
     {
         // Filter by node
         Predicate<ConfigMap> filter = c -> {
@@ -68,9 +68,9 @@ public abstract class CommandXpConfigApplyAll
             collect( Collectors.toList() );
     }
 
-    private List<XpConfigResource> getRelevantXpConfig( final ConfigMap configMap )
+    private List<Xp7ConfigResource> getRelevantXpConfig( final ConfigMap configMap )
     {
-        Predicate<XpConfigResource> filter = c -> {
+        Predicate<Xp7ConfigResource> filter = c -> {
             if ( c.getSpec().node().equals( cfgStr( "operator.deployment.xp.allNodes" ) ) )
             {
                 // Apply to all nodes

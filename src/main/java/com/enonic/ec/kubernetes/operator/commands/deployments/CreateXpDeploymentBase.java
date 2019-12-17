@@ -26,12 +26,14 @@ import com.enonic.ec.kubernetes.kubectl.apply.ImmutableCommandApplyXp7Config;
 import com.enonic.ec.kubernetes.kubectl.apply.ImmutableCommandApplyXp7VHost;
 import com.enonic.ec.kubernetes.operator.commands.deployments.spec.ImmutablePvcSpecBuilder;
 import com.enonic.ec.kubernetes.operator.commands.deployments.spec.ImmutableServiceSpecBuilder;
-import com.enonic.ec.kubernetes.operator.crd.app.client.XpAppClient;
-import com.enonic.ec.kubernetes.operator.crd.config.client.XpConfigClient;
-import com.enonic.ec.kubernetes.operator.crd.config.spec.ImmutableSpec;
-import com.enonic.ec.kubernetes.operator.crd.deployment.diff.InfoDeployment;
-import com.enonic.ec.kubernetes.operator.crd.vhost.client.XpVHostClient;
-import com.enonic.ec.kubernetes.operator.crd.vhost.spec.ImmutableSpecMapping;
+import com.enonic.ec.kubernetes.operator.info.xp7deployment.InfoXp7Deployment;
+import com.enonic.ec.kubernetes.operator.crd.xp7app.client.Xp7AppClient;
+import com.enonic.ec.kubernetes.operator.crd.xp7app.spec.ImmutableXp7AppSpec;
+import com.enonic.ec.kubernetes.operator.crd.xp7config.client.Xp7ConfigClient;
+import com.enonic.ec.kubernetes.operator.crd.xp7config.spec.ImmutableXp7ConfigSpec;
+import com.enonic.ec.kubernetes.operator.crd.xp7vhost.client.Xp7VHostClient;
+import com.enonic.ec.kubernetes.operator.crd.xp7vhost.spec.ImmutableXp7VHostSpec;
+import com.enonic.ec.kubernetes.operator.crd.xp7vhost.spec.ImmutableXp7VHostSpecMapping;
 
 @Value.Immutable
 public abstract class CreateXpDeploymentBase
@@ -40,13 +42,13 @@ public abstract class CreateXpDeploymentBase
 {
     protected abstract KubernetesClient defaultClient();
 
-    protected abstract XpConfigClient configClient();
+    protected abstract Xp7ConfigClient configClient();
 
-    protected abstract XpVHostClient vHostClient();
+    protected abstract Xp7VHostClient vHostClient();
 
-    protected abstract XpAppClient appClient();
+    protected abstract Xp7AppClient appClient();
 
-    protected abstract InfoDeployment info();
+    protected abstract InfoXp7Deployment info();
 
     protected abstract EnvVar suPassHash();
 
@@ -98,7 +100,7 @@ public abstract class CreateXpDeploymentBase
             ownerReference( info().ownerReference() ).
             namespace( info().namespaceName() ).
             name( cfgStrFmt( "operator.config.xp.system.name", cfgStr( "operator.deployment.xp.allNodes" ) ) ).
-            spec( ImmutableSpec.builder().
+            spec( ImmutableXp7ConfigSpec.builder().
                 node( cfgStr( "operator.deployment.xp.allNodes" ) ).
                 file( cfgStr( "operator.config.xp.system.file" ) ).
                 data( new StringBuilder().
@@ -147,7 +149,9 @@ public abstract class CreateXpDeploymentBase
             namespace( info().namespaceName() ).
             canSkipOwnerReference( true ).
             name( name ).
-            spec( com.enonic.ec.kubernetes.operator.crd.app.spec.ImmutableSpec.builder().uri( uri ).build() ).
+            spec( ImmutableXp7AppSpec.builder().
+                uri( uri ).
+                build() ).
             build() ) );
 
         // Setup vHost for node health checks
@@ -158,10 +162,10 @@ public abstract class CreateXpDeploymentBase
             namespace( info().namespaceName() ).
             canSkipOwnerReference( true ).
             name( healthCheckHost ).
-            spec( com.enonic.ec.kubernetes.operator.crd.vhost.spec.ImmutableSpec.builder().
+            spec( ImmutableXp7VHostSpec.builder().
                 skipIngress( true ).
                 host( healthCheckHost ).
-                addMappings( ImmutableSpecMapping.builder().
+                addMappings( ImmutableXp7VHostSpecMapping.builder().
                     node( cfgStr( "operator.deployment.xp.allNodes" ) ).
                     source( "/" ).
                     target( healthCheckPath ).

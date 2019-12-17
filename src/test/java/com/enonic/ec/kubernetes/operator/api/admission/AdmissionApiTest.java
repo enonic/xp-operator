@@ -23,8 +23,8 @@ import com.google.common.io.Resources;
 
 import io.fabric8.kubernetes.api.model.admission.AdmissionReview;
 
-import com.enonic.ec.kubernetes.operator.crd.deployment.XpDeploymentResource;
-import com.enonic.ec.kubernetes.operator.crd.deployment.client.XpDeploymentCache;
+import com.enonic.ec.kubernetes.operator.crd.xp7deployment.Xp7DeploymentResource;
+import com.enonic.ec.kubernetes.operator.crd.xp7deployment.client.Xp7DeploymentCache;
 
 public abstract class AdmissionApiTest
     extends AdmissionApi
@@ -42,13 +42,13 @@ public abstract class AdmissionApiTest
     @BeforeEach
     protected void setup()
     {
-        this.xpDeploymentCache = new TestDeploymentCache();
+        this.xp7DeploymentCache = new Test7DeploymentCache();
     }
 
     @AfterEach
     protected void teardown()
     {
-        this.xpDeploymentCache = null;
+        this.xp7DeploymentCache = null;
     }
 
     private String getFileContents( URL resource )
@@ -69,15 +69,15 @@ public abstract class AdmissionApiTest
         return resource;
     }
 
-    protected XpDeploymentCache getDeploymentsCache( String deploymentsFile )
+    protected Xp7DeploymentCache getDeploymentsCache( String deploymentsFile )
     {
         try
         {
-            List<XpDeploymentResource> deployments =
-                this.mapper.readValue( getFileContents( getFile(deploymentsFile) ), new TypeReference<List<XpDeploymentResource>>()
+            List<Xp7DeploymentResource> deployments =
+                this.mapper.readValue( getFileContents( getFile(deploymentsFile) ), new TypeReference<List<Xp7DeploymentResource>>()
                 {
                 } );
-            TestDeploymentCache cache = new TestDeploymentCache();
+            Test7DeploymentCache cache = new Test7DeploymentCache();
             deployments.forEach( d -> cache.put( d ) );
             return cache;
         }
@@ -123,8 +123,8 @@ public abstract class AdmissionApiTest
 
     protected Stream<DynamicTest> createStreamWithDeploymentCache( String deploymentsFile, Consumer<Map<String, String>> mapCreator )
     {
-        XpDeploymentCache cache = getDeploymentsCache( deploymentsFile );
-        return createStream( mapCreator, () -> this.xpDeploymentCache = cache );
+        Xp7DeploymentCache cache = getDeploymentsCache( deploymentsFile );
+        return createStream( mapCreator, () -> this.xp7DeploymentCache = cache );
     }
 
     protected Stream<DynamicTest> createStream( Consumer<Map<String, String>> mapCreator )

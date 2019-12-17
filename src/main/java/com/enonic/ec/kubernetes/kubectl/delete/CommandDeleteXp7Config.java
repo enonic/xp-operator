@@ -2,13 +2,13 @@ package com.enonic.ec.kubernetes.kubectl.delete;
 
 import org.immutables.value.Value;
 
-import com.enonic.ec.kubernetes.operator.crd.config.client.XpConfigClient;
+import com.enonic.ec.kubernetes.operator.crd.xp7config.client.Xp7ConfigClient;
 
 @Value.Immutable
 public abstract class CommandDeleteXp7Config
     extends CommandDeleteResource
 {
-    protected abstract XpConfigClient client();
+    protected abstract Xp7ConfigClient client();
 
     @Override
     protected String resourceKind()

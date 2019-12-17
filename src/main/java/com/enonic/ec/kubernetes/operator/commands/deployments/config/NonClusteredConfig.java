@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.immutables.value.Value;
 
-import com.enonic.ec.kubernetes.operator.crd.deployment.diff.InfoDeployment;
-import com.enonic.ec.kubernetes.operator.crd.deployment.spec.SpecNode;
+import com.enonic.ec.kubernetes.operator.info.xp7deployment.InfoXp7Deployment;
+import com.enonic.ec.kubernetes.operator.crd.xp7deployment.spec.Xp7DeploymentSpecNode;
 
 @Value.Immutable
 public abstract class NonClusteredConfig
@@ -19,13 +19,13 @@ public abstract class NonClusteredConfig
     }
 
     @Override
-    protected void setElasticSearchConfig( final StringBuilder sb, SpecNode node )
+    protected void setElasticSearchConfig( final StringBuilder sb, Xp7DeploymentSpecNode node )
     {
         sb.append( "http.enabled=" ).append( "false" ).append( "\n" );
     }
 
     @Override
-    protected List<String> createWaitForDnsRecordsList( final InfoDeployment info )
+    protected List<String> createWaitForDnsRecordsList( final InfoXp7Deployment info )
     {
         return Collections.emptyList();
     }

@@ -7,10 +7,10 @@ import io.fabric8.kubernetes.api.KubernetesResourceMappingProvider;
 import io.fabric8.kubernetes.api.model.KubernetesResource;
 
 import com.enonic.ec.kubernetes.common.Configuration;
-import com.enonic.ec.kubernetes.operator.crd.app.XpAppResource;
-import com.enonic.ec.kubernetes.operator.crd.config.XpConfigResource;
-import com.enonic.ec.kubernetes.operator.crd.deployment.XpDeploymentResource;
-import com.enonic.ec.kubernetes.operator.crd.vhost.XpVHostResource;
+import com.enonic.ec.kubernetes.operator.crd.xp7app.Xp7AppResource;
+import com.enonic.ec.kubernetes.operator.crd.xp7config.Xp7ConfigResource;
+import com.enonic.ec.kubernetes.operator.crd.xp7deployment.Xp7DeploymentResource;
+import com.enonic.ec.kubernetes.operator.crd.xp7vhost.Xp7VHostResource;
 
 public class ResourceMappingProvider
     extends Configuration
@@ -24,10 +24,10 @@ public class ResourceMappingProvider
 
         Map<String, Class<? extends KubernetesResource>> res = new HashMap<>();
 
-        res.put( String.format( "%s/%s#%s", group, apiVersion, cfgStr( "operator.crd.xp.deployments.kind" ) ), XpDeploymentResource.class );
-        res.put( String.format( "%s/%s#%s", group, apiVersion, cfgStr( "operator.crd.xp.vhosts.kind" ) ), XpVHostResource.class );
-        res.put( String.format( "%s/%s#%s", group, apiVersion, cfgStr( "operator.crd.xp.configs.kind" ) ), XpConfigResource.class );
-        res.put( String.format( "%s/%s#%s", group, apiVersion, cfgStr( "operator.crd.xp.apps.kind" ) ), XpAppResource.class );
+        res.put( String.format( "%s/%s#%s", group, apiVersion, cfgStr( "operator.crd.xp.deployments.kind" ) ), Xp7DeploymentResource.class );
+        res.put( String.format( "%s/%s#%s", group, apiVersion, cfgStr( "operator.crd.xp.vhosts.kind" ) ), Xp7VHostResource.class );
+        res.put( String.format( "%s/%s#%s", group, apiVersion, cfgStr( "operator.crd.xp.configs.kind" ) ), Xp7ConfigResource.class );
+        res.put( String.format( "%s/%s#%s", group, apiVersion, cfgStr( "operator.crd.xp.apps.kind" ) ), Xp7AppResource.class );
 
         return res;
     }

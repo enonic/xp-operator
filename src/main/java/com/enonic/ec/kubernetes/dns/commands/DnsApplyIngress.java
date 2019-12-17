@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import org.immutables.value.Value;
 
 import com.enonic.ec.kubernetes.common.Configuration;
-import com.enonic.ec.kubernetes.common.Diff;
+import com.enonic.ec.kubernetes.operator.info.Diff;
 import com.enonic.ec.kubernetes.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.dns.cloudflare.DnsRecordService;

@@ -8,22 +8,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import com.enonic.ec.kubernetes.operator.api.admission.AdmissionExceptionHandler;
-import com.enonic.ec.kubernetes.operator.crd.deployment.XpDeploymentResource;
+import com.enonic.ec.kubernetes.operator.crd.xp7deployment.Xp7DeploymentResource;
 
 public class DeploymentFileTest
 {
     public static ObjectMapper mapper = new ObjectMapper( new YAMLFactory() );
 
-    protected XpDeploymentResource loadResource( String file )
+    protected Xp7DeploymentResource loadResource( String file )
     {
         return loadResource( this.getClass(), file );
     }
 
-    protected XpDeploymentResource loadResource( Class klass, String file )
+    protected Xp7DeploymentResource loadResource( Class klass, String file )
     {
         try
         {
-            return mapper.readValue( klass.getResourceAsStream( file ), XpDeploymentResource.class );
+            return mapper.readValue( klass.getResourceAsStream( file ), Xp7DeploymentResource.class );
         }
         catch ( IOException ex )
         {

@@ -11,7 +11,7 @@ import com.enonic.ec.kubernetes.kubectl.delete.ImmutableCommandDeleteConfigMap;
 import com.enonic.ec.kubernetes.kubectl.delete.ImmutableCommandDeletePodDisruptionBudget;
 import com.enonic.ec.kubernetes.kubectl.delete.ImmutableCommandDeleteService;
 import com.enonic.ec.kubernetes.kubectl.delete.ImmutableCommandDeleteStatefulSet;
-import com.enonic.ec.kubernetes.operator.crd.deployment.diff.InfoDeployment;
+import com.enonic.ec.kubernetes.operator.info.xp7deployment.InfoXp7Deployment;
 
 @Value.Immutable
 public abstract class DeleteXpDeploymentNode
@@ -20,7 +20,7 @@ public abstract class DeleteXpDeploymentNode
 {
     protected abstract KubernetesClient defaultClient();
 
-    protected abstract InfoDeployment info();
+    protected abstract InfoXp7Deployment info();
 
     protected abstract String nodeId();
 

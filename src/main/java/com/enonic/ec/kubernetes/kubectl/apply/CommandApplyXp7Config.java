@@ -6,29 +6,29 @@ import org.immutables.value.Value;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 
-import com.enonic.ec.kubernetes.operator.crd.config.XpConfigResource;
-import com.enonic.ec.kubernetes.operator.crd.config.client.XpConfigClient;
-import com.enonic.ec.kubernetes.operator.crd.config.spec.Spec;
+import com.enonic.ec.kubernetes.operator.crd.xp7config.Xp7ConfigResource;
+import com.enonic.ec.kubernetes.operator.crd.xp7config.client.Xp7ConfigClient;
+import com.enonic.ec.kubernetes.operator.crd.xp7config.spec.Xp7ConfigSpec;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @Value.Immutable
 public abstract class CommandApplyXp7Config
-    extends CommandApplyResource<XpConfigResource>
+    extends CommandApplyResource<Xp7ConfigResource>
 {
-    protected abstract XpConfigClient client();
+    protected abstract Xp7ConfigClient client();
 
-    protected abstract Spec spec();
+    protected abstract Xp7ConfigSpec spec();
 
     @Override
-    protected Optional<XpConfigResource> fetchResource()
+    protected Optional<Xp7ConfigResource> fetchResource()
     {
         return Optional.ofNullable( client().client().inNamespace( namespace().get() ).withName( name() ).get() );
     }
 
     @Override
-    protected XpConfigResource build( final ObjectMeta metadata )
+    protected Xp7ConfigResource build( final ObjectMeta metadata )
     {
-        XpConfigResource resource = new XpConfigResource();
+        Xp7ConfigResource resource = new Xp7ConfigResource();
         resource.setKind( cfgStr( "operator.crd.xp.configs.kind" ) );
         resource.setMetadata( metadata );
         resource.setSpec( spec() );
@@ -36,7 +36,7 @@ public abstract class CommandApplyXp7Config
     }
 
     @Override
-    protected XpConfigResource apply( final XpConfigResource resource )
+    protected Xp7ConfigResource apply( final Xp7ConfigResource resource )
     {
         return client().client().inNamespace( namespace().get() ).createOrReplace( resource );
     }

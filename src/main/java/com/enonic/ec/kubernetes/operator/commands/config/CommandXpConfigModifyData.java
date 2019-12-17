@@ -9,19 +9,19 @@ import com.enonic.ec.kubernetes.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.kubectl.apply.ImmutableCommandApplyXp7Config;
 import com.enonic.ec.kubernetes.kubectl.delete.ImmutableCommandDeleteXp7Config;
-import com.enonic.ec.kubernetes.operator.crd.config.XpConfigResource;
-import com.enonic.ec.kubernetes.operator.crd.config.client.XpConfigCache;
-import com.enonic.ec.kubernetes.operator.crd.config.client.XpConfigClient;
-import com.enonic.ec.kubernetes.operator.crd.config.spec.ImmutableSpec;
+import com.enonic.ec.kubernetes.operator.crd.xp7config.Xp7ConfigResource;
+import com.enonic.ec.kubernetes.operator.crd.xp7config.client.Xp7ConfigCache;
+import com.enonic.ec.kubernetes.operator.crd.xp7config.client.Xp7ConfigClient;
+import com.enonic.ec.kubernetes.operator.crd.xp7config.spec.ImmutableXp7ConfigSpec;
 import com.enonic.ec.kubernetes.operator.info.ResourceInfoNamespaced;
 
 public abstract class CommandXpConfigModifyData
     extends Configuration
     implements CombinedCommandBuilder
 {
-    public abstract XpConfigClient xpConfigClient();
+    public abstract Xp7ConfigClient xpConfigClient();
 
-    public abstract XpConfigCache xpConfigCache();
+    public abstract Xp7ConfigCache xpConfigCache();
 
     public abstract ResourceInfoNamespaced info();
 
@@ -32,7 +32,7 @@ public abstract class CommandXpConfigModifyData
     public abstract String node();
 
     @Value.Derived
-    protected Optional<XpConfigResource> xpConfigResource()
+    protected Optional<Xp7ConfigResource> xpConfigResource()
     {
         return xpConfigCache().get( info().deploymentInfo().namespaceName(), name() );
     }
@@ -67,7 +67,7 @@ public abstract class CommandXpConfigModifyData
                 canSkipOwnerReference( true ). // TODO: Look at this
                 namespace( info().deploymentInfo().namespaceName() ).
                 name( name() ).
-                spec( ImmutableSpec.builder().
+                spec( ImmutableXp7ConfigSpec.builder().
                     file( file() ).
                     data( data ).
                     node( node() ).

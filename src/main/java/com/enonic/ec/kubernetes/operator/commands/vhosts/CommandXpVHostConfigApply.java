@@ -14,11 +14,11 @@ import com.enonic.ec.kubernetes.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.operator.commands.vhosts.helpers.ImmutableMapping;
 import com.enonic.ec.kubernetes.operator.commands.vhosts.helpers.Mapping;
-import com.enonic.ec.kubernetes.operator.crd.config.client.XpConfigCache;
-import com.enonic.ec.kubernetes.operator.crd.config.client.XpConfigClient;
-import com.enonic.ec.kubernetes.operator.crd.vhost.XpVHostResource;
-import com.enonic.ec.kubernetes.operator.crd.vhost.client.XpVHostCache;
-import com.enonic.ec.kubernetes.operator.crd.vhost.diff.DiffResource;
+import com.enonic.ec.kubernetes.operator.crd.xp7config.client.Xp7ConfigCache;
+import com.enonic.ec.kubernetes.operator.crd.xp7config.client.Xp7ConfigClient;
+import com.enonic.ec.kubernetes.operator.crd.xp7vhost.Xp7VHostResource;
+import com.enonic.ec.kubernetes.operator.crd.xp7vhost.client.Xp7VHostCache;
+import com.enonic.ec.kubernetes.operator.info.xp7vhost.DiffXp7VHost;
 import com.enonic.ec.kubernetes.operator.info.ResourceInfoNamespaced;
 
 @Value.Immutable
@@ -26,13 +26,13 @@ public abstract class CommandXpVHostConfigApply
     extends Configuration
     implements CombinedCommandBuilder
 {
-    protected abstract XpConfigClient xpConfigClient();
+    protected abstract Xp7ConfigClient xpConfigClient();
 
-    protected abstract XpConfigCache xpConfigCache();
+    protected abstract Xp7ConfigCache xpConfigCache();
 
-    protected abstract XpVHostCache vHostCache();
+    protected abstract Xp7VHostCache vHostCache();
 
-    protected abstract ResourceInfoNamespaced<XpVHostResource, DiffResource> info();
+    protected abstract ResourceInfoNamespaced<Xp7VHostResource, DiffXp7VHost> info();
 
     @Override
     public void addCommands( final ImmutableCombinedCommand.Builder commandBuilder )
@@ -60,7 +60,7 @@ public abstract class CommandXpVHostConfigApply
         }
     }
 
-    private Map<String, List<Mapping>> getNodeMappings( ResourceInfoNamespaced<XpVHostResource, DiffResource> info )
+    private Map<String, List<Mapping>> getNodeMappings( ResourceInfoNamespaced<Xp7VHostResource, DiffXp7VHost> info )
     {
         // Collect all mappings
         List<Mapping> mappings = new LinkedList<>();

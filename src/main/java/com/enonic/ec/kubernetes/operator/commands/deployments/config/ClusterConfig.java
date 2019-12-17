@@ -6,8 +6,8 @@ import java.util.Map;
 
 import org.immutables.value.Value;
 
-import com.enonic.ec.kubernetes.operator.crd.deployment.diff.InfoDeployment;
-import com.enonic.ec.kubernetes.operator.crd.deployment.spec.SpecNode;
+import com.enonic.ec.kubernetes.operator.info.xp7deployment.InfoXp7Deployment;
+import com.enonic.ec.kubernetes.operator.crd.xp7deployment.spec.Xp7DeploymentSpecNode;
 
 @Value.Immutable
 public abstract class ClusterConfig
@@ -33,7 +33,7 @@ public abstract class ClusterConfig
     }
 
     @Override
-    protected void setElasticSearchConfig( final StringBuilder sb, SpecNode node )
+    protected void setElasticSearchConfig( final StringBuilder sb, Xp7DeploymentSpecNode node )
     {
         sb.append( "node.master=" ).append( node.isMasterNode() ? "true" : "false" ).append( "\n" );
         sb.append( "node.data=" ).append( node.isDataNode() ? "true" : "false" ).append( "\n" );
@@ -47,10 +47,10 @@ public abstract class ClusterConfig
     }
 
     @Override
-    protected List<String> createWaitForDnsRecordsList( final InfoDeployment info )
+    protected List<String> createWaitForDnsRecordsList( final InfoXp7Deployment info )
     {
         List<String> res = new LinkedList<>();
-        for ( Map.Entry<String, SpecNode> node : info.resource().getSpec().nodes().entrySet() )
+        for ( Map.Entry<String, Xp7DeploymentSpecNode> node : info.resource().getSpec().nodes().entrySet() )
         {
             if ( node.getValue().isMasterNode() )
             {

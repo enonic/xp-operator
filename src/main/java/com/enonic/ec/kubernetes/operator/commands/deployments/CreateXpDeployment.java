@@ -11,7 +11,7 @@ import io.fabric8.kubernetes.api.model.SecretKeySelector;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
 import com.enonic.ec.kubernetes.common.Configuration;
-import com.enonic.ec.kubernetes.common.Diff;
+import com.enonic.ec.kubernetes.operator.info.Diff;
 import com.enonic.ec.kubernetes.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.operator.commands.deployments.config.ClusterConfigurator;
@@ -20,13 +20,13 @@ import com.enonic.ec.kubernetes.operator.commands.deployments.config.ImmutableNo
 import com.enonic.ec.kubernetes.operator.commands.deployments.volumes.ImmutableVolumeBuilderNfs;
 import com.enonic.ec.kubernetes.operator.commands.deployments.volumes.ImmutableVolumeBuilderStd;
 import com.enonic.ec.kubernetes.operator.commands.deployments.volumes.VolumeBuilder;
-import com.enonic.ec.kubernetes.operator.crd.app.client.XpAppClient;
-import com.enonic.ec.kubernetes.operator.crd.config.client.XpConfigClient;
-import com.enonic.ec.kubernetes.operator.crd.deployment.diff.DiffSpec;
-import com.enonic.ec.kubernetes.operator.crd.deployment.diff.DiffSpecNode;
-import com.enonic.ec.kubernetes.operator.crd.deployment.diff.InfoDeployment;
-import com.enonic.ec.kubernetes.operator.crd.deployment.spec.Spec;
-import com.enonic.ec.kubernetes.operator.crd.vhost.client.XpVHostClient;
+import com.enonic.ec.kubernetes.operator.crd.xp7app.client.Xp7AppClient;
+import com.enonic.ec.kubernetes.operator.crd.xp7config.client.Xp7ConfigClient;
+import com.enonic.ec.kubernetes.operator.info.xp7deployment.DiffXp7DeploymentSpec;
+import com.enonic.ec.kubernetes.operator.info.xp7deployment.DiffXp7DeploymentSpecNode;
+import com.enonic.ec.kubernetes.operator.info.xp7deployment.InfoXp7Deployment;
+import com.enonic.ec.kubernetes.operator.crd.xp7deployment.spec.Xp7DeploymentSpec;
+import com.enonic.ec.kubernetes.operator.crd.xp7vhost.client.Xp7VHostClient;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @Value.Immutable
@@ -36,24 +36,24 @@ public abstract class CreateXpDeployment
 {
     protected abstract KubernetesClient defaultClient();
 
-    protected abstract XpConfigClient configClient();
+    protected abstract Xp7ConfigClient configClient();
 
-    protected abstract XpVHostClient vHostClient();
+    protected abstract Xp7VHostClient vHostClient();
 
-    protected abstract XpAppClient appClient();
+    protected abstract Xp7AppClient appClient();
 
-    protected abstract InfoDeployment info();
+    protected abstract InfoXp7Deployment info();
 
     protected abstract Map<String, String> preInstallApps();
 
     @Value.Derived
-    protected Spec spec()
+    protected Xp7DeploymentSpec spec()
     {
         return info().resource().getSpec();
     }
 
     @Value.Derived
-    protected DiffSpec diffSpec()
+    protected DiffXp7DeploymentSpec diffSpec()
     {
         return info().diff().diffSpec();
     }
@@ -118,7 +118,7 @@ public abstract class CreateXpDeployment
                 addCommands( commandBuilder );
         }
 
-        Predicate<DiffSpecNode> createOrUpdate = n -> diffSpec().versionChanged() || diffSpec().enabledChanged() || n.shouldAddOrModify();
+        Predicate<DiffXp7DeploymentSpecNode> createOrUpdate = n -> diffSpec().versionChanged() || diffSpec().enabledChanged() || n.shouldAddOrModify();
 
         // Create / Update Nodes
         diffSpec().nodesChanged().stream().
@@ -157,7 +157,7 @@ public abstract class CreateXpDeployment
         return suPassHash;
     }
 
-    private String getNodeId( final DiffSpecNode diffSpecNode )
+    private String getNodeId( final DiffXp7DeploymentSpecNode diffSpecNode )
     {
         return spec().nodes().entrySet().stream().
             filter( e -> e.getValue() ==

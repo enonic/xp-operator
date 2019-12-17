@@ -26,10 +26,10 @@ import com.enonic.ec.kubernetes.operator.commands.deployments.spec.ImmutableServ
 import com.enonic.ec.kubernetes.operator.commands.deployments.spec.ImmutableStatefulSetSpecBuilder;
 import com.enonic.ec.kubernetes.operator.commands.deployments.volumes.VolumeBuilder;
 import com.enonic.ec.kubernetes.operator.commands.deployments.volumes.VolumeTripletList;
-import com.enonic.ec.kubernetes.operator.crd.deployment.diff.DiffSpec;
-import com.enonic.ec.kubernetes.operator.crd.deployment.diff.DiffSpecNode;
-import com.enonic.ec.kubernetes.operator.crd.deployment.diff.InfoDeployment;
-import com.enonic.ec.kubernetes.operator.crd.deployment.spec.SpecNode;
+import com.enonic.ec.kubernetes.operator.info.xp7deployment.DiffXp7DeploymentSpec;
+import com.enonic.ec.kubernetes.operator.info.xp7deployment.DiffXp7DeploymentSpecNode;
+import com.enonic.ec.kubernetes.operator.info.xp7deployment.InfoXp7Deployment;
+import com.enonic.ec.kubernetes.operator.crd.xp7deployment.spec.Xp7DeploymentSpecNode;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @Value.Immutable
@@ -37,7 +37,7 @@ public abstract class CreateXpDeploymentNode
     extends Configuration
     implements CombinedCommandBuilder
 {
-    private static Map<String, String> nodeExtraLabels( String nodeId, SpecNode node, Map<String, String> defaultLabels )
+    private static Map<String, String> nodeExtraLabels( String nodeId, Xp7DeploymentSpecNode node, Map<String, String> defaultLabels )
     {
         Map<String, String> res = new HashMap<>( defaultLabels );
         res.put( cfgStr( "operator.deployment.xp.labels.pod.id" ), nodeId );
@@ -71,13 +71,13 @@ public abstract class CreateXpDeploymentNode
 
     protected abstract KubernetesClient defaultClient();
 
-    protected abstract InfoDeployment info();
+    protected abstract InfoXp7Deployment info();
 
     protected abstract String nodeId();
 
-    protected abstract DiffSpec diffSpec();
+    protected abstract DiffXp7DeploymentSpec diffSpec();
 
-    protected abstract DiffSpecNode diffSpecNode();
+    protected abstract DiffXp7DeploymentSpecNode diffSpecNode();
 
     protected abstract ClusterConfigurator clusterConfigurator();
 
@@ -95,7 +95,7 @@ public abstract class CreateXpDeploymentNode
     @Override
     public void addCommands( ImmutableCombinedCommand.Builder commandBuilder )
     {
-        SpecNode node = diffSpecNode().newValue().get();
+        Xp7DeploymentSpecNode node = diffSpecNode().newValue().get();
         Map<String, String> nodeLabels = nodeExtraLabels( nodeId(), node, info().defaultLabels() );
 
         // If this is new node, create a service pointing to it

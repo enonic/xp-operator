@@ -15,14 +15,14 @@ import io.fabric8.kubernetes.api.model.extensions.IngressRule;
 import io.fabric8.kubernetes.api.model.extensions.IngressTLS;
 
 import com.enonic.ec.kubernetes.common.Configuration;
-import com.enonic.ec.kubernetes.operator.crd.vhost.spec.Spec;
-import com.enonic.ec.kubernetes.operator.crd.vhost.spec.SpecMapping;
+import com.enonic.ec.kubernetes.operator.crd.xp7vhost.spec.Xp7VHostSpec;
+import com.enonic.ec.kubernetes.operator.crd.xp7vhost.spec.Xp7VHostSpecMapping;
 
 @Value.Immutable
 public abstract class IngressSpec
     extends Configuration
 {
-    protected abstract Spec vHostSpec();
+    protected abstract Xp7VHostSpec vHostSpec();
 
     protected abstract Optional<String> certificateSecretName();
 
@@ -49,7 +49,7 @@ public abstract class IngressSpec
         spec.setRules( Collections.singletonList( ingressRule ) );
 
         List<HTTPIngressPath> paths = new LinkedList<>();
-        for ( SpecMapping m : vHostSpec().mappings() )
+        for ( Xp7VHostSpecMapping m : vHostSpec().mappings() )
         {
             paths.add( new HTTPIngressPath( new IngressBackend( m.node() != null ? m.node() : allService(),
                                                                 new IntOrString( cfgInt( "operator.deployment.xp.port.main.number" ) ) ),

@@ -14,11 +14,11 @@ import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.kubectl.apply.ImmutableCommandApplyIngress;
 import com.enonic.ec.kubernetes.kubectl.delete.ImmutableCommandDeleteIngress;
 import com.enonic.ec.kubernetes.operator.commands.vhosts.spec.ImmutableIngressSpec;
-import com.enonic.ec.kubernetes.operator.crd.vhost.XpVHostResource;
-import com.enonic.ec.kubernetes.operator.crd.vhost.diff.DiffResource;
-import com.enonic.ec.kubernetes.operator.crd.vhost.spec.SpecCertificate;
-import com.enonic.ec.kubernetes.operator.crd.vhost.spec.SpecCertificateAuthority;
-import com.enonic.ec.kubernetes.operator.crd.vhost.spec.SpecMapping;
+import com.enonic.ec.kubernetes.operator.crd.xp7vhost.Xp7VHostResource;
+import com.enonic.ec.kubernetes.operator.info.xp7vhost.DiffXp7VHost;
+import com.enonic.ec.kubernetes.operator.crd.xp7vhost.spec.Xp7VHostSpecCertificate;
+import com.enonic.ec.kubernetes.operator.crd.xp7vhost.spec.Xp7VHostSpecCertificateAuthority;
+import com.enonic.ec.kubernetes.operator.crd.xp7vhost.spec.Xp7VHostSpecMapping;
 import com.enonic.ec.kubernetes.operator.info.ResourceInfoNamespaced;
 
 @Value.Immutable
@@ -26,14 +26,14 @@ public abstract class CommandXpVHostIngressApply
     extends Configuration
     implements CombinedCommandBuilder
 {
-    private static String getIngressName( XpVHostResource resource )
+    private static String getIngressName( Xp7VHostResource resource )
     {
         return resource.getMetadata().getName();
     }
 
     protected abstract KubernetesClient defaultClient();
 
-    protected abstract ResourceInfoNamespaced<XpVHostResource, DiffResource> info();
+    protected abstract ResourceInfoNamespaced<Xp7VHostResource, DiffXp7VHost> info();
 
     @Override
     public void addCommands( final ImmutableCombinedCommand.Builder commandBuilder )
@@ -84,7 +84,7 @@ public abstract class CommandXpVHostIngressApply
             put( "nginx.ingress.kubernetes.io/limit-rpm", "240" ) );
 
         // Sticky session
-        Optional<SpecMapping> adminPath =
+        Optional<Xp7VHostSpecMapping> adminPath =
             info().resource().getSpec().mappings().stream().filter( m -> m.target().startsWith( "/admin" ) ).findAny();
         if ( adminPath.isPresent() )
         {
@@ -106,7 +106,7 @@ public abstract class CommandXpVHostIngressApply
             put( "ingress.kubernetes.io/rewrite-target", "/" ).
             put( "nginx.ingress.kubernetes.io/configuration-snippet", nginxConfigSnippet.toString() );
 
-        SpecCertificate cert = info().resource().getSpec().certificate();
+        Xp7VHostSpecCertificate cert = info().resource().getSpec().certificate();
         if ( cert != null )
         {
             ingressAnnotations.put( "nginx.ingress.kubernetes.io/ssl-redirect", "true" );
@@ -137,7 +137,7 @@ public abstract class CommandXpVHostIngressApply
             build() );
     }
 
-    private String getIssuer( SpecCertificateAuthority authority )
+    private String getIssuer( Xp7VHostSpecCertificateAuthority authority )
     {
         switch ( authority )
         {

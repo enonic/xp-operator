@@ -13,14 +13,14 @@ import com.enonic.ec.kubernetes.common.client.DefaultClientProducer;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.operator.commands.vhosts.ImmutableCommandXpVHostConfigApply;
 import com.enonic.ec.kubernetes.operator.commands.vhosts.ImmutableCommandXpVHostIngressApply;
-import com.enonic.ec.kubernetes.operator.crd.config.client.XpConfigCache;
-import com.enonic.ec.kubernetes.operator.crd.config.client.XpConfigClientProducer;
-import com.enonic.ec.kubernetes.operator.crd.deployment.client.XpDeploymentCache;
-import com.enonic.ec.kubernetes.operator.crd.vhost.XpVHostResource;
-import com.enonic.ec.kubernetes.operator.crd.vhost.client.XpVHostCache;
-import com.enonic.ec.kubernetes.operator.crd.vhost.diff.DiffResource;
-import com.enonic.ec.kubernetes.operator.crd.vhost.diff.ImmutableInfoVHost;
+import com.enonic.ec.kubernetes.operator.crd.xp7deployment.client.Xp7DeploymentCache;
+import com.enonic.ec.kubernetes.operator.crd.xp7vhost.Xp7VHostResource;
+import com.enonic.ec.kubernetes.operator.crd.xp7vhost.client.Xp7VHostCache;
+import com.enonic.ec.kubernetes.operator.crd.xp7config.client.Xp7ConfigCache;
+import com.enonic.ec.kubernetes.operator.crd.xp7config.client.Xp7ConfigClientProducer;
 import com.enonic.ec.kubernetes.operator.info.ResourceInfoNamespaced;
+import com.enonic.ec.kubernetes.operator.info.xp7vhost.DiffXp7VHost;
+import com.enonic.ec.kubernetes.operator.info.xp7vhost.ImmutableInfoXp7VHost;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @ApplicationScoped
@@ -31,27 +31,27 @@ public class OperatorVHosts
     DefaultClientProducer defaultClientProducer;
 
     @Inject
-    XpConfigClientProducer configClientProducer;
+    Xp7ConfigClientProducer configClientProducer;
 
     @Inject
-    XpDeploymentCache xpDeploymentCache;
+    Xp7DeploymentCache xp7DeploymentCache;
 
     @Inject
-    XpVHostCache xpVHostCache;
+    Xp7VHostCache xp7VHostCache;
 
     @Inject
-    XpConfigCache xpConfigCache;
+    Xp7ConfigCache xp7ConfigCache;
 
     void onStartup( @Observes StartupEvent _ev )
     {
-        xpVHostCache.addWatcher( this::watchVHosts );
+        xp7VHostCache.addWatcher( this::watchVHosts );
     }
 
-    private void watchVHosts( final Watcher.Action action, final String s, final Optional<XpVHostResource> oldResource,
-                              final Optional<XpVHostResource> newResource )
+    private void watchVHosts( final Watcher.Action action, final String s, final Optional<Xp7VHostResource> oldResource,
+                              final Optional<Xp7VHostResource> newResource )
     {
-        Optional<ResourceInfoNamespaced<XpVHostResource, DiffResource>> i = getInfo( action, () -> ImmutableInfoVHost.builder().
-            xpDeploymentCache( xpDeploymentCache ).
+        Optional<ResourceInfoNamespaced<Xp7VHostResource, DiffXp7VHost>> i = getInfo( action, () -> ImmutableInfoXp7VHost.builder().
+            xpDeploymentCache( xp7DeploymentCache ).
             oldResource( oldResource ).
             newResource( newResource ).
             build() );
@@ -60,7 +60,7 @@ public class OperatorVHosts
     }
 
     protected void createCommands( ImmutableCombinedCommand.Builder commandBuilder,
-                                   ResourceInfoNamespaced<XpVHostResource, DiffResource> info )
+                                   ResourceInfoNamespaced<Xp7VHostResource, DiffXp7VHost> info )
     {
         if ( !info.resourceDeleted() )
         {
@@ -77,8 +77,8 @@ public class OperatorVHosts
         stallAndRunCommands( commandBuilder, () -> {
             ImmutableCommandXpVHostConfigApply.builder().
                 xpConfigClient( configClientProducer.produce() ).
-                xpConfigCache( xpConfigCache ).
-                vHostCache( xpVHostCache ).
+                xpConfigCache( xp7ConfigCache ).
+                vHostCache( xp7VHostCache ).
                 info( info ).
                 build().
                 addCommands( commandBuilder );

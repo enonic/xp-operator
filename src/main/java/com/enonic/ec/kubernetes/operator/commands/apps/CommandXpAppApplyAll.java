@@ -8,11 +8,11 @@ import org.immutables.value.Value;
 import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.common.commands.ImmutableCombinedCommand;
-import com.enonic.ec.kubernetes.operator.crd.app.XpAppResource;
-import com.enonic.ec.kubernetes.operator.crd.app.client.XpAppCache;
-import com.enonic.ec.kubernetes.operator.crd.app.diff.DiffResource;
-import com.enonic.ec.kubernetes.operator.crd.config.client.XpConfigCache;
-import com.enonic.ec.kubernetes.operator.crd.config.client.XpConfigClient;
+import com.enonic.ec.kubernetes.operator.crd.xp7app.Xp7AppResource;
+import com.enonic.ec.kubernetes.operator.crd.xp7app.client.Xp7AppCache;
+import com.enonic.ec.kubernetes.operator.info.xp7app.DiffXp7App;
+import com.enonic.ec.kubernetes.operator.crd.xp7config.client.Xp7ConfigCache;
+import com.enonic.ec.kubernetes.operator.crd.xp7config.client.Xp7ConfigClient;
 import com.enonic.ec.kubernetes.operator.info.ResourceInfoNamespaced;
 
 @Value.Immutable
@@ -20,19 +20,19 @@ public abstract class CommandXpAppApplyAll
     extends Configuration
     implements CombinedCommandBuilder
 {
-    public abstract XpConfigClient xpConfigClient();
+    public abstract Xp7ConfigClient xpConfigClient();
 
-    public abstract XpConfigCache xpConfigCache();
+    public abstract Xp7ConfigCache xpConfigCache();
 
-    protected abstract XpAppCache xpAppCache();
+    protected abstract Xp7AppCache xpAppCache();
 
-    protected abstract ResourceInfoNamespaced<XpAppResource, DiffResource> info();
+    protected abstract ResourceInfoNamespaced<Xp7AppResource, DiffXp7App> info();
 
     @Override
     public void addCommands( final ImmutableCombinedCommand.Builder commandBuilder )
     {
         // Get all apps in namespace
-        List<XpAppResource> allApps = xpAppCache().getByNamespace( info().deploymentInfo().namespaceName() ).collect( Collectors.toList() );
+        List<Xp7AppResource> allApps = xpAppCache().getByNamespace( info().deploymentInfo().namespaceName() ).collect( Collectors.toList() );
 
         // Apply them to the config file
         ImmutableCommandXpAppApply.builder().

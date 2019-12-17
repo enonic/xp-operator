@@ -10,17 +10,16 @@ import com.google.common.base.Preconditions;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 
-import com.enonic.ec.kubernetes.common.Diff;
-import com.enonic.ec.kubernetes.operator.crd.deployment.XpDeploymentResource;
-import com.enonic.ec.kubernetes.operator.crd.deployment.client.XpDeploymentCache;
-import com.enonic.ec.kubernetes.operator.crd.deployment.diff.ImmutableInfoDeployment;
-import com.enonic.ec.kubernetes.operator.crd.deployment.diff.InfoDeployment;
+import com.enonic.ec.kubernetes.operator.crd.xp7deployment.Xp7DeploymentResource;
+import com.enonic.ec.kubernetes.operator.crd.xp7deployment.client.Xp7DeploymentCache;
+import com.enonic.ec.kubernetes.operator.info.xp7deployment.ImmutableInfoXp7Deployment;
+import com.enonic.ec.kubernetes.operator.info.xp7deployment.InfoXp7Deployment;
 
 public abstract class ResourceInfoNamespaced<T extends HasMetadata, D extends Diff<T>>
     extends ResourceInfo<T, D>
 {
     @Nullable
-    public abstract XpDeploymentCache xpDeploymentCache();
+    public abstract Xp7DeploymentCache xpDeploymentCache();
 
     protected void checkNode( boolean allowAll, List<String> nodes )
     {
@@ -41,10 +40,10 @@ public abstract class ResourceInfoNamespaced<T extends HasMetadata, D extends Di
     }
 
     @Value.Default
-    public XpDeploymentResource xpDeploymentResource()
+    public Xp7DeploymentResource xpDeploymentResource()
     {
         Preconditions.checkState( xpDeploymentCache() != null, "XpDeploymentCache is null" );
-        Optional<XpDeploymentResource> res = xpDeploymentCache().getByName( getXpDeploymentName() );
+        Optional<Xp7DeploymentResource> res = xpDeploymentCache().getByName( getXpDeploymentName() );
         if ( res.isEmpty() )
         {
             throw new XpDeploymentNotFound( getXpDeploymentName() );
@@ -53,9 +52,9 @@ public abstract class ResourceInfoNamespaced<T extends HasMetadata, D extends Di
     }
 
     @Value.Derived
-    public InfoDeployment deploymentInfo()
+    public InfoXp7Deployment deploymentInfo()
     {
-        return ImmutableInfoDeployment.builder().
+        return ImmutableInfoXp7Deployment.builder().
             oldResource( xpDeploymentResource() ).
             newResource( xpDeploymentResource() ).
             build();

@@ -6,29 +6,29 @@ import org.immutables.value.Value;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 
-import com.enonic.ec.kubernetes.operator.crd.vhost.XpVHostResource;
-import com.enonic.ec.kubernetes.operator.crd.vhost.client.XpVHostClient;
-import com.enonic.ec.kubernetes.operator.crd.vhost.spec.Spec;
+import com.enonic.ec.kubernetes.operator.crd.xp7vhost.Xp7VHostResource;
+import com.enonic.ec.kubernetes.operator.crd.xp7vhost.client.Xp7VHostClient;
+import com.enonic.ec.kubernetes.operator.crd.xp7vhost.spec.Xp7VHostSpec;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @Value.Immutable
 public abstract class CommandApplyXp7VHost
-    extends CommandApplyResource<XpVHostResource>
+    extends CommandApplyResource<Xp7VHostResource>
 {
-    protected abstract XpVHostClient client();
+    protected abstract Xp7VHostClient client();
 
-    protected abstract Spec spec();
+    protected abstract Xp7VHostSpec spec();
 
     @Override
-    protected Optional<XpVHostResource> fetchResource()
+    protected Optional<Xp7VHostResource> fetchResource()
     {
         return Optional.ofNullable( client().client().inNamespace( namespace().get() ).withName( name() ).get() );
     }
 
     @Override
-    protected XpVHostResource build( final ObjectMeta metadata )
+    protected Xp7VHostResource build( final ObjectMeta metadata )
     {
-        XpVHostResource resource = new XpVHostResource();
+        Xp7VHostResource resource = new Xp7VHostResource();
         resource.setKind( cfgStr( "operator.crd.xp.vhosts.kind" ) );
         resource.setMetadata( metadata );
         resource.setSpec( spec() );
@@ -36,7 +36,7 @@ public abstract class CommandApplyXp7VHost
     }
 
     @Override
-    protected XpVHostResource apply( final XpVHostResource resource )
+    protected Xp7VHostResource apply( final Xp7VHostResource resource )
     {
         return client().client().inNamespace( namespace().get() ).createOrReplace( resource );
     }

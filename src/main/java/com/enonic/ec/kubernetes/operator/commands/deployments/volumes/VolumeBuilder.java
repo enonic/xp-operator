@@ -15,7 +15,7 @@ import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 
 import com.enonic.ec.kubernetes.common.Configuration;
-import com.enonic.ec.kubernetes.operator.crd.deployment.diff.InfoDeployment;
+import com.enonic.ec.kubernetes.operator.info.xp7deployment.InfoXp7Deployment;
 
 public abstract class VolumeBuilder
     extends Configuration
@@ -38,7 +38,7 @@ public abstract class VolumeBuilder
         return claim;
     }
 
-    protected abstract InfoDeployment info();
+    protected abstract InfoXp7Deployment info();
 
     public VolumeTripletList getVolumeTriplets( final String configMapName, final Optional<Quantity> persistIndexSize )
     {

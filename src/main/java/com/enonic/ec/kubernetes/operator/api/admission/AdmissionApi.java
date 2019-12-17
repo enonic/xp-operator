@@ -23,15 +23,15 @@ import io.fabric8.kubernetes.api.model.Status;
 import io.fabric8.kubernetes.api.model.admission.AdmissionResponse;
 import io.fabric8.kubernetes.api.model.admission.AdmissionReview;
 
-import com.enonic.ec.kubernetes.operator.crd.app.XpAppResource;
-import com.enonic.ec.kubernetes.operator.crd.app.diff.ImmutableInfoApp;
-import com.enonic.ec.kubernetes.operator.crd.config.XpConfigResource;
-import com.enonic.ec.kubernetes.operator.crd.config.diff.ImmutableInfoConfig;
-import com.enonic.ec.kubernetes.operator.crd.deployment.XpDeploymentResource;
-import com.enonic.ec.kubernetes.operator.crd.deployment.client.XpDeploymentCache;
-import com.enonic.ec.kubernetes.operator.crd.deployment.diff.ImmutableInfoDeployment;
-import com.enonic.ec.kubernetes.operator.crd.vhost.XpVHostResource;
-import com.enonic.ec.kubernetes.operator.crd.vhost.diff.ImmutableInfoVHost;
+import com.enonic.ec.kubernetes.operator.crd.xp7app.Xp7AppResource;
+import com.enonic.ec.kubernetes.operator.crd.xp7config.Xp7ConfigResource;
+import com.enonic.ec.kubernetes.operator.crd.xp7deployment.Xp7DeploymentResource;
+import com.enonic.ec.kubernetes.operator.crd.xp7deployment.client.Xp7DeploymentCache;
+import com.enonic.ec.kubernetes.operator.crd.xp7vhost.Xp7VHostResource;
+import com.enonic.ec.kubernetes.operator.info.xp7app.ImmutableInfoXp7App;
+import com.enonic.ec.kubernetes.operator.info.xp7config.ImmutableInfoXp7Config;
+import com.enonic.ec.kubernetes.operator.info.xp7deployment.ImmutableInfoXp7Deployment;
+import com.enonic.ec.kubernetes.operator.info.xp7vhost.ImmutableInfoXp7VHost;
 
 @ApplicationScoped
 @Path("/apis/operator.enonic.cloud/v1alpha1")
@@ -58,7 +58,7 @@ public class AdmissionApi
     ObjectMapper mapper;
 
     @Inject
-    XpDeploymentCache xpDeploymentCache;
+    Xp7DeploymentCache xp7DeploymentCache;
 
     public static AdmissionReview createReview( String uid, String errorCause, String errorMessage )
     {
@@ -93,19 +93,19 @@ public class AdmissionApi
             obj = review.getRequest().getObject();
         }
 
-        if ( obj instanceof XpDeploymentResource )
+        if ( obj instanceof Xp7DeploymentResource )
         {
             return this::xpDeploymentReview;
         }
-        else if ( obj instanceof XpVHostResource )
+        else if ( obj instanceof Xp7VHostResource )
         {
             return this::xpVHostReview;
         }
-        else if ( obj instanceof XpConfigResource )
+        else if ( obj instanceof Xp7ConfigResource )
         {
             return this::xpConfigReview;
         }
-        else if ( obj instanceof XpAppResource )
+        else if ( obj instanceof Xp7AppResource )
         {
             return this::xpAppReview;
         }
@@ -150,36 +150,36 @@ public class AdmissionApi
 
     private void xpDeploymentReview( final AdmissionReview review )
     {
-        ImmutableInfoDeployment.builder().
-            oldResource( Optional.ofNullable( review.getRequest().getOldObject() ).map( obj -> (XpDeploymentResource) obj ) ).
-            newResource( Optional.ofNullable( review.getRequest().getObject() ).map( obj -> (XpDeploymentResource) obj ) ).
+        ImmutableInfoXp7Deployment.builder().
+            oldResource( Optional.ofNullable( review.getRequest().getOldObject() ).map( obj -> (Xp7DeploymentResource) obj ) ).
+            newResource( Optional.ofNullable( review.getRequest().getObject() ).map( obj -> (Xp7DeploymentResource) obj ) ).
             build();
     }
 
     private void xpVHostReview( final AdmissionReview review )
     {
-        ImmutableInfoVHost.builder().
-            xpDeploymentCache( xpDeploymentCache ).
-            oldResource( Optional.ofNullable( review.getRequest().getOldObject() ).map( obj -> (XpVHostResource) obj ) ).
-            newResource( Optional.ofNullable( review.getRequest().getObject() ).map( obj -> (XpVHostResource) obj ) ).
+        ImmutableInfoXp7VHost.builder().
+            xpDeploymentCache( xp7DeploymentCache ).
+            oldResource( Optional.ofNullable( review.getRequest().getOldObject() ).map( obj -> (Xp7VHostResource) obj ) ).
+            newResource( Optional.ofNullable( review.getRequest().getObject() ).map( obj -> (Xp7VHostResource) obj ) ).
             build();
     }
 
     private void xpConfigReview( final AdmissionReview review )
     {
-        ImmutableInfoConfig.builder().
-            xpDeploymentCache( xpDeploymentCache ).
-            oldResource( Optional.ofNullable( review.getRequest().getOldObject() ).map( obj -> (XpConfigResource) obj ) ).
-            newResource( Optional.ofNullable( review.getRequest().getObject() ).map( obj -> (XpConfigResource) obj ) ).
+        ImmutableInfoXp7Config.builder().
+            xpDeploymentCache( xp7DeploymentCache ).
+            oldResource( Optional.ofNullable( review.getRequest().getOldObject() ).map( obj -> (Xp7ConfigResource) obj ) ).
+            newResource( Optional.ofNullable( review.getRequest().getObject() ).map( obj -> (Xp7ConfigResource) obj ) ).
             build();
     }
 
     private void xpAppReview( final AdmissionReview review )
     {
-        ImmutableInfoApp.builder().
-            xpDeploymentCache( xpDeploymentCache ).
-            oldResource( Optional.ofNullable( review.getRequest().getOldObject() ).map( obj -> (XpAppResource) obj ) ).
-            newResource( Optional.ofNullable( review.getRequest().getObject() ).map( obj -> (XpAppResource) obj ) ).
+        ImmutableInfoXp7App.builder().
+            xpDeploymentCache( xp7DeploymentCache ).
+            oldResource( Optional.ofNullable( review.getRequest().getOldObject() ).map( obj -> (Xp7AppResource) obj ) ).
+            newResource( Optional.ofNullable( review.getRequest().getObject() ).map( obj -> (Xp7AppResource) obj ) ).
             build();
     }
 
