@@ -1,34 +1,36 @@
-request:
-  operation: CREATE
-  object:
-    apiVersion: enonic.cloud/v1alpha1
-    kind: Xp7Deployment
-    metadata:
-      name: mycloud-myproject-qaxp
-      labels:
-        cloud: mycloud
-        project: myproject
-        name: qaxp
-    spec:
-      enabled: true
-      xpVersion: 7.1.2
-      nodesSharedDisk: 1Gi
-      nodes:
-        master:
-          type: ["MASTER"]
-          replicas: 1
-          resources:
-            cpu: "1"
-            memory: 512Mi
-        data:
-          type: ["DATA"]
-          replicas: 1
-          resources:
-            cpu: "1"
-            memory: 512Mi
-        frontend:
-          type: ["FRONTEND"]
-          replicas: 1
-          resources:
-            cpu: "1"
-            memory: 512Mi
+testResult: "Nodes with type DATA must have disk 'index' defined"
+testReview:
+  request:
+    operation: CREATE
+    object:
+      apiVersion: enonic.cloud/v1alpha1
+      kind: Xp7Deployment
+      metadata:
+        name: mycloud-myproject-qaxp
+        labels:
+          cloud: mycloud
+          project: myproject
+          name: qaxp
+      spec:
+        enabled: true
+        xpVersion: 7.1.2
+        nodesSharedDisk: 1Gi
+        nodes:
+          master:
+            type: ["MASTER"]
+            replicas: 1
+            resources:
+              cpu: "1"
+              memory: 512Mi
+          data:
+            type: ["DATA"]
+            replicas: 1
+            resources:
+              cpu: "1"
+              memory: 512Mi
+          frontend:
+            type: ["FRONTEND"]
+            replicas: 1
+            resources:
+              cpu: "1"
+              memory: 512Mi

@@ -1,24 +1,26 @@
-request:
-  operation: CREATE
-  object:
-    apiVersion: enonic.cloud/v1alpha1
-    kind: Xp7Deployment
-    metadata:
-      name: mycloud-myproject-qaxp
-      labels:
-        cloud: mycloud
-        project: myproject
-        name: qaxp
-    spec:
-      enabled: true
-      xpVersion: 7.1.2
-      nodesSharedDisk: 1Gi
-      nodes:
-        main:
-          type: ["MASTER", "DATA", "FRONTEND", "WRONG"]
-          replicas: 1
-          resources:
-            cpu: "1"
-            memory: 512Mi
-            disks:
-              index: 200Mi
+testResult: "Cannot deserialize value of type `com.enonic.ec.kubernetes.operator.crd.xp7deployment.spec.Xp7DeploymentSpecNode$Type` from String "WRONG": value not one of declared Enum instance names: [FRONTEND, MASTER, DATA]  at [Source: UNKNOWN; line: -1, column: -1] (through reference chain: io.fabric8.kubernetes.api.model.admission.AdmissionReview["request"]->io.fabric8.kubernetes.api.model.admission.AdmissionRequest["object"]->com.enonic.ec.kubernetes.operator.crd.xp7deployment.Xp7DeploymentResource["spec"]->com.enonic.ec.kubernetes.operator.crd.xp7deployment.spec.ImmutableXp7DeploymentSpec$Builder["nodes"]->java.util.LinkedHashMap["main"]->com.enonic.ec.kubernetes.operator.crd.xp7deployment.spec.ImmutableXp7DeploymentSpecNode$Builder["type"]->java.util.ArrayList[3])"
+testReview:
+  request:
+    operation: CREATE
+    object:
+      apiVersion: enonic.cloud/v1alpha1
+      kind: Xp7Deployment
+      metadata:
+        name: mycloud-myproject-qaxp
+        labels:
+          cloud: mycloud
+          project: myproject
+          name: qaxp
+      spec:
+        enabled: true
+        xpVersion: 7.1.2
+        nodesSharedDisk: 1Gi
+        nodes:
+          main:
+            type: ["MASTER", "DATA", "FRONTEND", "WRONG"]
+            replicas: 1
+            resources:
+              cpu: "1"
+              memory: 512Mi
+              disks:
+                index: 200Mi

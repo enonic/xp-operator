@@ -1,24 +1,26 @@
-request:
-  operation: CREATE
-  object:
-    apiVersion: enonic.cloud/v1alpha1
-    kind: Xp7Deployment
-    metadata:
-      name: mycloud-myproject-qaxp
-      labels:
-        cloud: mycloud
-        project: myproject
-        name: qaxp
-    spec:
-      enabled: true
-      xpVersion: 7.1.2
-      nodesSharedDisk: 1Gi
-      nodes:
-        1234:
-          type: ["MASTER", "DATA", "FRONTEND"]
-          replicas: 1
-          resources:
-            cpu: "1"
-            memory: 512Mi
-            disks:
-              index: 200Mi
+testResult: "Field 'nodeId' with value '1234' is not valid, it must consist of lower case alphanumeric characters or '-', start with an alphabetic character, and end with an alphanumeric character (e.g. 'my-name',  or 'abc-123', regex used for validation is '[a-z]([-a-z0-9]*[a-z0-9])?')"
+testReview:
+  request:
+    operation: CREATE
+    object:
+      apiVersion: enonic.cloud/v1alpha1
+      kind: Xp7Deployment
+      metadata:
+        name: mycloud-myproject-qaxp
+        labels:
+          cloud: mycloud
+          project: myproject
+          name: qaxp
+      spec:
+        enabled: true
+        xpVersion: 7.1.2
+        nodesSharedDisk: 1Gi
+        nodes:
+          1234:
+            type: ["MASTER", "DATA", "FRONTEND"]
+            replicas: 1
+            resources:
+              cpu: "1"
+              memory: 512Mi
+              disks:
+                index: 200Mi

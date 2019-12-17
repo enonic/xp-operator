@@ -1,38 +1,40 @@
-request:
-  operation: CREATE
-  object:
-    apiVersion: enonic.cloud/v1alpha1
-    kind: Xp7Deployment
-    metadata:
-      name: mycloud-myproject-qaxp
-      labels:
-        cloud: mycloud
-        project: myproject
-        name: qaxp
-    spec:
-      enabled: true
-      xpVersion: 7.1.2
-      nodesSharedDisk: 1Gi
-      nodes:
-        master:
-          type: ["MASTER", "DATA"]
-          replicas: 1
-          resources:
-            cpu: "1"
-            memory: 512Mi
-            disks:
-              index: 200Mi
-        data:
-          type: ["DATA"]
-          replicas: 1
-          resources:
-            cpu: "1"
-            memory: 512Mi
-            disks:
-              index: 200Mi
-        frontend:
-          type: ["FRONTEND"]
-          replicas: 1
-          resources:
-            cpu: "1"
-            memory: 512Mi
+testResult: "1 and only 1 node has be of type DATA"
+testReview:
+  request:
+    operation: CREATE
+    object:
+      apiVersion: enonic.cloud/v1alpha1
+      kind: Xp7Deployment
+      metadata:
+        name: mycloud-myproject-qaxp
+        labels:
+          cloud: mycloud
+          project: myproject
+          name: qaxp
+      spec:
+        enabled: true
+        xpVersion: 7.1.2
+        nodesSharedDisk: 1Gi
+        nodes:
+          master:
+            type: ["MASTER", "DATA"]
+            replicas: 1
+            resources:
+              cpu: "1"
+              memory: 512Mi
+              disks:
+                index: 200Mi
+          data:
+            type: ["DATA"]
+            replicas: 1
+            resources:
+              cpu: "1"
+              memory: 512Mi
+              disks:
+                index: 200Mi
+          frontend:
+            type: ["FRONTEND"]
+            replicas: 1
+            resources:
+              cpu: "1"
+              memory: 512Mi
