@@ -20,6 +20,7 @@ minikube-start:
 
 minikube-certmanager:
 	kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/${CERT_MANAGER_VERSION}/cert-manager.yaml --validate=false
+	sleep 15 # Let certmanager start up
 
 minikube-certmanager-issuers:
 	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.dep.clusterissuers.yaml

@@ -5,6 +5,9 @@ metadata:
   namespace: ec-system
 data:
   application.properties: |
-    quarkus.log.min-level=DEBUG
+    quarkus.log.console.level=INFO
+    quarkus.log.min-level=INFO
+    quarkus.log.category."com.enonic.ec".level=INFO
+
     quarkus.http.ssl.certificate.file=/deployments/ssl/tls.crt
     quarkus.http.ssl.certificate.key-file=/deployments/ssl/tls.key

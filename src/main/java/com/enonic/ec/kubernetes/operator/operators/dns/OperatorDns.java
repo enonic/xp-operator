@@ -14,6 +14,9 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Charsets;
+import com.google.common.hash.Hashing;
+
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.kubernetes.client.Watcher;
 import io.quarkus.runtime.StartupEvent;
@@ -84,9 +87,14 @@ public class OperatorDns
 
         try
         {
+            String ingressName =
+                newIngress.map( r -> r.getMetadata().getName() ).orElse( oldIngress.map( r -> r.getMetadata().getName() ).orElse( null ) );
+            // Note: By changing this dnsId older managed records will stop working
+            String dnsId = Hashing.sha512().hashString( ingressName, Charsets.UTF_8 ).toString().substring( 0, 16 );
             ImmutableDnsApplyIngress.builder().
                 dnsRecordService( dnsRecordService ).
                 diff( diff ).
+                dnsId( dnsId ).
                 build().
                 addCommands( commandBuilder );
             commandBuilder.build().execute();

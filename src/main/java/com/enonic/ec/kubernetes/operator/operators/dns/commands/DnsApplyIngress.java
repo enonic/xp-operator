@@ -7,12 +7,12 @@ import java.util.stream.Collectors;
 import org.immutables.value.Value;
 
 import com.enonic.ec.kubernetes.operator.common.Configuration;
-import com.enonic.ec.kubernetes.operator.info.Diff;
 import com.enonic.ec.kubernetes.operator.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.operator.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.operator.dns.cloudflare.DnsRecordService;
 import com.enonic.ec.kubernetes.operator.dns.cloudflare.model.DnsRecord;
 import com.enonic.ec.kubernetes.operator.dns.cloudflare.model.ImmutableDnsRecord;
+import com.enonic.ec.kubernetes.operator.info.Diff;
 import com.enonic.ec.kubernetes.operator.operators.dns.commands.rest.ImmutableDnsCreate;
 import com.enonic.ec.kubernetes.operator.operators.dns.commands.rest.ImmutableDnsDelete;
 import com.enonic.ec.kubernetes.operator.operators.dns.model.DiffDnsIngress;
@@ -30,10 +30,12 @@ public abstract class DnsApplyIngress
 
     protected abstract DiffDnsIngress diff();
 
+    protected abstract String dnsId();
+
     @Value.Derived
     protected String heritageRecord()
     {
-        return "heritage=ec-operator";
+        return String.format( "heritage=ec-operator,id=%s", dnsId() );
     }
 
     @Override
