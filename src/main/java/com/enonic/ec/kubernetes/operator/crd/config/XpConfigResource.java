@@ -1,5 +1,7 @@
 package com.enonic.ec.kubernetes.operator.crd.config;
 
+import java.util.Objects;
+
 import io.fabric8.kubernetes.client.CustomResource;
 
 import com.enonic.ec.kubernetes.operator.crd.config.spec.Spec;
@@ -23,10 +25,6 @@ public class XpConfigResource
     @Override
     public boolean equals( final Object obj )
     {
-        if ( super.equals( obj ) || spec != null )
-        {
-            return spec.equals( ( (XpConfigResource) obj ).spec );
-        }
-        return true;
+        return super.equals( obj ) && Objects.equals( spec, ( (XpConfigResource) obj ).spec );
     }
 }

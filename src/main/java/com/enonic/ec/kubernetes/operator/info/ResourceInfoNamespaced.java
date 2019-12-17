@@ -30,11 +30,13 @@ public abstract class ResourceInfoNamespaced<T extends HasMetadata, D extends Di
             if ( allNodes.equals( node ) )
             {
                 Preconditions.checkState( allowAll, "All nodes selector not allowed" );
-                continue;
             }
-            Preconditions.checkState( xpDeploymentResource().getSpec().nodes().containsKey( node ),
-                                      "XpDeployment '" + xpDeploymentResource().getMetadata().getName() + "' does not contain node '" +
-                                          node + "'" );
+            else
+            {
+                Preconditions.checkState( xpDeploymentResource().getSpec().nodes().containsKey( node ),
+                                          "XpDeployment '" + xpDeploymentResource().getMetadata().getName() + "' does not contain node '" +
+                                              node + "'" );
+            }
         }
     }
 

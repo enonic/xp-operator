@@ -13,6 +13,9 @@ public class Deployments
     {
         return createStream( tests -> {
             tests.put( "deployments/create/missingEnabled.yaml", "Some fields in 'spec' are missing: [enabled]" );
+            tests.put( "deployments/create/missingLabelCloud.yaml", "Label 'metadata.labels.cloud' is missing" );
+            tests.put( "deployments/create/missingLabelName.yaml", "Label 'metadata.labels.name' is missing" );
+            tests.put( "deployments/create/missingLabelProject.yaml", "Label 'metadata.labels.project' is missing" );
             tests.put( "deployments/create/missingNodeResources.yaml", "Some fields in 'spec.nodes' are missing: [resources]" );
             tests.put( "deployments/create/missingNodeResourcesCpu.yaml", "Some fields in 'spec.nodes.resources' are missing: [cpu]" );
             tests.put( "deployments/create/missingNodeResourcesDisks.yaml", "Nodes with type DATA must have disk 'index' defined" );
@@ -49,8 +52,12 @@ public class Deployments
     public Stream<DynamicTest> update()
     {
         return createStream( tests -> {
+            tests.put( "deployments/update/changeCloud.yaml", "Field 'metadata.labels.cloud' cannot be changed" );
+            tests.put( "deployments/update/changeName.yaml", "Field 'metadata.labels.name' cannot be changed" );
+            tests.put( "deployments/update/changeNodeDisk.yaml", "Field 'spec.nodes.resources.disks' cannot be changed" );
+            tests.put( "deployments/update/changeNodeSharedDisk.yaml", "Field 'spec.nodesSharedDisk' cannot be changed" );
+            tests.put( "deployments/update/changeProject.yaml", "Field 'metadata.labels.project' cannot be changed" );
             tests.put( "deployments/update/valid.yaml", null );
-            // TODO: Create more update tests
         } );
     }
 

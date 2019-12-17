@@ -5,9 +5,13 @@ import java.util.Optional;
 
 import org.immutables.value.Value;
 
+import com.google.common.base.Preconditions;
+
 import com.enonic.ec.kubernetes.operator.crd.deployment.XpDeploymentResource;
 import com.enonic.ec.kubernetes.operator.crd.deployment.spec.SpecNode;
 import com.enonic.ec.kubernetes.operator.info.ResourceInfo;
+
+import static com.enonic.ec.kubernetes.common.Validator.dnsName;
 
 @Value.Immutable
 public abstract class InfoDeployment
@@ -79,4 +83,30 @@ public abstract class InfoDeployment
         return defaultMinimumAvailable( resource().getSpec().nodes().values().stream().filter( SpecNode::isDataNode ).findAny().get() );
     }
 
+    @Value.Check
+    protected void check()
+    {
+        newResource().ifPresent( resource -> resource.getSpec().nodes().keySet().forEach( k -> dnsName( "nodeId", k ) ) );
+
+        cfgIfBool( "operator.deployment.xp.labels.ec.strictValidation", () -> {
+            Preconditions.checkState( resource().ecCloud() != null,
+                                      "Label '" + "metadata.labels." + cfgStr( "operator.deployment.xp.labels.ec.cloud" ) +
+                                          "' is missing" );
+            dnsName( "metadata.labels." + cfgStr( "operator.deployment.xp.labels.ec.cloud" ), resource().ecCloud() );
+
+            Preconditions.checkState( resource().ecProject() != null,
+                                      "Label '" + "metadata.labels." + cfgStr( "operator.deployment.xp.labels.ec.project" ) +
+                                          "' is missing" );
+            dnsName( "metadata.labels." + cfgStr( "operator.deployment.xp.labels.ec.project" ), resource().ecProject() );
+
+            Preconditions.checkState( resource().ecName() != null,
+                                      "Label '" + "metadata.labels." + cfgStr( "operator.deployment.xp.labels.ec.name" ) + "' is missing" );
+            dnsName( "metadata.labels." + cfgStr( "operator.deployment.xp.labels.ec.name" ), resource().ecName() );
+
+            String fullName = String.join( "-", resource().ecCloud(), resource().ecProject(), resource().ecName() );
+            Preconditions.checkState( deploymentName().equals( fullName ),
+                                      "Xp7Deployment name must be equal to <Cloud>-<Project>-<Name> according to labels, i.e: '" +
+                                          fullName + "'" );
+        } );
+    }
 }

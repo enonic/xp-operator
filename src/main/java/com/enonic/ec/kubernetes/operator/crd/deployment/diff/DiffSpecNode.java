@@ -61,6 +61,6 @@ public abstract class DiffSpecNode
         {
             return;
         }
-        Preconditions.checkState( equals( r -> r.resources().disks() ), "Field 'spec.nodes.resources.disk' cannot be changed" );
+        Preconditions.checkState( equals( r -> r.resources().disks() ), "Field 'spec.nodes.resources.disks' cannot be changed" );
     }
 }

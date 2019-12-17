@@ -2,6 +2,7 @@ package com.enonic.ec.kubernetes.operator.api.admission;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,11 +51,11 @@ public abstract class AdmissionApiTest
         this.xpDeploymentCache = null;
     }
 
-    private String getFileContents( String file )
+    private String getFileContents( URL resource )
     {
         try
         {
-            return Resources.toString( AdmissionApiTest.class.getResource( file ), Charsets.UTF_8 );
+            return Resources.toString( resource, Charsets.UTF_8 );
         }
         catch ( IOException e )
         {
@@ -62,12 +63,18 @@ public abstract class AdmissionApiTest
         }
     }
 
+    protected URL getFile(String file) {
+        URL resource = AdmissionApiTest.class.getResource( file );
+        Assertions.assertNotNull( resource, "File " + file + " not found" );
+        return resource;
+    }
+
     protected XpDeploymentCache getDeploymentsCache( String deploymentsFile )
     {
         try
         {
             List<XpDeploymentResource> deployments =
-                this.mapper.readValue( getFileContents( deploymentsFile ), new TypeReference<List<XpDeploymentResource>>()
+                this.mapper.readValue( getFileContents( getFile(deploymentsFile) ), new TypeReference<List<XpDeploymentResource>>()
                 {
                 } );
             TestDeploymentCache cache = new TestDeploymentCache();
@@ -80,12 +87,12 @@ public abstract class AdmissionApiTest
         }
     }
 
-    protected void assertAdmissionReview( String file, String message )
+    protected void assertAdmissionReview( URL resource, String message )
     {
         AdmissionReview review = null;
         try
         {
-            review = validate( getFileContents( file ) );
+            review = validate( getFileContents( resource ) );
         }
         catch ( IOException e )
         {
@@ -100,9 +107,10 @@ public abstract class AdmissionApiTest
             map( e -> {
                 try
                 {
-                    return DynamicTest.dynamicTest( e.getKey(), AdmissionApiTest.class.getResource( e.getKey() ).toURI(), () -> {
+                    URL resource = getFile( e.getKey() );
+                    return DynamicTest.dynamicTest( e.getKey(), resource.toURI(), () -> {
                         init.run();
-                        assertAdmissionReview( e.getKey(), e.getValue() );
+                        assertAdmissionReview( resource, e.getValue() );
                     } );
                 }
                 catch ( URISyntaxException u )

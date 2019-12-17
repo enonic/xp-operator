@@ -35,7 +35,7 @@ public abstract class ResourceInfo<T extends HasMetadata, D extends Diff<T>>
     @Value.Derived
     public boolean resourceModified()
     {
-        return oldResource().isPresent() && newResource().isPresent();
+        return oldResource().isPresent() && newResource().isPresent() && !oldResource().equals( newResource() );
     }
 
     @Value.Derived
