@@ -4,7 +4,7 @@ import org.immutables.value.Value;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-import com.enonic.ec.kubernetes.common.Configuration;
+import com.enonic.ec.kubernetes.operator.common.Configuration;
 import com.enonic.ec.kubernetes.operator.crd.BuilderException;
 
 @JsonDeserialize(builder = ImmutableXp7ConfigSpec.Builder.class)

@@ -8,7 +8,7 @@ import org.immutables.value.Value;
 
 import com.google.common.base.Preconditions;
 
-import com.enonic.ec.kubernetes.common.Validator;
+import com.enonic.ec.kubernetes.operator.common.Validator;
 import com.enonic.ec.kubernetes.operator.crd.xp7deployment.spec.Xp7DeploymentSpec;
 import com.enonic.ec.kubernetes.operator.crd.xp7deployment.spec.Xp7DeploymentSpecNode;
 import com.enonic.ec.kubernetes.operator.info.Diff;

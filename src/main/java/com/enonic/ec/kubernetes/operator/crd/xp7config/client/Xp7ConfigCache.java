@@ -10,7 +10,7 @@ import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.FilterWatchListDeletable;
 import io.quarkus.runtime.StartupEvent;
 
-import com.enonic.ec.kubernetes.common.cache.ResourceCache;
+import com.enonic.ec.kubernetes.operator.common.cache.ResourceCache;
 import com.enonic.ec.kubernetes.operator.crd.xp7config.Xp7ConfigResource;
 import com.enonic.ec.kubernetes.operator.crd.xp7config.Xp7ConfigResourceList;
 

@@ -8,7 +8,7 @@ import io.fabric8.kubernetes.client.CustomResource;
 
 import com.enonic.ec.kubernetes.operator.crd.xp7deployment.spec.Xp7DeploymentSpec;
 
-import static com.enonic.ec.kubernetes.common.Configuration.cfgStr;
+import static com.enonic.ec.kubernetes.operator.common.Configuration.cfgStr;
 
 public class Xp7DeploymentResource
     extends CustomResource

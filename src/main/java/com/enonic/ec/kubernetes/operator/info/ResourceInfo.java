@@ -9,7 +9,7 @@ import com.google.common.base.Preconditions;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 
-import com.enonic.ec.kubernetes.common.Configuration;
+import com.enonic.ec.kubernetes.operator.common.Configuration;
 
 public abstract class ResourceInfo<T extends HasMetadata, D extends Diff<T>>
     extends Configuration

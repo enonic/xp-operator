@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.base.Preconditions;
 
-import com.enonic.ec.kubernetes.common.Configuration;
+import com.enonic.ec.kubernetes.operator.common.Configuration;
 import com.enonic.ec.kubernetes.operator.crd.BuilderException;
 
 @JsonDeserialize(builder = ImmutableXp7DeploymentSpecNode.Builder.class)

@@ -5,7 +5,7 @@ import javax.inject.Singleton;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
-import com.enonic.ec.kubernetes.common.client.DefaultClientProducer;
+import com.enonic.ec.kubernetes.operator.common.client.DefaultClientProducer;
 import com.enonic.ec.kubernetes.operator.crd.xp7config.Xp7ConfigResource;
 import com.enonic.ec.kubernetes.operator.crd.xp7config.Xp7ConfigResourceDoneable;
 import com.enonic.ec.kubernetes.operator.crd.xp7config.Xp7ConfigResourceList;

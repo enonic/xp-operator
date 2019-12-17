@@ -11,7 +11,7 @@ import com.enonic.ec.kubernetes.operator.crd.xp7deployment.Xp7DeploymentResource
 import com.enonic.ec.kubernetes.operator.crd.xp7deployment.spec.Xp7DeploymentSpecNode;
 import com.enonic.ec.kubernetes.operator.info.ResourceInfo;
 
-import static com.enonic.ec.kubernetes.common.Validator.dnsName;
+import static com.enonic.ec.kubernetes.operator.common.Validator.dnsName;
 
 @Value.Immutable
 public abstract class InfoXp7Deployment

@@ -15,7 +15,7 @@ import org.immutables.value.Value;
 
 import com.google.common.base.Preconditions;
 
-import com.enonic.ec.kubernetes.common.Configuration;
+import com.enonic.ec.kubernetes.operator.common.Configuration;
 
 public abstract class Diff<T>
     extends Configuration
