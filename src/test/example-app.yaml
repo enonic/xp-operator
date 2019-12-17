@@ -4,4 +4,4 @@ metadata:
   name: contentstudio
   namespace: mycloud-myproject-qaxp
 spec:
-  uri: https://repo.enonic.com/public/com/enonic/app/contentstudio/2.2.3/contentstudio-2.2.3.jar
+  url: https://repo.enonic.com/public/com/enonic/app/contentstudio/2.2.3/contentstudio-2.2.3.jar

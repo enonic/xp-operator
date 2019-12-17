@@ -5,6 +5,6 @@ request:
     kind: Xp7App
     metadata:
       name: contentstudio
-      namespace: mycloud-myproject-qaxp
+      namespace: wrongnamespace
     spec:
       url: https://repo.enonic.com/public/com/enonic/app/contentstudio/2.2.3/contentstudio-2.2.3.jar

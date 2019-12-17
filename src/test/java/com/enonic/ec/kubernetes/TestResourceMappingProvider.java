@@ -24,7 +24,8 @@ public class TestResourceMappingProvider
 
         Map<String, Class<? extends KubernetesResource>> res = new HashMap<>();
 
-        res.put( String.format( "%s/%s#%s", group, apiVersion, cfgStr( "operator.crd.xp.deployments.kind" ) ), Xp7DeploymentResource.class );
+        res.put( String.format( "%s/%s#%s", group, apiVersion, cfgStr( "operator.crd.xp.deployments.kind" ) ),
+                 Xp7DeploymentResource.class );
         res.put( String.format( "%s/%s#%s", group, apiVersion, cfgStr( "operator.crd.xp.vhosts.kind" ) ), Xp7VHostResource.class );
         res.put( String.format( "%s/%s#%s", group, apiVersion, cfgStr( "operator.crd.xp.configs.kind" ) ), Xp7ConfigResource.class );
         res.put( String.format( "%s/%s#%s", group, apiVersion, cfgStr( "operator.crd.xp.apps.kind" ) ), Xp7AppResource.class );

@@ -18,7 +18,7 @@ public abstract class CommandXpAppApply
     {
         for ( int i = 0; i < xpAppResources().size(); i++ )
         {
-            sb.append( "deploy." ).append( i + 1 ).append( "=" ).append( xpAppResources().get( i ).getSpec().uri() ).append( "\n" );
+            sb.append( "deploy." ).append( i + 1 ).append( "=" ).append( xpAppResources().get( i ).getSpec().url() ).append( "\n" );
         }
     }
 }

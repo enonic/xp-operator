@@ -7,7 +7,7 @@ request:
       name: contentstudio
       namespace: mycloud-myproject-qaxp
     spec:
-      uri: https://repo.enonic.com/public/com/enonic/app/contentstudio/2.2.3/contentstudio-2.2.3.jar
+      url: https://repo.enonic.com/public/com/enonic/app/contentstudio/2.2.3/contentstudio-2.2.3.jar
   object:
     apiVersion: enonic.cloud/v1alpha1
     kind: Xp7App
@@ -15,4 +15,4 @@ request:
       name: contentstudio
       namespace: mycloud-myproject-qaxp
     spec:
-      uri: https://repo.enonic.com/public/com/enonic/app/contentstudio/2.2.3/contentstudio-2.2.4.jar
+      url: https://repo.enonic.com/public/com/enonic/app/contentstudio/2.2.3/contentstudio-2.2.4.jar

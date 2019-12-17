@@ -144,13 +144,13 @@ public abstract class CreateXpDeploymentBase
             build() );
 
         // Pre Install Apps
-        preInstallApps().forEach( ( name, uri ) -> commandBuilder.addCommand( ImmutableCommandApplyXp7App.builder().
+        preInstallApps().forEach( ( name, url ) -> commandBuilder.addCommand( ImmutableCommandApplyXp7App.builder().
             client( appClient() ).
             namespace( info().namespaceName() ).
             canSkipOwnerReference( true ).
             name( name ).
             spec( ImmutableXp7AppSpec.builder().
-                uri( uri ).
+                url( url ).
                 build() ).
             build() ) );
 

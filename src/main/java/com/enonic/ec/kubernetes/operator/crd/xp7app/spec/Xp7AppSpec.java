@@ -11,7 +11,7 @@ import com.enonic.ec.kubernetes.operator.crd.BuilderException;
 @Value.Style(throwForInvalidImmutableState = Xp7AppSpec.ExceptionMissing.class, throwForNullPointer = Xp7AppSpec.ExceptionMissing.class)
 public abstract class Xp7AppSpec
 {
-    public abstract String uri();
+    public abstract String url();
 
     public static class ExceptionMissing
         extends BuilderException
