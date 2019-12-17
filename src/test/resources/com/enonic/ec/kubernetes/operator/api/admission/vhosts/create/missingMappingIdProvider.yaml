@@ -1,7 +1,5 @@
 request:
   operation: CREATE
-  kind:
-    kind: Xp7Deployment
   object:
     apiVersion: enonic.cloud/v1alpha1
     kind: Xp7VHost
@@ -14,4 +12,4 @@ request:
         - node: main
           source: /
           target: /admin
-#          idProvider: system
+          #idProvider: system

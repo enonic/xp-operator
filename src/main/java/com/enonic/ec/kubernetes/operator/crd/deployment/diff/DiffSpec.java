@@ -50,9 +50,9 @@ public abstract class DiffSpec
     @Value.Check
     protected void check()
     {
-        newValue().get().nodes().keySet().forEach( k -> {
+        newValue().ifPresent( spec -> spec.nodes().keySet().forEach( k -> {
             Validator.dnsName( "nodeId", k );
-        } );
+        } ) );
 
         if ( !shouldModify() )
         {

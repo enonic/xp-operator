@@ -1,8 +1,6 @@
 request:
   operation: DELETE
-  kind:
-    kind: Xp7Deployment
-  object:
+  oldObject:
     apiVersion: enonic.cloud/v1alpha1
     kind: Xp7VHost
     metadata:

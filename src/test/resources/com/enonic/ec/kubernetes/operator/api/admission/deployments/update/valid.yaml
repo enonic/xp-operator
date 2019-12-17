@@ -1,7 +1,5 @@
 request:
-  operation: CREATE
-  kind:
-    kind: Xp7Deployment
+  operation: UPDATE
   oldObject:
     apiVersion: enonic.cloud/v1alpha1
     kind: Xp7Deployment

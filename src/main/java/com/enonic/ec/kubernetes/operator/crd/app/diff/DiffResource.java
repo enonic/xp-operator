@@ -9,4 +9,12 @@ import com.enonic.ec.kubernetes.operator.crd.app.XpAppResource;
 public abstract class DiffResource
     extends Diff<XpAppResource>
 {
+    @Value.Derived
+    public ImmutableDiffSpec diffSpec()
+    {
+        return ImmutableDiffSpec.builder().
+            oldValue( oldValue().map( XpAppResource::getSpec ) ).
+            newValue( newValue().map( XpAppResource::getSpec ) ).
+            build();
+    }
 }

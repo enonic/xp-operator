@@ -27,7 +27,6 @@ public abstract class DiffResource
     {
         Function<XpDeploymentResource, String> getCloud = labelFunc( cfgStr( "operator.deployment.xp.labels.ec.cloud" ) );
         Function<XpDeploymentResource, String> getProject = labelFunc( cfgStr( "operator.deployment.xp.labels.ec.project" ) );
-        Function<XpDeploymentResource, String> getType = labelFunc( cfgStr( "operator.deployment.xp.labels.ec.type" ) );
         Function<XpDeploymentResource, String> getName = labelFunc( cfgStr( "operator.deployment.xp.labels.ec.name" ) );
 
         if ( shouldAddOrModify() )

@@ -1,7 +1,5 @@
 request:
   operation: UPDATE
-  kind:
-    kind: Xp7Deployment
   oldObject:
     apiVersion: enonic.cloud/v1alpha1
     kind: Xp7VHost

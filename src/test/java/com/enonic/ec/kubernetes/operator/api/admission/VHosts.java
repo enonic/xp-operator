@@ -20,7 +20,9 @@ public class VHosts
             tests.put( "vhosts/create/missingMappingNode.yaml", "Some fields in 'spec.mappings' are missing: [node]" );
             tests.put( "vhosts/create/missingMappingSource.yaml", "Some fields in 'spec.mappings' are missing: [source]" );
             tests.put( "vhosts/create/missingMappingTarget.yaml", "Some fields in 'spec.mappings' are missing: [target]" );
+            tests.put( "vhosts/create/missingSpec.yaml", "Old and new resource can not be empty, is 'spec' missing?" );
             tests.put( "vhosts/create/valid.yaml", null );
+            tests.put( "vhosts/create/validAll.yaml", null );
             tests.put( "vhosts/create/validFull.yaml", null );
             tests.put( "vhosts/create/wrongAuthority.yaml",
                        "Cannot deserialize value of type `com.enonic.ec.kubernetes.operator.crd.vhost.spec.SpecCertificateAuthority` from String \"wrong\": value not one of declared Enum instance names: [selfSigned, letsEncrypt, letsEncryptStaging]  at [Source: UNKNOWN; line: -1, column: -1] (through reference chain: io.fabric8.kubernetes.api.model.admission.AdmissionReview[\"request\"]->io.fabric8.kubernetes.api.model.admission.AdmissionRequest[\"object\"]->com.enonic.ec.kubernetes.operator.crd.vhost.XpVHostResource[\"spec\"]->com.enonic.ec.kubernetes.operator.crd.vhost.spec.ImmutableSpec$Builder[\"certificate\"]->com.enonic.ec.kubernetes.operator.crd.vhost.spec.ImmutableSpecCertificate$Builder[\"authority\"])" );

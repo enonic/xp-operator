@@ -9,4 +9,12 @@ import com.enonic.ec.kubernetes.operator.crd.config.XpConfigResource;
 public abstract class DiffResource
     extends Diff<XpConfigResource>
 {
+    @Value.Derived
+    public ImmutableDiffSpec diffSpec()
+    {
+        return ImmutableDiffSpec.builder().
+            oldValue( oldValue().map( XpConfigResource::getSpec ) ).
+            newValue( newValue().map( XpConfigResource::getSpec ) ).
+            build();
+    }
 }

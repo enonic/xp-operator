@@ -22,6 +22,7 @@ public class Deployments
             tests.put( "deployments/create/missingNodeType.yaml", "Field 'spec.nodes.type' has to be set" );
             tests.put( "deployments/create/missingReplicas.yaml", "Some fields in 'spec.nodes' are missing: [replicas]" );
             tests.put( "deployments/create/missingSharedDisk.yaml", "Some fields in 'spec' are missing: [nodesSharedDisk]" );
+            tests.put( "deployments/create/missingSpec.yaml", "Old and new resource can not be empty, is 'spec' missing?" );
             tests.put( "deployments/create/missingVersion.yaml", "Some fields in 'spec' are missing: [xpVersion]" );
             tests.put( "deployments/create/valid.yaml", null );
             tests.put( "deployments/create/validCluster.yaml", null );

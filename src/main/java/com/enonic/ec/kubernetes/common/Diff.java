@@ -55,7 +55,8 @@ public abstract class Diff<T>
     @Value.Check
     protected void checkNotBothNull()
     {
-        Preconditions.checkState( oldValue().isPresent() || newValue().isPresent(), "Old and new resource can not be empty" );
+        Preconditions.checkState( oldValue().isPresent() || newValue().isPresent(),
+                                  "Old and new resource can not be empty, is 'spec' missing?" );
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")

@@ -78,4 +78,5 @@ public abstract class InfoDeployment
     {
         return defaultMinimumAvailable( resource().getSpec().nodes().values().stream().filter( SpecNode::isDataNode ).findAny().get() );
     }
+
 }
