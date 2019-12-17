@@ -1,4 +1,4 @@
-testResult: ""
+testResult: "Nodes with type DATA must have disk 'index' defined"
 testReview:
   request:
     operation: CREATE
