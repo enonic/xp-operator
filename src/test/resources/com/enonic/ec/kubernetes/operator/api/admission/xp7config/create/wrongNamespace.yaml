@@ -1,13 +1,15 @@
-request:
-  operation: CREATE
-  object:
-    apiVersion: enonic.cloud/v1alpha1
-    kind: Xp7Config
-    metadata:
-      name: test
-      namespace: wrongnamespace
-    spec:
-      file: mytest.cfg
-      node: main
-      data: |
-        hello
+testResult: "XpDeployment 'wrongnamespace' not found"
+testReview:
+  request:
+    operation: CREATE
+    object:
+      apiVersion: enonic.cloud/v1alpha1
+      kind: Xp7Config
+      metadata:
+        name: test
+        namespace: wrongnamespace
+      spec:
+        file: mytest.cfg
+        node: main
+        data: |
+          hello

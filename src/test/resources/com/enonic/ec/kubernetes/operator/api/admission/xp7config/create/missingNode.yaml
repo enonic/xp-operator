@@ -1,13 +1,15 @@
-request:
-  operation: CREATE
-  object:
-    apiVersion: enonic.cloud/v1alpha1
-    kind: Xp7Config
-    metadata:
-      name: test
-      namespace: mycloud-myproject-qaxp
-    spec:
-      file: mytest.cfg
-      #node: main
-      data: |
-        hello
+testResult: "Some fields in 'spec' are missing: [node]"
+testReview:
+  request:
+    operation: CREATE
+    object:
+      apiVersion: enonic.cloud/v1alpha1
+      kind: Xp7Config
+      metadata:
+        name: test
+        namespace: mycloud-myproject-qaxp
+      spec:
+        file: mytest.cfg
+        #node: main
+        data: |
+          hello
