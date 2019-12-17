@@ -1,5 +1,6 @@
 package com.enonic.ec.kubernetes.operator.crd.config.diff;
 
+import java.util.Collections;
 import java.util.Optional;
 
 import org.immutables.value.Value;
@@ -18,5 +19,11 @@ public abstract class InfoConfig
             oldValue( oldResource ).
             newValue( newResource ).
             build();
+    }
+
+    @Value.Check
+    protected void check()
+    {
+        newResource().ifPresent( config -> checkNode( true, Collections.singletonList( config.getSpec().node() ) ) );
     }
 }

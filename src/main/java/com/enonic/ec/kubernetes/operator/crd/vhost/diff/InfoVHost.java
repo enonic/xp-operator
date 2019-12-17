@@ -1,10 +1,12 @@
 package com.enonic.ec.kubernetes.operator.crd.vhost.diff;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.immutables.value.Value;
 
 import com.enonic.ec.kubernetes.operator.crd.vhost.XpVHostResource;
+import com.enonic.ec.kubernetes.operator.crd.vhost.spec.SpecMapping;
 import com.enonic.ec.kubernetes.operator.info.ResourceInfoNamespaced;
 
 @Value.Immutable
@@ -18,5 +20,15 @@ public abstract class InfoVHost
             oldValue( oldResource ).
             newValue( newResource ).
             build();
+    }
+
+    @Value.Check
+    protected void check()
+    {
+        newResource().ifPresent( vHost -> checkNode( true, vHost.getSpec().
+            mappings().
+            stream().
+            map( SpecMapping::node ).
+            collect( Collectors.toList() ) ) );
     }
 }

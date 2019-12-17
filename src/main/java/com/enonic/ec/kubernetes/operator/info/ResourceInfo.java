@@ -9,9 +9,11 @@ import com.google.common.base.Preconditions;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 
+import com.enonic.ec.kubernetes.common.Configuration;
 import com.enonic.ec.kubernetes.common.Diff;
 
 public abstract class ResourceInfo<T extends HasMetadata, D extends Diff<T>>
+    extends Configuration
 {
     public abstract Optional<T> oldResource();
 
@@ -20,7 +22,7 @@ public abstract class ResourceInfo<T extends HasMetadata, D extends Diff<T>>
     @Value.Derived
     public T resource()
     {
-        Preconditions.checkState( oldResource().isPresent() || newResource().isPresent(), "Both old and new resource cannot be present" );
+        Preconditions.checkState( oldResource().isPresent() || newResource().isPresent(), "Either old or new resource have to be present" );
         return newResource().orElse( oldResource().orElse( null ) );
     }
 

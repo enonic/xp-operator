@@ -1,5 +1,6 @@
 package com.enonic.ec.kubernetes.operator.info;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.immutables.value.Value;
@@ -20,6 +21,22 @@ public abstract class ResourceInfoNamespaced<T extends HasMetadata, D extends Di
 {
     @Nullable
     public abstract XpDeploymentCache xpDeploymentCache();
+
+    protected void checkNode( boolean allowAll, List<String> nodes )
+    {
+        String allNodes = cfgStr( "operator.deployment.xp.allNodes" );
+        for ( final String node : nodes )
+        {
+            if ( allNodes.equals( node ) )
+            {
+                Preconditions.checkState( allowAll, "All nodes selector not allowed" );
+                continue;
+            }
+            Preconditions.checkState( xpDeploymentResource().getSpec().nodes().containsKey( node ),
+                                      "XpDeployment '" + xpDeploymentResource().getMetadata().getName() + "' does not contain node '" +
+                                          node + "'" );
+        }
+    }
 
     @Value.Default
     public XpDeploymentResource xpDeploymentResource()

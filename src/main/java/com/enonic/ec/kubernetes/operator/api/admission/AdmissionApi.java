@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Preconditions;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.Status;
@@ -25,11 +24,14 @@ import io.fabric8.kubernetes.api.model.admission.AdmissionResponse;
 import io.fabric8.kubernetes.api.model.admission.AdmissionReview;
 
 import com.enonic.ec.kubernetes.operator.crd.app.XpAppResource;
+import com.enonic.ec.kubernetes.operator.crd.app.diff.ImmutableInfoApp;
 import com.enonic.ec.kubernetes.operator.crd.config.XpConfigResource;
+import com.enonic.ec.kubernetes.operator.crd.config.diff.ImmutableInfoConfig;
 import com.enonic.ec.kubernetes.operator.crd.deployment.XpDeploymentResource;
 import com.enonic.ec.kubernetes.operator.crd.deployment.client.XpDeploymentCache;
+import com.enonic.ec.kubernetes.operator.crd.deployment.diff.ImmutableInfoDeployment;
 import com.enonic.ec.kubernetes.operator.crd.vhost.XpVHostResource;
-import com.enonic.ec.kubernetes.operator.crd.vhost.spec.SpecMapping;
+import com.enonic.ec.kubernetes.operator.crd.vhost.diff.ImmutableInfoVHost;
 
 @ApplicationScoped
 @Path("/apis/operator.enonic.cloud/v1alpha1")
@@ -95,23 +97,22 @@ public class AdmissionApi
         {
             return this::xpDeploymentReview;
         }
-
-        if ( obj instanceof XpVHostResource )
+        else if ( obj instanceof XpVHostResource )
         {
             return this::xpVHostReview;
         }
-
-        if ( obj instanceof XpConfigResource )
+        else if ( obj instanceof XpConfigResource )
         {
             return this::xpConfigReview;
         }
-
-        if ( obj instanceof XpAppResource )
+        else if ( obj instanceof XpAppResource )
         {
             return this::xpAppReview;
         }
-
-        return this::defaultReviewConsumers;
+        else
+        {
+            return this::defaultReviewConsumers;
+        }
     }
 
     @POST
@@ -149,73 +150,41 @@ public class AdmissionApi
 
     private void xpDeploymentReview( final AdmissionReview review )
     {
-        com.enonic.ec.kubernetes.operator.crd.deployment.diff.ImmutableDiffResource.builder().
-            oldValue( Optional.ofNullable(
-                review.getRequest().getOldObject() != null ? (XpDeploymentResource) review.getRequest().getOldObject() : null ) ).
-            newValue( Optional.ofNullable(
-                review.getRequest().getObject() != null ? (XpDeploymentResource) review.getRequest().getObject() : null ) ).
+        ImmutableInfoDeployment.builder().
+            oldResource( Optional.ofNullable( review.getRequest().getOldObject() ).map( obj -> (XpDeploymentResource) obj ) ).
+            newResource( Optional.ofNullable( review.getRequest().getObject() ).map( obj -> (XpDeploymentResource) obj ) ).
             build();
     }
 
     private void xpVHostReview( final AdmissionReview review )
     {
-        com.enonic.ec.kubernetes.operator.crd.vhost.diff.ImmutableDiffResource diff =
-            com.enonic.ec.kubernetes.operator.crd.vhost.diff.ImmutableDiffResource.builder().
-                oldValue( Optional.ofNullable(
-                    review.getRequest().getOldObject() != null ? (XpVHostResource) review.getRequest().getOldObject() : null ) ).
-                newValue( Optional.ofNullable(
-                    review.getRequest().getObject() != null ? (XpVHostResource) review.getRequest().getObject() : null ) ).
-                build();
-        if ( diff.newValue().isPresent() )
-        {
-            for ( SpecMapping mapping : diff.newValue().get().getSpec().mappings() )
-            {
-                if ( !mapping.node().equals( allNodesPicker ) )
-                {
-                    checkIfNodeExists( diff.newValue().get().getMetadata().getNamespace(), mapping.node(), "spec.mappings.node" );
-                }
-            }
-        }
+        ImmutableInfoVHost.builder().
+            xpDeploymentCache( xpDeploymentCache ).
+            oldResource( Optional.ofNullable( review.getRequest().getOldObject() ).map( obj -> (XpVHostResource) obj ) ).
+            newResource( Optional.ofNullable( review.getRequest().getObject() ).map( obj -> (XpVHostResource) obj ) ).
+            build();
     }
 
     private void xpConfigReview( final AdmissionReview review )
     {
-        com.enonic.ec.kubernetes.operator.crd.config.diff.ImmutableDiffResource diff =
-            com.enonic.ec.kubernetes.operator.crd.config.diff.ImmutableDiffResource.builder().
-                oldValue( Optional.ofNullable(
-                    review.getRequest().getOldObject() != null ? (XpConfigResource) review.getRequest().getOldObject() : null ) ).
-                newValue( Optional.ofNullable(
-                    review.getRequest().getObject() != null ? (XpConfigResource) review.getRequest().getObject() : null ) ).
-                build();
-        if ( diff.newValue().isPresent() && !diff.newValue().get().getSpec().node().equals( allNodesPicker ) )
-        {
-            checkIfNodeExists( diff.newValue().get().getMetadata().getNamespace(), diff.newValue().get().getSpec().node(), "spec.node" );
-        }
+        ImmutableInfoConfig.builder().
+            xpDeploymentCache( xpDeploymentCache ).
+            oldResource( Optional.ofNullable( review.getRequest().getOldObject() ).map( obj -> (XpConfigResource) obj ) ).
+            newResource( Optional.ofNullable( review.getRequest().getObject() ).map( obj -> (XpConfigResource) obj ) ).
+            build();
     }
 
     private void xpAppReview( final AdmissionReview review )
     {
-        com.enonic.ec.kubernetes.operator.crd.app.diff.ImmutableDiffResource diff =
-            com.enonic.ec.kubernetes.operator.crd.app.diff.ImmutableDiffResource.builder().
-                oldValue( Optional.ofNullable(
-                    review.getRequest().getOldObject() != null ? (XpAppResource) review.getRequest().getOldObject() : null ) ).
-                newValue( Optional.ofNullable(
-                    review.getRequest().getObject() != null ? (XpAppResource) review.getRequest().getObject() : null ) ).
-                build();
-    }
-
-    private void checkIfNodeExists( final String namespace, final String node, final String field )
-    {
-        Optional<XpDeploymentResource> deployment =
-            xpDeploymentCache.stream().filter( r -> r.getMetadata().getName().equals( namespace ) ).findFirst();
-        Preconditions.checkState( deployment.isPresent(),
-                                  xp7vHostKind + " can only be created in namespaces that are created by " + xp7DeploymentKind );
-        Preconditions.checkState( deployment.get().getSpec().nodes().containsKey( node ),
-                                  "Field '" + field + "' with value '" + node + "' has to match a node in a " + xp7DeploymentKind );
+        ImmutableInfoApp.builder().
+            xpDeploymentCache( xpDeploymentCache ).
+            oldResource( Optional.ofNullable( review.getRequest().getOldObject() ).map( obj -> (XpAppResource) obj ) ).
+            newResource( Optional.ofNullable( review.getRequest().getObject() ).map( obj -> (XpAppResource) obj ) ).
+            build();
     }
 
     private void defaultReviewConsumers( AdmissionReview r )
     {
-        throw new RuntimeException( "Could not find reviewer for kind: " + r.getRequest().getKind().getKind() );
+        log.warn( "Admission review sent to endpoint that has unknown kind: " + r.getRequest().getKind().getKind() );
     }
 }

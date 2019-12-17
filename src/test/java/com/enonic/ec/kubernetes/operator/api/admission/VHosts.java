@@ -24,10 +24,8 @@ public class VHosts
             tests.put( "vhosts/create/validFull.yaml", null );
             tests.put( "vhosts/create/wrongAuthority.yaml",
                        "Cannot deserialize value of type `com.enonic.ec.kubernetes.operator.crd.vhost.spec.SpecCertificateAuthority` from String \"wrong\": value not one of declared Enum instance names: [selfSigned, letsEncrypt, letsEncryptStaging]  at [Source: UNKNOWN; line: -1, column: -1] (through reference chain: io.fabric8.kubernetes.api.model.admission.AdmissionReview[\"request\"]->io.fabric8.kubernetes.api.model.admission.AdmissionRequest[\"object\"]->com.enonic.ec.kubernetes.operator.crd.vhost.XpVHostResource[\"spec\"]->com.enonic.ec.kubernetes.operator.crd.vhost.spec.ImmutableSpec$Builder[\"certificate\"]->com.enonic.ec.kubernetes.operator.crd.vhost.spec.ImmutableSpecCertificate$Builder[\"authority\"])" );
-            tests.put( "vhosts/create/wrongNamespace.yaml",
-                       "Xp7VHost can only be created in namespaces that are created by Xp7Deployment" );
-            tests.put( "vhosts/create/wrongNode.yaml",
-                       "Field 'spec.mappings.node' with value 'wrong' has to match a node in a Xp7Deployment" );
+            tests.put( "vhosts/create/wrongNamespace.yaml", "XpDeployment 'wrongnamespace' not found" );
+            tests.put( "vhosts/create/wrongNode.yaml", "XpDeployment 'mycloud-myproject-qaxp' does not contain node 'wrong'" );
         } );
     }
 
