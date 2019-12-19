@@ -1,0 +1,65 @@
+apiVersion: enonic.cloud/v1alpha1
+kind: Xp7Deployment
+metadata:
+  name: mycloud-myproject-qaxp
+  labels:
+    cloud: mycloud
+    project: myproject
+    name: qaxp
+spec:
+  enabled: true
+  xpVersion: 7.1.2
+
+  nodesSharedDisk:
+    blobstore: 1Gi
+    snapshots: 1Gi
+
+  nodeGroups:
+    fisk:
+      data: true
+      master: true
+      replicas: 1
+      resources:
+        cpu: "1"
+        memory: 512Mi
+        disks:
+          export: 234Mi # Default blobstore size, not smaller than blobstore
+          index: 200Mi
+          work: 400Mi
+
+---
+apiVersion: enonic.cloud/v1alpha1
+kind: Xp7VHost
+metadata:
+  name: test-purplejs-io
+  namespace: mycloud-myproject-qaxp
+spec:
+  host: test.purplejs.io
+  certificate:
+    authority: selfSigned
+  mappings:
+    - nodeGroup: fisk
+      source: /
+      target: /admin
+      idProvider: system
+
+---
+apiVersion: enonic.cloud/v1alpha1
+kind: Xp7Config
+metadata:
+  name: test
+  namespace: mycloud-myproject-qaxp
+spec:
+  file: mytest.cfg
+  nodeGroup: fisk
+  data: |
+    hello
+
+---
+apiVersion: enonic.cloud/v1alpha1
+kind: Xp7App
+metadata:
+  name: contentstudio
+  namespace: mycloud-myproject-qaxp
+spec:
+  url: https://repo.enonic.com/public/com/enonic/app/contentstudio/2.2.3/contentstudio-2.2.3.jar
