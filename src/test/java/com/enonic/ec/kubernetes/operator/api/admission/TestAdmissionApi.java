@@ -18,6 +18,7 @@ import io.fabric8.kubernetes.api.model.admission.AdmissionReview;
 
 import com.enonic.ec.kubernetes.TestFileSupplier;
 import com.enonic.ec.kubernetes.operator.crd.xp7deployment.Xp7DeploymentResource;
+import com.enonic.ec.kubernetes.operator.crd.xp7vhost.Xp7VHostResource;
 
 import static com.enonic.ec.kubernetes.operator.common.Configuration.cfgStr;
 
@@ -33,6 +34,7 @@ public class TestAdmissionApi
         xp7AppKind = cfgStr( "operator.crd.xp.apps.kind" );
         allNodesPicker = cfgStr( "operator.deployment.xp.allNodes" );
         xp7DeploymentCache = new TestXp7DeploymentCache();
+        xp7VHostCache = new TestXp7VHostCache();
     }
 
     @TestFactory
@@ -48,7 +50,14 @@ public class TestAdmissionApi
         } );
         deployments.forEach( d -> ( (TestXp7DeploymentCache) xp7DeploymentCache ).put( d ) );
 
-        return testFileSupplier.createTests( TestAdmissionApi.class, this::runTest, "xp7deploymentsCache.yaml" );
+        // Add vhosts to cache
+        cache = testFileSupplier.getFile( TestAdmissionApi.class, "xp7VHostCache.yaml" );
+        List<Xp7VHostResource> vHosts = this.mapper.readValue( cache, new TypeReference<List<Xp7VHostResource>>()
+        {
+        } );
+        vHosts.forEach( d -> ( (TestXp7VHostCache) xp7VHostCache ).put( d ) );
+
+        return testFileSupplier.createTests( TestAdmissionApi.class, this::runTest, "xp7deploymentsCache.yaml", "xp7VHostCache.yaml" );
     }
 
     @SuppressWarnings("unchecked")

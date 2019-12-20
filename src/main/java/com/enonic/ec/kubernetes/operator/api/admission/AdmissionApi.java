@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Preconditions;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.Status;
@@ -28,10 +29,12 @@ import com.enonic.ec.kubernetes.operator.crd.xp7config.Xp7ConfigResource;
 import com.enonic.ec.kubernetes.operator.crd.xp7deployment.Xp7DeploymentResource;
 import com.enonic.ec.kubernetes.operator.crd.xp7deployment.client.Xp7DeploymentCache;
 import com.enonic.ec.kubernetes.operator.crd.xp7vhost.Xp7VHostResource;
+import com.enonic.ec.kubernetes.operator.crd.xp7vhost.client.Xp7VHostCache;
 import com.enonic.ec.kubernetes.operator.info.xp7app.ImmutableInfoXp7App;
 import com.enonic.ec.kubernetes.operator.info.xp7config.ImmutableInfoXp7Config;
 import com.enonic.ec.kubernetes.operator.info.xp7deployment.ImmutableInfoXp7Deployment;
 import com.enonic.ec.kubernetes.operator.info.xp7vhost.ImmutableInfoXp7VHost;
+import com.enonic.ec.kubernetes.operator.info.xp7vhost.InfoXp7VHost;
 
 @ApplicationScoped
 @Path("/apis/operator.enonic.cloud/v1alpha1")
@@ -59,6 +62,9 @@ public class AdmissionApi
 
     @Inject
     Xp7DeploymentCache xp7DeploymentCache;
+
+    @Inject
+    Xp7VHostCache xp7VHostCache;
 
     public static AdmissionReview createReview( String uid, String errorCause, String errorMessage )
     {
@@ -158,11 +164,16 @@ public class AdmissionApi
 
     private void xpVHostReview( final AdmissionReview review )
     {
-        ImmutableInfoXp7VHost.builder().
+        InfoXp7VHost vHost = ImmutableInfoXp7VHost.builder().
             xpDeploymentCache( xp7DeploymentCache ).
             oldResource( Optional.ofNullable( review.getRequest().getOldObject() ).map( obj -> (Xp7VHostResource) obj ) ).
             newResource( Optional.ofNullable( review.getRequest().getObject() ).map( obj -> (Xp7VHostResource) obj ) ).
             build();
+        long sameHost = xp7VHostCache.stream().
+            filter( r -> !r.getMetadata().getUid().equals( vHost.resource().getMetadata().getUid() ) ).
+            filter( r -> r.getSpec().host().equals( vHost.resource().getSpec().host() ) ).
+            count();
+        Preconditions.checkState( sameHost < 1L, "This host is being used by another Xp7VHost" );
     }
 
     private void xpConfigReview( final AdmissionReview review )

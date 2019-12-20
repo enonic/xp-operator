@@ -18,6 +18,12 @@ import com.enonic.ec.kubernetes.operator.crd.xp7vhost.Xp7VHostResourceList;
 public class Xp7VHostCache
     extends ResourceCache<Xp7VHostResource, Xp7VHostResourceList>
 {
+    protected Xp7VHostCache()
+    {
+        // Only for testing
+        super();
+    }
+
     @Inject
     public Xp7VHostCache( Xp7VHostClientProducer xp7VHostClientProducer )
     {
