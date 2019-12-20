@@ -84,6 +84,13 @@ public abstract class Xp7DeploymentSpecNode
 
     @JsonIgnore
     @Value.Derived
+    public boolean isOnlyMaster()
+    {
+        return isType( Type.MASTER ) && type().size() == 1;
+    }
+
+    @JsonIgnore
+    @Value.Derived
     public boolean isOnlyFrontend()
     {
         return isType( Type.FRONTEND ) && type().size() == 1;

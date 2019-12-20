@@ -1,11 +1,14 @@
 package com.enonic.ec.kubernetes.operator.operators.xp7deployment.commands.spec;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -67,13 +70,15 @@ public abstract class StatefulSetSpecBuilder
 
     protected abstract Integer replicas();
 
-    protected abstract List<EnvVar> podEnv();
+    protected abstract Set<EnvVar> podEnv();
 
     protected abstract Map<String, Quantity> podResources();
 
     protected abstract VolumeTripletList volumeList();
 
     protected abstract ClusterConfigurator clusterConfigurator();
+
+    protected abstract Integer maxMemoryPercentage();
 
     @Value.Derived
     protected Long runAsUser()
@@ -193,19 +198,10 @@ public abstract class StatefulSetSpecBuilder
         exp.setImagePullPolicy( cfgStr( "operator.deployment.xp.pod.imagePullPolicy" ) );
 
         // Environment
-        List<EnvVar> envVars = new LinkedList<>( podEnv() );
-
-        EnvVar envNodeName = new EnvVar();
-        envNodeName.setName( "XP_NODE_NAME" );
-        envNodeName.setValueFrom( new EnvVarSource( null, new ObjectFieldSelector( null, "metadata.name" ), null, null ) );
-        envVars.add( envNodeName );
-
-        EnvVar envNodeIp = new EnvVar();
-        envNodeIp.setName( "XP_NODE_IP" );
-        envNodeIp.setValueFrom( new EnvVarSource( null, new ObjectFieldSelector( null, "status.podIP" ), null, null ) );
-        envVars.add( envNodeIp );
-
-        exp.setEnv( envVars );
+        Set<EnvVar> envVars = new HashSet<>( podEnv() );
+        addPodEnv( envVars );
+        addJavaOpts( envVars );
+        exp.setEnv( new ArrayList<>( envVars ) );
 
         // Security
         SecurityContext podSecurityContext = new SecurityContext();
@@ -242,5 +238,52 @@ public abstract class StatefulSetSpecBuilder
         exp.setVolumeMounts( volumeList().volumeMounts() );
 
         return Collections.singletonList( exp );
+    }
+
+    private void addPodEnv( final Set<EnvVar> envVars )
+    {
+        EnvVar envNodeName = new EnvVar();
+        envNodeName.setName( "XP_NODE_NAME" );
+        envNodeName.setValueFrom( new EnvVarSource( null, new ObjectFieldSelector( null, "metadata.name" ), null, null ) );
+        envVars.add( envNodeName );
+
+        EnvVar envNodeIp = new EnvVar();
+        envNodeIp.setName( "XP_NODE_IP" );
+        envNodeIp.setValueFrom( new EnvVarSource( null, new ObjectFieldSelector( null, "status.podIP" ), null, null ) );
+        envVars.add( envNodeIp );
+    }
+
+    private void addJavaOpts( final Set<EnvVar> envVars )
+    {
+        EnvVar javaOpts = envVars.stream().
+            filter( e -> e.getName().equals( "JAVA_OPTS" ) ).
+            findFirst().
+            orElse( new EnvVar( "JAVA_OPTS", "", null ) );
+
+        StringBuilder opts = new StringBuilder( javaOpts.getValue() );
+
+        // Set container support, not needed for java 11 but whatever
+        opts.append( " -XX:+UseContainerSupport" );
+
+        // Set heap percentage of memory
+        opts.append( " -XX:MinRAMPercentage=20" );
+        opts.append( " -XX:InitialRAMPercentage=30" );
+        opts.append( " -XX:MaxRAMPercentage=" ).append( maxMemoryPercentage() );
+
+        // Set GC
+        opts.append( " -Djsse.enableSNIExtension=true" );
+        opts.append( " -XX:+UseConcMarkSweepGC" );
+        opts.append( " -XX:+CMSParallelRemarkEnabled" );
+        opts.append( " -XX:+UseCMSInitiatingOccupancyOnly" );
+        opts.append( " -XX:CMSInitiatingOccupancyFraction=60" );
+        opts.append( " -XX:+ScavengeBeforeFullGC" );
+        opts.append( " -XX:+CMSScavengeBeforeRemark" );
+
+        // HeapDumps on OOM
+        opts.append( " -XX:-HeapDumpOnOutOfMemoryError" );
+        opts.append( " -XX:HeapDumpPath=" ).append( cfgStr( "operator.heapdump.location" ) ).append( "/oom.hprof" );
+
+        javaOpts.setValue( opts.toString() );
+        envVars.add( javaOpts );
     }
 }

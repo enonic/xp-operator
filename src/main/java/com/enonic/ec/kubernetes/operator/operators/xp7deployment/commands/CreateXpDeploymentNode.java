@@ -2,10 +2,10 @@ package com.enonic.ec.kubernetes.operator.operators.xp7deployment.commands;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.immutables.value.Value;
 
@@ -17,6 +17,10 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import com.enonic.ec.kubernetes.operator.common.Configuration;
 import com.enonic.ec.kubernetes.operator.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.operator.common.commands.ImmutableCombinedCommand;
+import com.enonic.ec.kubernetes.operator.crd.xp7deployment.spec.Xp7DeploymentSpecNode;
+import com.enonic.ec.kubernetes.operator.info.xp7deployment.DiffXp7DeploymentSpec;
+import com.enonic.ec.kubernetes.operator.info.xp7deployment.DiffXp7DeploymentSpecNode;
+import com.enonic.ec.kubernetes.operator.info.xp7deployment.InfoXp7Deployment;
 import com.enonic.ec.kubernetes.operator.kubectl.apply.ImmutableCommandApplyConfigMap;
 import com.enonic.ec.kubernetes.operator.kubectl.apply.ImmutableCommandApplyService;
 import com.enonic.ec.kubernetes.operator.kubectl.apply.ImmutableCommandApplyStatefulSet;
@@ -26,10 +30,6 @@ import com.enonic.ec.kubernetes.operator.operators.xp7deployment.commands.spec.I
 import com.enonic.ec.kubernetes.operator.operators.xp7deployment.commands.spec.ImmutableStatefulSetSpecBuilder;
 import com.enonic.ec.kubernetes.operator.operators.xp7deployment.commands.volumes.VolumeBuilder;
 import com.enonic.ec.kubernetes.operator.operators.xp7deployment.commands.volumes.VolumeTripletList;
-import com.enonic.ec.kubernetes.operator.info.xp7deployment.DiffXp7DeploymentSpec;
-import com.enonic.ec.kubernetes.operator.info.xp7deployment.DiffXp7DeploymentSpecNode;
-import com.enonic.ec.kubernetes.operator.info.xp7deployment.InfoXp7Deployment;
-import com.enonic.ec.kubernetes.operator.crd.xp7deployment.spec.Xp7DeploymentSpecNode;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @Value.Immutable
@@ -155,7 +155,7 @@ public abstract class CreateXpDeploymentNode
             diffSpec().versionChanged() || diffSpecNode().envChanged() || diffSpecNode().resourcesChanged() || diffSpec().isNew();
         if ( changeStatefulSet )
         {
-            List<EnvVar> podEnv = new LinkedList<>();
+            Set<EnvVar> podEnv = new HashSet<>();
             podEnv.add( suPassHash() );
 
             for ( Map.Entry<String, String> e : node.env().entrySet() )
@@ -185,6 +185,7 @@ public abstract class CreateXpDeploymentNode
                     volumeList( volumeList ).
                     serviceName( info().allNodesServiceName() ).
                     clusterConfigurator( clusterConfigurator() ).
+                    maxMemoryPercentage( node.isOnlyMaster() ? 75 : 50 ).
                     build().
                     spec() ).
                 build() );
