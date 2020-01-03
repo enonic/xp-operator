@@ -11,14 +11,16 @@ import com.enonic.ec.kubernetes.operator.crd.xp7deployment.Xp7DeploymentResource
 import com.enonic.ec.kubernetes.operator.crd.xp7deployment.spec.Xp7DeploymentSpecNode;
 import com.enonic.ec.kubernetes.operator.info.ResourceInfo;
 
-import static com.enonic.ec.kubernetes.operator.common.Validator.dnsName;
+import static com.enonic.ec.kubernetes.operator.common.Validator.dns1035;
+import static com.enonic.ec.kubernetes.operator.common.Validator.dns1123;
 
 @Value.Immutable
 public abstract class InfoXp7Deployment
     extends ResourceInfo<Xp7DeploymentResource, DiffXp7Deployment>
 {
     @Override
-    protected DiffXp7Deployment createDiff( final Optional<Xp7DeploymentResource> oldResource, final Optional<Xp7DeploymentResource> newResource )
+    protected DiffXp7Deployment createDiff( final Optional<Xp7DeploymentResource> oldResource,
+                                            final Optional<Xp7DeploymentResource> newResource )
     {
         return ImmutableDiffXp7Deployment.builder().
             oldValue( oldResource ).
@@ -74,34 +76,36 @@ public abstract class InfoXp7Deployment
     @Value.Derived
     public Integer minimumMasterNodes()
     {
-        return defaultMinimumAvailable( resource().getSpec().nodes().values().stream().filter( Xp7DeploymentSpecNode::isMasterNode ).findAny().get() );
+        return defaultMinimumAvailable(
+            resource().getSpec().nodes().values().stream().filter( Xp7DeploymentSpecNode::isMasterNode ).findAny().get() );
     }
 
     @Value.Derived
     public Integer minimumDataNodes()
     {
-        return defaultMinimumAvailable( resource().getSpec().nodes().values().stream().filter( Xp7DeploymentSpecNode::isDataNode ).findAny().get() );
+        return defaultMinimumAvailable(
+            resource().getSpec().nodes().values().stream().filter( Xp7DeploymentSpecNode::isDataNode ).findAny().get() );
     }
 
     @Value.Check
     protected void check()
     {
-        newResource().ifPresent( resource -> resource.getSpec().nodes().keySet().forEach( k -> dnsName( "nodeId", k ) ) );
+        newResource().ifPresent( resource -> resource.getSpec().nodes().keySet().forEach( k -> dns1123( "nodeId", k ) ) );
 
         cfgIfBool( "operator.deployment.xp.labels.ec.strictValidation", () -> {
             Preconditions.checkState( resource().ecCloud() != null,
                                       "Label '" + "metadata.labels." + cfgStr( "operator.deployment.xp.labels.ec.cloud" ) +
                                           "' is missing" );
-            dnsName( "metadata.labels." + cfgStr( "operator.deployment.xp.labels.ec.cloud" ), resource().ecCloud() );
+            dns1035( "metadata.labels." + cfgStr( "operator.deployment.xp.labels.ec.cloud" ), resource().ecCloud() );
 
             Preconditions.checkState( resource().ecProject() != null,
                                       "Label '" + "metadata.labels." + cfgStr( "operator.deployment.xp.labels.ec.project" ) +
                                           "' is missing" );
-            dnsName( "metadata.labels." + cfgStr( "operator.deployment.xp.labels.ec.project" ), resource().ecProject() );
+            dns1035( "metadata.labels." + cfgStr( "operator.deployment.xp.labels.ec.project" ), resource().ecProject() );
 
             Preconditions.checkState( resource().ecName() != null,
                                       "Label '" + "metadata.labels." + cfgStr( "operator.deployment.xp.labels.ec.name" ) + "' is missing" );
-            dnsName( "metadata.labels." + cfgStr( "operator.deployment.xp.labels.ec.name" ), resource().ecName() );
+            dns1035( "metadata.labels." + cfgStr( "operator.deployment.xp.labels.ec.name" ), resource().ecName() );
 
             String fullName = String.join( "-", resource().ecCloud(), resource().ecProject(), resource().ecName() );
             Preconditions.checkState( deploymentName().equals( fullName ),

@@ -8,7 +8,6 @@ import org.immutables.value.Value;
 
 import com.google.common.base.Preconditions;
 
-import com.enonic.ec.kubernetes.operator.common.Validator;
 import com.enonic.ec.kubernetes.operator.crd.xp7deployment.spec.Xp7DeploymentSpec;
 import com.enonic.ec.kubernetes.operator.crd.xp7deployment.spec.Xp7DeploymentSpecNode;
 import com.enonic.ec.kubernetes.operator.info.Diff;
@@ -50,10 +49,6 @@ public abstract class DiffXp7DeploymentSpec
     @Value.Check
     protected void check()
     {
-        newValue().ifPresent( spec -> spec.nodes().keySet().forEach( k -> {
-            Validator.dnsName( "nodeId", k );
-        } ) );
-
         if ( !shouldModify() )
         {
             return;

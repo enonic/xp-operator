@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.base.Preconditions;
 
 import com.enonic.ec.kubernetes.operator.common.Configuration;
+import com.enonic.ec.kubernetes.operator.common.Validator;
 import com.enonic.ec.kubernetes.operator.crd.BuilderException;
 
 @JsonDeserialize(builder = ImmutableXp7VHostSpec.Builder.class)
@@ -34,6 +35,7 @@ public abstract class Xp7VHostSpec
     @Value.Check
     protected void check()
     {
+        Validator.dns1123( "spec.host", host() );
         Preconditions.checkState( mappings().size() > 0, "Field 'spec.mappings' has to contain more than 0 mappings" );
         if ( skipIngress() )
         {
