@@ -1,4 +1,6 @@
 CERT_MANAGER_VERSION:=v0.11.0
+KUBERNETES_VERSION:=v1.14.10
+
 LOCAL_OPERATOR_PORT:=8080
 IMAGE:=gbbirkisson/ec-operator
 
@@ -14,7 +16,12 @@ mvn-dependencies:
 	mvn versions:display-plugin-updates
 
 minikube-start:
-	minikube start
+	minikube start \
+		--cpus=4 \
+		--memory=16gb \
+		--disk-size=20gb \
+		--kubernetes-version=${KUBERNETES_VERSION} \
+		--vm-driver=virtualbox
 	kubectl config use-context minikube
 	minikube addons enable ingress
 
@@ -23,6 +30,7 @@ minikube-certmanager:
 	sleep 15 # Let certmanager start up
 
 minikube-certmanager-issuers:
+	sleep 60 # Wait a little bit more for cert manager
 	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.dep.clusterissuers.yaml
 
 minikube-operator-setup:
