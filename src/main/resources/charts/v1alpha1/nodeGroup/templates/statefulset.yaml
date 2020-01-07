@@ -1,0 +1,185 @@
+{{- $useNfs := .Values.nfs.enabled -}}
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Values.nodeGroup.name }}
+  labels:
+    nodeGroup: {{ .Values.nodeGroup.name }}
+    {{- with .Values.defaultLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  serviceName: {{ .Values.nodeGroup.name }}
+  replicas: {{ .Values.nodeGroup.spec.replicas }}
+  podManagementPolicy: Parallel
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      nodeGroup: {{ .Values.nodeGroup.name }}
+      {{- with .Values.defaultLabels }}
+      {{- toYaml . | nindent 6 }}
+      {{- end }}
+  template:
+    metadata:
+      annotations:
+        {{- if index .Values.properties "operator.extensions.linkerd.enabled" }}
+        linkerd.io/inject: enabled
+        {{- end }}
+      labels:
+        nodeGroup: {{ .Values.nodeGroup.name }}
+        {{- with .Values.defaultLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      securityContext:
+        fsGroup: 0
+        runAsUser: 1337
+
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+
+      initContainers:
+        - name: configure-sysctl
+          image: gbbirkisson/xp:{{ .Values.deployment.spec.xpVersion }}-ubuntu
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            privileged: true
+            runAsUser: 0
+          command:
+            - sysctl
+            - -w
+            - vm.max_map_count=262144
+        {{- if $useNfs }}
+        - name: nfs-permissions
+          image: alpine:3.10
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            privileged: true
+            runAsUser: 0
+          volumeMounts:
+            - mountPath: /enonic-xp/home/repo/blob
+              name: shared
+              subPath: {{ .Values.deployment.name }}/blob
+            - mountPath: /enonic-xp/home/snapshots
+              name: shared
+              subPath: {{ .Values.deployment.name }}/snapshots
+          command:
+            - ash
+            - -c
+            - chown 1337:0 /enonic-xp/home/repo/blob && chown 1337:0 /enonic-xp/home/snapshots
+        {{ end }}
+      containers:
+        - name: exp
+          image: gbbirkisson/xp:{{ .Values.deployment.spec.xpVersion }}-ubuntu
+          imagePullPolicy: IfNotPresent
+
+          securityContext:
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
+            runAsUser: 1337
+
+          resources:
+            limits:
+              cpu: {{ .Values.nodegroup.spec.resources.cpu }}
+              memory: {{ .Values.nodegroup.spec.resources.memory }}
+            requests:
+              cpu: {{ .Values.nodegroup.spec.resources.cpu }}
+              memory: {{ .Values.nodegroup.spec.resources.memory }}
+
+          ports:
+          - name: xp-stats
+            containerPort: 2609
+            protocol: TCP
+          - name: xp-main
+            containerPort: 8080
+            protocol: TCP
+          - name: es-http
+            containerPort: 9200
+            protocol: TCP
+          - name: es-transport
+            containerPort: 9300
+            protocol: TCP
+          env:
+          - name: XP_NODE_NAME
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.name
+          - name: XP_NODE_IP
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: status.podIP
+          - name: SU_PASS_HASH
+            valueFrom:
+              secretKeyRef:
+                name: su
+                key: suPassHash
+                optional: false
+
+          livenessProbe:
+            {{- with .Values.readinessProbe }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+
+          readinessProbe:
+            {{- with .Values.readinessProbe }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+
+          volumeMounts:
+            {{- range $volume := .Values.nodeGroup.volumes.private }}
+            - name: {{ $volume.name }}
+              mountPath: {{ $volume.mountPath }}
+            {{- end }}
+            {{- if $useNfs }}
+              {{- range $volume := .Values.nodeGroup.volumes.shared }}
+            - name: shared
+              mountPath: {{ $volume.mountPath }}
+              subPath: {{ $.Values.deployment.name }}/{{ $volume.name }}
+              {{- end }}
+            {{- else }}
+              {{- range $volume := .Values.nodeGroup.volumes.shared }}
+            - name: {{ $volume.name }}
+              mountPath: {{ $volume.mountPath }}
+              {{- end }}
+            {{ end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ .Values.nodeGroup.name }}
+        {{- if $useNfs }}
+        - name: shared
+          nfs:
+            server: {{ .Values.nfs.server }}
+            path: {{ .Values.nfs.path }}
+        {{- else }}
+          {{- range $volume := .Values.nodeGroup.volumes.shared }}
+        - name: {{ $volume.name }}
+          persistentVolumeClaim:
+            claimName: {{ $volume.name }}
+          {{- end }}
+        {{- end }}
+
+  volumeClaimTemplates:
+    {{- range $volume := .Values.nodeGroup.volumes.private }}
+    - metadata:
+        name: {{ $volume.name }}
+        labels:
+          nodeGroup: {{ $.Values.nodeGroup.name }}
+          {{- with $.Values.defaultLabels }}
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
+      spec:
+        storageClassName: {{ $.Values.defaultStorageClass }}
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ $volume.size }}
+    {{- end }}

@@ -1,0 +1,15 @@
+apiVersion: enonic.cloud/v1alpha1
+kind: Xp7VHost
+metadata:
+  name: healthcheck
+  labels:
+    {{- with .Values.defaultLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  host: healthcheck
+  skipIngress: true
+  mappings:
+    - node: all
+      source: /
+      target: /webapp/com.enonic.app.alive

@@ -1,0 +1,28 @@
+apiVersion: enonic.cloud/v1alpha1
+kind: Xp7Config
+metadata:
+  name: {{ .Values.nodeGroup.name }}-cluster
+spec:
+  nodeGroup: {{ .Values.nodeGroup.name }}
+  file: com.enonic.xp.cluster.cfg
+  data: |-
+  {{- if .Values.deployment.clustered }}
+    # TODO
+  {{- else }}
+    cluster.enabled=false
+  {{- end }}
+
+---
+apiVersion: enonic.cloud/v1alpha1
+kind: Xp7Config
+metadata:
+  name: {{ .Values.nodeGroup.name }}-elasticsearch
+spec:
+  nodeGroup: {{ .Values.nodeGroup.name }}
+  file: com.enonic.xp.elasticsearch.cfg
+  data: |-
+  {{- if .Values.deployment.clustered }}
+    # TODO
+  {{- else }}
+    http.enabled=false
+  {{- end }}
