@@ -51,7 +51,7 @@ minikube-setup-linkerd: minikube-start minikube-certmanager minikube-linkerd min
 minikube-setup: minikube-start minikube-certmanager minikube-operator-setup minikube-ingress-patch minikube-certmanager-issuers
 
 minikube-operator-deploy:
-	./mvnw clean package
+	./mvnw -DskipTests clean package
 	bash -c 'eval $$(minikube docker-env) && docker build -f src/main/docker/Dockerfile.jvm -t enonic/kubernetes-operator .'
 	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.dep.serviceaccount.yaml
 	kubectl apply -f src/main/kubernetes/operator/deployment/ec-operator.dep.configmap.yaml

@@ -1,0 +1,10 @@
+extensions:
+  linkerd: true
+  ecDns: true
+
+# Filled in by operator
+# vhost:
+#   name: name
+#   issuer: someIssuer
+#   spec:
+#     ...

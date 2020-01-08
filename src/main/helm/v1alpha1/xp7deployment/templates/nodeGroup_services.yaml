@@ -1,0 +1,24 @@
+{{- range $nodeGroupName, $nodeGroup := .Values.deployment.spec.nodeGroups }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $nodeGroupName }}
+  labels:
+    nodeGroup: {{ $nodeGroupName }}
+    {{- with $.Values.defaultLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  publishNotReadyAddresses: true
+  sessionAffinity: None
+  selector:
+    nodeGroup: {{ $nodeGroupName }}
+    {{- with $.Values.defaultLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  ports:
+    - name: xp-main
+      port: 8080
+{{- end }}

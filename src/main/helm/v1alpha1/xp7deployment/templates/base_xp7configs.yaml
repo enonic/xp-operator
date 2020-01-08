@@ -1,0 +1,14 @@
+apiVersion: enonic.cloud/v1alpha1
+kind: Xp7Config
+metadata:
+  name: all-system
+  labels:
+    {{- with .Values.defaultLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  nodeGroup: all
+  file: system.properties
+  data: |-
+    xp.suPassword = {sha512}${env.SU_PASS_HASH}
+    xp.init.adminUserCreation = false

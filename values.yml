@@ -1,23 +1,15 @@
-# new
-su:
-  pass: pass
-  passHash: 5b722b307fce6c944905d132691d5e4a2214b7fe92b738920eb3fce3a90420a19511c3010a0e7712b054daef5b57bad59ecbd93b3280f210578f547f4aed4d25
+image: gbbirkisson/xp:7.1.2-ubuntu
+imagePullPolicy: IfNotPresent
 
-# meta
 defaultLabels:
   cloud: gbb
   project: tests
   name: qa
 
-clustered: false
-nfs:
-  enabled: false
-  server: 123123123
-  path: /false
-
 # base
 deployment:
   name: gbb-tests-qa
+  clustered: false
   spec:
     enabled: true
     xpVersion: 7.1.2
@@ -27,7 +19,7 @@ deployment:
       snapshots: 1Gi
 
     nodeGroups:
-      fisk:
+      main:
         data: true
         master: true
         replicas: 1
@@ -39,39 +31,17 @@ deployment:
             index: 200Mi
             work: 400Mi
 
-# nodeGroup
-nodeGroup:
-  name: fisk
-
-  volumes:
-    private:
-      - name: export
-        mountPath: /enonic-xp/home/data
-        size: 234Mi
-      - name: index
-        mountPath: /enonic-xp/home/repo/index
-        size: 234Mi
-      - name: work
-        mountPath: /enonic-xp/home/work
-        size: 400Mi
-    shared:
-      - name: blobstore
-        mountPath: /enonic-xp/home/repo/blob
-        size: 1Gi
-      - name: snapshots
-        mountPath: /enonic-xp/home/snapshots
-        size: 1Gi
-
+vhost:
+  name: name
+  issuer: blabla
   spec:
-    data: true
-    master: true
-    replicas: 1
-    resources:
-      cpu: "1"
-      memory: 512Mi
-      disks:
-        export: 234Mi # Default blobstore size, not smaller than blobstore
-        index: 200Mi
-        work: 400Mi
+    host: test.purplejs.io
+    certificate:
+      authority: selfSigned
+    mappings:
+      - node: main
+        source: /
+        target: /admin
+        idProvider: system
 
 properties: {}
