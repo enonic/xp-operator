@@ -7,11 +7,9 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,11 +36,11 @@ public abstract class HelmTest
         chartRepository = new LocalRepository( new File( Configuration.cfgStr( "operator.helm.charts.path" ) ) );
     }
 
-    protected void test( String chartName, Supplier<Object> valuesSupplier, String expectedResultFile )
+    protected void test( String chartName, Object values, String expectedResultFile )
         throws IOException
     {
-        String expectedResult = Files.readString( getFile( this.getClass(), expectedResultFile ).toPath(), StandardCharsets.UTF_8 );
-        assertEquals( expectedResult, helm.template( chartRepository.get( chartName ), valuesSupplier.get() ) );
+        String expectedResult = Files.readString( new File( expectedResultFile ).toPath(), StandardCharsets.UTF_8 );
+        assertEquals( expectedResult, helm.template( chartRepository.get( chartName ), values ) );
     }
 
     protected Map<File, String> createPairs()
@@ -51,28 +49,22 @@ public abstract class HelmTest
         List<File> files = getFiles( this.getClass(), ".yaml" );
         files.stream().
             filter( f -> !f.getAbsolutePath().endsWith( "result.yaml" ) ).
-            forEach( f -> pairs.put( f, f.getAbsolutePath().replace( ".yaml", "result.yaml" ) ) );
+            forEach( f -> pairs.put( f, f.getAbsolutePath().replace( ".yaml", "_result.yaml" ) ) );
         return pairs;
     }
 
     protected abstract String chartToTest();
 
-    protected abstract Object createValues( ObjectMapper mapper, File input );
+    protected abstract Object createValues( ObjectMapper mapper, File input )
+        throws IOException;
 
-//    @TestFactory
-//    public Stream<DynamicTest> createTests() {
-//        String classResourcePath = getClassFilePath(this.getClass());
-//        return createPairs().entrySet().stream().
-//            map( (k, v) -> DynamicTest.dynamicTest( testName( classResourcePath, k ),  ) )
-//    }
-    @Test
-    public void mytest()
-        throws IOException
+    @TestFactory
+    public Stream<DynamicTest> createTests()
     {
-        Map<File, String> pairs = createPairs();
-        for ( Map.Entry<File, String> e : pairs.entrySet() )
-        {
-            test( chartToTest(), () -> createValues( mapper, e.getKey() ), e.getValue() );
-        }
+        String classResourcePath = getClassFilePath( this.getClass() );
+        return createPairs().entrySet().stream().
+            map( e -> DynamicTest.dynamicTest( testName( classResourcePath, e.getKey() ), e.getKey().toURI(), () -> {
+                test( chartToTest(), createValues( mapper, e.getKey() ), e.getValue() );
+            } ) );
     }
 }

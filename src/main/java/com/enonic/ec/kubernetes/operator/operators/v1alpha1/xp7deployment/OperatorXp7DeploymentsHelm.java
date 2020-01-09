@@ -133,16 +133,7 @@ public class OperatorXp7DeploymentsHelm
 
     protected Object createValues( final InfoXp7Deployment info )
     {
-        Map<String, Object> deployment = new HashMap<>();
-        deployment.put( "name", info.deploymentName() );
-        deployment.put( "clustered", false ); // TODO: Fix
-        deployment.put( "spec", info.resource().getSpec() );
-
-        return ValuesBuilder.builder().
-            add( "image", String.format( imageTemplate, info.resource().getSpec().xpVersion() )).
-            add("defaultLabels", info.defaultLabels()).
-            add( "deployment", deployment ).
-            build();
+        return new Xp7DeploymentValues( imageTemplate, info ).build();
     }
 
     private String generateSuPassword()

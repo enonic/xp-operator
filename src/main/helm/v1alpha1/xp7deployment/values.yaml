@@ -1,0 +1,7 @@
+# Filled in by operator
+# deployment:
+#   name: gbb-tests-qa
+#   clustered: false
+#   discoveryHosts: ...
+#   spec:
+#     ...
