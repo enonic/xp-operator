@@ -2,7 +2,7 @@ package com.enonic.ec.kubernetes.operator.kubectl.delete;
 
 import org.immutables.value.Value;
 
-import com.enonic.ec.kubernetes.operator.crd.xp7config.client.Xp7ConfigClient;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7config.crd.client.Xp7ConfigClient;
 
 @Value.Immutable
 public abstract class CommandDeleteXp7Config

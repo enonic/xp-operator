@@ -8,7 +8,7 @@ public class Configuration
 {
     private static Config _cfg;
 
-    private static Config config()
+    protected static Config globalConfig()
     {
         if ( _cfg == null )
         {
@@ -19,28 +19,28 @@ public class Configuration
 
     public static String cfgStr( String key )
     {
-        return config().getOptionalValue( key, String.class ).get();
+        return globalConfig().getOptionalValue( key, String.class ).get();
     }
 
     @SuppressWarnings("SameParameterValue")
     public static String cfgStrFmt( String key, Object... args )
     {
-        return String.format( config().getOptionalValue( key, String.class ).get(), args );
+        return String.format( globalConfig().getOptionalValue( key, String.class ).get(), args );
     }
 
     public static int cfgInt( String key )
     {
-        return config().getOptionalValue( key, Integer.class ).get();
+        return globalConfig().getOptionalValue( key, Integer.class ).get();
     }
 
     public static long cfgLong( String key )
     {
-        return config().getOptionalValue( key, Long.class ).get();
+        return globalConfig().getOptionalValue( key, Long.class ).get();
     }
 
     public static boolean cfgBool( String key )
     {
-        return config().getOptionalValue( key, Boolean.class ).get();
+        return globalConfig().getOptionalValue( key, Boolean.class ).get();
     }
 
     public static void cfgIfBool( String key, Runnable func )

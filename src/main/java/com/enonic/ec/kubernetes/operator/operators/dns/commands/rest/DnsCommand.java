@@ -1,8 +1,8 @@
 package com.enonic.ec.kubernetes.operator.operators.dns.commands.rest;
 
 import com.enonic.ec.kubernetes.operator.common.commands.Command;
-import com.enonic.ec.kubernetes.operator.dns.cloudflare.DnsRecordService;
-import com.enonic.ec.kubernetes.operator.dns.cloudflare.model.DnsRecord;
+import com.enonic.ec.kubernetes.operator.operators.dns.cloudflare.DnsRecordService;
+import com.enonic.ec.kubernetes.operator.operators.dns.cloudflare.model.DnsRecord;
 
 public abstract class DnsCommand
     implements Command<Void>

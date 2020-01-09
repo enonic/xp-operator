@@ -43,5 +43,3 @@ vhost:
         source: /
         target: /admin
         idProvider: system
-
-properties: {}

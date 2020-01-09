@@ -1,0 +1,49 @@
+imagePullPolicy: IfNotPresent
+defaultStorageClass: standard
+
+livenessProbe:
+  failureThreshold: 4
+  httpGet:
+    httpHeaders:
+      - name: Host
+        value: healthcheck
+    path: /
+    port: 8080
+    scheme: HTTP
+  periodSeconds: 15
+  successThreshold: 1
+  timeoutSeconds: 1
+
+readinessProbe:
+  failureThreshold: 5
+  httpGet:
+    httpHeaders:
+      - name: Host
+        value: healthcheck
+    path: /
+    port: 8080
+    scheme: HTTP
+  initialDelaySeconds: 30
+  periodSeconds: 5
+  successThreshold: 1
+  timeoutSeconds: 1
+
+volumeMounts:
+  export: /enonic-xp/home/data
+  index: /enonic-xp/home/repo/index
+  work: /enonic-xp/home/work
+  blobstore: /enonic-xp/home/repo/blob
+  snapshots: /enonic-xp/home/snapshots
+
+nfs:
+  enabled: false
+  server: 127.0.0.1
+  path: /default
+
+# Filled in by operator
+# deployment:
+#   name: gbb-tests-qa
+#   clustered: false
+#   discoveryHosts:
+#   spec:
+#     ...

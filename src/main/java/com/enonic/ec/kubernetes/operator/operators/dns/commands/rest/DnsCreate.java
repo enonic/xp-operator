@@ -2,8 +2,8 @@ package com.enonic.ec.kubernetes.operator.operators.dns.commands.rest;
 
 import org.immutables.value.Value;
 
-import com.enonic.ec.kubernetes.operator.dns.cloudflare.DnsRecordService;
-import com.enonic.ec.kubernetes.operator.dns.cloudflare.model.DnsRecord;
+import com.enonic.ec.kubernetes.operator.operators.dns.cloudflare.DnsRecordService;
+import com.enonic.ec.kubernetes.operator.operators.dns.cloudflare.model.DnsRecord;
 
 @Value.Immutable
 public abstract class DnsCreate

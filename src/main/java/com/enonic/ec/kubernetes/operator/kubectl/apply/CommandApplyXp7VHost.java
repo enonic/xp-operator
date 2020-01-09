@@ -6,9 +6,9 @@ import org.immutables.value.Value;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 
-import com.enonic.ec.kubernetes.operator.crd.xp7vhost.Xp7VHostResource;
-import com.enonic.ec.kubernetes.operator.crd.xp7vhost.client.Xp7VHostClient;
-import com.enonic.ec.kubernetes.operator.crd.xp7vhost.spec.Xp7VHostSpec;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7vhost.crd.Xp7VHostResource;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7vhost.crd.client.Xp7VHostClient;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7vhost.crd.spec.Xp7VHostSpec;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @Value.Immutable

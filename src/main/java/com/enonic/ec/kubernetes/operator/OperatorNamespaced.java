@@ -12,8 +12,7 @@ import io.fabric8.kubernetes.client.Watcher;
 
 import com.enonic.ec.kubernetes.operator.info.Diff;
 import com.enonic.ec.kubernetes.operator.common.commands.ImmutableCombinedCommand;
-import com.enonic.ec.kubernetes.operator.info.ResourceInfoNamespaced;
-import com.enonic.ec.kubernetes.operator.info.XpDeploymentNotFound;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha1.ResourceInfoNamespaced;
 
 public abstract class OperatorNamespaced
     extends Operator

@@ -1,0 +1,6 @@
+# Filled in by operator
+# vhost:
+#   name: name
+#   issuer: someIssuer
+#   spec:
+#     ...

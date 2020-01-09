@@ -15,7 +15,6 @@ public class TestFileSupplier
 {
     private void getFiles( List<File> hits, File file, String fileExtension, List<String> exclude )
     {
-
         if ( file.isDirectory() )
         {
             for ( File f : file.listFiles() )
@@ -32,7 +31,7 @@ public class TestFileSupplier
         }
     }
 
-    private String getClassFilePath( Class k )
+    protected String getClassFilePath( Class k )
     {
         return k.getPackage().getName().replace( ".", "/" );
     }
@@ -54,9 +53,10 @@ public class TestFileSupplier
         return new File( resource.getPath() );
     }
 
-    private String testName( File file )
+    protected String testName( String classResourcePath, File file )
     {
-        return file.getName();
+        String[] name = file.getAbsolutePath().split( classResourcePath );
+        return name[name.length - 1];
     }
 
     public Stream<DynamicTest> createTests( Class k, Consumer<File> consumer, String... exclude )
@@ -65,8 +65,7 @@ public class TestFileSupplier
         List<DynamicTest> tests = new LinkedList<>();
         for ( File f : getFiles( k, ".yaml", exclude ) )
         {
-            String[] name = f.getAbsolutePath().split( classResourcePath );
-            tests.add( DynamicTest.dynamicTest( name[name.length - 1], f.toURI(), () -> consumer.accept( f ) ) );
+            tests.add( DynamicTest.dynamicTest( testName(classResourcePath, f), f.toURI(), () -> consumer.accept( f ) ) );
         }
         return tests.stream();
     }
