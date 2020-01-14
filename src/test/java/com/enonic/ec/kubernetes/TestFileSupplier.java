@@ -1,14 +1,13 @@
 package com.enonic.ec.kubernetes;
 
 import java.io.File;
-import java.net.URL;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DynamicTest;
 
 public class TestFileSupplier
@@ -38,19 +37,14 @@ public class TestFileSupplier
 
     public List<File> getFiles( Class k, String fileExtension, String... exclude )
     {
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        URL url = loader.getResource( getClassFilePath( k ) );
-        String path = url.getPath();
         List<File> res = new LinkedList<>();
-        getFiles( res, new File( path ), fileExtension, Arrays.asList( exclude ) );
+        getFiles( res, Paths.get( "src/test/resources", getClassFilePath( k ) ).toFile(), fileExtension, Arrays.asList( exclude ) );
         return res;
     }
 
     public File getFile( Class k, String file )
     {
-        URL resource = k.getResource( file );
-        Assertions.assertNotNull( resource, "File " + file + " not found" );
-        return new File( resource.getPath() );
+        return Paths.get( "src/test/resources", getClassFilePath( k ), file ).toFile();
     }
 
     protected String testName( String classResourcePath, File file )
@@ -65,7 +59,7 @@ public class TestFileSupplier
         List<DynamicTest> tests = new LinkedList<>();
         for ( File f : getFiles( k, ".yaml", exclude ) )
         {
-            tests.add( DynamicTest.dynamicTest( testName(classResourcePath, f), f.toURI(), () -> consumer.accept( f ) ) );
+            tests.add( DynamicTest.dynamicTest( testName( classResourcePath, f ), f.toURI(), () -> consumer.accept( f ) ) );
         }
         return tests.stream();
     }
