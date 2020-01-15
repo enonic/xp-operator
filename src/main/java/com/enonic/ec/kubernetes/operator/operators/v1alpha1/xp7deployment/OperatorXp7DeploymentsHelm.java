@@ -1,7 +1,5 @@
 package com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment;
 
-import java.io.File;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
@@ -9,6 +7,7 @@ import java.util.Random;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -21,19 +20,17 @@ import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.ec.kubernetes.operator.OperatorNamespaced;
 import com.enonic.ec.kubernetes.operator.common.client.DefaultClientProducer;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.crd.Xp7DeploymentResource;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.crd.client.Xp7DeploymentCache;
 import com.enonic.ec.kubernetes.operator.helm.ChartRepository;
 import com.enonic.ec.kubernetes.operator.helm.Helm;
-import com.enonic.ec.kubernetes.operator.helm.LocalRepository;
-import com.enonic.ec.kubernetes.operator.helm.ValuesBuilder;
 import com.enonic.ec.kubernetes.operator.helm.commands.ImmutableHelmInstall;
 import com.enonic.ec.kubernetes.operator.helm.commands.ImmutableHelmUninstall;
 import com.enonic.ec.kubernetes.operator.helm.commands.ImmutableHelmUpgrade;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.info.ImmutableInfoXp7Deployment;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.info.InfoXp7Deployment;
 import com.enonic.ec.kubernetes.operator.kubectl.apply.ImmutableCommandApplyNamespace;
 import com.enonic.ec.kubernetes.operator.kubectl.apply.ImmutableCommandApplySecret;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.crd.Xp7DeploymentResource;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.crd.client.Xp7DeploymentCache;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.info.ImmutableInfoXp7Deployment;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.info.InfoXp7Deployment;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @ApplicationScoped
@@ -55,12 +52,14 @@ public class OperatorXp7DeploymentsHelm
     @ConfigProperty(name = "operator.helm.imageTemplate")
     String imageTemplate;
 
+    @Inject
+    @Named("local")
     ChartRepository chartRepository;
 
     void onStartup( @Observes StartupEvent _ev )
     {
-        chartRepository = new LocalRepository( new File( helmChartsPath ) );
-        xp7DeploymentCache.addWatcher( this::watch );
+        // TODO: Enable
+        //xp7DeploymentCache.addWatcher( this::watch );
     }
 
     private void watch( final Watcher.Action action, final String id, final Optional<Xp7DeploymentResource> oldResource,
@@ -71,8 +70,8 @@ public class OperatorXp7DeploymentsHelm
             newResource( newResource ).
             build();
 
-        String name = info.deploymentName() + "new";
-        String namespace = info.namespaceName() + "new";
+        String name = info.deploymentName();
+        String namespace = info.namespaceName();
 
         runCommands( commandBuilder -> {
             if ( action == Watcher.Action.ADDED )
@@ -133,7 +132,11 @@ public class OperatorXp7DeploymentsHelm
 
     protected Object createValues( final InfoXp7Deployment info )
     {
-        return new Xp7DeploymentValues( imageTemplate, info ).build();
+        return ImmutableXp7DeploymentValues.builder().
+            info( info ).
+            imageTemplate( imageTemplate ).
+            build().
+            values();
     }
 
     private String generateSuPassword()

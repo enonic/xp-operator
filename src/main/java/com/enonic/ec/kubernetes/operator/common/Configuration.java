@@ -8,7 +8,7 @@ public class Configuration
 {
     private static Config _cfg;
 
-    protected static Config globalConfig()
+    public static Config globalConfig()
     {
         if ( _cfg == null )
         {

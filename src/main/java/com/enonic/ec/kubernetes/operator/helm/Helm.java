@@ -20,6 +20,8 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 
+import io.fabric8.kubernetes.api.model.HasMetadata;
+
 @Singleton
 public class Helm
 {
@@ -58,6 +60,28 @@ public class Helm
         throws IOException
     {
         return runCommandWithValuesFile( "template", chart.uri(), values, Optional.empty(), "none" );
+    }
+
+    public List<HasMetadata> templateToObjects( Chart chart, Object values )
+    {
+        try
+        {
+            String res = template( chart, values );
+            List<HasMetadata> list = new LinkedList<>();
+            for ( String obj : res.split( "---" ) )
+            {
+                if ( !obj.trim().equals( "" ) )
+                {
+                    list.add( objectMapper.readValue( obj, HasMetadata.class ) );
+                }
+            }
+            return list;
+        }
+        catch ( IOException e )
+        {
+            throw new RuntimeException( e );
+        }
+
     }
 
     public void uninstall( String namespace, String name )

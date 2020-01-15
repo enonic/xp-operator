@@ -12,7 +12,7 @@ spec:
   scope: Namespaced
   version: v1alpha1
   additionalPrinterColumns:
-    - name: Uri
+    - name: Url
       type: string
-      description: Uri to jar
-      JSONPath: .spec.uri
+      description: Url to jar
+      JSONPath: .spec.url

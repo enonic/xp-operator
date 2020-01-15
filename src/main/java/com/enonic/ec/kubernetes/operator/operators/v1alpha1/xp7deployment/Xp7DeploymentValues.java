@@ -3,35 +3,27 @@ package com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.enonic.ec.kubernetes.operator.helm.ValuesBuilder;
+import org.immutables.value.Value;
+
+import com.enonic.ec.kubernetes.operator.info.ValueBuilder;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.info.InfoXp7Deployment;
 
-public class Xp7DeploymentValues
-    extends ValuesBuilder
+@Value.Immutable
+public abstract class Xp7DeploymentValues
+    extends ValueBuilder<InfoXp7Deployment>
 {
-    private String imageTemplate;
-
-    private InfoXp7Deployment info;
-
-    public Xp7DeploymentValues( final String imageTemplate, final InfoXp7Deployment info )
-    {
-        super();
-        this.imageTemplate = imageTemplate;
-        this.info = info;
-    }
+    protected abstract String imageTemplate();
 
     @Override
-    public Object build()
+    protected void createValues( final Map<String, Object> values )
     {
         Map<String, Object> deployment = new HashMap<>();
-        deployment.put( "name", info.deploymentName() );
+        deployment.put( "name", info().deploymentName() );
         deployment.put( "clustered", false ); // TODO: Fix
-        deployment.put( "spec", info.resource().getSpec() );
+        deployment.put( "spec", info().resource().getSpec() );
 
-        add( "image", String.format( imageTemplate, info.resource().getSpec().xpVersion() ) );
-        add( "defaultLabels", info.defaultLabels() );
-        add( "deployment", deployment );
-
-        return map;
+        values.put( "image", String.format( imageTemplate(), info().resource().getSpec().xpVersion() ) );
+        values.put( "defaultLabels", info().defaultLabels() );
+        values.put( "deployment", deployment );
     }
 }

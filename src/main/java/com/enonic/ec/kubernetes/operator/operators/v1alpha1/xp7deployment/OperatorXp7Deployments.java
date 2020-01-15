@@ -14,17 +14,17 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import io.fabric8.kubernetes.client.Watcher;
 import io.quarkus.runtime.StartupEvent;
 
+import com.enonic.ec.kubernetes.operator.OperatorNamespaced;
 import com.enonic.ec.kubernetes.operator.common.client.DefaultClientProducer;
 import com.enonic.ec.kubernetes.operator.common.commands.ImmutableCombinedCommand;
-import com.enonic.ec.kubernetes.operator.OperatorNamespaced;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.commands.ImmutableCreateXpDeployment;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7app.crd.client.Xp7AppClientProducer;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7config.crd.client.Xp7ConfigClientProducer;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.commands.ImmutableCreateXpDeployment;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.crd.Xp7DeploymentResource;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.crd.client.Xp7DeploymentCache;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7vhost.crd.client.Xp7VHostClientProducer;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.info.ImmutableInfoXp7Deployment;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.info.InfoXp7Deployment;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7vhost.crd.client.Xp7VHostClientProducer;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @ApplicationScoped
