@@ -11,21 +11,21 @@ import io.fabric8.kubernetes.api.model.SecretKeySelector;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
 import com.enonic.ec.kubernetes.operator.common.Configuration;
-import com.enonic.ec.kubernetes.operator.info.Diff;
 import com.enonic.ec.kubernetes.operator.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.operator.common.commands.ImmutableCombinedCommand;
+import com.enonic.ec.kubernetes.operator.info.Diff;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7app.crd.client.Xp7AppClient;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7config.crd.client.Xp7ConfigClient;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.commands.config.ClusterConfigurator;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.commands.config.ImmutableClusterConfig;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.commands.config.ImmutableNonClusteredConfig;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.commands.volumes.ImmutableVolumeBuilderNfs;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.commands.volumes.ImmutableVolumeBuilderStd;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.commands.volumes.VolumeBuilder;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7app.crd.client.Xp7AppClient;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7config.crd.client.Xp7ConfigClient;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.crd.spec.Xp7DeploymentSpec;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.info.DiffXp7DeploymentSpec;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.info.DiffXp7DeploymentSpecNode;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.info.InfoXp7Deployment;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.crd.spec.Xp7DeploymentSpec;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7vhost.crd.client.Xp7VHostClient;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
@@ -118,7 +118,8 @@ public abstract class CreateXpDeployment
                 addCommands( commandBuilder );
         }
 
-        Predicate<DiffXp7DeploymentSpecNode> createOrUpdate = n -> diffSpec().versionChanged() || diffSpec().enabledChanged() || n.shouldAddOrModify();
+        Predicate<DiffXp7DeploymentSpecNode> createOrUpdate =
+            n -> diffSpec().versionChanged() || diffSpec().enabledChanged() || n.shouldAddOrModify();
 
         // Create / Update Nodes
         diffSpec().nodesChanged().stream().

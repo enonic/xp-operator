@@ -1,4 +1,4 @@
-package com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment;
+package com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7deployment;
 
 import java.util.Map;
 import java.util.Optional;
@@ -27,6 +27,7 @@ import com.enonic.ec.kubernetes.operator.helm.commands.ImmutableHelmUninstall;
 import com.enonic.ec.kubernetes.operator.helm.commands.ImmutableHelmUpgrade;
 import com.enonic.ec.kubernetes.operator.kubectl.apply.ImmutableCommandApplyNamespace;
 import com.enonic.ec.kubernetes.operator.kubectl.apply.ImmutableCommandApplySecret;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.ImmutableXp7DeploymentValues;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.crd.Xp7DeploymentResource;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.crd.client.Xp7DeploymentCache;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.info.ImmutableInfoXp7Deployment;

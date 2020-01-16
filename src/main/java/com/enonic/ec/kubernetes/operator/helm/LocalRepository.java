@@ -1,7 +1,6 @@
 package com.enonic.ec.kubernetes.operator.helm;
 
 import java.io.File;
-import java.nio.file.Path;
 
 import com.google.common.base.Preconditions;
 

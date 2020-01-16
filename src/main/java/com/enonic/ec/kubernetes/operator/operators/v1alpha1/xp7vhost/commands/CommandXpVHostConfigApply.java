@@ -12,14 +12,14 @@ import org.immutables.value.Value;
 import com.enonic.ec.kubernetes.operator.common.Configuration;
 import com.enonic.ec.kubernetes.operator.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.operator.common.commands.ImmutableCombinedCommand;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7vhost.commands.helpers.ImmutableMapping;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7vhost.commands.helpers.Mapping;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha1.ResourceInfoNamespaced;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7config.crd.client.Xp7ConfigCache;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7config.crd.client.Xp7ConfigClient;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7vhost.commands.helpers.ImmutableMapping;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7vhost.commands.helpers.Mapping;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7vhost.crd.Xp7VHostResource;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7vhost.crd.client.Xp7VHostCache;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7vhost.info.DiffXp7VHost;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.ResourceInfoNamespaced;
 
 @Value.Immutable
 public abstract class CommandXpVHostConfigApply

@@ -13,10 +13,10 @@ import com.enonic.ec.kubernetes.operator.common.Configuration;
 import com.enonic.ec.kubernetes.operator.common.cache.ConfigMapCache;
 import com.enonic.ec.kubernetes.operator.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.operator.common.commands.ImmutableCombinedCommand;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha1.ResourceInfoNamespaced;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7config.crd.Xp7ConfigResource;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7config.crd.client.Xp7ConfigCache;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7config.info.DiffXp7Config;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.ResourceInfoNamespaced;
 
 @Value.Immutable
 public abstract class CommandXpConfigApplyAll

@@ -10,9 +10,9 @@ import com.google.common.base.Preconditions;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 
+import com.enonic.ec.kubernetes.operator.XpDeploymentNotFound;
 import com.enonic.ec.kubernetes.operator.info.Diff;
 import com.enonic.ec.kubernetes.operator.info.ResourceInfo;
-import com.enonic.ec.kubernetes.operator.XpDeploymentNotFound;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.crd.Xp7DeploymentResource;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.crd.client.Xp7DeploymentCache;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.info.ImmutableInfoXp7Deployment;

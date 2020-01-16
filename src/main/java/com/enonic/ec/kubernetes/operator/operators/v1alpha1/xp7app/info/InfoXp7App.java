@@ -4,8 +4,8 @@ import java.util.Optional;
 
 import org.immutables.value.Value;
 
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7app.crd.Xp7AppResource;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.ResourceInfoNamespaced;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7app.crd.Xp7AppResource;
 
 @Value.Immutable
 public abstract class InfoXp7App

@@ -10,8 +10,8 @@ import org.slf4j.LoggerFactory;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.client.Watcher;
 
-import com.enonic.ec.kubernetes.operator.info.Diff;
 import com.enonic.ec.kubernetes.operator.common.commands.ImmutableCombinedCommand;
+import com.enonic.ec.kubernetes.operator.info.Diff;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.ResourceInfoNamespaced;
 
 public abstract class OperatorNamespaced

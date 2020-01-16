@@ -8,9 +8,9 @@ import org.immutables.value.Value;
 
 import com.google.common.base.Preconditions;
 
+import com.enonic.ec.kubernetes.operator.info.Diff;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.crd.spec.Xp7DeploymentSpec;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.crd.spec.Xp7DeploymentSpecNode;
-import com.enonic.ec.kubernetes.operator.info.Diff;
 
 @Value.Immutable
 public abstract class DiffXp7DeploymentSpec

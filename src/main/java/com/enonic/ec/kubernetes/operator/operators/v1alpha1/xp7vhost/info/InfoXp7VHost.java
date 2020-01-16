@@ -5,9 +5,9 @@ import java.util.stream.Collectors;
 
 import org.immutables.value.Value;
 
+import com.enonic.ec.kubernetes.operator.operators.v1alpha1.ResourceInfoNamespaced;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7vhost.crd.Xp7VHostResource;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7vhost.crd.spec.Xp7VHostSpecMapping;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.ResourceInfoNamespaced;
 
 @Value.Immutable
 public abstract class InfoXp7VHost

@@ -8,12 +8,12 @@ import org.immutables.value.Value;
 import com.enonic.ec.kubernetes.operator.common.Configuration;
 import com.enonic.ec.kubernetes.operator.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.operator.common.commands.ImmutableCombinedCommand;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha1.ResourceInfoNamespaced;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7app.crd.Xp7AppResource;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7app.crd.client.Xp7AppCache;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7app.info.DiffXp7App;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7config.crd.client.Xp7ConfigCache;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7config.crd.client.Xp7ConfigClient;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.ResourceInfoNamespaced;
 
 @Value.Immutable
 public abstract class CommandXpAppApplyAll
@@ -32,7 +32,8 @@ public abstract class CommandXpAppApplyAll
     public void addCommands( final ImmutableCombinedCommand.Builder commandBuilder )
     {
         // Get all apps in namespace
-        List<Xp7AppResource> allApps = xpAppCache().getByNamespace( info().deploymentInfo().namespaceName() ).collect( Collectors.toList() );
+        List<Xp7AppResource> allApps =
+            xpAppCache().getByNamespace( info().deploymentInfo().namespaceName() ).collect( Collectors.toList() );
 
         // Apply them to the config file
         ImmutableCommandXpAppApply.builder().

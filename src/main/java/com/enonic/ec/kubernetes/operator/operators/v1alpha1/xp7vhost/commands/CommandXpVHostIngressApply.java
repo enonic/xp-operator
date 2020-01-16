@@ -13,13 +13,13 @@ import com.enonic.ec.kubernetes.operator.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.operator.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.operator.kubectl.apply.ImmutableCommandApplyIngress;
 import com.enonic.ec.kubernetes.operator.kubectl.delete.ImmutableCommandDeleteIngress;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha1.ResourceInfoNamespaced;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7vhost.commands.spec.ImmutableIngressSpec;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7vhost.crd.Xp7VHostResource;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7vhost.info.DiffXp7VHost;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7vhost.crd.spec.Xp7VHostSpecCertificate;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7vhost.crd.spec.Xp7VHostSpecCertificateAuthority;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7vhost.crd.spec.Xp7VHostSpecMapping;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.ResourceInfoNamespaced;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7vhost.info.DiffXp7VHost;
 
 @Value.Immutable
 public abstract class CommandXpVHostIngressApply

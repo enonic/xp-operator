@@ -9,17 +9,17 @@ import javax.inject.Inject;
 import io.fabric8.kubernetes.client.Watcher;
 import io.quarkus.runtime.StartupEvent;
 
+import com.enonic.ec.kubernetes.operator.OperatorNamespaced;
 import com.enonic.ec.kubernetes.operator.common.cache.ConfigMapCache;
 import com.enonic.ec.kubernetes.operator.common.client.DefaultClientProducer;
 import com.enonic.ec.kubernetes.operator.common.commands.ImmutableCombinedCommand;
-import com.enonic.ec.kubernetes.operator.OperatorNamespaced;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha1.ResourceInfoNamespaced;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7config.commands.ImmutableCommandXpConfigApplyAll;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7config.crd.Xp7ConfigResource;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7config.crd.client.Xp7ConfigCache;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.crd.client.Xp7DeploymentCache;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.ResourceInfoNamespaced;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7config.info.DiffXp7Config;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7config.info.ImmutableInfoXp7Config;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.crd.client.Xp7DeploymentCache;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @ApplicationScoped

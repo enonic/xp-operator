@@ -17,10 +17,6 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import com.enonic.ec.kubernetes.operator.common.Configuration;
 import com.enonic.ec.kubernetes.operator.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.operator.common.commands.ImmutableCombinedCommand;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.crd.spec.Xp7DeploymentSpecNode;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.info.DiffXp7DeploymentSpec;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.info.DiffXp7DeploymentSpecNode;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.info.InfoXp7Deployment;
 import com.enonic.ec.kubernetes.operator.kubectl.apply.ImmutableCommandApplyConfigMap;
 import com.enonic.ec.kubernetes.operator.kubectl.apply.ImmutableCommandApplyService;
 import com.enonic.ec.kubernetes.operator.kubectl.apply.ImmutableCommandApplyStatefulSet;
@@ -30,6 +26,10 @@ import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.comman
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.commands.spec.ImmutableStatefulSetSpecBuilder;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.commands.volumes.VolumeBuilder;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.commands.volumes.VolumeTripletList;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.crd.spec.Xp7DeploymentSpecNode;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.info.DiffXp7DeploymentSpec;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.info.DiffXp7DeploymentSpecNode;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.info.InfoXp7Deployment;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @Value.Immutable

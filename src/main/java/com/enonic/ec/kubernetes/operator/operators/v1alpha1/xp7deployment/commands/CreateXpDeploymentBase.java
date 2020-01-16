@@ -24,13 +24,13 @@ import com.enonic.ec.kubernetes.operator.kubectl.apply.ImmutableCommandApplyServ
 import com.enonic.ec.kubernetes.operator.kubectl.apply.ImmutableCommandApplyXp7App;
 import com.enonic.ec.kubernetes.operator.kubectl.apply.ImmutableCommandApplyXp7Config;
 import com.enonic.ec.kubernetes.operator.kubectl.apply.ImmutableCommandApplyXp7VHost;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.commands.spec.ImmutablePvcSpecBuilder;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.commands.spec.ImmutableServiceSpecBuilder;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.info.InfoXp7Deployment;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7app.crd.client.Xp7AppClient;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7app.crd.spec.ImmutableXp7AppSpec;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7config.crd.client.Xp7ConfigClient;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7config.crd.spec.ImmutableXp7ConfigSpec;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.commands.spec.ImmutablePvcSpecBuilder;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.commands.spec.ImmutableServiceSpecBuilder;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7deployment.info.InfoXp7Deployment;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7vhost.crd.client.Xp7VHostClient;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7vhost.crd.spec.ImmutableXp7VHostSpec;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7vhost.crd.spec.ImmutableXp7VHostSpecMapping;

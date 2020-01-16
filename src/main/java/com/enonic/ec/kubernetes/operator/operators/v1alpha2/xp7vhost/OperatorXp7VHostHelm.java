@@ -1,4 +1,4 @@
-package com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7vhost;
+package com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7vhost;
 
 import java.util.Optional;
 

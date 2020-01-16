@@ -23,9 +23,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public abstract class HelmTest
     extends TestFileSupplier
 {
-    private Helm helm;
-
     protected ObjectMapper mapper;
+
+    private Helm helm;
 
     private ChartRepository chartRepository;
 
