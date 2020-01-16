@@ -32,7 +32,7 @@ public abstract class HelmTest
     public HelmTest()
     {
         mapper = new ObjectMapper( new YAMLFactory() );
-        helm = new Helm( mapper );
+        helm = new Helm();
         chartRepository = new LocalRepository( new File( Configuration.cfgStr( "operator.helm.charts.path" ) ) );
     }
 

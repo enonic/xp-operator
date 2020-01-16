@@ -11,13 +11,13 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.base.Preconditions;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
@@ -30,9 +30,9 @@ public class Helm
     private ObjectMapper objectMapper;
 
     @Inject
-    public Helm( @Named("yaml") ObjectMapper objectMapper )
+    public Helm()
     {
-        this.objectMapper = objectMapper;
+        this.objectMapper = new ObjectMapper( new YAMLFactory() );
     }
 
     public void install( Chart chart, Object values, String namespace, String name )
