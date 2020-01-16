@@ -69,7 +69,7 @@ public class TestAdmissionApi
             Map<String, Object> testReview = (Map<String, Object>) testFile.get( "testReview" );
             Object testResult = testFile.get( "testResult" );
             AdmissionReview review = validate( mapper.writeValueAsString( testReview ) );
-            Assertions.assertEquals( testResult.equals( "" ) ? null : testResult, review.getResponse().getStatus().getReason() );
+            Assertions.assertEquals( testResult.equals( "" ) ? null : testResult, review.getResponse().getStatus().getMessage() );
         }
         catch ( IOException e )
         {

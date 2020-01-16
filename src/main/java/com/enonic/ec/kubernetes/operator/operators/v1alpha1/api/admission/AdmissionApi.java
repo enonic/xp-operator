@@ -149,7 +149,7 @@ public class AdmissionApi
         {
             String message = AdmissionExceptionHandler.extractJacksonMessage( ex );
             log.warn( "AdmissionReview failed: " + message );
-            return createReview( uid, message, ex.getClass().getSimpleName() );
+            return createReview( uid, ex.getClass().getSimpleName(), message );
         }
         return createReview( uid, null, null );
     }
