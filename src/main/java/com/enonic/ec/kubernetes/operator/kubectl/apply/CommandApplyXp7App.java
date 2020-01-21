@@ -29,7 +29,7 @@ public abstract class CommandApplyXp7App
     protected Xp7AppResource build( final ObjectMeta metadata )
     {
         Xp7AppResource resource = new Xp7AppResource();
-        resource.setKind( cfgStr( "operator.crd.xp.apps.kind" ) );
+        resource.setKind( cfgStr( "operator.crd.v1alpha1.apps.kind" ) );
         resource.setMetadata( metadata );
         resource.setSpec( spec() );
         return resource;

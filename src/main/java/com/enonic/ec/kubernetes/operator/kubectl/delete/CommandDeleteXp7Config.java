@@ -13,7 +13,7 @@ public abstract class CommandDeleteXp7Config
     @Override
     protected String resourceKind()
     {
-        return cfgStr( "operator.crd.xp.configs.kind" );
+        return cfgStr( "operator.crd.v1alpha1.configs.kind" );
     }
 
     @Override

@@ -17,12 +17,11 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 @Path("/apis/operator.enonic.cloud/v1alpha1")
 public class InfoApi
 {
-
-    @ConfigProperty(name = "operator.api.group")
-    String group;
-
-    @ConfigProperty(name = "operator.api.apiVersion")
+    @ConfigProperty(name = "operator.crd.v1alpha1.apiVersion")
     String apiVersion;
+
+    @ConfigProperty(name = "operator.crd.v1alpha1.api.group")
+    String group;
 
     @GET
     @Path("/")

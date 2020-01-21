@@ -42,16 +42,16 @@ public class AdmissionApi
 {
     private final static Logger log = LoggerFactory.getLogger( AdmissionApi.class );
 
-    @ConfigProperty(name = "operator.crd.xp.deployments.kind")
+    @ConfigProperty(name = "operator.crd.v1alpha1.deployments.kind")
     String xp7DeploymentKind;
 
-    @ConfigProperty(name = "operator.crd.xp.vhosts.kind")
+    @ConfigProperty(name = "operator.crd.v1alpha1.vhosts.kind")
     String xp7vHostKind;
 
-    @ConfigProperty(name = "operator.crd.xp.configs.kind")
+    @ConfigProperty(name = "operator.crd.v1alpha1.configs.kind")
     String xp7ConfigKind;
 
-    @ConfigProperty(name = "operator.crd.xp.apps.kind")
+    @ConfigProperty(name = "operator.crd.v1alpha1.apps.kind")
     String xp7AppKind;
 
     @ConfigProperty(name = "operator.deployment.xp.allNodes")

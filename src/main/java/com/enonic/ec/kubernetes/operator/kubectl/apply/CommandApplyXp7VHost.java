@@ -29,7 +29,7 @@ public abstract class CommandApplyXp7VHost
     protected Xp7VHostResource build( final ObjectMeta metadata )
     {
         Xp7VHostResource resource = new Xp7VHostResource();
-        resource.setKind( cfgStr( "operator.crd.xp.vhosts.kind" ) );
+        resource.setKind( cfgStr( "operator.crd.v1alpha1.vhosts.kind" ) );
         resource.setMetadata( metadata );
         resource.setSpec( spec() );
         return resource;
