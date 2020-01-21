@@ -1,0 +1,18 @@
+testResult: ""
+testReview:
+  request:
+    operation: CREATE
+    object:
+      apiVersion: enonic.cloud/v1alpha1
+      kind: Xp7VHost
+      metadata:
+        name: healthcheck
+        namespace: mycloud-myproject-qaxp
+      spec:
+        host: healthcheck
+        skipIngress: true
+        mappings:
+          - node: main
+            source: /
+            target: /admin
+            idProvider: system

@@ -169,11 +169,14 @@ public class AdmissionApi
             oldResource( Optional.ofNullable( review.getRequest().getOldObject() ).map( obj -> (Xp7VHostResource) obj ) ).
             newResource( Optional.ofNullable( review.getRequest().getObject() ).map( obj -> (Xp7VHostResource) obj ) ).
             build();
-        long sameHost = xp7VHostCache.stream().
-            filter( r -> !r.getMetadata().getUid().equals( vHost.resource().getMetadata().getUid() ) ).
-            filter( r -> r.getSpec().host().equals( vHost.resource().getSpec().host() ) ).
-            count();
-        Preconditions.checkState( sameHost < 1L, "This host is being used by another Xp7VHost" );
+        if(!vHost.resource().getSpec().skipIngress()) {
+            long sameHost = xp7VHostCache.stream().
+                filter( r -> !r.getMetadata().getUid().equals( vHost.resource().getMetadata().getUid() ) ).
+                filter( r -> !r.getSpec().skipIngress()).
+                filter( r -> r.getSpec().host().equals( vHost.resource().getSpec().host() ) ).
+                count();
+            Preconditions.checkState( sameHost < 1L, "This host is being used by another Xp7VHost" );
+        }
     }
 
     private void xpConfigReview( final AdmissionReview review )
