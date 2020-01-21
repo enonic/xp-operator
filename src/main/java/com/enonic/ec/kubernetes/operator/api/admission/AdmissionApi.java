@@ -1,6 +1,7 @@
-package com.enonic.ec.kubernetes.operator.operators.v1alpha1.api.admission;
+package com.enonic.ec.kubernetes.operator.api.admission;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -16,7 +17,6 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
@@ -24,6 +24,7 @@ import io.fabric8.kubernetes.api.model.Status;
 import io.fabric8.kubernetes.api.model.admission.AdmissionResponse;
 import io.fabric8.kubernetes.api.model.admission.AdmissionReview;
 
+import com.enonic.ec.kubernetes.operator.api.BaseApi;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7app.crd.Xp7AppResource;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7app.info.ImmutableInfoXp7App;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7config.crd.Xp7ConfigResource;
@@ -39,26 +40,12 @@ import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7vhost.info.InfoXp
 @ApplicationScoped
 @Path("/apis/operator.enonic.cloud/v1alpha1")
 public class AdmissionApi
+    extends BaseApi<AdmissionReview>
 {
     private final static Logger log = LoggerFactory.getLogger( AdmissionApi.class );
 
-    @ConfigProperty(name = "operator.crd.v1alpha1.deployments.kind")
-    String xp7DeploymentKind;
-
-    @ConfigProperty(name = "operator.crd.v1alpha1.vhosts.kind")
-    String xp7vHostKind;
-
-    @ConfigProperty(name = "operator.crd.v1alpha1.configs.kind")
-    String xp7ConfigKind;
-
-    @ConfigProperty(name = "operator.crd.v1alpha1.apps.kind")
-    String xp7AppKind;
-
     @ConfigProperty(name = "operator.deployment.xp.allNodes")
     String allNodesPicker;
-
-    @Inject
-    ObjectMapper mapper;
 
     @Inject
     Xp7DeploymentCache xp7DeploymentCache;
@@ -66,7 +53,52 @@ public class AdmissionApi
     @Inject
     Xp7VHostCache xp7VHostCache;
 
-    public static AdmissionReview createReview( String uid, String errorCause, String errorMessage )
+    Map<Class<? extends HasMetadata>, Consumer<AdmissionReview>> admissionFunctionMap;
+
+    public AdmissionApi()
+    {
+        admissionFunctionMap = new HashMap<>();
+        admissionFunctionMap.put( Xp7DeploymentResource.class, this::xpDeploymentReview );
+        admissionFunctionMap.put( Xp7VHostResource.class, this::xpVHostReview );
+        admissionFunctionMap.put( Xp7ConfigResource.class, this::xpConfigReview );
+        admissionFunctionMap.put( Xp7AppResource.class, this::xpAppReview );
+    }
+
+    @POST
+    @Path("/validations")
+    @Consumes("application/json")
+    @Produces("application/json")
+    public AdmissionReview validate( String request )
+        throws IOException
+    {
+        log.debug( "Admission review: " + request );
+        return getResult( request, AdmissionReview.class );
+    }
+
+    @Override
+    protected AdmissionReview process( final String uid, final AdmissionReview review )
+    {
+        if ( review.getRequest().getOperation().equals( "CREATE" ) || review.getRequest().getOperation().equals( "UPDATE" ) )
+        {
+            HasMetadata obj = review.getRequest().getOldObject();
+            if ( review.getRequest().getObject() != null )
+            {
+                obj = review.getRequest().getObject();
+            }
+            Consumer<AdmissionReview> func = admissionFunctionMap.get( obj.getClass() );
+            Preconditions.checkState( func != null, "Admission review sent to endpoint that has unknown object" );
+            func.accept( review );
+        }
+        return createReview( uid, null );
+    }
+
+    @Override
+    protected AdmissionReview failure( final String uid, final String message )
+    {
+        return createReview( uid, message );
+    }
+
+    public AdmissionReview createReview( String uid, String errorMessage )
     {
         AdmissionReview review = new AdmissionReview();
         AdmissionResponse response = new AdmissionResponse();
@@ -86,72 +118,8 @@ public class AdmissionApi
         response.setAllowed( false );
         status.setCode( 400 );
         status.setMessage( errorMessage );
-        status.setReason( errorCause );
 
         return review;
-    }
-
-    private Consumer<AdmissionReview> getReviewConsumer( final AdmissionReview review )
-    {
-        HasMetadata obj = review.getRequest().getOldObject();
-        if ( review.getRequest().getObject() != null )
-        {
-            obj = review.getRequest().getObject();
-        }
-
-        if ( obj instanceof Xp7DeploymentResource )
-        {
-            return this::xpDeploymentReview;
-        }
-        else if ( obj instanceof Xp7VHostResource )
-        {
-            return this::xpVHostReview;
-        }
-        else if ( obj instanceof Xp7ConfigResource )
-        {
-            return this::xpConfigReview;
-        }
-        else if ( obj instanceof Xp7AppResource )
-        {
-            return this::xpAppReview;
-        }
-        else
-        {
-            return this::defaultReviewConsumers;
-        }
-    }
-
-    @POST
-    @Path("/validations")
-    @Consumes("application/json")
-    @Produces("application/json")
-    public AdmissionReview validate( String body )
-        throws IOException
-    {
-        log.debug( "Admission review: " + body );
-        @SuppressWarnings("unchecked") Map<String, Object> admission = mapper.readValue( body, Map.class );
-
-        // We have to extract the uid this way if there is a validation error during
-        // mapping of the actual objects.
-        String uid = (String) ( (Map) admission.get( "request" ) ).get( "uid" );
-
-        AdmissionReview review = null;
-
-        try
-        {
-            review = mapper.readValue( body, AdmissionReview.class );
-            if ( review.getRequest().getOperation().equals( "CREATE" ) || review.getRequest().getOperation().equals( "UPDATE" ) )
-            {
-                getReviewConsumer( review ).accept( review );
-            }
-        }
-        catch ( Exception ex )
-        {
-            String message = AdmissionExceptionHandler.extractJacksonMessage( ex );
-            log.warn( "AdmissionReview failed: " + message );
-            return createReview( uid, ex.getClass().getSimpleName(), message );
-        }
-        return createReview( uid, null, null );
     }
 
     private void xpDeploymentReview( final AdmissionReview review )
@@ -169,10 +137,11 @@ public class AdmissionApi
             oldResource( Optional.ofNullable( review.getRequest().getOldObject() ).map( obj -> (Xp7VHostResource) obj ) ).
             newResource( Optional.ofNullable( review.getRequest().getObject() ).map( obj -> (Xp7VHostResource) obj ) ).
             build();
-        if(!vHost.resource().getSpec().skipIngress()) {
+        if ( !vHost.resource().getSpec().skipIngress() )
+        {
             long sameHost = xp7VHostCache.stream().
                 filter( r -> !r.getMetadata().getUid().equals( vHost.resource().getMetadata().getUid() ) ).
-                filter( r -> !r.getSpec().skipIngress()).
+                filter( r -> !r.getSpec().skipIngress() ).
                 filter( r -> r.getSpec().host().equals( vHost.resource().getSpec().host() ) ).
                 count();
             Preconditions.checkState( sameHost < 1L, "This host is being used by another Xp7VHost" );
@@ -195,10 +164,5 @@ public class AdmissionApi
             oldResource( Optional.ofNullable( review.getRequest().getOldObject() ).map( obj -> (Xp7AppResource) obj ) ).
             newResource( Optional.ofNullable( review.getRequest().getObject() ).map( obj -> (Xp7AppResource) obj ) ).
             build();
-    }
-
-    private void defaultReviewConsumers( AdmissionReview r )
-    {
-        log.warn( "Admission review sent to endpoint that has unknown kind: " + r.getRequest().getKind().getKind() );
     }
 }

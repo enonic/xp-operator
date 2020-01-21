@@ -1,4 +1,4 @@
-package com.enonic.ec.kubernetes.operator.operators.v1alpha1.api.admission;
+package com.enonic.ec.kubernetes.operator.api.admission;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,10 +28,6 @@ public class TestAdmissionApi
     public TestAdmissionApi()
     {
         mapper = new ObjectMapper( new YAMLFactory() );
-        xp7DeploymentKind = cfgStr( "operator.crd.xp.deployments.kind" );
-        xp7vHostKind = cfgStr( "operator.crd.xp.vhosts.kind" );
-        xp7ConfigKind = cfgStr( "operator.crd.xp.configs.kind" );
-        xp7AppKind = cfgStr( "operator.crd.xp.apps.kind" );
         allNodesPicker = cfgStr( "operator.deployment.xp.allNodes" );
         xp7DeploymentCache = new TestXp7DeploymentCache();
         xp7VHostCache = new TestXp7VHostCache();

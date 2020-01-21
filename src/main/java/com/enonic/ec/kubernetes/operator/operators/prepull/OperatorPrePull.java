@@ -21,12 +21,12 @@ public class OperatorPrePull
     @Inject
     DefaultClientProducer defaultClientProducer;
 
-    @ConfigProperty(name = "operator.prePull.versions", defaultValue = "")
+    @ConfigProperty(name = "operator.prePull.versions", defaultValue = " ")
     List<String> imageVersionPrePull;
 
     void onStartup( @Observes StartupEvent _ev )
     {
-        if ( imageVersionPrePull.size() > 0 )
+        if ( imageVersionPrePull.size() > 0 && !imageVersionPrePull.get( 0 ).equals( " " ) )
         {
             runCommands( commandBuilder -> {
                 ImmutableCommandPrePullImages.builder().

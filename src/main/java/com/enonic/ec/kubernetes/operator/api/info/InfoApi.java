@@ -1,6 +1,7 @@
-package com.enonic.ec.kubernetes.operator.operators.v1alpha1.api.info;
+package com.enonic.ec.kubernetes.operator.api.info;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,10 +18,10 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 @Path("/apis/operator.enonic.cloud/v1alpha1")
 public class InfoApi
 {
-    @ConfigProperty(name = "operator.crd.v1alpha1.apiVersion")
+    @ConfigProperty(name = "operator.api.version")
     String apiVersion;
 
-    @ConfigProperty(name = "operator.crd.v1alpha1.api.group")
+    @ConfigProperty(name = "operator.api.group")
     String group;
 
     @GET
@@ -35,13 +36,22 @@ public class InfoApi
         admissionResource.put( "namespaced", false );
         admissionResource.put( "singularName", "" );
         admissionResource.put( "verbs", Collections.singletonList( "create" ) );
-        admissionResource.put( "version", apiVersion );
+        admissionResource.put( "version", "v1beta1" );
+
+        Map<String, Object> conversionResource = new HashMap<>();
+        conversionResource.put( "group", "apiextensions.k8s.io" );
+        admissionResource.put( "kind", "ConversionReview" );
+        admissionResource.put( "name", "conversions" );
+        admissionResource.put( "namespaced", false );
+        admissionResource.put( "singularName", "" );
+        admissionResource.put( "verbs", Collections.singletonList( "create" ) );
+        admissionResource.put( "version", "v1beta1" );
 
         Map<String, Object> res = new HashMap<>();
         res.put( "apiVersion", "v1" );
         res.put( "groupVersion", group + "/" + apiVersion );
         res.put( "kind", "APIResourceList" );
-        res.put( "resources", Collections.singletonList( admissionResource ) );
+        res.put( "resources", Arrays.asList(admissionResource, conversionResource) );
         return res;
     }
 

@@ -29,7 +29,7 @@ public abstract class CommandApplyXp7Config
     protected Xp7ConfigResource build( final ObjectMeta metadata )
     {
         Xp7ConfigResource resource = new Xp7ConfigResource();
-        resource.setKind( cfgStr( "operator.crd.v1alpha1.configs.kind" ) );
+        resource.setKind( cfgStr( "operator.crd.configs.kind" ) );
         resource.setMetadata( metadata );
         resource.setSpec( spec() );
         return resource;

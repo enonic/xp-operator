@@ -1,4 +1,4 @@
-package com.enonic.ec.kubernetes.operator.operators.v1alpha1.api.admission;
+package com.enonic.ec.kubernetes.operator.api.admission;
 
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7vhost.crd.Xp7VHostResource;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7vhost.crd.client.Xp7VHostCache;

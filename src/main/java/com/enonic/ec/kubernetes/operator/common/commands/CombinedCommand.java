@@ -23,11 +23,11 @@ public abstract class CombinedCommand
             log.debug( "No commands to run" );
             return null;
         }
-        log.info( "Running " + command().size() + " commands" );
+        log.debug( "Running " + command().size() + " commands" );
         for ( int i = 0; i < command().size(); i++ )
         {
             Command c = command().get( i );
-            log.info( String.format( "%2s: %s", i + 1, c ) );
+            log.info( c.toString() );
             c.execute();
         }
         return null;

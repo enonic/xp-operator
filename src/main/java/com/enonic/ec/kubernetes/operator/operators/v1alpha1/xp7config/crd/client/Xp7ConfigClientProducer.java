@@ -19,11 +19,10 @@ public class Xp7ConfigClientProducer
 
     @SuppressWarnings("CdiInjectionPointsInspection")
     @Inject
-    public Xp7ConfigClientProducer( DefaultClientProducer defaultClientProducer,
-                                    @ConfigProperty(name = "operator.crd.v1alpha1.group") String group,
+    public Xp7ConfigClientProducer( DefaultClientProducer defaultClientProducer, @ConfigProperty(name = "operator.crd.group") String group,
                                     @ConfigProperty(name = "operator.crd.v1alpha1.apiVersion") String apiVersion,
-                                    @ConfigProperty(name = "operator.crd.v1alpha1.configs.kind") String kind,
-                                    @ConfigProperty(name = "operator.crd.v1alpha1.configs.name") String name )
+                                    @ConfigProperty(name = "operator.crd.configs.kind") String kind,
+                                    @ConfigProperty(name = "operator.crd.configs.name") String name )
     {
         xp7ConfigClient = new Xp7ConfigClient(
             createCrdClient( defaultClientProducer.client(), group + "/" + apiVersion, kind, name, Xp7ConfigResource.class,

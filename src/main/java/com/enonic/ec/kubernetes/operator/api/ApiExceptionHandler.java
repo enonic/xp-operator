@@ -1,4 +1,4 @@
-package com.enonic.ec.kubernetes.operator.operators.v1alpha1.api.admission;
+package com.enonic.ec.kubernetes.operator.api;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,9 +8,9 @@ import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 
 import com.enonic.ec.kubernetes.operator.crd.BuilderException;
 
-public class AdmissionExceptionHandler
+public class ApiExceptionHandler
 {
-    private final static Logger log = LoggerFactory.getLogger( AdmissionExceptionHandler.class );
+    private final static Logger log = LoggerFactory.getLogger( ApiExceptionHandler.class );
 
     public static String extractJacksonMessage( Exception ex )
     {

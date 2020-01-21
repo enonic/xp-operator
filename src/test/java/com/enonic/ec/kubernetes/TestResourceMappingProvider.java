@@ -19,16 +19,15 @@ public class TestResourceMappingProvider
     @Override
     public Map<String, Class<? extends KubernetesResource>> getMappings()
     {
-        String group = cfgStr( "operator.crd.xp.group" );
-        String apiVersion = cfgStr( "operator.crd.xp.apiVersion" );
+        String group = cfgStr( "operator.crd.group" );
+        String apiVersion = cfgStr( "operator.crd.v1alpha1.apiVersion" );
 
         Map<String, Class<? extends KubernetesResource>> res = new HashMap<>();
 
-        res.put( String.format( "%s/%s#%s", group, apiVersion, cfgStr( "operator.crd.xp.deployments.kind" ) ),
-                 Xp7DeploymentResource.class );
-        res.put( String.format( "%s/%s#%s", group, apiVersion, cfgStr( "operator.crd.xp.vhosts.kind" ) ), Xp7VHostResource.class );
-        res.put( String.format( "%s/%s#%s", group, apiVersion, cfgStr( "operator.crd.xp.configs.kind" ) ), Xp7ConfigResource.class );
-        res.put( String.format( "%s/%s#%s", group, apiVersion, cfgStr( "operator.crd.xp.apps.kind" ) ), Xp7AppResource.class );
+        res.put( String.format( "%s/%s#%s", group, apiVersion, cfgStr( "operator.crd.deployments.kind" ) ), Xp7DeploymentResource.class );
+        res.put( String.format( "%s/%s#%s", group, apiVersion, cfgStr( "operator.crd.vhosts.kind" ) ), Xp7VHostResource.class );
+        res.put( String.format( "%s/%s#%s", group, apiVersion, cfgStr( "operator.crd.configs.kind" ) ), Xp7ConfigResource.class );
+        res.put( String.format( "%s/%s#%s", group, apiVersion, cfgStr( "operator.crd.apps.kind" ) ), Xp7AppResource.class );
 
         return res;
     }

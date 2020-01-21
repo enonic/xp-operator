@@ -11,6 +11,23 @@ spec:
     singular: xp7deployment
   scope: Cluster
   version: v1alpha1
+#  versions:
+#    - name: v1alpha1
+#      served: true
+#      storage: false
+#    - name: v1alpha2
+#      served: true
+#      storage: true
+#  conversion:
+#    strategy: Webhook
+#    webhook:
+#      conversionReviewVersions: ["v1beta1"]
+#      clientConfig:
+#        caBundle: "{CA_CERT}"
+#        service:
+#          name: kubernetes
+#          namespace: default
+#          path: /apis/operator.enonic.cloud/conversion
   additionalPrinterColumns:
     - name: Enabled
       type: boolean
