@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.immutables.value.Value;
 
-import com.enonic.ec.kubernetes.operator.info.Diff;
+import com.enonic.ec.kubernetes.operator.common.info.Diff;
 
 @Value.Immutable
 public abstract class DiffDnsIngress

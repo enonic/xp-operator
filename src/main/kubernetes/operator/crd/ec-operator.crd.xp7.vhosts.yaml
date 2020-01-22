@@ -10,7 +10,67 @@ spec:
     plural: xp7vhosts
     singular: xp7vhost
   scope: Namespaced
-  version: v1alpha1
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: false
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                host:
+                  type: string
+                certificate:
+                  type: object
+                  properties:
+                    authority:
+                      type: string
+                mappings:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      node:
+                        type: string
+                      source:
+                        type: string
+                      target:
+                        type: string
+                      idProvider:
+                        type: string
+    - name: v1alpha2
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                host:
+                  type: string
+                certificate:
+                  type: object
+                  properties:
+                    authority:
+                      type: string
+                mappings:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      nodeGroup:
+                        type: string
+                      source:
+                        type: string
+                      target:
+                        type: string
+                      idProvider:
+                        type: string
   additionalPrinterColumns:
     - name: Host
       type: string
@@ -23,7 +83,7 @@ spec:
     - name: Nodes
       type: string
       description: Nodes
-      JSONPath: .spec.mappings[*].node
+      JSONPath: .spec.mappings[*].nodeGroup
     - name: Sources
       type: string
       description: Sources

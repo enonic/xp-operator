@@ -6,29 +6,26 @@ import org.immutables.value.Value;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7config.crd.Xp7ConfigResource;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7config.crd.client.Xp7ConfigClient;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7config.crd.spec.Xp7ConfigSpec;
+import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.config.V1alpha2Xp7Config;
+import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.config.V1alpha2Xp7ConfigSpec;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @Value.Immutable
 public abstract class CommandApplyXp7Config
-    extends CommandApplyResource<Xp7ConfigResource>
+    extends CommandApplyResource<V1alpha2Xp7Config>
 {
-    protected abstract Xp7ConfigClient client();
-
-    protected abstract Xp7ConfigSpec spec();
+    protected abstract V1alpha2Xp7ConfigSpec spec();
 
     @Override
-    protected Optional<Xp7ConfigResource> fetchResource()
+    protected Optional<V1alpha2Xp7Config> fetchResource()
     {
-        return Optional.ofNullable( client().client().inNamespace( namespace().get() ).withName( name() ).get() );
+        return Optional.ofNullable( clients().getConfigClient().inNamespace( namespace().get() ).withName( name() ).get() );
     }
 
     @Override
-    protected Xp7ConfigResource build( final ObjectMeta metadata )
+    protected V1alpha2Xp7Config build( final ObjectMeta metadata )
     {
-        Xp7ConfigResource resource = new Xp7ConfigResource();
+        V1alpha2Xp7Config resource = new V1alpha2Xp7Config();
         resource.setKind( cfgStr( "operator.crd.configs.kind" ) );
         resource.setMetadata( metadata );
         resource.setSpec( spec() );
@@ -36,9 +33,9 @@ public abstract class CommandApplyXp7Config
     }
 
     @Override
-    protected Xp7ConfigResource apply( final Xp7ConfigResource resource )
+    protected V1alpha2Xp7Config apply( final V1alpha2Xp7Config resource )
     {
-        return client().client().inNamespace( namespace().get() ).createOrReplace( resource );
+        return clients().getConfigClient().inNamespace( namespace().get() ).createOrReplace( resource );
     }
 
     @Override

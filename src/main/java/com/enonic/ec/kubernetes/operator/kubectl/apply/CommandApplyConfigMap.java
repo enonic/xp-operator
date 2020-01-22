@@ -14,14 +14,12 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 public abstract class CommandApplyConfigMap
     extends CommandApplyResource<ConfigMap>
 {
-    protected abstract KubernetesClient client();
-
     protected abstract Map<String, String> data();
 
     @Override
     protected Optional<ConfigMap> fetchResource()
     {
-        return Optional.ofNullable( client().configMaps().inNamespace( namespace().get() ).withName( name() ).get() );
+        return Optional.ofNullable( clients().getDefaultClient().configMaps().inNamespace( namespace().get() ).withName( name() ).get() );
     }
 
     @Override
@@ -36,7 +34,7 @@ public abstract class CommandApplyConfigMap
     @Override
     protected ConfigMap apply( final ConfigMap resource )
     {
-        return client().configMaps().inNamespace( namespace().get() ).createOrReplace( resource );
+        return clients().getDefaultClient().configMaps().inNamespace( namespace().get() ).createOrReplace( resource );
     }
 
     @Override

@@ -16,12 +16,15 @@ import io.fabric8.kubernetes.api.model.OwnerReference;
 import com.enonic.ec.kubernetes.operator.kubectl.ImmutableKubernetesCommandSummary;
 import com.enonic.ec.kubernetes.operator.kubectl.KubernetesCommand;
 import com.enonic.ec.kubernetes.operator.kubectl.KubernetesCommandSummary;
+import com.enonic.ec.kubernetes.operator.operators.clients.Clients;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 public abstract class CommandApplyResource<T extends HasMetadata>
     extends KubernetesCommand<T>
 {
     private KubernetesCommandSummary summary;
+
+    protected abstract Clients clients();
 
     protected abstract String name();
 

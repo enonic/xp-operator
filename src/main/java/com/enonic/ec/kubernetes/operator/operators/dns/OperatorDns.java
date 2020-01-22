@@ -22,8 +22,8 @@ import io.fabric8.kubernetes.client.Watcher;
 import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.ec.kubernetes.operator.common.Configuration;
-import com.enonic.ec.kubernetes.operator.common.cache.IngressCache;
 import com.enonic.ec.kubernetes.operator.common.commands.ImmutableCombinedCommand;
+import com.enonic.ec.kubernetes.operator.operators.cache.Caches;
 import com.enonic.ec.kubernetes.operator.operators.dns.cloudflare.DnsRecordService;
 import com.enonic.ec.kubernetes.operator.operators.dns.commands.ImmutableDnsApplyIngress;
 import com.enonic.ec.kubernetes.operator.operators.dns.model.DiffDnsIngress;
@@ -40,7 +40,7 @@ public class OperatorDns
     private final static Logger log = LoggerFactory.getLogger( OperatorDns.class );
 
     @Inject
-    IngressCache ingressCache;
+    Caches caches;
 
     @RestClient
     @Inject
@@ -61,7 +61,7 @@ public class OperatorDns
             domain( cfgStr( "dns.domain." + k ) ).
             build() ).collect( Collectors.toList() );
 
-        ingressCache.addWatcher( this::watchIngress );
+        caches.getIngressCache().addWatcher( this::watchIngress );
     }
 
     private void watchIngress( final Watcher.Action action, final String s, final Optional<Ingress> oldIngress,

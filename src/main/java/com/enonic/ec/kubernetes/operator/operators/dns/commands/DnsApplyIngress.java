@@ -9,7 +9,7 @@ import org.immutables.value.Value;
 import com.enonic.ec.kubernetes.operator.common.Configuration;
 import com.enonic.ec.kubernetes.operator.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.operator.common.commands.ImmutableCombinedCommand;
-import com.enonic.ec.kubernetes.operator.info.Diff;
+import com.enonic.ec.kubernetes.operator.common.info.Diff;
 import com.enonic.ec.kubernetes.operator.operators.dns.cloudflare.DnsRecordService;
 import com.enonic.ec.kubernetes.operator.operators.dns.cloudflare.model.DnsRecord;
 import com.enonic.ec.kubernetes.operator.operators.dns.cloudflare.model.ImmutableDnsRecord;

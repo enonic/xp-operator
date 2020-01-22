@@ -3,6 +3,9 @@ package com.enonic.ec.kubernetes.operator.api.conversion.model;
 import org.immutables.value.Value;
 import org.wildfly.common.annotation.Nullable;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+@JsonDeserialize(builder = ImmutableConversionReview.Builder.class)
 @Value.Immutable
 public abstract class ConversionReview
 {

@@ -9,19 +9,19 @@ import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceSpec;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
+import com.enonic.ec.kubernetes.operator.operators.clients.Clients;
+
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @Value.Immutable
 public abstract class CommandApplyService
     extends CommandApplyResource<Service>
 {
-    protected abstract KubernetesClient client();
-
     protected abstract ServiceSpec spec();
 
     @Override
     protected Optional<Service> fetchResource()
     {
-        return Optional.ofNullable( client().services().inNamespace( namespace().get() ).withName( name() ).get() );
+        return Optional.ofNullable( clients().getDefaultClient().services().inNamespace( namespace().get() ).withName( name() ).get() );
     }
 
     @Override
@@ -36,7 +36,7 @@ public abstract class CommandApplyService
     @Override
     protected Service apply( final Service resource )
     {
-        return client().services().inNamespace( namespace().get() ).createOrReplace( resource );
+        return clients().getDefaultClient().services().inNamespace( namespace().get() ).createOrReplace( resource );
     }
 
     @Override

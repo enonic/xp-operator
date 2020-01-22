@@ -9,8 +9,6 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 public abstract class CommandScaleStatefulSet
     extends CommandScaleResource<StatefulSet>
 {
-    protected abstract KubernetesClient client();
-
     @Override
     protected String resourceKind()
     {
@@ -20,7 +18,7 @@ public abstract class CommandScaleStatefulSet
     @Override
     protected StatefulSet applyScale()
     {
-        return client().apps().statefulSets().
+        return clients().getDefaultClient().apps().statefulSets().
             inNamespace( namespace() ).
             withName( name() ).
             scale( scale() );

@@ -10,8 +10,8 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import io.quarkus.runtime.StartupEvent;
 
-import com.enonic.ec.kubernetes.operator.Operator;
-import com.enonic.ec.kubernetes.operator.common.client.DefaultClientProducer;
+import com.enonic.ec.kubernetes.operator.operators.Operator;
+import com.enonic.ec.kubernetes.operator.operators.clients.Clients;
 import com.enonic.ec.kubernetes.operator.operators.prepull.commands.ImmutableCommandPrePullImages;
 
 @ApplicationScoped
@@ -19,7 +19,7 @@ public class OperatorPrePull
     extends Operator
 {
     @Inject
-    DefaultClientProducer defaultClientProducer;
+    Clients clients;
 
     @ConfigProperty(name = "operator.prePull.versions", defaultValue = " ")
     List<String> imageVersionPrePull;
@@ -30,7 +30,7 @@ public class OperatorPrePull
         {
             runCommands( commandBuilder -> {
                 ImmutableCommandPrePullImages.builder().
-                    defaultClient( defaultClientProducer.client() ).
+                    clients( clients ).
                     addAllVersions( imageVersionPrePull ).
                     build().
                     addCommands( commandBuilder );

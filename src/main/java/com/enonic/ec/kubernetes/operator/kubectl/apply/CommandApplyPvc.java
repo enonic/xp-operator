@@ -9,19 +9,19 @@ import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaimSpec;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
+import com.enonic.ec.kubernetes.operator.operators.clients.Clients;
+
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @Value.Immutable
 public abstract class CommandApplyPvc
     extends CommandApplyResource<PersistentVolumeClaim>
 {
-    protected abstract KubernetesClient client();
-
     protected abstract PersistentVolumeClaimSpec spec();
 
     @Override
     protected Optional<PersistentVolumeClaim> fetchResource()
     {
-        return Optional.ofNullable( client().persistentVolumeClaims().inNamespace( namespace().get() ).withName( name() ).get() );
+        return Optional.ofNullable( clients().getDefaultClient().persistentVolumeClaims().inNamespace( namespace().get() ).withName( name() ).get() );
     }
 
     @Override
@@ -36,7 +36,7 @@ public abstract class CommandApplyPvc
     @Override
     protected PersistentVolumeClaim apply( final PersistentVolumeClaim resource )
     {
-        return client().persistentVolumeClaims().inNamespace( namespace().get() ).createOrReplace( resource );
+        return clients().getDefaultClient().persistentVolumeClaims().inNamespace( namespace().get() ).createOrReplace( resource );
     }
 
     @Override

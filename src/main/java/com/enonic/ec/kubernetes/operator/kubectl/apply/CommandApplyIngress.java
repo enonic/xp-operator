@@ -9,19 +9,19 @@ import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.kubernetes.api.model.extensions.IngressSpec;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
+import com.enonic.ec.kubernetes.operator.operators.clients.Clients;
+
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @Value.Immutable
 public abstract class CommandApplyIngress
     extends CommandApplyResource<Ingress>
 {
-    protected abstract KubernetesClient client();
-
     protected abstract IngressSpec spec();
 
     @Override
     protected Optional<Ingress> fetchResource()
     {
-        return Optional.ofNullable( client().extensions().ingresses().inNamespace( namespace().get() ).withName( name() ).get() );
+        return Optional.ofNullable( clients().getDefaultClient().extensions().ingresses().inNamespace( namespace().get() ).withName( name() ).get() );
     }
 
     @Override
@@ -36,7 +36,7 @@ public abstract class CommandApplyIngress
     @Override
     protected Ingress apply( final Ingress resource )
     {
-        return client().extensions().ingresses().inNamespace( namespace().get() ).createOrReplace( resource );
+        return clients().getDefaultClient().extensions().ingresses().inNamespace( namespace().get() ).createOrReplace( resource );
     }
 
     @Override

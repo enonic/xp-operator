@@ -9,19 +9,19 @@ import io.fabric8.kubernetes.api.model.policy.PodDisruptionBudget;
 import io.fabric8.kubernetes.api.model.policy.PodDisruptionBudgetSpec;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
+import com.enonic.ec.kubernetes.operator.operators.clients.Clients;
+
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @Value.Immutable
 public abstract class CommandApplyPodDisruptionBudget
     extends CommandApplyResource<PodDisruptionBudget>
 {
-    protected abstract KubernetesClient client();
-
     protected abstract PodDisruptionBudgetSpec spec();
 
     @Override
     protected Optional<PodDisruptionBudget> fetchResource()
     {
-        return Optional.ofNullable( client().policy().podDisruptionBudget().inNamespace( namespace().get() ).withName( name() ).get() );
+        return Optional.ofNullable( clients().getDefaultClient().policy().podDisruptionBudget().inNamespace( namespace().get() ).withName( name() ).get() );
     }
 
     @Override
@@ -36,7 +36,7 @@ public abstract class CommandApplyPodDisruptionBudget
     @Override
     protected PodDisruptionBudget apply( final PodDisruptionBudget resource )
     {
-        return client().policy().podDisruptionBudget().inNamespace( namespace().get() ).createOrReplace( resource );
+        return clients().getDefaultClient().policy().podDisruptionBudget().inNamespace( namespace().get() ).createOrReplace( resource );
     }
 
     @Override

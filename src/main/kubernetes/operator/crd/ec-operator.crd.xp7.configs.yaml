@@ -10,12 +10,44 @@ spec:
     plural: xp7configs
     singular: xp7config
   scope: Namespaced
-  version: v1alpha1
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: false
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                node:
+                  type: string
+                file:
+                  type: string
+                data:
+                  type: string
+    - name: v1alpha2
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                nodeGroup:
+                  type: string
+                file:
+                  type: string
+                data:
+                  type: string
   additionalPrinterColumns:
-    - name: Node
+    - name: NodeGroup
       type: string
       description: Node running the config
-      JSONPath: .spec.node
+      JSONPath: .spec.nodeGroup
     - name: File
       type: string
       description: Config file name

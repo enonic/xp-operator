@@ -9,8 +9,6 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 public abstract class CommandDeleteIngress
     extends CommandDeleteResource
 {
-    protected abstract KubernetesClient client();
-
     @Override
     protected String resourceKind()
     {
@@ -20,7 +18,7 @@ public abstract class CommandDeleteIngress
     @Override
     protected Boolean delete()
     {
-        return client().extensions().ingresses().inNamespace( namespace() ).withName( name() ).delete();
+        return clients().getDefaultClient().extensions().ingresses().inNamespace( namespace() ).withName( name() ).delete();
     }
 
     @Override

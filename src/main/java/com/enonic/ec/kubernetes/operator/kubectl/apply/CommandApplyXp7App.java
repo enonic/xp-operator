@@ -6,29 +6,28 @@ import org.immutables.value.Value;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7app.crd.Xp7AppResource;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7app.crd.client.Xp7AppClient;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7app.crd.spec.Xp7AppSpec;
+import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha1.app.V1alpha1Xp7App;
+import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha1.app.V1alpha1Xp7AppSpec;
+
+;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @Value.Immutable
 public abstract class CommandApplyXp7App
-    extends CommandApplyResource<Xp7AppResource>
+    extends CommandApplyResource<V1alpha1Xp7App>
 {
-    protected abstract Xp7AppClient client();
-
-    protected abstract Xp7AppSpec spec();
+    protected abstract V1alpha1Xp7AppSpec spec();
 
     @Override
-    protected Optional<Xp7AppResource> fetchResource()
+    protected Optional<V1alpha1Xp7App> fetchResource()
     {
-        return Optional.ofNullable( client().client().inNamespace( namespace().get() ).withName( name() ).get() );
+        return Optional.ofNullable( clients().getAppClient().inNamespace( namespace().get() ).withName( name() ).get() );
     }
 
     @Override
-    protected Xp7AppResource build( final ObjectMeta metadata )
+    protected V1alpha1Xp7App build( final ObjectMeta metadata )
     {
-        Xp7AppResource resource = new Xp7AppResource();
+        V1alpha1Xp7App resource = new V1alpha1Xp7App();
         resource.setKind( cfgStr( "operator.crd.apps.kind" ) );
         resource.setMetadata( metadata );
         resource.setSpec( spec() );
@@ -36,9 +35,9 @@ public abstract class CommandApplyXp7App
     }
 
     @Override
-    protected Xp7AppResource apply( final Xp7AppResource resource )
+    protected V1alpha1Xp7App apply( final V1alpha1Xp7App resource )
     {
-        return client().client().inNamespace( namespace().get() ).createOrReplace( resource );
+        return clients().getAppClient().inNamespace( namespace().get() ).createOrReplace( resource );
     }
 
     @Override

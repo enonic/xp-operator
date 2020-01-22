@@ -20,19 +20,19 @@ import io.fabric8.kubernetes.api.model.PodTemplateSpec;
 import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 import io.fabric8.kubernetes.api.model.apps.DaemonSetSpec;
-import io.fabric8.kubernetes.client.KubernetesClient;
 
 import com.enonic.ec.kubernetes.operator.common.Configuration;
 import com.enonic.ec.kubernetes.operator.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.operator.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.operator.kubectl.apply.ImmutableCommandApplyDaemonSet;
+import com.enonic.ec.kubernetes.operator.operators.clients.Clients;
 
 @Value.Immutable
 public abstract class CommandPrePullImages
     extends Configuration
     implements CombinedCommandBuilder
 {
-    protected abstract KubernetesClient defaultClient();
+    protected abstract Clients clients();
 
     protected abstract List<String> versions();
 
@@ -102,7 +102,7 @@ public abstract class CommandPrePullImages
         vol.setHostPath( new HostPathVolumeSource( mountPath, null ) );
 
         commandBuilder.addCommand( ImmutableCommandApplyDaemonSet.builder().
-            client( defaultClient() ).
+            clients( clients() ).
             namespace( getOperatorNamespace() ).
             name( name ).
             canSkipOwnerReference( true ).

@@ -6,29 +6,26 @@ import org.immutables.value.Value;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7vhost.crd.Xp7VHostResource;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7vhost.crd.client.Xp7VHostClient;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7vhost.crd.spec.Xp7VHostSpec;
+import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHost;
+import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHostSpec;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @Value.Immutable
 public abstract class CommandApplyXp7VHost
-    extends CommandApplyResource<Xp7VHostResource>
+    extends CommandApplyResource<V1alpha2Xp7VHost>
 {
-    protected abstract Xp7VHostClient client();
-
-    protected abstract Xp7VHostSpec spec();
+    protected abstract V1alpha2Xp7VHostSpec spec();
 
     @Override
-    protected Optional<Xp7VHostResource> fetchResource()
+    protected Optional<V1alpha2Xp7VHost> fetchResource()
     {
-        return Optional.ofNullable( client().client().inNamespace( namespace().get() ).withName( name() ).get() );
+        return Optional.ofNullable( clients().getVHostClient().inNamespace( namespace().get() ).withName( name() ).get() );
     }
 
     @Override
-    protected Xp7VHostResource build( final ObjectMeta metadata )
+    protected V1alpha2Xp7VHost build( final ObjectMeta metadata )
     {
-        Xp7VHostResource resource = new Xp7VHostResource();
+        V1alpha2Xp7VHost resource = new V1alpha2Xp7VHost();
         resource.setKind( cfgStr( "operator.crd.vhosts.kind" ) );
         resource.setMetadata( metadata );
         resource.setSpec( spec() );
@@ -36,9 +33,9 @@ public abstract class CommandApplyXp7VHost
     }
 
     @Override
-    protected Xp7VHostResource apply( final Xp7VHostResource resource )
+    protected V1alpha2Xp7VHost apply( final V1alpha2Xp7VHost resource )
     {
-        return client().client().inNamespace( namespace().get() ).createOrReplace( resource );
+        return clients().getVHostClient().inNamespace( namespace().get() ).createOrReplace( resource );
     }
 
     @Override

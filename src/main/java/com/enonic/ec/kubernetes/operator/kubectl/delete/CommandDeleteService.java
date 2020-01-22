@@ -9,8 +9,6 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 public abstract class CommandDeleteService
     extends CommandDeleteResource
 {
-    protected abstract KubernetesClient client();
-
     @Override
     protected String resourceKind()
     {
@@ -20,7 +18,7 @@ public abstract class CommandDeleteService
     @Override
     protected Boolean delete()
     {
-        return client().services().inNamespace( namespace() ).withName( name() ).delete();
+        return clients().getDefaultClient().services().inNamespace( namespace() ).withName( name() ).delete();
     }
 
     @Override

@@ -8,16 +8,16 @@ import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
+import com.enonic.ec.kubernetes.operator.operators.clients.Clients;
+
 @Value.Immutable
 public abstract class CommandApplyNamespace
     extends CommandApplyResource<Namespace>
 {
-    protected abstract KubernetesClient client();
-
     @Override
     protected Optional<Namespace> fetchResource()
     {
-        return Optional.ofNullable( client().namespaces().withName( name() ).get() );
+        return Optional.ofNullable( clients().getDefaultClient().namespaces().withName( name() ).get() );
     }
 
     @Override
@@ -31,7 +31,7 @@ public abstract class CommandApplyNamespace
     @Override
     protected Namespace apply( final Namespace resource )
     {
-        return client().namespaces().createOrReplace( resource );
+        return clients().getDefaultClient().namespaces().createOrReplace( resource );
     }
 
     @Override

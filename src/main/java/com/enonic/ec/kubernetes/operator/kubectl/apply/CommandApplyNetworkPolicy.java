@@ -9,19 +9,19 @@ import io.fabric8.kubernetes.api.model.networking.NetworkPolicy;
 import io.fabric8.kubernetes.api.model.networking.NetworkPolicySpec;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
+import com.enonic.ec.kubernetes.operator.operators.clients.Clients;
+
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @Value.Immutable
 public abstract class CommandApplyNetworkPolicy
     extends CommandApplyResource<NetworkPolicy>
 {
-    protected abstract KubernetesClient client();
-
     protected abstract NetworkPolicySpec spec();
 
     @Override
     protected Optional<NetworkPolicy> fetchResource()
     {
-        return Optional.ofNullable( client().network().networkPolicies().inNamespace( namespace().get() ).withName( name() ).get() );
+        return Optional.ofNullable( clients().getDefaultClient().network().networkPolicies().inNamespace( namespace().get() ).withName( name() ).get() );
     }
 
     @Override
@@ -36,7 +36,7 @@ public abstract class CommandApplyNetworkPolicy
     @Override
     protected NetworkPolicy apply( final NetworkPolicy resource )
     {
-        return client().network().networkPolicies().inNamespace( namespace().get() ).createOrReplace( resource );
+        return clients().getDefaultClient().network().networkPolicies().inNamespace( namespace().get() ).createOrReplace( resource );
     }
 
     @Override

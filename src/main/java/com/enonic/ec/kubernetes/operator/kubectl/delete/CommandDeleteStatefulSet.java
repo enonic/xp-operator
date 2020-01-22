@@ -9,8 +9,6 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 public abstract class CommandDeleteStatefulSet
     extends CommandDeleteResource
 {
-    protected abstract KubernetesClient client();
-
     @Override
     protected String resourceKind()
     {
@@ -20,7 +18,7 @@ public abstract class CommandDeleteStatefulSet
     @Override
     protected Boolean delete()
     {
-        return client().apps().statefulSets().inNamespace( namespace() ).withName( name() ).delete();
+        return clients().getDefaultClient().apps().statefulSets().inNamespace( namespace() ).withName( name() ).delete();
     }
 
     @Override

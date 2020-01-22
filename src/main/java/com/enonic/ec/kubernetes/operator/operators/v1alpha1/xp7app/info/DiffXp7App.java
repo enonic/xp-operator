@@ -2,19 +2,19 @@ package com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7app.info;
 
 import org.immutables.value.Value;
 
-import com.enonic.ec.kubernetes.operator.info.Diff;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7app.crd.Xp7AppResource;
+import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha1.app.V1alpha1Xp7App;
+import com.enonic.ec.kubernetes.operator.common.info.Diff;
 
 @Value.Immutable
 public abstract class DiffXp7App
-    extends Diff<Xp7AppResource>
+    extends Diff<V1alpha1Xp7App>
 {
     @Value.Derived
     public DiffXp7AppSpec diffSpec()
     {
         return ImmutableDiffXp7AppSpec.builder().
-            oldValue( oldValue().map( Xp7AppResource::getSpec ) ).
-            newValue( newValue().map( Xp7AppResource::getSpec ) ).
+            oldValue( oldValue().map( V1alpha1Xp7App::getSpec ) ).
+            newValue( newValue().map( V1alpha1Xp7App::getSpec ) ).
             build();
     }
 }

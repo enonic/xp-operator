@@ -9,19 +9,19 @@ import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import io.fabric8.kubernetes.api.model.apps.StatefulSetSpec;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
+import com.enonic.ec.kubernetes.operator.operators.clients.Clients;
+
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @Value.Immutable
 public abstract class CommandApplyStatefulSet
     extends CommandApplyResource<StatefulSet>
 {
-    protected abstract KubernetesClient client();
-
     protected abstract StatefulSetSpec spec();
 
     @Override
     protected Optional<StatefulSet> fetchResource()
     {
-        return Optional.ofNullable( client().apps().statefulSets().inNamespace( namespace().get() ).withName( name() ).get() );
+        return Optional.ofNullable( clients().getDefaultClient().apps().statefulSets().inNamespace( namespace().get() ).withName( name() ).get() );
     }
 
     @Override
@@ -36,7 +36,7 @@ public abstract class CommandApplyStatefulSet
     @Override
     protected StatefulSet apply( final StatefulSet resource )
     {
-        return client().apps().statefulSets().inNamespace( namespace().get() ).createOrReplace( resource );
+        return clients().getDefaultClient().apps().statefulSets().inNamespace( namespace().get() ).createOrReplace( resource );
     }
 
     @Override

@@ -10,7 +10,19 @@ spec:
     plural: xp7apps
     singular: xp7app
   scope: Namespaced
-  version: v1alpha1
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+  validation:
+    openAPIV3Schema:
+      type: object
+      properties:
+        spec:
+          type: object
+          properties:
+            url:
+              type: string
   additionalPrinterColumns:
     - name: Url
       type: string

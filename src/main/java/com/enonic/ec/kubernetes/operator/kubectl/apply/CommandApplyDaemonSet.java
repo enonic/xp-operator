@@ -9,19 +9,19 @@ import io.fabric8.kubernetes.api.model.apps.DaemonSet;
 import io.fabric8.kubernetes.api.model.apps.DaemonSetSpec;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
+import com.enonic.ec.kubernetes.operator.operators.clients.Clients;
+
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @Value.Immutable
 public abstract class CommandApplyDaemonSet
     extends CommandApplyResource<DaemonSet>
 {
-    protected abstract KubernetesClient client();
-
     protected abstract DaemonSetSpec spec();
 
     @Override
     protected Optional<DaemonSet> fetchResource()
     {
-        return Optional.ofNullable( client().apps().daemonSets().inNamespace( namespace().get() ).withName( name() ).get() );
+        return Optional.ofNullable( clients().getDefaultClient().apps().daemonSets().inNamespace( namespace().get() ).withName( name() ).get() );
     }
 
     @Override
@@ -36,7 +36,7 @@ public abstract class CommandApplyDaemonSet
     @Override
     protected DaemonSet apply( final DaemonSet resource )
     {
-        return client().apps().daemonSets().inNamespace( namespace().get() ).createOrReplace( resource );
+        return clients().getDefaultClient().apps().daemonSets().inNamespace( namespace().get() ).createOrReplace( resource );
     }
 
     @Override

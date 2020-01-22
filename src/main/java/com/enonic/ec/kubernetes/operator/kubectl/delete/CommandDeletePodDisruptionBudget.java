@@ -9,8 +9,6 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 public abstract class CommandDeletePodDisruptionBudget
     extends CommandDeleteResource
 {
-    protected abstract KubernetesClient client();
-
     @Override
     protected String resourceKind()
     {
@@ -20,7 +18,7 @@ public abstract class CommandDeletePodDisruptionBudget
     @Override
     protected Boolean delete()
     {
-        return client().policy().podDisruptionBudget().inNamespace( namespace() ).withName( name() ).delete();
+        return clients().getDefaultClient().policy().podDisruptionBudget().inNamespace( namespace() ).withName( name() ).delete();
     }
 
     @Override

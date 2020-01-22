@@ -3,6 +3,7 @@ package com.enonic.ec.kubernetes.operator.api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 
@@ -29,6 +30,9 @@ public class ApiExceptionHandler
         if ( ex instanceof UnrecognizedPropertyException )
         {
             return "Field unrecognized: " + ( (UnrecognizedPropertyException) ex ).getPropertyName();
+        }
+        if ( ex instanceof JsonMappingException ) {
+            return ( (JsonMappingException) ex ).getOriginalMessage();
         }
 
         log.error( "Unknown exception in admission api", ex );
