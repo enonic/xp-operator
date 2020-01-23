@@ -12,7 +12,7 @@ public abstract class Mapping
 {
     public abstract String host();
 
-    public abstract String node();
+    public abstract String nodeGroup();
 
     public abstract String source();
 

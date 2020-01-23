@@ -66,7 +66,7 @@ public abstract class CommandXpVHostConfigApply
             forEach( v -> v.getSpec().mappings().
                 forEach( m -> mappings.add( ImmutableMapping.builder().
                     host( v.getSpec().host() ).
-                    node( m.node() ).
+                    nodeGroup( m.nodeGroup() ).
                     source( m.source() ).
                     target( m.target() ).
                     idProvider( Optional.ofNullable( m.idProvider() ) ).
@@ -80,13 +80,13 @@ public abstract class CommandXpVHostConfigApply
 
         // Add mappings to nodes
         mappings.forEach( m -> {
-            if ( m.node().equals( cfgStr( "operator.deployment.xp.allNodes" ) ) )
+            if ( m.nodeGroup().equals( cfgStr( "operator.deployment.xp.allNodes" ) ) )
             {
                 result.values().forEach( v -> v.add( m ) );
             }
             else
             {
-                result.get( m.node() ).add( m );
+                result.get( m.nodeGroup() ).add( m );
             }
         } );
 

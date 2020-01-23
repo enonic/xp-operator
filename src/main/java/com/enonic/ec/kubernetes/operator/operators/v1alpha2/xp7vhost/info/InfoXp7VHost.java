@@ -28,7 +28,7 @@ public abstract class InfoXp7VHost
         newResource().ifPresent( vHost -> checkNode( true, vHost.getSpec().
             mappings().
             stream().
-            map( V1alpha2Xp7VHostSpecMapping::node ).
+            map( V1alpha2Xp7VHostSpecMapping::nodeGroup ).
             collect( Collectors.toList() ) ) );
     }
 }

@@ -14,7 +14,7 @@ import com.enonic.ec.kubernetes.operator.crd.BuilderException;
 @Value.Style(throwForInvalidImmutableState = V1alpha2Xp7VHostSpecMapping.ExceptionMissing.class, throwForNullPointer = V1alpha2Xp7VHostSpecMapping.ExceptionMissing.class)
 public abstract class V1alpha2Xp7VHostSpecMapping
 {
-    public abstract String node();
+    public abstract String nodeGroup();
 
     public abstract String source();
 
