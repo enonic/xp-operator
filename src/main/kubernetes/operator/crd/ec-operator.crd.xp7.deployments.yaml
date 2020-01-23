@@ -12,6 +12,53 @@ spec:
   scope: Cluster
   preserveUnknownFields: false
   versions:
+    - name: v1alpha2
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                xpVersion:
+                  type: string
+                nodesSharedDisks:
+                  type: object
+                  additionalProperties:
+                    type: string
+                nodeGroups:
+                  type: object
+                  additionalProperties:
+                    type: object
+                    properties:
+                      displayName:
+                        type: string
+                      data:
+                        type: boolean
+                      master:
+                        type: boolean
+                      replicas:
+                        type: integer
+                        format: int32
+                      env:
+                        type: object
+                        additionalProperties:
+                          type: string
+                      resources:
+                        type: object
+                        properties:
+                          cpu:
+                            type: string
+                          memory:
+                            type: string
+                          disks:
+                            type: object
+                            additionalProperties:
+                              type: string
     - name: v1alpha1
       served: true
       storage: false
@@ -43,53 +90,6 @@ spec:
                             - MASTER
                             - DATA
                             - FRONTEND
-                      replicas:
-                        type: integer
-                        format: int32
-                      env:
-                        type: object
-                        additionalProperties:
-                          type: string
-                      resources:
-                        type: object
-                        properties:
-                          cpu:
-                            type: string
-                          memory:
-                            type: string
-                          disks:
-                            type: object
-                            additionalProperties:
-                              type: string
-    - name: v1alpha2
-      served: true
-      storage: true
-      schema:
-        openAPIV3Schema:
-          type: object
-          properties:
-            spec:
-              type: object
-              properties:
-                enabled:
-                  type: boolean
-                xpVersion:
-                  type: string
-                nodesSharedDisks:
-                  type: object
-                  additionalProperties:
-                    type: string
-                nodeGroups:
-                  type: object
-                  additionalProperties:
-                    type: object
-                    properties:
-                      displayName:
-                        type: string
-                      data:
-                        type: boolean
-                      master:
-                        type: boolean
                       replicas:
                         type: integer
                         format: int32
