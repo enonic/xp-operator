@@ -1,4 +1,5 @@
 {{- range $nodeGroupName, $nodeGroup := .Values.deployment.spec.nodeGroups }}
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:

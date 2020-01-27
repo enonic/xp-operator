@@ -1,0 +1,35 @@
+---
+image: "7.1.2"
+extensions:
+  linkerd: false
+  ecDns: false
+defaultLabels:
+  cloud: "mycloud"
+  project: "myproject"
+  name: "qaxp"
+defaultStorageClass: "standard"
+sharedStorageClass: "standard"
+deployment:
+  clustered: false
+  name: "mycloud-myproject-qaxp"
+  allNodeGroupsKey: "all"
+  spec:
+    xpVersion: "7.1.2"
+    enabled: true
+    nodesSharedDisks:
+      blobstore: "2Gi"
+      snapshots: "3Gi"
+    nodeGroups:
+      fisk:
+        displayName: null
+        master: true
+        data: true
+        replicas: 1
+        resources:
+          cpu: "1"
+          memory: "512Mi"
+          disks:
+            export: "234Mi"
+            index: "200Mi"
+            work: "400Mi"
+        env: {}

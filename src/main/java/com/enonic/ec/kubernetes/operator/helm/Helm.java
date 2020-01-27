@@ -62,6 +62,32 @@ public class Helm
         return runCommandWithValuesFile( "template", chart.uri(), values, Optional.empty(), "none" );
     }
 
+    public List<HasMetadata> templateObjects( Chart chart, Object values )
+        throws IOException
+    {
+        String template = template( chart, values );
+        String[] objects = template.split( "---" );
+        List<HasMetadata> res = new LinkedList<>();
+        for ( String s : objects )
+        {
+            if ( !"".equals( s ) )
+            {
+                res.add( objectMapper.readValue( s, HasMetadata.class ) );
+            }
+        }
+        res.sort( this::sort );
+        return res;
+    }
+
+    private int sort( final HasMetadata a, final HasMetadata b )
+    {
+        if(a.getKind().equals( b.getKind() )) {
+            return a.getMetadata().getName().compareTo( b.getMetadata().getName() );
+        } else {
+            return a.getKind().compareTo( b.getKind() );
+        }
+    }
+
     public List<HasMetadata> templateToObjects( Chart chart, Object values )
     {
         try

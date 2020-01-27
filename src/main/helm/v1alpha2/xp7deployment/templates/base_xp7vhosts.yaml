@@ -1,4 +1,4 @@
-apiVersion: enonic.cloud/v1alpha1
+apiVersion: enonic.cloud/v1alpha2
 kind: Xp7VHost
 metadata:
   name: healthcheck
@@ -10,6 +10,6 @@ spec:
   host: healthcheck
   skipIngress: true
   mappings:
-    - node: all
+    - nodeGroup: all
       source: /
       target: /webapp/com.enonic.app.alive

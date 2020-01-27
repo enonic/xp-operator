@@ -1,6 +1,6 @@
 {{- range $nodeGroupName, $nodeGroup := .Values.deployment.spec.nodeGroups }}
 ---
-apiVersion: enonic.cloud/v1alpha1
+apiVersion: enonic.cloud/v1alpha2
 kind: Xp7Config
 metadata:
   name: {{ $nodeGroupName }}-cluster
@@ -13,14 +13,22 @@ spec:
   nodeGroup: {{ $nodeGroupName }}
   file: com.enonic.xp.cluster.cfg
   data: |-
-  {{- if $.Values.deployment.clustered }}
-    # TODO
-  {{- else }}
+  {{- if not $.Values.deployment.clustered }}
     cluster.enabled=false
+  {{- else }}
+    cluster.enabled=true
+    node.name=${env.XP_NODE_NAME}
+    discovery.unicast.hosts={{ $.Values.deployment.discoveryHosts }}
+    network.publish.host=${env.XP_NODE_NAME}.{{ $.Values.deployment.allNodeGroupsKey }}
+    {{- if $.Values.extensions.linkerd }}
+      network.host=127.0.0.1
+    {{- else }}
+      network.host=${env.XP_NODE_NAME}.{{ $.Values.deployment.allNodeGroupsKey }}
+    {{- end }}
   {{- end }}
 
 ---
-apiVersion: enonic.cloud/v1alpha1
+apiVersion: enonic.cloud/v1alpha2
 kind: Xp7Config
 metadata:
   name: {{ $nodeGroupName }}-elasticsearch
@@ -33,14 +41,22 @@ spec:
   nodeGroup: {{ $nodeGroupName }}
   file: com.enonic.xp.elasticsearch.cfg
   data: |-
-  {{- if $.Values.deployment.clustered }}
-    # TODO
-  {{- else }}
+  {{- if not $.Values.deployment.clustered }}
     http.enabled=false
+  {{- else }}
+    node.master={{ if $nodeGroup.master }}true{{ else }}false{{ end }}
+    node.data={{ if $nodeGroup.data }}true{{ else }}false{{ end }}
+    cluster.name={{ $.Values.deployment.name }}
+    http.enabled=false
+    gateway.expected_master_nodes={{ $.Values.deployment.minimumMasterNodes }}
+    gateway.expected_data_nodes={{ $.Values.deployment.minimumDataNodes }}
+    gateway.recover_after_time=5m
+    discovery.zen.minimum_master_nodes={{ $.Values.deployment.minimumMasterNodes }}
+    network.tcp.keep_alive=true
   {{- end }}
 
 ---
-apiVersion: enonic.cloud/v1alpha1
+apiVersion: enonic.cloud/v1alpha2
 kind: Xp7Config
 metadata:
   name: {{ $nodeGroupName }}-vhosts

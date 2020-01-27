@@ -1,0 +1,398 @@
+---
+apiVersion: "v1"
+kind: "ConfigMap"
+metadata:
+  labels:
+    managedBy: "ec-operator"
+    nodeGroup: "fisk"
+    cloud: "mycloud"
+    name: "qaxp"
+    project: "myproject"
+  name: "fisk"
+data: {}
+---
+apiVersion: "v1"
+kind: "PersistentVolumeClaim"
+metadata:
+  labels:
+    cloud: "mycloud"
+    name: "qaxp"
+    project: "myproject"
+  name: "blobstore"
+spec:
+  accessModes:
+  - "ReadWriteMany"
+  resources:
+    requests:
+      storage: "2Gi"
+  storageClassName: "standard"
+---
+apiVersion: "v1"
+kind: "PersistentVolumeClaim"
+metadata:
+  labels:
+    cloud: "mycloud"
+    name: "qaxp"
+    project: "myproject"
+  name: "snapshots"
+spec:
+  accessModes:
+  - "ReadWriteMany"
+  resources:
+    requests:
+      storage: "3Gi"
+  storageClassName: "standard"
+---
+apiVersion: "v1"
+kind: "Service"
+metadata:
+  labels:
+    cloud: "mycloud"
+    name: "qaxp"
+    project: "myproject"
+  name: "all"
+spec:
+  clusterIP: "None"
+  ports:
+  - name: "xp-metrics"
+    port: 2609
+  - name: "xp-management"
+    port: 4848
+  - name: "xp-main"
+    port: 8080
+  - name: "es-api"
+    port: 9200
+  - name: "es-transport"
+    port: 9300
+  publishNotReadyAddresses: true
+  selector:
+    cloud: "mycloud"
+    name: "qaxp"
+    project: "myproject"
+  sessionAffinity: "None"
+  type: "ClusterIP"
+---
+apiVersion: "v1"
+kind: "Service"
+metadata:
+  labels:
+    nodeGroup: "fisk"
+    cloud: "mycloud"
+    name: "qaxp"
+    project: "myproject"
+  name: "fisk"
+spec:
+  clusterIP: "None"
+  ports:
+  - name: "xp-metrics"
+    port: 2609
+  - name: "xp-management"
+    port: 4848
+  - name: "xp-main"
+    port: 8080
+  - name: "es-api"
+    port: 9200
+  - name: "es-transport"
+    port: 9300
+  publishNotReadyAddresses: true
+  selector:
+    nodeGroup: "fisk"
+    cloud: "mycloud"
+    name: "qaxp"
+    project: "myproject"
+  sessionAffinity: "None"
+  type: "ClusterIP"
+---
+apiVersion: "apps/v1"
+kind: "StatefulSet"
+metadata:
+  labels:
+    nodeGroup: "fisk"
+    cloud: "mycloud"
+    name: "qaxp"
+    project: "myproject"
+  name: "fisk"
+spec:
+  podManagementPolicy: "Parallel"
+  replicas: 1
+  selector:
+    matchLabels:
+      nodeGroup: "fisk"
+      cloud: "mycloud"
+      name: "qaxp"
+      project: "myproject"
+  serviceName: "all"
+  template:
+    metadata:
+      labels:
+        nodeGroup: "fisk"
+        cloud: "mycloud"
+        name: "qaxp"
+        project: "myproject"
+    spec:
+      containers:
+      - env:
+        - name: "XP_NODE_NAME"
+          valueFrom:
+            fieldRef:
+              apiVersion: "v1"
+              fieldPath: "metadata.name"
+        - name: "XP_NODE_IP"
+          valueFrom:
+            fieldRef:
+              apiVersion: "v1"
+              fieldPath: "status.podIP"
+        - name: "SU_PASS_HASH"
+          valueFrom:
+            secretKeyRef:
+              key: "suPassHash"
+              name: "su"
+              optional: false
+        - name: "JAVA_OPTS"
+          value: "-XX:+UseContainerSupport -XX:MinRAMPercentage=20 -XX:InitialRAMPercentage=30\
+            \ -XX:MaxRAMPercentage=50 -Djsse.enableSNIExtension=true -XX:+UseConcMarkSweepGC\
+            \ -XX:+CMSParallelRemarkEnabled -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=60\
+            \ -XX:+ScavengeBeforeFullGC -XX:+CMSScavengeBeforeRemark -XX:-HeapDumpOnOutOfMemoryError\
+            \ -XX:HeapDumpPath=/enonic-xp/home/exports/dumps/oom.hprof"
+        image: "7.1.2"
+        imagePullPolicy: "IfNotPresent"
+        livenessProbe:
+          failureThreshold: 4
+          httpGet:
+            httpHeaders:
+            - name: "Host"
+              value: "healthcheck"
+            path: "/"
+            port: 8080
+            scheme: "HTTP"
+          periodSeconds: 15
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: "exp"
+        ports:
+        - containerPort: 2609
+          name: "xp-stats"
+          protocol: "TCP"
+        - containerPort: 8080
+          name: "xp-main"
+          protocol: "TCP"
+        - containerPort: 9200
+          name: "es-http"
+          protocol: "TCP"
+        - containerPort: 9300
+          name: "es-transport"
+          protocol: "TCP"
+        readinessProbe:
+          failureThreshold: 5
+          httpGet:
+            httpHeaders:
+            - name: "Host"
+              value: "healthcheck"
+            path: "/"
+            port: 8080
+            scheme: "HTTP"
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          limits:
+            cpu: "1"
+            memory: "512Mi"
+          requests:
+            cpu: "1"
+            memory: "512Mi"
+        securityContext:
+          capabilities:
+            drop:
+            - "ALL"
+          runAsNonRoot: true
+          runAsUser: 1337
+        volumeMounts:
+        - mountPath: "/enonic-xp/home/data"
+          name: "export"
+        - mountPath: "/enonic-xp/home/repo/index"
+          name: "index"
+        - mountPath: "/enonic-xp/home/work"
+          name: "work"
+        - mountPath: "/enonic-xp/home/repo/blob"
+          name: "$volumeName"
+          subPath: "mycloud-myproject-qaxp/blobstore"
+        - mountPath: "/enonic-xp/home/snapshots"
+          name: "$volumeName"
+          subPath: "mycloud-myproject-qaxp/snapshots"
+      dnsPolicy: "ClusterFirst"
+      initContainers:
+      - command:
+        - "sysctl"
+        - "-w"
+        - "vm.max_map_count=262144"
+        image: "7.1.2"
+        imagePullPolicy: "IfNotPresent"
+        name: "configure-sysctl"
+        securityContext:
+          privileged: true
+          runAsUser: 0
+      restartPolicy: "Always"
+      securityContext:
+        fsGroup: 0
+        runAsUser: 1337
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - configMap:
+          name: "fisk"
+        name: "config"
+      - name: "blobstore"
+        persistentVolumeClaim:
+          claimName: "blobstore"
+      - name: "snapshots"
+        persistentVolumeClaim:
+          claimName: "snapshots"
+  updateStrategy:
+    type: "RollingUpdate"
+  volumeClaimTemplates:
+  - apiVersion: "v1"
+    kind: "PersistentVolumeClaim"
+    metadata:
+      labels:
+        nodeGroup: "fisk"
+        cloud: "mycloud"
+        name: "qaxp"
+        project: "myproject"
+      name: "export"
+    spec:
+      accessModes:
+      - "ReadWriteOnce"
+      resources:
+        requests:
+          storage: "234Mi"
+      storageClassName: "standard"
+  - apiVersion: "v1"
+    kind: "PersistentVolumeClaim"
+    metadata:
+      labels:
+        nodeGroup: "fisk"
+        cloud: "mycloud"
+        name: "qaxp"
+        project: "myproject"
+      name: "index"
+    spec:
+      accessModes:
+      - "ReadWriteOnce"
+      resources:
+        requests:
+          storage: "200Mi"
+      storageClassName: "standard"
+  - apiVersion: "v1"
+    kind: "PersistentVolumeClaim"
+    metadata:
+      labels:
+        nodeGroup: "fisk"
+        cloud: "mycloud"
+        name: "qaxp"
+        project: "myproject"
+      name: "work"
+    spec:
+      accessModes:
+      - "ReadWriteOnce"
+      resources:
+        requests:
+          storage: "400Mi"
+      storageClassName: "standard"
+---
+kind: "Xp7App"
+apiVersion: "enonic.cloud/v1alpha1"
+metadata:
+  labels:
+    cloud: "mycloud"
+    name: "qaxp"
+    project: "myproject"
+  name: "alive"
+spec:
+  url: "https://repo.enonic.com/public/com/enonic/app/alive/2.0.0/alive-2.0.0.jar"
+---
+kind: "Xp7App"
+apiVersion: "enonic.cloud/v1alpha1"
+metadata:
+  labels:
+    cloud: "mycloud"
+    name: "qaxp"
+    project: "myproject"
+  name: "snapshotter"
+spec:
+  url: "https://repo.enonic.com/public/com/enonic/app/snapshotter/2.1.1/snapshotter-2.1.1.jar"
+---
+kind: "Xp7Config"
+apiVersion: "enonic.cloud/v1alpha2"
+metadata:
+  labels:
+    cloud: "mycloud"
+    name: "qaxp"
+    project: "myproject"
+  name: "all-system"
+spec:
+  file: "system.properties"
+  nodeGroup: "all"
+  data: "xp.suPassword = {sha512}${env.SU_PASS_HASH}\nxp.init.adminUserCreation =\
+    \ false"
+---
+kind: "Xp7Config"
+apiVersion: "enonic.cloud/v1alpha2"
+metadata:
+  labels:
+    nodeGroup: "fisk"
+    cloud: "mycloud"
+    name: "qaxp"
+    project: "myproject"
+  name: "fisk-cluster"
+spec:
+  file: "com.enonic.xp.cluster.cfg"
+  nodeGroup: "fisk"
+  data: "cluster.enabled=false"
+---
+kind: "Xp7Config"
+apiVersion: "enonic.cloud/v1alpha2"
+metadata:
+  labels:
+    nodeGroup: "fisk"
+    cloud: "mycloud"
+    name: "qaxp"
+    project: "myproject"
+  name: "fisk-elasticsearch"
+spec:
+  file: "com.enonic.xp.elasticsearch.cfg"
+  nodeGroup: "fisk"
+  data: "http.enabled=false"
+---
+kind: "Xp7Config"
+apiVersion: "enonic.cloud/v1alpha2"
+metadata:
+  labels:
+    managedBy: "ec-operator"
+    nodeGroup: "fisk"
+    cloud: "mycloud"
+    name: "qaxp"
+    project: "myproject"
+  name: "fisk-vhosts"
+spec:
+  file: "com.enonic.xp.web.vhost.cfg"
+  nodeGroup: "fisk"
+  data: "enabled = true\n# Operator will manage this Xp7Config so leave data empty"
+---
+kind: "Xp7VHost"
+apiVersion: "enonic.cloud/v1alpha2"
+metadata:
+  labels:
+    cloud: "mycloud"
+    name: "qaxp"
+    project: "myproject"
+  name: "healthcheck"
+spec:
+  host: "healthcheck"
+  skipIngress: true
+  certificate: null
+  mappings:
+  - nodeGroup: "all"
+    source: "/"
+    target: "/webapp/com.enonic.app.alive"
+    idProvider: null

@@ -53,9 +53,9 @@ public abstract class InfoXp7Deployment
     }
 
     @Value.Derived
-    public String allNodesServiceName()
+    public String allNodeGroupsKey()
     {
-        return deploymentName();
+        return cfgStr( "operator.deployment.xp.allNodes" );
     }
 
     @Value.Derived

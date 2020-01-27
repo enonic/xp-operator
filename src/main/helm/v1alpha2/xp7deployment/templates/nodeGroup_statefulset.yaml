@@ -1,5 +1,5 @@
 {{- range $nodeGroupName, $nodeGroup := .Values.deployment.spec.nodeGroups }}
-{{- $useNfs := $.Values.nfs.enabled -}}
+---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -10,7 +10,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  serviceName: {{ $nodeGroupName }}
+  serviceName: all
   replicas: {{ $nodeGroup.replicas }}
   podManagementPolicy: Parallel
   updateStrategy:
@@ -104,7 +104,18 @@ spec:
                 name: su
                 key: suPassHash
                 optional: false
-
+          {{- range $key, $value := $nodeGroup.env }}
+          - name: {{ $key }}
+            value: {{ $value }}
+          {{- end }}
+          {{- if not (index $nodeGroup.env "JAVA_OPTS") }}
+          - name: JAVA_OPTS
+            value: '-XX:+UseContainerSupport -XX:MinRAMPercentage=20 -XX:InitialRAMPercentage=30
+                        -XX:MaxRAMPercentage={{ if and $nodeGroup.master (not $nodeGroup.data) }}75{{ else }}50{{ end }} -Djsse.enableSNIExtension=true -XX:+UseConcMarkSweepGC
+                        -XX:+CMSParallelRemarkEnabled -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=60
+                        -XX:+ScavengeBeforeFullGC -XX:+CMSScavengeBeforeRemark -XX:-HeapDumpOnOutOfMemoryError
+                        -XX:HeapDumpPath={{ $.Values.heapDumpLocation }}/oom.hprof'
+          {{- end }}
           livenessProbe:
             {{- with $.Values.livenessProbe }}
             {{- toYaml . | nindent 12 }}
@@ -120,33 +131,19 @@ spec:
             - name: {{ $volumeName }}
               mountPath: {{ index $.Values.volumeMounts $volumeName }}
             {{- end }}
-            {{- if $useNfs }}
-              {{- range $volumeName, $volumeSize := $.Values.deployment.spec.nodesSharedDisk }}
-            - name: shared
+            {{- range $volumeName, $volumeSize := $.Values.deployment.spec.nodesSharedDisks }}
+            - name: $volumeName
               mountPath: {{ index $.Values.volumeMounts $volumeName }}
               subPath: {{ $.Values.deployment.name }}/{{ $volumeName }}
-              {{- end }}
-            {{- else }}
-              {{- range $volumeName, $volumeSize := $.Values.deployment.spec.nodesSharedDisk }}
-            - name: {{ $volumeName }}
-              mountPath: {{ index $.Values.volumeMounts $volumeName }}
-              {{- end }}
-            {{ end }}
+            {{- end }}
       volumes:
         - name: config
           configMap:
             name: {{ $nodeGroupName }}
-        {{- if $useNfs }}
-        - name: shared
-          nfs:
-            server: {{ .Values.nfs.server }}
-            path: {{ .Values.nfs.path }}
-        {{- else }}
-          {{- range $volumeName, $volumeSize := $.Values.deployment.spec.nodesSharedDisk }}
+        {{- range $volumeName, $volumeSize := $.Values.deployment.spec.nodesSharedDisks }}
         - name: {{ $volumeName }}
           persistentVolumeClaim:
             claimName: {{ $volumeName }}
-          {{- end }}
         {{- end }}
 
   volumeClaimTemplates:

@@ -1,0 +1,62 @@
+---
+image: "7.1.2"
+extensions:
+  linkerd: false
+  ecDns: false
+defaultLabels:
+  cloud: "mycloud"
+  project: "myproject"
+  name: "qaxp"
+defaultStorageClass: "standard"
+sharedStorageClass: "standard"
+deployment:
+  minimumDataNodes: 2
+  clustered: true
+  name: "mycloud-myproject-qaxp"
+  minimumMasterNodes: 2
+  allNodeGroupsKey: "all"
+  spec:
+    xpVersion: "7.1.2"
+    enabled: true
+    nodesSharedDisks:
+      blobstore: "1Gi"
+      snapshots: "2Gi"
+    nodeGroups:
+      master:
+        displayName: null
+        master: true
+        data: false
+        replicas: 3
+        resources:
+          cpu: "1"
+          memory: "1Gi"
+          disks:
+            export: "3Gi"
+        env: {}
+      data:
+        displayName: null
+        master: false
+        data: true
+        replicas: 2
+        resources:
+          cpu: "2"
+          memory: "2Gi"
+          disks:
+            export: "4Gi"
+            index: "5Gi"
+        env:
+          JAVA_OPTS: "My java opts"
+      frontend:
+        displayName: null
+        master: false
+        data: false
+        replicas: 3
+        resources:
+          cpu: "3"
+          memory: "3Gi"
+          disks:
+            export: "6Gi"
+            work: "7Gi"
+        env:
+          CUSTOM_ENV: "myenvvar"
+  discoveryHosts: "master-0.all,master-1.all,master-2.all"

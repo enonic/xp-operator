@@ -1,7 +1,4 @@
-{{- $useNfs := .Values.nfs.enabled -}}
-
-{{- if not $useNfs }}
-{{- range $name, $size := .Values.deployment.spec.nodesSharedDisk }}
+{{- range $name, $size := .Values.deployment.spec.nodesSharedDisks }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -12,11 +9,10 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  storageClassName: {{ $.Values.defaultStorageClass }}
+  storageClassName: {{ $.Values.sharedStorageClass }}
   accessModes:
     - ReadWriteMany
   resources:
     requests:
       storage: {{ $size }}
-{{- end }}
 {{- end }}

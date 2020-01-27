@@ -1,4 +1,5 @@
 {{- range $nodeGroupName, $nodeGroup := .Values.deployment.spec.nodeGroups }}
+---
 apiVersion: v1
 kind: Service
 metadata:
@@ -19,6 +20,14 @@ spec:
     {{- toYaml . | nindent 4 }}
     {{- end }}
   ports:
+    - name: xp-metrics
+      port: 2609
+    - name: xp-management
+      port: 4848
     - name: xp-main
       port: 8080
+    - name: es-api
+      port: 9200
+    - name: es-transport
+      port: 9300
 {{- end }}

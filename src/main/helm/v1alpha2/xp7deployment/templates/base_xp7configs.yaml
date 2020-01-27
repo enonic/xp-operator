@@ -1,4 +1,4 @@
-apiVersion: enonic.cloud/v1alpha1
+apiVersion: enonic.cloud/v1alpha2
 kind: Xp7Config
 metadata:
   name: all-system

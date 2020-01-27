@@ -15,6 +15,8 @@ import org.junit.jupiter.api.TestFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
+import io.fabric8.kubernetes.api.model.HasMetadata;
+
 import com.enonic.ec.kubernetes.TestFileSupplier;
 import com.enonic.ec.kubernetes.operator.common.Configuration;
 
@@ -36,21 +38,19 @@ public abstract class HelmTest
         chartRepository = new LocalRepository( new File( Configuration.cfgStr( "operator.helm.charts.path" ) ) );
     }
 
-    protected void test( String chartName, Object values, String expectedResultFile )
+    protected void test( String chartName, Object values, String expectedValuesFile, String expectedResultFile )
         throws IOException
     {
-        String expectedResult = Files.readString( new File( expectedResultFile ).toPath(), StandardCharsets.UTF_8 );
-        assertEquals( expectedResult, helm.template( chartRepository.get( chartName ), values ) );
-    }
+        String expectedValues = Files.readString( new File( expectedValuesFile ).toPath(), StandardCharsets.UTF_8 );
+        assertEquals( expectedValues, mapper.writeValueAsString( values ) );
 
-    protected Map<File, String> createPairs()
-    {
-        Map<File, String> pairs = new HashMap<>();
-        List<File> files = getFiles( this.getClass(), ".yaml" );
-        files.stream().
-            filter( f -> !f.getAbsolutePath().endsWith( "result.yaml" ) ).
-            forEach( f -> pairs.put( f, f.getAbsolutePath().replace( ".yaml", "_result.yaml" ) ) );
-        return pairs;
+        String expectedResult = Files.readString( new File( expectedResultFile ).toPath(), StandardCharsets.UTF_8 );
+        StringBuilder sb = new StringBuilder(  );
+        for ( HasMetadata r : helm.templateObjects( chartRepository.get( chartName ), values ) )
+        {
+            sb.append( mapper.writeValueAsString( r ) );
+        }
+        assertEquals( expectedResult, sb.toString() );
     }
 
     protected abstract String chartToTest();
@@ -62,9 +62,11 @@ public abstract class HelmTest
     public Stream<DynamicTest> createTests()
     {
         String classResourcePath = getClassFilePath( this.getClass() );
-        return createPairs().entrySet().stream().
-            map( e -> DynamicTest.dynamicTest( testName( classResourcePath, e.getKey() ), e.getKey().toURI(), () -> {
-                test( chartToTest(), createValues( mapper, e.getKey() ), e.getValue() );
-            } ) );
+        return getFiles( this.getClass(), ".yaml" ).stream().
+            filter( f -> !f.getAbsolutePath().endsWith( "result.yaml" ) ).
+            filter( f -> !f.getAbsolutePath().endsWith( "values.yaml" ) ).
+            map( f -> DynamicTest.dynamicTest( testName( classResourcePath, f ), f.toURI(), () -> {
+            test( chartToTest(), createValues( mapper, f ), f.getAbsolutePath().replace( ".yaml", "_values.yaml" ), f.getAbsolutePath().replace( ".yaml", "_result.yaml" ) );
+        } ) );
     }
 }

@@ -1,5 +1,4 @@
 imagePullPolicy: IfNotPresent
-defaultStorageClass: standard
 
 livenessProbe:
   failureThreshold: 4
@@ -35,10 +34,7 @@ volumeMounts:
   blobstore: /enonic-xp/home/repo/blob
   snapshots: /enonic-xp/home/snapshots
 
-nfs:
-  enabled: false
-  server: 127.0.0.1
-  path: /default
+heapDumpLocation: /enonic-xp/home/exports/dumps
 
 # Filled in by operator
 # deployment:
