@@ -49,7 +49,7 @@ public abstract class ResourceInfoNamespaced<T extends HasMetadata, D extends Di
         Optional<V1alpha2Xp7Deployment> res = caches().getDeploymentCache().get( null, getXpDeploymentName() );
         if ( res.isEmpty() )
         {
-            throw new XpDeploymentNotFound( getXpDeploymentName() );
+            throw new Xp7DeploymentNotFound( getXpDeploymentName() );
         }
         return res.get();
     }

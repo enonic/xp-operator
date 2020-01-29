@@ -62,7 +62,7 @@ public abstract class CommandXpVHostConfigApply
         // Collect all mappings
         List<Mapping> mappings = new LinkedList<>();
 
-        caches().getvHostCache().getByNamespace( info.deploymentInfo().namespaceName() ).
+        caches().getVHostCache().getByNamespace( info.deploymentInfo().namespaceName() ).
             forEach( v -> v.getSpec().mappings().
                 forEach( m -> mappings.add( ImmutableMapping.builder().
                     host( v.getSpec().host() ).

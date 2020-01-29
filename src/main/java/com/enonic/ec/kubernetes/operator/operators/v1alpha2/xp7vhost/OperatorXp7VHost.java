@@ -12,19 +12,21 @@ import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.ec.kubernetes.operator.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHost;
+import com.enonic.ec.kubernetes.operator.helm.BaseValues;
 import com.enonic.ec.kubernetes.operator.helm.ChartRepository;
+import com.enonic.ec.kubernetes.operator.helm.Helm;
+import com.enonic.ec.kubernetes.operator.kubectl.newapply.mapping.ImmutableKubeCommandBuilder;
 import com.enonic.ec.kubernetes.operator.operators.OperatorNamespaced;
 import com.enonic.ec.kubernetes.operator.operators.ResourceInfoNamespaced;
 import com.enonic.ec.kubernetes.operator.operators.cache.Caches;
 import com.enonic.ec.kubernetes.operator.operators.clients.Clients;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7vhost.commands.ImmutableCommandXpVHostConfigApply;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7vhost.commands.ImmutableCommandXpVHostIngressTemplateApply;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7vhost.info.DiffXp7VHost;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7vhost.info.ImmutableInfoXp7VHost;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @ApplicationScoped
-public class OperatorXp7VHostHelm
+public class OperatorXp7VHost
     extends OperatorNamespaced
 {
     @Inject
@@ -34,13 +36,15 @@ public class OperatorXp7VHostHelm
     Caches caches;
 
     @Inject
+    Helm helm;
+
+    @Inject
     @Named("local")
     ChartRepository chartRepository;
 
     void onStartup( @Observes StartupEvent _ev )
     {
-        // TODO: Enable
-        //xp7VHostCache.addWatcher( this::watchVHosts );
+        caches.getVHostCache().addWatcher( this::watchVHosts );
     }
 
     private void watchVHosts( final Watcher.Action action, final String s, final Optional<V1alpha2Xp7VHost> oldResource,
@@ -58,10 +62,15 @@ public class OperatorXp7VHostHelm
     protected void createCommands( ImmutableCombinedCommand.Builder commandBuilder,
                                    ResourceInfoNamespaced<V1alpha2Xp7VHost, DiffXp7VHost> info )
     {
-
-        ImmutableCommandXpVHostIngressTemplateApply.builder().
+        ImmutableKubeCommandBuilder.builder().
             clients( clients ).
-            info( info ).
+            helm( helm ).
+            chart( chartRepository.get( "v1alpha2/xp7vhost" ) ).
+            namespace( info.deploymentInfo().namespaceName() ).
+            valueBuilder( ImmutableXp7VHostValues.builder().
+                baseValues( new BaseValues() ).
+                info( info ).
+                build() ).
             build().
             addCommands( commandBuilder );
 

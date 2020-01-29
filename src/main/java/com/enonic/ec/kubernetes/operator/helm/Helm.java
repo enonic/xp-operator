@@ -126,7 +126,7 @@ public class Helm
         {
             int exit = process.waitFor();
             String output = String.join( System.lineSeparator(), outReader.lines().collect( Collectors.toList() ) );
-            log.info( "Helm output:\n" + output );
+            log.debug( "Helm output:\n" + output );
             if ( exit != 0 )
             {
                 throw new IOException( output );

@@ -8,7 +8,7 @@ spec:
   certificate:
     authority: selfSigned
   mappings:
-    - node: main
+    - nodeGroup: fisk
       source: /
       target: /admin
       idProvider: system

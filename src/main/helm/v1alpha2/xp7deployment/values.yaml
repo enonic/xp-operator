@@ -35,6 +35,7 @@ volumeMounts:
   snapshots: /enonic-xp/home/snapshots
 
 heapDumpLocation: /enonic-xp/home/exports/dumps
+configLocation: /enonic-xp/home/config
 
 # Filled in by operator
 # deployment:

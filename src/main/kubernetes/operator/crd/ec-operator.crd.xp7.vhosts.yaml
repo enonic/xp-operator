@@ -25,6 +25,7 @@ spec:
                   type: string
                 certificate:
                   type: object
+                  nullable: true
                   properties:
                     authority:
                       type: string
@@ -41,6 +42,7 @@ spec:
                         type: string
                       idProvider:
                         type: string
+                        nullable: true
     - name: v1alpha1
       served: true
       storage: false
@@ -55,6 +57,7 @@ spec:
                   type: string
                 certificate:
                   type: object
+                  nullable: true
                   properties:
                     authority:
                       type: string
@@ -71,6 +74,7 @@ spec:
                         type: string
                       idProvider:
                         type: string
+                        nullable: true
   additionalPrinterColumns:
     - name: Host
       type: string

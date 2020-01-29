@@ -6,6 +6,7 @@ import java.io.IOException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.deployment.V1alpha2Xp7Deployment;
+import com.enonic.ec.kubernetes.operator.helm.BaseValues;
 import com.enonic.ec.kubernetes.operator.helm.HelmTest;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7deployment.ImmutableXp7DeploymentValues;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7deployment.info.ImmutableInfoXp7Deployment;
@@ -29,9 +30,11 @@ public class Xp7DeploymentTest
             newResource( resource ).
             build();
         return ImmutableXp7DeploymentValues.builder().
-            info( info ).
+            baseValues( new BaseValues() ).
             imageTemplate( "%s" ).
+            info( info ).
             build().
-            values();
+            buildNewValues().
+            get();
     }
 }

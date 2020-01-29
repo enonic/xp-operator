@@ -5,12 +5,11 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.stream.Stream;
-
-import javax.enterprise.event.Observes;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,21 +20,19 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.FilterWatchListDeletable;
-import io.quarkus.runtime.StartupEvent;
 
-public abstract class Cache<T extends HasMetadata>
+public abstract class Cache<T extends HasMetadata, L extends KubernetesResourceList<T>>
 {
     private final static Logger log = LoggerFactory.getLogger( Cache.class );
 
-    private final Executor executor;
+    protected final Executor executor;
 
-    private final List<OnAction<T>> watchers;
+    protected final List<OnAction<T>> watchers;
 
     protected final Map<String, HasMetadata> cache;
 
     public Cache()
     {
-
         executor = Executors.newSingleThreadExecutor();
         watchers = new LinkedList<>();
         cache = new HashMap<>();
@@ -46,78 +43,71 @@ public abstract class Cache<T extends HasMetadata>
         watchers.add( watcher );
     }
 
-    @SuppressWarnings("unchecked")
-    void onStartup( @Observes StartupEvent _ev )
+    protected void startWatcher( FilterWatchListDeletable<T, L, Boolean, Watch, Watcher<T>> filter, Watcher<T> watcher )
     {
-        ((FilterWatchListDeletable<? extends HasMetadata, KubernetesResourceList<? extends HasMetadata>, Boolean, Watch, Watcher<? extends HasMetadata>>)filter()).list().getItems().forEach( r -> cache.put( r.getMetadata().getUid(), r ) );
-        ((FilterWatchListDeletable<? extends HasMetadata, KubernetesResourceList<? extends HasMetadata>, Boolean, Watch, Watcher<? extends HasMetadata>>)filter()).watch( new Watcher<>()
+        filter.list().getItems().forEach( r -> cache.put( r.getMetadata().getUid(), r ) );
+        filter.watch( watcher );
+    }
+
+    @SuppressWarnings("unchecked")
+    protected void watcherEventRecieved( final Watcher.Action action, final T resource )
+    {
+        try
         {
-            @SuppressWarnings("unchecked")
-            @Override
-            public void eventReceived( final Action action, final HasMetadata resource )
+            String uid = resource.getMetadata().getUid();
+            final Optional<T> oldResource = (Optional<T>) Optional.ofNullable( cache.get( uid ) );
+
+            if ( oldResource.isPresent() )
             {
-                if ( !getResourceClass().isInstance( resource ) )
+                // This is an update
+                int knownResourceVersion = Integer.parseInt( oldResource.get().getMetadata().getResourceVersion() );
+                int receivedResourceVersion = Integer.parseInt( resource.getMetadata().getResourceVersion() );
+                if ( knownResourceVersion > receivedResourceVersion )
                 {
+                    // This is an old event
                     return;
                 }
-                try
-                {
-                    String uid = resource.getMetadata().getUid();
-                    final Optional<T> oldResource = (Optional<T>) Optional.ofNullable( cache.get( uid ) );
-                    if ( oldResource.isPresent() )
-                    {
-                        // This is an update
-                        int knownResourceVersion = Integer.parseInt( oldResource.get().getMetadata().getResourceVersion() );
-                        int receivedResourceVersion = Integer.parseInt( resource.getMetadata().getResourceVersion() );
-                        if ( knownResourceVersion > receivedResourceVersion )
-                        {
-                            // This is an old event
-                            return;
-                        }
-                    }
-
-                    log.debug( "Resource " + uid + " " + action + " " + resource.getKind() + ": " + resource.getMetadata().getName() );
-                    if ( action == Watcher.Action.ADDED || action == Watcher.Action.MODIFIED )
-                    {
-                        cache.put( uid, resource );
-                        watchers.forEach(
-                            watcher -> executor.execute( () -> watcher.accept( action, uid, oldResource, Optional.of( (T) resource ) ) ) );
-                    }
-                    else if ( action == Watcher.Action.DELETED )
-                    {
-                        cache.remove( uid );
-                        watchers.forEach(
-                            watcher -> executor.execute( () -> watcher.accept( action, uid, oldResource, Optional.of( (T) resource ) ) ) );
-                    }
-                    else
-                    {
-                        // This should never happen, best just to let kubernetes restart the operator
-                        log.error(
-                            "Received unexpected event " + action + " for " + resource.getMetadata().getUid() + " " + resource.getKind() +
-                                ": " + resource.getMetadata().getName() );
-                        System.exit( -1 );
-                    }
-                }
-                catch ( Exception e )
-                {
-                    // Best just to let kubernetes restart the operator
-                    log.error( "Something when terribly wrong", e );
-                    System.exit( -1 );
-                }
             }
 
-            @Override
-            public void onClose( final KubernetesClientException cause )
+            log.debug( "Resource " + uid + " " + action + " " + resource.getKind() + ": " + resource.getMetadata().getName() );
+            if ( action == Watcher.Action.ADDED || action == Watcher.Action.MODIFIED )
             {
-                if ( cause != null )
-                {
-                    // This means the socket closed and we have a problem, best to
-                    // let kubernetes just restart the operator pod.
-                    cause.printStackTrace();
-                    System.exit( -1 );
-                }
+                cache.put( uid, resource );
+                watchers.forEach(
+                    watcher -> executor.execute( () -> watcher.accept( action, uid, oldResource, Optional.of( (T) resource ) ) ) );
             }
-        } );
+            else if ( action == Watcher.Action.DELETED )
+            {
+                cache.remove( uid );
+                watchers.forEach(
+                    watcher -> executor.execute( () -> watcher.accept( action, uid, oldResource, Optional.of( (T) resource ) ) ) );
+            }
+            else
+            {
+                // This should never happen, best just to let kubernetes restart the operator
+                log.error(
+                    "Received unexpected event " + action + " for " + resource.getMetadata().getUid() + " " + resource.getKind() + ": " +
+                        resource.getMetadata().getName() );
+                System.exit( -1 );
+            }
+        }
+        catch ( Exception e )
+        {
+            // Best just to let kubernetes restart the operator
+            log.error( "Something when terribly wrong", e );
+            System.exit( -1 );
+        }
+    }
+
+    protected void watcherOnClose( final KubernetesClientException cause )
+    {
+        if ( cause != null )
+        {
+            // This means the socket closed and we have a problem, best to
+            // let kubernetes just restart the operator pod.
+            cause.printStackTrace();
+            System.exit( -1 );
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -129,16 +119,13 @@ public abstract class Cache<T extends HasMetadata>
     public Optional<T> get( String namespace, String name )
     {
         return getCollection().stream().
-            filter( r -> namespace == null || namespace.equals( r.getMetadata().getNamespace() ) ).
+            filter( r -> Objects.equals( namespace, r.getMetadata().getNamespace() ) ).
             filter( r -> name.equals( r.getMetadata().getName() ) ).findFirst();
     }
 
     public Stream<T> getByNamespace( String namespace )
     {
-        return getCollection().stream().filter( r -> namespace.equals( r ) );
+        return getCollection().stream().filter( r -> Objects.equals( namespace, r.getMetadata().getNamespace() ) );
     }
 
-    protected abstract Class<T> getResourceClass();
-
-    protected abstract FilterWatchListDeletable filter();
 }

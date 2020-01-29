@@ -1,4 +1,4 @@
-apiVersion: enonic.cloud/v1alpha1
+apiVersion: enonic.cloud/v1alpha2
 kind: Xp7Deployment
 metadata:
   name: mycloud-myproject-qaxp
@@ -9,14 +9,20 @@ metadata:
 spec:
   enabled: true
   xpVersion: 7.1.2
-  nodesSharedDisk: 1Gi
-  nodes:
-    main:
-      displayName: "My Node"
-      type: ["MASTER", "DATA", "FRONTEND"]
+
+  nodesSharedDisks:
+    blobstore: 100Mi
+    snapshots: 100Mi
+
+  nodeGroups:
+    fisk:
+      data: true
+      master: true
       replicas: 1
       resources:
         cpu: "1"
         memory: 512Mi
         disks:
-          index: 200Mi
+          export: 100Mi
+          index: 100Mi
+          work: 100Mi

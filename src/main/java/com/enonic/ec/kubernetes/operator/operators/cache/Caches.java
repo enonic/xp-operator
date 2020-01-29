@@ -55,7 +55,7 @@ public class Caches
         return ingressCache;
     }
 
-    public VHostCache getvHostCache()
+    public VHostCache getVHostCache()
     {
         return vHostCache;
     }

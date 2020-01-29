@@ -1,4 +1,4 @@
-package com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7app;
+package com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7config;
 
 import java.util.Optional;
 
@@ -10,51 +10,51 @@ import io.fabric8.kubernetes.client.Watcher;
 import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.ec.kubernetes.operator.common.commands.ImmutableCombinedCommand;
-import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha1.app.V1alpha1Xp7App;
+import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.config.V1alpha2Xp7Config;
 import com.enonic.ec.kubernetes.operator.operators.OperatorNamespaced;
 import com.enonic.ec.kubernetes.operator.operators.ResourceInfoNamespaced;
 import com.enonic.ec.kubernetes.operator.operators.cache.Caches;
 import com.enonic.ec.kubernetes.operator.operators.clients.Clients;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7app.commands.ImmutableCommandXpAppApplyAll;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7app.info.DiffXp7App;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7app.info.ImmutableInfoXp7App;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7config.commands.ImmutableCommandXpConfigApplyAll;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7config.info.DiffXp7Config;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7config.info.ImmutableInfoXp7Config;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @ApplicationScoped
-public class OperatorXp7App
+public class OperatorXp7Config
     extends OperatorNamespaced
 {
     @Inject
-    Caches caches;
+    Clients clients;
 
     @Inject
-    Clients clients;
+    Caches caches;
 
     void onStartup( @Observes StartupEvent _ev )
     {
-        caches.getAppCache().addWatcher( this::watchApps );
+        caches.getConfigCache().addWatcher( this::watchXpConfig );
     }
 
-    private void watchApps( final Watcher.Action action, final String s, final Optional<V1alpha1Xp7App> oldResource,
-                            final Optional<V1alpha1Xp7App> newResource )
+    private void watchXpConfig( final Watcher.Action action, final String s, final Optional<V1alpha2Xp7Config> oldResource,
+                                final Optional<V1alpha2Xp7Config> newResource )
     {
-        Optional<ResourceInfoNamespaced<V1alpha1Xp7App, DiffXp7App>> i = getInfo( action, () -> ImmutableInfoXp7App.builder().
+        Optional<ResourceInfoNamespaced<V1alpha2Xp7Config, DiffXp7Config>> i = getInfo( action, () -> ImmutableInfoXp7Config.builder().
             caches( caches ).
             oldResource( oldResource ).
             newResource( newResource ).
             build() );
 
         i.ifPresent( info -> {
-            // Because multiple apps could potentially be deployed at the same time,
+            // Because multiple configs could potentially be deployed at the same time,
             // lets use the stall function to let them accumulate before we update config
             stallAndRunCommands( ( commandBuilder ) -> createCommands( commandBuilder, info ) );
         } );
     }
 
     protected void createCommands( ImmutableCombinedCommand.Builder commandBuilder,
-                                   ResourceInfoNamespaced<V1alpha1Xp7App, DiffXp7App> info )
+                                   ResourceInfoNamespaced<V1alpha2Xp7Config, DiffXp7Config> info )
     {
-        ImmutableCommandXpAppApplyAll.builder().
+        ImmutableCommandXpConfigApplyAll.builder().
             clients( clients ).
             caches( caches ).
             info( info ).

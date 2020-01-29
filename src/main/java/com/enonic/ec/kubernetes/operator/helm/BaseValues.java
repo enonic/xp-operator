@@ -1,42 +1,29 @@
-package com.enonic.ec.kubernetes.operator.common.info;
+package com.enonic.ec.kubernetes.operator.helm;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.immutables.value.Value;
-
 import com.google.common.base.Preconditions;
 
 import static com.enonic.ec.kubernetes.operator.common.Configuration.cfgStr;
 import static com.enonic.ec.kubernetes.operator.common.Configuration.globalConfig;
 
-public abstract class ValueBuilder<R extends ResourceInfo>
+public class BaseValues
+    extends HashMap<String, Object>
 {
     private static String keyPrefix = "operator.helm.charts.Values.";
 
-    public abstract R info();
-
-    @Value.Derived
-    public Map<String, Object> baseValues()
+    public BaseValues()
     {
-        Map<String, Object> values = new HashMap<>();
+        super();
         globalConfig().getPropertyNames().forEach( name -> {
             if ( name.startsWith( keyPrefix ) )
             {
-                handleKey( values, name.replace( keyPrefix, "" ), cfgStr( name ) );
+                handleKey( this, name.replace( keyPrefix, "" ), cfgStr( name ) );
             }
         } );
-        return values;
-    }
-
-    @Value.Derived
-    public Object values()
-    {
-        Map<String, Object> values = new HashMap<>( baseValues() );
-        createValues( values );
-        return values;
     }
 
     private void handleKey( Map<String, Object> values, final String name, final String value )
@@ -71,6 +58,4 @@ public abstract class ValueBuilder<R extends ResourceInfo>
             values.put( split.get( 0 ), tmp );
         }
     }
-
-    protected abstract void createValues( final Map<String, Object> values );
 }

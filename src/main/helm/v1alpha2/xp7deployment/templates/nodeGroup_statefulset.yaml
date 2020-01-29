@@ -102,7 +102,7 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: su
-                key: suPassHash
+                key: passHash
                 optional: false
           {{- range $key, $value := $nodeGroup.env }}
           - name: {{ $key }}
@@ -127,12 +127,14 @@ spec:
             {{- end }}
 
           volumeMounts:
+            - name: config
+              mountPath: {{ $.Values.configLocation }}
             {{- range $volumeName, $volumeSize := $nodeGroup.resources.disks }}
             - name: {{ $volumeName }}
               mountPath: {{ index $.Values.volumeMounts $volumeName }}
             {{- end }}
             {{- range $volumeName, $volumeSize := $.Values.deployment.spec.nodesSharedDisks }}
-            - name: $volumeName
+            - name: {{ $volumeName }}
               mountPath: {{ index $.Values.volumeMounts $volumeName }}
               subPath: {{ $.Values.deployment.name }}/{{ $volumeName }}
             {{- end }}

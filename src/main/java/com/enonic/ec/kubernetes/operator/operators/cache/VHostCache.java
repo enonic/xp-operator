@@ -1,15 +1,23 @@
 package com.enonic.ec.kubernetes.operator.operators.cache;
 
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
-import io.fabric8.kubernetes.client.dsl.FilterWatchListDeletable;
+import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.fabric8.kubernetes.client.Watch;
+import io.fabric8.kubernetes.client.Watcher;
+import io.fabric8.kubernetes.client.dsl.FilterWatchListMultiDeletable;
+import io.quarkus.runtime.StartupEvent;
 
+import com.enonic.ec.kubernetes.operator.common.resources.Cache;
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHost;
 import com.enonic.ec.kubernetes.operator.operators.clients.Clients;
-import com.enonic.ec.kubernetes.operator.common.resources.Cache;
+import com.enonic.ec.kubernetes.operator.operators.clients.V1alpha2Xp7VHostList;
 
+@Singleton
 public class VHostCache
-    extends Cache<V1alpha2Xp7VHost>
+    extends Cache<V1alpha2Xp7VHost, V1alpha2Xp7VHostList>
 {
     private Clients clients;
 
@@ -19,18 +27,24 @@ public class VHostCache
         this.clients = clients;
     }
 
-    @Override
-    protected Class<V1alpha2Xp7VHost> getResourceClass()
+    protected void onStartup( @Observes StartupEvent _ev )
     {
-        return V1alpha2Xp7VHost.class;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    protected FilterWatchListDeletable filter()
-    {
-        return clients.
+        FilterWatchListMultiDeletable<V1alpha2Xp7VHost, V1alpha2Xp7VHostList, Boolean, Watch, Watcher<V1alpha2Xp7VHost>> filter = clients.
             getVHostClient().
             inAnyNamespace();
+        startWatcher( filter, new Watcher<>()
+        {
+            @Override
+            public void eventReceived( final Action action, final V1alpha2Xp7VHost v1alpha2Xp7VHost )
+            {
+                watcherEventRecieved( action, v1alpha2Xp7VHost );
+            }
+
+            @Override
+            public void onClose( final KubernetesClientException e )
+            {
+                watcherOnClose( e );
+            }
+        } );
     }
 }

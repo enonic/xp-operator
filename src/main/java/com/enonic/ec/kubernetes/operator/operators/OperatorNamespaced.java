@@ -49,7 +49,7 @@ public abstract class OperatorNamespaced
         {
             return Optional.of( s.get() );
         }
-        catch ( XpDeploymentNotFound e )
+        catch ( Xp7DeploymentNotFound e )
         {
             if ( action != Watcher.Action.DELETED )
             {

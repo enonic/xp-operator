@@ -12,9 +12,9 @@ import com.enonic.ec.kubernetes.operator.common.Configuration;
 import com.enonic.ec.kubernetes.operator.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.operator.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.config.V1alpha2Xp7Config;
+import com.enonic.ec.kubernetes.operator.operators.ResourceInfoNamespaced;
 import com.enonic.ec.kubernetes.operator.operators.cache.Caches;
 import com.enonic.ec.kubernetes.operator.operators.clients.Clients;
-import com.enonic.ec.kubernetes.operator.operators.ResourceInfoNamespaced;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7config.info.DiffXp7Config;
 
 
@@ -40,7 +40,7 @@ public abstract class CommandXpConfigApplyAll
 
             // Update ConfigMap
             ImmutableCommandXpConfigApply.builder().
-                clients(clients()).
+                clients( clients() ).
                 configMap( configMap ).
                 xpConfigResources( allXpConfigs ).
                 build().

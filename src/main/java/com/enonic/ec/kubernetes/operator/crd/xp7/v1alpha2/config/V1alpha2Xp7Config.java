@@ -8,6 +8,11 @@ import io.fabric8.kubernetes.client.CustomResource;
 public class V1alpha2Xp7Config
     extends CustomResource
 {
+    public V1alpha2Xp7Config()
+    {
+        setKind( "Xp7Config" );
+    }
+
     private V1alpha2Xp7ConfigSpec spec;
 
     public V1alpha2Xp7ConfigSpec getSpec()

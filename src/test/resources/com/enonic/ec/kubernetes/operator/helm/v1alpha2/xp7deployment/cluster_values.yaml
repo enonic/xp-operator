@@ -3,12 +3,12 @@ image: "7.1.2"
 extensions:
   linkerd: false
   ecDns: false
+defaultStorageClass: "standard"
+sharedStorageClass: "standard"
 defaultLabels:
   cloud: "mycloud"
   project: "myproject"
   name: "qaxp"
-defaultStorageClass: "standard"
-sharedStorageClass: "standard"
 deployment:
   minimumDataNodes: 2
   clustered: true

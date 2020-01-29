@@ -8,14 +8,13 @@ import java.util.Map;
 import org.immutables.value.Value;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.client.KubernetesClient;
 
 import com.enonic.ec.kubernetes.operator.common.Configuration;
 import com.enonic.ec.kubernetes.operator.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.operator.common.commands.ImmutableCombinedCommand;
-import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha1.config.V1alpha1Xp7Config;
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.config.V1alpha2Xp7Config;
-import com.enonic.ec.kubernetes.operator.kubectl.apply.ImmutableCommandApplyConfigMap;
+import com.enonic.ec.kubernetes.operator.kubectl.newapply.base.KubeCommandResource;
+import com.enonic.ec.kubernetes.operator.kubectl.newapply.mapping.CommandMapper;
 import com.enonic.ec.kubernetes.operator.operators.clients.Clients;
 
 @Value.Immutable
@@ -41,13 +40,9 @@ public abstract class CommandXpConfigApply
         if ( !newData.equals( oldData ) )
         {
             configMap().setData( newData );
-            commandBuilder.addCommand( ImmutableCommandApplyConfigMap.builder().
-                clients( clients() ).
-                canSkipOwnerReference( true ). // Config map is owned by the XpDeployment
-                namespace( configMap().getMetadata().getNamespace() ).
-                name( configMap().getMetadata().getName() ).
-                data( newData ).
-                build() );
+            KubeCommandResource<ConfigMap> cmd =
+                CommandMapper.getCommandClass( clients(), configMap().getMetadata().getNamespace(), configMap() );
+            commandBuilder.addCommand( cmd.apply() );
         }
     }
 }

@@ -26,6 +26,7 @@ public class CrdSerializerInitialization
 
     private void v1alpha1()
     {
+        // TODO: FIX RACE CONDITION
         String apiVersion = cfgStr( "operator.crd.group" ) + "/" + cfgStr( "operator.crd.v1alpha1.apiVersion" );
         KubernetesDeserializer.registerCustomKind( apiVersion, cfgStr( "operator.crd.apps.kind" ), V1alpha1Xp7App.class );
         KubernetesDeserializer.registerCustomKind( apiVersion, cfgStr( "operator.crd.configs.kind" ), V1alpha1Xp7Config.class );

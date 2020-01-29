@@ -1,3 +1,4 @@
+{{- if not .Values.vhost.spec.skipIngress }}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
@@ -5,18 +6,18 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: nginx
     ingress.kubernetes.io/rewrite-target: /
-    {{- if index $.Values "extensions.ecDns" }}
+    {{- if .Values.extensions.ecDns }}
     enonic.cloud/dns.hostname: {{ .Values.vhost.spec.host }}
     {{- end }}
     {{- if .Values.vhost.issuer }}
     cert-manager.io/cluster-issuer: {{ .Values.vhost.issuer }}
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     {{- end }}
-    {{- if index $.Values "extensions.linkerd" }}
+    {{- if .Values.extensions.linkerd }}
     nginx.ingress.kubernetes.io/configuration-snippet: |
-    proxy_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;
-    proxy_hide_header l5d-remote-ip;
-    proxy_hide_header l5d-server-id;
+      proxy_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;
+      proxy_hide_header l5d-remote-ip;
+      proxy_hide_header l5d-server-id;
     {{- end }}
 spec:
   rules:
@@ -35,3 +36,4 @@ spec:
         - {{ .Values.vhost.spec.host }}
       secretName: {{ .Values.vhost.name }}
   {{- end }}
+{{- end }}
