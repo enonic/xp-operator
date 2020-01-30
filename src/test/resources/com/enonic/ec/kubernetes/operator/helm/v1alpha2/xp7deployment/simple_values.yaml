@@ -1,6 +1,10 @@
 ---
 image: "7.1.2"
 extensions:
+  ingress:
+    DDOS: false
+    stickySession: false
+    caching: false
   linkerd: false
   ecDns: false
 defaultStorageClass: "standard"

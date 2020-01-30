@@ -109,9 +109,8 @@ public abstract class Cache<T extends HasMetadata, L extends KubernetesResourceL
             System.exit( -1 );
         }
     }
-
-    @SuppressWarnings("unchecked")
-    private Collection<T> getCollection()
+    
+    public Collection<T> getCollection()
     {
         return (Collection<T>) cache.values();
     }
@@ -127,5 +126,4 @@ public abstract class Cache<T extends HasMetadata, L extends KubernetesResourceL
     {
         return getCollection().stream().filter( r -> Objects.equals( namespace, r.getMetadata().getNamespace() ) );
     }
-
 }

@@ -31,7 +31,8 @@ public class ApiExceptionHandler
         {
             return "Field unrecognized: " + ( (UnrecognizedPropertyException) ex ).getPropertyName();
         }
-        if ( ex instanceof JsonMappingException ) {
+        if ( ex instanceof JsonMappingException )
+        {
             return ( (JsonMappingException) ex ).getOriginalMessage();
         }
 

@@ -231,7 +231,7 @@ spec:
         - name: "SU_PASS_HASH"
           valueFrom:
             secretKeyRef:
-              key: "suPassHash"
+              key: "passHash"
               name: "su"
               optional: false
         - name: "JAVA_OPTS"
@@ -291,15 +291,17 @@ spec:
           runAsNonRoot: true
           runAsUser: 1337
         volumeMounts:
+        - mountPath: "/enonic-xp/home/config"
+          name: "config"
         - mountPath: "/enonic-xp/home/data"
           name: "export"
         - mountPath: "/enonic-xp/home/repo/index"
           name: "index"
         - mountPath: "/enonic-xp/home/repo/blob"
-          name: "$volumeName"
+          name: "blobstore"
           subPath: "mycloud-myproject-qaxp/blobstore"
         - mountPath: "/enonic-xp/home/snapshots"
-          name: "$volumeName"
+          name: "snapshots"
           subPath: "mycloud-myproject-qaxp/snapshots"
       dnsPolicy: "ClusterFirst"
       initContainers:
@@ -406,7 +408,7 @@ spec:
         - name: "SU_PASS_HASH"
           valueFrom:
             secretKeyRef:
-              key: "suPassHash"
+              key: "passHash"
               name: "su"
               optional: false
         - name: "CUSTOM_ENV"
@@ -472,15 +474,17 @@ spec:
           runAsNonRoot: true
           runAsUser: 1337
         volumeMounts:
+        - mountPath: "/enonic-xp/home/config"
+          name: "config"
         - mountPath: "/enonic-xp/home/data"
           name: "export"
         - mountPath: "/enonic-xp/home/work"
           name: "work"
         - mountPath: "/enonic-xp/home/repo/blob"
-          name: "$volumeName"
+          name: "blobstore"
           subPath: "mycloud-myproject-qaxp/blobstore"
         - mountPath: "/enonic-xp/home/snapshots"
-          name: "$volumeName"
+          name: "snapshots"
           subPath: "mycloud-myproject-qaxp/snapshots"
       dnsPolicy: "ClusterFirst"
       initContainers:
@@ -587,7 +591,7 @@ spec:
         - name: "SU_PASS_HASH"
           valueFrom:
             secretKeyRef:
-              key: "suPassHash"
+              key: "passHash"
               name: "su"
               optional: false
         - name: "JAVA_OPTS"
@@ -651,13 +655,15 @@ spec:
           runAsNonRoot: true
           runAsUser: 1337
         volumeMounts:
+        - mountPath: "/enonic-xp/home/config"
+          name: "config"
         - mountPath: "/enonic-xp/home/data"
           name: "export"
         - mountPath: "/enonic-xp/home/repo/blob"
-          name: "$volumeName"
+          name: "blobstore"
           subPath: "mycloud-myproject-qaxp/blobstore"
         - mountPath: "/enonic-xp/home/snapshots"
-          name: "$volumeName"
+          name: "snapshots"
           subPath: "mycloud-myproject-qaxp/snapshots"
       dnsPolicy: "ClusterFirst"
       initContainers:
@@ -896,4 +902,22 @@ spec:
   - nodeGroup: "all"
     source: "/"
     target: "/webapp/com.enonic.app.alive"
+    idProvider: null
+---
+kind: "Xp7VHost"
+apiVersion: "enonic.cloud/v1alpha2"
+metadata:
+  labels:
+    cloud: "mycloud"
+    name: "qaxp"
+    project: "myproject"
+  name: "localhost"
+spec:
+  host: "localhost"
+  skipIngress: true
+  certificate: null
+  mappings:
+  - nodeGroup: "all"
+    source: "/"
+    target: "/"
     idProvider: null

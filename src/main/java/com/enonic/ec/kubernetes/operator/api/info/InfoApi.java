@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -51,7 +52,7 @@ public class InfoApi
         res.put( "apiVersion", "v1" );
         res.put( "groupVersion", group + "/" + apiVersion );
         res.put( "kind", "APIResourceList" );
-        res.put( "resources", Arrays.asList(admissionResource, conversionResource) );
+        res.put( "resources", Arrays.asList( admissionResource, conversionResource ) );
         return res;
     }
 
@@ -62,7 +63,7 @@ public class InfoApi
         throws IOException
     {
         Properties git = new Properties();
-        git.load( getClass().getClassLoader().getResourceAsStream( "git.properties" ) );
+        git.load( Objects.requireNonNull( getClass().getClassLoader().getResourceAsStream( "git.properties" ) ) );
         Map<String, String> res = new HashMap<>();
 
         res.put( "buildDate", git.getProperty( "git.build.time" ) );
