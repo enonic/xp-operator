@@ -10,11 +10,13 @@ public class V1alpha1Xp7Config
 {
     private V1alpha1Xp7ConfigSpec spec;
 
+    @SuppressWarnings("unused")
     public V1alpha1Xp7ConfigSpec getSpec()
     {
         return spec;
     }
 
+    @SuppressWarnings("unused")
     public void setSpec( V1alpha1Xp7ConfigSpec spec )
     {
         this.spec = spec;

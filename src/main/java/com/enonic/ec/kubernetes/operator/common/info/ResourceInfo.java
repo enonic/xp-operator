@@ -55,11 +55,13 @@ public abstract class ResourceInfo<T extends HasMetadata, D extends Diff<T>>
         return createOwnerReference( resource() );
     }
 
+    @SuppressWarnings("WeakerAccess")
     public OwnerReference createOwnerReference( HasMetadata owner )
     {
         return new OwnerReference( owner.getApiVersion(), true, true, owner.getKind(), owner.getMetadata().getName(),
                                    owner.getMetadata().getUid() );
     }
 
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     protected abstract D createDiff( final Optional<T> oldResource, final Optional<T> newResource );
 }

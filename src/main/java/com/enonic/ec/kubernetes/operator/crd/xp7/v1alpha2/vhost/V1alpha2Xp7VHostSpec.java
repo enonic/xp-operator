@@ -32,6 +32,7 @@ public abstract class V1alpha2Xp7VHostSpec
 
     public abstract List<V1alpha2Xp7VHostSpecMapping> mappings();
 
+    @SuppressWarnings("DuplicatedCode")
     @Value.Check
     protected void check()
     {
@@ -41,8 +42,8 @@ public abstract class V1alpha2Xp7VHostSpec
         {
             Preconditions.checkState( certificate() == null, "Field 'spec.certificate' cannot be set if ingress is skipped" );
         }
-        mappings().stream().collect( Collectors.groupingBy( V1alpha2Xp7VHostSpecMapping::source ) ).entrySet().
-            forEach( e -> Preconditions.checkState( e.getValue().size() == 1, "Field 'spec.mappings.target' has to be unique" ) );
+        mappings().stream().collect( Collectors.groupingBy( V1alpha2Xp7VHostSpecMapping::source ) ).forEach(
+            ( key, value ) -> Preconditions.checkState( value.size() == 1, "Field 'spec.mappings.target' has to be unique" ) );
     }
 
     public static class ExceptionMissing

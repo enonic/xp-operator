@@ -20,6 +20,7 @@ public abstract class Mapping
 
     public abstract Optional<String> idProvider();
 
+    @SuppressWarnings("UnstableApiUsage")
     @Value.Derived
     public String name()
     {

@@ -10,11 +10,13 @@ public class V1alpha1Xp7VHost
 {
     private V1alpha1Xp7VHostSpec spec;
 
+    @SuppressWarnings("unused")
     public V1alpha1Xp7VHostSpec getSpec()
     {
         return spec;
     }
 
+    @SuppressWarnings("unused")
     public void setSpec( V1alpha1Xp7VHostSpec spec )
     {
         this.spec = spec;

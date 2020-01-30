@@ -26,15 +26,14 @@ import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.deployment.V1alpha2Xp7
 import com.enonic.ec.kubernetes.operator.helm.BaseValues;
 import com.enonic.ec.kubernetes.operator.helm.ChartRepository;
 import com.enonic.ec.kubernetes.operator.helm.Helm;
-import com.enonic.ec.kubernetes.operator.kubectl.newapply.mapping.CommandMapper;
-import com.enonic.ec.kubernetes.operator.kubectl.newapply.mapping.ImmutableKubeCommandBuilder;
-import com.enonic.ec.kubernetes.operator.operators.OperatorNamespaced;
-import com.enonic.ec.kubernetes.operator.operators.cache.Caches;
-import com.enonic.ec.kubernetes.operator.operators.clients.Clients;
+import com.enonic.ec.kubernetes.operator.helm.commands.ImmutableKubeCmdBuilder;
+import com.enonic.ec.kubernetes.operator.kubectl.ImmutableKubeCmd;
+import com.enonic.ec.kubernetes.operator.operators.common.OperatorNamespaced;
+import com.enonic.ec.kubernetes.operator.operators.common.cache.Caches;
+import com.enonic.ec.kubernetes.operator.operators.common.clients.Clients;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7deployment.info.ImmutableInfoXp7Deployment;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7deployment.info.InfoXp7Deployment;
 
-@SuppressWarnings("OptionalGetWithoutIsPresent")
 @Singleton
 public class OperatorXp7Deployments
     extends OperatorNamespaced
@@ -60,6 +59,7 @@ public class OperatorXp7Deployments
         caches.getDeploymentCache().addWatcher( this::watch );
     }
 
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private void watch( final Watcher.Action action, final String id, final Optional<V1alpha2Xp7Deployment> oldResource,
                         final Optional<V1alpha2Xp7Deployment> newResource )
     {
@@ -72,16 +72,25 @@ public class OperatorXp7Deployments
             if ( action == Watcher.Action.ADDED )
             {
                 // Create namespace
-                commandBuilder.addCommand( CommandMapper.getCommandClass( clients, Optional.empty(), createNamespace( info ) ).apply() );
+                ImmutableKubeCmd.builder().
+                    clients( clients ).
+                    resource( createNamespace( info ) ).
+                    build().
+                    apply( commandBuilder );
 
                 // Create su pass
-                commandBuilder.addCommand( CommandMapper.getCommandClass( clients, info.namespaceName(), createSecret() ).apply() );
+                ImmutableKubeCmd.builder().
+                    clients( clients ).
+                    namespace( info.namespaceName() ).
+                    resource( createSecret() ).
+                    build().
+                    apply( commandBuilder );
             }
 
             if ( action == Watcher.Action.ADDED || action == Watcher.Action.MODIFIED )
             {
                 // Apply chart
-                ImmutableKubeCommandBuilder.builder().
+                ImmutableKubeCmdBuilder.builder().
                     clients( clients ).
                     helm( helm ).
                     chart( chartRepository.get( "v1alpha2/xp7deployment" ) ).
@@ -109,6 +118,7 @@ public class OperatorXp7Deployments
         return namespace;
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     private Secret createSecret()
     {
         String password = generateSuPassword();

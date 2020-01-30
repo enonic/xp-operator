@@ -99,9 +99,9 @@ public abstract class CreateXpDeploymentBase
             client( configClient() ).
             ownerReference( info().ownerReference() ).
             namespace( info().namespaceName() ).
-            name( cfgStrFmt( "operator.config.xp.system.name", cfgStr( "operator.deployment.xp.allNodes" ) ) ).
+            name( cfgStrFmt( "operator.config.xp.system.name", cfgStr( "operator.deployment.xp.allNodesKey" ) ) ).
             spec( ImmutableXp7ConfigSpec.builder().
-                node( cfgStr( "operator.deployment.xp.allNodes" ) ).
+                node( cfgStr( "operator.deployment.xp.allNodesKey" ) ).
                 file( cfgStr( "operator.config.xp.system.file" ) ).
                 data( new StringBuilder().
                     append( "xp.suPassword = {sha512}${env." ).append( suPassHash().getName() ).append( "}" ).append( "\n" ).
@@ -166,7 +166,7 @@ public abstract class CreateXpDeploymentBase
                 skipIngress( true ).
                 host( healthCheckHost ).
                 addMappings( ImmutableXp7VHostSpecMapping.builder().
-                    node( cfgStr( "operator.deployment.xp.allNodes" ) ).
+                    node( cfgStr( "operator.deployment.xp.allNodesKey" ) ).
                     source( "/" ).
                     target( healthCheckPath ).
                     build() ).

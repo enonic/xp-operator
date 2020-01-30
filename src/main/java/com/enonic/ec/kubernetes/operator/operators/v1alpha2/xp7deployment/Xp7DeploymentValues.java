@@ -11,7 +11,7 @@ import org.immutables.value.Value;
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.deployment.V1alpha2Xp7Deployment;
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.deployment.V1alpha2Xp7DeploymentSpecNode;
 import com.enonic.ec.kubernetes.operator.helm.BaseValues;
-import com.enonic.ec.kubernetes.operator.kubectl.newapply.mapping.ValueBuilder;
+import com.enonic.ec.kubernetes.operator.helm.commands.ValueBuilder;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7deployment.info.InfoXp7Deployment;
 
 import static com.enonic.ec.kubernetes.operator.common.Configuration.cfgStr;
@@ -72,7 +72,7 @@ public abstract class Xp7DeploymentValues
 
     public String allNodeGroupsKey()
     {
-        return cfgStr( "operator.deployment.xp.allNodes" );
+        return cfgStr( "operator.deployment.xp.allNodesKey" );
     }
 
     public Map<String, String> defaultLabels( V1alpha2Xp7Deployment resource )

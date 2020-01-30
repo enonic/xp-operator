@@ -15,6 +15,7 @@ public class V1alpha1Xp7App
         return spec;
     }
 
+    @SuppressWarnings("unused")
     public void setSpec( V1alpha1Xp7AppSpec spec )
     {
         this.spec = spec;

@@ -14,6 +14,7 @@ public abstract class CombinedCommand
 
     protected abstract List<Command> command();
 
+    @SuppressWarnings("unused")
     @Override
     public Void execute()
         throws Exception

@@ -31,8 +31,10 @@ public abstract class DiffXp7DeploymentSpec
     @Value.Derived
     public List<DiffXp7DeploymentSpecNode> nodesChanged()
     {
-        Map<String, V1alpha2Xp7DeploymentSpecNode> oldNodes = oldValue().map( V1alpha2Xp7DeploymentSpec::nodeGroups ).orElse( Collections.emptyMap() );
-        Map<String, V1alpha2Xp7DeploymentSpecNode> newNodes = newValue().map( V1alpha2Xp7DeploymentSpec::nodeGroups ).orElse( Collections.emptyMap() );
+        Map<String, V1alpha2Xp7DeploymentSpecNode> oldNodes =
+            oldValue().map( V1alpha2Xp7DeploymentSpec::nodeGroups ).orElse( Collections.emptyMap() );
+        Map<String, V1alpha2Xp7DeploymentSpecNode> newNodes =
+            newValue().map( V1alpha2Xp7DeploymentSpec::nodeGroups ).orElse( Collections.emptyMap() );
         return mergeMaps( oldNodes, newNodes, ( s, o, n ) -> ImmutableDiffXp7DeploymentSpecNode.builder().
             name( s ).
             oldValue( o ).

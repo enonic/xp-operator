@@ -13,9 +13,8 @@ import com.enonic.ec.kubernetes.operator.common.Configuration;
 import com.enonic.ec.kubernetes.operator.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.operator.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.config.V1alpha2Xp7Config;
-import com.enonic.ec.kubernetes.operator.kubectl.newapply.base.KubeCommandResource;
-import com.enonic.ec.kubernetes.operator.kubectl.newapply.mapping.CommandMapper;
-import com.enonic.ec.kubernetes.operator.operators.clients.Clients;
+import com.enonic.ec.kubernetes.operator.kubectl.ImmutableKubeCmd;
+import com.enonic.ec.kubernetes.operator.operators.common.clients.Clients;
 
 @Value.Immutable
 public abstract class CommandXpConfigApply
@@ -40,9 +39,12 @@ public abstract class CommandXpConfigApply
         if ( !newData.equals( oldData ) )
         {
             configMap().setData( newData );
-            KubeCommandResource<ConfigMap> cmd =
-                CommandMapper.getCommandClass( clients(), configMap().getMetadata().getNamespace(), configMap() );
-            commandBuilder.addCommand( cmd.apply() );
+            ImmutableKubeCmd.builder().
+                clients( clients() ).
+                namespace( configMap().getMetadata().getNamespace() ).
+                resource( configMap() ).
+                build().
+                apply( commandBuilder );
         }
     }
 }

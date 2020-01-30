@@ -9,10 +9,10 @@ import com.enonic.ec.kubernetes.operator.common.Configuration;
 import com.enonic.ec.kubernetes.operator.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.operator.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha1.app.V1alpha1Xp7App;
-import com.enonic.ec.kubernetes.operator.operators.cache.Caches;
-import com.enonic.ec.kubernetes.operator.operators.clients.Clients;
+import com.enonic.ec.kubernetes.operator.operators.common.ResourceInfoNamespaced;
+import com.enonic.ec.kubernetes.operator.operators.common.cache.Caches;
+import com.enonic.ec.kubernetes.operator.operators.common.clients.Clients;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7app.info.DiffXp7App;
-import com.enonic.ec.kubernetes.operator.operators.ResourceInfoNamespaced;;
 
 @Value.Immutable
 public abstract class CommandXpAppApplyAll
@@ -37,9 +37,9 @@ public abstract class CommandXpAppApplyAll
             clients( clients() ).
             caches( caches() ).
             info( info() ).
-            nodeGroup( cfgStr( "operator.deployment.xp.allNodes" ) ).
-            name( cfgStrFmt( "operator.config.xp.deploy.name", cfgStr( "operator.deployment.xp.allNodes" ) ) ).
-            file( cfgStr( "operator.config.xp.deploy.file" ) ).
+            nodeGroup( cfgStr( "operator.deployment.xp.allNodesKey" ) ).
+            name( cfgStrFmt( "operator.deployment.xp.config.deploy.nameTemplate", cfgStr( "operator.deployment.xp.allNodesKey" ) ) ).
+            file( cfgStr( "operator.deployment.xp.config.deploy.file" ) ).
             xpAppResources( allApps ).
             build().
             addCommands( commandBuilder );

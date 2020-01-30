@@ -28,16 +28,19 @@ public class Configuration
         return String.format( globalConfig().getOptionalValue( key, String.class ).get(), args );
     }
 
+    @SuppressWarnings("unused")
     public static int cfgInt( String key )
     {
         return globalConfig().getOptionalValue( key, Integer.class ).get();
     }
 
+    @SuppressWarnings("unused")
     public static long cfgLong( String key )
     {
         return globalConfig().getOptionalValue( key, Long.class ).get();
     }
 
+    @SuppressWarnings("WeakerAccess")
     public static boolean cfgBool( String key )
     {
         return globalConfig().getOptionalValue( key, Boolean.class ).get();

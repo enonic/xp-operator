@@ -1,5 +1,6 @@
 package com.enonic.ec.kubernetes.operator.common.info;
 
+@SuppressWarnings("WeakerAccess")
 @FunctionalInterface
 public interface TriFunction<S, T, U, R>
 {

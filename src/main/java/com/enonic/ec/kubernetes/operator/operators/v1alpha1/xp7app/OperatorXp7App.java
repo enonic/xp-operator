@@ -11,15 +11,14 @@ import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.ec.kubernetes.operator.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha1.app.V1alpha1Xp7App;
-import com.enonic.ec.kubernetes.operator.operators.OperatorNamespaced;
-import com.enonic.ec.kubernetes.operator.operators.ResourceInfoNamespaced;
-import com.enonic.ec.kubernetes.operator.operators.cache.Caches;
-import com.enonic.ec.kubernetes.operator.operators.clients.Clients;
+import com.enonic.ec.kubernetes.operator.operators.common.OperatorNamespaced;
+import com.enonic.ec.kubernetes.operator.operators.common.ResourceInfoNamespaced;
+import com.enonic.ec.kubernetes.operator.operators.common.cache.Caches;
+import com.enonic.ec.kubernetes.operator.operators.common.clients.Clients;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7app.commands.ImmutableCommandXpAppApplyAll;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7app.info.DiffXp7App;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7app.info.ImmutableInfoXp7App;
 
-@SuppressWarnings("OptionalGetWithoutIsPresent")
 @ApplicationScoped
 public class OperatorXp7App
     extends OperatorNamespaced
@@ -35,6 +34,7 @@ public class OperatorXp7App
         caches.getAppCache().addWatcher( this::watchApps );
     }
 
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private void watchApps( final Watcher.Action action, final String s, final Optional<V1alpha1Xp7App> oldResource,
                             final Optional<V1alpha1Xp7App> newResource )
     {
@@ -47,7 +47,7 @@ public class OperatorXp7App
         i.ifPresent( info -> {
             // Because multiple apps could potentially be deployed at the same time,
             // lets use the stall function to let them accumulate before we update config
-            stallAndRunCommands( ( commandBuilder ) -> createCommands( commandBuilder, info ) );
+            stallAndRunCommands(500L, ( commandBuilder ) -> createCommands( commandBuilder, info ) );
         } );
     }
 

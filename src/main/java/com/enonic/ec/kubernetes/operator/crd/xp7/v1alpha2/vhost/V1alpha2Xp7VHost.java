@@ -15,6 +15,7 @@ public class V1alpha2Xp7VHost
         return spec;
     }
 
+    @SuppressWarnings("unused")
     public void setSpec( V1alpha2Xp7VHostSpec spec )
     {
         this.spec = spec;

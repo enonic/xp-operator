@@ -28,7 +28,7 @@
 //    public TestAdmissionApi()
 //    {
 //        mapper = new ObjectMapper( new YAMLFactory() );
-//        allNodesPicker = cfgStr( "operator.deployment.xp.allNodes" );
+//        allNodesPicker = cfgStr( "operator.deployment.xp.allNodesKey" );
 //        xp7DeploymentCache = new TestXp7DeploymentCache();
 //        xp7VHostCache = new TestXp7VHostCache();
 //    }

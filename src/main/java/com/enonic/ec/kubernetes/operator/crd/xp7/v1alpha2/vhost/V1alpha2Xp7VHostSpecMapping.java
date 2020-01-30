@@ -20,11 +20,6 @@ public abstract class V1alpha2Xp7VHostSpecMapping
 
     public abstract String target();
 
-    public String name( String host )
-    {
-        return Hashing.sha512().hashString( host + source(), Charsets.UTF_8 ).toString().substring( 0, 10 );
-    }
-
     @Nullable
     public abstract String idProvider();
 

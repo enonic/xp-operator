@@ -29,11 +29,11 @@ public abstract class DiffXp7Deployment
         }
 
         Preconditions.checkState( equals( Xp7DeploymentResource::ecCloud ),
-                                  "Field 'metadata.labels." + cfgStr( "operator.deployment.xp.labels.ec.cloud" ) + "' cannot be changed" );
+                                  "Field 'metadata.labels." + cfgStr( "operator.deployment.xp.labels.cloud" ) + "' cannot be changed" );
         Preconditions.checkState( equals( Xp7DeploymentResource::ecProject ),
-                                  "Field 'metadata.labels." + cfgStr( "operator.deployment.xp.labels.ec.project" ) +
+                                  "Field 'metadata.labels." + cfgStr( "operator.deployment.xp.labels.project" ) +
                                       "' cannot be changed" );
         Preconditions.checkState( equals( Xp7DeploymentResource::ecName ),
-                                  "Field 'metadata.labels." + cfgStr( "operator.deployment.xp.labels.ec.name" ) + "' cannot be changed" );
+                                  "Field 'metadata.labels." + cfgStr( "operator.deployment.xp.labels.name" ) + "' cannot be changed" );
     }
 }

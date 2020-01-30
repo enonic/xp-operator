@@ -23,7 +23,7 @@ import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.ec.kubernetes.operator.common.Configuration;
 import com.enonic.ec.kubernetes.operator.common.commands.ImmutableCombinedCommand;
-import com.enonic.ec.kubernetes.operator.operators.cache.Caches;
+import com.enonic.ec.kubernetes.operator.operators.common.cache.Caches;
 import com.enonic.ec.kubernetes.operator.operators.dns.cloudflare.DnsRecordService;
 import com.enonic.ec.kubernetes.operator.operators.dns.commands.ImmutableDnsApplyIngress;
 import com.enonic.ec.kubernetes.operator.operators.dns.model.DiffDnsIngress;
@@ -42,6 +42,7 @@ public class OperatorDns
     @Inject
     Caches caches;
 
+    @SuppressWarnings("CdiInjectionPointsInspection")
     @RestClient
     @Inject
     DnsRecordService dnsRecordService;
@@ -56,6 +57,10 @@ public class OperatorDns
 
     void onStartup( @Observes StartupEvent _ev )
     {
+        if ( !enabled )
+        {
+            return;
+        }
         allowedDomains = allowedDomainKeys.stream().map( k -> ImmutableDomain.builder().
             zoneId( cfgStr( "dns.zoneId." + k ) ).
             domain( cfgStr( "dns.domain." + k ) ).
@@ -64,14 +69,10 @@ public class OperatorDns
         caches.getIngressCache().addWatcher( this::watchIngress );
     }
 
+    @SuppressWarnings({"UnstableApiUsage", "OptionalUsedAsFieldOrParameterType"})
     private void watchIngress( final Watcher.Action action, final String s, final Optional<Ingress> oldIngress,
                                final Optional<Ingress> newIngress )
     {
-        if ( !enabled )
-        {
-            return;
-        }
-
         DiffDnsIngress diff = ImmutableDiffDnsIngress.builder().
             oldValue( oldIngress.map( o -> ImmutableDnsIngress.builder().
                 ingress( o ).
@@ -87,10 +88,13 @@ public class OperatorDns
 
         try
         {
-            String ingressName =
-                newIngress.map( r -> r.getMetadata().getName() ).orElse( oldIngress.map( r -> r.getMetadata().getName() ).orElse( null ) );
+            String ingressName = newIngress.
+                map( r -> r.getMetadata().getName() ).
+                orElse( oldIngress.map( r -> r.getMetadata().getName() ).orElse( null ) );
+
             // Note: By changing this dnsId older managed records will stop working
             String dnsId = Hashing.sha512().hashString( ingressName, Charsets.UTF_8 ).toString().substring( 0, 16 );
+
             ImmutableDnsApplyIngress.builder().
                 dnsRecordService( dnsRecordService ).
                 diff( diff ).

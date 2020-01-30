@@ -3,7 +3,6 @@ package com.enonic.ec.kubernetes.operator.helm.commands;
 import org.immutables.value.Value;
 
 import com.enonic.ec.kubernetes.operator.helm.Chart;
-import com.enonic.ec.kubernetes.operator.helm.HelmCommand;
 
 @Value.Immutable
 public abstract class HelmUpgrade

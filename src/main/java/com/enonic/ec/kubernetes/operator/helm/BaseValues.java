@@ -13,7 +13,7 @@ import static com.enonic.ec.kubernetes.operator.common.Configuration.globalConfi
 public class BaseValues
     extends HashMap<String, Object>
 {
-    private static String keyPrefix = "operator.helm.charts.Values.";
+    private static final String keyPrefix = "operator.helm.charts.Values.";
 
     public BaseValues()
     {
@@ -24,11 +24,6 @@ public class BaseValues
                 handleKey( this, name.replace( keyPrefix, "" ), cfgStr( name ) );
             }
         } );
-    }
-
-    private void handleKey( Map<String, Object> values, final String name, final String value )
-    {
-        handleKeySplit( values, Arrays.asList( name.split( "\\." ) ), value );
     }
 
     @SuppressWarnings("unchecked")
@@ -57,5 +52,10 @@ public class BaseValues
             handleKeySplit( tmp, split.subList( 1, split.size() ), value );
             values.put( split.get( 0 ), tmp );
         }
+    }
+
+    private void handleKey( Map<String, Object> values, final String name, final String value )
+    {
+        handleKeySplit( values, Arrays.asList( name.split( "\\." ) ), value );
     }
 }

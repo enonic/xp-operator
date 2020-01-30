@@ -7,7 +7,7 @@ import org.immutables.value.Value;
 
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHost;
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHostSpecMapping;
-import com.enonic.ec.kubernetes.operator.operators.ResourceInfoNamespaced;
+import com.enonic.ec.kubernetes.operator.operators.common.ResourceInfoNamespaced;
 
 @Value.Immutable
 public abstract class InfoXp7VHost

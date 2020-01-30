@@ -45,7 +45,8 @@ public class Auth
     void onStart( @Observes StartupEvent ev )
     {
         Configuration.cfgIfBool( "dns.enabled", () -> {
-            Preconditions.checkState( !token.equals( "not_set" ), "You have to set the DNS token with propertie 'dns.cloudflare.apiToken'" );
+            Preconditions.checkState( !token.equals( "not_set" ),
+                                      "You have to set the DNS token with propertie 'dns.cloudflare.apiToken'" );
             Auth.setApiToken( token );
             tokenSet.set( true );
         } );

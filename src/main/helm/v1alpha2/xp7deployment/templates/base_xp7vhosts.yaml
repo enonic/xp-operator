@@ -13,3 +13,20 @@ spec:
     - nodeGroup: all
       source: /
       target: /webapp/com.enonic.app.alive
+
+---
+apiVersion: enonic.cloud/v1alpha2
+kind: Xp7VHost
+metadata:
+  name: localhost
+  labels:
+    {{- with .Values.defaultLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  host: localhost
+  skipIngress: true
+  mappings:
+    - nodeGroup: all
+      source: /
+      target: /

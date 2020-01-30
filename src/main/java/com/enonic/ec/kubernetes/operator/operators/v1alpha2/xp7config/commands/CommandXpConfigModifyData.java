@@ -11,11 +11,11 @@ import com.enonic.ec.kubernetes.operator.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.operator.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.config.ImmutableV1alpha2Xp7ConfigSpec;
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.config.V1alpha2Xp7Config;
-import com.enonic.ec.kubernetes.operator.kubectl.newapply.base.KubeCommandResource;
-import com.enonic.ec.kubernetes.operator.kubectl.newapply.mapping.CommandMapper;
-import com.enonic.ec.kubernetes.operator.operators.ResourceInfoNamespaced;
-import com.enonic.ec.kubernetes.operator.operators.cache.Caches;
-import com.enonic.ec.kubernetes.operator.operators.clients.Clients;
+import com.enonic.ec.kubernetes.operator.kubectl.ImmutableKubeCmd;
+import com.enonic.ec.kubernetes.operator.kubectl.KubeCmd;
+import com.enonic.ec.kubernetes.operator.operators.common.ResourceInfoNamespaced;
+import com.enonic.ec.kubernetes.operator.operators.common.cache.Caches;
+import com.enonic.ec.kubernetes.operator.operators.common.clients.Clients;
 
 public abstract class CommandXpConfigModifyData
     extends Configuration
@@ -39,7 +39,6 @@ public abstract class CommandXpConfigModifyData
         return caches().getConfigCache().get( info().deploymentInfo().namespaceName(), name() );
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void addCommands( final ImmutableCombinedCommand.Builder commandBuilder )
     {
@@ -68,17 +67,20 @@ public abstract class CommandXpConfigModifyData
             build() );
 
         // Create command to edit it
-        KubeCommandResource<V1alpha2Xp7Config> cmd =
-            CommandMapper.getCommandClass( clients(), info().deploymentInfo().namespaceName(), config );
+        KubeCmd cmd = ImmutableKubeCmd.builder().
+            clients( clients() ).
+            namespace( info().deploymentInfo().namespaceName() ).
+            resource( config ).
+            build();
 
         // The config is empty, delete the config
         if ( data.equals( "" ) )
         {
-            cmd.delete().ifPresent( commandBuilder::addCommand );
+            cmd.delete( commandBuilder );
         }
         else
         {
-            commandBuilder.addCommand( cmd.apply() );
+            cmd.apply( commandBuilder );
         }
     }
 

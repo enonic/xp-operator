@@ -25,14 +25,31 @@ import io.fabric8.kubernetes.api.model.HasMetadata;
 @Singleton
 public class Helm
 {
-    private static Logger log = LoggerFactory.getLogger( Helm.class );
+    private static final Logger log = LoggerFactory.getLogger( Helm.class );
 
-    private ObjectMapper objectMapper;
+    private static final String helmBin = "helm";
+
+    private final ObjectMapper objectMapper;
 
     @Inject
     public Helm()
     {
+        assertHelmVersion();
         this.objectMapper = new ObjectMapper( new YAMLFactory() );
+    }
+
+    private void assertHelmVersion()
+    {
+        ProcessBuilder pb = new ProcessBuilder( helmBin, "version" );
+        try
+        {
+            String result = runCommand( pb );
+            Preconditions.checkState( result.contains( "Version:\"v3" ), "Helm version not 3: " + result );
+        }
+        catch ( IOException e )
+        {
+            throw new RuntimeException( e );
+        }
     }
 
     public void install( Chart chart, Object values, String namespace, String name )
@@ -49,19 +66,22 @@ public class Helm
         Preconditions.checkState( output.contains( "STATUS: deployed" ) );
     }
 
+    @SuppressWarnings("unused")
     public void rollback( String namespace, String name, Integer revision )
         throws IOException
     {
-        String output = runCommand( new ProcessBuilder( "helm", "rollback", "-n", namespace, name, revision.toString() ) );
+        String output = runCommand( new ProcessBuilder( helmBin, "rollback", "-n", namespace, name, revision.toString() ) );
         Preconditions.checkState( output.contains( "Rollback was a success!" ) );
     }
 
+    @SuppressWarnings("WeakerAccess")
     public String template( Chart chart, Object values )
         throws IOException
     {
         return runCommandWithValuesFile( "template", chart.uri(), values, Optional.empty(), "none" );
     }
 
+    @SuppressWarnings("WeakerAccess")
     public List<HasMetadata> templateObjects( Chart chart, Object values )
         throws IOException
     {
@@ -81,9 +101,12 @@ public class Helm
 
     private int sort( final HasMetadata a, final HasMetadata b )
     {
-        if(a.getKind().equals( b.getKind() )) {
+        if ( a.getKind().equals( b.getKind() ) )
+        {
             return a.getMetadata().getName().compareTo( b.getMetadata().getName() );
-        } else {
+        }
+        else
+        {
             return a.getKind().compareTo( b.getKind() );
         }
     }
@@ -113,7 +136,7 @@ public class Helm
     public void uninstall( String namespace, String name )
         throws IOException
     {
-        String output = runCommand( new ProcessBuilder( "helm", "uninstall", "-n", namespace, name ) );
+        String output = runCommand( new ProcessBuilder( helmBin, "uninstall", "-n", namespace, name ) );
         Preconditions.checkState( output.contains( "release \"" + name + "\" uninstalled" ) );
     }
 
@@ -125,8 +148,7 @@ public class Helm
         try (BufferedReader outReader = new BufferedReader( new InputStreamReader( process.getInputStream() ) ))
         {
             int exit = process.waitFor();
-            String output = String.join( System.lineSeparator(), outReader.lines().collect( Collectors.toList() ) );
-            log.debug( "Helm output:\n" + output );
+            String output = outReader.lines().collect( Collectors.joining( System.lineSeparator() ) );
             if ( exit != 0 )
             {
                 throw new IOException( output );
@@ -139,13 +161,14 @@ public class Helm
         }
     }
 
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private String runCommandWithValuesFile( String command, String chart, Object values, Optional<String> namespace, String name )
         throws IOException
     {
         File tmp = createValuesFile( values );
         try
         {
-            List<String> cmd = new LinkedList<>( Arrays.asList( "helm", command, "-f", tmp.getAbsolutePath(), name, chart ) );
+            List<String> cmd = new LinkedList<>( Arrays.asList( helmBin, command, "-f", tmp.getAbsolutePath(), name, chart ) );
             namespace.ifPresent( ns -> {
                 cmd.add( "-n" );
                 cmd.add( ns );
@@ -155,7 +178,10 @@ public class Helm
         }
         finally
         {
-            tmp.delete();
+            if ( !tmp.delete() )
+            {
+                log.warn( "Could not delete file: " + tmp.getAbsolutePath() );
+            }
         }
     }
 

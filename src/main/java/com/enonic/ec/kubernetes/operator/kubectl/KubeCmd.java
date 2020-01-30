@@ -1,0 +1,40 @@
+package com.enonic.ec.kubernetes.operator.kubectl;
+
+import java.util.Optional;
+
+import org.immutables.value.Value;
+
+import io.fabric8.kubernetes.api.model.HasMetadata;
+
+import com.enonic.ec.kubernetes.operator.common.commands.ImmutableCombinedCommand;
+import com.enonic.ec.kubernetes.operator.kubectl.base.KubeCommand;
+import com.enonic.ec.kubernetes.operator.kubectl.base.KubeCommandResource;
+import com.enonic.ec.kubernetes.operator.operators.common.clients.Clients;
+
+@Value.Immutable
+public abstract class KubeCmd
+{
+    protected abstract Clients clients();
+
+    protected abstract Optional<String> namespace();
+
+    protected abstract HasMetadata resource();
+
+    @SuppressWarnings("WeakerAccess")
+    @Value.Derived
+    protected KubeCommandResource<HasMetadata> cmd()
+    {
+        return CommandMapper.getCommandClass( clients(), namespace(), resource() );
+    }
+
+    public void apply( ImmutableCombinedCommand.Builder commandBuilder )
+    {
+        commandBuilder.addCommand( cmd().apply() );
+    }
+
+    public void delete( ImmutableCombinedCommand.Builder commandBuilder )
+    {
+        Optional<KubeCommand> delete = cmd().delete();
+        delete.ifPresent( commandBuilder::addCommand );
+    }
+}

@@ -8,8 +8,8 @@ import org.immutables.value.Value;
 
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHost;
 import com.enonic.ec.kubernetes.operator.helm.BaseValues;
-import com.enonic.ec.kubernetes.operator.kubectl.newapply.mapping.ValueBuilder;
-import com.enonic.ec.kubernetes.operator.operators.ResourceInfoNamespaced;
+import com.enonic.ec.kubernetes.operator.helm.commands.ValueBuilder;
+import com.enonic.ec.kubernetes.operator.operators.common.ResourceInfoNamespaced;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7vhost.info.DiffXp7VHost;
 
 import static com.enonic.ec.kubernetes.operator.common.Configuration.cfgStr;

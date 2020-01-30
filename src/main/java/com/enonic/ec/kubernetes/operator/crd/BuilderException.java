@@ -11,6 +11,7 @@ public abstract class BuilderException
         this.initCause( createCause( missingAttributes ) );
     }
 
+    @SuppressWarnings("WeakerAccess")
     protected IllegalStateException createCause( String... missingAttributes )
     {
         return new IllegalStateException( "Some fields in '" + getFieldPath() + "' are missing: " + Arrays.asList( missingAttributes ) );

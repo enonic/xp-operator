@@ -18,6 +18,7 @@ public class V1alpha2Xp7Deployment
         return spec;
     }
 
+    @SuppressWarnings("unused")
     public void setSpec( V1alpha2Xp7DeploymentSpec spec )
     {
         this.spec = spec;
@@ -26,19 +27,19 @@ public class V1alpha2Xp7Deployment
     @JsonIgnore
     public String ecCloud()
     {
-        return getLabel( cfgStr( "operator.deployment.xp.labels.ec.cloud" ) );
+        return getLabel( cfgStr( "operator.deployment.xp.labels.cloud" ) );
     }
 
     @JsonIgnore
     public String ecProject()
     {
-        return getLabel( cfgStr( "operator.deployment.xp.labels.ec.project" ) );
+        return getLabel( cfgStr( "operator.deployment.xp.labels.project" ) );
     }
 
     @JsonIgnore
     public String ecName()
     {
-        return getLabel( cfgStr( "operator.deployment.xp.labels.ec.name" ) );
+        return getLabel( cfgStr( "operator.deployment.xp.labels.name" ) );
     }
 
     private String getLabel( String key )

@@ -44,7 +44,7 @@
 //{
 //    private final static Logger log = LoggerFactory.getLogger( AdmissionApi.class );
 //
-//    @ConfigProperty(name = "operator.deployment.xp.allNodes")
+//    @ConfigProperty(name = "operator.deployment.xp.allNodesKey")
 //    String allNodesPicker;
 //
 //    @Inject

@@ -19,13 +19,14 @@ import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.PodTemplateSpec;
 import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeMount;
+import io.fabric8.kubernetes.api.model.apps.DaemonSet;
 import io.fabric8.kubernetes.api.model.apps.DaemonSetSpec;
 
 import com.enonic.ec.kubernetes.operator.common.Configuration;
 import com.enonic.ec.kubernetes.operator.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.operator.common.commands.ImmutableCombinedCommand;
-import com.enonic.ec.kubernetes.operator.kubectl.apply.ImmutableCommandApplyDaemonSet;
-import com.enonic.ec.kubernetes.operator.operators.clients.Clients;
+import com.enonic.ec.kubernetes.operator.kubectl.ImmutableKubeCmd;
+import com.enonic.ec.kubernetes.operator.operators.common.clients.Clients;
 
 @Value.Immutable
 public abstract class CommandPrePullImages
@@ -101,12 +102,18 @@ public abstract class CommandPrePullImages
         vol.setName( mountName );
         vol.setHostPath( new HostPathVolumeSource( mountPath, null ) );
 
-        commandBuilder.addCommand( ImmutableCommandApplyDaemonSet.builder().
+        ObjectMeta daemonSetMeta = new ObjectMeta();
+        daemonSetMeta.setName( name );
+
+        DaemonSet daemonSet = new DaemonSet();
+        daemonSet.setMetadata( daemonSetMeta );
+        daemonSet.setSpec( spec );
+
+        ImmutableKubeCmd.builder().
             clients( clients() ).
             namespace( getOperatorNamespace() ).
-            name( name ).
-            canSkipOwnerReference( true ).
-            spec( spec ).
-            build() );
+            resource( daemonSet ).
+            build().
+            apply( commandBuilder );
     }
 }

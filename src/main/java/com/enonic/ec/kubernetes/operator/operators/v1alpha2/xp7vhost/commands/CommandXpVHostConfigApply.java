@@ -13,9 +13,9 @@ import com.enonic.ec.kubernetes.operator.common.Configuration;
 import com.enonic.ec.kubernetes.operator.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.operator.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHost;
-import com.enonic.ec.kubernetes.operator.operators.ResourceInfoNamespaced;
-import com.enonic.ec.kubernetes.operator.operators.cache.Caches;
-import com.enonic.ec.kubernetes.operator.operators.clients.Clients;
+import com.enonic.ec.kubernetes.operator.operators.common.ResourceInfoNamespaced;
+import com.enonic.ec.kubernetes.operator.operators.common.cache.Caches;
+import com.enonic.ec.kubernetes.operator.operators.common.clients.Clients;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7vhost.helpers.ImmutableMapping;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7vhost.helpers.Mapping;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7vhost.info.DiffXp7VHost;
@@ -48,8 +48,8 @@ public abstract class CommandXpVHostConfigApply
                 clients( clients() ).
                 caches( caches() ).
                 info( info() ).
-                name( cfgStrFmt( "operator.config.xp.vhosts.name", nodeName ) ).
-                file( cfgStr( "operator.config.xp.vhosts.file" ) ).
+                name( cfgStrFmt( "operator.deployment.xp.config.vhosts.nameTemplate", nodeName ) ).
+                file( cfgStr( "operator.deployment.xp.config.vhosts.file" ) ).
                 nodeGroup( nodeName ).
                 mappings( mappings ).
                 build().
@@ -80,7 +80,7 @@ public abstract class CommandXpVHostConfigApply
 
         // Add mappings to nodes
         mappings.forEach( m -> {
-            if ( m.nodeGroup().equals( cfgStr( "operator.deployment.xp.allNodes" ) ) )
+            if ( m.nodeGroup().equals( cfgStr( "operator.deployment.xp.allNodesKey" ) ) )
             {
                 result.values().forEach( v -> v.add( m ) );
             }

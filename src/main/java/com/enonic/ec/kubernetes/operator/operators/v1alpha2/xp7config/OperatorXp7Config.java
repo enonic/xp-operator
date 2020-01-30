@@ -11,15 +11,14 @@ import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.ec.kubernetes.operator.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.config.V1alpha2Xp7Config;
-import com.enonic.ec.kubernetes.operator.operators.OperatorNamespaced;
-import com.enonic.ec.kubernetes.operator.operators.ResourceInfoNamespaced;
-import com.enonic.ec.kubernetes.operator.operators.cache.Caches;
-import com.enonic.ec.kubernetes.operator.operators.clients.Clients;
+import com.enonic.ec.kubernetes.operator.operators.common.OperatorNamespaced;
+import com.enonic.ec.kubernetes.operator.operators.common.ResourceInfoNamespaced;
+import com.enonic.ec.kubernetes.operator.operators.common.cache.Caches;
+import com.enonic.ec.kubernetes.operator.operators.common.clients.Clients;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7config.commands.ImmutableCommandXpConfigApplyAll;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7config.info.DiffXp7Config;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7config.info.ImmutableInfoXp7Config;
 
-@SuppressWarnings("OptionalGetWithoutIsPresent")
 @ApplicationScoped
 public class OperatorXp7Config
     extends OperatorNamespaced
@@ -35,6 +34,7 @@ public class OperatorXp7Config
         caches.getConfigCache().addWatcher( this::watchXpConfig );
     }
 
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private void watchXpConfig( final Watcher.Action action, final String s, final Optional<V1alpha2Xp7Config> oldResource,
                                 final Optional<V1alpha2Xp7Config> newResource )
     {
@@ -47,7 +47,7 @@ public class OperatorXp7Config
         i.ifPresent( info -> {
             // Because multiple configs could potentially be deployed at the same time,
             // lets use the stall function to let them accumulate before we update config
-            stallAndRunCommands( ( commandBuilder ) -> createCommands( commandBuilder, info ) );
+            stallAndRunCommands( 1500L, ( commandBuilder ) -> createCommands( commandBuilder, info ) );
         } );
     }
 

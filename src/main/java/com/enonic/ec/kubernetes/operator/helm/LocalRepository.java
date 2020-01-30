@@ -7,7 +7,7 @@ import com.google.common.base.Preconditions;
 public class LocalRepository
     implements ChartRepository
 {
-    private File path;
+    private final File path;
 
     public LocalRepository( File path )
     {
@@ -15,6 +15,7 @@ public class LocalRepository
         Preconditions.checkState( path.isDirectory(), "path must be a directory" );
     }
 
+    @SuppressWarnings("unused")
     @Override
     public Chart get( final String name )
     {

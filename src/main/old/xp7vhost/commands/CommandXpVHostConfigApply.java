@@ -51,8 +51,8 @@ public abstract class CommandXpVHostConfigApply
                 xpConfigClient( xpConfigClient() ).
                 xpConfigCache( xpConfigCache() ).
                 info( info() ).
-                name( cfgStrFmt( "operator.config.xp.vhosts.name", nodeName ) ).
-                file( cfgStr( "operator.config.xp.vhosts.file" ) ).
+                name( cfgStrFmt( "operator.deployment.xp.config.vhosts.nameTemplate", nodeName ) ).
+                file( cfgStr( "operator.deployment.xp.config.vhosts.file" ) ).
                 node( nodeName ).
                 mappings( mappings ).
                 build().
@@ -82,7 +82,7 @@ public abstract class CommandXpVHostConfigApply
 
         // Add mappings to nodes
         mappings.forEach( m -> {
-            if ( m.node().equals( cfgStr( "operator.deployment.xp.allNodes" ) ) )
+            if ( m.node().equals( cfgStr( "operator.deployment.xp.allNodesKey" ) ) )
             {
                 result.values().forEach( v -> v.add( m ) );
             }
