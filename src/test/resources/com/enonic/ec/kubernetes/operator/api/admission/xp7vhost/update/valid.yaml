@@ -3,7 +3,7 @@ testReview:
   request:
     operation: UPDATE
     oldObject:
-      apiVersion: enonic.cloud/v1alpha1
+      apiVersion: enonic.cloud/v1alpha2
       kind: Xp7VHost
       metadata:
         name: test-purplejs-io
@@ -11,12 +11,12 @@ testReview:
       spec:
         host: test.purplejs.io
         mappings:
-          - node: main
+          - nodeGroup: main
             source: /
             target: /admin
             idProvider: system
     object:
-      apiVersion: enonic.cloud/v1alpha1
+      apiVersion: enonic.cloud/v1alpha2
       kind: Xp7VHost
       metadata:
         name: test-purplejs-io
@@ -24,7 +24,7 @@ testReview:
       spec:
         host: test.purplejs.io
         mappings:
-          - node: main
+          - nodeGroup: main
             source: /admin
             target: /admin
             idProvider: system

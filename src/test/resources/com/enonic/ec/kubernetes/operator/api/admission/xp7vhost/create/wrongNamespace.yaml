@@ -1,9 +1,9 @@
-testResult: "XpDeployment 'wrongnamespace' not found"
+testResult: "Xp7Deployment 'wrongnamespace' not found"
 testReview:
   request:
     operation: CREATE
     object:
-      apiVersion: enonic.cloud/v1alpha1
+      apiVersion: enonic.cloud/v1alpha2
       kind: Xp7VHost
       metadata:
         name: test-purplejs-io
@@ -13,7 +13,7 @@ testReview:
         certificate:
           authority: selfSigned
         mappings:
-          - node: main
+          - nodeGroup: main
             source: /
             target: /admin
             idProvider: system

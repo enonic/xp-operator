@@ -1,15 +1,15 @@
-testResult: "XpDeployment 'wrongnamespace' not found"
+testResult: "Xp7Deployment 'wrongnamespace' not found"
 testReview:
   request:
     operation: CREATE
     object:
-      apiVersion: enonic.cloud/v1alpha1
+      apiVersion: enonic.cloud/v1alpha2
       kind: Xp7Config
       metadata:
         name: test
         namespace: wrongnamespace
       spec:
         file: mytest.cfg
-        node: main
+        nodeGroup: main
         data: |
           hello

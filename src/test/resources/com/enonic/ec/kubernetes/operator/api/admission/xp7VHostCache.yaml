@@ -1,4 +1,4 @@
-- apiVersion: enonic.cloud/v1alpha1
+- apiVersion: enonic.cloud/v1alpha2
   kind: Xp7VHost
   metadata:
     uid: 9265a02a-000f-421a-b4aa-4768e8eab21e
@@ -9,11 +9,11 @@
     certificate:
       authority: selfSigned
     mappings:
-      - node: main
+      - nodeGroup: main
         source: /
         target: /admin
         idProvider: system
-- apiVersion: enonic.cloud/v1alpha1
+- apiVersion: enonic.cloud/v1alpha2
   kind: Xp7VHost
   metadata:
     uid: 9265a02a-000f-421a-b4aa-4768e8egafes
@@ -23,7 +23,7 @@
     host: healthcheck
     skipIngress: true
     mappings:
-      - node: main
+      - nodeGroup: main
         source: /
         target: /admin
         idProvider: system

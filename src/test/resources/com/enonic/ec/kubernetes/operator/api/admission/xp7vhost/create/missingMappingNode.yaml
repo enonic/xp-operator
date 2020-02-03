@@ -1,9 +1,9 @@
-testResult: "Some fields in 'spec.mappings' are missing: [node]"
+testResult: "Some fields in 'spec.mappings' are missing: [nodeGroup]"
 testReview:
   request:
     operation: CREATE
     object:
-      apiVersion: enonic.cloud/v1alpha1
+      apiVersion: enonic.cloud/v1alpha2
       kind: Xp7VHost
       metadata:
         name: test-purplejs-io
@@ -11,7 +11,7 @@ testReview:
       spec:
         host: test.purplejs.io
         mappings:
-          #- node: main
+          #- nodeGroup: main
           - source: /
             target: /admin
             idProvider: system

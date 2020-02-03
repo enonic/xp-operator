@@ -3,7 +3,7 @@ testReview:
   request:
     operation: CREATE
     object:
-      apiVersion: enonic.cloud/v1alpha1
+      apiVersion: enonic.cloud/v1alpha2
       kind: Xp7Deployment
       metadata:
         name: mycloud-myproject-qaxp
@@ -14,10 +14,13 @@ testReview:
       spec:
         enabled: true
         xpVersion: 7.1.2
-        nodesSharedDisk: 1Gi
-        nodes:
+        nodesSharedDisks:
+          blobstore: 1Gi
+          snapshots: 1Gi
+        nodeGroups:
           main:
-            type: ["MASTER", "DATA", "FRONTEND"]
+            master: true
+            data: true
             replicas: 0
             resources:
               cpu: "1"

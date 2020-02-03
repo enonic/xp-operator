@@ -10,7 +10,7 @@ spec:
   enabled: true
   xpVersion: 7.1.2
 
-  nodesSharedDisk:
+  nodesSharedDisks:
     blobstore: 1Gi
     snapshots: 1Gi
 

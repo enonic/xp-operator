@@ -3,13 +3,13 @@ testReview:
   request:
     operation: CREATE
     object:
-      apiVersion: enonic.cloud/v1alpha1
+      apiVersion: enonic.cloud/v1alpha2
       kind: Xp7Config
       metadata:
         name: test
         namespace: mycloud-myproject-qaxp
       spec:
         #file: mytest.cfg
-        node: main
+        nodeGroup: main
         data: |
           hello

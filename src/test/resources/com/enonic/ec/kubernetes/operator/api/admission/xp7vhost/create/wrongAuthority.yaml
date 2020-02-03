@@ -1,9 +1,9 @@
-testResult: 'Cannot deserialize value of type `com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7vhost.crd.spec.Xp7VHostSpecCertificateAuthority` from String "wrong": value not one of declared Enum instance names: [selfSigned, letsEncrypt, letsEncryptStaging]  at [Source: UNKNOWN; line: -1, column: -1] (through reference chain: io.fabric8.kubernetes.api.model.admission.AdmissionReview["request"]->io.fabric8.kubernetes.api.model.admission.AdmissionRequest["object"]->com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7vhost.crd.Xp7VHostResource["spec"]->com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7vhost.crd.spec.ImmutableXp7VHostSpec$Builder["certificate"]->com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7vhost.crd.spec.ImmutableXp7VHostSpecCertificate$Builder["authority"])'
+testResult: 'Cannot deserialize value of type `com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHostSpecCertificateAuthority` from String "wrong": value not one of declared Enum instance names: [selfSigned, letsEncrypt, letsEncryptStaging]'
 testReview:
   request:
     operation: CREATE
     object:
-      apiVersion: enonic.cloud/v1alpha1
+      apiVersion: enonic.cloud/v1alpha2
       kind: Xp7VHost
       metadata:
         name: test-purplejs-io
@@ -14,7 +14,7 @@ testReview:
           authority: wrong
         skipIngress: false
         mappings:
-          - node: main
+          - nodeGroup: main
             source: /
             target: /admin
             idProvider: system
