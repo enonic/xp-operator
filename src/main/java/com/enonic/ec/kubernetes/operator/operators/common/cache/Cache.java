@@ -110,6 +110,7 @@ public abstract class Cache<T extends HasMetadata, L extends KubernetesResourceL
         }
     }
     
+    @SuppressWarnings("unchecked")
     public Collection<T> getCollection()
     {
         return (Collection<T>) cache.values();

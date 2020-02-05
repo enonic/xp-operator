@@ -31,12 +31,12 @@ public abstract class KubeCmdConfigMaps
     }
 
     @Override
-    protected void update( final ConfigMap resource )
+    protected void patch( final ConfigMap resource )
     {
         clients().getDefaultClient().configMaps().
             inNamespace( resource.getMetadata().getNamespace() ).
             withName( resource.getMetadata().getName() ).
-            replace( resource );
+            patch( resource );
     }
 
     @Override

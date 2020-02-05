@@ -76,7 +76,7 @@ public class OperatorXp7VHost
 
         // Because multiple vHosts could potentially be deployed at the same time,
         // lets use the stall function to let them accumulate before we update config
-        stallAndRunCommands(500L, commandBuilder, () -> ImmutableCommandXpVHostConfigApply.builder().
+        stallAndRunCommands( 500L, commandBuilder, () -> ImmutableCommandXpVHostConfigApply.builder().
             clients( clients ).
             caches( caches ).
             info( info ).

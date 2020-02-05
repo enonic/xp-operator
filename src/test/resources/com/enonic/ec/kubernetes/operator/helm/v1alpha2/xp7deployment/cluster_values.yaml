@@ -7,8 +7,12 @@ extensions:
     caching: false
   linkerd: false
   ecDns: false
-defaultStorageClass: "standard"
-sharedStorageClass: "standard"
+storage:
+  shared:
+    storageClassName: "standard"
+    forcePermissions: false
+  default:
+    storageClassName: "standard"
 defaultLabels:
   cloud: "mycloud"
   project: "myproject"

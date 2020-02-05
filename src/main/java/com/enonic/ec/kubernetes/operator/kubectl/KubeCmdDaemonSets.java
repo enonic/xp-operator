@@ -31,12 +31,12 @@ public abstract class KubeCmdDaemonSets
     }
 
     @Override
-    protected void update( final DaemonSet resource )
+    protected void patch( final DaemonSet resource )
     {
         clients().getDefaultClient().apps().daemonSets().
             inNamespace( resource.getMetadata().getNamespace() ).
             withName( resource.getMetadata().getName() ).
-            replace( resource );
+            patch( resource );
     }
 
     @Override

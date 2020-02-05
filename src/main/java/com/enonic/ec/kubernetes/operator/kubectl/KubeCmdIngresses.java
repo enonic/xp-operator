@@ -31,12 +31,12 @@ public abstract class KubeCmdIngresses
     }
 
     @Override
-    protected void update( final Ingress resource )
+    protected void patch( final Ingress resource )
     {
         clients().getDefaultClient().extensions().ingresses().
             inNamespace( resource.getMetadata().getNamespace() ).
             withName( resource.getMetadata().getName() ).
-            replace( resource );
+            patch( resource );
     }
 
     @Override

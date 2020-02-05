@@ -39,9 +39,28 @@ spec:
 
       securityContext:
         fsGroup: 0
-        runAsUser: 1337
+        runAsUser: {{ $.Values.user }}
 
       initContainers:
+        {{- if $.Values.storage.shared.forcePermissions }}
+        - name: shared-storage-permissions
+          image: alpine:3.10
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            privileged: true
+            runAsUser: 0
+          resources: {}
+          volumeMounts:
+            {{- range $volumeName, $volumeSize := $.Values.deployment.spec.nodesSharedDisks }}
+            - name: {{ $volumeName }}
+              mountPath: {{ index $.Values.volumeMounts $volumeName }}
+              subPath: {{ $.Values.deployment.name }}/{{ $volumeName }}
+            {{- end }}
+          command:
+            - ash
+            - -c
+            - {{ range $volumeName, $volumeSize := $.Values.deployment.spec.nodesSharedDisks }}chown 1337:0 {{ index $.Values.volumeMounts $volumeName }}; {{ end }}
+        {{- end }}
         - name: configure-sysctl
           image: {{ $.Values.image }}
           imagePullPolicy: {{ $.Values.imagePullPolicy }}
@@ -63,7 +82,7 @@ spec:
               drop:
                 - ALL
             runAsNonRoot: true
-            runAsUser: 1337
+            runAsUser: {{ $.Values.user }}
 
           resources:
             limits:
@@ -158,7 +177,7 @@ spec:
           {{- toYaml . | nindent 10 }}
           {{- end }}
       spec:
-        storageClassName: {{ $.Values.defaultStorageClass }}
+        storageClassName: {{ $.Values.storage.default.storageClassName }}
         accessModes:
           - ReadWriteOnce
         resources:

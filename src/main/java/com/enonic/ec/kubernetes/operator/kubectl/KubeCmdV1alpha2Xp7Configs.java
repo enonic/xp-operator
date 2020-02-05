@@ -30,12 +30,12 @@ public abstract class KubeCmdV1alpha2Xp7Configs
     }
 
     @Override
-    protected void update( final V1alpha2Xp7Config resource )
+    protected void patch( final V1alpha2Xp7Config resource )
     {
         clients().getConfigClient().
             inNamespace( resource.getMetadata().getNamespace() ).
             withName( resource.getMetadata().getName() ).
-            replace( resource );
+            patch( resource );
     }
 
     @Override

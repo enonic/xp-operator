@@ -30,12 +30,12 @@ public abstract class KubeCmdV1alpha1Xp7Apps
     }
 
     @Override
-    protected void update( final V1alpha1Xp7App resource )
+    protected void patch( final V1alpha1Xp7App resource )
     {
         clients().getAppClient().
             inNamespace( resource.getMetadata().getNamespace() ).
             withName( resource.getMetadata().getName() ).
-            replace( resource );
+            patch( resource );
     }
 
     @Override

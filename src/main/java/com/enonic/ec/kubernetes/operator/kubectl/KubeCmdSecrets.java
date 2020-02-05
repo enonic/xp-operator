@@ -31,12 +31,12 @@ public abstract class KubeCmdSecrets
     }
 
     @Override
-    protected void update( final Secret resource )
+    protected void patch( final Secret resource )
     {
         clients().getDefaultClient().secrets().
             inNamespace( resource.getMetadata().getNamespace() ).
             withName( resource.getMetadata().getName() ).
-            replace( resource );
+            patch( resource );
     }
 
     @Override

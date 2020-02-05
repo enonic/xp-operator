@@ -37,6 +37,8 @@ volumeMounts:
 heapDumpLocation: /enonic-xp/home/exports/dumps
 configLocation: /enonic-xp/home/config
 
+user: 1337
+
 # Filled in by operator
 # deployment:
 #   name: gbb-tests-qa

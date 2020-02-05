@@ -31,12 +31,12 @@ public abstract class KubeCmdServices
     }
 
     @Override
-    protected void update( final Service resource )
+    protected void patch( final Service resource )
     {
         clients().getDefaultClient().services().
             inNamespace( resource.getMetadata().getNamespace() ).
             withName( resource.getMetadata().getName() ).
-            replace( resource );
+            patch( resource );
     }
 
     @Override

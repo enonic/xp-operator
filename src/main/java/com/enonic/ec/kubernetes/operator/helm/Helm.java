@@ -99,6 +99,29 @@ public class Helm
         return res;
     }
 
+    public List<String> templateStrings( Chart chart, Object values )
+    {
+        String template = null;
+        try
+        {
+            template = template( chart, values );
+        }
+        catch ( IOException e )
+        {
+            throw new RuntimeException( e );
+        }
+        String[] objects = template.split( "---" );
+        List<String> res = new LinkedList<>();
+        for ( String s : objects )
+        {
+            if ( !"".equals( s ) )
+            {
+                res.add( s );
+            }
+        }
+        return res;
+    }
+
     private int sort( final HasMetadata a, final HasMetadata b )
     {
         if ( a.getKind().equals( b.getKind() ) )

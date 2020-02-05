@@ -39,7 +39,11 @@ public class BaseValues
             }
             else if ( value.equals( "true" ) )
             {
-                values.put( key, false );
+                values.put( key, true );
+            }
+            else if ( value.contains( "," ) )
+            {
+                values.put( key, value.split( "," ) );
             }
             else
             {

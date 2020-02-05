@@ -29,11 +29,11 @@ public abstract class KubeCmdNamespaces
     }
 
     @Override
-    protected void update( final Namespace resource )
+    protected void patch( final Namespace resource )
     {
         clients().getDefaultClient().namespaces().
             withName( resource.getMetadata().getName() ).
-            replace( resource );
+            patch( resource );
     }
 
     @Override

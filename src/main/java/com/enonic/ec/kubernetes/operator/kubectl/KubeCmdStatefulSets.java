@@ -31,12 +31,12 @@ public abstract class KubeCmdStatefulSets
     }
 
     @Override
-    protected void update( final StatefulSet resource )
+    protected void patch( final StatefulSet resource )
     {
         clients().getDefaultClient().apps().statefulSets().
             inNamespace( resource.getMetadata().getNamespace() ).
             withName( resource.getMetadata().getName() ).
-            replace( resource );
+            patch( resource );
     }
 
     @Override
