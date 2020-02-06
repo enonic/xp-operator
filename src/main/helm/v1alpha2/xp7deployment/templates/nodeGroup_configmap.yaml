@@ -1,5 +1,5 @@
+# Setup ConfigMap for each node group
 {{- range $nodeGroupName, $nodeGroup := .Values.deployment.spec.nodeGroups }}
----
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -11,4 +11,5 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
 data: {} # Operator will manage this ConfigMap so leave data empty
+---
 {{- end }}

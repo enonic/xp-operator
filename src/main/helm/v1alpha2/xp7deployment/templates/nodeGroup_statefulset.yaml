@@ -1,5 +1,5 @@
+# Create StatefulSet for each nodeGroup
 {{- range $nodeGroupName, $nodeGroup := .Values.deployment.spec.nodeGroups }}
----
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -184,4 +184,5 @@ spec:
           requests:
             storage: {{ $volumeSize }}
     {{- end }}
+---
 {{- end }}

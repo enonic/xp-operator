@@ -1,5 +1,6 @@
 package com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7vhost;
 
+import java.util.Map;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -20,7 +21,7 @@ import com.enonic.ec.kubernetes.operator.operators.common.OperatorNamespaced;
 import com.enonic.ec.kubernetes.operator.operators.common.ResourceInfoNamespaced;
 import com.enonic.ec.kubernetes.operator.operators.common.cache.Caches;
 import com.enonic.ec.kubernetes.operator.operators.common.clients.Clients;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7vhost.commands.ImmutableCommandXpVHostConfigApply;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7vhost.commands.ImmutableCommandXpVHostsApply;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7vhost.info.DiffXp7VHost;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7vhost.info.ImmutableInfoXp7VHost;
 
@@ -40,6 +41,10 @@ public class OperatorXp7VHost
     @Inject
     @Named("local")
     ChartRepository chartRepository;
+
+    @Inject
+    @Named("baseValues")
+    Map<String, Object> baseValues;
 
     void onStartup( @Observes StartupEvent _ev )
     {
@@ -68,15 +73,15 @@ public class OperatorXp7VHost
             chart( chartRepository.get( "v1alpha2/xp7vhost" ) ).
             namespace( info.deploymentInfo().namespaceName() ).
             valueBuilder( ImmutableXp7VHostValues.builder().
-                baseValues( new BaseValues() ).
+                baseValues( baseValues ).
                 info( info ).
                 build() ).
             build().
             addCommands( commandBuilder );
 
-        // Because multiple vHosts could potentially be deployed at the same time,
-        // lets use the stall function to let them accumulate before we update config
-        stallAndRunCommands( 500L, commandBuilder, () -> ImmutableCommandXpVHostConfigApply.builder().
+        // Because multiple vhosts could potentially be deployed at the same time, lets use
+        // the stall function to let them accumulate in the cache before we update config
+        stallAndRunCommands( 500L, commandBuilder, () -> ImmutableCommandXpVHostsApply.builder().
             clients( clients ).
             caches( caches ).
             info( info ).

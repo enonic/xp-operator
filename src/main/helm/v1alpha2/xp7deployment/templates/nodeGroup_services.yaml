@@ -1,5 +1,5 @@
+# Setup service pointing to each nodeGroup
 {{- range $nodeGroupName, $nodeGroup := .Values.deployment.spec.nodeGroups }}
----
 apiVersion: v1
 kind: Service
 metadata:
@@ -30,4 +30,5 @@ spec:
       port: 9200
     - name: es-transport
       port: 9300
+---
 {{- end }}

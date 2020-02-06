@@ -7,7 +7,6 @@ import java.util.Optional;
 import org.immutables.value.Value;
 
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHost;
-import com.enonic.ec.kubernetes.operator.helm.BaseValues;
 import com.enonic.ec.kubernetes.operator.helm.commands.ValueBuilder;
 import com.enonic.ec.kubernetes.operator.operators.common.ResourceInfoNamespaced;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7vhost.info.DiffXp7VHost;
@@ -18,7 +17,7 @@ import static com.enonic.ec.kubernetes.operator.common.Configuration.cfgStr;
 public abstract class Xp7VHostValues
     implements ValueBuilder
 {
-    protected abstract BaseValues baseValues();
+    protected abstract Map<String, Object> baseValues();
 
     protected abstract ResourceInfoNamespaced<V1alpha2Xp7VHost, DiffXp7VHost> info();
 

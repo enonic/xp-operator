@@ -23,7 +23,6 @@ import io.fabric8.kubernetes.client.Watcher;
 import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.deployment.V1alpha2Xp7Deployment;
-import com.enonic.ec.kubernetes.operator.helm.BaseValues;
 import com.enonic.ec.kubernetes.operator.helm.ChartRepository;
 import com.enonic.ec.kubernetes.operator.helm.Helm;
 import com.enonic.ec.kubernetes.operator.helm.commands.ImmutableHelmKubeCmdBuilder;
@@ -53,6 +52,10 @@ public class OperatorXp7Deployments
     @Inject
     @Named("local")
     ChartRepository chartRepository;
+
+    @Inject
+    @Named("baseValues")
+    Map<String, Object> baseValues;
 
     void onStartup( @Observes StartupEvent _ev )
     {
@@ -96,7 +99,7 @@ public class OperatorXp7Deployments
                     chart( chartRepository.get( "v1alpha2/xp7deployment" ) ).
                     namespace( info.namespaceName() ).
                     valueBuilder( ImmutableXp7DeploymentValues.builder().
-                        baseValues( new BaseValues() ).
+                        baseValues( baseValues ).
                         imageTemplate( imageTemplate ).
                         info( info ).
                         build() ).

@@ -17,7 +17,7 @@ import com.enonic.ec.kubernetes.operator.operators.common.ResourceInfoNamespaced
 import com.enonic.ec.kubernetes.operator.operators.common.cache.Caches;
 import com.enonic.ec.kubernetes.operator.operators.common.clients.Clients;
 
-public abstract class CommandXpConfigModifyData
+public abstract class CommandXpConfigModify
     extends Configuration
     implements CombinedCommandBuilder
 {
@@ -48,16 +48,17 @@ public abstract class CommandXpConfigModifyData
 
         if ( xpConfigResource().isPresent() && xpConfigResource().get().getSpec().data().equals( data ) )
         {
-            // There is no change in this config
+            // There is no change in this config, lets just exit
             return;
         }
 
-        // Create new object
+        // Create metadata
         ObjectMeta meta = new ObjectMeta();
         meta.setName( name() );
         meta.setNamespace( info().deploymentInfo().namespaceName() );
         meta.setLabels( info().deploymentInfo().resource().getMetadata().getLabels() );
 
+        // Create Xp7Config
         V1alpha2Xp7Config config = new V1alpha2Xp7Config();
         config.setMetadata( meta );
         config.setSpec( ImmutableV1alpha2Xp7ConfigSpec.builder().
@@ -66,7 +67,7 @@ public abstract class CommandXpConfigModifyData
             nodeGroup( nodeGroup() ).
             build() );
 
-        // Create command to edit it
+        // Create command to modify it
         KubeCmd cmd = ImmutableKubeCmd.builder().
             clients( clients() ).
             namespace( info().deploymentInfo().namespaceName() ).

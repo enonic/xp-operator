@@ -1,6 +1,7 @@
 package com.enonic.ec.kubernetes.operator.helm;
 
 import java.io.File;
+import java.util.Map;
 
 import javax.enterprise.inject.Produces;
 import javax.inject.Named;
@@ -8,7 +9,9 @@ import javax.inject.Singleton;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
-public class RepositoryProducer
+import com.google.common.collect.ImmutableMap;
+
+public class HelmDependenciesProducer
 {
     @ConfigProperty(name = "operator.helm.charts.path")
     String helmChartsPath;
@@ -19,5 +22,13 @@ public class RepositoryProducer
     public ChartRepository local()
     {
         return new LocalRepository( new File( helmChartsPath ) );
+    }
+
+    @Produces
+    @Singleton
+    @Named("baseValues")
+    public Map<String, Object> baseValues()
+    {
+        return ImmutableMap.copyOf( new BaseValues() );
     }
 }

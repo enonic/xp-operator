@@ -19,7 +19,7 @@ import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7config.info.DiffX
 
 
 @Value.Immutable
-public abstract class CommandXpConfigApplyAll
+public abstract class CommandConfigMapUpdateAll
     extends Configuration
     implements CombinedCommandBuilder
 {
@@ -39,7 +39,7 @@ public abstract class CommandXpConfigApplyAll
             List<V1alpha2Xp7Config> allXpConfigs = getRelevantXpConfig( configMap );
 
             // Update ConfigMap
-            ImmutableCommandXpConfigApply.builder().
+            ImmutableCommandConfigMapUpdate.builder().
                 clients( clients() ).
                 configMap( configMap ).
                 xpConfigResources( allXpConfigs ).
@@ -50,14 +50,14 @@ public abstract class CommandXpConfigApplyAll
 
     private List<ConfigMap> getRelevantConfigMaps( final V1alpha2Xp7Config configResource )
     {
-        // Filter by node
+        // Filter by node predicate
         Predicate<ConfigMap> filter = c -> {
             if ( configResource.getSpec().nodeGroup().equals( cfgStr( "operator.deployment.xp.allNodesKey" ) ) )
             {
-                // Apply to all nodes
+                // Apply to all nodes (config maps)
                 return true;
             }
-            // Filter by node name
+            // Filter by node (config map) name
             return configResource.getSpec().nodeGroup().equals( c.getMetadata().getName() );
         };
 
@@ -68,13 +68,14 @@ public abstract class CommandXpConfigApplyAll
 
     private List<V1alpha2Xp7Config> getRelevantXpConfig( final ConfigMap configMap )
     {
+        // Filter by ConfigMap predicate
         Predicate<V1alpha2Xp7Config> filter = c -> {
             if ( c.getSpec().nodeGroup().equals( cfgStr( "operator.deployment.xp.allNodesKey" ) ) )
             {
-                // Apply to all nodes
+                // Apply to all nodes (config maps)
                 return true;
             }
-            // Filter by node name
+            // Filter by node (config map) name
             return c.getSpec().nodeGroup().equals( configMap.getMetadata().getName() );
         };
 

@@ -15,7 +15,7 @@ import com.enonic.ec.kubernetes.operator.operators.common.OperatorNamespaced;
 import com.enonic.ec.kubernetes.operator.operators.common.ResourceInfoNamespaced;
 import com.enonic.ec.kubernetes.operator.operators.common.cache.Caches;
 import com.enonic.ec.kubernetes.operator.operators.common.clients.Clients;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7config.commands.ImmutableCommandXpConfigApplyAll;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7config.commands.ImmutableCommandConfigMapUpdateAll;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7config.info.DiffXp7Config;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7config.info.ImmutableInfoXp7Config;
 
@@ -54,7 +54,7 @@ public class OperatorXp7Config
     private void createCommands( ImmutableCombinedCommand.Builder commandBuilder,
                                  ResourceInfoNamespaced<V1alpha2Xp7Config, DiffXp7Config> info )
     {
-        ImmutableCommandXpConfigApplyAll.builder().
+        ImmutableCommandConfigMapUpdateAll.builder().
             clients( clients ).
             caches( caches ).
             info( info ).

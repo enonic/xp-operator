@@ -741,6 +741,19 @@ metadata:
     cloud: "mycloud"
     name: "qaxp"
     project: "myproject"
+  name: "all-admin"
+spec:
+  file: "com.enonic.xp.app.main.cfg"
+  nodeGroup: "all"
+  data: "tourDisabled = true"
+---
+kind: "Xp7Config"
+apiVersion: "enonic.cloud/v1alpha2"
+metadata:
+  labels:
+    cloud: "mycloud"
+    name: "qaxp"
+    project: "myproject"
   name: "all-system"
 spec:
   file: "system.properties"
@@ -792,7 +805,7 @@ metadata:
 spec:
   file: "com.enonic.xp.web.vhost.cfg"
   nodeGroup: "data"
-  data: "enabled = true\n# Operator will manage this Xp7Config so leave data empty"
+  data: "enabled = true"
 ---
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
@@ -838,7 +851,7 @@ metadata:
 spec:
   file: "com.enonic.xp.web.vhost.cfg"
   nodeGroup: "frontend"
-  data: "enabled = true\n# Operator will manage this Xp7Config so leave data empty"
+  data: "enabled = true"
 ---
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
@@ -884,7 +897,7 @@ metadata:
 spec:
   file: "com.enonic.xp.web.vhost.cfg"
   nodeGroup: "master"
-  data: "enabled = true\n# Operator will manage this Xp7Config so leave data empty"
+  data: "enabled = true"
 ---
 kind: "Xp7VHost"
 apiVersion: "enonic.cloud/v1alpha2"

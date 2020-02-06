@@ -1,3 +1,4 @@
+# Setup admin user with generated password
 apiVersion: enonic.cloud/v1alpha2
 kind: Xp7Config
 metadata:
@@ -12,3 +13,20 @@ spec:
   data: |-
     xp.suPassword = {sha512}${env.SU_PASS_HASH}
     xp.init.adminUserCreation = false
+
+---
+
+# Disable tour in admin
+apiVersion: enonic.cloud/v1alpha2
+kind: Xp7Config
+metadata:
+  name: all-admin
+  labels:
+    {{- with .Values.defaultLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  nodeGroup: all
+  file: com.enonic.xp.app.main.cfg
+  data: |-
+    tourDisabled = true

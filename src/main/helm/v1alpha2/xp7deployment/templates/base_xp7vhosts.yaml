@@ -1,3 +1,6 @@
+# Default vHosts
+
+# Health check for Kubernetes
 apiVersion: enonic.cloud/v1alpha2
 kind: Xp7VHost
 metadata:
@@ -15,6 +18,8 @@ spec:
       target: /webapp/com.enonic.app.alive
 
 ---
+
+# Access to localhost if OPs want to do 'kubectl port-forward'
 apiVersion: enonic.cloud/v1alpha2
 kind: Xp7VHost
 metadata:

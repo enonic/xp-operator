@@ -21,7 +21,7 @@ import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7vhost.helpers.Map
 import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7vhost.info.DiffXp7VHost;
 
 @Value.Immutable
-public abstract class CommandXpVHostConfigApply
+public abstract class CommandXpVHostsApply
     extends Configuration
     implements CombinedCommandBuilder
 {
@@ -40,11 +40,9 @@ public abstract class CommandXpVHostConfigApply
             String nodeName = e.getKey();
             List<Mapping> mappings = e.getValue();
             mappings.sort( Comparator.comparing( Mapping::host ) );
-
-            // TODO: Setup owner references to Xp7Config to garbage collect
-
+            
             // Create / Update config
-            ImmutableCommandXpVHostConfigNodesApply.builder().
+            ImmutableCommandXpUpdateVHostConfigFile.builder().
                 clients( clients() ).
                 caches( caches() ).
                 info( info() ).

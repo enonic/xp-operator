@@ -21,7 +21,7 @@ public class Configuration
     {
         return globalConfig().getOptionalValue( key, String.class ).get();
     }
-    
+
     public static String cfgStrFmt( String key, Object... args )
     {
         return String.format( globalConfig().getOptionalValue( key, String.class ).get(), args );

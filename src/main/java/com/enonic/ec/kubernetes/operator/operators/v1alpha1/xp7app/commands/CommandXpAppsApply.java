@@ -15,7 +15,7 @@ import com.enonic.ec.kubernetes.operator.operators.common.clients.Clients;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7app.info.DiffXp7App;
 
 @Value.Immutable
-public abstract class CommandXpAppApplyAll
+public abstract class CommandXpAppsApply
     extends Configuration
     implements CombinedCommandBuilder
 {
@@ -32,8 +32,8 @@ public abstract class CommandXpAppApplyAll
         List<V1alpha1Xp7App> allApps =
             caches().getAppCache().getByNamespace( info().deploymentInfo().namespaceName() ).collect( Collectors.toList() );
 
-        // Apply them to the config file
-        ImmutableCommandXpAppApply.builder().
+        // Apply them to the deploy config file
+        ImmutableCommandXpUpdateDeployConfigFile.builder().
             clients( clients() ).
             caches( caches() ).
             info( info() ).

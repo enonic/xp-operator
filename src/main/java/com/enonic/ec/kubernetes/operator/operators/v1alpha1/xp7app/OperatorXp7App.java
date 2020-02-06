@@ -15,7 +15,7 @@ import com.enonic.ec.kubernetes.operator.operators.common.OperatorNamespaced;
 import com.enonic.ec.kubernetes.operator.operators.common.ResourceInfoNamespaced;
 import com.enonic.ec.kubernetes.operator.operators.common.cache.Caches;
 import com.enonic.ec.kubernetes.operator.operators.common.clients.Clients;
-import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7app.commands.ImmutableCommandXpAppApplyAll;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7app.commands.ImmutableCommandXpAppsApply;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7app.info.DiffXp7App;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7app.info.ImmutableInfoXp7App;
 
@@ -38,6 +38,7 @@ public class OperatorXp7App
     private void watchApps( final Watcher.Action action, final String s, final Optional<V1alpha1Xp7App> oldResource,
                             final Optional<V1alpha1Xp7App> newResource )
     {
+        // Create info about the CRD
         Optional<ResourceInfoNamespaced<V1alpha1Xp7App, DiffXp7App>> i = getInfo( action, () -> ImmutableInfoXp7App.builder().
             caches( caches ).
             oldResource( oldResource ).
@@ -45,15 +46,15 @@ public class OperatorXp7App
             build() );
 
         i.ifPresent( info -> {
-            // Because multiple apps could potentially be deployed at the same time,
-            // lets use the stall function to let them accumulate before we update config
+            // Because multiple apps could potentially be deployed at the same time, lets use
+            // the stall function to let them accumulate in the cache before we update config
             stallAndRunCommands( 500L, ( commandBuilder ) -> createCommands( commandBuilder, info ) );
         } );
     }
 
     private void createCommands( ImmutableCombinedCommand.Builder commandBuilder, ResourceInfoNamespaced<V1alpha1Xp7App, DiffXp7App> info )
     {
-        ImmutableCommandXpAppApplyAll.builder().
+        ImmutableCommandXpAppsApply.builder().
             clients( clients ).
             caches( caches ).
             info( info ).

@@ -10,7 +10,6 @@ import org.immutables.value.Value;
 
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.deployment.V1alpha2Xp7Deployment;
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.deployment.V1alpha2Xp7DeploymentSpecNode;
-import com.enonic.ec.kubernetes.operator.helm.BaseValues;
 import com.enonic.ec.kubernetes.operator.helm.commands.ValueBuilder;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7deployment.info.InfoXp7Deployment;
 
@@ -20,7 +19,7 @@ import static com.enonic.ec.kubernetes.operator.common.Configuration.cfgStr;
 public abstract class Xp7DeploymentValues
     implements ValueBuilder
 {
-    protected abstract BaseValues baseValues();
+    protected abstract Map<String, Object> baseValues();
 
     protected abstract String imageTemplate();
 
