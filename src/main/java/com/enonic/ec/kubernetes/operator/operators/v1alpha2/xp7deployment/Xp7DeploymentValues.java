@@ -11,12 +11,14 @@ import org.immutables.value.Value;
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.deployment.V1alpha2Xp7Deployment;
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.deployment.V1alpha2Xp7DeploymentSpecNode;
 import com.enonic.ec.kubernetes.operator.helm.commands.ValueBuilder;
+import com.enonic.ec.kubernetes.operator.operators.common.DefaultValues;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7deployment.info.InfoXp7Deployment;
 
 import static com.enonic.ec.kubernetes.operator.common.Configuration.cfgStr;
 
 @Value.Immutable
 public abstract class Xp7DeploymentValues
+    extends DefaultValues
     implements ValueBuilder
 {
     protected abstract Map<String, Object> baseValues();
@@ -76,32 +78,25 @@ public abstract class Xp7DeploymentValues
         return cfgStr( "operator.deployment.xp.allNodesKey" );
     }
 
-    private Map<String, String> defaultLabels( V1alpha2Xp7Deployment resource )
-    {
-        return resource.getMetadata().getLabels();
-    }
-
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     private Integer minimumMasterNodes( V1alpha2Xp7Deployment resource )
     {
-        return defaultMinimumAvailable( resource, resource.getSpec().nodeGroups().values().stream().filter(
-            V1alpha2Xp7DeploymentSpecNode::master ).findAny().get() );
+        return defaultMinimumAvailable( resource.getSpec().totalMasterNodes() );
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     private Integer minimumDataNodes( V1alpha2Xp7Deployment resource )
     {
-        return defaultMinimumAvailable( resource, resource.getSpec().nodeGroups().values().stream().filter(
-            V1alpha2Xp7DeploymentSpecNode::data ).findAny().get() );
+        return defaultMinimumAvailable( resource.getSpec().totalDataNodes() );
     }
 
-    private Integer defaultMinimumAvailable( V1alpha2Xp7Deployment resource, V1alpha2Xp7DeploymentSpecNode node )
+    private Integer defaultMinimumAvailable( int total )
     {
-        if ( !isClustered( resource ) )
+        if ( total < 2 )
         {
             return 0;
         }
-        return ( node.replicas() / 2 ) + 1;
+        return ( total / 2 ) + 1;
     }
 
     @SuppressWarnings("unused")

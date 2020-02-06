@@ -78,6 +78,7 @@ public class OperatorXp7Deployments
                 ImmutableKubeCmd.builder().
                     clients( clients ).
                     resource( createNamespace( info ) ).
+                    neverOverwrite( true ).
                     build().
                     apply( commandBuilder );
 
@@ -86,6 +87,7 @@ public class OperatorXp7Deployments
                     clients( clients ).
                     namespace( info.namespaceName() ).
                     resource( createSecret() ).
+                    neverOverwrite( true ).
                     build().
                     apply( commandBuilder );
             }

@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.immutables.value.Value;
 
@@ -13,6 +12,7 @@ import com.enonic.ec.kubernetes.operator.common.Configuration;
 import com.enonic.ec.kubernetes.operator.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.operator.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHost;
+import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHostSpecMapping;
 import com.enonic.ec.kubernetes.operator.operators.common.ResourceInfoNamespaced;
 import com.enonic.ec.kubernetes.operator.operators.common.cache.Caches;
 import com.enonic.ec.kubernetes.operator.operators.common.clients.Clients;
@@ -40,7 +40,7 @@ public abstract class CommandXpVHostsApply
             String nodeName = e.getKey();
             List<Mapping> mappings = e.getValue();
             mappings.sort( Comparator.comparing( Mapping::host ) );
-            
+
             // Create / Update config
             ImmutableCommandXpUpdateVHostConfigFile.builder().
                 clients( clients() ).
@@ -67,7 +67,7 @@ public abstract class CommandXpVHostsApply
                     nodeGroup( m.nodeGroup() ).
                     source( m.source() ).
                     target( m.target() ).
-                    idProvider( Optional.ofNullable( m.idProvider() ) ).
+                    idProviders( buildIdProviderMap( m ) ).
                     build() ) ) );
 
         // Create map for all nodes
@@ -89,5 +89,17 @@ public abstract class CommandXpVHostsApply
         } );
 
         return result;
+    }
+
+    private Map<String, String> buildIdProviderMap( final V1alpha2Xp7VHostSpecMapping m )
+    {
+        Map<String, String> res = new HashMap<>();
+        if ( m.idProviders() == null )
+        {
+            return res;
+        }
+        res.put( m.idProviders().defaultIdProvider(), "default" );
+        m.idProviders().enabled().forEach( s -> res.put( s, "enabled" ) );
+        return res;
     }
 }

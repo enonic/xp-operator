@@ -2,20 +2,22 @@
 apiVersion: "v1"
 kind: "ConfigMap"
 metadata:
+  annotations:
+    neverOverwrite: "true"
   labels:
-    managedBy: "ec-operator"
     nodeGroup: "fisk"
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "fisk"
-data: {}
 ---
 apiVersion: "v1"
 kind: "PersistentVolumeClaim"
 metadata:
   labels:
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "blobstore"
@@ -32,6 +34,7 @@ kind: "PersistentVolumeClaim"
 metadata:
   labels:
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "snapshots"
@@ -48,6 +51,7 @@ kind: "Service"
 metadata:
   labels:
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "all"
@@ -56,17 +60,28 @@ spec:
   ports:
   - name: "xp-metrics"
     port: 2609
+    protocol: "TCP"
+    targetPort: 2609
   - name: "xp-management"
     port: 4848
+    protocol: "TCP"
+    targetPort: 4848
   - name: "xp-main"
     port: 8080
+    protocol: "TCP"
+    targetPort: 8080
   - name: "es-api"
     port: 9200
+    protocol: "TCP"
+    targetPort: 9200
   - name: "es-transport"
     port: 9300
+    protocol: "TCP"
+    targetPort: 9300
   publishNotReadyAddresses: true
   selector:
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   sessionAffinity: "None"
@@ -78,6 +93,7 @@ metadata:
   labels:
     nodeGroup: "fisk"
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "fisk"
@@ -86,18 +102,29 @@ spec:
   ports:
   - name: "xp-metrics"
     port: 2609
+    protocol: "TCP"
+    targetPort: 2609
   - name: "xp-management"
     port: 4848
+    protocol: "TCP"
+    targetPort: 4848
   - name: "xp-main"
     port: 8080
+    protocol: "TCP"
+    targetPort: 8080
   - name: "es-api"
     port: 9200
+    protocol: "TCP"
+    targetPort: 9200
   - name: "es-transport"
     port: 9300
+    protocol: "TCP"
+    targetPort: 9300
   publishNotReadyAddresses: true
   selector:
     nodeGroup: "fisk"
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   sessionAffinity: "None"
@@ -109,6 +136,7 @@ metadata:
   labels:
     nodeGroup: "fisk"
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "fisk"
@@ -119,6 +147,7 @@ spec:
     matchLabels:
       nodeGroup: "fisk"
       cloud: "mycloud"
+      managedBy: "ec-operator"
       name: "qaxp"
       project: "myproject"
   serviceName: "all"
@@ -127,6 +156,7 @@ spec:
       labels:
         nodeGroup: "fisk"
         cloud: "mycloud"
+        managedBy: "ec-operator"
         name: "qaxp"
         project: "myproject"
     spec:
@@ -259,6 +289,7 @@ spec:
       labels:
         nodeGroup: "fisk"
         cloud: "mycloud"
+        managedBy: "ec-operator"
         name: "qaxp"
         project: "myproject"
       name: "export"
@@ -275,6 +306,7 @@ spec:
       labels:
         nodeGroup: "fisk"
         cloud: "mycloud"
+        managedBy: "ec-operator"
         name: "qaxp"
         project: "myproject"
       name: "index"
@@ -291,6 +323,7 @@ spec:
       labels:
         nodeGroup: "fisk"
         cloud: "mycloud"
+        managedBy: "ec-operator"
         name: "qaxp"
         project: "myproject"
       name: "work"
@@ -307,6 +340,7 @@ apiVersion: "enonic.cloud/v1alpha1"
 metadata:
   labels:
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "alive"
@@ -318,6 +352,7 @@ apiVersion: "enonic.cloud/v1alpha1"
 metadata:
   labels:
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "snapshotter"
@@ -329,6 +364,7 @@ apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   labels:
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "all-admin"
@@ -342,6 +378,7 @@ apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   labels:
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "all-system"
@@ -355,8 +392,8 @@ kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   labels:
-    nodeGroup: "fisk"
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "fisk-cluster"
@@ -369,8 +406,8 @@ kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   labels:
-    nodeGroup: "fisk"
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "fisk-elasticsearch"
@@ -382,10 +419,11 @@ spec:
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
+  annotations:
+    neverOverwrite: "true"
   labels:
-    managedBy: "ec-operator"
-    nodeGroup: "fisk"
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "fisk-vhosts"
@@ -399,6 +437,7 @@ apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   labels:
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "healthcheck"
@@ -410,13 +449,14 @@ spec:
   - nodeGroup: "all"
     source: "/"
     target: "/webapp/com.enonic.app.alive"
-    idProvider: null
+    idProviders: null
 ---
 kind: "Xp7VHost"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   labels:
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "localhost"
@@ -428,4 +468,4 @@ spec:
   - nodeGroup: "all"
     source: "/"
     target: "/"
-    idProvider: null
+    idProviders: null

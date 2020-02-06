@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.immutables.value.Value;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.base.Preconditions;
 
@@ -24,15 +25,27 @@ public abstract class V1alpha2Xp7DeploymentSpec
 
     public abstract Map<String, V1alpha2Xp7DeploymentSpecNode> nodeGroups();
 
+    @JsonIgnore
+    @Value.Derived
+    public int totalMasterNodes() {
+        return nodeGroups().values().stream().filter( V1alpha2Xp7DeploymentSpecNode::master ).map(
+            V1alpha2Xp7DeploymentSpecNode::replicas ).reduce( Integer::sum ).get();
+    }
+
+    @JsonIgnore
+    @Value.Derived
+    public int totalDataNodes() {
+        return nodeGroups().values().stream().filter( V1alpha2Xp7DeploymentSpecNode::data ).map(
+            V1alpha2Xp7DeploymentSpecNode::replicas ).reduce( Integer::sum ).get();
+    }
+
     @Value.Check
     protected void check()
     {
-        Preconditions.checkState( nodeGroups().size() > 0, "Field 'spec.nodes' has to contain more than 0 nodes" );
-
-        Preconditions.checkState( nodeGroups().values().stream().filter( V1alpha2Xp7DeploymentSpecNode::master ).count() == 1,
-                                  "1 and only 1 node has be of master=true" );
-        Preconditions.checkState( nodeGroups().values().stream().filter( V1alpha2Xp7DeploymentSpecNode::data ).count() == 1,
-                                  "1 and only 1 node has be of type data=true" );
+        Preconditions.checkState( nodeGroups().size() > 0, "Field 'spec.nodeGroups' has to contain more than 0 nodes" );
+        Preconditions.checkState( totalMasterNodes() > 0, "Some nodes must have master=true" );
+        Preconditions.checkState( totalMasterNodes() % 2 == 1, "Number of master nodes has to be an odd number" );
+        Preconditions.checkState( totalDataNodes() > 0, "Some nodes must have data=true" );
     }
 
     public static class ExceptionMissing

@@ -20,11 +20,17 @@ public abstract class KubeCmd
 
     protected abstract HasMetadata resource();
 
+    @Value.Default
+    protected boolean neverOverwrite()
+    {
+        return false;
+    }
+
     @SuppressWarnings("WeakerAccess")
     @Value.Derived
     protected KubeCommandBuilder<HasMetadata> cmd()
     {
-        return CommandMapper.getCommandClass( clients(), namespace(), resource() );
+        return CommandMapper.getCommandClass( clients(), namespace(), resource(), neverOverwrite() );
     }
 
     public void apply( ImmutableCombinedCommand.Builder commandBuilder )

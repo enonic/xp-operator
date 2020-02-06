@@ -1,4 +1,4 @@
-testResult: ""
+testResult: "Some fields in 'spec.mappings.idProviders' are missing: [default]"
 testReview:
   request:
     operation: CREATE
@@ -11,6 +11,9 @@ testReview:
       spec:
         host: test.purplejs.io
         mappings:
-          - nodeGroup: all
+          - nodeGroup: main
             source: /
             target: /admin
+            idProviders:
+              enabled:
+                - system

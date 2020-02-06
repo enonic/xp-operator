@@ -41,7 +41,11 @@ spec:
     - nodeGroup: fisk
       source: /
       target: /admin
-      idProvider: system
+      idProviders: # optional
+        default: system
+        enabled:
+          - adfs
+          - oidc
 
 ---
 apiVersion: enonic.cloud/v1alpha1

@@ -37,7 +37,6 @@ public abstract class V1alpha2Xp7DeploymentSpecNode
 
         Preconditions.checkState( !data() || resources().disks().containsKey( "index" ),
                                   "Nodes with data=true must have disk 'index' defined" );
-        Preconditions.checkState( !master() || replicas() % 2 == 1, "Nodes with type master=true replicas has to be an odd number" );
     }
 
     public static class ExceptionMissing

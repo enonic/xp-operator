@@ -69,6 +69,7 @@ public abstract class HelmKubeCmdBuilder
                     clients( clients() ).
                     namespace( namespace() ).
                     resource( r.getValue() ).
+                    neverOverwrite( neverOverwrite( r.getValue().getMetadata().getAnnotations() ) ).
                     build().
                     delete( commandBuilder );
             }
@@ -79,8 +80,18 @@ public abstract class HelmKubeCmdBuilder
                 clients( clients() ).
                 namespace( namespace() ).
                 resource( r.getValue() ).
+                neverOverwrite( neverOverwrite( r.getValue().getMetadata().getAnnotations() ) ).
                 build().
                 apply( commandBuilder );
         }
+    }
+
+    private boolean neverOverwrite( final Map<String, String> annotations )
+    {
+        if ( annotations == null )
+        {
+            return false;
+        }
+        return annotations.getOrDefault( "neverOverwrite", "false" ).equals( "true" );
     }
 }

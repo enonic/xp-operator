@@ -14,4 +14,7 @@ testReview:
           - nodeGroup: main
             source: /
             target: /admin
-            idProvider: system
+            idProviders:
+              default: system
+              enabled:
+                - adfs

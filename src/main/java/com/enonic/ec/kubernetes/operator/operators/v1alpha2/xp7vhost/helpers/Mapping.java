@@ -1,5 +1,6 @@
 package com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7vhost.helpers;
 
+import java.util.Map;
 import java.util.Optional;
 
 import org.immutables.value.Value;
@@ -18,7 +19,7 @@ public abstract class Mapping
 
     public abstract String target();
 
-    public abstract Optional<String> idProvider();
+    public abstract Map<String, String> idProviders();
 
     @SuppressWarnings("UnstableApiUsage")
     @Value.Derived

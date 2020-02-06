@@ -1,13 +1,17 @@
 package com.enonic.ec.kubernetes.operator.kubectl.base;
 
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import org.immutables.value.Value;
 
+import com.google.common.base.Preconditions;
+
 import io.fabric8.kubernetes.api.model.HasMetadata;
-import io.fabric8.kubernetes.api.model.ObjectMeta;
 
 import com.enonic.ec.kubernetes.operator.operators.common.clients.Clients;
 
@@ -18,6 +22,8 @@ public abstract class KubeCommandBuilder<T extends HasMetadata>
     public abstract Optional<String> namespace();
 
     public abstract T resource();
+
+    public abstract boolean neverOverwrite();
 
     @Value.Derived
     protected T maybeNamespacedResource()
@@ -45,7 +51,7 @@ public abstract class KubeCommandBuilder<T extends HasMetadata>
     {
         if ( oldResource().isPresent() )
         {
-            if ( equalsResourcesWithMetadata( oldResource().get(), maybeNamespacedResource() ) )
+            if ( neverOverwrite() || equalsResourcesWithMetadata( oldResource().get(), maybeNamespacedResource() ) )
             {
                 return Optional.empty();
             }
@@ -83,17 +89,27 @@ public abstract class KubeCommandBuilder<T extends HasMetadata>
 
     private boolean equalsResourcesWithMetadata( T o, T n )
     {
-        if ( !equalsMetadata( o.getMetadata(), n.getMetadata() ) )
+        Preconditions.checkState( Objects.equals( o.getMetadata().getName(), n.getMetadata().getName() ) );
+        Preconditions.checkState( Objects.equals( o.getMetadata().getNamespace(), n.getMetadata().getNamespace() ) );
+        if ( !equalLabels( getOrDefault( o.getMetadata().getLabels() ), getOrDefault( n.getMetadata().getLabels() ) ) )
+        {
+            return false;
+        }
+        if ( !equalAnnotations( getOrDefault( o.getMetadata().getAnnotations() ), getOrDefault( n.getMetadata().getAnnotations() ) ) )
         {
             return false;
         }
         return equalsSpec( o, n );
     }
 
-    private boolean equalsMetadata( ObjectMeta o, ObjectMeta n )
+    protected boolean equalLabels( Map<String, String> o, Map<String, String> n )
     {
-        return Objects.equals( o.getName(), n.getName() ) && Objects.equals( o.getNamespace(), n.getNamespace() ) &&
-            Objects.equals( o.getLabels(), n.getLabels() ) && Objects.equals( o.getAnnotations(), n.getAnnotations() );
+        return Objects.equals( o, n );
+    }
+
+    protected boolean equalAnnotations( final Map<String, String> o, final Map<String, String> n )
+    {
+        return Objects.equals( o, n );
     }
 
     protected boolean equalsSpec( final T o, final T n )
@@ -101,4 +117,17 @@ public abstract class KubeCommandBuilder<T extends HasMetadata>
         return Objects.equals( o, n );
     }
 
+    private <T> T getOrDefault( T value, Supplier<T> sup )
+    {
+        if ( value == null )
+        {
+            return sup.get();
+        }
+        return value;
+    }
+
+    private Map<String, String> getOrDefault( Map<String, String> m )
+    {
+        return getOrDefault( m, Collections::emptyMap );
+    }
 }

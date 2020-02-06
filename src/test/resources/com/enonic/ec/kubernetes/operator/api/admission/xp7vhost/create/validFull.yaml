@@ -17,4 +17,3 @@ testReview:
           - nodeGroup: main
             source: /
             target: /admin
-            idProvider: system

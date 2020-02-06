@@ -14,4 +14,3 @@ testReview:
           - nodeGroup: wrong
             source: /
             target: /admin
-            idProvider: system

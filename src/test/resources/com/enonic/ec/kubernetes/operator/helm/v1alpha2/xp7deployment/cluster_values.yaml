@@ -15,8 +15,9 @@ storage:
     storageClassName: "standard"
 defaultLabels:
   cloud: "mycloud"
-  project: "myproject"
   name: "qaxp"
+  project: "myproject"
+  managedBy: "ec-operator"
 deployment:
   minimumDataNodes: 2
   clustered: true

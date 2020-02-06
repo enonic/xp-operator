@@ -1,4 +1,4 @@
-testResult: "1 and only 1 node has be of type data=true"
+testResult: "Number of master nodes has to be an odd number"
 testReview:
   request:
     operation: CREATE
@@ -21,7 +21,7 @@ testReview:
           master:
             master: true
             data: true
-            replicas: 1
+            replicas: 2
             resources:
               cpu: "1"
               memory: 512Mi

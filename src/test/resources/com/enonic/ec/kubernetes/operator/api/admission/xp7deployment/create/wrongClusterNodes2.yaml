@@ -27,7 +27,7 @@ testReview:
               memory: 512Mi
           data:
             master: true
-            data: true
+            data: false
             replicas: 1
             resources:
               cpu: "1"

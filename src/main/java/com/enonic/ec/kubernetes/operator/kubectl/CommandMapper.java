@@ -21,7 +21,7 @@ import com.enonic.ec.kubernetes.operator.operators.common.clients.Clients;
 class CommandMapper
 {
     @SuppressWarnings({"unchecked", "OptionalUsedAsFieldOrParameterType"})
-    static <T extends HasMetadata> KubeCommandBuilder<T> getCommandClass( Clients clients, Optional<String> namespace, T resource )
+    static <T extends HasMetadata> KubeCommandBuilder<T> getCommandClass( Clients clients, Optional<String> namespace, T resource, boolean neverOverwrite )
     {
         if ( resource instanceof ConfigMap )
         {
@@ -29,6 +29,7 @@ class CommandMapper
                 clients( clients ).
                 namespace( namespace ).
                 resource( (ConfigMap) resource ).
+                neverOverwrite( neverOverwrite ).
                 build();
         }
         else if ( resource instanceof DaemonSet )
@@ -37,6 +38,7 @@ class CommandMapper
                 clients( clients ).
                 namespace( namespace ).
                 resource( (DaemonSet) resource ).
+                neverOverwrite( neverOverwrite ).
                 build();
         }
         else if ( resource instanceof Ingress )
@@ -45,6 +47,7 @@ class CommandMapper
                 clients( clients ).
                 namespace( namespace ).
                 resource( (Ingress) resource ).
+                neverOverwrite( neverOverwrite ).
                 build();
         }
         else if ( resource instanceof Namespace )
@@ -52,6 +55,7 @@ class CommandMapper
             return (KubeCommandBuilder<T>) ImmutableKubeCmdNamespaces.builder().
                 clients( clients ).
                 resource( (Namespace) resource ).
+                neverOverwrite( neverOverwrite ).
                 build();
         }
         else if ( resource instanceof PersistentVolumeClaim )
@@ -60,6 +64,7 @@ class CommandMapper
                 clients( clients ).
                 namespace( namespace ).
                 resource( (PersistentVolumeClaim) resource ).
+                neverOverwrite( neverOverwrite ).
                 build();
         }
         else if ( resource instanceof Secret )
@@ -68,6 +73,7 @@ class CommandMapper
                 clients( clients ).
                 namespace( namespace ).
                 resource( (Secret) resource ).
+                neverOverwrite( neverOverwrite ).
                 build();
         }
         else if ( resource instanceof Service )
@@ -76,6 +82,7 @@ class CommandMapper
                 clients( clients ).
                 namespace( namespace ).
                 resource( (Service) resource ).
+                neverOverwrite( neverOverwrite ).
                 build();
         }
         else if ( resource instanceof StatefulSet )
@@ -84,6 +91,7 @@ class CommandMapper
                 clients( clients ).
                 namespace( namespace ).
                 resource( (StatefulSet) resource ).
+                neverOverwrite( neverOverwrite ).
                 build();
         }
         else if ( resource instanceof V1alpha1Xp7App )
@@ -92,6 +100,7 @@ class CommandMapper
                 clients( clients ).
                 namespace( namespace ).
                 resource( (V1alpha1Xp7App) resource ).
+                neverOverwrite( neverOverwrite ).
                 build();
         }
         else if ( resource instanceof V1alpha2Xp7Config )
@@ -100,6 +109,7 @@ class CommandMapper
                 clients( clients ).
                 namespace( namespace ).
                 resource( (V1alpha2Xp7Config) resource ).
+                neverOverwrite( neverOverwrite ).
                 build();
         }
         else if ( resource instanceof V1alpha2Xp7VHost )
@@ -108,6 +118,7 @@ class CommandMapper
                 clients( clients ).
                 namespace( namespace ).
                 resource( (V1alpha2Xp7VHost) resource ).
+                neverOverwrite( neverOverwrite ).
                 build();
         }
         throw new IllegalStateException( "Cannot find command class for " + resource.getKind() );

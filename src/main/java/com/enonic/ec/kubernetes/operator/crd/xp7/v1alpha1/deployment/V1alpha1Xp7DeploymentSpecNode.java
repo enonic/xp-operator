@@ -20,7 +20,7 @@ public abstract class V1alpha1Xp7DeploymentSpecNode
     extends Configuration
 {
     @Nullable
-    public abstract String displayName();
+    public abstract String displayName(); // TODO: Remove this from equals check
 
     public abstract Integer replicas();
 

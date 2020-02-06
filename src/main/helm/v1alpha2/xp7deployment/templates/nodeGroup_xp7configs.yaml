@@ -6,7 +6,6 @@ kind: Xp7Config
 metadata:
   name: {{ $nodeGroupName }}-cluster
   labels:
-    nodeGroup: {{ $nodeGroupName }}
     {{- with $.Values.defaultLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
@@ -36,7 +35,6 @@ kind: Xp7Config
 metadata:
   name: {{ $nodeGroupName }}-elasticsearch
   labels:
-    nodeGroup: {{ $nodeGroupName }}
     {{- with $.Values.defaultLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
@@ -65,9 +63,9 @@ apiVersion: enonic.cloud/v1alpha2
 kind: Xp7Config
 metadata:
   name: {{ $nodeGroupName }}-vhosts
+  annotations:
+    neverOverwrite: true # This is done so if the chart is applied it will not override the existing resource
   labels:
-    managedBy: ec-operator
-    nodeGroup: {{ $nodeGroupName }}
     {{- with $.Values.defaultLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}

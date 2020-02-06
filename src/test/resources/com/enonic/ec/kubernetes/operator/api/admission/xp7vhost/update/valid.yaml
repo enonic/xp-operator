@@ -14,7 +14,6 @@ testReview:
           - nodeGroup: main
             source: /
             target: /admin
-            idProvider: system
     object:
       apiVersion: enonic.cloud/v1alpha2
       kind: Xp7VHost
@@ -27,4 +26,3 @@ testReview:
           - nodeGroup: main
             source: /admin
             target: /admin
-            idProvider: system

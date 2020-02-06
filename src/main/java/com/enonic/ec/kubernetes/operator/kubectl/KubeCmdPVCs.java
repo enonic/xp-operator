@@ -1,5 +1,6 @@
 package com.enonic.ec.kubernetes.operator.kubectl;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -62,6 +63,13 @@ public abstract class KubeCmdPVCs
             inNamespace( resource.getMetadata().getNamespace() ).
             withName( resource.getMetadata().getName() ).
             delete();
+    }
+
+    @Override
+    protected boolean equalAnnotations( final Map<String, String> o, final Map<String, String> n )
+    {
+        // Ignore annotations on PVCs
+        return true;
     }
 
     @Override

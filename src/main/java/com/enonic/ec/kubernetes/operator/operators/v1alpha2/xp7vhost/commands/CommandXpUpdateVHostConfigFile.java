@@ -23,9 +23,9 @@ public abstract class CommandXpUpdateVHostConfigFile
             sb.append( String.format( "mapping.%s.host=%s\n", m.name(), m.host() ) );
             sb.append( String.format( "mapping.%s.source=%s\n", m.name(), m.source() ) );
             sb.append( String.format( "mapping.%s.target=%s", m.name(), m.target() ) );
-            m.idProvider().ifPresent( p -> {
+            m.idProviders().forEach( ( name, val ) -> {
                 sb.append( "\n" );
-                sb.append( String.format( "mapping.%s.idProvider.%s=default", m.name(), p ) );
+                sb.append( String.format( "mapping.%s.idProvider.%s=%s", m.name(), name, val ) );
             } );
         }
     }

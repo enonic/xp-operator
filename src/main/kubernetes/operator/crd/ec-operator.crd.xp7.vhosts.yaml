@@ -40,9 +40,16 @@ spec:
                         type: string
                       target:
                         type: string
-                      idProvider:
-                        type: string
+                      idProviders:
+                        type: object
                         nullable: true
+                        properties:
+                          default:
+                            type: string
+                          enabled:
+                            type: array
+                            items:
+                              type: string
     - name: v1alpha1
       served: true
       storage: false

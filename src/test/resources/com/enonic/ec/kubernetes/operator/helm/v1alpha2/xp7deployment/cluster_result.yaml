@@ -2,44 +2,48 @@
 apiVersion: "v1"
 kind: "ConfigMap"
 metadata:
+  annotations:
+    neverOverwrite: "true"
   labels:
-    managedBy: "ec-operator"
     nodeGroup: "data"
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "data"
-data: {}
 ---
 apiVersion: "v1"
 kind: "ConfigMap"
 metadata:
+  annotations:
+    neverOverwrite: "true"
   labels:
-    managedBy: "ec-operator"
     nodeGroup: "frontend"
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "frontend"
-data: {}
 ---
 apiVersion: "v1"
 kind: "ConfigMap"
 metadata:
+  annotations:
+    neverOverwrite: "true"
   labels:
-    managedBy: "ec-operator"
     nodeGroup: "master"
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "master"
-data: {}
 ---
 apiVersion: "v1"
 kind: "PersistentVolumeClaim"
 metadata:
   labels:
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "blobstore"
@@ -56,6 +60,7 @@ kind: "PersistentVolumeClaim"
 metadata:
   labels:
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "snapshots"
@@ -72,6 +77,7 @@ kind: "Service"
 metadata:
   labels:
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "all"
@@ -80,17 +86,28 @@ spec:
   ports:
   - name: "xp-metrics"
     port: 2609
+    protocol: "TCP"
+    targetPort: 2609
   - name: "xp-management"
     port: 4848
+    protocol: "TCP"
+    targetPort: 4848
   - name: "xp-main"
     port: 8080
+    protocol: "TCP"
+    targetPort: 8080
   - name: "es-api"
     port: 9200
+    protocol: "TCP"
+    targetPort: 9200
   - name: "es-transport"
     port: 9300
+    protocol: "TCP"
+    targetPort: 9300
   publishNotReadyAddresses: true
   selector:
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   sessionAffinity: "None"
@@ -102,6 +119,7 @@ metadata:
   labels:
     nodeGroup: "data"
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "data"
@@ -110,18 +128,29 @@ spec:
   ports:
   - name: "xp-metrics"
     port: 2609
+    protocol: "TCP"
+    targetPort: 2609
   - name: "xp-management"
     port: 4848
+    protocol: "TCP"
+    targetPort: 4848
   - name: "xp-main"
     port: 8080
+    protocol: "TCP"
+    targetPort: 8080
   - name: "es-api"
     port: 9200
+    protocol: "TCP"
+    targetPort: 9200
   - name: "es-transport"
     port: 9300
+    protocol: "TCP"
+    targetPort: 9300
   publishNotReadyAddresses: true
   selector:
     nodeGroup: "data"
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   sessionAffinity: "None"
@@ -133,6 +162,7 @@ metadata:
   labels:
     nodeGroup: "frontend"
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "frontend"
@@ -141,18 +171,29 @@ spec:
   ports:
   - name: "xp-metrics"
     port: 2609
+    protocol: "TCP"
+    targetPort: 2609
   - name: "xp-management"
     port: 4848
+    protocol: "TCP"
+    targetPort: 4848
   - name: "xp-main"
     port: 8080
+    protocol: "TCP"
+    targetPort: 8080
   - name: "es-api"
     port: 9200
+    protocol: "TCP"
+    targetPort: 9200
   - name: "es-transport"
     port: 9300
+    protocol: "TCP"
+    targetPort: 9300
   publishNotReadyAddresses: true
   selector:
     nodeGroup: "frontend"
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   sessionAffinity: "None"
@@ -164,6 +205,7 @@ metadata:
   labels:
     nodeGroup: "master"
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "master"
@@ -172,18 +214,29 @@ spec:
   ports:
   - name: "xp-metrics"
     port: 2609
+    protocol: "TCP"
+    targetPort: 2609
   - name: "xp-management"
     port: 4848
+    protocol: "TCP"
+    targetPort: 4848
   - name: "xp-main"
     port: 8080
+    protocol: "TCP"
+    targetPort: 8080
   - name: "es-api"
     port: 9200
+    protocol: "TCP"
+    targetPort: 9200
   - name: "es-transport"
     port: 9300
+    protocol: "TCP"
+    targetPort: 9300
   publishNotReadyAddresses: true
   selector:
     nodeGroup: "master"
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   sessionAffinity: "None"
@@ -195,6 +248,7 @@ metadata:
   labels:
     nodeGroup: "data"
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "data"
@@ -205,6 +259,7 @@ spec:
     matchLabels:
       nodeGroup: "data"
       cloud: "mycloud"
+      managedBy: "ec-operator"
       name: "qaxp"
       project: "myproject"
   serviceName: "all"
@@ -213,6 +268,7 @@ spec:
       labels:
         nodeGroup: "data"
         cloud: "mycloud"
+        managedBy: "ec-operator"
         name: "qaxp"
         project: "myproject"
     spec:
@@ -339,6 +395,7 @@ spec:
       labels:
         nodeGroup: "data"
         cloud: "mycloud"
+        managedBy: "ec-operator"
         name: "qaxp"
         project: "myproject"
       name: "export"
@@ -355,6 +412,7 @@ spec:
       labels:
         nodeGroup: "data"
         cloud: "mycloud"
+        managedBy: "ec-operator"
         name: "qaxp"
         project: "myproject"
       name: "index"
@@ -372,6 +430,7 @@ metadata:
   labels:
     nodeGroup: "frontend"
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "frontend"
@@ -382,6 +441,7 @@ spec:
     matchLabels:
       nodeGroup: "frontend"
       cloud: "mycloud"
+      managedBy: "ec-operator"
       name: "qaxp"
       project: "myproject"
   serviceName: "all"
@@ -390,6 +450,7 @@ spec:
       labels:
         nodeGroup: "frontend"
         cloud: "mycloud"
+        managedBy: "ec-operator"
         name: "qaxp"
         project: "myproject"
     spec:
@@ -522,6 +583,7 @@ spec:
       labels:
         nodeGroup: "frontend"
         cloud: "mycloud"
+        managedBy: "ec-operator"
         name: "qaxp"
         project: "myproject"
       name: "export"
@@ -538,6 +600,7 @@ spec:
       labels:
         nodeGroup: "frontend"
         cloud: "mycloud"
+        managedBy: "ec-operator"
         name: "qaxp"
         project: "myproject"
       name: "work"
@@ -555,6 +618,7 @@ metadata:
   labels:
     nodeGroup: "master"
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "master"
@@ -565,6 +629,7 @@ spec:
     matchLabels:
       nodeGroup: "master"
       cloud: "mycloud"
+      managedBy: "ec-operator"
       name: "qaxp"
       project: "myproject"
   serviceName: "all"
@@ -573,6 +638,7 @@ spec:
       labels:
         nodeGroup: "master"
         cloud: "mycloud"
+        managedBy: "ec-operator"
         name: "qaxp"
         project: "myproject"
     spec:
@@ -701,6 +767,7 @@ spec:
       labels:
         nodeGroup: "master"
         cloud: "mycloud"
+        managedBy: "ec-operator"
         name: "qaxp"
         project: "myproject"
       name: "export"
@@ -717,6 +784,7 @@ apiVersion: "enonic.cloud/v1alpha1"
 metadata:
   labels:
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "alive"
@@ -728,6 +796,7 @@ apiVersion: "enonic.cloud/v1alpha1"
 metadata:
   labels:
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "snapshotter"
@@ -739,6 +808,7 @@ apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   labels:
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "all-admin"
@@ -752,6 +822,7 @@ apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   labels:
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "all-system"
@@ -765,8 +836,8 @@ kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   labels:
-    nodeGroup: "data"
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "data-cluster"
@@ -780,8 +851,8 @@ kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   labels:
-    nodeGroup: "data"
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "data-elasticsearch"
@@ -795,10 +866,11 @@ spec:
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
+  annotations:
+    neverOverwrite: "true"
   labels:
-    managedBy: "ec-operator"
-    nodeGroup: "data"
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "data-vhosts"
@@ -811,8 +883,8 @@ kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   labels:
-    nodeGroup: "frontend"
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "frontend-cluster"
@@ -826,8 +898,8 @@ kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   labels:
-    nodeGroup: "frontend"
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "frontend-elasticsearch"
@@ -841,10 +913,11 @@ spec:
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
+  annotations:
+    neverOverwrite: "true"
   labels:
-    managedBy: "ec-operator"
-    nodeGroup: "frontend"
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "frontend-vhosts"
@@ -857,8 +930,8 @@ kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   labels:
-    nodeGroup: "master"
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "master-cluster"
@@ -872,8 +945,8 @@ kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   labels:
-    nodeGroup: "master"
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "master-elasticsearch"
@@ -887,10 +960,11 @@ spec:
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
+  annotations:
+    neverOverwrite: "true"
   labels:
-    managedBy: "ec-operator"
-    nodeGroup: "master"
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "master-vhosts"
@@ -904,6 +978,7 @@ apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   labels:
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "healthcheck"
@@ -915,13 +990,14 @@ spec:
   - nodeGroup: "all"
     source: "/"
     target: "/webapp/com.enonic.app.alive"
-    idProvider: null
+    idProviders: null
 ---
 kind: "Xp7VHost"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   labels:
     cloud: "mycloud"
+    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "localhost"
@@ -933,4 +1009,4 @@ spec:
   - nodeGroup: "all"
     source: "/"
     target: "/"
-    idProvider: null
+    idProviders: null

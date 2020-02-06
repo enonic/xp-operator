@@ -19,7 +19,7 @@ public abstract class V1alpha2Xp7VHostSpecMapping
     public abstract String target();
 
     @Nullable
-    public abstract String idProvider();
+    public abstract V1alpha2Xp7VHostSpecMappingIdProviders idProviders();
 
     public static class ExceptionMissing
         extends BuilderException

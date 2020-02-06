@@ -11,4 +11,7 @@ spec:
     - nodeGroup: fisk
       source: /
       target: /admin
-      idProvider: system
+      idProviders:
+        default: system
+        enabled:
+          - adfs

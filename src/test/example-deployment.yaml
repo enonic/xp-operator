@@ -18,9 +18,22 @@ spec:
     fisk:
       data: true
       master: true
+      replicas: 2
+      env:
+        test: test1
+      resources:
+        cpu: "1"
+        memory: 512Mi
+        disks:
+          export: 100Mi
+          index: 100Mi
+          work: 100Mi
+    ost:
+      data: false
+      master: true
       replicas: 1
       env:
-        test: test2
+        test: test7g6tgg
       resources:
         cpu: "1"
         memory: 512Mi
