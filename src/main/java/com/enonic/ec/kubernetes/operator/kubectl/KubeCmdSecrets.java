@@ -50,7 +50,7 @@ public abstract class KubeCmdSecrets
     }
 
     @Override
-    protected boolean compareSpec( final Secret o, final Secret n )
+    protected boolean equalsSpec( final Secret o, final Secret n )
     {
         return Objects.equals( o.getData(), n.getData() );
     }

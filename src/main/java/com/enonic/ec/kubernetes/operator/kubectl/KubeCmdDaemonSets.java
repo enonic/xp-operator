@@ -49,9 +49,9 @@ public abstract class KubeCmdDaemonSets
     }
 
     @Override
-    protected boolean compareSpec( final DaemonSet o, final DaemonSet n )
+    protected boolean equalsSpec( final DaemonSet o, final DaemonSet n )
     {
         // TODO: Compare Specs
-        return super.compareSpec( o, n );
+        return super.equalsSpec( o, n );
     }
 }

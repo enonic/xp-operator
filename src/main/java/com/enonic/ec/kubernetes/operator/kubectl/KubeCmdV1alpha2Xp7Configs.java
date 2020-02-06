@@ -49,7 +49,7 @@ public abstract class KubeCmdV1alpha2Xp7Configs
     }
 
     @Override
-    protected boolean compareSpec( final V1alpha2Xp7Config o, final V1alpha2Xp7Config n )
+    protected boolean equalsSpec( final V1alpha2Xp7Config o, final V1alpha2Xp7Config n )
     {
         return Objects.equals( o.getSpec(), n.getSpec() );
     }

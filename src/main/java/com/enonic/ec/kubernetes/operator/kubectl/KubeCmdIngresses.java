@@ -50,7 +50,7 @@ public abstract class KubeCmdIngresses
     }
 
     @Override
-    protected boolean compareSpec( final Ingress o, final Ingress n )
+    protected boolean equalsSpec( final Ingress o, final Ingress n )
     {
         return Objects.equals( o.getSpec(), n.getSpec() );
     }

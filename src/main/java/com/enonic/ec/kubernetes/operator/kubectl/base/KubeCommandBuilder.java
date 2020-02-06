@@ -41,35 +41,30 @@ public abstract class KubeCommandBuilder<T extends HasMetadata>
 
     protected abstract void delete( T resource );
 
-    public KubeCommand apply()
+    public Optional<KubeCommand> apply()
     {
         if ( oldResource().isPresent() )
         {
-            if ( compareResourcesWithMetadata( oldResource().get(), maybeNamespacedResource() ) )
+            if ( equalsResourcesWithMetadata( oldResource().get(), maybeNamespacedResource() ) )
             {
-                return ImmutableKubeCommand.builder().
-                    action( KubeCommandAction.SKIP ).
-                    resource( maybeNamespacedResource() ).
-                    cmd( () -> {
-                    } ).
-                    build();
+                return Optional.empty();
             }
             else
             {
-                return ImmutableKubeCommand.builder().
+                return Optional.of( ImmutableKubeCommand.builder().
                     action( KubeCommandAction.UPDATE ).
                     resource( maybeNamespacedResource() ).
                     cmd( () -> patch( maybeNamespacedResource() ) ).
-                    build();
+                    build() );
             }
         }
         else
         {
-            return ImmutableKubeCommand.builder().
+            return Optional.of( ImmutableKubeCommand.builder().
                 action( KubeCommandAction.CREATE ).
                 resource( maybeNamespacedResource() ).
                 cmd( () -> create( maybeNamespacedResource() ) ).
-                build();
+                build() );
         }
     }
 
@@ -86,22 +81,22 @@ public abstract class KubeCommandBuilder<T extends HasMetadata>
         return Optional.empty();
     }
 
-    private boolean compareResourcesWithMetadata( T o, T n )
+    private boolean equalsResourcesWithMetadata( T o, T n )
     {
-        if ( !compareMetadata( o.getMetadata(), n.getMetadata() ) )
+        if ( !equalsMetadata( o.getMetadata(), n.getMetadata() ) )
         {
             return false;
         }
-        return compareSpec( o, n );
+        return equalsSpec( o, n );
     }
 
-    private boolean compareMetadata( ObjectMeta o, ObjectMeta n )
+    private boolean equalsMetadata( ObjectMeta o, ObjectMeta n )
     {
         return Objects.equals( o.getName(), n.getName() ) && Objects.equals( o.getNamespace(), n.getNamespace() ) &&
             Objects.equals( o.getLabels(), n.getLabels() ) && Objects.equals( o.getAnnotations(), n.getAnnotations() );
     }
 
-    protected boolean compareSpec( final T o, final T n )
+    protected boolean equalsSpec( final T o, final T n )
     {
         return Objects.equals( o, n );
     }

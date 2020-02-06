@@ -50,7 +50,7 @@ public abstract class KubeCmdConfigMaps
     }
 
     @Override
-    protected boolean compareSpec( final ConfigMap o, final ConfigMap n )
+    protected boolean equalsSpec( final ConfigMap o, final ConfigMap n )
     {
         return Objects.equals( o.getData(), n.getData() );
     }

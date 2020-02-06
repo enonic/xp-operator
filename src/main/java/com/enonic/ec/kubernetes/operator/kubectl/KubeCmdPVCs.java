@@ -65,7 +65,7 @@ public abstract class KubeCmdPVCs
     }
 
     @Override
-    protected boolean compareSpec( final PersistentVolumeClaim o, final PersistentVolumeClaim n )
+    protected boolean equalsSpec( final PersistentVolumeClaim o, final PersistentVolumeClaim n )
     {
         return Objects.equals( o.getSpec().getResources().getRequests(), n.getSpec().getResources().getRequests() );
     }

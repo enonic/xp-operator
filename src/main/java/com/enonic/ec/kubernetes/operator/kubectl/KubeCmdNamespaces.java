@@ -45,7 +45,7 @@ public abstract class KubeCmdNamespaces
     }
 
     @Override
-    protected boolean compareSpec( final Namespace o, final Namespace n )
+    protected boolean equalsSpec( final Namespace o, final Namespace n )
     {
         // If new namespace spec is empty, there is no update to the namespace
         return n.getSpec() == null;

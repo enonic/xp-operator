@@ -49,7 +49,7 @@ public abstract class KubeCmdV1alpha1Xp7Apps
     }
 
     @Override
-    protected boolean compareSpec( final V1alpha1Xp7App o, final V1alpha1Xp7App n )
+    protected boolean equalsSpec( final V1alpha1Xp7App o, final V1alpha1Xp7App n )
     {
         return Objects.equals( o.getSpec(), n.getSpec() );
     }

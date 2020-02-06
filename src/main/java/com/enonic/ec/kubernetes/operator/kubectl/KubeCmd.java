@@ -29,7 +29,8 @@ public abstract class KubeCmd
 
     public void apply( ImmutableCombinedCommand.Builder commandBuilder )
     {
-        commandBuilder.addCommand( cmd().apply() );
+        Optional<KubeCommand> apply = cmd().apply();
+        apply.ifPresent( commandBuilder::addCommand );
     }
 
     public void delete( ImmutableCombinedCommand.Builder commandBuilder )

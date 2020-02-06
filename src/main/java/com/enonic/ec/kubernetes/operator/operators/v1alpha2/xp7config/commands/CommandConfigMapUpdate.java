@@ -1,6 +1,5 @@
 package com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7config.commands;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,21 +29,20 @@ public abstract class CommandConfigMapUpdate
     @Override
     public void addCommands( final ImmutableCombinedCommand.Builder commandBuilder )
     {
-        Map<String, String> oldData = configMap().getData() != null ? configMap().getData() : Collections.emptyMap();
+        // Build the config map
         Map<String, String> newData = new HashMap<>();
         for ( V1alpha2Xp7Config resource : xpConfigResources() )
         {
             newData.put( resource.getSpec().file(), resource.getSpec().data() );
         }
-        if ( !newData.equals( oldData ) )
-        {
-            configMap().setData( newData );
-            ImmutableKubeCmd.builder().
-                clients( clients() ).
-                namespace( configMap().getMetadata().getNamespace() ).
-                resource( configMap() ).
-                build().
-                apply( commandBuilder );
-        }
+
+        // Apply the config map
+        configMap().setData( newData );
+        ImmutableKubeCmd.builder().
+            clients( clients() ).
+            namespace( configMap().getMetadata().getNamespace() ).
+            resource( configMap() ).
+            build().
+            apply( commandBuilder );
     }
 }

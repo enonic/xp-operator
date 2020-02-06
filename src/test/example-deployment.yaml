@@ -19,6 +19,8 @@ spec:
       data: true
       master: true
       replicas: 1
+      env:
+        test: test2
       resources:
         cpu: "1"
         memory: 512Mi

@@ -50,7 +50,7 @@ public abstract class KubeCmdServices
     }
 
     @Override
-    protected boolean compareSpec( final Service o, final Service n )
+    protected boolean equalsSpec( final Service o, final Service n )
     {
         return Objects.equals( o.getSpec(), n.getSpec() );
     }

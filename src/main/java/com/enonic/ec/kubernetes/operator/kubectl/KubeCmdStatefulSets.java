@@ -49,9 +49,9 @@ public abstract class KubeCmdStatefulSets
     }
 
     @Override
-    protected boolean compareSpec( final StatefulSet o, final StatefulSet n )
+    protected boolean equalsSpec( final StatefulSet o, final StatefulSet n )
     {
         // TODO: Compare Specs
-        return super.compareSpec( o, n );
+        return super.equalsSpec( o, n );
     }
 }
