@@ -1,5 +1,6 @@
 package com.enonic.ec.kubernetes.operator.kubectl;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import org.immutables.value.Value;
@@ -46,5 +47,11 @@ public abstract class KubeCmdSecrets
             inNamespace( resource.getMetadata().getNamespace() ).
             withName( resource.getMetadata().getName() ).
             delete();
+    }
+
+    @Override
+    protected boolean compareSpec( final Secret o, final Secret n )
+    {
+        return Objects.equals( o.getData(), n.getData() );
     }
 }

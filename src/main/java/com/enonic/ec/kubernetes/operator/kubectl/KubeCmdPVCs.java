@@ -1,10 +1,7 @@
 package com.enonic.ec.kubernetes.operator.kubectl;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 import org.immutables.value.Value;
 
@@ -37,6 +34,7 @@ public abstract class KubeCmdPVCs
     @Override
     protected void patch( final PersistentVolumeClaim resource )
     {
+        // Update metadata
         clients().getDefaultClient().persistentVolumeClaims().
             inNamespace( resource.getMetadata().getNamespace() ).
             withName( resource.getMetadata().getName() ).
@@ -44,19 +42,17 @@ public abstract class KubeCmdPVCs
             withMetadata( resource.getMetadata() ).
             done();
 
-        // Everything is immutable after creation except resources.requests
-        if(resource.getSpec().getResources().getRequests() != null) {
-            clients().getDefaultClient().persistentVolumeClaims().
-                inNamespace( resource.getMetadata().getNamespace() ).
-                withName( resource.getMetadata().getName() ).
-                edit().
-                editSpec().
-                editOrNewResources().
-                withRequests( resource.getSpec().getResources().getRequests() ).
-                endResources().
-                endSpec().
-                done();
-        }
+        // Everything in spec is immutable after creation except resources.requests
+        clients().getDefaultClient().persistentVolumeClaims().
+            inNamespace( resource.getMetadata().getNamespace() ).
+            withName( resource.getMetadata().getName() ).
+            edit().
+            editSpec().
+            editOrNewResources().
+            withRequests( resource.getSpec().getResources().getRequests() ).
+            endResources().
+            endSpec().
+            done();
     }
 
     @Override
@@ -66,5 +62,11 @@ public abstract class KubeCmdPVCs
             inNamespace( resource.getMetadata().getNamespace() ).
             withName( resource.getMetadata().getName() ).
             delete();
+    }
+
+    @Override
+    protected boolean compareSpec( final PersistentVolumeClaim o, final PersistentVolumeClaim n )
+    {
+        return Objects.equals( o.getSpec().getResources().getRequests(), n.getSpec().getResources().getRequests() );
     }
 }

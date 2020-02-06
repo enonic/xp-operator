@@ -1,5 +1,6 @@
 package com.enonic.ec.kubernetes.operator.kubectl;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import org.immutables.value.Value;
@@ -46,5 +47,11 @@ public abstract class KubeCmdConfigMaps
             inNamespace( resource.getMetadata().getNamespace() ).
             withName( resource.getMetadata().getName() ).
             delete();
+    }
+
+    @Override
+    protected boolean compareSpec( final ConfigMap o, final ConfigMap n )
+    {
+        return Objects.equals( o.getData(), n.getData() );
     }
 }

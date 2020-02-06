@@ -43,4 +43,11 @@ public abstract class KubeCmdNamespaces
             withName( resource.getMetadata().getName() ).
             delete();
     }
+
+    @Override
+    protected boolean compareSpec( final Namespace o, final Namespace n )
+    {
+        // If new namespace spec is empty, there is no update to the namespace
+        return n.getSpec() == null;
+    }
 }

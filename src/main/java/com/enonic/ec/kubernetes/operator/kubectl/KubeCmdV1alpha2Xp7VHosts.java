@@ -1,5 +1,6 @@
 package com.enonic.ec.kubernetes.operator.kubectl;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import org.immutables.value.Value;
@@ -45,5 +46,11 @@ public abstract class KubeCmdV1alpha2Xp7VHosts
             inNamespace( resource.getMetadata().getNamespace() ).
             withName( resource.getMetadata().getName() ).
             delete();
+    }
+
+    @Override
+    protected boolean compareSpec( final V1alpha2Xp7VHost o, final V1alpha2Xp7VHost n )
+    {
+        return Objects.equals( o.getSpec(), n.getSpec() );
     }
 }

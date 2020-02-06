@@ -100,7 +100,7 @@ public abstract class KubeCommandResource<T extends HasMetadata>
         {
             return false;
         }
-        return compareResources( o, n );
+        return compareSpec( o, n );
     }
 
     private final boolean compareMetadata( ObjectMeta o, ObjectMeta n )
@@ -109,7 +109,7 @@ public abstract class KubeCommandResource<T extends HasMetadata>
             Objects.equals( o.getLabels(), n.getLabels() ) && Objects.equals( o.getAnnotations(), n.getAnnotations() );
     }
 
-    protected boolean compareResources( final T o, final T n )
+    protected boolean compareSpec( final T o, final T n )
     {
         return Objects.equals( o, n );
     }
