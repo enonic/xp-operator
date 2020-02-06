@@ -6,12 +6,12 @@ import org.immutables.value.Value;
 
 import io.fabric8.kubernetes.api.model.Namespace;
 
-import com.enonic.ec.kubernetes.operator.kubectl.base.KubeCommandResource;
+import com.enonic.ec.kubernetes.operator.kubectl.base.KubeCommandBuilder;
 
 
 @Value.Immutable
 public abstract class KubeCmdNamespaces
-    extends KubeCommandResource<Namespace>
+    extends KubeCommandBuilder<Namespace>
 {
     @Override
     protected Optional<Namespace> fetch( final Namespace resource )

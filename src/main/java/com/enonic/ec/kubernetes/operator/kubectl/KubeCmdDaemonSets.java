@@ -6,12 +6,12 @@ import org.immutables.value.Value;
 
 import io.fabric8.kubernetes.api.model.apps.DaemonSet;
 
-import com.enonic.ec.kubernetes.operator.kubectl.base.KubeCommandResource;
+import com.enonic.ec.kubernetes.operator.kubectl.base.KubeCommandBuilder;
 
 
 @Value.Immutable
 public abstract class KubeCmdDaemonSets
-    extends KubeCommandResource<DaemonSet>
+    extends KubeCommandBuilder<DaemonSet>
 {
     @Override
     protected Optional<DaemonSet> fetch( final DaemonSet resource )
@@ -46,5 +46,12 @@ public abstract class KubeCmdDaemonSets
             inNamespace( resource.getMetadata().getNamespace() ).
             withName( resource.getMetadata().getName() ).
             delete();
+    }
+
+    @Override
+    protected boolean compareSpec( final DaemonSet o, final DaemonSet n )
+    {
+        // TODO: Compare Specs
+        return super.compareSpec( o, n );
     }
 }

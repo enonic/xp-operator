@@ -11,7 +11,7 @@ import io.fabric8.kubernetes.api.model.ObjectMeta;
 
 import com.enonic.ec.kubernetes.operator.operators.common.clients.Clients;
 
-public abstract class KubeCommandResource<T extends HasMetadata>
+public abstract class KubeCommandBuilder<T extends HasMetadata>
 {
     public abstract Clients clients();
 

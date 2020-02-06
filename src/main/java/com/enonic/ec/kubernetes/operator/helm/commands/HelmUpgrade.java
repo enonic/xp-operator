@@ -22,6 +22,6 @@ public abstract class HelmUpgrade
     @Override
     public String toString()
     {
-        return "HelmUpgrade{}";
+        return String.format( "%s in NS '%s' helm chart %s", "UPGRADE", namespace(), name() );
     }
 }

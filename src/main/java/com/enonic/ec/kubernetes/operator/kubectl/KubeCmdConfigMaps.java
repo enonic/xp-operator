@@ -7,12 +7,12 @@ import org.immutables.value.Value;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 
-import com.enonic.ec.kubernetes.operator.kubectl.base.KubeCommandResource;
+import com.enonic.ec.kubernetes.operator.kubectl.base.KubeCommandBuilder;
 
 
 @Value.Immutable
 public abstract class KubeCmdConfigMaps
-    extends KubeCommandResource<ConfigMap>
+    extends KubeCommandBuilder<ConfigMap>
 {
     @Override
     protected Optional<ConfigMap> fetch( final ConfigMap resource )

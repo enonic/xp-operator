@@ -15,17 +15,17 @@ import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha1.app.V1alpha1Xp7App;
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.config.V1alpha2Xp7Config;
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHost;
-import com.enonic.ec.kubernetes.operator.kubectl.base.KubeCommandResource;
+import com.enonic.ec.kubernetes.operator.kubectl.base.KubeCommandBuilder;
 import com.enonic.ec.kubernetes.operator.operators.common.clients.Clients;
 
 class CommandMapper
 {
     @SuppressWarnings({"unchecked", "OptionalUsedAsFieldOrParameterType"})
-    static <T extends HasMetadata> KubeCommandResource<T> getCommandClass( Clients clients, Optional<String> namespace, T resource )
+    static <T extends HasMetadata> KubeCommandBuilder<T> getCommandClass( Clients clients, Optional<String> namespace, T resource )
     {
         if ( resource instanceof ConfigMap )
         {
-            return (KubeCommandResource<T>) ImmutableKubeCmdConfigMaps.builder().
+            return (KubeCommandBuilder<T>) ImmutableKubeCmdConfigMaps.builder().
                 clients( clients ).
                 namespace( namespace ).
                 resource( (ConfigMap) resource ).
@@ -33,7 +33,7 @@ class CommandMapper
         }
         else if ( resource instanceof DaemonSet )
         {
-            return (KubeCommandResource<T>) ImmutableKubeCmdDaemonSets.builder().
+            return (KubeCommandBuilder<T>) ImmutableKubeCmdDaemonSets.builder().
                 clients( clients ).
                 namespace( namespace ).
                 resource( (DaemonSet) resource ).
@@ -41,7 +41,7 @@ class CommandMapper
         }
         else if ( resource instanceof Ingress )
         {
-            return (KubeCommandResource<T>) ImmutableKubeCmdIngresses.builder().
+            return (KubeCommandBuilder<T>) ImmutableKubeCmdIngresses.builder().
                 clients( clients ).
                 namespace( namespace ).
                 resource( (Ingress) resource ).
@@ -49,14 +49,14 @@ class CommandMapper
         }
         else if ( resource instanceof Namespace )
         {
-            return (KubeCommandResource<T>) ImmutableKubeCmdNamespaces.builder().
+            return (KubeCommandBuilder<T>) ImmutableKubeCmdNamespaces.builder().
                 clients( clients ).
                 resource( (Namespace) resource ).
                 build();
         }
         else if ( resource instanceof PersistentVolumeClaim )
         {
-            return (KubeCommandResource<T>) ImmutableKubeCmdPVCs.builder().
+            return (KubeCommandBuilder<T>) ImmutableKubeCmdPVCs.builder().
                 clients( clients ).
                 namespace( namespace ).
                 resource( (PersistentVolumeClaim) resource ).
@@ -64,7 +64,7 @@ class CommandMapper
         }
         else if ( resource instanceof Secret )
         {
-            return (KubeCommandResource<T>) ImmutableKubeCmdSecrets.builder().
+            return (KubeCommandBuilder<T>) ImmutableKubeCmdSecrets.builder().
                 clients( clients ).
                 namespace( namespace ).
                 resource( (Secret) resource ).
@@ -72,7 +72,7 @@ class CommandMapper
         }
         else if ( resource instanceof Service )
         {
-            return (KubeCommandResource<T>) ImmutableKubeCmdServices.builder().
+            return (KubeCommandBuilder<T>) ImmutableKubeCmdServices.builder().
                 clients( clients ).
                 namespace( namespace ).
                 resource( (Service) resource ).
@@ -80,7 +80,7 @@ class CommandMapper
         }
         else if ( resource instanceof StatefulSet )
         {
-            return (KubeCommandResource<T>) ImmutableKubeCmdStatefulSets.builder().
+            return (KubeCommandBuilder<T>) ImmutableKubeCmdStatefulSets.builder().
                 clients( clients ).
                 namespace( namespace ).
                 resource( (StatefulSet) resource ).
@@ -88,7 +88,7 @@ class CommandMapper
         }
         else if ( resource instanceof V1alpha1Xp7App )
         {
-            return (KubeCommandResource<T>) ImmutableKubeCmdV1alpha1Xp7Apps.builder().
+            return (KubeCommandBuilder<T>) ImmutableKubeCmdV1alpha1Xp7Apps.builder().
                 clients( clients ).
                 namespace( namespace ).
                 resource( (V1alpha1Xp7App) resource ).
@@ -96,7 +96,7 @@ class CommandMapper
         }
         else if ( resource instanceof V1alpha2Xp7Config )
         {
-            return (KubeCommandResource<T>) ImmutableKubeCmdV1alpha2Xp7Configs.builder().
+            return (KubeCommandBuilder<T>) ImmutableKubeCmdV1alpha2Xp7Configs.builder().
                 clients( clients ).
                 namespace( namespace ).
                 resource( (V1alpha2Xp7Config) resource ).
@@ -104,7 +104,7 @@ class CommandMapper
         }
         else if ( resource instanceof V1alpha2Xp7VHost )
         {
-            return (KubeCommandResource<T>) ImmutableKubeCmdV1alpha2Xp7VHosts.builder().
+            return (KubeCommandBuilder<T>) ImmutableKubeCmdV1alpha2Xp7VHosts.builder().
                 clients( clients ).
                 namespace( namespace ).
                 resource( (V1alpha2Xp7VHost) resource ).

@@ -16,6 +16,6 @@ public abstract class HelmUninstall
     @Override
     public String toString()
     {
-        return "HelmUninstall{}";
+        return String.format( "%s in NS '%s' helm chart %s", "UNINSTALL", namespace(), name() );
     }
 }

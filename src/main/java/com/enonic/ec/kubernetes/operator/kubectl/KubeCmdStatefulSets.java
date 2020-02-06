@@ -6,12 +6,12 @@ import org.immutables.value.Value;
 
 import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 
-import com.enonic.ec.kubernetes.operator.kubectl.base.KubeCommandResource;
+import com.enonic.ec.kubernetes.operator.kubectl.base.KubeCommandBuilder;
 
 
 @Value.Immutable
 public abstract class KubeCmdStatefulSets
-    extends KubeCommandResource<StatefulSet>
+    extends KubeCommandBuilder<StatefulSet>
 {
     @Override
     protected Optional<StatefulSet> fetch( final StatefulSet resource )
@@ -46,5 +46,12 @@ public abstract class KubeCmdStatefulSets
             inNamespace( resource.getMetadata().getNamespace() ).
             withName( resource.getMetadata().getName() ).
             delete();
+    }
+
+    @Override
+    protected boolean compareSpec( final StatefulSet o, final StatefulSet n )
+    {
+        // TODO: Compare Specs
+        return super.compareSpec( o, n );
     }
 }

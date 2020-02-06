@@ -7,12 +7,12 @@ import org.immutables.value.Value;
 
 import io.fabric8.kubernetes.api.model.Secret;
 
-import com.enonic.ec.kubernetes.operator.kubectl.base.KubeCommandResource;
+import com.enonic.ec.kubernetes.operator.kubectl.base.KubeCommandBuilder;
 
 
 @Value.Immutable
 public abstract class KubeCmdSecrets
-    extends KubeCommandResource<Secret>
+    extends KubeCommandBuilder<Secret>
 {
     @Override
     protected Optional<Secret> fetch( final Secret resource )

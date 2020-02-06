@@ -8,7 +8,7 @@ import io.fabric8.kubernetes.api.model.HasMetadata;
 
 import com.enonic.ec.kubernetes.operator.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.operator.kubectl.base.KubeCommand;
-import com.enonic.ec.kubernetes.operator.kubectl.base.KubeCommandResource;
+import com.enonic.ec.kubernetes.operator.kubectl.base.KubeCommandBuilder;
 import com.enonic.ec.kubernetes.operator.operators.common.clients.Clients;
 
 @Value.Immutable
@@ -22,7 +22,7 @@ public abstract class KubeCmd
 
     @SuppressWarnings("WeakerAccess")
     @Value.Derived
-    protected KubeCommandResource<HasMetadata> cmd()
+    protected KubeCommandBuilder<HasMetadata> cmd()
     {
         return CommandMapper.getCommandClass( clients(), namespace(), resource() );
     }

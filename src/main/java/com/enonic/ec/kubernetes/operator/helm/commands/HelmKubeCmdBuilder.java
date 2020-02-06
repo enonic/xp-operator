@@ -19,7 +19,7 @@ import com.enonic.ec.kubernetes.operator.kubectl.ImmutableKubeCmd;
 import com.enonic.ec.kubernetes.operator.operators.common.clients.Clients;
 
 @Value.Immutable
-public abstract class KubeCmdBuilder
+public abstract class HelmKubeCmdBuilder
     implements CombinedCommandBuilder
 {
     protected abstract Clients clients();

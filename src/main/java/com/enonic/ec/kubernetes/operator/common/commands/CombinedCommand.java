@@ -1,6 +1,7 @@
 package com.enonic.ec.kubernetes.operator.common.commands;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.immutables.value.Value;
 import org.slf4j.Logger;
@@ -24,11 +25,12 @@ public abstract class CombinedCommand
             log.debug( "No commands to run" );
             return;
         }
-        log.debug( "Running " + command().size() + " commands" );
+        String uuid = UUID.randomUUID().toString().substring( 0, 8 );
+        log.debug( "Running " + command().size() + " commands with transaction id " + uuid );
         for ( int i = 0; i < command().size(); i++ )
         {
             Command c = command().get( i );
-            log.info( c.toString() );
+            log.info( String.format( "%s: %s", uuid, c.toString() ) );
             c.execute();
         }
     }

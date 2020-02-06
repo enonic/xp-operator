@@ -15,7 +15,7 @@ import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHost
 import com.enonic.ec.kubernetes.operator.helm.BaseValues;
 import com.enonic.ec.kubernetes.operator.helm.ChartRepository;
 import com.enonic.ec.kubernetes.operator.helm.Helm;
-import com.enonic.ec.kubernetes.operator.helm.commands.ImmutableKubeCmdBuilder;
+import com.enonic.ec.kubernetes.operator.helm.commands.ImmutableHelmKubeCmdBuilder;
 import com.enonic.ec.kubernetes.operator.operators.common.OperatorNamespaced;
 import com.enonic.ec.kubernetes.operator.operators.common.ResourceInfoNamespaced;
 import com.enonic.ec.kubernetes.operator.operators.common.cache.Caches;
@@ -62,7 +62,7 @@ public class OperatorXp7VHost
     private void createCommands( ImmutableCombinedCommand.Builder commandBuilder,
                                  ResourceInfoNamespaced<V1alpha2Xp7VHost, DiffXp7VHost> info )
     {
-        ImmutableKubeCmdBuilder.builder().
+        ImmutableHelmKubeCmdBuilder.builder().
             clients( clients ).
             helm( helm ).
             chart( chartRepository.get( "v1alpha2/xp7vhost" ) ).

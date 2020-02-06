@@ -6,12 +6,12 @@ import java.util.Optional;
 import org.immutables.value.Value;
 
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha1.app.V1alpha1Xp7App;
-import com.enonic.ec.kubernetes.operator.kubectl.base.KubeCommandResource;
+import com.enonic.ec.kubernetes.operator.kubectl.base.KubeCommandBuilder;
 
 
 @Value.Immutable
 public abstract class KubeCmdV1alpha1Xp7Apps
-    extends KubeCommandResource<V1alpha1Xp7App>
+    extends KubeCommandBuilder<V1alpha1Xp7App>
 {
     @Override
     protected Optional<V1alpha1Xp7App> fetch( final V1alpha1Xp7App resource )

@@ -7,12 +7,12 @@ import org.immutables.value.Value;
 
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 
-import com.enonic.ec.kubernetes.operator.kubectl.base.KubeCommandResource;
+import com.enonic.ec.kubernetes.operator.kubectl.base.KubeCommandBuilder;
 
 
 @Value.Immutable
 public abstract class KubeCmdPVCs
-    extends KubeCommandResource<PersistentVolumeClaim>
+    extends KubeCommandBuilder<PersistentVolumeClaim>
 {
     @Override
     protected Optional<PersistentVolumeClaim> fetch( final PersistentVolumeClaim resource )
