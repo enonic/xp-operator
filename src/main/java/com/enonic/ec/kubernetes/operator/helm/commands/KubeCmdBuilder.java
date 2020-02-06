@@ -40,7 +40,7 @@ public abstract class KubeCmdBuilder
         {
             return Collections.emptyList();
         }
-        return helm().templateToObjects( chart(), values.get() );
+        return helm().templateObjects( chart(), values.get() );
     }
 
     @Value.Derived
@@ -51,7 +51,7 @@ public abstract class KubeCmdBuilder
         {
             return Collections.emptyList();
         }
-        return helm().templateToObjects( chart(), values.get() );
+        return helm().templateObjects( chart(), values.get() );
     }
 
     @Override

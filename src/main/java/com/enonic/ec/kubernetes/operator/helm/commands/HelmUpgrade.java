@@ -13,11 +13,10 @@ public abstract class HelmUpgrade
     protected abstract Object values();
 
     @Override
-    public Void execute()
+    public void execute()
         throws Exception
     {
         helm().upgrade( chart(), values(), namespace(), name() );
-        return null;
     }
 
     @Override

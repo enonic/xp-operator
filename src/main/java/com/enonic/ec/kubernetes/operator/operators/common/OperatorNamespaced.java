@@ -30,7 +30,7 @@ public abstract class OperatorNamespaced
         runCommands( commandBuilder, r );
     }
 
-    protected void waitSome( Long ms )
+    private void waitSome( Long ms )
     {
         try
         {
@@ -38,7 +38,7 @@ public abstract class OperatorNamespaced
         }
         catch ( InterruptedException e )
         {
-            // Do nothing
+            // Just ignore, not a big deal
         }
     }
 

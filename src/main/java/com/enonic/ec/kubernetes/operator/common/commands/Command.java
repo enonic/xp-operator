@@ -1,7 +1,7 @@
 package com.enonic.ec.kubernetes.operator.common.commands;
 
-public interface Command<T>
+public interface Command
 {
-    T execute()
+    void execute()
         throws Exception;
 }

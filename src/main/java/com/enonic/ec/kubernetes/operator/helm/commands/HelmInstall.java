@@ -13,11 +13,10 @@ public abstract class HelmInstall
     protected abstract Object values();
 
     @Override
-    public Void execute()
+    public void execute()
         throws Exception
     {
         helm().install( chart(), values(), namespace(), name() );
-        return null;
     }
 
     @Override

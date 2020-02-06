@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 @Value.Immutable
 public abstract class CombinedCommand
-    implements Command<Void>
+    implements Command
 {
     private final static Logger log = LoggerFactory.getLogger( CombinedCommand.class );
 
@@ -16,13 +16,13 @@ public abstract class CombinedCommand
 
     @SuppressWarnings("unused")
     @Override
-    public Void execute()
+    public void execute()
         throws Exception
     {
         if ( command().size() == 0 )
         {
             log.debug( "No commands to run" );
-            return null;
+            return;
         }
         log.debug( "Running " + command().size() + " commands" );
         for ( int i = 0; i < command().size(); i++ )
@@ -31,7 +31,6 @@ public abstract class CombinedCommand
             log.info( c.toString() );
             c.execute();
         }
-        return null;
     }
 
 }

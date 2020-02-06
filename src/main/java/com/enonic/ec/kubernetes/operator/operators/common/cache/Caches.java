@@ -6,17 +6,17 @@ import javax.inject.Singleton;
 @Singleton
 public class Caches
 {
-    private AppCache appCache;
+    private final AppCache appCache;
 
-    private ConfigCache configCache;
+    private final ConfigCache configCache;
 
-    private ConfigMapCache configMapCache;
+    private final ConfigMapCache configMapCache;
 
-    private DeploymentCache deploymentCache;
+    private final DeploymentCache deploymentCache;
 
-    private IngressCache ingressCache;
+    private final IngressCache ingressCache;
 
-    private VHostCache vHostCache;
+    private final VHostCache vHostCache;
 
     @Inject
     public Caches( final AppCache appCache, final ConfigCache configCache, final ConfigMapCache configMapCache,

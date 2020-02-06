@@ -3,7 +3,7 @@ package com.enonic.ec.kubernetes.operator.common;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
 
-@SuppressWarnings("OptionalGetWithoutIsPresent")
+@SuppressWarnings({"OptionalGetWithoutIsPresent", "WeakerAccess"})
 public class Configuration
 {
     private static Config _cfg;

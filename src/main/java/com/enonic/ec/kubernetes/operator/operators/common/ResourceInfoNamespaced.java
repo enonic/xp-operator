@@ -24,6 +24,7 @@ public abstract class ResourceInfoNamespaced<T extends HasMetadata, D extends Di
     @Nullable
     public abstract Caches caches();
 
+    @SuppressWarnings("SameParameterValue") // Keeping allowAll for the future
     protected void checkNode( boolean allowAll, List<String> nodes )
     {
         String allNodes = cfgStr( "operator.deployment.xp.allNodesKey" );

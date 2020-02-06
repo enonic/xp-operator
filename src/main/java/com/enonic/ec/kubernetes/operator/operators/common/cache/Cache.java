@@ -25,13 +25,13 @@ public abstract class Cache<T extends HasMetadata, L extends KubernetesResourceL
 {
     private final static Logger log = LoggerFactory.getLogger( Cache.class );
 
-    protected final Executor executor;
-
-    protected final List<OnAction<T>> watchers;
-
     protected final Map<String, HasMetadata> cache;
 
-    public Cache()
+    private final Executor executor;
+
+    private final List<OnAction<T>> watchers;
+
+    Cache()
     {
         executor = Executors.newSingleThreadExecutor();
         watchers = new LinkedList<>();
@@ -43,14 +43,14 @@ public abstract class Cache<T extends HasMetadata, L extends KubernetesResourceL
         watchers.add( watcher );
     }
 
-    protected void startWatcher( FilterWatchListDeletable<T, L, Boolean, Watch, Watcher<T>> filter, Watcher<T> watcher )
+    void startWatcher( FilterWatchListDeletable<T, L, Boolean, Watch, Watcher<T>> filter, Watcher<T> watcher )
     {
         filter.list().getItems().forEach( r -> cache.put( r.getMetadata().getUid(), r ) );
         filter.watch( watcher );
     }
 
     @SuppressWarnings("unchecked")
-    protected void watcherEventRecieved( final Watcher.Action action, final T resource )
+    void watcherEventReceived( final Watcher.Action action, final T resource )
     {
         try
         {
@@ -99,7 +99,7 @@ public abstract class Cache<T extends HasMetadata, L extends KubernetesResourceL
         }
     }
 
-    protected void watcherOnClose( final KubernetesClientException cause )
+    void watcherOnClose( final KubernetesClientException cause )
     {
         if ( cause != null )
         {
@@ -109,7 +109,7 @@ public abstract class Cache<T extends HasMetadata, L extends KubernetesResourceL
             System.exit( -1 );
         }
     }
-    
+
     @SuppressWarnings("unchecked")
     public Collection<T> getCollection()
     {

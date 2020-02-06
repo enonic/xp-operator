@@ -7,11 +7,10 @@ public abstract class HelmUninstall
     extends HelmCommand
 {
     @Override
-    public Void execute()
+    public void execute()
         throws Exception
     {
         helm().uninstall( namespace(), name() );
-        return null;
     }
 
     @Override

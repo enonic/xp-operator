@@ -4,7 +4,6 @@ import java.util.Map;
 
 import org.immutables.value.Value;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.base.Preconditions;
 
@@ -35,13 +34,6 @@ public abstract class V1alpha2Xp7DeploymentSpec
         Preconditions.checkState( nodeGroups().values().stream().filter( V1alpha2Xp7DeploymentSpecNode::data ).count() == 1,
                                   "1 and only 1 node has be of type data=true" );
     }
-
-    @Value.Default
-    @JsonIgnore
-    public boolean isClustered()
-    {
-        return nodeGroups().values().stream().mapToInt( V1alpha2Xp7DeploymentSpecNode::replicas ).sum() > 1;
-    } // TODO: REMOVE
 
     public static class ExceptionMissing
         extends BuilderException

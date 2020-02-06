@@ -1,7 +1,6 @@
 package com.enonic.ec.kubernetes.operator.kubectl;
 
 import java.util.Optional;
-import java.util.function.BiFunction;
 
 import org.immutables.value.Value;
 

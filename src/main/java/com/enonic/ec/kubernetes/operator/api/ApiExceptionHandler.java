@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 
 import com.enonic.ec.kubernetes.operator.crd.BuilderException;
 
-public class ApiExceptionHandler
+class ApiExceptionHandler
 {
     private final static Logger log = LoggerFactory.getLogger( ApiExceptionHandler.class );
 

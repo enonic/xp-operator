@@ -18,7 +18,7 @@ import com.enonic.ec.kubernetes.operator.operators.common.clients.Clients;
 public class ConfigMapCache
     extends Cache<ConfigMap, ConfigMapList>
 {
-    private Clients clients;
+    private final Clients clients;
 
     @Inject
     public ConfigMapCache( Clients clients )
@@ -39,7 +39,7 @@ public class ConfigMapCache
             @Override
             public void eventReceived( final Action action, final ConfigMap configMap )
             {
-                watcherEventRecieved( action, configMap );
+                watcherEventReceived( action, configMap );
             }
 
             @Override

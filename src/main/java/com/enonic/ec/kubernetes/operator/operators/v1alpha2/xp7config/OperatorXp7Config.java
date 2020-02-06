@@ -51,8 +51,8 @@ public class OperatorXp7Config
         } );
     }
 
-    protected void createCommands( ImmutableCombinedCommand.Builder commandBuilder,
-                                   ResourceInfoNamespaced<V1alpha2Xp7Config, DiffXp7Config> info )
+    private void createCommands( ImmutableCombinedCommand.Builder commandBuilder,
+                                 ResourceInfoNamespaced<V1alpha2Xp7Config, DiffXp7Config> info )
     {
         ImmutableCommandXpConfigApplyAll.builder().
             clients( clients ).

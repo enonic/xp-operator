@@ -47,12 +47,11 @@ public class OperatorXp7App
         i.ifPresent( info -> {
             // Because multiple apps could potentially be deployed at the same time,
             // lets use the stall function to let them accumulate before we update config
-            stallAndRunCommands(500L, ( commandBuilder ) -> createCommands( commandBuilder, info ) );
+            stallAndRunCommands( 500L, ( commandBuilder ) -> createCommands( commandBuilder, info ) );
         } );
     }
 
-    protected void createCommands( ImmutableCombinedCommand.Builder commandBuilder,
-                                   ResourceInfoNamespaced<V1alpha1Xp7App, DiffXp7App> info )
+    private void createCommands( ImmutableCombinedCommand.Builder commandBuilder, ResourceInfoNamespaced<V1alpha1Xp7App, DiffXp7App> info )
     {
         ImmutableCommandXpAppApplyAll.builder().
             clients( clients ).

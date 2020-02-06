@@ -33,7 +33,7 @@ public class ConversionApi
 {
     private final static Logger log = LoggerFactory.getLogger( ConversionApi.class );
 
-    Map<String, Map<Class<? extends HasMetadata>, Converter>> conversionFunctionMap;
+    private final Map<String, Map<Class<? extends HasMetadata>, Converter>> conversionFunctionMap;
 
     @SuppressWarnings("unchecked")
     public ConversionApi()
@@ -66,7 +66,7 @@ public class ConversionApi
     protected ConversionReview process( final String uid, final ConversionReview review )
     {
         Map<Class<? extends HasMetadata>, Converter> convertFuncMap = conversionFunctionMap.get( review.request().desiredAPIVersion() );
-        Preconditions.checkState( convertFuncMap != null, "No convertion functions for '" + review.request().desiredAPIVersion() + "'" );
+        Preconditions.checkState( convertFuncMap != null, "No conversion functions for '" + review.request().desiredAPIVersion() + "'" );
         List<HasMetadata> resultingObjects = new LinkedList<>();
         for ( HasMetadata obj : review.request().objects() )
         {
@@ -79,7 +79,7 @@ public class ConversionApi
                 return failure( uid, e.getMessage() );
             }
         }
-        ConversionReview result = ImmutableConversionReview.copyOf( review ).
+        return ImmutableConversionReview.copyOf( review ).
             withResponse( ImmutableConversionReviewResponse.builder().
                 uid( uid ).
                 result( ImmutableConversionReviewResponseResult.builder().
@@ -87,7 +87,6 @@ public class ConversionApi
                     build() ).
                 convertedObjects( resultingObjects ).
                 build() );
-        return result;
     }
 
     @Override

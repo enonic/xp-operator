@@ -9,7 +9,7 @@ import com.enonic.ec.kubernetes.operator.common.commands.Command;
 
 @Value.Immutable
 public abstract class KubeCommand
-    implements Command<Void>
+    implements Command
 {
     protected abstract HasMetadata resource();
 
@@ -18,11 +18,10 @@ public abstract class KubeCommand
     protected abstract Command cmd();
 
     @Override
-    public Void execute()
+    public void execute()
         throws Exception
     {
         cmd().execute();
-        return null;
     }
 
     @Override

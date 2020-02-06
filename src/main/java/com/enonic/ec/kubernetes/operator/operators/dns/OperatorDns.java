@@ -53,7 +53,7 @@ public class OperatorDns
     @ConfigProperty(name = "dns.allowedDomains.keys")
     List<String> allowedDomainKeys;
 
-    List<Domain> allowedDomains;
+    private List<Domain> allowedDomains;
 
     void onStartup( @Observes StartupEvent _ev )
     {
@@ -109,7 +109,7 @@ public class OperatorDns
         }
         catch ( Exception e )
         {
-            e.printStackTrace(); // TODO: Do something
+            log.error( "Exception when setting DNS records", e );
         }
     }
 }

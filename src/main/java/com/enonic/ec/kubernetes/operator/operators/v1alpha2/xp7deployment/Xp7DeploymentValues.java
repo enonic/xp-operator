@@ -30,11 +30,13 @@ public abstract class Xp7DeploymentValues
     {
         Map<String, Object> values = new HashMap<>( baseValues() );
 
+        boolean isClustered = isClustered( resource );
+
         Map<String, Object> deployment = new HashMap<>();
-        deployment.put( "name", deploymentName( resource ) );
+        deployment.put( "name", info().deploymentName() );
         deployment.put( "allNodeGroupsKey", allNodeGroupsKey() );
-        deployment.put( "clustered", resource.getSpec().isClustered() );
-        if ( resource.getSpec().isClustered() )
+        deployment.put( "clustered", isClustered );
+        if ( isClustered )
         {
             deployment.put( "discoveryHosts", createDiscoveryHosts( resource ) );
             deployment.put( "minimumMasterNodes", minimumMasterNodes( resource ) );
@@ -65,42 +67,45 @@ public abstract class Xp7DeploymentValues
         return String.join( ",", res );
     }
 
-    public String deploymentName( V1alpha2Xp7Deployment resource )
+    public boolean isClustered( V1alpha2Xp7Deployment resource )
     {
-        return resource.getMetadata().getName();
+        return resource.getSpec().nodeGroups().values().stream().mapToInt( V1alpha2Xp7DeploymentSpecNode::replicas ).sum() > 1;
     }
 
-    public String allNodeGroupsKey()
+    private String allNodeGroupsKey()
     {
         return cfgStr( "operator.deployment.xp.allNodesKey" );
     }
 
-    public Map<String, String> defaultLabels( V1alpha2Xp7Deployment resource )
+    private Map<String, String> defaultLabels( V1alpha2Xp7Deployment resource )
     {
         return resource.getMetadata().getLabels();
     }
 
-    public Integer minimumMasterNodes( V1alpha2Xp7Deployment resource )
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    private Integer minimumMasterNodes( V1alpha2Xp7Deployment resource )
     {
         return defaultMinimumAvailable( resource, resource.getSpec().nodeGroups().values().stream().filter(
             V1alpha2Xp7DeploymentSpecNode::master ).findAny().get() );
     }
 
-    public Integer minimumDataNodes( V1alpha2Xp7Deployment resource )
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    private Integer minimumDataNodes( V1alpha2Xp7Deployment resource )
     {
         return defaultMinimumAvailable( resource, resource.getSpec().nodeGroups().values().stream().filter(
             V1alpha2Xp7DeploymentSpecNode::data ).findAny().get() );
     }
 
-    public Integer defaultMinimumAvailable( V1alpha2Xp7Deployment resource, V1alpha2Xp7DeploymentSpecNode node )
+    private Integer defaultMinimumAvailable( V1alpha2Xp7Deployment resource, V1alpha2Xp7DeploymentSpecNode node )
     {
-        if ( !resource.getSpec().isClustered() )
+        if ( !isClustered( resource ) )
         {
             return 0;
         }
         return ( node.replicas() / 2 ) + 1;
     }
 
+    @SuppressWarnings("unused")
     @Value.Derived
     @Override
     public Optional<Object> buildOldValues()
@@ -112,6 +117,7 @@ public abstract class Xp7DeploymentValues
         return Optional.of( values( info().oldResource().get() ) );
     }
 
+    @SuppressWarnings("unused")
     @Value.Derived
     @Override
     public Optional<Object> buildNewValues()

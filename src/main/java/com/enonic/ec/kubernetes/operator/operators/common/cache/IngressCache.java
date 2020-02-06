@@ -18,7 +18,7 @@ import com.enonic.ec.kubernetes.operator.operators.common.clients.Clients;
 public class IngressCache
     extends Cache<Ingress, IngressList>
 {
-    private Clients clients;
+    private final Clients clients;
 
     @Inject
     public IngressCache( Clients clients )
@@ -37,7 +37,7 @@ public class IngressCache
             @Override
             public void eventReceived( final Action action, final Ingress ingress )
             {
-                watcherEventRecieved( action, ingress );
+                watcherEventReceived( action, ingress );
             }
 
             @Override

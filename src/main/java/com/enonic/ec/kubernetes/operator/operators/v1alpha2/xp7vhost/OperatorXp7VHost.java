@@ -59,8 +59,8 @@ public class OperatorXp7VHost
         i.ifPresent( info -> createCommands( ImmutableCombinedCommand.builder(), info ) );
     }
 
-    protected void createCommands( ImmutableCombinedCommand.Builder commandBuilder,
-                                   ResourceInfoNamespaced<V1alpha2Xp7VHost, DiffXp7VHost> info )
+    private void createCommands( ImmutableCombinedCommand.Builder commandBuilder,
+                                 ResourceInfoNamespaced<V1alpha2Xp7VHost, DiffXp7VHost> info )
     {
         ImmutableKubeCmdBuilder.builder().
             clients( clients ).

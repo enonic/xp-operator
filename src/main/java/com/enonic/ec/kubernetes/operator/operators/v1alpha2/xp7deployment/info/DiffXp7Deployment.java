@@ -31,8 +31,7 @@ public abstract class DiffXp7Deployment
         Preconditions.checkState( equals( V1alpha2Xp7Deployment::ecCloud ),
                                   "Field 'metadata.labels." + cfgStr( "operator.deployment.xp.labels.cloud" ) + "' cannot be changed" );
         Preconditions.checkState( equals( V1alpha2Xp7Deployment::ecProject ),
-                                  "Field 'metadata.labels." + cfgStr( "operator.deployment.xp.labels.project" ) +
-                                      "' cannot be changed" );
+                                  "Field 'metadata.labels." + cfgStr( "operator.deployment.xp.labels.project" ) + "' cannot be changed" );
         Preconditions.checkState( equals( V1alpha2Xp7Deployment::ecName ),
                                   "Field 'metadata.labels." + cfgStr( "operator.deployment.xp.labels.name" ) + "' cannot be changed" );
     }

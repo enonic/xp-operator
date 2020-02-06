@@ -1,6 +1,5 @@
 package com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7deployment.info;
 
-import java.util.Map;
 import java.util.Optional;
 
 import org.immutables.value.Value;
@@ -9,7 +8,6 @@ import com.google.common.base.Preconditions;
 
 import com.enonic.ec.kubernetes.operator.common.info.ResourceInfo;
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.deployment.V1alpha2Xp7Deployment;
-import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.deployment.V1alpha2Xp7DeploymentSpecNode;
 
 import static com.enonic.ec.kubernetes.operator.common.Validator.dns1035;
 import static com.enonic.ec.kubernetes.operator.common.Validator.dns1123;
@@ -40,52 +38,11 @@ public abstract class InfoXp7Deployment
         return deploymentName();
     }
 
-    @Value.Derived
-    public Map<String, String> defaultLabels()
-    {
-        return resource().getMetadata().getLabels();
-    }
-
-    @Value.Derived
-    public String sharedStorageName()
-    {
-        return deploymentName();
-    }
-
-    @Value.Derived
-    public String allNodeGroupsKey()
-    {
-        return cfgStr( "operator.deployment.xp.allNodesKey" );
-    }
-
-    @Value.Derived
-    public String suPassSecretName()
-    {
-        return "su-pass";
-    }
-
-    public Integer defaultMinimumAvailable( V1alpha2Xp7DeploymentSpecNode node )
-    {
-        if ( !resource().getSpec().isClustered() )
-        {
-            return 0;
-        }
-        return ( node.replicas() / 2 ) + 1;
-    }
-
-    @Value.Derived
-    public Integer minimumMasterNodes()
-    {
-        return defaultMinimumAvailable(
-            resource().getSpec().nodeGroups().values().stream().filter( V1alpha2Xp7DeploymentSpecNode::master ).findAny().get() );
-    }
-
-    @Value.Derived
-    public Integer minimumDataNodes()
-    {
-        return defaultMinimumAvailable(
-            resource().getSpec().nodeGroups().values().stream().filter( V1alpha2Xp7DeploymentSpecNode::data ).findAny().get() );
-    }
+//    @Value.Derived
+//    public Map<String, String> defaultLabels()
+//    {
+//        return resource().getMetadata().getLabels();
+//    }
 
     @Value.Check
     protected void check()
@@ -94,13 +51,11 @@ public abstract class InfoXp7Deployment
 
         cfgIfBool( "operator.deployment.xp.labels.strictValidation", () -> {
             Preconditions.checkState( resource().ecCloud() != null,
-                                      "Label '" + "metadata.labels." + cfgStr( "operator.deployment.xp.labels.cloud" ) +
-                                          "' is missing" );
+                                      "Label '" + "metadata.labels." + cfgStr( "operator.deployment.xp.labels.cloud" ) + "' is missing" );
             dns1035( "metadata.labels." + cfgStr( "operator.deployment.xp.labels.cloud" ), resource().ecCloud() );
 
             Preconditions.checkState( resource().ecProject() != null,
-                                      "Label '" + "metadata.labels." + cfgStr( "operator.deployment.xp.labels.project" ) +
-                                          "' is missing" );
+                                      "Label '" + "metadata.labels." + cfgStr( "operator.deployment.xp.labels.project" ) + "' is missing" );
             dns1035( "metadata.labels." + cfgStr( "operator.deployment.xp.labels.project" ), resource().ecProject() );
 
             Preconditions.checkState( resource().ecName() != null,

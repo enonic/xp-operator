@@ -22,7 +22,7 @@ public abstract class Xp7VHostValues
 
     protected abstract ResourceInfoNamespaced<V1alpha2Xp7VHost, DiffXp7VHost> info();
 
-    protected Object createValues( V1alpha2Xp7VHost resource )
+    private Object createValues( V1alpha2Xp7VHost resource )
     {
         Map<String, Object> values = new HashMap<>( baseValues() );
 
@@ -35,6 +35,7 @@ public abstract class Xp7VHostValues
         return values;
     }
 
+    @SuppressWarnings("SpellCheckingInspection")
     private String getIssuer( V1alpha2Xp7VHost resource )
     {
         if ( resource.getSpec().certificate() == null || resource.getSpec().certificate().authority() == null )
@@ -53,6 +54,7 @@ public abstract class Xp7VHostValues
         return null;
     }
 
+    @SuppressWarnings("unused")
     @Override
     public Optional<Object> buildOldValues()
     {
@@ -63,6 +65,7 @@ public abstract class Xp7VHostValues
         return Optional.of( createValues( info().oldResource().get() ) );
     }
 
+    @SuppressWarnings("unused")
     @Override
     public Optional<Object> buildNewValues()
     {

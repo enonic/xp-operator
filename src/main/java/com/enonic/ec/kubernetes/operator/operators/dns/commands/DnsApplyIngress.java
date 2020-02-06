@@ -38,6 +38,7 @@ public abstract class DnsApplyIngress
         return String.format( "heritage=ec-operator,id=%s", dnsId() );
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // I know that it's ok
     @Override
     public void addCommands( final ImmutableCombinedCommand.Builder commandBuilder )
     {
@@ -132,7 +133,7 @@ public abstract class DnsApplyIngress
         }
     }
 
-    protected Optional<DnsRecord> getHeritageRecord( List<DnsRecord> records )
+    private Optional<DnsRecord> getHeritageRecord( List<DnsRecord> records )
     {
         if ( records.size() == 0 )
         {

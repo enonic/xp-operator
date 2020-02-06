@@ -56,7 +56,7 @@ public abstract class CommandXpConfigModifyData
         ObjectMeta meta = new ObjectMeta();
         meta.setName( name() );
         meta.setNamespace( info().deploymentInfo().namespaceName() );
-        meta.setLabels( info().deploymentInfo().defaultLabels() );
+        meta.setLabels( info().deploymentInfo().resource().getMetadata().getLabels() );
 
         V1alpha2Xp7Config config = new V1alpha2Xp7Config();
         config.setMetadata( meta );

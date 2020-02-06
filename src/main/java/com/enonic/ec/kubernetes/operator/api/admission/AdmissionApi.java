@@ -43,13 +43,13 @@ public class AdmissionApi
 {
     private final static Logger log = LoggerFactory.getLogger( AdmissionApi.class );
 
+    private final Map<Class<? extends HasMetadata>, Consumer<AdmissionReview>> admissionFunctionMap;
+
     @ConfigProperty(name = "operator.deployment.xp.allNodesKey")
     String allNodesPicker;
 
     @Inject
     Caches caches;
-
-    Map<Class<? extends HasMetadata>, Consumer<AdmissionReview>> admissionFunctionMap;
 
     public AdmissionApi()
     {
@@ -94,7 +94,7 @@ public class AdmissionApi
         return createReview( uid, message );
     }
 
-    public AdmissionReview createReview( String uid, String errorMessage )
+    private AdmissionReview createReview( String uid, String errorMessage )
     {
         AdmissionReview review = new AdmissionReview();
         AdmissionResponse response = new AdmissionResponse();

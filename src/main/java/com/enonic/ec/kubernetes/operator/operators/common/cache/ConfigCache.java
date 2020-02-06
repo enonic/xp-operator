@@ -18,7 +18,7 @@ import com.enonic.ec.kubernetes.operator.operators.common.clients.V1alpha2Xp7Con
 public class ConfigCache
     extends Cache<V1alpha2Xp7Config, V1alpha2Xp7ConfigList>
 {
-    private Clients clients;
+    private final Clients clients;
 
     @Inject
     public ConfigCache( Clients clients )
@@ -37,7 +37,7 @@ public class ConfigCache
             @Override
             public void eventReceived( final Action action, final V1alpha2Xp7Config v1alpha2Xp7Config )
             {
-                watcherEventRecieved( action, v1alpha2Xp7Config );
+                watcherEventReceived( action, v1alpha2Xp7Config );
             }
 
             @Override

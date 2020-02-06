@@ -5,13 +5,13 @@ import com.enonic.ec.kubernetes.operator.operators.dns.cloudflare.DnsRecordServi
 import com.enonic.ec.kubernetes.operator.operators.dns.cloudflare.model.DnsRecord;
 
 public abstract class DnsCommand
-    implements Command<Void>
+    implements Command
 {
     protected abstract DnsRecordService dnsRecordsService();
 
     protected abstract DnsRecord dnsRecord();
 
-    protected String action()
+    String action()
     {
         throw new RuntimeException( "Override this method" );
     }

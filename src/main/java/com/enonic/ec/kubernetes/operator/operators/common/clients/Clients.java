@@ -21,18 +21,18 @@ import static com.enonic.ec.kubernetes.operator.common.Configuration.cfgStr;
 @Singleton
 public class Clients
 {
-    MixedOperation<V1alpha2Xp7VHost, V1alpha2Xp7VHostList, V1alpha2Xp7VHostDoneable, Resource<V1alpha2Xp7VHost, V1alpha2Xp7VHostDoneable>>
+    private final MixedOperation<V1alpha2Xp7VHost, V1alpha2Xp7VHostList, V1alpha2Xp7VHostDoneable, Resource<V1alpha2Xp7VHost, V1alpha2Xp7VHostDoneable>>
         vHostClient;
 
-    private KubernetesClient defaultClient;
+    private final KubernetesClient defaultClient;
 
-    private MixedOperation<V1alpha1Xp7App, V1alpha1Xp7AppList, V1alpha1Xp7AppDoneable, Resource<V1alpha1Xp7App, V1alpha1Xp7AppDoneable>>
+    private final MixedOperation<V1alpha1Xp7App, V1alpha1Xp7AppList, V1alpha1Xp7AppDoneable, Resource<V1alpha1Xp7App, V1alpha1Xp7AppDoneable>>
         appClient;
 
-    private MixedOperation<V1alpha2Xp7Config, V1alpha2Xp7ConfigList, V1alpha2Xp7ConfigDoneable, Resource<V1alpha2Xp7Config, V1alpha2Xp7ConfigDoneable>>
+    private final MixedOperation<V1alpha2Xp7Config, V1alpha2Xp7ConfigList, V1alpha2Xp7ConfigDoneable, Resource<V1alpha2Xp7Config, V1alpha2Xp7ConfigDoneable>>
         configClient;
 
-    private MixedOperation<V1alpha2Xp7Deployment, V1alpha2Xp7DeploymentList, V1alpha2Xp7DeploymentDoneable, Resource<V1alpha2Xp7Deployment, V1alpha2Xp7DeploymentDoneable>>
+    private final MixedOperation<V1alpha2Xp7Deployment, V1alpha2Xp7DeploymentList, V1alpha2Xp7DeploymentDoneable, Resource<V1alpha2Xp7Deployment, V1alpha2Xp7DeploymentDoneable>>
         deploymentClient;
 
     @Inject

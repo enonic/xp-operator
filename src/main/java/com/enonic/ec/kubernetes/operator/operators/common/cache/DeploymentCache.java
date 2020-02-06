@@ -18,7 +18,7 @@ import com.enonic.ec.kubernetes.operator.operators.common.clients.V1alpha2Xp7Dep
 public class DeploymentCache
     extends Cache<V1alpha2Xp7Deployment, V1alpha2Xp7DeploymentList>
 {
-    private Clients clients;
+    private final Clients clients;
 
     @Inject
     public DeploymentCache( Clients clients )
@@ -37,7 +37,7 @@ public class DeploymentCache
             @Override
             public void eventReceived( final Action action, final V1alpha2Xp7Deployment v1alpha2Xp7Deployment )
             {
-                watcherEventRecieved( action, v1alpha2Xp7Deployment );
+                watcherEventReceived( action, v1alpha2Xp7Deployment );
             }
 
             @Override

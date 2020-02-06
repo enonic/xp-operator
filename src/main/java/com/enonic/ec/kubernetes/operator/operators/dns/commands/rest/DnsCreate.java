@@ -16,10 +16,9 @@ public abstract class DnsCreate
     protected abstract DnsRecord dnsRecord();
 
     @Override
-    public Void execute()
+    public void execute()
     {
         dnsRecordsService().create( zoneId(), dnsRecord() );
-        return null;
     }
 
     @Override
@@ -28,6 +27,7 @@ public abstract class DnsCreate
         return "CREATE";
     }
 
+    @SuppressWarnings("EmptyMethod") // Immutables will complain if we remove this method
     @Override
     public String toString()
     {

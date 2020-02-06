@@ -83,33 +83,27 @@ public class Helm
 
     @SuppressWarnings("WeakerAccess")
     public List<HasMetadata> templateObjects( Chart chart, Object values )
-        throws IOException
     {
-        String template = template( chart, values );
-        String[] objects = template.split( "---" );
-        List<HasMetadata> res = new LinkedList<>();
-        for ( String s : objects )
+        try
         {
-            if ( !"".equals( s ) )
+            List<HasMetadata> res = new LinkedList<>();
+            for ( String s : templateStrings( chart, values ) )
             {
                 res.add( objectMapper.readValue( s, HasMetadata.class ) );
             }
-        }
-        res.sort( this::sort );
-        return res;
-    }
-
-    public List<String> templateStrings( Chart chart, Object values )
-    {
-        String template = null;
-        try
-        {
-            template = template( chart, values );
+            res.sort( this::sort );
+            return res;
         }
         catch ( IOException e )
         {
             throw new RuntimeException( e );
         }
+    }
+
+    private List<String> templateStrings( Chart chart, Object values )
+        throws IOException
+    {
+        String template = template( chart, values );
         String[] objects = template.split( "---" );
         List<String> res = new LinkedList<>();
         for ( String s : objects )
@@ -132,28 +126,6 @@ public class Helm
         {
             return a.getKind().compareTo( b.getKind() );
         }
-    }
-
-    public List<HasMetadata> templateToObjects( Chart chart, Object values )
-    {
-        try
-        {
-            String res = template( chart, values );
-            List<HasMetadata> list = new LinkedList<>();
-            for ( String obj : res.split( "---" ) )
-            {
-                if ( !obj.trim().equals( "" ) )
-                {
-                    list.add( objectMapper.readValue( obj, HasMetadata.class ) );
-                }
-            }
-            return list;
-        }
-        catch ( IOException e )
-        {
-            throw new RuntimeException( e );
-        }
-
     }
 
     public void uninstall( String namespace, String name )

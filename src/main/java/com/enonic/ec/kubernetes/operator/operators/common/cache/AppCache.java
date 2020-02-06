@@ -18,7 +18,7 @@ import com.enonic.ec.kubernetes.operator.operators.common.clients.V1alpha1Xp7App
 public class AppCache
     extends Cache<V1alpha1Xp7App, V1alpha1Xp7AppList>
 {
-    private Clients clients;
+    private final Clients clients;
 
     @Inject
     public AppCache( Clients clients )
@@ -36,7 +36,7 @@ public class AppCache
             @Override
             public void eventReceived( final Action action, final V1alpha1Xp7App v1alpha1Xp7App )
             {
-                watcherEventRecieved( action, v1alpha1Xp7App );
+                watcherEventReceived( action, v1alpha1Xp7App );
             }
 
             @Override

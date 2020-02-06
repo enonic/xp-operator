@@ -20,6 +20,7 @@ public abstract class DnsRecord
 
     public abstract String content();
 
+    @SuppressWarnings("SpellCheckingInspection") // That's what its called in the cloudflare API
     @Nullable
     public abstract Boolean proxiable();
 

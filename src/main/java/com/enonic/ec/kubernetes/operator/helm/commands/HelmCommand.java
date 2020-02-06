@@ -4,7 +4,7 @@ import com.enonic.ec.kubernetes.operator.common.commands.Command;
 import com.enonic.ec.kubernetes.operator.helm.Helm;
 
 public abstract class HelmCommand
-    implements Command<Void>
+    implements Command
 {
     public abstract Helm helm();
 

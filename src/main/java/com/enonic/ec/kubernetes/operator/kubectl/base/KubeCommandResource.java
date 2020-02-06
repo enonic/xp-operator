@@ -50,7 +50,8 @@ public abstract class KubeCommandResource<T extends HasMetadata>
                 return ImmutableKubeCommand.builder().
                     action( KubeCommandAction.SKIP ).
                     resource( maybeNamespacedResource() ).
-                    cmd( () -> null ).
+                    cmd( () -> {
+                    } ).
                     build();
             }
             else
@@ -58,10 +59,7 @@ public abstract class KubeCommandResource<T extends HasMetadata>
                 return ImmutableKubeCommand.builder().
                     action( KubeCommandAction.UPDATE ).
                     resource( maybeNamespacedResource() ).
-                    cmd( () -> {
-                        patch( maybeNamespacedResource() );
-                        return null;
-                    } ).
+                    cmd( () -> patch( maybeNamespacedResource() ) ).
                     build();
             }
         }
@@ -70,10 +68,7 @@ public abstract class KubeCommandResource<T extends HasMetadata>
             return ImmutableKubeCommand.builder().
                 action( KubeCommandAction.CREATE ).
                 resource( maybeNamespacedResource() ).
-                cmd( () -> {
-                    create( maybeNamespacedResource() );
-                    return null;
-                } ).
+                cmd( () -> create( maybeNamespacedResource() ) ).
                 build();
         }
     }
@@ -85,16 +80,13 @@ public abstract class KubeCommandResource<T extends HasMetadata>
             return Optional.of( ImmutableKubeCommand.builder().
                 action( KubeCommandAction.DELETE ).
                 resource( maybeNamespacedResource() ).
-                cmd( () -> {
-                    delete( maybeNamespacedResource() );
-                    return null;
-                } ).
+                cmd( () -> delete( maybeNamespacedResource() ) ).
                 build() );
         }
         return Optional.empty();
     }
 
-    private final boolean compareResourcesWithMetadata( T o, T n )
+    private boolean compareResourcesWithMetadata( T o, T n )
     {
         if ( !compareMetadata( o.getMetadata(), n.getMetadata() ) )
         {
@@ -103,7 +95,7 @@ public abstract class KubeCommandResource<T extends HasMetadata>
         return compareSpec( o, n );
     }
 
-    private final boolean compareMetadata( ObjectMeta o, ObjectMeta n )
+    private boolean compareMetadata( ObjectMeta o, ObjectMeta n )
     {
         return Objects.equals( o.getName(), n.getName() ) && Objects.equals( o.getNamespace(), n.getNamespace() ) &&
             Objects.equals( o.getLabels(), n.getLabels() ) && Objects.equals( o.getAnnotations(), n.getAnnotations() );

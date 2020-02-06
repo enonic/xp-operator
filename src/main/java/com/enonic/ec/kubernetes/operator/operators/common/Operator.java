@@ -19,7 +19,7 @@ public abstract class Operator
         runCommands( commandBuilder, () -> commandBuilderConsumer.accept( commandBuilder ) );
     }
 
-    protected synchronized void runCommands( ImmutableCombinedCommand.Builder commandBuilder, Runnable r )
+    synchronized void runCommands( ImmutableCombinedCommand.Builder commandBuilder, Runnable r )
     {
         r.run();
         try

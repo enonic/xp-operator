@@ -18,7 +18,7 @@ import com.enonic.ec.kubernetes.operator.operators.common.clients.V1alpha2Xp7VHo
 public class VHostCache
     extends Cache<V1alpha2Xp7VHost, V1alpha2Xp7VHostList>
 {
-    private Clients clients;
+    private final Clients clients;
 
     @Inject
     public VHostCache( Clients clients )
@@ -36,7 +36,7 @@ public class VHostCache
             @Override
             public void eventReceived( final Action action, final V1alpha2Xp7VHost v1alpha2Xp7VHost )
             {
-                watcherEventRecieved( action, v1alpha2Xp7VHost );
+                watcherEventReceived( action, v1alpha2Xp7VHost );
             }
 
             @Override
