@@ -1,4 +1,4 @@
-testResult: "Field 'spec.nodes' has to contain more than 0 nodes"
+testResult: "Field 'spec.nodeGroups' has to contain more than 0 nodes"
 testReview:
   request:
     operation: CREATE
@@ -17,13 +17,13 @@ testReview:
         nodesSharedDisks:
           blobstore: 1Gi
           snapshots: 1Gi
-  #      nodeGroups:
-  #        main:
-  #          master: true
-  #          data: true
-  #          replicas: 1
-  #          resources:
-  #            cpu: "1"
-  #            memory: 512Mi
-  #            disks:
-  #              index: 200Mi
+        nodeGroups: {}
+#          main:
+#            master: true
+#            data: true
+#            replicas: 1
+#            resources:
+#              cpu: "1"
+#              memory: 512Mi
+#              disks:
+#                index: 200Mi

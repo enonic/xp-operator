@@ -1,4 +1,4 @@
-testResult: "1 and only 1 node has be of master=true"
+testResult: "Some nodes must have master=true"
 testReview:
   request:
     operation: CREATE
@@ -19,15 +19,15 @@ testReview:
           snapshots: 1Gi
         nodeGroups:
           master:
-            master: true
+            master: false
             data: false
             replicas: 1
             resources:
               cpu: "1"
               memory: 512Mi
           data:
-            master: true
-            data: false
+            master: false
+            data: true
             replicas: 1
             resources:
               cpu: "1"
@@ -41,3 +41,4 @@ testReview:
             resources:
               cpu: "1"
               memory: 512Mi
+
