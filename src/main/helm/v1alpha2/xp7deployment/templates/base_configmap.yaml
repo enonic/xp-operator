@@ -1,0 +1,12 @@
+# Setup service that points to all nodes in the cluster
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: extra-config
+  labels:
+    {{- with $.Values.defaultLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+data:
+  java.security.properties: |-
+    networkaddress.cache.ttl=30

@@ -18,7 +18,7 @@ spec:
   {{- else }}
     cluster.enabled=true
     node.name=${env.XP_NODE_NAME}
-    discovery.unicast.hosts={{ $.Values.deployment.discoveryHosts }}
+    discovery.unicast.hosts={{ $.Values.deployment.discoveryHosts | join "," }}
     network.publish.host=${env.XP_NODE_NAME}.{{ $.Values.deployment.allNodeGroupsKey }}
     {{- if $.Values.extensions.linkerd }}
       network.host=127.0.0.1

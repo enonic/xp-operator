@@ -108,7 +108,8 @@ public class Helm
         List<String> res = new LinkedList<>();
         for ( String s : objects )
         {
-            if(s.contains( "apiVersion:" )) {
+            if ( s.contains( "apiVersion:" ) )
+            {
                 res.add( s );
             }
         }

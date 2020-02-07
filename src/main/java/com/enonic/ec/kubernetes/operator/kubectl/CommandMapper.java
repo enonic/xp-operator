@@ -21,7 +21,8 @@ import com.enonic.ec.kubernetes.operator.operators.common.clients.Clients;
 class CommandMapper
 {
     @SuppressWarnings({"unchecked", "OptionalUsedAsFieldOrParameterType"})
-    static <T extends HasMetadata> KubeCommandBuilder<T> getCommandClass( Clients clients, Optional<String> namespace, T resource, boolean neverOverwrite )
+    static <T extends HasMetadata> KubeCommandBuilder<T> getCommandClass( Clients clients, Optional<String> namespace, T resource,
+                                                                          boolean neverOverwrite )
     {
         if ( resource instanceof ConfigMap )
         {

@@ -1,7 +1,6 @@
 package com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7vhost.helpers;
 
 import java.util.Map;
-import java.util.Optional;
 
 import org.immutables.value.Value;
 

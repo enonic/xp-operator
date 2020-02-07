@@ -39,7 +39,8 @@ public abstract class Xp7DeploymentValues
         deployment.put( "clustered", isClustered );
         if ( isClustered )
         {
-            deployment.put( "discoveryHosts", createDiscoveryHosts( resource ) );
+            List<String> discoveryHosts = createDiscoveryHosts( resource );
+            deployment.put( "discoveryHosts", discoveryHosts );
             deployment.put( "minimumMasterNodes", minimumMasterNodes( resource ) );
             deployment.put( "minimumDataNodes", minimumDataNodes( resource ) );
         }
@@ -52,7 +53,7 @@ public abstract class Xp7DeploymentValues
         return values;
     }
 
-    private String createDiscoveryHosts( V1alpha2Xp7Deployment resource )
+    private List<String> createDiscoveryHosts( V1alpha2Xp7Deployment resource )
     {
         List<String> res = new LinkedList<>();
         for ( Map.Entry<String, V1alpha2Xp7DeploymentSpecNode> node : resource.getSpec().nodeGroups().entrySet() )
@@ -65,7 +66,7 @@ public abstract class Xp7DeploymentValues
                 }
             }
         }
-        return String.join( ",", res );
+        return res;
     }
 
     public boolean isClustered( V1alpha2Xp7Deployment resource )

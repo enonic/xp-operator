@@ -68,4 +68,7 @@ deployment:
             work: "7Gi"
         env:
           CUSTOM_ENV: "myenvvar"
-  discoveryHosts: "master-0.all,master-1.all,master-2.all"
+  discoveryHosts:
+  - "master-0.all"
+  - "master-1.all"
+  - "master-2.all"

@@ -27,14 +27,16 @@ public abstract class V1alpha2Xp7DeploymentSpec
 
     @JsonIgnore
     @Value.Derived
-    public int totalMasterNodes() {
+    public int totalMasterNodes()
+    {
         return nodeGroups().values().stream().filter( V1alpha2Xp7DeploymentSpecNode::master ).map(
             V1alpha2Xp7DeploymentSpecNode::replicas ).reduce( Integer::sum ).get();
     }
 
     @JsonIgnore
     @Value.Derived
-    public int totalDataNodes() {
+    public int totalDataNodes()
+    {
         return nodeGroups().values().stream().filter( V1alpha2Xp7DeploymentSpecNode::data ).map(
             V1alpha2Xp7DeploymentSpecNode::replicas ).reduce( Integer::sum ).get();
     }

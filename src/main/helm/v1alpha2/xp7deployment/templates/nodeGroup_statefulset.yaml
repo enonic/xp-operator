@@ -71,6 +71,15 @@ spec:
             - sysctl
             - -w
             - vm.max_map_count=262144
+        {{- if $.Values.deployment.clustered }}
+        - name: wait-for-dns
+          image: alpine:3.10
+          imagePullPolicy: IfNotPresent
+          command:
+            - ash
+            - -c
+            - x="0"; while [ "$x" == "0" ]; do {{ range $host := $.Values.deployment.discoveryHosts }}nslookup {{$host}} && {{end}}x="1"; sleep 2; done
+        {{- end }}
 
       containers:
         - name: exp
@@ -129,7 +138,7 @@ spec:
           {{- end }}
           {{- if not (index $nodeGroup.env "JAVA_OPTS") }}
           - name: JAVA_OPTS
-            value: '-XX:+UseContainerSupport -XX:MinRAMPercentage=20 -XX:InitialRAMPercentage=30
+            value: '-Djava.security.properties={{ $.Values.extraConfigLocation }}/java.security.properties -XX:+UseContainerSupport -XX:MinRAMPercentage=20 -XX:InitialRAMPercentage=30
                         -XX:MaxRAMPercentage={{ if and $nodeGroup.master (not $nodeGroup.data) }}75{{ else }}50{{ end }} -Djsse.enableSNIExtension=true -XX:+UseConcMarkSweepGC
                         -XX:+CMSParallelRemarkEnabled -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=60
                         -XX:+ScavengeBeforeFullGC -XX:+CMSScavengeBeforeRemark -XX:-HeapDumpOnOutOfMemoryError
@@ -148,6 +157,8 @@ spec:
           volumeMounts:
             - name: config
               mountPath: {{ $.Values.configLocation }}
+            - name: extra-config
+              mountPath: {{ $.Values.extraConfigLocation }}
             {{- range $volumeName, $volumeSize := $nodeGroup.resources.disks }}
             - name: {{ $volumeName }}
               mountPath: {{ index $.Values.volumeMounts $volumeName }}
@@ -161,6 +172,9 @@ spec:
         - name: config
           configMap:
             name: {{ $nodeGroupName }}
+        - name: extra-config
+          configMap:
+            name: extra-config
         {{- range $volumeName, $volumeSize := $.Values.deployment.spec.nodesSharedDisks }}
         - name: {{ $volumeName }}
           persistentVolumeClaim:

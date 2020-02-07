@@ -29,11 +29,11 @@ spec:
           index: 100Mi
           work: 100Mi
     ost:
-      data: false
+      data: true
       master: true
       replicas: 1
       env:
-        test: test7g6tgg
+        test: test2
       resources:
         cpu: "1"
         memory: 512Mi

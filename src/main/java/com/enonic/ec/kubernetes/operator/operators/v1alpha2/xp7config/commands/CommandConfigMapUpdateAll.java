@@ -52,6 +52,11 @@ public abstract class CommandConfigMapUpdateAll
     {
         // Filter by node predicate
         Predicate<ConfigMap> filter = c -> {
+            if ( c.getMetadata().getLabels().get( "nodeGroup" ) == null )
+            {
+                // This is not a node config, ignore it
+                return false;
+            }
             if ( configResource.getSpec().nodeGroup().equals( cfgStr( "operator.deployment.xp.allNodesKey" ) ) )
             {
                 // Apply to all nodes (config maps)

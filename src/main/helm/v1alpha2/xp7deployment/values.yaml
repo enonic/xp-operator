@@ -36,6 +36,7 @@ volumeMounts:
 
 heapDumpLocation: /enonic-xp/home/exports/dumps
 configLocation: /enonic-xp/home/config
+extraConfigLocation: /enonic-xp/home/extra-config
 
 user: 1337
 
