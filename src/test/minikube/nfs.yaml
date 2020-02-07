@@ -1,0 +1,10 @@
+storageClass:
+  name: nfs
+  archiveOnDelete: false
+
+nfs:
+  server: 192.168.255.6
+  path: /
+  mountOptions:
+    - hard
+    - nfsvers=4.1

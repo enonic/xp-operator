@@ -69,6 +69,14 @@ minikube-operator-logs:
 minikube-operator-port-forward:
 	kubectl -n ec-system get pods | grep ec-operator | awk '{print $$1}' | xargs -I % kubectl -n ec-system port-forward % ${LOCAL_OPERATOR_PORT}:8080
 
+minikube-nfs:
+	helm upgrade --install \
+        nfs-client-provisioner \
+        stable/nfs-client-provisioner \
+        --version 1.2.8 \
+        --namespace kube-system \
+        --values src/test/minikube/nfs.yaml
+
 deployment-create:
 	kubectl apply -f src/test/example-deployment.yaml
 
