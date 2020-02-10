@@ -264,10 +264,8 @@ spec:
           name: "work"
         - mountPath: "/enonic-xp/home/repo/blob"
           name: "blobstore"
-          subPath: "mycloud-myproject-qaxp/blobstore"
         - mountPath: "/enonic-xp/home/snapshots"
           name: "snapshots"
-          subPath: "mycloud-myproject-qaxp/snapshots"
       dnsPolicy: "ClusterFirst"
       initContainers:
       - command:

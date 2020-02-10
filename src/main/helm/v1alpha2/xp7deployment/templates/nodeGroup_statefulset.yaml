@@ -54,7 +54,6 @@ spec:
             {{- range $volumeName, $volumeSize := $.Values.deployment.spec.nodesSharedDisks }}
             - name: {{ $volumeName }}
               mountPath: {{ index $.Values.volumeMounts $volumeName }}
-              subPath: {{ $.Values.deployment.name }}/{{ $volumeName }}
             {{- end }}
           command:
             - ash
@@ -166,7 +165,6 @@ spec:
             {{- range $volumeName, $volumeSize := $.Values.deployment.spec.nodesSharedDisks }}
             - name: {{ $volumeName }}
               mountPath: {{ index $.Values.volumeMounts $volumeName }}
-              subPath: {{ $.Values.deployment.name }}/{{ $volumeName }}
             {{- end }}
       volumes:
         - name: config

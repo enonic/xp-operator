@@ -12,14 +12,19 @@ public abstract class BaseApi<T>
     @Inject
     public ObjectMapper mapper;
 
+    @SuppressWarnings("unchecked")
     protected T getResult( String request, Class<T> k )
         throws IOException
     {
-        @SuppressWarnings("unchecked") Map<String, Object> admission = mapper.readValue( request, Map.class );
-
+        Map<String, Object> admission = mapper.readValue( request, Map.class );
         // We have to extract the uid this way if there is a validation error during
         // mapping of the actual objects.
         String uid = (String) ( (Map) admission.get( "request" ) ).get( "uid" );
+
+        // Hack until this is fixed: https://github.com/fabric8io/kubernetes-client/issues/1898
+        ((Map<String, Object>)admission.get( "request" )).remove( "options" );
+        request = mapper.writeValueAsString( admission );
+
         try
         {
             return process( uid, mapper.readValue( request, k ) );
