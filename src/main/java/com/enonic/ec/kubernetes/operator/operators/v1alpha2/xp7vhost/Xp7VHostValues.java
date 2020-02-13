@@ -33,7 +33,7 @@ public abstract class Xp7VHostValues
         vhost.put( "spec", resource.getSpec() );
 
         values.put( "vhost", vhost );
-        values.put( "defaultLabels", defaultLabels( resource ) );
+        values.put( "defaultLabels", defaultLabels( info().xpDeploymentResource() ) );
         return values;
     }
 
