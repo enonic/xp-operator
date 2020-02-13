@@ -26,14 +26,14 @@ public abstract class CombinedCommand
             return;
         }
         String uuid = UUID.randomUUID().toString().substring( 0, 8 );
-        log.info( "Running " + command().size() + " commands with id " + uuid );
+        log.info( String.format( "%s: %s", uuid, "Running " + command().size() + " commands" ) );
         for ( int i = 0; i < command().size(); i++ )
         {
             Command c = command().get( i );
             log.info( String.format( "%s: %s", uuid, c.toString() ) );
             c.execute();
         }
-        log.info( "Finished commands with id " + uuid );
+        log.info( String.format( "%s: %s", uuid, "Finished" ) );
     }
 
 }

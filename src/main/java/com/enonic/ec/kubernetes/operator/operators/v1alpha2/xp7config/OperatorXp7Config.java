@@ -6,6 +6,9 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.fabric8.kubernetes.client.Watcher;
 import io.quarkus.runtime.StartupEvent;
 
@@ -23,6 +26,8 @@ import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7config.info.Immut
 public class OperatorXp7Config
     extends OperatorNamespaced
 {
+    private static final Logger log = LoggerFactory.getLogger( OperatorXp7Config.class );
+
     @Inject
     Clients clients;
 
@@ -31,7 +36,10 @@ public class OperatorXp7Config
 
     void onStartup( @Observes StartupEvent _ev )
     {
-        caches.getConfigCache().addWatcher( this::watchXpConfig );
+        new Thread( () -> stallAndRunCommands( 1000L, () -> {
+            log.info( "Started listening for Xp7Config events" );
+            caches.getConfigCache().addWatcher( this::watchXpConfig );
+        } ) ).start();
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -45,6 +53,8 @@ public class OperatorXp7Config
             build() );
 
         i.ifPresent( info -> {
+            log.info( String.format( "Xp7Config '%s' %s", info.resource().getMetadata().getName(), action ) );
+
             // Because multiple configs could potentially be deployed at the same time,
             // lets use the stall function to let them accumulate before we update config
             stallAndRunCommands( 1500L, ( commandBuilder ) -> createCommands( commandBuilder, info ) );

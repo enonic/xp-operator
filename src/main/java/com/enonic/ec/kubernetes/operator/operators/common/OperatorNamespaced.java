@@ -30,6 +30,12 @@ public abstract class OperatorNamespaced
         runCommands( commandBuilder, r );
     }
 
+    protected synchronized void stallAndRunCommands( Long ms, Runnable r )
+    {
+        waitSome( ms );
+        r.run();
+    }
+
     private void waitSome( Long ms )
     {
         try

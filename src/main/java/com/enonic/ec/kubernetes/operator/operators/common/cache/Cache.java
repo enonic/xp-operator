@@ -80,7 +80,7 @@ public abstract class Cache<T extends HasMetadata, L extends KubernetesResourceL
             {
                 cache.remove( uid );
                 watchers.forEach(
-                    watcher -> executor.execute( () -> watcher.accept( action, uid, oldResource, Optional.of( resource ) ) ) );
+                    watcher -> executor.execute( () -> watcher.accept( action, uid, Optional.of( resource ), Optional.empty() ) ) );
             }
             else
             {

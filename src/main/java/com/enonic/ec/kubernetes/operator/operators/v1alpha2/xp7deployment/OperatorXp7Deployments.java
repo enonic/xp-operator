@@ -11,6 +11,8 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
@@ -37,6 +39,8 @@ import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7deployment.info.I
 public class OperatorXp7Deployments
     extends OperatorNamespaced
 {
+    private static final Logger log = LoggerFactory.getLogger( OperatorXp7Deployments.class );
+
     @Inject
     Clients clients;
 
@@ -59,7 +63,10 @@ public class OperatorXp7Deployments
 
     void onStartup( @Observes StartupEvent _ev )
     {
-        caches.getDeploymentCache().addWatcher( this::watch );
+        new Thread( () -> stallAndRunCommands( 1000L, () -> {
+            log.info( "Started listening for Xp7Deployment events" );
+            caches.getDeploymentCache().addWatcher( this::watch );
+        } ) ).start();
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -71,7 +78,15 @@ public class OperatorXp7Deployments
             newResource( newResource ).
             build();
 
+        log.info( String.format( "Xp7Deployment '%s' %s", info.namespaceName(), action ) );
+
         runCommands( commandBuilder -> {
+            if ( action == Watcher.Action.DELETED )
+            {
+                // Deployment namespace and all children will automatically be deleted
+                return;
+            }
+
             if ( action == Watcher.Action.ADDED )
             {
                 // Create namespace
@@ -108,8 +123,6 @@ public class OperatorXp7Deployments
                     build().
                     addCommands( commandBuilder );
             }
-
-            // Everything will be deleted on action == Watcher.Action.DELETED automatically
         } );
     }
 

@@ -6,6 +6,9 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.fabric8.kubernetes.client.Watcher;
 import io.quarkus.runtime.StartupEvent;
 
@@ -23,6 +26,8 @@ import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7app.info.Immutabl
 public class OperatorXp7App
     extends OperatorNamespaced
 {
+    private static final Logger log = LoggerFactory.getLogger( OperatorXp7App.class );
+
     @Inject
     Caches caches;
 
@@ -31,7 +36,10 @@ public class OperatorXp7App
 
     void onStartup( @Observes StartupEvent _ev )
     {
-        caches.getAppCache().addWatcher( this::watchApps );
+        new Thread( () -> stallAndRunCommands( 1000L, () -> {
+            log.info( "Started listening for Xp7App events" );
+            caches.getAppCache().addWatcher( this::watchApps );
+        } ) ).start();
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -46,6 +54,8 @@ public class OperatorXp7App
             build() );
 
         i.ifPresent( info -> {
+            log.info( String.format( "Xp7App '%s' %s", info.resource().getMetadata().getName(), action ) );
+
             // Because multiple apps could potentially be deployed at the same time, lets use
             // the stall function to let them accumulate in the cache before we update config
             stallAndRunCommands( 500L, ( commandBuilder ) -> createCommands( commandBuilder, info ) );

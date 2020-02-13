@@ -8,6 +8,9 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.fabric8.kubernetes.client.Watcher;
 import io.quarkus.runtime.StartupEvent;
 
@@ -28,6 +31,8 @@ import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7vhost.info.Immuta
 public class OperatorXp7VHost
     extends OperatorNamespaced
 {
+    private static final Logger log = LoggerFactory.getLogger( OperatorXp7VHost.class );
+
     @Inject
     Clients clients;
 
@@ -47,7 +52,10 @@ public class OperatorXp7VHost
 
     void onStartup( @Observes StartupEvent _ev )
     {
-        caches.getVHostCache().addWatcher( this::watchVHosts );
+        new Thread( () -> stallAndRunCommands( 1000L, () -> {
+            log.info( "Started listening for Xp7VHost events" );
+            caches.getVHostCache().addWatcher( this::watchVHosts );
+        } ) ).start();
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -60,7 +68,10 @@ public class OperatorXp7VHost
             newResource( newResource ).
             build() );
 
-        i.ifPresent( info -> createCommands( ImmutableCombinedCommand.builder(), info ) );
+        i.ifPresent( info -> {
+            log.info( String.format( "Xp7VHost '%s' %s", info.resource().getMetadata().getName(), action ) );
+            createCommands( ImmutableCombinedCommand.builder(), info );
+        } );
     }
 
     private void createCommands( ImmutableCombinedCommand.Builder commandBuilder,
