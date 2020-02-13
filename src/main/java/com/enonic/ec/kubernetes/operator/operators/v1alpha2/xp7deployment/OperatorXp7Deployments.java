@@ -146,7 +146,8 @@ public class OperatorXp7Deployments
         metaData.setName( "su" );
         Secret secret = new Secret();
         secret.setMetadata( metaData );
-        secret.setData( Map.of( "pass", BaseEncoding.base64().encode( password.getBytes() ), "passHash", passHash ) );
+        secret.setData( Map.of( "pass", BaseEncoding.base64().encode( password.getBytes() ), "passHash",
+                                BaseEncoding.base64().encode( passHash.getBytes() ) ) );
 
         return secret;
     }
