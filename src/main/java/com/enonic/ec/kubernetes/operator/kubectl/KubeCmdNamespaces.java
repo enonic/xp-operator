@@ -22,10 +22,10 @@ public abstract class KubeCmdNamespaces
     }
 
     @Override
-    protected void create( final Namespace resource )
+    protected void createOrReplace( final Namespace resource )
     {
         clients().getDefaultClient().namespaces().
-            create( resource );
+            createOrReplace( resource );
     }
 
     @Override

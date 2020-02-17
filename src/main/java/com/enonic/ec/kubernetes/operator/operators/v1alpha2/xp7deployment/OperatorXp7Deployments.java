@@ -29,6 +29,7 @@ import com.enonic.ec.kubernetes.operator.helm.ChartRepository;
 import com.enonic.ec.kubernetes.operator.helm.Helm;
 import com.enonic.ec.kubernetes.operator.helm.commands.ImmutableHelmKubeCmdBuilder;
 import com.enonic.ec.kubernetes.operator.kubectl.ImmutableKubeCmd;
+import com.enonic.ec.kubernetes.operator.kubectl.base.ImmutableKubeCommandOptions;
 import com.enonic.ec.kubernetes.operator.operators.common.OperatorNamespaced;
 import com.enonic.ec.kubernetes.operator.operators.common.cache.Caches;
 import com.enonic.ec.kubernetes.operator.operators.common.clients.Clients;
@@ -78,9 +79,10 @@ public class OperatorXp7Deployments
             newResource( newResource ).
             build();
 
-        log.info( String.format( "Xp7Deployment '%s' %s", info.namespaceName(), action ) );
+        String cmdId = createCmdId();
+        logEvent( log, cmdId, info.resource(), action );
 
-        runCommands( commandBuilder -> {
+        runCommands( cmdId, commandBuilder -> {
             if ( action == Watcher.Action.DELETED )
             {
                 // Deployment namespace and all children will automatically be deleted
@@ -93,7 +95,7 @@ public class OperatorXp7Deployments
                 ImmutableKubeCmd.builder().
                     clients( clients ).
                     resource( createNamespace( info ) ).
-                    neverOverwrite( true ).
+                    options( ImmutableKubeCommandOptions.builder().neverOverwrite( true ).build() ).
                     build().
                     apply( commandBuilder );
 
@@ -102,7 +104,7 @@ public class OperatorXp7Deployments
                     clients( clients ).
                     namespace( info.namespaceName() ).
                     resource( createSecret() ).
-                    neverOverwrite( true ).
+                    options( ImmutableKubeCommandOptions.builder().neverOverwrite( true ).build() ).
                     build().
                     apply( commandBuilder );
             }

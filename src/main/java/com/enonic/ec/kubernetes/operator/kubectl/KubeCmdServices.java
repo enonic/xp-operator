@@ -24,11 +24,11 @@ public abstract class KubeCmdServices
     }
 
     @Override
-    protected void create( final Service resource )
+    protected void createOrReplace( final Service resource )
     {
         clients().getDefaultClient().services().
             inNamespace( resource.getMetadata().getNamespace() ).
-            create( resource );
+            createOrReplace( resource );
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7vhost;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.locks.Lock;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -11,10 +12,11 @@ import javax.inject.Named;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.util.concurrent.Striped;
+
 import io.fabric8.kubernetes.client.Watcher;
 import io.quarkus.runtime.StartupEvent;
 
-import com.enonic.ec.kubernetes.operator.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHost;
 import com.enonic.ec.kubernetes.operator.helm.ChartRepository;
 import com.enonic.ec.kubernetes.operator.helm.Helm;
@@ -32,6 +34,8 @@ public class OperatorXp7VHost
     extends OperatorNamespaced
 {
     private static final Logger log = LoggerFactory.getLogger( OperatorXp7VHost.class );
+
+    private static final Striped<Lock> locks = Striped.lock( 10 );
 
     @Inject
     Clients clients;
@@ -69,33 +73,38 @@ public class OperatorXp7VHost
             build() );
 
         i.ifPresent( info -> {
-            log.info( String.format( "Xp7VHost '%s' %s", info.resource().getMetadata().getName(), action ) );
-            createCommands( ImmutableCombinedCommand.builder(), info );
+            String cmdId = createCmdId();
+            logEvent( log, cmdId, info.resource(), action );
+            createAndRunCommands( cmdId, info );
         } );
     }
 
-    private void createCommands( ImmutableCombinedCommand.Builder commandBuilder,
-                                 ResourceInfoNamespaced<V1alpha2Xp7VHost, DiffXp7VHost> info )
+    private void createAndRunCommands( String cmdId, ResourceInfoNamespaced<V1alpha2Xp7VHost, DiffXp7VHost> info )
     {
-        ImmutableHelmKubeCmdBuilder.builder().
-            clients( clients ).
-            helm( helm ).
-            chart( chartRepository.get( "v1alpha2/xp7vhost" ) ).
-            namespace( info.deploymentInfo().namespaceName() ).
-            valueBuilder( ImmutableXp7VHostValues.builder().
-                baseValues( baseValues ).
-                info( info ).
-                build() ).
-            build().
-            addCommands( commandBuilder );
+        // Create ingress independent of config
+        runCommands( cmdId, ( commandBuilder ) -> {
+            ImmutableHelmKubeCmdBuilder.builder().
+                clients( clients ).
+                helm( helm ).
+                chart( chartRepository.get( "v1alpha2/xp7vhost" ) ).
+                namespace( info.deploymentInfo().namespaceName() ).
+                valueBuilder( ImmutableXp7VHostValues.builder().
+                    baseValues( baseValues ).
+                    info( info ).
+                    build() ).
+                build().
+                addCommands( commandBuilder );
+        } );
 
-        // Because multiple vhosts could potentially be deployed at the same time, lets use
-        // the stall function to let them accumulate in the cache before we update config
-        stallAndRunCommands( 500L, commandBuilder, () -> ImmutableCommandXpVHostsApply.builder().
-            clients( clients ).
-            caches( caches ).
-            info( info ).
-            build().
-            addCommands( commandBuilder ) );
+        // Update config
+        runCommands( cmdId, ( commandBuilder ) -> {
+            ImmutableCommandXpVHostsApply.builder().
+                clients( clients ).
+                caches( caches ).
+                info( info ).
+                locks( locks ).
+                build().
+                addCommands( commandBuilder );
+        } );
     }
 }

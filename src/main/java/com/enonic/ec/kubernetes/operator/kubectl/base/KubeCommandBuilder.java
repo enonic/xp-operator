@@ -23,7 +23,7 @@ public abstract class KubeCommandBuilder<T extends HasMetadata>
 
     public abstract T resource();
 
-    public abstract boolean neverOverwrite();
+    public abstract KubeCommandOptions options();
 
     @Value.Derived
     protected T maybeNamespacedResource()
@@ -41,7 +41,7 @@ public abstract class KubeCommandBuilder<T extends HasMetadata>
 
     protected abstract Optional<T> fetch( T resource );
 
-    protected abstract void create( T resource );
+    protected abstract void createOrReplace( T resource );
 
     protected abstract void patch( T resource );
 
@@ -51,11 +51,11 @@ public abstract class KubeCommandBuilder<T extends HasMetadata>
     {
         if ( oldResource().isPresent() )
         {
-            if ( neverOverwrite() || equalsResourcesWithMetadata( oldResource().get(), maybeNamespacedResource() ) )
+            if ( options().neverOverwrite() || equalsResourcesWithMetadata( oldResource().get(), maybeNamespacedResource() ) )
             {
                 return Optional.empty();
             }
-            else
+            else if ( !options().replaceOld() )
             {
                 return Optional.of( ImmutableKubeCommand.builder().
                     action( KubeCommandAction.UPDATE ).
@@ -64,14 +64,12 @@ public abstract class KubeCommandBuilder<T extends HasMetadata>
                     build() );
             }
         }
-        else
-        {
-            return Optional.of( ImmutableKubeCommand.builder().
-                action( KubeCommandAction.CREATE ).
-                resource( maybeNamespacedResource() ).
-                cmd( () -> create( maybeNamespacedResource() ) ).
-                build() );
-        }
+
+        return Optional.of( ImmutableKubeCommand.builder().
+            action( oldResource().isPresent() ? KubeCommandAction.REPLACE : KubeCommandAction.CREATE ).
+            resource( maybeNamespacedResource() ).
+            cmd( () -> createOrReplace( maybeNamespacedResource() ) ).
+            build() );
     }
 
     public Optional<KubeCommand> delete()
@@ -84,6 +82,7 @@ public abstract class KubeCommandBuilder<T extends HasMetadata>
                 cmd( () -> delete( maybeNamespacedResource() ) ).
                 build() );
         }
+
         return Optional.empty();
     }
 

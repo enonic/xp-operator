@@ -2,12 +2,19 @@
 
 ## Debug with minikube
 
+### Setup minikube
+
+See https://github.com/enonic/ec-terraform/tree/master/clusters/minikube-dev
+
 ### Run operator locally
-* Setup minikube: `make minikube-setup`
+
 * Create jar run configuration with mvn pre step: `-DskipTests clean package`
 * Run the project
 
-### Run operator on minikube
-* Setup minikube: `make minikube-setup`
-* Deploy to minikube: `make minikube-operator-deploy`
-* View operator logs: `make minikube-operator-logs`
+## Create new release
+
+```bash
+./advance-version.sh
+git commit -am "Bump version"
+make docker-push
+```

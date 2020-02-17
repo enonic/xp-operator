@@ -24,11 +24,11 @@ public abstract class KubeCmdConfigMaps
     }
 
     @Override
-    protected void create( final ConfigMap resource )
+    protected void createOrReplace( final ConfigMap resource )
     {
         clients().getDefaultClient().configMaps().
             inNamespace( resource.getMetadata().getNamespace() ).
-            create( resource );
+            createOrReplace( resource );
     }
 
     @Override

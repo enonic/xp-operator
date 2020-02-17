@@ -16,6 +16,7 @@ import com.enonic.ec.kubernetes.operator.common.commands.ImmutableCombinedComman
 import com.enonic.ec.kubernetes.operator.helm.Chart;
 import com.enonic.ec.kubernetes.operator.helm.Helm;
 import com.enonic.ec.kubernetes.operator.kubectl.ImmutableKubeCmd;
+import com.enonic.ec.kubernetes.operator.kubectl.base.ImmutableKubeCommandOptions;
 import com.enonic.ec.kubernetes.operator.operators.common.clients.Clients;
 
 @Value.Immutable
@@ -69,7 +70,9 @@ public abstract class HelmKubeCmdBuilder
                     clients( clients() ).
                     namespace( namespace() ).
                     resource( r.getValue() ).
-                    neverOverwrite( neverOverwrite( r.getValue().getMetadata().getAnnotations() ) ).
+                    options( ImmutableKubeCommandOptions.builder().
+                        neverOverwrite( neverOverwrite( r.getValue().getMetadata().getAnnotations() ) ).
+                        build() ).
                     build().
                     delete( commandBuilder );
             }
@@ -80,7 +83,9 @@ public abstract class HelmKubeCmdBuilder
                 clients( clients() ).
                 namespace( namespace() ).
                 resource( r.getValue() ).
-                neverOverwrite( neverOverwrite( r.getValue().getMetadata().getAnnotations() ) ).
+                options( ImmutableKubeCommandOptions.builder().
+                    neverOverwrite( neverOverwrite( r.getValue().getMetadata().getAnnotations() ) ).
+                    build() ).
                 build().
                 apply( commandBuilder );
         }

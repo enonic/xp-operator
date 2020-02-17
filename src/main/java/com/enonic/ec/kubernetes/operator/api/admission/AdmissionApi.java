@@ -29,12 +29,16 @@ import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha1.app.V1alpha1Xp7App;
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.config.V1alpha2Xp7Config;
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.deployment.V1alpha2Xp7Deployment;
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHost;
+import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHostSpecMapping;
 import com.enonic.ec.kubernetes.operator.operators.common.cache.Caches;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7app.info.ImmutableInfoXp7App;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7config.info.ImmutableInfoXp7Config;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7config.info.InfoXp7Config;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7deployment.info.ImmutableInfoXp7Deployment;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7vhost.info.ImmutableInfoXp7VHost;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7vhost.info.InfoXp7VHost;
+
+import static com.enonic.ec.kubernetes.operator.common.Configuration.cfgStr;
 
 @ApplicationScoped
 @Path("/apis/operator.enonic.cloud/v1alpha1")
@@ -133,6 +137,17 @@ public class AdmissionApi
             oldResource( Optional.ofNullable( review.getRequest().getOldObject() ).map( obj -> (V1alpha2Xp7VHost) obj ) ).
             newResource( Optional.ofNullable( review.getRequest().getObject() ).map( obj -> (V1alpha2Xp7VHost) obj ) ).
             build();
+
+        for ( V1alpha2Xp7VHostSpecMapping mapping : vHost.resource().getSpec().mappings() )
+        {
+            if ( !cfgStr( "operator.deployment.xp.allNodesKey" ).equals( mapping.nodeGroup() ) )
+            {
+                Preconditions.checkState( vHost.deploymentInfo().resource().getSpec().nodeGroups().containsKey( mapping.nodeGroup() ),
+                                          String.format( "Xp7Deployment '%s' does not contain nodeGroup '%s'",
+                                                         vHost.deploymentInfo().deploymentName(), mapping.nodeGroup() ) );
+            }
+        }
+
         if ( !vHost.resource().getSpec().skipIngress() )
         {
             long sameHost = caches.getVHostCache().getCollection().stream().
@@ -146,11 +161,19 @@ public class AdmissionApi
 
     private void xpConfigReview( final AdmissionReview review )
     {
-        ImmutableInfoXp7Config.builder().
+        InfoXp7Config config = ImmutableInfoXp7Config.builder().
             caches( caches ).
             oldResource( Optional.ofNullable( review.getRequest().getOldObject() ).map( obj -> (V1alpha2Xp7Config) obj ) ).
             newResource( Optional.ofNullable( review.getRequest().getObject() ).map( obj -> (V1alpha2Xp7Config) obj ) ).
             build();
+
+        if ( !cfgStr( "operator.deployment.xp.allNodesKey" ).equals( config.resource().getSpec().nodeGroup() ) )
+        {
+            String nodeGroup = config.resource().getSpec().nodeGroup();
+            Preconditions.checkState( config.deploymentInfo().resource().getSpec().nodeGroups().containsKey( nodeGroup ),
+                                      String.format( "Xp7Deployment '%s' does not contain nodeGroup '%s'",
+                                                     config.deploymentInfo().deploymentName(), nodeGroup ) );
+        }
     }
 
     private void xpAppReview( final AdmissionReview review )

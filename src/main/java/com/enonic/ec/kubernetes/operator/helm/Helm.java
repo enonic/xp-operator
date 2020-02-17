@@ -184,7 +184,15 @@ public class Helm
         throws IOException
     {
         File tmp = File.createTempFile( "operator", ".yaml" );
-        objectMapper.writeValue( tmp, values );
+        try
+        {
+            objectMapper.writeValue( tmp, values );
+        }
+        catch ( IOException e )
+        {
+            log.error( "Unable to create values file", e );
+            throw e;
+        }
         return tmp;
     }
 }

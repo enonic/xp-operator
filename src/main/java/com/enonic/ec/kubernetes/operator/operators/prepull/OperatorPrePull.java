@@ -28,7 +28,7 @@ public class OperatorPrePull
     {
         if ( imageVersionPrePull.size() > 0 && !imageVersionPrePull.get( 0 ).equals( " " ) )
         {
-            runCommands( commandBuilder -> ImmutableCommandPrePullImages.builder().
+            runCommands( createCmdId(), commandBuilder -> ImmutableCommandPrePullImages.builder().
                 clients( clients ).
                 addAllVersions( imageVersionPrePull ).
                 build().

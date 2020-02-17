@@ -23,11 +23,11 @@ public abstract class KubeCmdV1alpha1Xp7Apps
     }
 
     @Override
-    protected void create( final V1alpha1Xp7App resource )
+    protected void createOrReplace( final V1alpha1Xp7App resource )
     {
         clients().getAppClient().
             inNamespace( resource.getMetadata().getNamespace() ).
-            create( resource );
+            createOrReplace( resource );
     }
 
     @Override

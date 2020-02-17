@@ -23,6 +23,7 @@ public class ConfigCache
     @Inject
     public ConfigCache( Clients clients )
     {
+        super( 3 );
         this.clients = clients;
     }
 

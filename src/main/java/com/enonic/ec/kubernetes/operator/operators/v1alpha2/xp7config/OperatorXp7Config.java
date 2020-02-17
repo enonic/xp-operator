@@ -1,6 +1,7 @@
 package com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7config;
 
 import java.util.Optional;
+import java.util.concurrent.locks.Lock;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -9,10 +10,11 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.util.concurrent.Striped;
+
 import io.fabric8.kubernetes.client.Watcher;
 import io.quarkus.runtime.StartupEvent;
 
-import com.enonic.ec.kubernetes.operator.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.config.V1alpha2Xp7Config;
 import com.enonic.ec.kubernetes.operator.operators.common.OperatorNamespaced;
 import com.enonic.ec.kubernetes.operator.operators.common.ResourceInfoNamespaced;
@@ -28,6 +30,8 @@ public class OperatorXp7Config
 {
     private static final Logger log = LoggerFactory.getLogger( OperatorXp7Config.class );
 
+    private static final Striped<Lock> locks = Striped.lock( 10 );
+
     @Inject
     Clients clients;
 
@@ -39,11 +43,13 @@ public class OperatorXp7Config
         new Thread( () -> stallAndRunCommands( 1000L, () -> {
             log.info( "Started listening for Xp7Config events" );
             caches.getConfigCache().addWatcher( this::watchXpConfig );
+//            log.info( "Started listening for ConfigMap events" );
+//            caches.getConfigMapCache().addWatcher( this::watchConfigMap );
         } ) ).start();
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private void watchXpConfig( final Watcher.Action action, final String s, final Optional<V1alpha2Xp7Config> oldResource,
+    private void watchXpConfig( final Watcher.Action action, final String id, final Optional<V1alpha2Xp7Config> oldResource,
                                 final Optional<V1alpha2Xp7Config> newResource )
     {
         Optional<ResourceInfoNamespaced<V1alpha2Xp7Config, DiffXp7Config>> i = getInfo( action, () -> ImmutableInfoXp7Config.builder().
@@ -53,22 +59,49 @@ public class OperatorXp7Config
             build() );
 
         i.ifPresent( info -> {
-            log.info( String.format( "Xp7Config '%s' %s", info.resource().getMetadata().getName(), action ) );
+            String cmdId = createCmdId();
+            logEvent( log, cmdId, info.resource(), action );
 
-            // Because multiple configs could potentially be deployed at the same time,
-            // lets use the stall function to let them accumulate before we update config
-            stallAndRunCommands( 1500L, ( commandBuilder ) -> createCommands( commandBuilder, info ) );
+            runCommands( cmdId, ( commandBuilder ) -> ImmutableCommandConfigMapUpdateAll.builder().
+                clients( clients ).
+                caches( caches ).
+                info( info ).
+                locks( locks ).
+                build().
+                addCommands( commandBuilder ) );
         } );
     }
 
-    private void createCommands( ImmutableCombinedCommand.Builder commandBuilder,
-                                 ResourceInfoNamespaced<V1alpha2Xp7Config, DiffXp7Config> info )
-    {
-        ImmutableCommandConfigMapUpdateAll.builder().
-            clients( clients ).
-            caches( caches ).
-            info( info ).
-            build().
-            addCommands( commandBuilder );
-    }
+//    private void watchConfigMap( final Watcher.Action action, final String id, final Optional<ConfigMap> oldResource,
+//                                 final Optional<ConfigMap> newResource )
+//    {
+//        // This is to make sure that the config map is in sync with the Xp7Configs
+//        newResource.ifPresent( oldConfigMap -> {
+//            String cmdId = createCmdId();
+//            stallAndRunCommands( "", 60000L, cmdId, commandBuilder -> {
+//                // Fetch from the cache status of the config map
+//                caches.getConfigMapCache().
+//                    get( oldConfigMap.getMetadata().getNamespace(), oldConfigMap.getMetadata().getName() ).
+//                    ifPresent( configMap -> {
+//                        log.info( String.format( "%s: In NS '%s' ensuring ConfigMap '%s' consistency", cmdId,
+//                                                 configMap.getMetadata().getNamespace(), configMap.getMetadata().getName() ) );
+//
+//                        // Get all relevant XpConfig for this ConfigMap
+//                        List<V1alpha2Xp7Config> allXpConfigs = ImmutableRelevantXp7Config.builder().
+//                            caches( caches ).
+//                            configMap( configMap ).
+//                            build().
+//                            xp7Configs();
+//
+//                        // Update ConfigMap
+//                        ImmutableCommandConfigMapUpdate.builder().
+//                            clients( clients ).
+//                            configMap( configMap ).
+//                            xpConfigResources( allXpConfigs ).
+//                            build().
+//                            addCommands( commandBuilder );
+//                    } );
+//            } );
+//        } );
+//    }
 }

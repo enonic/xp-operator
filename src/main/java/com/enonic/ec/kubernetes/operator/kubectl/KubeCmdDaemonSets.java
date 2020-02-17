@@ -23,11 +23,11 @@ public abstract class KubeCmdDaemonSets
     }
 
     @Override
-    protected void create( final DaemonSet resource )
+    protected void createOrReplace( final DaemonSet resource )
     {
         clients().getDefaultClient().apps().daemonSets().
             inNamespace( resource.getMetadata().getNamespace() ).
-            create( resource );
+            createOrReplace( resource );
     }
 
     @Override

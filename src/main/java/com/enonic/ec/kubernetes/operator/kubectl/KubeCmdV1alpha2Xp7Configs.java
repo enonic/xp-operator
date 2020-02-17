@@ -23,11 +23,11 @@ public abstract class KubeCmdV1alpha2Xp7Configs
     }
 
     @Override
-    protected void create( final V1alpha2Xp7Config resource )
+    protected void createOrReplace( final V1alpha2Xp7Config resource )
     {
         clients().getConfigClient().
             inNamespace( resource.getMetadata().getNamespace() ).
-            create( resource );
+            createOrReplace( resource );
     }
 
     @Override

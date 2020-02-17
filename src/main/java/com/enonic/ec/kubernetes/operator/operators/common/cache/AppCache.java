@@ -23,6 +23,7 @@ public class AppCache
     @Inject
     public AppCache( Clients clients )
     {
+        super( 3 );
         this.clients = clients;
     }
 

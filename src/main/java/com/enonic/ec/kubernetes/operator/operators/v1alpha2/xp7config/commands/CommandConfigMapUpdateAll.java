@@ -8,20 +8,21 @@ import org.immutables.value.Value;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 
-import com.enonic.ec.kubernetes.operator.common.Configuration;
-import com.enonic.ec.kubernetes.operator.common.commands.CombinedCommandBuilder;
+import com.enonic.ec.kubernetes.operator.common.commands.CombinedCommandBuilderStripeLock;
 import com.enonic.ec.kubernetes.operator.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.config.V1alpha2Xp7Config;
 import com.enonic.ec.kubernetes.operator.operators.common.ResourceInfoNamespaced;
 import com.enonic.ec.kubernetes.operator.operators.common.cache.Caches;
 import com.enonic.ec.kubernetes.operator.operators.common.clients.Clients;
+import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7config.helpers.ImmutableRelevantXp7Config;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7config.info.DiffXp7Config;
+
+import static com.enonic.ec.kubernetes.operator.common.Configuration.cfgStr;
 
 
 @Value.Immutable
 public abstract class CommandConfigMapUpdateAll
-    extends Configuration
-    implements CombinedCommandBuilder
+    extends CombinedCommandBuilderStripeLock
 {
     protected abstract Clients clients();
 
@@ -30,13 +31,17 @@ public abstract class CommandConfigMapUpdateAll
     protected abstract ResourceInfoNamespaced<V1alpha2Xp7Config, DiffXp7Config> info();
 
     @Override
-    public void addCommands( final ImmutableCombinedCommand.Builder commandBuilder )
+    public void synchronizedAddCommands( final ImmutableCombinedCommand.Builder commandBuilder )
     {
         // Iterate over config maps relevant to this XpConfig change
         for ( ConfigMap configMap : getRelevantConfigMaps( info().resource() ) )
         {
             // Get all relevant XpConfig for this ConfigMap
-            List<V1alpha2Xp7Config> allXpConfigs = getRelevantXpConfig( configMap );
+            List<V1alpha2Xp7Config> allXpConfigs = ImmutableRelevantXp7Config.builder().
+                caches( caches() ).
+                configMap( configMap ).
+                build().
+                xp7Configs();
 
             // Update ConfigMap
             ImmutableCommandConfigMapUpdate.builder().
@@ -71,21 +76,9 @@ public abstract class CommandConfigMapUpdateAll
             collect( Collectors.toList() );
     }
 
-    private List<V1alpha2Xp7Config> getRelevantXpConfig( final ConfigMap configMap )
+    @Override
+    protected String produceLockKey()
     {
-        // Filter by ConfigMap predicate
-        Predicate<V1alpha2Xp7Config> filter = c -> {
-            if ( c.getSpec().nodeGroup().equals( cfgStr( "operator.deployment.xp.allNodesKey" ) ) )
-            {
-                // Apply to all nodes (config maps)
-                return true;
-            }
-            // Filter by node (config map) name
-            return c.getSpec().nodeGroup().equals( configMap.getMetadata().getName() );
-        };
-
-        return caches().getConfigCache().getByNamespace( info().deploymentInfo().namespaceName() ).
-            filter( filter ).
-            collect( Collectors.toList() );
+        return info().deploymentInfo().deploymentName();
     }
 }

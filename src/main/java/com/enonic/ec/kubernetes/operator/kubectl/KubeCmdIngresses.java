@@ -24,11 +24,11 @@ public abstract class KubeCmdIngresses
     }
 
     @Override
-    protected void create( final Ingress resource )
+    protected void createOrReplace( final Ingress resource )
     {
         clients().getDefaultClient().extensions().ingresses().
             inNamespace( resource.getMetadata().getNamespace() ).
-            create( resource );
+            createOrReplace( resource );
     }
 
     @Override

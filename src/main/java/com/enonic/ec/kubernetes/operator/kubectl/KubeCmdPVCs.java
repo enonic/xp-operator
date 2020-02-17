@@ -25,11 +25,11 @@ public abstract class KubeCmdPVCs
     }
 
     @Override
-    protected void create( final PersistentVolumeClaim resource )
+    protected void createOrReplace( final PersistentVolumeClaim resource )
     {
         clients().getDefaultClient().persistentVolumeClaims().
             inNamespace( resource.getMetadata().getNamespace() ).
-            create( resource );
+            createOrReplace( resource );
     }
 
     @Override

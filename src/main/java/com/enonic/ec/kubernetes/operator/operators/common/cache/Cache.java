@@ -31,9 +31,9 @@ public abstract class Cache<T extends HasMetadata, L extends KubernetesResourceL
 
     private final List<OnAction<T>> watchers;
 
-    Cache()
+    Cache( int threadPoolSize )
     {
-        executor = Executors.newSingleThreadExecutor();
+        executor = Executors.newFixedThreadPool( threadPoolSize );
         watchers = new LinkedList<>();
         cache = new HashMap<>();
     }

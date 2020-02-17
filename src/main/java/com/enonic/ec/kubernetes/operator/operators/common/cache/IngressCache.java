@@ -23,6 +23,7 @@ public class IngressCache
     @Inject
     public IngressCache( Clients clients )
     {
+        super( 1 );
         this.clients = clients;
     }
 

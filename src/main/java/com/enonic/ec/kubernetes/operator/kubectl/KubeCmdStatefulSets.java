@@ -1,5 +1,6 @@
 package com.enonic.ec.kubernetes.operator.kubectl;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import org.immutables.value.Value;
@@ -23,11 +24,11 @@ public abstract class KubeCmdStatefulSets
     }
 
     @Override
-    protected void create( final StatefulSet resource )
+    protected void createOrReplace( final StatefulSet resource )
     {
         clients().getDefaultClient().apps().statefulSets().
             inNamespace( resource.getMetadata().getNamespace() ).
-            create( resource );
+            createOrReplace( resource );
     }
 
     @Override
@@ -51,7 +52,8 @@ public abstract class KubeCmdStatefulSets
     @Override
     protected boolean equalsSpec( final StatefulSet o, final StatefulSet n )
     {
-        // TODO: Compare Specs
-        return super.equalsSpec( o, n );
+        // Remove volume status, that is not relevant
+        o.getSpec().getVolumeClaimTemplates().forEach( t -> t.setStatus( null ) );
+        return Objects.equals( o.getSpec(), n.getSpec() );
     }
 }

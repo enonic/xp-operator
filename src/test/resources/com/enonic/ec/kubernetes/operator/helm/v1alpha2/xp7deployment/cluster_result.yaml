@@ -267,6 +267,7 @@ metadata:
 spec:
   podManagementPolicy: "Parallel"
   replicas: 2
+  revisionHistoryLimit: 10
   selector:
     matchLabels:
       nodeGroup: "data"
@@ -358,6 +359,8 @@ spec:
             - "ALL"
           runAsNonRoot: true
           runAsUser: 1337
+        terminationMessagePath: "/dev/termination-log"
+        terminationMessagePolicy: "File"
         volumeMounts:
         - mountPath: "/enonic-xp/home/config"
           name: "config"
@@ -380,27 +383,42 @@ spec:
         image: "7.1.2"
         imagePullPolicy: "IfNotPresent"
         name: "configure-sysctl"
+        resources: {}
         securityContext:
           privileged: true
           runAsUser: 0
+        terminationMessagePath: "/dev/termination-log"
+        terminationMessagePolicy: "File"
       - command:
         - "ash"
         - "-c"
-        - "x=\"0\"; while [ \"$x\" == \"0\" ]; do nslookup master-0.all && nslookup\
-          \ master-1.all && nslookup master-2.all && x=\"1\"; sleep 2; done"
+        - "sleep 5; x=\"0\"; while [ \"$x\" == \"0\" ]; do nslookup ${XP_NODE_NAME}.all\
+          \ && x=\"1\"; sleep 2; done"
+        env:
+        - name: "XP_NODE_NAME"
+          valueFrom:
+            fieldRef:
+              apiVersion: "v1"
+              fieldPath: "metadata.name"
         image: "alpine:3.10"
         imagePullPolicy: "IfNotPresent"
         name: "wait-for-dns"
+        resources: {}
+        terminationMessagePath: "/dev/termination-log"
+        terminationMessagePolicy: "File"
       restartPolicy: "Always"
+      schedulerName: "default-scheduler"
       securityContext:
         fsGroup: 0
         runAsUser: 1337
       terminationGracePeriodSeconds: 30
       volumes:
       - configMap:
+          defaultMode: 420
           name: "data"
         name: "config"
       - configMap:
+          defaultMode: 420
           name: "extra-config"
         name: "extra-config"
       - name: "blobstore"
@@ -429,6 +447,7 @@ spec:
         requests:
           storage: "4Gi"
       storageClassName: "standard"
+      volumeMode: "Filesystem"
   - apiVersion: "v1"
     kind: "PersistentVolumeClaim"
     metadata:
@@ -446,6 +465,7 @@ spec:
         requests:
           storage: "5Gi"
       storageClassName: "standard"
+      volumeMode: "Filesystem"
 ---
 apiVersion: "apps/v1"
 kind: "StatefulSet"
@@ -460,6 +480,7 @@ metadata:
 spec:
   podManagementPolicy: "Parallel"
   replicas: 3
+  revisionHistoryLimit: 10
   selector:
     matchLabels:
       nodeGroup: "frontend"
@@ -558,6 +579,8 @@ spec:
             - "ALL"
           runAsNonRoot: true
           runAsUser: 1337
+        terminationMessagePath: "/dev/termination-log"
+        terminationMessagePolicy: "File"
         volumeMounts:
         - mountPath: "/enonic-xp/home/config"
           name: "config"
@@ -580,27 +603,42 @@ spec:
         image: "7.1.2"
         imagePullPolicy: "IfNotPresent"
         name: "configure-sysctl"
+        resources: {}
         securityContext:
           privileged: true
           runAsUser: 0
+        terminationMessagePath: "/dev/termination-log"
+        terminationMessagePolicy: "File"
       - command:
         - "ash"
         - "-c"
-        - "x=\"0\"; while [ \"$x\" == \"0\" ]; do nslookup master-0.all && nslookup\
-          \ master-1.all && nslookup master-2.all && x=\"1\"; sleep 2; done"
+        - "sleep 5; x=\"0\"; while [ \"$x\" == \"0\" ]; do nslookup ${XP_NODE_NAME}.all\
+          \ && x=\"1\"; sleep 2; done"
+        env:
+        - name: "XP_NODE_NAME"
+          valueFrom:
+            fieldRef:
+              apiVersion: "v1"
+              fieldPath: "metadata.name"
         image: "alpine:3.10"
         imagePullPolicy: "IfNotPresent"
         name: "wait-for-dns"
+        resources: {}
+        terminationMessagePath: "/dev/termination-log"
+        terminationMessagePolicy: "File"
       restartPolicy: "Always"
+      schedulerName: "default-scheduler"
       securityContext:
         fsGroup: 0
         runAsUser: 1337
       terminationGracePeriodSeconds: 30
       volumes:
       - configMap:
+          defaultMode: 420
           name: "frontend"
         name: "config"
       - configMap:
+          defaultMode: 420
           name: "extra-config"
         name: "extra-config"
       - name: "blobstore"
@@ -629,6 +667,7 @@ spec:
         requests:
           storage: "6Gi"
       storageClassName: "standard"
+      volumeMode: "Filesystem"
   - apiVersion: "v1"
     kind: "PersistentVolumeClaim"
     metadata:
@@ -646,6 +685,7 @@ spec:
         requests:
           storage: "7Gi"
       storageClassName: "standard"
+      volumeMode: "Filesystem"
 ---
 apiVersion: "apps/v1"
 kind: "StatefulSet"
@@ -660,6 +700,7 @@ metadata:
 spec:
   podManagementPolicy: "Parallel"
   replicas: 3
+  revisionHistoryLimit: 10
   selector:
     matchLabels:
       nodeGroup: "master"
@@ -756,6 +797,8 @@ spec:
             - "ALL"
           runAsNonRoot: true
           runAsUser: 1337
+        terminationMessagePath: "/dev/termination-log"
+        terminationMessagePolicy: "File"
         volumeMounts:
         - mountPath: "/enonic-xp/home/config"
           name: "config"
@@ -776,27 +819,42 @@ spec:
         image: "7.1.2"
         imagePullPolicy: "IfNotPresent"
         name: "configure-sysctl"
+        resources: {}
         securityContext:
           privileged: true
           runAsUser: 0
+        terminationMessagePath: "/dev/termination-log"
+        terminationMessagePolicy: "File"
       - command:
         - "ash"
         - "-c"
-        - "x=\"0\"; while [ \"$x\" == \"0\" ]; do nslookup master-0.all && nslookup\
-          \ master-1.all && nslookup master-2.all && x=\"1\"; sleep 2; done"
+        - "sleep 5; x=\"0\"; while [ \"$x\" == \"0\" ]; do nslookup ${XP_NODE_NAME}.all\
+          \ && x=\"1\"; sleep 2; done"
+        env:
+        - name: "XP_NODE_NAME"
+          valueFrom:
+            fieldRef:
+              apiVersion: "v1"
+              fieldPath: "metadata.name"
         image: "alpine:3.10"
         imagePullPolicy: "IfNotPresent"
         name: "wait-for-dns"
+        resources: {}
+        terminationMessagePath: "/dev/termination-log"
+        terminationMessagePolicy: "File"
       restartPolicy: "Always"
+      schedulerName: "default-scheduler"
       securityContext:
         fsGroup: 0
         runAsUser: 1337
       terminationGracePeriodSeconds: 30
       volumes:
       - configMap:
+          defaultMode: 420
           name: "master"
         name: "config"
       - configMap:
+          defaultMode: 420
           name: "extra-config"
         name: "extra-config"
       - name: "blobstore"
@@ -825,6 +883,7 @@ spec:
         requests:
           storage: "3Gi"
       storageClassName: "standard"
+      volumeMode: "Filesystem"
 ---
 kind: "Xp7App"
 apiVersion: "enonic.cloud/v1alpha1"

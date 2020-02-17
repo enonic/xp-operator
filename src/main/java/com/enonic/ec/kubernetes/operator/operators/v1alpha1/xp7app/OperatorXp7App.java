@@ -1,6 +1,7 @@
 package com.enonic.ec.kubernetes.operator.operators.v1alpha1.xp7app;
 
 import java.util.Optional;
+import java.util.concurrent.locks.Lock;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -9,10 +10,11 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.util.concurrent.Striped;
+
 import io.fabric8.kubernetes.client.Watcher;
 import io.quarkus.runtime.StartupEvent;
 
-import com.enonic.ec.kubernetes.operator.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha1.app.V1alpha1Xp7App;
 import com.enonic.ec.kubernetes.operator.operators.common.OperatorNamespaced;
 import com.enonic.ec.kubernetes.operator.operators.common.ResourceInfoNamespaced;
@@ -27,6 +29,8 @@ public class OperatorXp7App
     extends OperatorNamespaced
 {
     private static final Logger log = LoggerFactory.getLogger( OperatorXp7App.class );
+
+    private static final Striped<Lock> locks = Striped.lock( 10 );
 
     @Inject
     Caches caches;
@@ -54,21 +58,16 @@ public class OperatorXp7App
             build() );
 
         i.ifPresent( info -> {
-            log.info( String.format( "Xp7App '%s' %s", info.resource().getMetadata().getName(), action ) );
+            String cmdId = createCmdId();
+            logEvent( log, cmdId, info.resource(), action );
 
-            // Because multiple apps could potentially be deployed at the same time, lets use
-            // the stall function to let them accumulate in the cache before we update config
-            stallAndRunCommands( 500L, ( commandBuilder ) -> createCommands( commandBuilder, info ) );
+            runCommands( cmdId, commandBuilder -> ImmutableCommandXpAppsApply.builder().
+                clients( clients ).
+                caches( caches ).
+                info( info ).
+                locks( locks ).
+                build().
+                addCommands( commandBuilder ) );
         } );
-    }
-
-    private void createCommands( ImmutableCombinedCommand.Builder commandBuilder, ResourceInfoNamespaced<V1alpha1Xp7App, DiffXp7App> info )
-    {
-        ImmutableCommandXpAppsApply.builder().
-            clients( clients ).
-            caches( caches ).
-            info( info ).
-            build().
-            addCommands( commandBuilder );
     }
 }

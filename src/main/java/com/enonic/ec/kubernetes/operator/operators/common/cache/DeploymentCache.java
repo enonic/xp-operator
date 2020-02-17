@@ -23,6 +23,7 @@ public class DeploymentCache
     @Inject
     public DeploymentCache( Clients clients )
     {
+        super( 1 );
         this.clients = clients;
     }
 

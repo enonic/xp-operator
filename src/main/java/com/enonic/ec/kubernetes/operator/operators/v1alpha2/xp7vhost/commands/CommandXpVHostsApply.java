@@ -8,8 +8,7 @@ import java.util.Map;
 
 import org.immutables.value.Value;
 
-import com.enonic.ec.kubernetes.operator.common.Configuration;
-import com.enonic.ec.kubernetes.operator.common.commands.CombinedCommandBuilder;
+import com.enonic.ec.kubernetes.operator.common.commands.CombinedCommandBuilderStripeLock;
 import com.enonic.ec.kubernetes.operator.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHost;
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHostSpecMapping;
@@ -20,10 +19,12 @@ import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7vhost.helpers.Imm
 import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7vhost.helpers.Mapping;
 import com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7vhost.info.DiffXp7VHost;
 
+import static com.enonic.ec.kubernetes.operator.common.Configuration.cfgStr;
+import static com.enonic.ec.kubernetes.operator.common.Configuration.cfgStrFmt;
+
 @Value.Immutable
 public abstract class CommandXpVHostsApply
-    extends Configuration
-    implements CombinedCommandBuilder
+    extends CombinedCommandBuilderStripeLock
 {
     protected abstract Clients clients();
 
@@ -32,7 +33,7 @@ public abstract class CommandXpVHostsApply
     protected abstract ResourceInfoNamespaced<V1alpha2Xp7VHost, DiffXp7VHost> info();
 
     @Override
-    public void addCommands( final ImmutableCombinedCommand.Builder commandBuilder )
+    public void synchronizedAddCommands( final ImmutableCombinedCommand.Builder commandBuilder )
     {
         // Iterate over each node mapping
         for ( Map.Entry<String, List<Mapping>> e : getNodeMappings( info() ).entrySet() )
@@ -101,5 +102,11 @@ public abstract class CommandXpVHostsApply
         res.put( m.idProviders().defaultIdProvider(), "default" );
         m.idProviders().enabled().forEach( s -> res.put( s, "enabled" ) );
         return res;
+    }
+
+    @Override
+    protected String produceLockKey()
+    {
+        return info().deploymentInfo().deploymentName();
     }
 }

@@ -17,12 +17,13 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
 
+import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.kubernetes.client.Watcher;
 import io.quarkus.runtime.StartupEvent;
 
-import com.enonic.ec.kubernetes.operator.common.Configuration;
 import com.enonic.ec.kubernetes.operator.common.commands.ImmutableCombinedCommand;
+import com.enonic.ec.kubernetes.operator.operators.common.Operator;
 import com.enonic.ec.kubernetes.operator.operators.common.cache.Caches;
 import com.enonic.ec.kubernetes.operator.operators.dns.cloudflare.DnsRecordService;
 import com.enonic.ec.kubernetes.operator.operators.dns.commands.ImmutableDnsApplyIngress;
@@ -35,7 +36,7 @@ import com.enonic.ec.kubernetes.operator.operators.dns.model.ImmutableDomain;
 
 @ApplicationScoped
 public class OperatorDns
-    extends Configuration
+    extends Operator
 {
     private final static Logger log = LoggerFactory.getLogger( OperatorDns.class );
 
@@ -66,7 +67,10 @@ public class OperatorDns
             domain( cfgStr( "dns.domain." + k ) ).
             build() ).collect( Collectors.toList() );
 
-        caches.getIngressCache().addWatcher( this::watchIngress );
+        new Thread( () -> stallAndRunCommands( 1000L, () -> {
+            log.info( "Started listening for Ingress events" );
+            caches.getIngressCache().addWatcher( this::watchIngress );
+        } ) ).start();
     }
 
     @SuppressWarnings({"UnstableApiUsage", "OptionalUsedAsFieldOrParameterType"})
@@ -84,14 +88,18 @@ public class OperatorDns
                 build() ) ).
             build();
 
-        ImmutableCombinedCommand.Builder commandBuilder = ImmutableCombinedCommand.builder();
+        HasMetadata resource = newIngress.orElse( oldIngress.orElse( null ) );
+
+        String ingressName = resource.getMetadata().getName();
+
+        String cmdId = createCmdId();
+        logEvent( log, cmdId, resource, action );
+        log.info( String.format( "%s: Trigger Ingress '%s' %s", cmdId, ingressName, action ) );
+
+        ImmutableCombinedCommand.Builder commandBuilder = ImmutableCombinedCommand.builder().id( cmdId );
 
         try
         {
-            String ingressName = newIngress.
-                map( r -> r.getMetadata().getName() ).
-                orElse( oldIngress.map( r -> r.getMetadata().getName() ).orElse( null ) );
-
             // Note: By changing this dnsId older managed records will stop working
             String dnsId = Hashing.sha512().hashString( ingressName, Charsets.UTF_8 ).toString().substring( 0, 16 );
 

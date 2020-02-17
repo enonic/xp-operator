@@ -1,4 +1,4 @@
-testResult: "XpDeployment 'mycloud-myproject-qaxp' does not contain node 'wrong'"
+testResult: "Xp7Deployment 'mycloud-myproject-qaxp' does not contain nodeGroup 'wrong'"
 testReview:
   request:
     operation: CREATE

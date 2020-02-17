@@ -24,11 +24,11 @@ public abstract class KubeCmdSecrets
     }
 
     @Override
-    protected void create( final Secret resource )
+    protected void createOrReplace( final Secret resource )
     {
         clients().getDefaultClient().secrets().
             inNamespace( resource.getMetadata().getNamespace() ).
-            create( resource );
+            createOrReplace( resource );
     }
 
     @Override

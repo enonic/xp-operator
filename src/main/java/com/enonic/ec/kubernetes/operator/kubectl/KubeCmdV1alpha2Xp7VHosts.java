@@ -23,11 +23,11 @@ public abstract class KubeCmdV1alpha2Xp7VHosts
     }
 
     @Override
-    protected void create( final V1alpha2Xp7VHost resource )
+    protected void createOrReplace( final V1alpha2Xp7VHost resource )
     {
         clients().getVHostClient().
             inNamespace( resource.getMetadata().getNamespace() ).
-            create( resource );
+            createOrReplace( resource );
     }
 
     @Override
