@@ -64,14 +64,12 @@ public class OperatorXp7Deployments
 
     void onStartup( @Observes StartupEvent _ev )
     {
-        new Thread( () -> stallAndRunCommands( 1000L, () -> {
-            log.info( "Started listening for Xp7Deployment events" );
-            caches.getDeploymentCache().addWatcher( this::watch );
-        } ) ).start();
+        log.info( "Started listening for Xp7Deployment events" );
+        caches.getDeploymentCache().addWatcher( this::watch );
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private void watch( final Watcher.Action action, final String id, final Optional<V1alpha2Xp7Deployment> oldResource,
+    private void watch( final String actionId, final Watcher.Action action, final Optional<V1alpha2Xp7Deployment> oldResource,
                         final Optional<V1alpha2Xp7Deployment> newResource )
     {
         InfoXp7Deployment info = ImmutableInfoXp7Deployment.builder().
@@ -79,10 +77,7 @@ public class OperatorXp7Deployments
             newResource( newResource ).
             build();
 
-        String cmdId = createCmdId();
-        logEvent( log, cmdId, info.resource(), action );
-
-        runCommands( cmdId, commandBuilder -> {
+        runCommands( actionId, commandBuilder -> {
             if ( action == Watcher.Action.DELETED )
             {
                 // Deployment namespace and all children will automatically be deleted

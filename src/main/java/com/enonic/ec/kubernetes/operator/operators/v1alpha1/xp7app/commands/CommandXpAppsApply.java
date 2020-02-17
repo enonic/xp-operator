@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 
 import org.immutables.value.Value;
 
-import com.enonic.ec.kubernetes.operator.common.commands.CombinedCommandBuilderStripeLock;
+import com.enonic.ec.kubernetes.operator.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.operator.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha1.app.V1alpha1Xp7App;
 import com.enonic.ec.kubernetes.operator.operators.common.ResourceInfoNamespaced;
@@ -18,7 +18,7 @@ import static com.enonic.ec.kubernetes.operator.common.Configuration.cfgStrFmt;
 
 @Value.Immutable
 public abstract class CommandXpAppsApply
-    extends CombinedCommandBuilderStripeLock
+    implements CombinedCommandBuilder
 {
     public abstract Clients clients();
 
@@ -27,7 +27,7 @@ public abstract class CommandXpAppsApply
     protected abstract ResourceInfoNamespaced<V1alpha1Xp7App, DiffXp7App> info();
 
     @Override
-    public void synchronizedAddCommands( final ImmutableCombinedCommand.Builder commandBuilder )
+    public void addCommands( final ImmutableCombinedCommand.Builder commandBuilder )
     {
         // Get all apps in namespace
         List<V1alpha1Xp7App> allApps =
@@ -44,11 +44,5 @@ public abstract class CommandXpAppsApply
             xpAppResources( allApps ).
             build().
             addCommands( commandBuilder );
-    }
-
-    @Override
-    protected String produceLockKey()
-    {
-        return info().deploymentInfo().deploymentName();
     }
 }

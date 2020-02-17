@@ -8,7 +8,7 @@ import org.immutables.value.Value;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 
-import com.enonic.ec.kubernetes.operator.common.commands.CombinedCommandBuilderStripeLock;
+import com.enonic.ec.kubernetes.operator.common.commands.CombinedCommandBuilder;
 import com.enonic.ec.kubernetes.operator.common.commands.ImmutableCombinedCommand;
 import com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.config.V1alpha2Xp7Config;
 import com.enonic.ec.kubernetes.operator.operators.common.ResourceInfoNamespaced;
@@ -22,7 +22,7 @@ import static com.enonic.ec.kubernetes.operator.common.Configuration.cfgStr;
 
 @Value.Immutable
 public abstract class CommandConfigMapUpdateAll
-    extends CombinedCommandBuilderStripeLock
+    implements CombinedCommandBuilder
 {
     protected abstract Clients clients();
 
@@ -31,7 +31,7 @@ public abstract class CommandConfigMapUpdateAll
     protected abstract ResourceInfoNamespaced<V1alpha2Xp7Config, DiffXp7Config> info();
 
     @Override
-    public void synchronizedAddCommands( final ImmutableCombinedCommand.Builder commandBuilder )
+    public void addCommands( final ImmutableCombinedCommand.Builder commandBuilder )
     {
         // Iterate over config maps relevant to this XpConfig change
         for ( ConfigMap configMap : getRelevantConfigMaps( info().resource() ) )
@@ -74,11 +74,5 @@ public abstract class CommandConfigMapUpdateAll
         return caches().getConfigMapCache().getByNamespace( info().deploymentInfo().namespaceName() ).
             filter( filter ).
             collect( Collectors.toList() );
-    }
-
-    @Override
-    protected String produceLockKey()
-    {
-        return info().deploymentInfo().deploymentName();
     }
 }

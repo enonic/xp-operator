@@ -23,7 +23,7 @@ public class ConfigMapCache
     @Inject
     public ConfigMapCache( Clients clients )
     {
-        super( 1 );
+        super( defaultExecutorService );
         this.clients = clients;
     }
 

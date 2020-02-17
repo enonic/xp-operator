@@ -23,7 +23,7 @@ public class ConfigCache
     @Inject
     public ConfigCache( Clients clients )
     {
-        super( 3 );
+        super( defaultExecutorService );
         this.clients = clients;
     }
 

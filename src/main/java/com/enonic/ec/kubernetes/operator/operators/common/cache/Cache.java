@@ -7,7 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.Executor;
+import java.util.UUID;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Stream;
 
@@ -25,15 +26,17 @@ public abstract class Cache<T extends HasMetadata, L extends KubernetesResourceL
 {
     private final static Logger log = LoggerFactory.getLogger( Cache.class );
 
-    protected final Map<String, HasMetadata> cache;
+    protected static final ExecutorService defaultExecutorService = Executors.newSingleThreadExecutor();
 
-    private final Executor executor;
+    protected final Map<String, HasMetadata> cache;
 
     private final List<OnAction<T>> watchers;
 
-    Cache( int threadPoolSize )
+    private final ExecutorService executorService;
+
+    Cache(ExecutorService executorService)
     {
-        executor = Executors.newFixedThreadPool( threadPoolSize );
+        this.executorService = executorService;
         watchers = new LinkedList<>();
         cache = new HashMap<>();
     }
@@ -56,6 +59,7 @@ public abstract class Cache<T extends HasMetadata, L extends KubernetesResourceL
         {
             String uid = resource.getMetadata().getUid();
             final Optional<T> oldResource = (Optional<T>) Optional.ofNullable( cache.get( uid ) );
+            final Optional<T> newResource = action == Watcher.Action.DELETED ? Optional.empty() : Optional.of( resource );
 
             if ( oldResource.isPresent() )
             {
@@ -73,14 +77,10 @@ public abstract class Cache<T extends HasMetadata, L extends KubernetesResourceL
             if ( action == Watcher.Action.ADDED || action == Watcher.Action.MODIFIED )
             {
                 cache.put( uid, resource );
-                watchers.forEach(
-                    watcher -> executor.execute( () -> watcher.accept( action, uid, oldResource, Optional.of( resource ) ) ) );
             }
             else if ( action == Watcher.Action.DELETED )
             {
                 cache.remove( uid );
-                watchers.forEach(
-                    watcher -> executor.execute( () -> watcher.accept( action, uid, Optional.of( resource ), Optional.empty() ) ) );
             }
             else
             {
@@ -90,6 +90,7 @@ public abstract class Cache<T extends HasMetadata, L extends KubernetesResourceL
                         resource.getMetadata().getName() );
                 System.exit( -1 );
             }
+            runExecutor( action, resource, oldResource, newResource );
         }
         catch ( Exception e )
         {
@@ -97,6 +98,25 @@ public abstract class Cache<T extends HasMetadata, L extends KubernetesResourceL
             log.error( "Something when terribly wrong", e );
             System.exit( -1 );
         }
+    }
+
+    private void runExecutor( final Watcher.Action action, final T resource, final Optional<T> oldResource, final Optional<T> newResource )
+    {
+        executorService.execute( () -> {
+            final String actionId = UUID.randomUUID().toString().substring( 0, 8 );
+            if ( resource.getMetadata().getNamespace() != null )
+            {
+                log.info(
+                    String.format( "%s: Event in NS '%s': %s '%s' %s", actionId, resource.getMetadata().getNamespace(), resource.getKind(),
+                                   resource.getMetadata().getName(), action ) );
+            }
+            else
+            {
+                log.info(
+                    String.format( "%s: Event: %s '%s' %s", actionId, resource.getKind(), resource.getMetadata().getName(), action ) );
+            }
+            watchers.forEach( watcher -> watcher.accept( actionId, action, oldResource, newResource ) );
+        } );
     }
 
     void watcherOnClose( final KubernetesClientException cause )

@@ -2,7 +2,6 @@ package com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7vhost;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.locks.Lock;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -11,8 +10,6 @@ import javax.inject.Named;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.util.concurrent.Striped;
 
 import io.fabric8.kubernetes.client.Watcher;
 import io.quarkus.runtime.StartupEvent;
@@ -35,8 +32,6 @@ public class OperatorXp7VHost
 {
     private static final Logger log = LoggerFactory.getLogger( OperatorXp7VHost.class );
 
-    private static final Striped<Lock> locks = Striped.lock( 10 );
-
     @Inject
     Clients clients;
 
@@ -56,14 +51,12 @@ public class OperatorXp7VHost
 
     void onStartup( @Observes StartupEvent _ev )
     {
-        new Thread( () -> stallAndRunCommands( 1000L, () -> {
-            log.info( "Started listening for Xp7VHost events" );
-            caches.getVHostCache().addWatcher( this::watchVHosts );
-        } ) ).start();
+        log.info( "Started listening for Xp7VHost events" );
+        caches.getVHostCache().addWatcher( this::watchVHosts );
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private void watchVHosts( final Watcher.Action action, final String s, final Optional<V1alpha2Xp7VHost> oldResource,
+    private void watchVHosts( final String actionId, final Watcher.Action action, final Optional<V1alpha2Xp7VHost> oldResource,
                               final Optional<V1alpha2Xp7VHost> newResource )
     {
         Optional<ResourceInfoNamespaced<V1alpha2Xp7VHost, DiffXp7VHost>> i = getInfo( action, () -> ImmutableInfoXp7VHost.builder().
@@ -73,38 +66,28 @@ public class OperatorXp7VHost
             build() );
 
         i.ifPresent( info -> {
-            String cmdId = createCmdId();
-            logEvent( log, cmdId, info.resource(), action );
-            createAndRunCommands( cmdId, info );
-        } );
-    }
+            runCommands( actionId, ( commandBuilder ) -> {
+                // Create ingress independent of config
+                ImmutableHelmKubeCmdBuilder.builder().
+                    clients( clients ).
+                    helm( helm ).
+                    chart( chartRepository.get( "v1alpha2/xp7vhost" ) ).
+                    namespace( info.deploymentInfo().namespaceName() ).
+                    valueBuilder( ImmutableXp7VHostValues.builder().
+                        baseValues( baseValues ).
+                        info( info ).
+                        build() ).
+                    build().
+                    addCommands( commandBuilder );
 
-    private void createAndRunCommands( String cmdId, ResourceInfoNamespaced<V1alpha2Xp7VHost, DiffXp7VHost> info )
-    {
-        // Create ingress independent of config
-        runCommands( cmdId, ( commandBuilder ) -> {
-            ImmutableHelmKubeCmdBuilder.builder().
-                clients( clients ).
-                helm( helm ).
-                chart( chartRepository.get( "v1alpha2/xp7vhost" ) ).
-                namespace( info.deploymentInfo().namespaceName() ).
-                valueBuilder( ImmutableXp7VHostValues.builder().
-                    baseValues( baseValues ).
+                // Update config
+                ImmutableCommandXpVHostsApply.builder().
+                    clients( clients ).
+                    caches( caches ).
                     info( info ).
-                    build() ).
-                build().
-                addCommands( commandBuilder );
-        } );
-
-        // Update config
-        runCommands( cmdId, ( commandBuilder ) -> {
-            ImmutableCommandXpVHostsApply.builder().
-                clients( clients ).
-                caches( caches ).
-                info( info ).
-                locks( locks ).
-                build().
-                addCommands( commandBuilder );
+                    build().
+                    addCommands( commandBuilder );
+            } );
         } );
     }
 }

@@ -67,14 +67,12 @@ public class OperatorDns
             domain( cfgStr( "dns.domain." + k ) ).
             build() ).collect( Collectors.toList() );
 
-        new Thread( () -> stallAndRunCommands( 1000L, () -> {
-            log.info( "Started listening for Ingress events" );
-            caches.getIngressCache().addWatcher( this::watchIngress );
-        } ) ).start();
+        log.info( "Started listening for Ingress events" );
+        caches.getIngressCache().addWatcher( this::watchIngress );
     }
 
     @SuppressWarnings({"UnstableApiUsage", "OptionalUsedAsFieldOrParameterType"})
-    private void watchIngress( final Watcher.Action action, final String s, final Optional<Ingress> oldIngress,
+    private void watchIngress( final String actionId, final Watcher.Action action, final Optional<Ingress> oldIngress,
                                final Optional<Ingress> newIngress )
     {
         DiffDnsIngress diff = ImmutableDiffDnsIngress.builder().
@@ -92,11 +90,7 @@ public class OperatorDns
 
         String ingressName = resource.getMetadata().getName();
 
-        String cmdId = createCmdId();
-        logEvent( log, cmdId, resource, action );
-        log.info( String.format( "%s: Trigger Ingress '%s' %s", cmdId, ingressName, action ) );
-
-        ImmutableCombinedCommand.Builder commandBuilder = ImmutableCombinedCommand.builder().id( cmdId );
+        ImmutableCombinedCommand.Builder commandBuilder = ImmutableCombinedCommand.builder().id( actionId );
 
         try
         {

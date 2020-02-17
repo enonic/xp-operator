@@ -1,7 +1,6 @@
 package com.enonic.ec.kubernetes.operator.operators.v1alpha2.xp7config;
 
 import java.util.Optional;
-import java.util.concurrent.locks.Lock;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -9,8 +8,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.util.concurrent.Striped;
 
 import io.fabric8.kubernetes.client.Watcher;
 import io.quarkus.runtime.StartupEvent;
@@ -30,8 +27,6 @@ public class OperatorXp7Config
 {
     private static final Logger log = LoggerFactory.getLogger( OperatorXp7Config.class );
 
-    private static final Striped<Lock> locks = Striped.lock( 10 );
-
     @Inject
     Clients clients;
 
@@ -40,16 +35,12 @@ public class OperatorXp7Config
 
     void onStartup( @Observes StartupEvent _ev )
     {
-        new Thread( () -> stallAndRunCommands( 1000L, () -> {
-            log.info( "Started listening for Xp7Config events" );
-            caches.getConfigCache().addWatcher( this::watchXpConfig );
-//            log.info( "Started listening for ConfigMap events" );
-//            caches.getConfigMapCache().addWatcher( this::watchConfigMap );
-        } ) ).start();
+        log.info( "Started listening for Xp7Config events" );
+        caches.getConfigCache().addWatcher( this::watchXpConfig );
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private void watchXpConfig( final Watcher.Action action, final String id, final Optional<V1alpha2Xp7Config> oldResource,
+    private void watchXpConfig( final String actionId, final Watcher.Action action, final Optional<V1alpha2Xp7Config> oldResource,
                                 final Optional<V1alpha2Xp7Config> newResource )
     {
         Optional<ResourceInfoNamespaced<V1alpha2Xp7Config, DiffXp7Config>> i = getInfo( action, () -> ImmutableInfoXp7Config.builder().
@@ -59,14 +50,11 @@ public class OperatorXp7Config
             build() );
 
         i.ifPresent( info -> {
-            String cmdId = createCmdId();
-            logEvent( log, cmdId, info.resource(), action );
 
-            runCommands( cmdId, ( commandBuilder ) -> ImmutableCommandConfigMapUpdateAll.builder().
+            runCommands( actionId, ( commandBuilder ) -> ImmutableCommandConfigMapUpdateAll.builder().
                 clients( clients ).
                 caches( caches ).
                 info( info ).
-                locks( locks ).
                 build().
                 addCommands( commandBuilder ) );
         } );

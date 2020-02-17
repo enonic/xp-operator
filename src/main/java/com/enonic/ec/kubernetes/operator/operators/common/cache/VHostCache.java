@@ -23,7 +23,7 @@ public class VHostCache
     @Inject
     public VHostCache( Clients clients )
     {
-        super( 3 );
+        super( defaultExecutorService );
         this.clients = clients;
     }
 

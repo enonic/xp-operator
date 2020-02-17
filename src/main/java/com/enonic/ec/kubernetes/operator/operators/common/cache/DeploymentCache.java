@@ -23,7 +23,7 @@ public class DeploymentCache
     @Inject
     public DeploymentCache( Clients clients )
     {
-        super( 1 );
+        super( defaultExecutorService );
         this.clients = clients;
     }
 
