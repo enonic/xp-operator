@@ -65,7 +65,7 @@ public class OperatorXp7Deployments
     void onStartup( @Observes StartupEvent _ev )
     {
         log.info( "Started listening for Xp7Deployment events" );
-        caches.getDeploymentCache().addWatcher( this::watch );
+        caches.getDeploymentCache().addEventListener( this::watch );
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")

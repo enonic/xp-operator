@@ -68,7 +68,7 @@ public class OperatorDns
             build() ).collect( Collectors.toList() );
 
         log.info( "Started listening for Ingress events" );
-        caches.getIngressCache().addWatcher( this::watchIngress );
+        caches.getIngressCache().addEventListener( this::watchIngress );
     }
 
     @SuppressWarnings({"UnstableApiUsage", "OptionalUsedAsFieldOrParameterType"})

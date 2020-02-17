@@ -23,37 +23,41 @@ import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.FilterWatchListDeletable;
 
 public abstract class Cache<T extends HasMetadata, L extends KubernetesResourceList<T>>
+    implements Watcher<T>
 {
     private final static Logger log = LoggerFactory.getLogger( Cache.class );
 
-    protected static final ExecutorService defaultExecutorService = Executors.newSingleThreadExecutor();
+    protected static final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     protected final Map<String, HasMetadata> cache;
 
-    private final List<OnAction<T>> watchers;
+    private final List<OnAction<T>> eventListeners;
 
-    private final ExecutorService executorService;
+    private final FilterWatchListDeletable<T, L, Boolean, Watch, Watcher<T>> filter;
 
-    Cache(ExecutorService executorService)
+    private boolean initialized = false;
+
+    Cache( final FilterWatchListDeletable<T, L, Boolean, Watch, Watcher<T>> filter )
     {
-        this.executorService = executorService;
-        watchers = new LinkedList<>();
-        cache = new HashMap<>();
+        this.filter = filter;
+        this.eventListeners = new LinkedList<>();
+        this.cache = new HashMap<>();
+        this.filter.list().getItems().forEach( r -> eventReceived( Action.ADDED, r ) );
+        startWatcher();
     }
 
-    public void addWatcher( OnAction<T> watcher )
+    public void addEventListener( OnAction<T> eventListener )
     {
-        watchers.add( watcher );
+        eventListeners.add( eventListener );
     }
 
-    void startWatcher( FilterWatchListDeletable<T, L, Boolean, Watch, Watcher<T>> filter, Watcher<T> watcher )
+    protected void startWatcher()
     {
-        filter.list().getItems().forEach( r -> cache.put( r.getMetadata().getUid(), r ) );
-        filter.watch( watcher );
+        filter.watch( this );
     }
 
-    @SuppressWarnings("unchecked")
-    void watcherEventReceived( final Watcher.Action action, final T resource )
+    @Override
+    public void eventReceived( final Action action, final T resource )
     {
         try
         {
@@ -100,9 +104,25 @@ public abstract class Cache<T extends HasMetadata, L extends KubernetesResourceL
         }
     }
 
+    @Override
+    public void onClose( final KubernetesClientException cause )
+    {
+        if ( cause != null )
+        {
+            log.warn( "Watcher " + this.getClass().getSimpleName() + " closed with exception: ", cause );
+            log.warn( "Restarting watcher..." );
+            startWatcher();
+        }
+    }
+
     private void runExecutor( final Watcher.Action action, final T resource, final Optional<T> oldResource, final Optional<T> newResource )
     {
         executorService.execute( () -> {
+            if ( eventListeners.size() == 0 )
+            {
+                return;
+            }
+
             final String actionId = UUID.randomUUID().toString().substring( 0, 8 );
             if ( resource.getMetadata().getNamespace() != null )
             {
@@ -115,19 +135,8 @@ public abstract class Cache<T extends HasMetadata, L extends KubernetesResourceL
                 log.info(
                     String.format( "%s: Event: %s '%s' %s", actionId, resource.getKind(), resource.getMetadata().getName(), action ) );
             }
-            watchers.forEach( watcher -> watcher.accept( actionId, action, oldResource, newResource ) );
+            eventListeners.forEach( watcher -> watcher.accept( actionId, action, oldResource, newResource ) );
         } );
-    }
-
-    void watcherOnClose( final KubernetesClientException cause )
-    {
-        if ( cause != null )
-        {
-            // This means the socket closed and we have a problem, best to
-            // let kubernetes just restart the operator pod.
-            cause.printStackTrace();
-            System.exit( -1 );
-        }
     }
 
     @SuppressWarnings("unchecked")
