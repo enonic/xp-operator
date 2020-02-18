@@ -22,20 +22,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public abstract class HelmTest
     extends TestFileSupplier
 {
-    protected ObjectMapper mapper;
+    private final ObjectMapper mapper;
 
-    private Helm helm;
+    private final Helm helm;
 
-    private ChartRepository chartRepository;
+    private final ChartRepository chartRepository;
 
-    public HelmTest()
+    protected HelmTest()
     {
         mapper = new ObjectMapper( new YAMLFactory() );
         helm = new Helm();
         chartRepository = new LocalRepository( new File( Configuration.cfgStr( "operator.helm.charts.path" ) ) );
     }
 
-    protected void test( String chartName, Object values, String expectedValuesFile, String expectedResultFile )
+    void test( String chartName, Object values, String expectedValuesFile, String expectedResultFile )
         throws IOException
     {
         String expectedValues = Files.readString( new File( expectedValuesFile ).toPath(), StandardCharsets.UTF_8 );
@@ -52,21 +52,22 @@ public abstract class HelmTest
         assertEquals( expectedResult, sb.toString(), "Result does not match: (" + new File( expectedResultFile ).getName() + ":0)" );
     }
 
+    @SuppressWarnings("SameReturnValue")
     protected abstract String chartToTest();
 
     protected abstract Object createValues( ObjectMapper mapper, File input )
         throws IOException;
 
     @TestFactory
-    public Stream<DynamicTest> createTests()
+    Stream<DynamicTest> createTests()
     {
         String classResourcePath = getClassFilePath( this.getClass() );
-        return getFiles( this.getClass(), ".yaml" ).stream().
+        return getFiles( this.getClass() ).stream().
             filter( f -> !f.getAbsolutePath().endsWith( "result.yaml" ) ).
             filter( f -> !f.getAbsolutePath().endsWith( "values.yaml" ) ).
-            map( f -> DynamicTest.dynamicTest( testName( classResourcePath, f ), f.toURI(), () -> {
-                test( chartToTest(), createValues( mapper, f ), f.getAbsolutePath().replace( ".yaml", "_values.yaml" ),
-                      f.getAbsolutePath().replace( ".yaml", "_result.yaml" ) );
-            } ) );
+            map( f -> DynamicTest.dynamicTest( testName( classResourcePath, f ), f.toURI(),
+                                               () -> test( chartToTest(), createValues( mapper, f ),
+                                                           f.getAbsolutePath().replace( ".yaml", "_values.yaml" ),
+                                                           f.getAbsolutePath().replace( ".yaml", "_result.yaml" ) ) ) );
     }
 }

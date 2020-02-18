@@ -21,7 +21,7 @@ import com.enonic.cloud.operator.operators.common.clients.Clients;
 
 class CommandMapper
 {
-    @SuppressWarnings({"unchecked", "OptionalUsedAsFieldOrParameterType"})
+    @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "unchecked"})
     static <T extends HasMetadata> KubeCommandBuilder<T> getCommandClass( Clients clients, Optional<String> namespace, T resource,
                                                                           KubeCommandOptions options )
     {

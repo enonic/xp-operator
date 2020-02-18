@@ -1,5 +1,6 @@
 package com.enonic.cloud.operator.kubectl;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import org.immutables.value.Value;
@@ -51,7 +52,6 @@ public abstract class KubeCmdDaemonSets
     @Override
     protected boolean equalsSpec( final DaemonSet o, final DaemonSet n )
     {
-        // TODO: Compare Specs
-        return super.equalsSpec( o, n );
+        return Objects.equals( o.getSpec(), n.getSpec() );
     }
 }

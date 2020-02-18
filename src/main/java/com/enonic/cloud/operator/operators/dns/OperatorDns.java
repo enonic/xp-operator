@@ -1,6 +1,7 @@
 package com.enonic.cloud.operator.operators.dns;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -34,6 +35,7 @@ import com.enonic.cloud.operator.operators.dns.model.ImmutableDnsIngress;
 import com.enonic.cloud.operator.operators.dns.model.ImmutableDomain;
 
 
+@SuppressWarnings("WeakerAccess")
 @ApplicationScoped
 public class OperatorDns
     extends Operator
@@ -72,8 +74,7 @@ public class OperatorDns
     }
 
     @SuppressWarnings({"UnstableApiUsage", "OptionalUsedAsFieldOrParameterType"})
-    private void watchIngress( final String actionId, final Watcher.Action action, final Optional<Ingress> oldIngress,
-                               final Optional<Ingress> newIngress )
+    private void watchIngress( final String actionId, final Watcher.Action action, final Optional<Ingress> oldIngress, final Optional<Ingress> newIngress )
     {
         DiffDnsIngress diff = ImmutableDiffDnsIngress.builder().
             oldValue( oldIngress.map( o -> ImmutableDnsIngress.builder().
@@ -86,7 +87,7 @@ public class OperatorDns
                 build() ) ).
             build();
 
-        HasMetadata resource = newIngress.orElse( oldIngress.orElse( null ) );
+        HasMetadata resource = Objects.requireNonNull( newIngress.orElse( oldIngress.orElse( null ) ) );
 
         String ingressName = resource.getMetadata().getName();
 

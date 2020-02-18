@@ -35,7 +35,7 @@ public class ConversionApi
 
     private final Map<String, Map<Class<? extends HasMetadata>, Converter>> conversionFunctionMap;
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "MismatchedQueryAndUpdateOfCollection", "RedundantOperationOnEmptyContainer"})
     public ConversionApi()
     {
         conversionFunctionMap = new HashMap<>();

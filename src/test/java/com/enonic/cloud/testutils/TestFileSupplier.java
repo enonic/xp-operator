@@ -5,6 +5,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -16,7 +17,7 @@ public class TestFileSupplier
     {
         if ( file.isDirectory() )
         {
-            for ( File f : file.listFiles() )
+            for ( File f : Objects.requireNonNull( file.listFiles() ) )
             {
                 getFiles( hits, f, fileExtension, exclude );
             }
@@ -35,10 +36,10 @@ public class TestFileSupplier
         return k.getPackage().getName().replace( ".", "/" );
     }
 
-    public List<File> getFiles( Class k, String fileExtension, String... exclude )
+    protected List<File> getFiles( Class k, String... exclude )
     {
         List<File> res = new LinkedList<>();
-        getFiles( res, Paths.get( "src/test/resources", getClassFilePath( k ) ).toFile(), fileExtension, Arrays.asList( exclude ) );
+        getFiles( res, Paths.get( "src/test/resources", getClassFilePath( k ) ).toFile(), ".yaml", Arrays.asList( exclude ) );
         return res;
     }
 
@@ -57,7 +58,7 @@ public class TestFileSupplier
     {
         String classResourcePath = getClassFilePath( k );
         List<DynamicTest> tests = new LinkedList<>();
-        for ( File f : getFiles( k, ".yaml", exclude ) )
+        for ( File f : getFiles( k, exclude ) )
         {
             tests.add( DynamicTest.dynamicTest( testName( classResourcePath, f ), f.toURI(), () -> consumer.accept( f ) ) );
         }

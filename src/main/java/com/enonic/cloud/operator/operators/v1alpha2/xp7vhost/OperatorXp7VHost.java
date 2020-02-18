@@ -26,6 +26,7 @@ import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.commands.ImmutableC
 import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.info.DiffXp7VHost;
 import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.info.ImmutableInfoXp7VHost;
 
+@SuppressWarnings("WeakerAccess")
 @ApplicationScoped
 public class OperatorXp7VHost
     extends OperatorNamespaced
@@ -56,8 +57,7 @@ public class OperatorXp7VHost
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private void watchVHosts( final String actionId, final Watcher.Action action, final Optional<V1alpha2Xp7VHost> oldResource,
-                              final Optional<V1alpha2Xp7VHost> newResource )
+    private void watchVHosts( final String actionId, final Watcher.Action action, final Optional<V1alpha2Xp7VHost> oldResource, final Optional<V1alpha2Xp7VHost> newResource )
     {
         Optional<ResourceInfoNamespaced<V1alpha2Xp7VHost, DiffXp7VHost>> i = getInfo( action, () -> ImmutableInfoXp7VHost.builder().
             caches( caches ).
@@ -65,29 +65,27 @@ public class OperatorXp7VHost
             newResource( newResource ).
             build() );
 
-        i.ifPresent( info -> {
-            runCommands( actionId, ( commandBuilder ) -> {
-                // Create ingress independent of config
-                ImmutableHelmKubeCmdBuilder.builder().
-                    clients( clients ).
-                    helm( helm ).
-                    chart( chartRepository.get( "v1alpha2/xp7vhost" ) ).
-                    namespace( info.deploymentInfo().namespaceName() ).
-                    valueBuilder( ImmutableXp7VHostValues.builder().
-                        baseValues( baseValues ).
-                        info( info ).
-                        build() ).
-                    build().
-                    addCommands( commandBuilder );
-
-                // Update config
-                ImmutableCommandXpVHostsApply.builder().
-                    clients( clients ).
-                    caches( caches ).
+        i.ifPresent( info -> runCommands( actionId, ( commandBuilder ) -> {
+            // Create ingress independent of config
+            ImmutableHelmKubeCmdBuilder.builder().
+                clients( clients ).
+                helm( helm ).
+                chart( chartRepository.get( "v1alpha2/xp7vhost" ) ).
+                namespace( info.deploymentInfo().namespaceName() ).
+                valueBuilder( ImmutableXp7VHostValues.builder().
+                    baseValues( baseValues ).
                     info( info ).
-                    build().
-                    addCommands( commandBuilder );
-            } );
-        } );
+                    build() ).
+                build().
+                addCommands( commandBuilder );
+
+            // Update config
+            ImmutableCommandXpVHostsApply.builder().
+                clients( clients ).
+                caches( caches ).
+                info( info ).
+                build().
+                addCommands( commandBuilder );
+        } ) );
     }
 }

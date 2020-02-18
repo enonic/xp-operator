@@ -18,6 +18,7 @@ public class Caches
 
     private final VHostCache vHostCache;
 
+    @SuppressWarnings("CdiInjectionPointsInspection") // Inspection thinks the test classes clash with the real ones
     @Inject
     public Caches( final AppCache appCache, final ConfigCache configCache, final ConfigMapCache configMapCache,
                    final DeploymentCache deploymentCache, final IngressCache ingressCache, final VHostCache vHostCache )

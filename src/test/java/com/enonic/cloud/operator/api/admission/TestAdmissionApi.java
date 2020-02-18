@@ -23,14 +23,14 @@ import com.enonic.cloud.testutils.TestFileSupplier;
 
 import static com.enonic.cloud.operator.common.Configuration.cfgStr;
 
-public class TestAdmissionApi
+class TestAdmissionApi
     extends AdmissionApi
 {
-    private TestXp7DeploymentCache deploymentCache;
+    private final TestXp7DeploymentCache deploymentCache;
 
-    private TestXp7VHostCache vHostCache;
+    private final TestXp7VHostCache vHostCache;
 
-    public TestAdmissionApi()
+    TestAdmissionApi()
     {
         mapper = new ObjectMapper( new YAMLFactory() );
         allNodesPicker = cfgStr( "operator.deployment.xp.allNodesKey" );
@@ -40,24 +40,24 @@ public class TestAdmissionApi
     }
 
     @TestFactory
-    public Stream<DynamicTest> tests()
+    Stream<DynamicTest> tests()
         throws IOException
     {
         TestFileSupplier testFileSupplier = new TestFileSupplier();
 
         // Add deployments to cache
         File cache = testFileSupplier.getFile( TestAdmissionApi.class, "xp7deploymentsCache.yaml" );
-        List<V1alpha2Xp7Deployment> deployments = this.mapper.readValue( cache, new TypeReference<List<V1alpha2Xp7Deployment>>()
+        List<V1alpha2Xp7Deployment> deployments = this.mapper.readValue( cache, new TypeReference<>()
         {
         } );
-        deployments.forEach( d -> deploymentCache.put( d ) );
+        deployments.forEach( deploymentCache::put );
 
         // Add vhosts to cache
         cache = testFileSupplier.getFile( TestAdmissionApi.class, "xp7VHostCache.yaml" );
-        List<V1alpha2Xp7VHost> vHosts = this.mapper.readValue( cache, new TypeReference<List<V1alpha2Xp7VHost>>()
+        List<V1alpha2Xp7VHost> vHosts = this.mapper.readValue( cache, new TypeReference<>()
         {
         } );
-        vHosts.forEach( d -> vHostCache.put( d ) );
+        vHosts.forEach( vHostCache::put );
 
         return testFileSupplier.createTests( TestAdmissionApi.class, this::runTest, "xp7deploymentsCache.yaml", "xp7VHostCache.yaml" );
     }

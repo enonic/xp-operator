@@ -12,7 +12,7 @@ import org.eclipse.microprofile.config.spi.ConfigSource;
 public class Config
     implements ConfigSource
 {
-    private Map<String, String> map;
+    private final Map<String, String> map;
 
     public Config()
     {

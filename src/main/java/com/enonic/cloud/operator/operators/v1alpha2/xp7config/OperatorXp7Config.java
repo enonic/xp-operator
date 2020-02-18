@@ -21,6 +21,7 @@ import com.enonic.cloud.operator.operators.v1alpha2.xp7config.commands.Immutable
 import com.enonic.cloud.operator.operators.v1alpha2.xp7config.info.DiffXp7Config;
 import com.enonic.cloud.operator.operators.v1alpha2.xp7config.info.ImmutableInfoXp7Config;
 
+@SuppressWarnings("WeakerAccess")
 @ApplicationScoped
 public class OperatorXp7Config
     extends OperatorNamespaced
@@ -40,8 +41,7 @@ public class OperatorXp7Config
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private void watchXpConfig( final String actionId, final Watcher.Action action, final Optional<V1alpha2Xp7Config> oldResource,
-                                final Optional<V1alpha2Xp7Config> newResource )
+    private void watchXpConfig( final String actionId, final Watcher.Action action, final Optional<V1alpha2Xp7Config> oldResource, final Optional<V1alpha2Xp7Config> newResource )
     {
         Optional<ResourceInfoNamespaced<V1alpha2Xp7Config, DiffXp7Config>> i = getInfo( action, () -> ImmutableInfoXp7Config.builder().
             caches( caches ).
@@ -49,15 +49,12 @@ public class OperatorXp7Config
             newResource( newResource ).
             build() );
 
-        i.ifPresent( info -> {
-
-            runCommands( actionId, ( commandBuilder ) -> ImmutableCommandConfigMapUpdateAll.builder().
-                clients( clients ).
-                caches( caches ).
-                info( info ).
-                build().
-                addCommands( commandBuilder ) );
-        } );
+        i.ifPresent( info -> runCommands( actionId, ( commandBuilder ) -> ImmutableCommandConfigMapUpdateAll.builder().
+            clients( clients ).
+            caches( caches ).
+            info( info ).
+            build().
+            addCommands( commandBuilder ) ) );
     }
 
 //    private void watchConfigMap( final Watcher.Action action, final String id, final Optional<ConfigMap> oldResource,

@@ -69,7 +69,7 @@ public abstract class Xp7DeploymentValues
         return res;
     }
 
-    public boolean isClustered( V1alpha2Xp7Deployment resource )
+    private boolean isClustered( V1alpha2Xp7Deployment resource )
     {
         return resource.getSpec().nodeGroups().values().stream().mapToInt( V1alpha2Xp7DeploymentSpecNode::replicas ).sum() > 1;
     }
@@ -79,13 +79,11 @@ public abstract class Xp7DeploymentValues
         return cfgStr( "operator.deployment.xp.allNodesKey" );
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
     private Integer minimumMasterNodes( V1alpha2Xp7Deployment resource )
     {
         return defaultMinimumAvailable( resource.getSpec().totalMasterNodes() );
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
     private Integer minimumDataNodes( V1alpha2Xp7Deployment resource )
     {
         return defaultMinimumAvailable( resource.getSpec().totalDataNodes() );

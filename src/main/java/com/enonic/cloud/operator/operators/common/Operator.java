@@ -19,6 +19,7 @@ public abstract class Operator
         runCommands( commandBuilder, () -> commandBuilderConsumer.accept( commandBuilder ) );
     }
 
+    @SuppressWarnings("WeakerAccess")
     protected synchronized void runCommands( ImmutableCombinedCommand.Builder commandBuilder, Runnable r )
     {
         r.run();

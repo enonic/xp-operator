@@ -24,12 +24,13 @@ import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.FilterWatchListDeletable;
 
+@SuppressWarnings("WeakerAccess")
 public abstract class Cache<T extends HasMetadata, L extends KubernetesResourceList<T>>
     implements Watcher<T>
 {
     private final static Logger log = LoggerFactory.getLogger( Cache.class );
 
-    protected static final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private static final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     protected final Map<String, T> cache;
 
@@ -56,7 +57,7 @@ public abstract class Cache<T extends HasMetadata, L extends KubernetesResourceL
         eventListeners.add( eventListener );
     }
 
-    protected void startWatcher()
+    private void startWatcher()
     {
         executorService.execute( () -> filter.watch( this ) );
     }
@@ -136,9 +137,8 @@ public abstract class Cache<T extends HasMetadata, L extends KubernetesResourceL
             final String actionId = UUID.randomUUID().toString().substring( 0, 8 );
             if ( resource.getMetadata().getNamespace() != null )
             {
-                log.info(
-                    String.format( "%s: Event in NS '%s': %s '%s' %s", actionId, resource.getMetadata().getNamespace(), resource.getKind(),
-                                   resource.getMetadata().getName(), action ) );
+                log.info( String.format( "%s: Event in NS '%s': %s '%s' %s", actionId, resource.getMetadata().getNamespace(), resource.getKind(),
+                                         resource.getMetadata().getName(), action ) );
             }
             else
             {
@@ -150,10 +150,9 @@ public abstract class Cache<T extends HasMetadata, L extends KubernetesResourceL
         } );
     }
 
-    @SuppressWarnings("unchecked")
     public Collection<T> getCollection()
     {
-        return (Collection<T>) cache.values();
+        return cache.values();
     }
 
     public Optional<T> get( String namespace, String name )

@@ -4,6 +4,7 @@ import com.enonic.cloud.operator.common.commands.Command;
 import com.enonic.cloud.operator.operators.dns.cloudflare.DnsRecordService;
 import com.enonic.cloud.operator.operators.dns.cloudflare.model.DnsRecord;
 
+@SuppressWarnings("EmptyMethod")
 public abstract class DnsCommand
     implements Command
 {

@@ -21,6 +21,7 @@ public class Xp7DeploymentTest
         return "v1alpha2/xp7deployment";
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Override
     protected Object createValues( final ObjectMapper mapper, final File input )
         throws IOException

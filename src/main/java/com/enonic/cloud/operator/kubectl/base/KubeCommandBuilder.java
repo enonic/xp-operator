@@ -101,6 +101,7 @@ public abstract class KubeCommandBuilder<T extends HasMetadata>
         return equalsSpec( o, n );
     }
 
+    @SuppressWarnings("WeakerAccess")
     protected boolean equalLabels( Map<String, String> o, Map<String, String> n )
     {
         return Objects.equals( o, n );
@@ -116,7 +117,7 @@ public abstract class KubeCommandBuilder<T extends HasMetadata>
         return Objects.equals( o, n );
     }
 
-    private <T> T getOrDefault( T value, Supplier<T> sup )
+    private <R> R getOrDefault( R value, Supplier<R> sup )
     {
         if ( value == null )
         {
