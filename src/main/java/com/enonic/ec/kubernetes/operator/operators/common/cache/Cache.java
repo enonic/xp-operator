@@ -15,6 +15,8 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesResourceList;
 import io.fabric8.kubernetes.client.KubernetesClientException;
@@ -29,20 +31,23 @@ public abstract class Cache<T extends HasMetadata, L extends KubernetesResourceL
 
     protected static final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-    protected final Map<String, HasMetadata> cache;
+    protected final Map<String, T> cache;
 
     private final List<OnAction<T>> eventListeners;
 
-    private final FilterWatchListDeletable<T, L, Boolean, Watch, Watcher<T>> filter;
+    private FilterWatchListDeletable<T, L, Boolean, Watch, Watcher<T>> filter;
 
-    private boolean initialized = false;
-
-    Cache( final FilterWatchListDeletable<T, L, Boolean, Watch, Watcher<T>> filter )
+    protected Cache()
     {
-        this.filter = filter;
         this.eventListeners = new LinkedList<>();
         this.cache = new HashMap<>();
-        this.filter.list().getItems().forEach( r -> eventReceived( Action.ADDED, r ) );
+    }
+
+    protected Cache( final FilterWatchListDeletable<T, L, Boolean, Watch, Watcher<T>> filter )
+    {
+        this();
+        this.filter = filter;
+        this.filter.list().getItems().forEach( r -> cache.put( r.getMetadata().getUid(), r ) );
         startWatcher();
     }
 
@@ -53,7 +58,7 @@ public abstract class Cache<T extends HasMetadata, L extends KubernetesResourceL
 
     protected void startWatcher()
     {
-        filter.watch( this );
+        executorService.execute( () -> filter.watch( this ) );
     }
 
     @Override
@@ -62,24 +67,29 @@ public abstract class Cache<T extends HasMetadata, L extends KubernetesResourceL
         try
         {
             String uid = resource.getMetadata().getUid();
-            final Optional<T> oldResource = (Optional<T>) Optional.ofNullable( cache.get( uid ) );
-            final Optional<T> newResource = action == Watcher.Action.DELETED ? Optional.empty() : Optional.of( resource );
+            log.debug( "Resource " + uid + " " + action + " " + resource.getKind() + ": " + resource.getMetadata().getName() );
 
-            if ( oldResource.isPresent() )
+            T oldResource = null;
+
+            if ( cache.containsKey( uid ) )
             {
-                // This is an update
-                int knownResourceVersion = Integer.parseInt( oldResource.get().getMetadata().getResourceVersion() );
+                oldResource = cache.get( uid );
+                int knownResourceVersion = Integer.parseInt( oldResource.getMetadata().getResourceVersion() );
                 int receivedResourceVersion = Integer.parseInt( resource.getMetadata().getResourceVersion() );
-                if ( knownResourceVersion > receivedResourceVersion )
+                log.debug( "Resource " + uid + " version known(" + knownResourceVersion + ") received(" + receivedResourceVersion + ")" );
+                if ( knownResourceVersion >= receivedResourceVersion )
                 {
-                    // This is an old event
                     return;
                 }
             }
 
-            log.debug( "Resource " + uid + " " + action + " " + resource.getKind() + ": " + resource.getMetadata().getName() );
-            if ( action == Watcher.Action.ADDED || action == Watcher.Action.MODIFIED )
+            if ( action == Watcher.Action.ADDED )
             {
+                cache.put( uid, resource );
+            }
+            else if ( action == Watcher.Action.MODIFIED )
+            {
+                Preconditions.checkState( oldResource != null );
                 cache.put( uid, resource );
             }
             else if ( action == Watcher.Action.DELETED )
@@ -94,7 +104,7 @@ public abstract class Cache<T extends HasMetadata, L extends KubernetesResourceL
                         resource.getMetadata().getName() );
                 System.exit( -1 );
             }
-            runExecutor( action, resource, oldResource, newResource );
+            runExecutor( action, resource, oldResource, action == Watcher.Action.DELETED ? null : resource );
         }
         catch ( Exception e )
         {
@@ -115,7 +125,7 @@ public abstract class Cache<T extends HasMetadata, L extends KubernetesResourceL
         }
     }
 
-    private void runExecutor( final Watcher.Action action, final T resource, final Optional<T> oldResource, final Optional<T> newResource )
+    private void runExecutor( final Watcher.Action action, final T resource, final T oldResource, final T newResource )
     {
         executorService.execute( () -> {
             if ( eventListeners.size() == 0 )
@@ -135,7 +145,8 @@ public abstract class Cache<T extends HasMetadata, L extends KubernetesResourceL
                 log.info(
                     String.format( "%s: Event: %s '%s' %s", actionId, resource.getKind(), resource.getMetadata().getName(), action ) );
             }
-            eventListeners.forEach( watcher -> watcher.accept( actionId, action, oldResource, newResource ) );
+            eventListeners.forEach(
+                watcher -> watcher.accept( actionId, action, Optional.ofNullable( oldResource ), Optional.ofNullable( newResource ) ) );
         } );
     }
 

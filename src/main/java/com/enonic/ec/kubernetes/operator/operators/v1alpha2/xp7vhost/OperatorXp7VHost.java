@@ -51,8 +51,8 @@ public class OperatorXp7VHost
 
     void onStartup( @Observes StartupEvent _ev )
     {
-        log.info( "Started listening for Xp7VHost events" );
         caches.getVHostCache().addEventListener( this::watchVHosts );
+        log.info( "Started listening for Xp7VHost events" );
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")

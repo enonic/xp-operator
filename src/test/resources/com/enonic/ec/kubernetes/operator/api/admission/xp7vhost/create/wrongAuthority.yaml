@@ -1,4 +1,4 @@
-testResult: 'Cannot deserialize value of type `com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHostSpecCertificateAuthority` from String "wrong": value not one of declared Enum instance names: [selfSigned, letsEncrypt, letsEncryptStaging]'
+testResult: 'Cannot deserialize value of type `com.enonic.ec.kubernetes.operator.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHostSpecCertificateAuthority` from String "wrong": not one of the values accepted for Enum class: [selfSigned, letsEncrypt, letsEncryptStaging]'
 testReview:
   request:
     operation: CREATE

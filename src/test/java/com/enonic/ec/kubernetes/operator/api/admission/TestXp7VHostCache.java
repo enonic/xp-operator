@@ -8,7 +8,7 @@ public class TestXp7VHostCache
 {
     public TestXp7VHostCache()
     {
-        super( null );
+        super();
     }
 
     public void put( V1alpha2Xp7VHost resource )

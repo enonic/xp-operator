@@ -3,9 +3,9 @@ package com.enonic.ec.kubernetes.operator.api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
+import com.fasterxml.jackson.databind.exc.ValueInstantiationException;
 
 import com.enonic.ec.kubernetes.operator.crd.BuilderException;
 
@@ -13,27 +13,23 @@ class ApiExceptionHandler
 {
     private final static Logger log = LoggerFactory.getLogger( ApiExceptionHandler.class );
 
-    public static String extractJacksonMessage( Exception ex )
+    public static String extractSerializationExceptionMessage( Throwable ex )
     {
-        if ( ex instanceof InvalidDefinitionException && ex.getCause() != null && ex.getCause() instanceof BuilderException )
-        {
-            return ex.getCause().getCause().getMessage();
-        }
-        if ( ex instanceof InvalidDefinitionException && ex.getCause() != null && ex.getCause() instanceof IllegalStateException )
-        {
-            return ex.getCause().getMessage();
-        }
         if ( ex instanceof IllegalStateException )
         {
             return ex.getMessage();
+        }
+        if ( ex instanceof BuilderException || ex instanceof ValueInstantiationException )
+        {
+            return extractSerializationExceptionMessage( ex.getCause() );
         }
         if ( ex instanceof UnrecognizedPropertyException )
         {
             return "Field unrecognized: " + ( (UnrecognizedPropertyException) ex ).getPropertyName();
         }
-        if ( ex instanceof JsonMappingException )
+        if ( ex instanceof InvalidFormatException )
         {
-            return ( (JsonMappingException) ex ).getOriginalMessage();
+            return ( (InvalidFormatException) ex ).getOriginalMessage();
         }
 
         log.error( "Unknown exception in admission api", ex );

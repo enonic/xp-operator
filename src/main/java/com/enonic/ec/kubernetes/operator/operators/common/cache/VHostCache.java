@@ -11,6 +11,11 @@ import com.enonic.ec.kubernetes.operator.operators.common.clients.V1alpha2Xp7VHo
 public class VHostCache
     extends Cache<V1alpha2Xp7VHost, V1alpha2Xp7VHostList>
 {
+    protected VHostCache()
+    {
+        super();
+    }
+
     @Inject
     public VHostCache( Clients clients )
     {

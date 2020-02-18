@@ -8,7 +8,7 @@ public class TestXp7DeploymentCache
 {
     public TestXp7DeploymentCache()
     {
-        super( null );
+        super();
     }
 
     public void put( V1alpha2Xp7Deployment resource )

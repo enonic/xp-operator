@@ -11,6 +11,11 @@ import com.enonic.ec.kubernetes.operator.operators.common.clients.V1alpha2Xp7Dep
 public class DeploymentCache
     extends Cache<V1alpha2Xp7Deployment, V1alpha2Xp7DeploymentList>
 {
+    protected DeploymentCache()
+    {
+        super();
+    }
+
     @Inject
     public DeploymentCache( Clients clients )
     {

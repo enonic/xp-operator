@@ -22,7 +22,7 @@ public abstract class BaseApi<T>
         String uid = (String) ( (Map) admission.get( "request" ) ).get( "uid" );
 
         // Hack until this is fixed: https://github.com/fabric8io/kubernetes-client/issues/1898
-        ((Map<String, Object>)admission.get( "request" )).remove( "options" );
+        ( (Map<String, Object>) admission.get( "request" ) ).remove( "options" );
         request = mapper.writeValueAsString( admission );
 
         try
@@ -31,7 +31,7 @@ public abstract class BaseApi<T>
         }
         catch ( Exception e )
         {
-            return failure( uid, ApiExceptionHandler.extractJacksonMessage( e ) );
+            return failure( uid, ApiExceptionHandler.extractSerializationExceptionMessage( e ) );
         }
     }
 

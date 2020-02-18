@@ -35,8 +35,8 @@ public class OperatorXp7App
 
     void onStartup( @Observes StartupEvent _ev )
     {
-        log.info( "Started listening for Xp7App events" );
         caches.getAppCache().addEventListener( this::watchApps );
+        log.info( "Started listening for Xp7App events" );
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")

@@ -35,8 +35,8 @@ public class OperatorXp7Config
 
     void onStartup( @Observes StartupEvent _ev )
     {
-        log.info( "Started listening for Xp7Config events" );
         caches.getConfigCache().addEventListener( this::watchXpConfig );
+        log.info( "Started listening for Xp7Config events" );
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
