@@ -1,1 +1,1 @@
-com.enonic.ec.kubernetes.operator.crd.CrdMappingProvider
+com.enonic.cloud.operator.crd.CrdMappingProvider

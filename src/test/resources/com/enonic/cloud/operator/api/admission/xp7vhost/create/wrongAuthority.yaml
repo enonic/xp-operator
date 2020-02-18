@@ -1,0 +1,20 @@
+testResult: 'Cannot deserialize value of type `com.enonic.cloud.operator.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHostSpecCertificateAuthority` from String "wrong": not one of the values accepted for Enum class: [selfSigned, letsEncrypt, letsEncryptStaging]'
+testReview:
+  request:
+    operation: CREATE
+    object:
+      apiVersion: enonic.cloud/v1alpha2
+      kind: Xp7VHost
+      metadata:
+        name: test-purplejs-io
+        namespace: mycloud-myproject-qaxp
+      spec:
+        host: test.purplejs.io
+        certificate:
+          authority: wrong
+        skipIngress: false
+        mappings:
+          - nodeGroup: main
+            source: /
+            target: /admin
+            idProvider: system

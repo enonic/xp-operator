@@ -16,7 +16,7 @@
 ###
 FROM fabric8/java-centos-openjdk11-jre
 #RUN apk add --no-cache nss
-COPY --from=alpine/helm:3.0.2 /usr/bin/helm /usr/bin/helm
+COPY --from=alpine/helm:3.1.0 /usr/bin/helm /usr/bin/helm
 COPY src/main/helm /deployments/helm
 ENV JAVA_OPTIONS="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager -Doperator.helm.charts.path=helm"
 ENV AB_ENABLED=jmx_exporter
