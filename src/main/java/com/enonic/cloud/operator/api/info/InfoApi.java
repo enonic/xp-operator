@@ -41,12 +41,12 @@ public class InfoApi
 
         Map<String, Object> conversionResource = new HashMap<>();
         conversionResource.put( "group", "apiextensions.k8s.io" );
-        admissionResource.put( "kind", "ConversionReview" );
-        admissionResource.put( "name", "conversions" );
-        admissionResource.put( "namespaced", false );
-        admissionResource.put( "singularName", "" );
-        admissionResource.put( "verbs", Collections.singletonList( "create" ) );
-        admissionResource.put( "version", "v1beta1" );
+        conversionResource.put( "kind", "ConversionReview" );
+        conversionResource.put( "name", "conversions" );
+        conversionResource.put( "namespaced", false );
+        conversionResource.put( "singularName", "" );
+        conversionResource.put( "verbs", Collections.singletonList( "create" ) );
+        conversionResource.put( "version", "v1beta1" );
 
         Map<String, Object> res = new HashMap<>();
         res.put( "apiVersion", "v1" );
