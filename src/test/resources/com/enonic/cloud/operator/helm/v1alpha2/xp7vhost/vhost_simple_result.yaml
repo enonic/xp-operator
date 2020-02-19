@@ -9,6 +9,11 @@ metadata:
     cert-manager.io/cluster-issuer: "selfsigned"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/configuration-snippet: "# Extra config\n"
+  labels:
+    enonic.managed: "true"
+    cloud: "mycloud"
+    name: "qaxp"
+    project: "myproject"
   name: "test-purplejs-io"
 spec:
   rules:

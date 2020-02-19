@@ -25,7 +25,7 @@ public abstract class RelevantXp7Config
     {
         // Filter by ConfigMap predicate
         Predicate<V1alpha2Xp7Config> filter = c -> {
-            if ( c.getSpec().nodeGroup().equals( cfgStr( "operator.deployment.xp.allNodesKey" ) ) )
+            if ( c.getSpec().nodeGroup().equals( cfgStr( "operator.helm.charts.Values.allNodesKey" ) ) )
             {
                 // Apply to all nodes (config maps)
                 return true;

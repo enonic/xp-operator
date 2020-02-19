@@ -29,14 +29,19 @@ extensions:
     enabled: false
   ecDns:
     enabled: false
+allNodesKey: "all"
+defaultLabels:
+  cloud: "mycloud"
+  project: "myproject"
+  name: "qaxp"
+annotations:
+  alwaysOverwrite: "enonic.alwaysOverwrite"
+  neverOverwrite: "enonic.neverOverwrite"
 storage:
   shared:
     storageClassName: "standard"
     forcePermissions: false
   default:
     storageClassName: "standard"
-defaultLabels:
-  cloud: "mycloud"
-  name: "qaxp"
-  project: "myproject"
-  managedBy: "ec-operator"
+labels:
+  managed: "enonic.managed"

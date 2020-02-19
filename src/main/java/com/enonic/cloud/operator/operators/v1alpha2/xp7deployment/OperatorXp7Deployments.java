@@ -128,6 +128,7 @@ public class OperatorXp7Deployments
         ObjectMeta metaData = new ObjectMeta();
         metaData.setName( info.namespaceName() );
         metaData.setOwnerReferences( Collections.singletonList( info.ownerReference() ) );
+        metaData.setAnnotations( Map.of( cfgStr( "operator.helm.charts.Values.labels.managed" ), "true" ) );
         Namespace namespace = new Namespace();
         namespace.setMetadata( metaData );
         return namespace;
@@ -140,6 +141,7 @@ public class OperatorXp7Deployments
         String passHash = Hashing.sha512().hashString( password, Charsets.UTF_8 ).toString();
 
         ObjectMeta metaData = new ObjectMeta();
+        metaData.setAnnotations( Map.of( cfgStr( "operator.helm.charts.Values.labels.managed" ), "true" ) );
         metaData.setName( "su" );
         Secret secret = new Secret();
         secret.setMetadata( metaData );

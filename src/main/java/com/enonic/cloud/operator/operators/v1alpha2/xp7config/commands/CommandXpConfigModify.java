@@ -1,5 +1,6 @@
 package com.enonic.cloud.operator.operators.v1alpha2.xp7config.commands;
 
+import java.util.Map;
 import java.util.Optional;
 
 import org.immutables.value.Value;
@@ -33,6 +34,8 @@ public abstract class CommandXpConfigModify
 
     public abstract String nodeGroup();
 
+    public abstract Map<String, String> annotations();
+
     @Value.Derived
     protected Optional<V1alpha2Xp7Config> xpConfigResource()
     {
@@ -57,6 +60,7 @@ public abstract class CommandXpConfigModify
         meta.setName( name() );
         meta.setNamespace( info().deploymentInfo().namespaceName() );
         meta.setLabels( info().deploymentInfo().resource().getMetadata().getLabels() );
+        meta.setAnnotations( annotations() );
 
         // Create Xp7Config
         V1alpha2Xp7Config config = new V1alpha2Xp7Config();

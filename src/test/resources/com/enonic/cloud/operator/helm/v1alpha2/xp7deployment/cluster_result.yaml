@@ -3,11 +3,11 @@ apiVersion: "v1"
 kind: "ConfigMap"
 metadata:
   annotations:
-    neverOverwrite: "true"
+    enonic.neverOverwrite: "true"
   labels:
+    enonic.managed: "true"
     nodeGroup: "data"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "data"
@@ -16,10 +16,10 @@ apiVersion: "v1"
 kind: "ConfigMap"
 metadata:
   annotations:
-    neverOverwrite: "true"
+    enonic.neverOverwrite: "true"
   labels:
+    enonic.managed: "true"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "extra-config"
@@ -30,11 +30,11 @@ apiVersion: "v1"
 kind: "ConfigMap"
 metadata:
   annotations:
-    neverOverwrite: "true"
+    enonic.neverOverwrite: "true"
   labels:
+    enonic.managed: "true"
     nodeGroup: "frontend"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "frontend"
@@ -43,11 +43,11 @@ apiVersion: "v1"
 kind: "ConfigMap"
 metadata:
   annotations:
-    neverOverwrite: "true"
+    enonic.neverOverwrite: "true"
   labels:
+    enonic.managed: "true"
     nodeGroup: "master"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "master"
@@ -56,8 +56,8 @@ apiVersion: "v1"
 kind: "PersistentVolumeClaim"
 metadata:
   labels:
+    enonic.managed: "true"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "blobstore"
@@ -73,8 +73,8 @@ apiVersion: "v1"
 kind: "PersistentVolumeClaim"
 metadata:
   labels:
+    enonic.managed: "true"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "snapshots"
@@ -90,8 +90,8 @@ apiVersion: "v1"
 kind: "Service"
 metadata:
   labels:
+    enonic.managed: "true"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "all"
@@ -121,7 +121,6 @@ spec:
   publishNotReadyAddresses: true
   selector:
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   sessionAffinity: "None"
@@ -131,9 +130,9 @@ apiVersion: "v1"
 kind: "Service"
 metadata:
   labels:
+    enonic.managed: "true"
     nodeGroup: "data"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "data"
@@ -164,7 +163,6 @@ spec:
   selector:
     nodeGroup: "data"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   sessionAffinity: "None"
@@ -174,9 +172,9 @@ apiVersion: "v1"
 kind: "Service"
 metadata:
   labels:
+    enonic.managed: "true"
     nodeGroup: "frontend"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "frontend"
@@ -207,7 +205,6 @@ spec:
   selector:
     nodeGroup: "frontend"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   sessionAffinity: "None"
@@ -217,9 +214,9 @@ apiVersion: "v1"
 kind: "Service"
 metadata:
   labels:
+    enonic.managed: "true"
     nodeGroup: "master"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "master"
@@ -250,7 +247,6 @@ spec:
   selector:
     nodeGroup: "master"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   sessionAffinity: "None"
@@ -260,9 +256,9 @@ apiVersion: "apps/v1"
 kind: "StatefulSet"
 metadata:
   labels:
+    enonic.managed: "true"
     nodeGroup: "data"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "data"
@@ -274,7 +270,6 @@ spec:
     matchLabels:
       nodeGroup: "data"
       cloud: "mycloud"
-      managedBy: "ec-operator"
       name: "qaxp"
       project: "myproject"
   serviceName: "all"
@@ -283,7 +278,6 @@ spec:
       labels:
         nodeGroup: "data"
         cloud: "mycloud"
-        managedBy: "ec-operator"
         name: "qaxp"
         project: "myproject"
     spec:
@@ -436,9 +430,9 @@ spec:
     kind: "PersistentVolumeClaim"
     metadata:
       labels:
+        enonic.managed: "true"
         nodeGroup: "data"
         cloud: "mycloud"
-        managedBy: "ec-operator"
         name: "qaxp"
         project: "myproject"
       name: "export"
@@ -454,9 +448,9 @@ spec:
     kind: "PersistentVolumeClaim"
     metadata:
       labels:
+        enonic.managed: "true"
         nodeGroup: "data"
         cloud: "mycloud"
-        managedBy: "ec-operator"
         name: "qaxp"
         project: "myproject"
       name: "index"
@@ -473,9 +467,9 @@ apiVersion: "apps/v1"
 kind: "StatefulSet"
 metadata:
   labels:
+    enonic.managed: "true"
     nodeGroup: "frontend"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "frontend"
@@ -487,7 +481,6 @@ spec:
     matchLabels:
       nodeGroup: "frontend"
       cloud: "mycloud"
-      managedBy: "ec-operator"
       name: "qaxp"
       project: "myproject"
   serviceName: "all"
@@ -496,7 +489,6 @@ spec:
       labels:
         nodeGroup: "frontend"
         cloud: "mycloud"
-        managedBy: "ec-operator"
         name: "qaxp"
         project: "myproject"
     spec:
@@ -656,9 +648,9 @@ spec:
     kind: "PersistentVolumeClaim"
     metadata:
       labels:
+        enonic.managed: "true"
         nodeGroup: "frontend"
         cloud: "mycloud"
-        managedBy: "ec-operator"
         name: "qaxp"
         project: "myproject"
       name: "export"
@@ -674,9 +666,9 @@ spec:
     kind: "PersistentVolumeClaim"
     metadata:
       labels:
+        enonic.managed: "true"
         nodeGroup: "frontend"
         cloud: "mycloud"
-        managedBy: "ec-operator"
         name: "qaxp"
         project: "myproject"
       name: "work"
@@ -693,9 +685,9 @@ apiVersion: "apps/v1"
 kind: "StatefulSet"
 metadata:
   labels:
+    enonic.managed: "true"
     nodeGroup: "master"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "master"
@@ -707,7 +699,6 @@ spec:
     matchLabels:
       nodeGroup: "master"
       cloud: "mycloud"
-      managedBy: "ec-operator"
       name: "qaxp"
       project: "myproject"
   serviceName: "all"
@@ -716,7 +707,6 @@ spec:
       labels:
         nodeGroup: "master"
         cloud: "mycloud"
-        managedBy: "ec-operator"
         name: "qaxp"
         project: "myproject"
     spec:
@@ -872,9 +862,9 @@ spec:
     kind: "PersistentVolumeClaim"
     metadata:
       labels:
+        enonic.managed: "true"
         nodeGroup: "master"
         cloud: "mycloud"
-        managedBy: "ec-operator"
         name: "qaxp"
         project: "myproject"
       name: "export"
@@ -891,8 +881,8 @@ kind: "Xp7App"
 apiVersion: "enonic.cloud/v1alpha1"
 metadata:
   labels:
+    enonic.managed: "true"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "alive"
@@ -903,8 +893,8 @@ kind: "Xp7App"
 apiVersion: "enonic.cloud/v1alpha1"
 metadata:
   labels:
+    enonic.managed: "true"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "snapshotter"
@@ -915,10 +905,10 @@ kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   annotations:
-    neverOverwrite: "true"
+    enonic.neverOverwrite: "true"
   labels:
+    enonic.managed: "true"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "all-admin"
@@ -931,10 +921,10 @@ kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   annotations:
-    neverOverwrite: "true"
+    enonic.neverOverwrite: "true"
   labels:
+    enonic.managed: "true"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "all-system"
@@ -948,8 +938,8 @@ kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   labels:
+    enonic.managed: "true"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "data-cluster"
@@ -963,8 +953,8 @@ kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   labels:
+    enonic.managed: "true"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "data-elasticsearch"
@@ -978,25 +968,9 @@ spec:
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
-  annotations:
-    neverOverwrite: "true"
   labels:
+    enonic.managed: "true"
     cloud: "mycloud"
-    managedBy: "ec-operator"
-    name: "qaxp"
-    project: "myproject"
-  name: "data-vhosts"
-spec:
-  file: "com.enonic.xp.web.vhost.cfg"
-  nodeGroup: "data"
-  data: "enabled = true"
----
-kind: "Xp7Config"
-apiVersion: "enonic.cloud/v1alpha2"
-metadata:
-  labels:
-    cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "frontend-cluster"
@@ -1010,8 +984,8 @@ kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   labels:
+    enonic.managed: "true"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "frontend-elasticsearch"
@@ -1025,25 +999,9 @@ spec:
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
-  annotations:
-    neverOverwrite: "true"
   labels:
+    enonic.managed: "true"
     cloud: "mycloud"
-    managedBy: "ec-operator"
-    name: "qaxp"
-    project: "myproject"
-  name: "frontend-vhosts"
-spec:
-  file: "com.enonic.xp.web.vhost.cfg"
-  nodeGroup: "frontend"
-  data: "enabled = true"
----
-kind: "Xp7Config"
-apiVersion: "enonic.cloud/v1alpha2"
-metadata:
-  labels:
-    cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "master-cluster"
@@ -1057,8 +1015,8 @@ kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   labels:
+    enonic.managed: "true"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "master-elasticsearch"
@@ -1069,30 +1027,12 @@ spec:
     http.enabled=false\ngateway.expected_master_nodes=2\ngateway.expected_data_nodes=2\n\
     gateway.recover_after_time=5m\ndiscovery.zen.minimum_master_nodes=2\nnetwork.tcp.keep_alive=true"
 ---
-kind: "Xp7Config"
-apiVersion: "enonic.cloud/v1alpha2"
-metadata:
-  annotations:
-    neverOverwrite: "true"
-  labels:
-    cloud: "mycloud"
-    managedBy: "ec-operator"
-    name: "qaxp"
-    project: "myproject"
-  name: "master-vhosts"
-spec:
-  file: "com.enonic.xp.web.vhost.cfg"
-  nodeGroup: "master"
-  data: "enabled = true"
----
 kind: "Xp7VHost"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
-  annotations:
-    alwaysOverwrite: "true"
   labels:
+    enonic.managed: "true"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "healthcheck"
@@ -1110,11 +1050,9 @@ spec:
 kind: "Xp7VHost"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
-  annotations:
-    alwaysOverwrite: "true"
   labels:
+    enonic.managed: "true"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "localhost"

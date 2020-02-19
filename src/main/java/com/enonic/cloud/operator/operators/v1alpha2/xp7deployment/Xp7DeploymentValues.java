@@ -35,7 +35,6 @@ public abstract class Xp7DeploymentValues
 
         Map<String, Object> deployment = new HashMap<>();
         deployment.put( "name", info().deploymentName() );
-        deployment.put( "allNodeGroupsKey", allNodeGroupsKey() );
         deployment.put( "clustered", isClustered );
         if ( isClustered )
         {
@@ -76,7 +75,7 @@ public abstract class Xp7DeploymentValues
 
     private String allNodeGroupsKey()
     {
-        return cfgStr( "operator.deployment.xp.allNodesKey" );
+        return cfgStr( "operator.helm.charts.Values.allNodesKey" );
     }
 
     private Integer minimumMasterNodes( V1alpha2Xp7Deployment resource )

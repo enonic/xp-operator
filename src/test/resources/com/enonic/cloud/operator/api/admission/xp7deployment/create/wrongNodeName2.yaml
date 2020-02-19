@@ -1,0 +1,29 @@
+testResult: "Node groups cannot be named 'all' because that is the identifier for all nodeGroups"
+testReview:
+  request:
+    operation: CREATE
+    object:
+      apiVersion: enonic.cloud/v1alpha2
+      kind: Xp7Deployment
+      metadata:
+        name: mycloud-myproject-qaxp
+        labels:
+          cloud: mycloud
+          project: myproject
+          name: qaxp
+      spec:
+        enabled: true
+        xpVersion: 7.1.2
+        nodesSharedDisks:
+          blobstore: 1Gi
+          snapshots: 1Gi
+        nodeGroups:
+          all:
+            master: true
+            data: true
+            replicas: 1
+            resources:
+              cpu: "1"
+              memory: 512Mi
+              disks:
+                index: 200Mi

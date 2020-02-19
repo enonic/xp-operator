@@ -7,6 +7,7 @@ kind: Xp7Config
 metadata:
   name: {{ $nodeGroupName }}-cluster
   labels:
+    {{ $.Values.labels.managed }}: true
     {{- with $.Values.defaultLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
@@ -20,11 +21,11 @@ spec:
     cluster.enabled=true
     node.name=${env.XP_NODE_NAME}
     discovery.unicast.hosts={{ $.Values.deployment.discoveryHosts | join "," }}
-    network.publish.host=${env.XP_NODE_NAME}.{{ $.Values.deployment.allNodeGroupsKey }}
+    network.publish.host=${env.XP_NODE_NAME}.{{ $.Values.allNodesKey }}
   {{- if $.Values.extensions.linkerd.enabled }}
       network.host=127.0.0.1
     {{- else }}
-      network.host=${env.XP_NODE_NAME}.{{ $.Values.deployment.allNodeGroupsKey }}
+      network.host=${env.XP_NODE_NAME}.{{ $.Values.allNodesKey }}
     {{- end }}
   {{- end }}
 
@@ -36,6 +37,7 @@ kind: Xp7Config
 metadata:
   name: {{ $nodeGroupName }}-elasticsearch
   labels:
+    {{ $.Values.labels.managed }}: true
     {{- with $.Values.defaultLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
@@ -57,23 +59,5 @@ spec:
     network.tcp.keep_alive=true
   {{- end }}
 
----
-
-# VHosts configuration
-apiVersion: enonic.cloud/v1alpha2
-kind: Xp7Config
-metadata:
-  name: {{ $nodeGroupName }}-vhosts
-  annotations:
-    neverOverwrite: true
-  labels:
-    {{- with $.Values.defaultLabels }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
-spec:
-  nodeGroup: {{ $nodeGroupName }}
-  file: com.enonic.xp.web.vhost.cfg
-  data: |- # Operator will manage this Xp7Config so leave data empty
-    enabled = true
 ---
 {{- end }}

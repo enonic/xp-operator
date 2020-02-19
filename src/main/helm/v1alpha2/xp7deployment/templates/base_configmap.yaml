@@ -4,8 +4,9 @@ kind: ConfigMap
 metadata:
   name: extra-config
   annotations:
-    neverOverwrite: true
+    {{ $.Values.annotations.neverOverwrite }}: true
   labels:
+    {{ $.Values.labels.managed }}: true
     {{- with $.Values.defaultLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}

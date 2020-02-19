@@ -38,9 +38,10 @@ public abstract class CommandXpAppsApply
             clients( clients() ).
             caches( caches() ).
             info( info() ).
-            nodeGroup( cfgStr( "operator.deployment.xp.allNodesKey" ) ).
-            name( cfgStrFmt( "operator.deployment.xp.config.deploy.nameTemplate", cfgStr( "operator.deployment.xp.allNodesKey" ) ) ).
+            nodeGroup( cfgStr( "operator.helm.charts.Values.allNodesKey" ) ).
+            name( cfgStrFmt( "operator.deployment.xp.config.deploy.nameTemplate", cfgStr( "operator.helm.charts.Values.allNodesKey" ) ) ).
             file( cfgStr( "operator.deployment.xp.config.deploy.file" ) ).
+            putAnnotations( cfgStr( "operator.helm.charts.Values.labels.managed" ), "true" ).
             xpAppResources( allApps ).
             build().
             addCommands( commandBuilder );

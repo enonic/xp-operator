@@ -62,7 +62,7 @@ public abstract class CommandConfigMapUpdateAll
                 // This is not a node config, ignore it
                 return false;
             }
-            if ( configResource.getSpec().nodeGroup().equals( cfgStr( "operator.deployment.xp.allNodesKey" ) ) )
+            if ( configResource.getSpec().nodeGroup().equals( cfgStr( "operator.helm.charts.Values.allNodesKey" ) ) )
             {
                 // Apply to all nodes (config maps)
                 return true;

@@ -10,6 +10,8 @@ import io.fabric8.kubernetes.api.model.ConfigMapList;
 
 import com.enonic.cloud.operator.operators.common.clients.Clients;
 
+import static com.enonic.cloud.operator.common.Configuration.cfgStr;
+
 @Singleton
 public class ConfigMapCache
     extends Cache<ConfigMap, ConfigMapList>
@@ -21,6 +23,6 @@ public class ConfigMapCache
             getDefaultClient().
             configMaps().
             inAnyNamespace().
-            withLabel( "managedBy", "ec-operator" ) );
+            withLabel( cfgStr( "operator.helm.charts.Values.labels.managed" ), "true" ) );
     }
 }

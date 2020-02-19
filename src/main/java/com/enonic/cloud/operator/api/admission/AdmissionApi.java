@@ -35,6 +35,7 @@ import com.enonic.cloud.operator.operators.v1alpha1.xp7app.info.ImmutableInfoXp7
 import com.enonic.cloud.operator.operators.v1alpha2.xp7config.info.ImmutableInfoXp7Config;
 import com.enonic.cloud.operator.operators.v1alpha2.xp7config.info.InfoXp7Config;
 import com.enonic.cloud.operator.operators.v1alpha2.xp7deployment.info.ImmutableInfoXp7Deployment;
+import com.enonic.cloud.operator.operators.v1alpha2.xp7deployment.info.InfoXp7Deployment;
 import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.info.ImmutableInfoXp7VHost;
 import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.info.InfoXp7VHost;
 
@@ -49,7 +50,7 @@ public class AdmissionApi
 
     private final Map<Class<? extends HasMetadata>, Consumer<AdmissionReview>> admissionFunctionMap;
 
-    @ConfigProperty(name = "operator.deployment.xp.allNodesKey")
+    @ConfigProperty(name = "operator.helm.charts.Values.allNodesKey")
     String allNodesPicker;
 
     @Inject
@@ -124,10 +125,13 @@ public class AdmissionApi
 
     private void xpDeploymentReview( final AdmissionReview review )
     {
-        ImmutableInfoXp7Deployment.builder().
+        InfoXp7Deployment deployment = ImmutableInfoXp7Deployment.builder().
             oldResource( Optional.ofNullable( review.getRequest().getOldObject() ).map( obj -> (V1alpha2Xp7Deployment) obj ) ).
             newResource( Optional.ofNullable( review.getRequest().getObject() ).map( obj -> (V1alpha2Xp7Deployment) obj ) ).
             build();
+        deployment.resource().getSpec().nodeGroups().keySet().forEach(
+            nodeGroup -> Preconditions.checkState( !allNodesPicker.equals( nodeGroup ), "Node groups cannot be named '" + allNodesPicker +
+                "' because that is the identifier for all nodeGroups" ) );
     }
 
     private void xpVHostReview( final AdmissionReview review )
@@ -140,7 +144,7 @@ public class AdmissionApi
 
         for ( V1alpha2Xp7VHostSpecMapping mapping : vHost.resource().getSpec().mappings() )
         {
-            if ( !cfgStr( "operator.deployment.xp.allNodesKey" ).equals( mapping.nodeGroup() ) )
+            if ( !cfgStr( "operator.helm.charts.Values.allNodesKey" ).equals( mapping.nodeGroup() ) )
             {
                 Preconditions.checkState( vHost.deploymentInfo().resource().getSpec().nodeGroups().containsKey( mapping.nodeGroup() ),
                                           String.format( "Xp7Deployment '%s' does not contain nodeGroup '%s'",
@@ -167,7 +171,7 @@ public class AdmissionApi
             newResource( Optional.ofNullable( review.getRequest().getObject() ).map( obj -> (V1alpha2Xp7Config) obj ) ).
             build();
 
-        if ( !cfgStr( "operator.deployment.xp.allNodesKey" ).equals( config.resource().getSpec().nodeGroup() ) )
+        if ( !cfgStr( "operator.helm.charts.Values.allNodesKey" ).equals( config.resource().getSpec().nodeGroup() ) )
         {
             String nodeGroup = config.resource().getSpec().nodeGroup();
             Preconditions.checkState( config.deploymentInfo().resource().getSpec().nodeGroups().containsKey( nodeGroup ),

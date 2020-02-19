@@ -60,7 +60,7 @@ public abstract class CommandPrePullImages
 
         String name = "ec-pre-pull-images";
 
-        String imageTemplate = cfgStr( "operator.deployment.xp.pod.imageTemplate" );
+        String imageTemplate = cfgStr( "operator.helm.imageTemplate" );
         List<String> commands = versions().stream().
             map( v -> String.format( imageTemplate, v ) ).
             map( v -> "docker pull " + v ).

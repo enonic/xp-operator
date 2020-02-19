@@ -3,10 +3,10 @@ apiVersion: "v1"
 kind: "ConfigMap"
 metadata:
   annotations:
-    neverOverwrite: "true"
+    enonic.neverOverwrite: "true"
   labels:
+    enonic.managed: "true"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "extra-config"
@@ -17,11 +17,11 @@ apiVersion: "v1"
 kind: "ConfigMap"
 metadata:
   annotations:
-    neverOverwrite: "true"
+    enonic.neverOverwrite: "true"
   labels:
+    enonic.managed: "true"
     nodeGroup: "fisk"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "fisk"
@@ -30,8 +30,8 @@ apiVersion: "v1"
 kind: "PersistentVolumeClaim"
 metadata:
   labels:
+    enonic.managed: "true"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "blobstore"
@@ -47,8 +47,8 @@ apiVersion: "v1"
 kind: "PersistentVolumeClaim"
 metadata:
   labels:
+    enonic.managed: "true"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "snapshots"
@@ -64,8 +64,8 @@ apiVersion: "v1"
 kind: "Service"
 metadata:
   labels:
+    enonic.managed: "true"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "all"
@@ -95,7 +95,6 @@ spec:
   publishNotReadyAddresses: true
   selector:
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   sessionAffinity: "None"
@@ -105,9 +104,9 @@ apiVersion: "v1"
 kind: "Service"
 metadata:
   labels:
+    enonic.managed: "true"
     nodeGroup: "fisk"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "fisk"
@@ -138,7 +137,6 @@ spec:
   selector:
     nodeGroup: "fisk"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   sessionAffinity: "None"
@@ -148,9 +146,9 @@ apiVersion: "apps/v1"
 kind: "StatefulSet"
 metadata:
   labels:
+    enonic.managed: "true"
     nodeGroup: "fisk"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "fisk"
@@ -162,7 +160,6 @@ spec:
     matchLabels:
       nodeGroup: "fisk"
       cloud: "mycloud"
-      managedBy: "ec-operator"
       name: "qaxp"
       project: "myproject"
   serviceName: "all"
@@ -171,7 +168,6 @@ spec:
       labels:
         nodeGroup: "fisk"
         cloud: "mycloud"
-        managedBy: "ec-operator"
         name: "qaxp"
         project: "myproject"
     spec:
@@ -331,9 +327,9 @@ spec:
     kind: "PersistentVolumeClaim"
     metadata:
       labels:
+        enonic.managed: "true"
         nodeGroup: "fisk"
         cloud: "mycloud"
-        managedBy: "ec-operator"
         name: "qaxp"
         project: "myproject"
       name: "export"
@@ -349,9 +345,9 @@ spec:
     kind: "PersistentVolumeClaim"
     metadata:
       labels:
+        enonic.managed: "true"
         nodeGroup: "fisk"
         cloud: "mycloud"
-        managedBy: "ec-operator"
         name: "qaxp"
         project: "myproject"
       name: "index"
@@ -367,9 +363,9 @@ spec:
     kind: "PersistentVolumeClaim"
     metadata:
       labels:
+        enonic.managed: "true"
         nodeGroup: "fisk"
         cloud: "mycloud"
-        managedBy: "ec-operator"
         name: "qaxp"
         project: "myproject"
       name: "work"
@@ -386,8 +382,8 @@ kind: "Xp7App"
 apiVersion: "enonic.cloud/v1alpha1"
 metadata:
   labels:
+    enonic.managed: "true"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "alive"
@@ -398,8 +394,8 @@ kind: "Xp7App"
 apiVersion: "enonic.cloud/v1alpha1"
 metadata:
   labels:
+    enonic.managed: "true"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "snapshotter"
@@ -410,10 +406,10 @@ kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   annotations:
-    neverOverwrite: "true"
+    enonic.neverOverwrite: "true"
   labels:
+    enonic.managed: "true"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "all-admin"
@@ -426,10 +422,10 @@ kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   annotations:
-    neverOverwrite: "true"
+    enonic.neverOverwrite: "true"
   labels:
+    enonic.managed: "true"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "all-system"
@@ -443,8 +439,8 @@ kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   labels:
+    enonic.managed: "true"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "fisk-cluster"
@@ -457,8 +453,8 @@ kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   labels:
+    enonic.managed: "true"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "fisk-elasticsearch"
@@ -467,30 +463,12 @@ spec:
   nodeGroup: "fisk"
   data: "http.enabled=false"
 ---
-kind: "Xp7Config"
-apiVersion: "enonic.cloud/v1alpha2"
-metadata:
-  annotations:
-    neverOverwrite: "true"
-  labels:
-    cloud: "mycloud"
-    managedBy: "ec-operator"
-    name: "qaxp"
-    project: "myproject"
-  name: "fisk-vhosts"
-spec:
-  file: "com.enonic.xp.web.vhost.cfg"
-  nodeGroup: "fisk"
-  data: "enabled = true"
----
 kind: "Xp7VHost"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
-  annotations:
-    alwaysOverwrite: "true"
   labels:
+    enonic.managed: "true"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "healthcheck"
@@ -508,11 +486,9 @@ spec:
 kind: "Xp7VHost"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
-  annotations:
-    alwaysOverwrite: "true"
   labels:
+    enonic.managed: "true"
     cloud: "mycloud"
-    managedBy: "ec-operator"
     name: "qaxp"
     project: "myproject"
   name: "localhost"

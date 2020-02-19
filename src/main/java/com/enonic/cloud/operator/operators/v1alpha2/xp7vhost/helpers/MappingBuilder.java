@@ -39,7 +39,7 @@ public abstract class MappingBuilder
 
         // Add mappings to nodes
         mappings.forEach( m -> {
-            if ( m.nodeGroup().equals( cfgStr( "operator.deployment.xp.allNodesKey" ) ) )
+            if ( m.nodeGroup().equals( cfgStr( "operator.helm.charts.Values.allNodesKey" ) ) )
             {
                 result.values().forEach( v -> v.add( m ) );
             }

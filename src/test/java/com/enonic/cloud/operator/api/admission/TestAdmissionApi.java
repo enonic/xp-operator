@@ -33,7 +33,7 @@ class TestAdmissionApi
     TestAdmissionApi()
     {
         mapper = new ObjectMapper( new YAMLFactory() );
-        allNodesPicker = cfgStr( "operator.deployment.xp.allNodesKey" );
+        allNodesPicker = cfgStr( "operator.helm.charts.Values.allNodesKey" );
         deploymentCache = new TestXp7DeploymentCache();
         vHostCache = new TestXp7VHostCache();
         caches = new Caches( null, null, null, deploymentCache, null, vHostCache );

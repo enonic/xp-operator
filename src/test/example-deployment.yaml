@@ -20,7 +20,7 @@ spec:
       master: true
       replicas: 1
       env:
-        test: test
+        test: test1
       resources:
         cpu: "1"
         memory: 512Mi
@@ -28,16 +28,16 @@ spec:
           export: 100Mi
           index: 100Mi
           work: 100Mi
-#    ost:
-#      data: true
-#      master: true
-#      replicas: 2
-#      env:
-#        test: test131
-#      resources:
-#        cpu: "1"
-#        memory: 512Mi
-#        disks:
-#          export: 100Mi
-#          index: 100Mi
-#          work: 100Mi
+    ost:
+      data: true
+      master: true
+      replicas: 2
+      env:
+        test: test131
+      resources:
+        cpu: "1"
+        memory: 512Mi
+        disks:
+          export: 100Mi
+          index: 100Mi
+          work: 100Mi

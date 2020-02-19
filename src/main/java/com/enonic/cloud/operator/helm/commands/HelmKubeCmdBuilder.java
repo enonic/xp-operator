@@ -20,6 +20,8 @@ import com.enonic.cloud.operator.kubectl.base.ImmutableKubeCommandOptions;
 import com.enonic.cloud.operator.kubectl.base.KubeCommandOptions;
 import com.enonic.cloud.operator.operators.common.clients.Clients;
 
+import static com.enonic.cloud.operator.common.Configuration.cfgStr;
+
 @Value.Immutable
 public abstract class HelmKubeCmdBuilder
     implements CombinedCommandBuilder
@@ -95,14 +97,16 @@ public abstract class HelmKubeCmdBuilder
             return builder.build();
         }
 
-        if ( annotations.containsKey( "neverOverwrite" ) )
+        String neverOverwrite = cfgStr( "operator.helm.charts.Values.annotations.neverOverwrite" );
+        if ( annotations.containsKey( neverOverwrite ) )
         {
-            builder.neverOverwrite( annotations.get( "neverOverwrite" ).equals( "true" ) );
+            builder.neverOverwrite( annotations.get( neverOverwrite ).equals( "true" ) );
         }
 
-        if ( annotations.containsKey( "alwaysOverwrite" ) )
+        String alwaysOverwrite = cfgStr( "operator.helm.charts.Values.annotations.alwaysOverwrite" );
+        if ( annotations.containsKey( alwaysOverwrite ) )
         {
-            builder.alwaysOverwrite( annotations.get( "alwaysOverwrite" ).equals( "true" ) );
+            builder.alwaysOverwrite( annotations.get( alwaysOverwrite ).equals( "true" ) );
         }
 
         return builder.build();

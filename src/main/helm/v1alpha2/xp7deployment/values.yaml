@@ -41,6 +41,7 @@ extraConfigLocation: /enonic-xp/home/extra-config
 user: 1337
 terminationGracePeriodSeconds: 30
 updateStrategy: RollingUpdate
+initContainersImage: alpine:3.10
 
 # Filled in by operator
 # deployment:

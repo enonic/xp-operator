@@ -45,6 +45,7 @@ public abstract class CommandXpVHostsApplyNodeMappings
                 info( info() ).
                 name( cfgStrFmt( "operator.deployment.xp.config.vhosts.nameTemplate", nodeName ) ).
                 file( cfgStr( "operator.deployment.xp.config.vhosts.file" ) ).
+                putAnnotations( cfgStr( "operator.helm.charts.Values.labels.managed" ), "true" ).
                 nodeGroup( nodeName ).
                 mappings( mappings ).
                 build().
