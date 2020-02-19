@@ -94,7 +94,7 @@ spec:
           command:
             - ash
             - -c
-            - sleep 5; x="0"; while [ "$x" == "0" ]; do nslookup ${XP_NODE_NAME}.{{ $.Values.deployment.allNodeGroupsKey }} && x="1"; sleep 2; done
+            - sleep 10; x="0"; while [ "$x" == "0" ]; do nslookup ${XP_NODE_NAME}.{{ $.Values.deployment.allNodeGroupsKey }} && x="1"; sleep 2; done
 
       containers:
         - name: exp

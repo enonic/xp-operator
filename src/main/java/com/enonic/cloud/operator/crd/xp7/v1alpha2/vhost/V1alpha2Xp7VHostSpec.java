@@ -22,6 +22,12 @@ public abstract class V1alpha2Xp7VHostSpec
     public abstract String host();
 
     @Value.Default
+    public String maxBodySize()
+    {
+        return "100m";
+    }
+
+    @Value.Default
     public Boolean skipIngress()
     {
         return false;

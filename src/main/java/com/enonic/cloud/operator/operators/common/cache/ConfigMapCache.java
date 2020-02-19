@@ -1,5 +1,7 @@
 package com.enonic.cloud.operator.operators.common.cache;
 
+import java.util.concurrent.Executors;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -15,7 +17,7 @@ public class ConfigMapCache
     @Inject
     public ConfigMapCache( Clients clients )
     {
-        super( clients.
+        super( Executors.newSingleThreadExecutor(), clients.
             getDefaultClient().
             configMaps().
             inAnyNamespace().

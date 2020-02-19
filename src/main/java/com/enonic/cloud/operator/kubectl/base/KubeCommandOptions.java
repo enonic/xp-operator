@@ -1,19 +1,13 @@
 package com.enonic.cloud.operator.kubectl.base;
 
+import java.util.Optional;
+
 import org.immutables.value.Value;
 
 @Value.Immutable
-public class KubeCommandOptions
+public abstract class KubeCommandOptions
 {
-    @Value.Default
-    protected boolean replaceOld()
-    {
-        return false;
-    }
+    protected abstract Optional<Boolean> alwaysOverwrite();
 
-    @Value.Default
-    protected boolean neverOverwrite()
-    {
-        return false;
-    }
+    protected abstract Optional<Boolean> neverOverwrite();
 }

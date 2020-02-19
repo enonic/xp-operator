@@ -1,4 +1,4 @@
-# Default apps installed in the cluster
+# Setup default apps installed in the cluster
 apiVersion: enonic.cloud/v1alpha1
 kind: Xp7App
 metadata:

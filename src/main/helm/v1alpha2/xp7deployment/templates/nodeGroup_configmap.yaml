@@ -5,7 +5,7 @@ kind: ConfigMap
 metadata:
   name: {{ $nodeGroupName }}
   annotations:
-    neverOverwrite: true # This is done so if the chart is applied it will not override the existing resource
+    neverOverwrite: true
   labels:
     nodeGroup: {{ $nodeGroupName }}
     {{- with $.Values.defaultLabels }}

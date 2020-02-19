@@ -2,11 +2,18 @@
 image: "7.1.2"
 extensions:
   ingress:
-    DDOS: false
-    stickySession: false
-    caching: false
-  linkerd: false
-  ecDns: false
+    DDOS:
+      limitConnections: "5"
+      enabled: false
+      limitRpm: "100"
+    stickySession:
+      enabled: false
+    caching:
+      enabled: false
+  linkerd:
+    enabled: false
+  ecDns:
+    enabled: false
 storage:
   shared:
     storageClassName: "standard"

@@ -17,5 +17,4 @@ public abstract class DiffXp7VHost
             newValue( newValue().map( V1alpha2Xp7VHost::getSpec ) ).
             build();
     }
-
 }

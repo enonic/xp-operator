@@ -41,7 +41,8 @@ public class OperatorXp7Config
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private void watchXpConfig( final String actionId, final Watcher.Action action, final Optional<V1alpha2Xp7Config> oldResource, final Optional<V1alpha2Xp7Config> newResource )
+    private void watchXpConfig( final String actionId, final Watcher.Action action, final Optional<V1alpha2Xp7Config> oldResource,
+                                final Optional<V1alpha2Xp7Config> newResource )
     {
         Optional<ResourceInfoNamespaced<V1alpha2Xp7Config, DiffXp7Config>> i = getInfo( action, () -> ImmutableInfoXp7Config.builder().
             caches( caches ).
@@ -56,37 +57,4 @@ public class OperatorXp7Config
             build().
             addCommands( commandBuilder ) ) );
     }
-
-//    private void watchConfigMap( final Watcher.Action action, final String id, final Optional<ConfigMap> oldResource,
-//                                 final Optional<ConfigMap> newResource )
-//    {
-//        // This is to make sure that the config map is in sync with the Xp7Configs
-//        newResource.ifPresent( oldConfigMap -> {
-//            String cmdId = createCmdId();
-//            stallAndRunCommands( "", 60000L, cmdId, commandBuilder -> {
-//                // Fetch from the cache status of the config map
-//                caches.getConfigMapCache().
-//                    get( oldConfigMap.getMetadata().getNamespace(), oldConfigMap.getMetadata().getName() ).
-//                    ifPresent( configMap -> {
-//                        log.info( String.format( "%s: In NS '%s' ensuring ConfigMap '%s' consistency", cmdId,
-//                                                 configMap.getMetadata().getNamespace(), configMap.getMetadata().getName() ) );
-//
-//                        // Get all relevant XpConfig for this ConfigMap
-//                        List<V1alpha2Xp7Config> allXpConfigs = ImmutableRelevantXp7Config.builder().
-//                            caches( caches ).
-//                            configMap( configMap ).
-//                            build().
-//                            xp7Configs();
-//
-//                        // Update ConfigMap
-//                        ImmutableCommandConfigMapUpdate.builder().
-//                            clients( clients ).
-//                            configMap( configMap ).
-//                            xpConfigResources( allXpConfigs ).
-//                            build().
-//                            addCommands( commandBuilder );
-//                    } );
-//            } );
-//        } );
-//    }
 }

@@ -17,6 +17,7 @@ import com.enonic.cloud.operator.helm.Chart;
 import com.enonic.cloud.operator.helm.Helm;
 import com.enonic.cloud.operator.kubectl.ImmutableKubeCmd;
 import com.enonic.cloud.operator.kubectl.base.ImmutableKubeCommandOptions;
+import com.enonic.cloud.operator.kubectl.base.KubeCommandOptions;
 import com.enonic.cloud.operator.operators.common.clients.Clients;
 
 @Value.Immutable
@@ -70,9 +71,6 @@ public abstract class HelmKubeCmdBuilder
                     clients( clients() ).
                     namespace( namespace() ).
                     resource( r.getValue() ).
-                    options( ImmutableKubeCommandOptions.builder().
-                        neverOverwrite( neverOverwrite( r.getValue().getMetadata().getAnnotations() ) ).
-                        build() ).
                     build().
                     delete( commandBuilder );
             }
@@ -83,20 +81,30 @@ public abstract class HelmKubeCmdBuilder
                 clients( clients() ).
                 namespace( namespace() ).
                 resource( r.getValue() ).
-                options( ImmutableKubeCommandOptions.builder().
-                    neverOverwrite( neverOverwrite( r.getValue().getMetadata().getAnnotations() ) ).
-                    build() ).
+                options( createOptions( r.getValue().getMetadata().getAnnotations() ) ).
                 build().
                 apply( commandBuilder );
         }
     }
 
-    private boolean neverOverwrite( final Map<String, String> annotations )
+    private KubeCommandOptions createOptions( final Map<String, String> annotations )
     {
+        ImmutableKubeCommandOptions.Builder builder = ImmutableKubeCommandOptions.builder();
         if ( annotations == null )
         {
-            return false;
+            return builder.build();
         }
-        return annotations.getOrDefault( "neverOverwrite", "false" ).equals( "true" );
+
+        if ( annotations.containsKey( "neverOverwrite" ) )
+        {
+            builder.neverOverwrite( annotations.get( "neverOverwrite" ).equals( "true" ) );
+        }
+
+        if ( annotations.containsKey( "alwaysOverwrite" ) )
+        {
+            builder.alwaysOverwrite( annotations.get( "alwaysOverwrite" ).equals( "true" ) );
+        }
+
+        return builder.build();
     }
 }

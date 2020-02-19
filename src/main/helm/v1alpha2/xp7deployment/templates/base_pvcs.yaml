@@ -1,3 +1,4 @@
+# Setup shared volumes persistent claims
 {{- range $name, $size := .Values.deployment.spec.nodesSharedDisks }}
 ---
 apiVersion: v1
@@ -6,8 +7,8 @@ metadata:
   name: {{ $name }}
   labels:
     {{- with $.Values.defaultLabels }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
+      {{- toYaml . | nindent 4 }}
+      {{- end }}
 spec:
   storageClassName: {{ $.Values.storage.shared.storageClassName }}
   accessModes:

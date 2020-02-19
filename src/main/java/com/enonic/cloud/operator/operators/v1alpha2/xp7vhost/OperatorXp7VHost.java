@@ -11,6 +11,7 @@ import javax.inject.Named;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.client.Watcher;
 import io.quarkus.runtime.StartupEvent;
 
@@ -22,8 +23,11 @@ import com.enonic.cloud.operator.operators.common.OperatorNamespaced;
 import com.enonic.cloud.operator.operators.common.ResourceInfoNamespaced;
 import com.enonic.cloud.operator.operators.common.cache.Caches;
 import com.enonic.cloud.operator.operators.common.clients.Clients;
-import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.commands.ImmutableCommandXpVHostsApply;
+import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.commands.ImmutableCommandXpVHostsApplyNodeMappings;
+import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.helpers.MappingBuilder;
+import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.info.DiffConfigMap;
 import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.info.DiffXp7VHost;
+import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.info.ImmutableInfoXp7ConfigMap;
 import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.info.ImmutableInfoXp7VHost;
 
 @SuppressWarnings("WeakerAccess")
@@ -54,10 +58,14 @@ public class OperatorXp7VHost
     {
         caches.getVHostCache().addEventListener( this::watchVHosts );
         log.info( "Started listening for Xp7VHost events" );
+
+        caches.getConfigMapCache().addEventListener( this::watchConfigMap );
+        log.info( "Started listening for ConfigMap events" );
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private void watchVHosts( final String actionId, final Watcher.Action action, final Optional<V1alpha2Xp7VHost> oldResource, final Optional<V1alpha2Xp7VHost> newResource )
+    private void watchVHosts( final String actionId, final Watcher.Action action, final Optional<V1alpha2Xp7VHost> oldResource,
+                              final Optional<V1alpha2Xp7VHost> newResource )
     {
         Optional<ResourceInfoNamespaced<V1alpha2Xp7VHost, DiffXp7VHost>> i = getInfo( action, () -> ImmutableInfoXp7VHost.builder().
             caches( caches ).
@@ -80,12 +88,50 @@ public class OperatorXp7VHost
                 addCommands( commandBuilder );
 
             // Update config
-            ImmutableCommandXpVHostsApply.builder().
-                clients( clients ).
+            ImmutableCommandXpVHostsApplyNodeMappings.builder().
                 caches( caches ).
+                clients( clients ).
                 info( info ).
+                nodeMappings( MappingBuilder.getNodeMappings( caches, info ) ).
                 build().
                 addCommands( commandBuilder );
         } ) );
+    }
+
+    // This watcher is to make sure new node config maps get the correct vhost configuration
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    private void watchConfigMap( final String actionId, final Watcher.Action action, final Optional<ConfigMap> oldResource,
+                                 final Optional<ConfigMap> newResource )
+    {
+        // We only care about new ConfigMaps
+        if ( action != Watcher.Action.ADDED )
+        {
+            return;
+        }
+
+        // Give other process some slack to finish its thing
+        try
+        {
+            Thread.sleep( 2000L );
+        }
+        catch ( InterruptedException e )
+        {
+            // Ignore
+        }
+
+        Optional<ResourceInfoNamespaced<ConfigMap, DiffConfigMap>> i = getInfo( action, () -> ImmutableInfoXp7ConfigMap.builder().
+            caches( caches ).
+            oldResource( oldResource ).
+            newResource( newResource ).
+            build() );
+
+        // Update config
+        i.ifPresent( info -> runCommands( actionId, ( commandBuilder ) -> ImmutableCommandXpVHostsApplyNodeMappings.builder().
+            caches( caches ).
+            clients( clients ).
+            info( info ).
+            nodeMappings( MappingBuilder.getNodeMappings( caches, info ) ).
+            build().
+            addCommands( commandBuilder ) ) );
     }
 }

@@ -30,23 +30,35 @@ public abstract class Cache<T extends HasMetadata, L extends KubernetesResourceL
 {
     private final static Logger log = LoggerFactory.getLogger( Cache.class );
 
-    private static final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private static final ExecutorService defaultExecutorService = Executors.newSingleThreadExecutor();
 
     protected final Map<String, T> cache;
 
     private final List<OnAction<T>> eventListeners;
 
-    private FilterWatchListDeletable<T, L, Boolean, Watch, Watcher<T>> filter;
+    private final ExecutorService executorService;
 
+    private final FilterWatchListDeletable<T, L, Boolean, Watch, Watcher<T>> filter;
+
+    // ONLY FOR TESTING
     protected Cache()
     {
-        this.eventListeners = new LinkedList<>();
+        this.eventListeners = null;
+        this.executorService = null;
+        this.filter = null;
         this.cache = new HashMap<>();
     }
 
     protected Cache( final FilterWatchListDeletable<T, L, Boolean, Watch, Watcher<T>> filter )
     {
-        this();
+        this( defaultExecutorService, filter );
+    }
+
+    protected Cache( final ExecutorService executorService, final FilterWatchListDeletable<T, L, Boolean, Watch, Watcher<T>> filter )
+    {
+        this.executorService = executorService;
+        this.eventListeners = new LinkedList<>();
+        this.cache = new HashMap<>();
         this.filter = filter;
         this.filter.list().getItems().forEach( r -> cache.put( r.getMetadata().getUid(), r ) );
         startWatcher();
@@ -59,7 +71,7 @@ public abstract class Cache<T extends HasMetadata, L extends KubernetesResourceL
 
     private void startWatcher()
     {
-        executorService.execute( () -> filter.watch( this ) );
+        defaultExecutorService.execute( () -> filter.watch( this ) );
     }
 
     @Override
@@ -137,8 +149,9 @@ public abstract class Cache<T extends HasMetadata, L extends KubernetesResourceL
             final String actionId = UUID.randomUUID().toString().substring( 0, 8 );
             if ( resource.getMetadata().getNamespace() != null )
             {
-                log.info( String.format( "%s: Event in NS '%s': %s '%s' %s", actionId, resource.getMetadata().getNamespace(), resource.getKind(),
-                                         resource.getMetadata().getName(), action ) );
+                log.info(
+                    String.format( "%s: Event in NS '%s': %s '%s' %s", actionId, resource.getMetadata().getNamespace(), resource.getKind(),
+                                   resource.getMetadata().getName(), action ) );
             }
             else
             {

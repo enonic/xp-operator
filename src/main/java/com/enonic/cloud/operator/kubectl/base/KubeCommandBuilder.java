@@ -49,14 +49,18 @@ public abstract class KubeCommandBuilder<T extends HasMetadata>
 
     public Optional<KubeCommand> apply()
     {
-        if ( oldResource().isPresent() )
+        // If always overwrite flag is not true and old resource is present
+        if ( !options().alwaysOverwrite().orElse( false ) && oldResource().isPresent() )
         {
-            if ( options().neverOverwrite() || equalsResourcesWithMetadata( oldResource().get(), maybeNamespacedResource() ) )
+            if ( options().neverOverwrite().orElse( false ) ||
+                equalsResourcesWithMetadata( oldResource().get(), maybeNamespacedResource() ) )
             {
+                // If never overwrite is set
                 return Optional.empty();
             }
-            else if ( !options().replaceOld() )
+            else
             {
+                // Otherwise just update
                 return Optional.of( ImmutableKubeCommand.builder().
                     action( KubeCommandAction.UPDATE ).
                     resource( maybeNamespacedResource() ).

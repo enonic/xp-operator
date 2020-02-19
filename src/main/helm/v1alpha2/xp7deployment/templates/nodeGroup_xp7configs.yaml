@@ -1,5 +1,6 @@
 # Setup Xp7Config for each node
 {{- range $nodeGroupName, $nodeGroup := .Values.deployment.spec.nodeGroups }}
+
 # Cluster configuration
 apiVersion: enonic.cloud/v1alpha2
 kind: Xp7Config
@@ -20,7 +21,7 @@ spec:
     node.name=${env.XP_NODE_NAME}
     discovery.unicast.hosts={{ $.Values.deployment.discoveryHosts | join "," }}
     network.publish.host=${env.XP_NODE_NAME}.{{ $.Values.deployment.allNodeGroupsKey }}
-    {{- if $.Values.extensions.linkerd }}
+  {{- if $.Values.extensions.linkerd.enabled }}
       network.host=127.0.0.1
     {{- else }}
       network.host=${env.XP_NODE_NAME}.{{ $.Values.deployment.allNodeGroupsKey }}
@@ -64,7 +65,7 @@ kind: Xp7Config
 metadata:
   name: {{ $nodeGroupName }}-vhosts
   annotations:
-    neverOverwrite: true # This is done so if the chart is applied it will not override the existing resource
+    neverOverwrite: true
   labels:
     {{- with $.Values.defaultLabels }}
     {{- toYaml . | nindent 4 }}

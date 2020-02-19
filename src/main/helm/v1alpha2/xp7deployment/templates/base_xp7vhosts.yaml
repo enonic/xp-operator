@@ -5,6 +5,8 @@ apiVersion: enonic.cloud/v1alpha2
 kind: Xp7VHost
 metadata:
   name: healthcheck
+  annotations:
+    alwaysOverwrite: true
   labels:
     {{- with .Values.defaultLabels }}
     {{- toYaml . | nindent 4 }}
@@ -24,6 +26,8 @@ apiVersion: enonic.cloud/v1alpha2
 kind: Xp7VHost
 metadata:
   name: localhost
+  annotations:
+    alwaysOverwrite: true
   labels:
     {{- with .Values.defaultLabels }}
     {{- toYaml . | nindent 4 }}
@@ -35,3 +39,5 @@ spec:
     - nodeGroup: all
       source: /
       target: /
+      idProviders:
+        default: system

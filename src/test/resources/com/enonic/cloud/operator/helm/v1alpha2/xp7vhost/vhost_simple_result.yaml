@@ -1,0 +1,25 @@
+---
+apiVersion: "extensions/v1beta1"
+kind: "Ingress"
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/proxy-body-size: "8m"
+    ingress.kubernetes.io/rewrite-target: "/"
+    cert-manager.io/cluster-issuer: "selfsigned"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/configuration-snippet: "# Extra config\n"
+  name: "test-purplejs-io"
+spec:
+  rules:
+    - host: "test.purplejs.io"
+      http:
+        paths:
+          - backend:
+              serviceName: "all"
+              servicePort: 8080
+            path: "/"
+  tls:
+    - hosts:
+        - "test.purplejs.io"
+      secretName: "test-purplejs-io"

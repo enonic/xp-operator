@@ -23,9 +23,17 @@ public abstract class ResourceInfoNamespaced<T extends HasMetadata, D extends Di
     @Nullable
     public abstract Caches caches();
 
+    @Nullable
+    public abstract V1alpha2Xp7Deployment overrideDeployment();
+
     @Value.Default
     public V1alpha2Xp7Deployment xpDeploymentResource()
     {
+        if ( overrideDeployment() != null )
+        {
+            return overrideDeployment();
+        }
+
         Preconditions.checkState( caches() != null || caches().getDeploymentCache() != null, "XpDeploymentCache is null" );
         Optional<V1alpha2Xp7Deployment> res = caches().getDeploymentCache().get( null, getXpDeploymentName() );
         if ( res.isEmpty() )

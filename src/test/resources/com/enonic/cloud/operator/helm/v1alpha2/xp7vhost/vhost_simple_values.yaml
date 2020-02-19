@@ -1,0 +1,42 @@
+---
+vhost:
+  name: "test-purplejs-io"
+  issuer: "selfsigned"
+  spec:
+    host: "test.purplejs.io"
+    maxBodySize: "8m"
+    skipIngress: false
+    certificate:
+      authority: "selfSigned"
+    mappings:
+      - nodeGroup: "all"
+        source: "/"
+        target: "/admin"
+        idProviders:
+          default: "system"
+          enabled: []
+extensions:
+  ingress:
+    DDOS:
+      limitConnections: "5"
+      enabled: false
+      limitRpm: "100"
+    stickySession:
+      enabled: false
+    caching:
+      enabled: false
+  linkerd:
+    enabled: false
+  ecDns:
+    enabled: false
+storage:
+  shared:
+    storageClassName: "standard"
+    forcePermissions: false
+  default:
+    storageClassName: "standard"
+defaultLabels:
+  cloud: "mycloud"
+  name: "qaxp"
+  project: "myproject"
+  managedBy: "ec-operator"

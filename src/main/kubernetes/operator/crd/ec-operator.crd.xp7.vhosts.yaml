@@ -23,6 +23,8 @@ spec:
               properties:
                 host:
                   type: string
+                maxBodySize:
+                  type: string
                 certificate:
                   type: object
                   nullable: true

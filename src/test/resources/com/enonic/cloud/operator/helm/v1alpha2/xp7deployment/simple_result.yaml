@@ -2,6 +2,8 @@
 apiVersion: "v1"
 kind: "ConfigMap"
 metadata:
+  annotations:
+    neverOverwrite: "true"
   labels:
     cloud: "mycloud"
     managedBy: "ec-operator"
@@ -287,7 +289,7 @@ spec:
       - command:
         - "ash"
         - "-c"
-        - "sleep 5; x=\"0\"; while [ \"$x\" == \"0\" ]; do nslookup ${XP_NODE_NAME}.all\
+        - "sleep 10; x=\"0\"; while [ \"$x\" == \"0\" ]; do nslookup ${XP_NODE_NAME}.all\
           \ && x=\"1\"; sleep 2; done"
         env:
         - name: "XP_NODE_NAME"
@@ -407,6 +409,8 @@ spec:
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
+  annotations:
+    neverOverwrite: "true"
   labels:
     cloud: "mycloud"
     managedBy: "ec-operator"
@@ -421,6 +425,8 @@ spec:
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
+  annotations:
+    neverOverwrite: "true"
   labels:
     cloud: "mycloud"
     managedBy: "ec-operator"
@@ -480,6 +486,8 @@ spec:
 kind: "Xp7VHost"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
+  annotations:
+    alwaysOverwrite: "true"
   labels:
     cloud: "mycloud"
     managedBy: "ec-operator"
@@ -488,6 +496,7 @@ metadata:
   name: "healthcheck"
 spec:
   host: "healthcheck"
+  maxBodySize: "100m"
   skipIngress: true
   certificate: null
   mappings:
@@ -499,6 +508,8 @@ spec:
 kind: "Xp7VHost"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
+  annotations:
+    alwaysOverwrite: "true"
   labels:
     cloud: "mycloud"
     managedBy: "ec-operator"
@@ -507,10 +518,13 @@ metadata:
   name: "localhost"
 spec:
   host: "localhost"
+  maxBodySize: "100m"
   skipIngress: true
   certificate: null
   mappings:
   - nodeGroup: "all"
     source: "/"
     target: "/"
-    idProviders: null
+    idProviders:
+      default: "system"
+      enabled: []
