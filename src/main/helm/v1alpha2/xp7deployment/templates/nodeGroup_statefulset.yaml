@@ -15,7 +15,7 @@ spec:
   revisionHistoryLimit: 10
   podManagementPolicy: Parallel
   updateStrategy:
-    type: RollingUpdate
+    type: {{ $.Values.updateStrategy }}
   selector:
     matchLabels:
       nodeGroup: {{ $nodeGroupName }}
@@ -37,7 +37,7 @@ spec:
       restartPolicy: Always
       dnsPolicy: ClusterFirst
       schedulerName: default-scheduler
-      terminationGracePeriodSeconds: 30
+      terminationGracePeriodSeconds: {{ $.Values.terminationGracePeriodSeconds }}
 
       securityContext:
         fsGroup: 0

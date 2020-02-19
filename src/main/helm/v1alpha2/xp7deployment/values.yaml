@@ -39,6 +39,8 @@ configLocation: /enonic-xp/home/config
 extraConfigLocation: /enonic-xp/home/extra-config
 
 user: 1337
+terminationGracePeriodSeconds: 30
+updateStrategy: RollingUpdate
 
 # Filled in by operator
 # deployment:

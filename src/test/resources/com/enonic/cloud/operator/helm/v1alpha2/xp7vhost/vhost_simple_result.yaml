@@ -12,14 +12,14 @@ metadata:
   name: "test-purplejs-io"
 spec:
   rules:
-    - host: "test.purplejs.io"
-      http:
-        paths:
-          - backend:
-              serviceName: "all"
-              servicePort: 8080
-            path: "/"
+  - host: "test.purplejs.io"
+    http:
+      paths:
+      - backend:
+          serviceName: "all"
+          servicePort: 8080
+        path: "/"
   tls:
-    - hosts:
-        - "test.purplejs.io"
-      secretName: "test-purplejs-io"
+  - hosts:
+    - "test.purplejs.io"
+    secretName: "test-purplejs-io"

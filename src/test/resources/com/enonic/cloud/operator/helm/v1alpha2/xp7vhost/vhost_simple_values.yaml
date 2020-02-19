@@ -9,12 +9,12 @@ vhost:
     certificate:
       authority: "selfSigned"
     mappings:
-      - nodeGroup: "all"
-        source: "/"
-        target: "/admin"
-        idProviders:
-          default: "system"
-          enabled: []
+    - nodeGroup: "all"
+      source: "/"
+      target: "/admin"
+      idProviders:
+        default: "system"
+        enabled: []
 extensions:
   ingress:
     DDOS:
