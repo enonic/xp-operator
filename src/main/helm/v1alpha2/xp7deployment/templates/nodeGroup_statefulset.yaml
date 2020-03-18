@@ -95,7 +95,7 @@ spec:
           command:
             - ash
             - -c
-            - sleep 10; x="0"; while [ "$x" == "0" ]; do nslookup ${XP_NODE_NAME}.{{ $.Values.allNodesKey }} && x="1"; sleep 2; done
+            - sleep 2; x="0"; while [ "$x" == "0" ]; do nslookup ${XP_NODE_NAME}.{{ $.Values.allNodesKey }}.{{ $.Values.deployment.namespace }}.svc.cluster.local && x="1"; sleep 2; done
 
       containers:
         - name: exp

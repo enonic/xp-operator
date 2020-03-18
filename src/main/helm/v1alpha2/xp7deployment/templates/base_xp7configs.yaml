@@ -36,3 +36,27 @@ spec:
   file: com.enonic.xp.app.main.cfg
   data: |-
     tourDisabled = true
+
+---
+
+# Set session store
+apiVersion: enonic.cloud/v1alpha2
+kind: Xp7Config
+metadata:
+  name: all-sessionstore
+  annotations:
+    {{ $.Values.annotations.neverOverwrite }}: true
+  labels:
+    {{ $.Values.labels.managed }}: true
+    {{- with .Values.defaultLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  nodeGroup: all
+  file: com.enonic.xp.web.sessionstore.cfg
+  data: |-
+    {{- if $.Values.deployment.clustered }}
+    storeMode=replicated
+    {{- else }}
+    storeMode=non-persistent
+    {{- end }}

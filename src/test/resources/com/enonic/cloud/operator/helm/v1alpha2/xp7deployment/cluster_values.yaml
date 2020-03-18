@@ -34,6 +34,7 @@ deployment:
   minimumDataNodes: 2
   clustered: true
   name: "mycloud-myproject-qaxp"
+  namespace: "mycloud-myproject-qaxp"
   minimumMasterNodes: 2
   spec:
     xpVersion: "7.1.2"

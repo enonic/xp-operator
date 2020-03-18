@@ -33,6 +33,7 @@ labels:
 deployment:
   clustered: false
   name: "mycloud-myproject-qaxp"
+  namespace: "mycloud-myproject-qaxp"
   spec:
     xpVersion: "7.1.2"
     enabled: true

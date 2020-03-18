@@ -35,6 +35,7 @@ public abstract class Xp7DeploymentValues
 
         Map<String, Object> deployment = new HashMap<>();
         deployment.put( "name", info().deploymentName() );
+        deployment.put( "namespace", info().namespaceName() );
         deployment.put( "clustered", isClustered );
         if ( isClustered )
         {

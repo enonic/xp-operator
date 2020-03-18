@@ -388,7 +388,7 @@ spec:
       - command:
         - "ash"
         - "-c"
-        - "sleep 10; x=\"0\"; while [ \"$x\" == \"0\" ]; do nslookup ${XP_NODE_NAME}.all\
+        - "sleep 2; x=\"0\"; while [ \"$x\" == \"0\" ]; do nslookup ${XP_NODE_NAME}.all.mycloud-myproject-qaxp.svc.cluster.local\
           \ && x=\"1\"; sleep 2; done"
         env:
         - name: "XP_NODE_NAME"
@@ -606,7 +606,7 @@ spec:
       - command:
         - "ash"
         - "-c"
-        - "sleep 10; x=\"0\"; while [ \"$x\" == \"0\" ]; do nslookup ${XP_NODE_NAME}.all\
+        - "sleep 2; x=\"0\"; while [ \"$x\" == \"0\" ]; do nslookup ${XP_NODE_NAME}.all.mycloud-myproject-qaxp.svc.cluster.local\
           \ && x=\"1\"; sleep 2; done"
         env:
         - name: "XP_NODE_NAME"
@@ -820,7 +820,7 @@ spec:
       - command:
         - "ash"
         - "-c"
-        - "sleep 10; x=\"0\"; while [ \"$x\" == \"0\" ]; do nslookup ${XP_NODE_NAME}.all\
+        - "sleep 2; x=\"0\"; while [ \"$x\" == \"0\" ]; do nslookup ${XP_NODE_NAME}.all.mycloud-myproject-qaxp.svc.cluster.local\
           \ && x=\"1\"; sleep 2; done"
         env:
         - name: "XP_NODE_NAME"
@@ -927,6 +927,22 @@ metadata:
     cloud: "mycloud"
     name: "qaxp"
     project: "myproject"
+  name: "all-sessionstore"
+spec:
+  file: "com.enonic.xp.web.sessionstore.cfg"
+  nodeGroup: "all"
+  data: "storeMode=replicated"
+---
+kind: "Xp7Config"
+apiVersion: "enonic.cloud/v1alpha2"
+metadata:
+  annotations:
+    enonic.neverOverwrite: "true"
+  labels:
+    enonic.managed: "true"
+    cloud: "mycloud"
+    name: "qaxp"
+    project: "myproject"
   name: "all-system"
 spec:
   file: "system.properties"
@@ -946,8 +962,8 @@ metadata:
 spec:
   file: "com.enonic.xp.cluster.cfg"
   nodeGroup: "data"
-  data: "cluster.enabled=true\nnode.name=${env.XP_NODE_NAME}\ndiscovery.unicast.hosts=master-0.all,master-1.all,master-2.all\n\
-    network.publish.host=${env.XP_NODE_NAME}.all\n  network.host=${env.XP_NODE_NAME}.all"
+  data: "cluster.enabled=true\nnode.name=${env.XP_NODE_NAME}\nnetwork.publish.host=${env.XP_NODE_NAME}.all\n\
+    \  network.host=${env.XP_NODE_NAME}.all"
 ---
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
@@ -961,9 +977,28 @@ metadata:
 spec:
   file: "com.enonic.xp.elasticsearch.cfg"
   nodeGroup: "data"
-  data: "node.master=false\nnode.data=true\ncluster.name=mycloud-myproject-qaxp\n\
-    http.enabled=false\ngateway.expected_master_nodes=2\ngateway.expected_data_nodes=2\n\
-    gateway.recover_after_time=5m\ndiscovery.zen.minimum_master_nodes=2\nnetwork.tcp.keep_alive=true"
+  data: "http.enabled=false\nnode.master=false\nnode.data=true\ncluster.name=mycloud-myproject-qaxp\n\
+    gateway.expected_master_nodes=2\ngateway.expected_data_nodes=2\ngateway.recover_after_time=5m\n\
+    discovery.zen.minimum_master_nodes=2\ndiscovery.unicast.sockets=all.mycloud-myproject-qaxp.svc.cluster.local\n\
+    network.tcp.keep_alive=true"
+---
+kind: "Xp7Config"
+apiVersion: "enonic.cloud/v1alpha2"
+metadata:
+  annotations:
+    enonic.neverOverwrite: "true"
+  labels:
+    enonic.managed: "true"
+    cloud: "mycloud"
+    name: "qaxp"
+    project: "myproject"
+  name: "data-hazelcast"
+spec:
+  file: "com.enonic.xp.hazelcast.cfg"
+  nodeGroup: "data"
+  data: "clusterConfigDefaults=false\nsystem.hazelcast.initial.min.cluster.size=2\n\
+    network.join.kubernetes.serviceDns=all.mycloud-myproject-qaxp.svc.cluster.local\n\
+    network.join.kubernetes.enabled=true\nnetwork.join.tcpIp.enabled=false"
 ---
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
@@ -977,8 +1012,8 @@ metadata:
 spec:
   file: "com.enonic.xp.cluster.cfg"
   nodeGroup: "frontend"
-  data: "cluster.enabled=true\nnode.name=${env.XP_NODE_NAME}\ndiscovery.unicast.hosts=master-0.all,master-1.all,master-2.all\n\
-    network.publish.host=${env.XP_NODE_NAME}.all\n  network.host=${env.XP_NODE_NAME}.all"
+  data: "cluster.enabled=true\nnode.name=${env.XP_NODE_NAME}\nnetwork.publish.host=${env.XP_NODE_NAME}.all\n\
+    \  network.host=${env.XP_NODE_NAME}.all"
 ---
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
@@ -992,9 +1027,28 @@ metadata:
 spec:
   file: "com.enonic.xp.elasticsearch.cfg"
   nodeGroup: "frontend"
-  data: "node.master=false\nnode.data=false\ncluster.name=mycloud-myproject-qaxp\n\
-    http.enabled=false\ngateway.expected_master_nodes=2\ngateway.expected_data_nodes=2\n\
-    gateway.recover_after_time=5m\ndiscovery.zen.minimum_master_nodes=2\nnetwork.tcp.keep_alive=true"
+  data: "http.enabled=false\nnode.master=false\nnode.data=false\ncluster.name=mycloud-myproject-qaxp\n\
+    gateway.expected_master_nodes=2\ngateway.expected_data_nodes=2\ngateway.recover_after_time=5m\n\
+    discovery.zen.minimum_master_nodes=2\ndiscovery.unicast.sockets=all.mycloud-myproject-qaxp.svc.cluster.local\n\
+    network.tcp.keep_alive=true"
+---
+kind: "Xp7Config"
+apiVersion: "enonic.cloud/v1alpha2"
+metadata:
+  annotations:
+    enonic.neverOverwrite: "true"
+  labels:
+    enonic.managed: "true"
+    cloud: "mycloud"
+    name: "qaxp"
+    project: "myproject"
+  name: "frontend-hazelcast"
+spec:
+  file: "com.enonic.xp.hazelcast.cfg"
+  nodeGroup: "frontend"
+  data: "clusterConfigDefaults=false\nsystem.hazelcast.initial.min.cluster.size=2\n\
+    network.join.kubernetes.serviceDns=all.mycloud-myproject-qaxp.svc.cluster.local\n\
+    network.join.kubernetes.enabled=true\nnetwork.join.tcpIp.enabled=false"
 ---
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
@@ -1008,8 +1062,8 @@ metadata:
 spec:
   file: "com.enonic.xp.cluster.cfg"
   nodeGroup: "master"
-  data: "cluster.enabled=true\nnode.name=${env.XP_NODE_NAME}\ndiscovery.unicast.hosts=master-0.all,master-1.all,master-2.all\n\
-    network.publish.host=${env.XP_NODE_NAME}.all\n  network.host=${env.XP_NODE_NAME}.all"
+  data: "cluster.enabled=true\nnode.name=${env.XP_NODE_NAME}\nnetwork.publish.host=${env.XP_NODE_NAME}.all\n\
+    \  network.host=${env.XP_NODE_NAME}.all"
 ---
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
@@ -1023,9 +1077,28 @@ metadata:
 spec:
   file: "com.enonic.xp.elasticsearch.cfg"
   nodeGroup: "master"
-  data: "node.master=true\nnode.data=false\ncluster.name=mycloud-myproject-qaxp\n\
-    http.enabled=false\ngateway.expected_master_nodes=2\ngateway.expected_data_nodes=2\n\
-    gateway.recover_after_time=5m\ndiscovery.zen.minimum_master_nodes=2\nnetwork.tcp.keep_alive=true"
+  data: "http.enabled=false\nnode.master=true\nnode.data=false\ncluster.name=mycloud-myproject-qaxp\n\
+    gateway.expected_master_nodes=2\ngateway.expected_data_nodes=2\ngateway.recover_after_time=5m\n\
+    discovery.zen.minimum_master_nodes=2\ndiscovery.unicast.sockets=all.mycloud-myproject-qaxp.svc.cluster.local\n\
+    network.tcp.keep_alive=true"
+---
+kind: "Xp7Config"
+apiVersion: "enonic.cloud/v1alpha2"
+metadata:
+  annotations:
+    enonic.neverOverwrite: "true"
+  labels:
+    enonic.managed: "true"
+    cloud: "mycloud"
+    name: "qaxp"
+    project: "myproject"
+  name: "master-hazelcast"
+spec:
+  file: "com.enonic.xp.hazelcast.cfg"
+  nodeGroup: "master"
+  data: "clusterConfigDefaults=false\nsystem.hazelcast.initial.min.cluster.size=2\n\
+    network.join.kubernetes.serviceDns=all.mycloud-myproject-qaxp.svc.cluster.local\n\
+    network.join.kubernetes.enabled=true\nnetwork.join.tcpIp.enabled=false"
 ---
 kind: "Xp7VHost"
 apiVersion: "enonic.cloud/v1alpha2"

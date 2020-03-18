@@ -20,7 +20,6 @@ spec:
   {{- else }}
     cluster.enabled=true
     node.name=${env.XP_NODE_NAME}
-    discovery.unicast.hosts={{ $.Values.deployment.discoveryHosts | join "," }}
     network.publish.host=${env.XP_NODE_NAME}.{{ $.Values.allNodesKey }}
   {{- if $.Values.extensions.linkerd.enabled }}
       network.host=127.0.0.1
@@ -45,19 +44,43 @@ spec:
   nodeGroup: {{ $nodeGroupName }}
   file: com.enonic.xp.elasticsearch.cfg
   data: |-
-  {{- if not $.Values.deployment.clustered }}
     http.enabled=false
-  {{- else }}
+  {{- if $.Values.deployment.clustered }}
     node.master={{ if $nodeGroup.master }}true{{ else }}false{{ end }}
     node.data={{ if $nodeGroup.data }}true{{ else }}false{{ end }}
     cluster.name={{ $.Values.deployment.name }}
-    http.enabled=false
     gateway.expected_master_nodes={{ $.Values.deployment.minimumMasterNodes }}
     gateway.expected_data_nodes={{ $.Values.deployment.minimumDataNodes }}
     gateway.recover_after_time=5m
     discovery.zen.minimum_master_nodes={{ $.Values.deployment.minimumMasterNodes }}
+    discovery.unicast.sockets={{ $.Values.allNodesKey }}.{{ $.Values.deployment.namespace }}.svc.cluster.local
     network.tcp.keep_alive=true
   {{- end }}
 
 ---
+{{- if $.Values.deployment.clustered }}
+# Hazelcast configuration
+apiVersion: enonic.cloud/v1alpha2
+kind: Xp7Config
+metadata:
+  name: {{ $nodeGroupName }}-hazelcast
+  annotations:
+    {{ $.Values.annotations.neverOverwrite }}: true
+  labels:
+    {{ $.Values.labels.managed }}: true
+    {{- with $.Values.defaultLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  nodeGroup: {{ $nodeGroupName }}
+  file: com.enonic.xp.hazelcast.cfg
+  data: |-
+    clusterConfigDefaults=false
+    system.hazelcast.initial.min.cluster.size=2
+    network.join.kubernetes.serviceDns={{ $.Values.allNodesKey }}.{{ $.Values.deployment.namespace }}.svc.cluster.local
+    network.join.kubernetes.enabled=true
+    network.join.tcpIp.enabled=false
+
+---
+{{- end }}
 {{- end }}

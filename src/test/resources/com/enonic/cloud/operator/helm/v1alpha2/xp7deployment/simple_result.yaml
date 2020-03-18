@@ -285,7 +285,7 @@ spec:
       - command:
         - "ash"
         - "-c"
-        - "sleep 10; x=\"0\"; while [ \"$x\" == \"0\" ]; do nslookup ${XP_NODE_NAME}.all\
+        - "sleep 2; x=\"0\"; while [ \"$x\" == \"0\" ]; do nslookup ${XP_NODE_NAME}.all.mycloud-myproject-qaxp.svc.cluster.local\
           \ && x=\"1\"; sleep 2; done"
         env:
         - name: "XP_NODE_NAME"
@@ -417,6 +417,22 @@ spec:
   file: "com.enonic.xp.app.main.cfg"
   nodeGroup: "all"
   data: "tourDisabled = true"
+---
+kind: "Xp7Config"
+apiVersion: "enonic.cloud/v1alpha2"
+metadata:
+  annotations:
+    enonic.neverOverwrite: "true"
+  labels:
+    enonic.managed: "true"
+    cloud: "mycloud"
+    name: "qaxp"
+    project: "myproject"
+  name: "all-sessionstore"
+spec:
+  file: "com.enonic.xp.web.sessionstore.cfg"
+  nodeGroup: "all"
+  data: "storeMode=non-persistent"
 ---
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
