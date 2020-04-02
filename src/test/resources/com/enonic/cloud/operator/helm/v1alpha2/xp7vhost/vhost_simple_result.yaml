@@ -12,8 +12,9 @@ metadata:
   labels:
     enonic.managed: "true"
     cloud: "mycloud"
-    name: "qaxp"
-    project: "myproject"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
   name: "test-purplejs-io"
 spec:
   rules:

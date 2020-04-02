@@ -54,17 +54,24 @@ public abstract class InfoXp7Deployment
                                       "Label '" + "metadata.labels." + cfgStr( "operator.deployment.xp.labels.cloud" ) + "' is missing" );
             dns1035( "metadata.labels." + cfgStr( "operator.deployment.xp.labels.cloud" ), resource().ecCloud() );
 
-            Preconditions.checkState( resource().ecProject() != null,
-                                      "Label '" + "metadata.labels." + cfgStr( "operator.deployment.xp.labels.project" ) + "' is missing" );
-            dns1035( "metadata.labels." + cfgStr( "operator.deployment.xp.labels.project" ), resource().ecProject() );
+            Preconditions.checkState( resource().ecSolution() != null,
+                                      "Label '" + "metadata.labels." + cfgStr( "operator.deployment.xp.labels.solution" ) +
+                                          "' is missing" );
+            dns1035( "metadata.labels." + cfgStr( "operator.deployment.xp.labels.solution" ), resource().ecSolution() );
 
-            Preconditions.checkState( resource().ecName() != null,
-                                      "Label '" + "metadata.labels." + cfgStr( "operator.deployment.xp.labels.name" ) + "' is missing" );
-            dns1035( "metadata.labels." + cfgStr( "operator.deployment.xp.labels.name" ), resource().ecName() );
+            Preconditions.checkState( resource().ecEnvironment() != null,
+                                      "Label '" + "metadata.labels." + cfgStr( "operator.deployment.xp.labels.environment" ) +
+                                          "' is missing" );
+            dns1035( "metadata.labels." + cfgStr( "operator.deployment.xp.labels.environment" ), resource().ecEnvironment() );
 
-            String fullName = String.join( "-", resource().ecCloud(), resource().ecProject(), resource().ecName() );
+            Preconditions.checkState( resource().ecService() != null,
+                                      "Label '" + "metadata.labels." + cfgStr( "operator.deployment.xp.labels.service" ) + "' is missing" );
+            dns1035( "metadata.labels." + cfgStr( "operator.deployment.xp.labels.service" ), resource().ecService() );
+
+            String fullName =
+                String.join( "-", resource().ecCloud(), resource().ecSolution(), resource().ecEnvironment(), resource().ecService() );
             Preconditions.checkState( deploymentName().equals( fullName ),
-                                      "Xp7Deployment name must be equal to <Cloud>-<Project>-<Name> according to labels, i.e: '" +
+                                      "Xp7Deployment name must be equal to <Cloud>-<Solution>-<Environment>-<Service> according to labels, i.e: '" +
                                           fullName + "'" );
         } );
     }

@@ -1,4 +1,4 @@
-testResult: "Field 'metadata.labels.project' cannot be changed"
+testResult: "Field 'metadata.labels.service' cannot be changed"
 testReview:
   request:
     operation: UPDATE
@@ -6,11 +6,12 @@ testReview:
       apiVersion: enonic.cloud/v1alpha2
       kind: Xp7Deployment
       metadata:
-        name: mycloud-myproject-qaxp
+        name: mycloud-mysolution-myenv-myservice
         labels:
           cloud: mycloud
-          project: myproject
-          name: qaxp
+          solution: mysolution
+          environment: myenv
+          service: myservice
       spec:
         enabled: true
         xpVersion: 7.1.2
@@ -31,11 +32,12 @@ testReview:
       apiVersion: enonic.cloud/v1alpha2
       kind: Xp7Deployment
       metadata:
-        name: mycloud-myproject-qaxp
+        name: mycloud-mysolution-myenv-myservice
         labels:
           cloud: mycloud
-          project: newProject
-          name: qaxp
+          solution: mysolution
+          environment: myenv
+          service: myservice2
       spec:
         enabled: true
         xpVersion: 7.1.3

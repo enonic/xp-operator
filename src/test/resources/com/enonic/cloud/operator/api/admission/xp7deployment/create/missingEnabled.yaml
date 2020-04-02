@@ -6,7 +6,7 @@ testReview:
       apiVersion: enonic.cloud/v1alpha2
       kind: Xp7Deployment
       metadata:
-        name: mycloud-myproject-qaxp
+        name: mycloud-mysolution-myenv-myservice
         labels:
           cloud: mycloud
           project: myproject

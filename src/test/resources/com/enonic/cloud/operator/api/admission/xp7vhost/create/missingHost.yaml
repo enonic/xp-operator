@@ -7,7 +7,7 @@ testReview:
       kind: Xp7VHost
       metadata:
         name: test-purplejs-io
-        namespace: mycloud-myproject-qaxp
+        namespace: mycloud-mysolution-myenv-myservice
       spec:
         #host: test.purplejs.io
         mappings:

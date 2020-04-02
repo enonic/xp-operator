@@ -3,7 +3,7 @@
   metadata:
     uid: 9265a02a-000f-421a-b4aa-4768e8eab21e
     name: test-purplejs-io
-    namespace: mycloud-myproject-qaxp
+    namespace: mycloud-mysolution-myenv-myservice
   spec:
     host: taken.purplejs.io
     certificate:

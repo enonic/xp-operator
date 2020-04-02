@@ -2,11 +2,12 @@
   kind: Xp7Deployment
   metadata:
     uid: 9265a02a-000f-421a-b4aa-4768e8eab21e
-    name: mycloud-myproject-qaxp
+    name: mycloud-mysolution-myenv-myservice
     labels:
       cloud: mycloud
-      project: myproject
-      name: qaxp
+      solution: mysolution
+      environment: myenv
+      service: myservice
   spec:
     enabled: true
     xpVersion: 7.1.2

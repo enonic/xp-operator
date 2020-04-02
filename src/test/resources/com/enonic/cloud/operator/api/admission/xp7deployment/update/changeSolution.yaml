@@ -1,4 +1,4 @@
-testResult: "Field 'metadata.labels.cloud' cannot be changed"
+testResult: "Field 'metadata.labels.solution' cannot be changed"
 testReview:
   request:
     operation: UPDATE
@@ -34,8 +34,8 @@ testReview:
       metadata:
         name: mycloud-mysolution-myenv-myservice
         labels:
-          cloud: mycloud2
-          solution: mysolution
+          cloud: mycloud
+          solution: mysolution2
           environment: myenv
           service: myservice
       spec:

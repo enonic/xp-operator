@@ -1,4 +1,4 @@
-testResult: "Some nodes must have master=true"
+testResult: "Label 'metadata.labels.solution' is missing"
 testReview:
   request:
     operation: CREATE
@@ -9,8 +9,9 @@ testReview:
         name: mycloud-mysolution-myenv-myservice
         labels:
           cloud: mycloud
-          project: myproject
-          name: qaxp
+          #solution: mysolution
+          environment: myenv
+          service: myservice
       spec:
         enabled: true
         xpVersion: 7.1.2
@@ -18,15 +19,8 @@ testReview:
           blobstore: 1Gi
           snapshots: 1Gi
         nodeGroups:
-          master:
-            master: false
-            data: false
-            replicas: 1
-            resources:
-              cpu: "1"
-              memory: 512Mi
-          data:
-            master: false
+          main:
+            master: true
             data: true
             replicas: 1
             resources:
@@ -34,11 +28,3 @@ testReview:
               memory: 512Mi
               disks:
                 index: 200Mi
-          frontend:
-            master: false
-            data: false
-            replicas: 1
-            resources:
-              cpu: "1"
-              memory: 512Mi
-

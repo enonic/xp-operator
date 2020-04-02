@@ -8,8 +8,9 @@ metadata:
     enonic.managed: "true"
     nodeGroup: "data"
     cloud: "mycloud"
-    name: "qaxp"
-    project: "myproject"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
   name: "data"
 ---
 apiVersion: "v1"
@@ -20,8 +21,9 @@ metadata:
   labels:
     enonic.managed: "true"
     cloud: "mycloud"
-    name: "qaxp"
-    project: "myproject"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
   name: "extra-config"
 data:
   java.security.properties: "networkaddress.cache.ttl=30"
@@ -35,8 +37,9 @@ metadata:
     enonic.managed: "true"
     nodeGroup: "frontend"
     cloud: "mycloud"
-    name: "qaxp"
-    project: "myproject"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
   name: "frontend"
 ---
 apiVersion: "v1"
@@ -48,8 +51,9 @@ metadata:
     enonic.managed: "true"
     nodeGroup: "master"
     cloud: "mycloud"
-    name: "qaxp"
-    project: "myproject"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
   name: "master"
 ---
 apiVersion: "v1"
@@ -58,8 +62,9 @@ metadata:
   labels:
     enonic.managed: "true"
     cloud: "mycloud"
-    name: "qaxp"
-    project: "myproject"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
   name: "blobstore"
 spec:
   accessModes:
@@ -75,8 +80,9 @@ metadata:
   labels:
     enonic.managed: "true"
     cloud: "mycloud"
-    name: "qaxp"
-    project: "myproject"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
   name: "snapshots"
 spec:
   accessModes:
@@ -92,8 +98,9 @@ metadata:
   labels:
     enonic.managed: "true"
     cloud: "mycloud"
-    name: "qaxp"
-    project: "myproject"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
   name: "all"
 spec:
   clusterIP: "None"
@@ -121,8 +128,9 @@ spec:
   publishNotReadyAddresses: true
   selector:
     cloud: "mycloud"
-    name: "qaxp"
-    project: "myproject"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
   sessionAffinity: "None"
   type: "ClusterIP"
 ---
@@ -133,8 +141,9 @@ metadata:
     enonic.managed: "true"
     nodeGroup: "data"
     cloud: "mycloud"
-    name: "qaxp"
-    project: "myproject"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
   name: "data"
 spec:
   clusterIP: "None"
@@ -163,8 +172,9 @@ spec:
   selector:
     nodeGroup: "data"
     cloud: "mycloud"
-    name: "qaxp"
-    project: "myproject"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
   sessionAffinity: "None"
   type: "ClusterIP"
 ---
@@ -175,8 +185,9 @@ metadata:
     enonic.managed: "true"
     nodeGroup: "frontend"
     cloud: "mycloud"
-    name: "qaxp"
-    project: "myproject"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
   name: "frontend"
 spec:
   clusterIP: "None"
@@ -205,8 +216,9 @@ spec:
   selector:
     nodeGroup: "frontend"
     cloud: "mycloud"
-    name: "qaxp"
-    project: "myproject"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
   sessionAffinity: "None"
   type: "ClusterIP"
 ---
@@ -217,8 +229,9 @@ metadata:
     enonic.managed: "true"
     nodeGroup: "master"
     cloud: "mycloud"
-    name: "qaxp"
-    project: "myproject"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
   name: "master"
 spec:
   clusterIP: "None"
@@ -247,8 +260,9 @@ spec:
   selector:
     nodeGroup: "master"
     cloud: "mycloud"
-    name: "qaxp"
-    project: "myproject"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
   sessionAffinity: "None"
   type: "ClusterIP"
 ---
@@ -259,8 +273,9 @@ metadata:
     enonic.managed: "true"
     nodeGroup: "data"
     cloud: "mycloud"
-    name: "qaxp"
-    project: "myproject"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
   name: "data"
 spec:
   podManagementPolicy: "Parallel"
@@ -270,16 +285,18 @@ spec:
     matchLabels:
       nodeGroup: "data"
       cloud: "mycloud"
-      name: "qaxp"
-      project: "myproject"
+      environment: "myenv"
+      service: "myservice"
+      solution: "mysolution"
   serviceName: "all"
   template:
     metadata:
       labels:
         nodeGroup: "data"
         cloud: "mycloud"
-        name: "qaxp"
-        project: "myproject"
+        environment: "myenv"
+        service: "myservice"
+        solution: "mysolution"
     spec:
       containers:
       - env:
@@ -388,7 +405,7 @@ spec:
       - command:
         - "ash"
         - "-c"
-        - "sleep 2; x=\"0\"; while [ \"$x\" == \"0\" ]; do nslookup ${XP_NODE_NAME}.all.mycloud-myproject-qaxp.svc.cluster.local\
+        - "sleep 2; x=\"0\"; while [ \"$x\" == \"0\" ]; do nslookup ${XP_NODE_NAME}.all.mycloud-mysolution-myenv-myservice.svc.cluster.local\
           \ && x=\"1\"; sleep 2; done"
         env:
         - name: "XP_NODE_NAME"
@@ -433,8 +450,9 @@ spec:
         enonic.managed: "true"
         nodeGroup: "data"
         cloud: "mycloud"
-        name: "qaxp"
-        project: "myproject"
+        environment: "myenv"
+        service: "myservice"
+        solution: "mysolution"
       name: "export"
     spec:
       accessModes:
@@ -451,8 +469,9 @@ spec:
         enonic.managed: "true"
         nodeGroup: "data"
         cloud: "mycloud"
-        name: "qaxp"
-        project: "myproject"
+        environment: "myenv"
+        service: "myservice"
+        solution: "mysolution"
       name: "index"
     spec:
       accessModes:
@@ -470,8 +489,9 @@ metadata:
     enonic.managed: "true"
     nodeGroup: "frontend"
     cloud: "mycloud"
-    name: "qaxp"
-    project: "myproject"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
   name: "frontend"
 spec:
   podManagementPolicy: "Parallel"
@@ -481,16 +501,18 @@ spec:
     matchLabels:
       nodeGroup: "frontend"
       cloud: "mycloud"
-      name: "qaxp"
-      project: "myproject"
+      environment: "myenv"
+      service: "myservice"
+      solution: "mysolution"
   serviceName: "all"
   template:
     metadata:
       labels:
         nodeGroup: "frontend"
         cloud: "mycloud"
-        name: "qaxp"
-        project: "myproject"
+        environment: "myenv"
+        service: "myservice"
+        solution: "mysolution"
     spec:
       containers:
       - env:
@@ -606,7 +628,7 @@ spec:
       - command:
         - "ash"
         - "-c"
-        - "sleep 2; x=\"0\"; while [ \"$x\" == \"0\" ]; do nslookup ${XP_NODE_NAME}.all.mycloud-myproject-qaxp.svc.cluster.local\
+        - "sleep 2; x=\"0\"; while [ \"$x\" == \"0\" ]; do nslookup ${XP_NODE_NAME}.all.mycloud-mysolution-myenv-myservice.svc.cluster.local\
           \ && x=\"1\"; sleep 2; done"
         env:
         - name: "XP_NODE_NAME"
@@ -651,8 +673,9 @@ spec:
         enonic.managed: "true"
         nodeGroup: "frontend"
         cloud: "mycloud"
-        name: "qaxp"
-        project: "myproject"
+        environment: "myenv"
+        service: "myservice"
+        solution: "mysolution"
       name: "export"
     spec:
       accessModes:
@@ -669,8 +692,9 @@ spec:
         enonic.managed: "true"
         nodeGroup: "frontend"
         cloud: "mycloud"
-        name: "qaxp"
-        project: "myproject"
+        environment: "myenv"
+        service: "myservice"
+        solution: "mysolution"
       name: "work"
     spec:
       accessModes:
@@ -688,8 +712,9 @@ metadata:
     enonic.managed: "true"
     nodeGroup: "master"
     cloud: "mycloud"
-    name: "qaxp"
-    project: "myproject"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
   name: "master"
 spec:
   podManagementPolicy: "Parallel"
@@ -699,16 +724,18 @@ spec:
     matchLabels:
       nodeGroup: "master"
       cloud: "mycloud"
-      name: "qaxp"
-      project: "myproject"
+      environment: "myenv"
+      service: "myservice"
+      solution: "mysolution"
   serviceName: "all"
   template:
     metadata:
       labels:
         nodeGroup: "master"
         cloud: "mycloud"
-        name: "qaxp"
-        project: "myproject"
+        environment: "myenv"
+        service: "myservice"
+        solution: "mysolution"
     spec:
       containers:
       - env:
@@ -820,7 +847,7 @@ spec:
       - command:
         - "ash"
         - "-c"
-        - "sleep 2; x=\"0\"; while [ \"$x\" == \"0\" ]; do nslookup ${XP_NODE_NAME}.all.mycloud-myproject-qaxp.svc.cluster.local\
+        - "sleep 2; x=\"0\"; while [ \"$x\" == \"0\" ]; do nslookup ${XP_NODE_NAME}.all.mycloud-mysolution-myenv-myservice.svc.cluster.local\
           \ && x=\"1\"; sleep 2; done"
         env:
         - name: "XP_NODE_NAME"
@@ -865,8 +892,9 @@ spec:
         enonic.managed: "true"
         nodeGroup: "master"
         cloud: "mycloud"
-        name: "qaxp"
-        project: "myproject"
+        environment: "myenv"
+        service: "myservice"
+        solution: "mysolution"
       name: "export"
     spec:
       accessModes:
@@ -883,8 +911,9 @@ metadata:
   labels:
     enonic.managed: "true"
     cloud: "mycloud"
-    name: "qaxp"
-    project: "myproject"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
   name: "alive"
 spec:
   url: "https://repo.enonic.com/public/com/enonic/app/alive/2.0.0/alive-2.0.0.jar"
@@ -895,8 +924,9 @@ metadata:
   labels:
     enonic.managed: "true"
     cloud: "mycloud"
-    name: "qaxp"
-    project: "myproject"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
   name: "snapshotter"
 spec:
   url: "https://repo.enonic.com/public/com/enonic/app/snapshotter/2.1.1/snapshotter-2.1.1.jar"
@@ -909,8 +939,9 @@ metadata:
   labels:
     enonic.managed: "true"
     cloud: "mycloud"
-    name: "qaxp"
-    project: "myproject"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
   name: "all-admin"
 spec:
   file: "com.enonic.xp.app.main.cfg"
@@ -925,8 +956,9 @@ metadata:
   labels:
     enonic.managed: "true"
     cloud: "mycloud"
-    name: "qaxp"
-    project: "myproject"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
   name: "all-sessionstore"
 spec:
   file: "com.enonic.xp.web.sessionstore.cfg"
@@ -941,8 +973,9 @@ metadata:
   labels:
     enonic.managed: "true"
     cloud: "mycloud"
-    name: "qaxp"
-    project: "myproject"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
   name: "all-system"
 spec:
   file: "system.properties"
@@ -956,8 +989,9 @@ metadata:
   labels:
     enonic.managed: "true"
     cloud: "mycloud"
-    name: "qaxp"
-    project: "myproject"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
   name: "data-cluster"
 spec:
   file: "com.enonic.xp.cluster.cfg"
@@ -971,15 +1005,16 @@ metadata:
   labels:
     enonic.managed: "true"
     cloud: "mycloud"
-    name: "qaxp"
-    project: "myproject"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
   name: "data-elasticsearch"
 spec:
   file: "com.enonic.xp.elasticsearch.cfg"
   nodeGroup: "data"
-  data: "http.enabled=false\nnode.master=false\nnode.data=true\ncluster.name=mycloud-myproject-qaxp\n\
+  data: "http.enabled=false\nnode.master=false\nnode.data=true\ncluster.name=mycloud-mysolution-myenv-myservice\n\
     gateway.expected_master_nodes=2\ngateway.expected_data_nodes=2\ngateway.recover_after_time=5m\n\
-    discovery.zen.minimum_master_nodes=2\ndiscovery.unicast.sockets=all.mycloud-myproject-qaxp.svc.cluster.local\n\
+    discovery.zen.minimum_master_nodes=2\ndiscovery.unicast.sockets=all.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
     network.tcp.keep_alive=true"
 ---
 kind: "Xp7Config"
@@ -990,14 +1025,15 @@ metadata:
   labels:
     enonic.managed: "true"
     cloud: "mycloud"
-    name: "qaxp"
-    project: "myproject"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
   name: "data-hazelcast"
 spec:
   file: "com.enonic.xp.hazelcast.cfg"
   nodeGroup: "data"
   data: "clusterConfigDefaults=false\nsystem.hazelcast.initial.min.cluster.size=2\n\
-    network.join.kubernetes.serviceDns=all.mycloud-myproject-qaxp.svc.cluster.local\n\
+    network.join.kubernetes.serviceDns=all.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
     network.join.kubernetes.enabled=true\nnetwork.join.tcpIp.enabled=false"
 ---
 kind: "Xp7Config"
@@ -1006,8 +1042,9 @@ metadata:
   labels:
     enonic.managed: "true"
     cloud: "mycloud"
-    name: "qaxp"
-    project: "myproject"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
   name: "frontend-cluster"
 spec:
   file: "com.enonic.xp.cluster.cfg"
@@ -1021,15 +1058,16 @@ metadata:
   labels:
     enonic.managed: "true"
     cloud: "mycloud"
-    name: "qaxp"
-    project: "myproject"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
   name: "frontend-elasticsearch"
 spec:
   file: "com.enonic.xp.elasticsearch.cfg"
   nodeGroup: "frontend"
-  data: "http.enabled=false\nnode.master=false\nnode.data=false\ncluster.name=mycloud-myproject-qaxp\n\
+  data: "http.enabled=false\nnode.master=false\nnode.data=false\ncluster.name=mycloud-mysolution-myenv-myservice\n\
     gateway.expected_master_nodes=2\ngateway.expected_data_nodes=2\ngateway.recover_after_time=5m\n\
-    discovery.zen.minimum_master_nodes=2\ndiscovery.unicast.sockets=all.mycloud-myproject-qaxp.svc.cluster.local\n\
+    discovery.zen.minimum_master_nodes=2\ndiscovery.unicast.sockets=all.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
     network.tcp.keep_alive=true"
 ---
 kind: "Xp7Config"
@@ -1040,14 +1078,15 @@ metadata:
   labels:
     enonic.managed: "true"
     cloud: "mycloud"
-    name: "qaxp"
-    project: "myproject"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
   name: "frontend-hazelcast"
 spec:
   file: "com.enonic.xp.hazelcast.cfg"
   nodeGroup: "frontend"
   data: "clusterConfigDefaults=false\nsystem.hazelcast.initial.min.cluster.size=2\n\
-    network.join.kubernetes.serviceDns=all.mycloud-myproject-qaxp.svc.cluster.local\n\
+    network.join.kubernetes.serviceDns=all.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
     network.join.kubernetes.enabled=true\nnetwork.join.tcpIp.enabled=false"
 ---
 kind: "Xp7Config"
@@ -1056,8 +1095,9 @@ metadata:
   labels:
     enonic.managed: "true"
     cloud: "mycloud"
-    name: "qaxp"
-    project: "myproject"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
   name: "master-cluster"
 spec:
   file: "com.enonic.xp.cluster.cfg"
@@ -1071,15 +1111,16 @@ metadata:
   labels:
     enonic.managed: "true"
     cloud: "mycloud"
-    name: "qaxp"
-    project: "myproject"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
   name: "master-elasticsearch"
 spec:
   file: "com.enonic.xp.elasticsearch.cfg"
   nodeGroup: "master"
-  data: "http.enabled=false\nnode.master=true\nnode.data=false\ncluster.name=mycloud-myproject-qaxp\n\
+  data: "http.enabled=false\nnode.master=true\nnode.data=false\ncluster.name=mycloud-mysolution-myenv-myservice\n\
     gateway.expected_master_nodes=2\ngateway.expected_data_nodes=2\ngateway.recover_after_time=5m\n\
-    discovery.zen.minimum_master_nodes=2\ndiscovery.unicast.sockets=all.mycloud-myproject-qaxp.svc.cluster.local\n\
+    discovery.zen.minimum_master_nodes=2\ndiscovery.unicast.sockets=all.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
     network.tcp.keep_alive=true"
 ---
 kind: "Xp7Config"
@@ -1090,14 +1131,15 @@ metadata:
   labels:
     enonic.managed: "true"
     cloud: "mycloud"
-    name: "qaxp"
-    project: "myproject"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
   name: "master-hazelcast"
 spec:
   file: "com.enonic.xp.hazelcast.cfg"
   nodeGroup: "master"
   data: "clusterConfigDefaults=false\nsystem.hazelcast.initial.min.cluster.size=2\n\
-    network.join.kubernetes.serviceDns=all.mycloud-myproject-qaxp.svc.cluster.local\n\
+    network.join.kubernetes.serviceDns=all.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
     network.join.kubernetes.enabled=true\nnetwork.join.tcpIp.enabled=false"
 ---
 kind: "Xp7VHost"
@@ -1106,8 +1148,9 @@ metadata:
   labels:
     enonic.managed: "true"
     cloud: "mycloud"
-    name: "qaxp"
-    project: "myproject"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
   name: "healthcheck"
 spec:
   host: "healthcheck"
@@ -1126,8 +1169,9 @@ metadata:
   labels:
     enonic.managed: "true"
     cloud: "mycloud"
-    name: "qaxp"
-    project: "myproject"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
   name: "localhost"
 spec:
   host: "localhost"

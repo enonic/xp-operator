@@ -1,4 +1,4 @@
-testResult: "Xp7Deployment name must be equal to <Cloud>-<Project>-<Name> according to labels, i.e: 'mycloud-myproject-qaxp'"
+testResult: "Xp7Deployment name must be equal to <Cloud>-<Solution>-<Environment>-<Service> according to labels, i.e: 'mycloud-mysolution-myenv-myservice'"
 testReview:
   request:
     operation: CREATE
@@ -9,8 +9,9 @@ testReview:
         name: wrongname
         labels:
           cloud: mycloud
-          project: myproject
-          name: qaxp
+          solution: mysolution
+          environment: myenv
+          service: myservice
       spec:
         enabled: true
         xpVersion: 7.1.2

@@ -31,15 +31,21 @@ public class V1alpha2Xp7Deployment
     }
 
     @JsonIgnore
-    public String ecProject()
+    public String ecSolution()
     {
-        return getLabel( cfgStr( "operator.deployment.xp.labels.project" ) );
+        return getLabel( cfgStr( "operator.deployment.xp.labels.solution" ) );
     }
 
     @JsonIgnore
-    public String ecName()
+    public String ecEnvironment()
     {
-        return getLabel( cfgStr( "operator.deployment.xp.labels.name" ) );
+        return getLabel( cfgStr( "operator.deployment.xp.labels.environment" ) );
+    }
+
+    @JsonIgnore
+    public String ecService()
+    {
+        return getLabel( cfgStr( "operator.deployment.xp.labels.service" ) );
     }
 
     private String getLabel( String key )

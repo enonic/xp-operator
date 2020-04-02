@@ -1,4 +1,4 @@
-testResult: "Label 'metadata.labels.name' is missing"
+testResult: "Label 'metadata.labels.service' is missing"
 testReview:
   request:
     operation: CREATE
@@ -6,11 +6,12 @@ testReview:
       apiVersion: enonic.cloud/v1alpha2
       kind: Xp7Deployment
       metadata:
-        name: mycloud-myproject-qaxp
+        name: mycloud-mysolution-myenv-myservice
         labels:
           cloud: mycloud
-          project: myproject
-          #name: qaxp
+          solution: mysolution
+          environment: myenv
+          #service: myservice
       spec:
         enabled: true
         xpVersion: 7.1.2

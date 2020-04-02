@@ -17,8 +17,9 @@ extensions:
 allNodesKey: "all"
 defaultLabels:
   cloud: "mycloud"
-  project: "myproject"
-  name: "qaxp"
+  solution: "mysolution"
+  environment: "myenv"
+  service: "myservice"
 annotations:
   alwaysOverwrite: "enonic.alwaysOverwrite"
   neverOverwrite: "enonic.neverOverwrite"
@@ -32,8 +33,8 @@ labels:
   managed: "enonic.managed"
 deployment:
   clustered: false
-  name: "mycloud-myproject-qaxp"
-  namespace: "mycloud-myproject-qaxp"
+  name: "mycloud-mysolution-myenv-myservice"
+  namespace: "mycloud-mysolution-myenv-myservice"
   spec:
     xpVersion: "7.1.2"
     enabled: true

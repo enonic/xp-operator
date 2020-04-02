@@ -32,8 +32,9 @@ extensions:
 allNodesKey: "all"
 defaultLabels:
   cloud: "mycloud"
-  project: "myproject"
-  name: "qaxp"
+  solution: "mysolution"
+  environment: "myenv"
+  service: "myservice"
 annotations:
   alwaysOverwrite: "enonic.alwaysOverwrite"
   neverOverwrite: "enonic.neverOverwrite"

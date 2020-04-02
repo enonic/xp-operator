@@ -2,7 +2,7 @@ apiVersion: enonic.cloud/v1alpha2
 kind: Xp7Config
 metadata:
   name: test
-  namespace: mycloud-myproject-qaxp
+  namespace: mycloud-mysolution-myenv-myservice
 spec:
   file: mytest.cfg
   nodeGroup: fisk
