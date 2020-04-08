@@ -26,6 +26,7 @@ spec:
   template:
     metadata:
       annotations:
+        enonic.cloud/xp7metrics: "true"
         {{- if index $.Values "extensions.linkerd" }}
         linkerd.io/inject: enabled
         {{- end }}
