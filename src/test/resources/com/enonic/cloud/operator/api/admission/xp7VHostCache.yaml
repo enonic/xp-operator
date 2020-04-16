@@ -20,7 +20,8 @@
     namespace: other-project-xp
   spec:
     host: healthcheck
-    skipIngress: true
+    options:
+      ingress: false
     mappings:
       - nodeGroup: main
         source: /

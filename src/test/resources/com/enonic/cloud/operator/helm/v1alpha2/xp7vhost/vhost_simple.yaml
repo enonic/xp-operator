@@ -5,7 +5,8 @@ metadata:
   namespace: mycloud-mysolution-myenv-myservice
 spec:
   host: test.purplejs.io
-  maxBodySize: 8m
+  options:
+    ingressMaxBodySize: 8m
   certificate:
     authority: selfSigned
   mappings:

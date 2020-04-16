@@ -152,11 +152,11 @@ public class AdmissionApi
             }
         }
 
-        if ( !vHost.resource().getSpec().skipIngress() )
+        if ( vHost.resource().getSpec().options().ingress() )
         {
             long sameHost = caches.getVHostCache().getCollection().stream().
                 filter( r -> !r.getMetadata().getUid().equals( vHost.resource().getMetadata().getUid() ) ).
-                filter( r -> !r.getSpec().skipIngress() ).
+                filter( r -> vHost.resource().getSpec().options().ingress() ).
                 filter( r -> r.getSpec().host().equals( vHost.resource().getSpec().host() ) ).
                 count();
             Preconditions.checkState( sameHost < 1L, "This host is being used by another Xp7VHost" );

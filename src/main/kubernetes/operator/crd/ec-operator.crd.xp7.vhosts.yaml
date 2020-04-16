@@ -23,8 +23,22 @@ spec:
               properties:
                 host:
                   type: string
-                maxBodySize:
-                  type: string
+                options:
+                  type: object
+                  nullable: true
+                  properties:
+                    ingress:
+                      type: boolean
+                      nullable: true
+                    ingressMaxBodySize:
+                      type: string
+                      nullable: true
+                    dnsRecord:
+                      type: boolean
+                      nullable: true
+                    statusCake:
+                      type: boolean
+                      nullable: true
                 certificate:
                   type: object
                   nullable: true

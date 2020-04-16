@@ -12,8 +12,6 @@ extensions:
       enabled: false
   linkerd:
     enabled: false
-  ecDns:
-    enabled: false
 allNodesKey: "all"
 defaultLabels:
   cloud: "mycloud"

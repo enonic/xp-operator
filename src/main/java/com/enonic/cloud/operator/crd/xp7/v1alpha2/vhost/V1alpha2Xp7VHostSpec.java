@@ -22,15 +22,8 @@ public abstract class V1alpha2Xp7VHostSpec
     public abstract String host();
 
     @Value.Default
-    public String maxBodySize()
-    {
-        return "100m";
-    }
-
-    @Value.Default
-    public Boolean skipIngress()
-    {
-        return false;
+    public V1alpha2Xp7VHostSpecOptions options() {
+        return ImmutableV1alpha2Xp7VHostSpecOptions.builder().build();
     }
 
     @Nullable
@@ -44,7 +37,7 @@ public abstract class V1alpha2Xp7VHostSpec
     {
         Validator.dns1123( "spec.host", host() );
         Preconditions.checkState( mappings().size() > 0, "Field 'spec.mappings' has to contain more than 0 mappings" );
-        if ( skipIngress() )
+        if ( !options().ingress() )
         {
             Preconditions.checkState( certificate() == null, "Field 'spec.certificate' cannot be set if ingress is skipped" );
         }

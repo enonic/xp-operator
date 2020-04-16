@@ -1,5 +1,5 @@
 # Create ingress
-{{- if not .Values.vhost.spec.skipIngress }}
+{{- if .Values.vhost.spec.options.ingress }}
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
@@ -12,13 +12,14 @@ metadata:
     {{- end }}
   annotations:
     kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/proxy-body-size: {{ .Values.vhost.spec.maxBodySize }}
+    nginx.ingress.kubernetes.io/proxy-body-size: {{ .Values.vhost.spec.options.ingressMaxBodySize }}
     ingress.kubernetes.io/rewrite-target: /
-
-    {{- if .Values.extensions.ecDns.enabled }}
+    {{- if .Values.vhost.spec.options.dnsRecord }}
     enonic.cloud/dns.hostname: {{ .Values.vhost.spec.host }}
     {{- end }}
-
+    {{- if .Values.vhost.spec.options.statusCake }}
+    monitor.stakater.com/enabled: "true"
+    {{- end }}
     {{- if .Values.vhost.issuer }}
     cert-manager.io/cluster-issuer: {{ .Values.vhost.issuer }}
     nginx.ingress.kubernetes.io/ssl-redirect: "true"

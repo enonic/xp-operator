@@ -75,7 +75,7 @@ public abstract class Cache<T extends HasMetadata, L extends KubernetesResourceL
     }
 
     @Override
-    public void eventReceived( final Action action, final T resource )
+    public void eventReceived( Action action, final T resource )
     {
         try
         {
@@ -102,7 +102,9 @@ public abstract class Cache<T extends HasMetadata, L extends KubernetesResourceL
             }
             else if ( action == Watcher.Action.MODIFIED )
             {
-                Preconditions.checkState( oldResource != null );
+                if (oldResource == null) {
+                    action = Action.ADDED;
+                }
                 cache.put( uid, resource );
             }
             else if ( action == Watcher.Action.DELETED )

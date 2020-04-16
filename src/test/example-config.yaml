@@ -4,7 +4,7 @@ metadata:
   name: test
   namespace: mycloud-mysolution-myenv-myservice
 spec:
-  file: mytest.cfg
-  nodeGroup: fisk
+  file: com.enonic.app.status.cfg
+  nodeGroup: all
   data: |
-    hello
+    metricsUrl = http://asdf:2609/

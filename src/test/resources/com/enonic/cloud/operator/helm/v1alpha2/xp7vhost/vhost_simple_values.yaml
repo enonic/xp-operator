@@ -4,8 +4,11 @@ vhost:
   issuer: "selfsigned"
   spec:
     host: "test.purplejs.io"
-    maxBodySize: "8m"
-    skipIngress: false
+    options:
+      ingress: true
+      ingressMaxBodySize: "8m"
+      dnsRecord: true
+      statusCake: false
     certificate:
       authority: "selfSigned"
     mappings:
@@ -26,8 +29,6 @@ extensions:
     caching:
       enabled: false
   linkerd:
-    enabled: false
-  ecDns:
     enabled: false
 allNodesKey: "all"
 defaultLabels:

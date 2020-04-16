@@ -12,7 +12,8 @@ testReview:
         host: test.purplejs.io
         certificate:
           authority: selfSigned
-        skipIngress: true
+        options:
+          ingress: false
         mappings:
           - nodeGroup: main
             source: /

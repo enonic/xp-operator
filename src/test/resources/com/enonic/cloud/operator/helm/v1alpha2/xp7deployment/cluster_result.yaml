@@ -291,6 +291,10 @@ spec:
   serviceName: "all"
   template:
     metadata:
+      annotations:
+        enonic.cloud/metrics.xp7: "true"
+        enonic.cloud/logs.xp7: "true"
+        backup.velero.io/backup-volumes: "blobstore,snapshots"
       labels:
         nodeGroup: "data"
         cloud: "mycloud"
@@ -507,6 +511,10 @@ spec:
   serviceName: "all"
   template:
     metadata:
+      annotations:
+        enonic.cloud/metrics.xp7: "true"
+        enonic.cloud/logs.xp7: "true"
+        backup.velero.io/backup-volumes: "blobstore,snapshots"
       labels:
         nodeGroup: "frontend"
         cloud: "mycloud"
@@ -730,6 +738,10 @@ spec:
   serviceName: "all"
   template:
     metadata:
+      annotations:
+        enonic.cloud/metrics.xp7: "true"
+        enonic.cloud/logs.xp7: "true"
+        backup.velero.io/backup-volumes: "blobstore,snapshots"
       labels:
         nodeGroup: "master"
         cloud: "mycloud"
@@ -1154,8 +1166,11 @@ metadata:
   name: "healthcheck"
 spec:
   host: "healthcheck"
-  maxBodySize: "100m"
-  skipIngress: true
+  options:
+    ingress: false
+    ingressMaxBodySize: "100m"
+    dnsRecord: false
+    statusCake: false
   certificate: null
   mappings:
   - nodeGroup: "all"
@@ -1175,8 +1190,11 @@ metadata:
   name: "localhost"
 spec:
   host: "localhost"
-  maxBodySize: "100m"
-  skipIngress: true
+  options:
+    ingress: false
+    ingressMaxBodySize: "100m"
+    dnsRecord: false
+    statusCake: false
   certificate: null
   mappings:
   - nodeGroup: "all"
