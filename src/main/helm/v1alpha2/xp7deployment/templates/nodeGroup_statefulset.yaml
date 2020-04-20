@@ -115,10 +115,10 @@ spec:
             runAsUser: {{ $.Values.user }}
 
           resources:
-            limits:
-              cpu: {{ $nodeGroup.resources.cpu }}
-              memory: {{ $nodeGroup.resources.memory }}
             requests:
+              cpu: {{ if $.Values.resources.cpu.defaultRequests }}{{ $.Values.resources.cpu.defaultRequests }}{{ else }}{{ $nodeGroup.resources.cpu }}{{ end }}
+              memory: {{ if $.Values.resources.memory.defaultRequests }}{{ $.Values.resources.memory.defaultRequests }}{{ else }}{{ $nodeGroup.resources.memory }}{{ end }}
+            limits:
               cpu: {{ $nodeGroup.resources.cpu }}
               memory: {{ $nodeGroup.resources.memory }}
 

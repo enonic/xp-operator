@@ -45,6 +45,12 @@ terminationGracePeriodSeconds: 30
 updateStrategy: RollingUpdate
 initContainersImage: alpine:3.10
 
+resources:
+  cpu:
+    defaultRequests: null
+  memory:
+    defaultRequests: null
+
 # Filled in by operator
 # deployment:
 #   name: gbb-tests-qa
