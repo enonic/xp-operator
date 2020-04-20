@@ -15,6 +15,9 @@ mvn-dependencies:
 deployment-create:
 	kubectl apply -f src/test/example-deployment.yaml
 
+deployment-delete:
+	kubectl delete -f src/test/example-deployment.yaml
+
 deployment-supass:
 	kubectl -n mycloud-myproject-qaxp get secrets su-pass -o jsonpath={.data.suPass} | base64 -d
 

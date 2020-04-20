@@ -21,6 +21,12 @@ import com.google.common.io.BaseEncoding;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Secret;
+import io.fabric8.kubernetes.api.model.ServiceAccount;
+import io.fabric8.kubernetes.api.model.rbac.PolicyRule;
+import io.fabric8.kubernetes.api.model.rbac.Role;
+import io.fabric8.kubernetes.api.model.rbac.RoleBinding;
+import io.fabric8.kubernetes.api.model.rbac.RoleRef;
+import io.fabric8.kubernetes.api.model.rbac.Subject;
 import io.fabric8.kubernetes.client.Watcher;
 import io.quarkus.runtime.StartupEvent;
 
@@ -94,6 +100,27 @@ public class OperatorXp7Deployments
                     build().
                     apply( commandBuilder );
 
+                // Create SA rules
+                ServiceAccount sa = getServiceAccount();
+                if ( sa != null )
+                {
+                    // Create role && role binding
+                    Role role = createRole( info.namespaceName() );
+                    RoleBinding roleBinding = createRoleBinding( role, sa );
+
+                    ImmutableKubeCmd.builder().
+                        clients( clients ).
+                        resource( role ).
+                        build().
+                        apply( commandBuilder );
+
+                    ImmutableKubeCmd.builder().
+                        clients( clients ).
+                        resource( roleBinding ).
+                        build().
+                        apply( commandBuilder );
+                }
+
                 // Create su pass
                 ImmutableKubeCmd.builder().
                     clients( clients ).
@@ -132,6 +159,50 @@ public class OperatorXp7Deployments
         Namespace namespace = new Namespace();
         namespace.setMetadata( metaData );
         return namespace;
+    }
+
+    private ServiceAccount getServiceAccount()
+    {
+        return clients.getDefaultClient().
+            serviceAccounts().
+            inNamespace( cfgStr( "operator.deployment.adminServiceAccount.namespace" ) ).
+            withName( cfgStr( "operator.deployment.adminServiceAccount.name" ) ).
+            get();
+    }
+
+    private Role createRole( String namespace )
+    {
+        ObjectMeta metaData = new ObjectMeta();
+        metaData.setName( "read-secrets" );
+        metaData.setNamespace( namespace );
+
+        Role role = new Role();
+        role.setMetadata( metaData );
+
+        PolicyRule rule = new PolicyRule();
+        rule.setApiGroups( Collections.singletonList( "*" ) );
+        rule.setResources( Collections.singletonList( "secrets" ) );
+        rule.setVerbs( Collections.singletonList( "get" ) );
+        role.setRules( Collections.singletonList( rule ) );
+
+        return role;
+    }
+
+    private RoleBinding createRoleBinding( Role role, ServiceAccount sa )
+    {
+        String saName = sa.getMetadata().getName();
+        ObjectMeta metaData = new ObjectMeta();
+        metaData.setName( saName + "-read-secrets" );
+        metaData.setNamespace( role.getMetadata().getNamespace() );
+
+        RoleBinding rb = new RoleBinding();
+        rb.setMetadata( metaData );
+
+        rb.setSubjects( Collections.singletonList(
+            new Subject( null, "ServiceAccount", sa.getMetadata().getName(), sa.getMetadata().getNamespace() ) ) );
+        rb.setRoleRef( new RoleRef( null, "Role", role.getMetadata().getName() ) );
+
+        return rb;
     }
 
     @SuppressWarnings("UnstableApiUsage")

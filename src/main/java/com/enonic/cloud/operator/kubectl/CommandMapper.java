@@ -11,6 +11,8 @@ import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.apps.DaemonSet;
 import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
+import io.fabric8.kubernetes.api.model.rbac.Role;
+import io.fabric8.kubernetes.api.model.rbac.RoleBinding;
 
 import com.enonic.cloud.operator.crd.xp7.v1alpha1.app.V1alpha1Xp7App;
 import com.enonic.cloud.operator.crd.xp7.v1alpha2.config.V1alpha2Xp7Config;
@@ -57,6 +59,24 @@ class CommandMapper
             return (KubeCommandBuilder<T>) ImmutableKubeCmdNamespaces.builder().
                 clients( clients ).
                 resource( (Namespace) resource ).
+                options( options ).
+                build();
+        }
+        else if ( resource instanceof Role )
+        {
+            return (KubeCommandBuilder<T>) ImmutableKubeCmdRole.builder().
+                clients( clients ).
+                namespace( namespace ).
+                resource( (Role) resource ).
+                options( options ).
+                build();
+        }
+        else if ( resource instanceof RoleBinding )
+        {
+            return (KubeCommandBuilder<T>) ImmutableKubeCmdRoleBinding.builder().
+                clients( clients ).
+                namespace( namespace ).
+                resource( (RoleBinding) resource ).
                 options( options ).
                 build();
         }
