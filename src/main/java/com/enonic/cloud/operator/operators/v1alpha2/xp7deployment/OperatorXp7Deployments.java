@@ -42,6 +42,8 @@ import com.enonic.cloud.operator.operators.common.clients.Clients;
 import com.enonic.cloud.operator.operators.v1alpha2.xp7deployment.info.ImmutableInfoXp7Deployment;
 import com.enonic.cloud.operator.operators.v1alpha2.xp7deployment.info.InfoXp7Deployment;
 
+import static com.enonic.cloud.operator.operators.common.BackupRestore.isBeingRestored;
+
 @Singleton
 public class OperatorXp7Deployments
     extends OperatorNamespaced
@@ -82,6 +84,11 @@ public class OperatorXp7Deployments
             oldResource( oldResource ).
             newResource( newResource ).
             build();
+
+        if(isBeingRestored(actionId, action, info.resource())) {
+            // This is a backup restore, just ignore
+            return;
+        }
 
         runCommands( actionId, commandBuilder -> {
             if ( action == Watcher.Action.DELETED )

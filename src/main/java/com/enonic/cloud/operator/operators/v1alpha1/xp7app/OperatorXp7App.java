@@ -21,6 +21,8 @@ import com.enonic.cloud.operator.operators.v1alpha1.xp7app.commands.ImmutableCom
 import com.enonic.cloud.operator.operators.v1alpha1.xp7app.info.DiffXp7App;
 import com.enonic.cloud.operator.operators.v1alpha1.xp7app.info.ImmutableInfoXp7App;
 
+import static com.enonic.cloud.operator.operators.common.BackupRestore.isBeingRestored;
+
 @ApplicationScoped
 public class OperatorXp7App
     extends OperatorNamespaced
@@ -50,11 +52,19 @@ public class OperatorXp7App
             newResource( newResource ).
             build() );
 
-        i.ifPresent( info -> runCommands( actionId, commandBuilder -> ImmutableCommandXpAppsApply.builder().
-            clients( clients ).
-            caches( caches ).
-            info( info ).
-            build().
-            addCommands( commandBuilder ) ) );
+        i.ifPresent( info -> runCommands( actionId, commandBuilder -> {
+            if ( isBeingRestored( actionId, action, info.resource() ) )
+            {
+                // This is a backup restore, just ignore
+                return;
+            }
+
+            ImmutableCommandXpAppsApply.builder().
+                clients( clients ).
+                caches( caches ).
+                info( info ).
+                build().
+                addCommands( commandBuilder );
+        } ) );
     }
 }

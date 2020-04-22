@@ -21,6 +21,8 @@ import com.enonic.cloud.operator.operators.v1alpha2.xp7config.commands.Immutable
 import com.enonic.cloud.operator.operators.v1alpha2.xp7config.info.DiffXp7Config;
 import com.enonic.cloud.operator.operators.v1alpha2.xp7config.info.ImmutableInfoXp7Config;
 
+import static com.enonic.cloud.operator.operators.common.BackupRestore.isBeingRestored;
+
 @SuppressWarnings("WeakerAccess")
 @ApplicationScoped
 public class OperatorXp7Config
@@ -50,11 +52,19 @@ public class OperatorXp7Config
             newResource( newResource ).
             build() );
 
-        i.ifPresent( info -> runCommands( actionId, ( commandBuilder ) -> ImmutableCommandConfigMapUpdateAll.builder().
-            clients( clients ).
-            caches( caches ).
-            info( info ).
-            build().
-            addCommands( commandBuilder ) ) );
+        i.ifPresent( info -> runCommands( actionId, ( commandBuilder ) -> {
+            if ( isBeingRestored( actionId, action, info.resource() ) )
+            {
+                // This is a backup restore, just ignore
+                return;
+            }
+
+            ImmutableCommandConfigMapUpdateAll.builder().
+                clients( clients ).
+                caches( caches ).
+                info( info ).
+                build().
+                addCommands( commandBuilder );
+        } ) );
     }
 }

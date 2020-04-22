@@ -30,6 +30,8 @@ import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.info.DiffXp7VHost;
 import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.info.ImmutableInfoXp7ConfigMap;
 import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.info.ImmutableInfoXp7VHost;
 
+import static com.enonic.cloud.operator.operators.common.BackupRestore.isBeingRestored;
+
 @SuppressWarnings("WeakerAccess")
 @ApplicationScoped
 public class OperatorXp7VHost
@@ -74,6 +76,12 @@ public class OperatorXp7VHost
             build() );
 
         i.ifPresent( info -> runCommands( actionId, ( commandBuilder ) -> {
+
+            if(isBeingRestored(actionId, action, info.resource())) {
+                // This is a backup restore, just ignore
+                return;
+            }
+
             // Create ingress independent of config
             ImmutableHelmKubeCmdBuilder.builder().
                 clients( clients ).
