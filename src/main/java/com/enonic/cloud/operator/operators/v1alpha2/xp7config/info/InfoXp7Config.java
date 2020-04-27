@@ -5,11 +5,11 @@ import java.util.Optional;
 import org.immutables.value.Value;
 
 import com.enonic.cloud.operator.crd.xp7.v1alpha2.config.V1alpha2Xp7Config;
-import com.enonic.cloud.operator.operators.common.ResourceInfoNamespaced;
+import com.enonic.cloud.operator.operators.common.ResourceInfoXp7DeploymentDependant;
 
 @Value.Immutable
 public abstract class InfoXp7Config
-    extends ResourceInfoNamespaced<V1alpha2Xp7Config, DiffXp7Config>
+    extends ResourceInfoXp7DeploymentDependant<V1alpha2Xp7Config, DiffXp7Config>
 {
     @Override
     protected DiffXp7Config createDiff( final Optional<V1alpha2Xp7Config> oldResource, final Optional<V1alpha2Xp7Config> newResource )

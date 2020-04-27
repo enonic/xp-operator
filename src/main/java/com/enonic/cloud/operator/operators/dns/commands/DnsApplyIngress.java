@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 
 import org.immutables.value.Value;
 
-import com.enonic.cloud.operator.common.Configuration;
 import com.enonic.cloud.operator.common.commands.CombinedCommandBuilder;
 import com.enonic.cloud.operator.common.commands.ImmutableCombinedCommand;
 import com.enonic.cloud.operator.common.info.Diff;
@@ -23,7 +22,6 @@ import com.enonic.cloud.operator.operators.dns.model.Domain;
 
 @Value.Immutable
 public abstract class DnsApplyIngress
-    extends Configuration
     implements CombinedCommandBuilder
 {
     protected abstract DnsRecordService dnsRecordService();
@@ -50,7 +48,7 @@ public abstract class DnsApplyIngress
 
         for ( DiffDnsIngressDomains diffDomain : diff().diffDomains() )
         {
-            if ( !diffDomain.shouldRemove() )
+            if ( !diffDomain.modified() )
             {
                 addOrModify( commandBuilder, diffDomain.newValue().get(), diff().newValue().get().ttl(), diff().diffIps() );
             }
@@ -90,7 +88,7 @@ public abstract class DnsApplyIngress
         List<String> dnsRecords =
             records.stream().filter( r -> r.type().equals( "A" ) ).map( DnsRecord::content ).collect( Collectors.toList() );
         ipsChanged.stream().
-            filter( Diff::isNew ).
+            filter( Diff::added ).
             filter( d -> !dnsRecords.contains( d.ip() ) ).
             forEach( diffIp -> commandBuilder.addCommand( ImmutableDnsCreate.builder().
                 dnsRecordsService( dnsRecordService() ).
@@ -104,8 +102,7 @@ public abstract class DnsApplyIngress
                     build() ).
                 build() ) );
 
-        List<String> ipsToRemove =
-            ipsChanged.stream().filter( Diff::shouldRemove ).map( DiffDnsIngressIps::ip ).collect( Collectors.toList() );
+        List<String> ipsToRemove = ipsChanged.stream().filter( Diff::removed ).map( DiffDnsIngressIps::ip ).collect( Collectors.toList() );
         records.stream().filter( r -> ipsToRemove.contains( r.content() ) ).forEach(
             r -> commandBuilder.addCommand( ImmutableDnsDelete.builder().
                 dnsRecordsService( dnsRecordService() ).

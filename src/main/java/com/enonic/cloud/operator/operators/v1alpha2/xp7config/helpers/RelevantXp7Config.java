@@ -8,13 +8,13 @@ import org.immutables.value.Value;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 
-import com.enonic.cloud.operator.common.Configuration;
 import com.enonic.cloud.operator.crd.xp7.v1alpha2.config.V1alpha2Xp7Config;
 import com.enonic.cloud.operator.operators.common.cache.Caches;
 
+import static com.enonic.cloud.operator.common.Configuration.cfgStr;
+
 @Value.Immutable
 public abstract class RelevantXp7Config
-    extends Configuration
 {
     protected abstract Caches caches();
 

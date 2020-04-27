@@ -16,8 +16,8 @@ public abstract class OperatorNamespaced
 {
     private final static Logger log = LoggerFactory.getLogger( OperatorNamespaced.class );
 
-    protected <R extends HasMetadata, D extends Diff<R>> Optional<ResourceInfoNamespaced<R, D>> getInfo( Watcher.Action action,
-                                                                                                         Supplier<ResourceInfoNamespaced<R, D>> s )
+    protected <R extends HasMetadata, D extends Diff<R>> Optional<ResourceInfoXp7DeploymentDependant<R, D>> getInfo( Watcher.Action action,
+                                                                                                                     Supplier<ResourceInfoXp7DeploymentDependant<R, D>> s )
     {
         try
         {

@@ -15,43 +15,32 @@ import org.immutables.value.Value;
 
 import com.google.common.base.Preconditions;
 
-import com.enonic.cloud.operator.common.Configuration;
-
 public abstract class Diff<T>
-    extends Configuration
 {
     public abstract Optional<T> oldValue();
 
     public abstract Optional<T> newValue();
 
     @Value.Derived
-    public boolean isNew()
+    public boolean added()
     {
         return oldValue().isEmpty() && newValue().isPresent();
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     @Value.Derived
-    public boolean shouldAddOrModify()
+    public boolean modified()
     {
-        return ( oldValue().isEmpty() && newValue().isPresent() ) || shouldModify();
+        if(oldValue().isPresent() && newValue().isPresent()) {
+            return !Objects.equals( oldValue(), newValue() );
+        }
+        return false;
     }
 
     @Value.Derived
-    public boolean shouldModify()
-    {
-        return oldValue().isPresent() && newValue().isPresent() && !oldValue().equals( newValue() );
-    }
-
-    @Value.Derived
-    public boolean shouldRemove()
+    public boolean removed()
     {
         return oldValue().isPresent() && newValue().isEmpty();
-    }
-
-    @Value.Derived
-    public boolean shouldAddOrModifyOrRemove()
-    {
-        return shouldAddOrModify() || shouldRemove();
     }
 
     @Value.Check
@@ -64,7 +53,7 @@ public abstract class Diff<T>
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     protected <B> boolean equals( Function<T, B> func )
     {
-        if ( !shouldModify() )
+        if ( !modified() )
         {
             return true;
         }
@@ -113,6 +102,7 @@ public abstract class Diff<T>
         return res;
     }
 
+    @SuppressWarnings("unused")
     protected <C, D extends Diff<C>> List<D> mergeMaps( Map<String, C> oldMap, Map<String, C> newMap,
                                                         BiFunction<Optional<C>, Optional<C>, D> creator )
     {

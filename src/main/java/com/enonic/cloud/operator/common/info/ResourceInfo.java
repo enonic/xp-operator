@@ -9,10 +9,9 @@ import com.google.common.base.Preconditions;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 
-import com.enonic.cloud.operator.common.Configuration;
+import static com.enonic.cloud.operator.common.Configuration.cfgStr;
 
 public abstract class ResourceInfo<T extends HasMetadata, D extends Diff<T>>
-    extends Configuration
 {
     public abstract Optional<T> oldResource();
 
@@ -26,21 +25,19 @@ public abstract class ResourceInfo<T extends HasMetadata, D extends Diff<T>>
     }
 
     @Value.Derived
-    public boolean resourceAdded()
+    public String name()
     {
-        return oldResource().isEmpty() && newResource().isPresent();
+        return resource().getMetadata().getName();
     }
 
     @Value.Derived
-    public boolean resourceModified()
+    public boolean resourceBeingRestoredFromBackup()
     {
-        return oldResource().isPresent() && newResource().isPresent() && !oldResource().equals( newResource() );
-    }
-
-    @Value.Derived
-    public boolean resourceDeleted()
-    {
-        return oldResource().isPresent() && newResource().isEmpty();
+        if ( resource().getMetadata().getLabels() == null )
+        {
+            return false;
+        }
+        return diff().added() && resource().getMetadata().getLabels().containsKey( cfgStr( "operator.deployment.backup.label" ) );
     }
 
     @Value.Derived
@@ -50,13 +47,13 @@ public abstract class ResourceInfo<T extends HasMetadata, D extends Diff<T>>
     }
 
     @Value.Derived
-    public OwnerReference ownerReference()
+    public OwnerReference createResourceOwnerReference()
     {
         return createOwnerReference( resource() );
     }
 
     @SuppressWarnings("WeakerAccess")
-    public OwnerReference createOwnerReference( HasMetadata owner )
+    protected OwnerReference createOwnerReference( HasMetadata owner )
     {
         return new OwnerReference( owner.getApiVersion(), true, true, owner.getKind(), owner.getMetadata().getName(),
                                    owner.getMetadata().getUid() );

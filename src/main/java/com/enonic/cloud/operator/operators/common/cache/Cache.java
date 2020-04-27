@@ -15,8 +15,6 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesResourceList;
 import io.fabric8.kubernetes.client.KubernetesClientException;
@@ -102,7 +100,8 @@ public abstract class Cache<T extends HasMetadata, L extends KubernetesResourceL
             }
             else if ( action == Watcher.Action.MODIFIED )
             {
-                if (oldResource == null) {
+                if ( oldResource == null )
+                {
                     action = Action.ADDED;
                 }
                 cache.put( uid, resource );

@@ -7,26 +7,24 @@ import org.immutables.value.Value;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 
-import com.enonic.cloud.operator.common.Configuration;
 import com.enonic.cloud.operator.common.commands.CombinedCommandBuilder;
 import com.enonic.cloud.operator.common.commands.ImmutableCombinedCommand;
 import com.enonic.cloud.operator.crd.xp7.v1alpha2.config.ImmutableV1alpha2Xp7ConfigSpec;
 import com.enonic.cloud.operator.crd.xp7.v1alpha2.config.V1alpha2Xp7Config;
 import com.enonic.cloud.operator.kubectl.ImmutableKubeCmd;
 import com.enonic.cloud.operator.kubectl.KubeCmd;
-import com.enonic.cloud.operator.operators.common.ResourceInfoNamespaced;
+import com.enonic.cloud.operator.operators.common.ResourceInfoXp7DeploymentDependant;
 import com.enonic.cloud.operator.operators.common.cache.Caches;
 import com.enonic.cloud.operator.operators.common.clients.Clients;
 
 public abstract class CommandXpConfigModify
-    extends Configuration
     implements CombinedCommandBuilder
 {
     public abstract Clients clients();
 
     public abstract Caches caches();
 
-    public abstract ResourceInfoNamespaced info();
+    public abstract ResourceInfoXp7DeploymentDependant info();
 
     public abstract String name();
 
@@ -39,7 +37,7 @@ public abstract class CommandXpConfigModify
     @Value.Derived
     protected Optional<V1alpha2Xp7Config> xpConfigResource()
     {
-        return caches().getConfigCache().get( info().deploymentInfo().namespaceName(), name() );
+        return caches().getConfigCache().get( info().namespace(), name() );
     }
 
     @Override
@@ -58,8 +56,8 @@ public abstract class CommandXpConfigModify
         // Create metadata
         ObjectMeta meta = new ObjectMeta();
         meta.setName( name() );
-        meta.setNamespace( info().deploymentInfo().namespaceName() );
-        meta.setLabels( info().deploymentInfo().resource().getMetadata().getLabels() );
+        meta.setNamespace( info().namespace() );
+        meta.setLabels( info().xpDeploymentResource().getMetadata().getLabels() );
         meta.setAnnotations( annotations() );
 
         // Create Xp7Config
@@ -74,7 +72,7 @@ public abstract class CommandXpConfigModify
         // Create command to modify it
         KubeCmd cmd = ImmutableKubeCmd.builder().
             clients( clients() ).
-            namespace( info().deploymentInfo().namespaceName() ).
+            namespace( info().namespace() ).
             resource( config ).
             build();
 

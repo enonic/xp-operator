@@ -7,6 +7,9 @@ import com.google.common.base.Preconditions;
 import com.enonic.cloud.operator.common.info.Diff;
 import com.enonic.cloud.operator.crd.xp7.v1alpha2.deployment.V1alpha2Xp7Deployment;
 
+import static com.enonic.cloud.operator.common.Configuration.cfgIfBool;
+import static com.enonic.cloud.operator.common.Configuration.cfgStr;
+
 @Value.Immutable
 public abstract class DiffXp7Deployment
     extends Diff<V1alpha2Xp7Deployment>
@@ -23,7 +26,7 @@ public abstract class DiffXp7Deployment
     @Value.Check
     protected void check()
     {
-        if ( !shouldModify() )
+        if ( !modified() )
         {
             return;
         }

@@ -38,7 +38,7 @@ public abstract class V1alpha2Xp7DeploymentSpec
     public int totalDataNodes()
     {
         return nodeGroups().values().stream().filter( V1alpha2Xp7DeploymentSpecNode::data ).map(
-            V1alpha2Xp7DeploymentSpecNode::replicas ).reduce( Integer::sum ).orElse(0);
+            V1alpha2Xp7DeploymentSpecNode::replicas ).reduce( Integer::sum ).orElse( 0 );
     }
 
     @Value.Check

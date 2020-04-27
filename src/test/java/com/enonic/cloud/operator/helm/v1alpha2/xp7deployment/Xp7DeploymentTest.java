@@ -12,6 +12,7 @@ import com.enonic.cloud.operator.operators.v1alpha2.xp7deployment.ImmutableXp7De
 import com.enonic.cloud.operator.operators.v1alpha2.xp7deployment.info.ImmutableInfoXp7Deployment;
 import com.enonic.cloud.operator.operators.v1alpha2.xp7deployment.info.InfoXp7Deployment;
 
+@SuppressWarnings("WeakerAccess")
 public class Xp7DeploymentTest
     extends HelmTest
 {

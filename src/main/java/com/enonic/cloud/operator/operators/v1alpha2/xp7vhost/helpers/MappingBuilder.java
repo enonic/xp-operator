@@ -8,7 +8,7 @@ import java.util.Map;
 import org.immutables.value.Value;
 
 import com.enonic.cloud.operator.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHostSpecMapping;
-import com.enonic.cloud.operator.operators.common.ResourceInfoNamespaced;
+import com.enonic.cloud.operator.operators.common.ResourceInfoXp7DeploymentDependant;
 import com.enonic.cloud.operator.operators.common.cache.Caches;
 
 import static com.enonic.cloud.operator.common.Configuration.cfgStr;
@@ -16,12 +16,12 @@ import static com.enonic.cloud.operator.common.Configuration.cfgStr;
 @Value.Immutable
 public abstract class MappingBuilder
 {
-    public static Map<String, List<Mapping>> getNodeMappings( Caches caches, ResourceInfoNamespaced info )
+    public static Map<String, List<Mapping>> getNodeMappings( Caches caches, ResourceInfoXp7DeploymentDependant info )
     {
         // Collect all mappings
         List<Mapping> mappings = new LinkedList<>();
 
-        caches.getVHostCache().getByNamespace( info.deploymentInfo().namespaceName() ).
+        caches.getVHostCache().getByNamespace( info.namespace() ).
             forEach( v -> v.getSpec().mappings().
                 forEach( m -> mappings.add( ImmutableMapping.builder().
                     host( v.getSpec().host() ).
@@ -35,7 +35,7 @@ public abstract class MappingBuilder
         Map<String, List<Mapping>> result = new HashMap<>();
 
         // Populate map with all the nodes
-        info.deploymentInfo().resource().getSpec().nodeGroups().keySet().forEach( n -> result.put( n, new LinkedList<>() ) );
+        info.xpDeploymentResource().getSpec().nodeGroups().keySet().forEach( n -> result.put( n, new LinkedList<>() ) );
 
         // Add mappings to nodes
         mappings.forEach( m -> {

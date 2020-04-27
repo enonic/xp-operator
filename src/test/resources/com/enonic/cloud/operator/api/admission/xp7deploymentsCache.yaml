@@ -3,6 +3,7 @@
   metadata:
     uid: 9265a02a-000f-421a-b4aa-4768e8eab21e
     name: mycloud-mysolution-myenv-myservice
+    namespace: mycloud-mysolution-myenv-myservice
     labels:
       cloud: mycloud
       solution: mysolution

@@ -34,8 +34,8 @@ public abstract class Xp7DeploymentValues
         boolean isClustered = isClustered( resource );
 
         Map<String, Object> deployment = new HashMap<>();
-        deployment.put( "name", info().deploymentName() );
-        deployment.put( "namespace", info().namespaceName() );
+        deployment.put( "name", info().name() );
+        deployment.put( "namespace", info().namespace() );
         deployment.put( "clustered", isClustered );
         if ( isClustered )
         {

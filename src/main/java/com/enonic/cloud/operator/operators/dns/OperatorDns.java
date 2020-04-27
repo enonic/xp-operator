@@ -34,6 +34,8 @@ import com.enonic.cloud.operator.operators.dns.model.ImmutableDiffDnsIngress;
 import com.enonic.cloud.operator.operators.dns.model.ImmutableDnsIngress;
 import com.enonic.cloud.operator.operators.dns.model.ImmutableDomain;
 
+import static com.enonic.cloud.operator.common.Configuration.cfgStr;
+
 
 @SuppressWarnings("WeakerAccess")
 @ApplicationScoped
@@ -74,7 +76,8 @@ public class OperatorDns
     }
 
     @SuppressWarnings({"UnstableApiUsage", "OptionalUsedAsFieldOrParameterType"})
-    private void watchIngress( final String actionId, final Watcher.Action action, final Optional<Ingress> oldIngress, final Optional<Ingress> newIngress )
+    private void watchIngress( final String actionId, final Watcher.Action action, final Optional<Ingress> oldIngress,
+                               final Optional<Ingress> newIngress )
     {
         DiffDnsIngress diff = ImmutableDiffDnsIngress.builder().
             oldValue( oldIngress.map( o -> ImmutableDnsIngress.builder().

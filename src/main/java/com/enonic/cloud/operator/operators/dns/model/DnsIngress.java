@@ -13,11 +13,10 @@ import io.fabric8.kubernetes.api.model.LoadBalancerIngress;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.kubernetes.api.model.extensions.IngressRule;
 
-import com.enonic.cloud.operator.common.Configuration;
+import static com.enonic.cloud.operator.common.Configuration.cfgStr;
 
 @Value.Immutable
 public abstract class DnsIngress
-    extends Configuration
 {
     protected abstract Ingress ingress();
 

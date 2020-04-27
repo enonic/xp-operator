@@ -146,9 +146,9 @@ public class AdmissionApi
         {
             if ( !cfgStr( "operator.helm.charts.Values.allNodesKey" ).equals( mapping.nodeGroup() ) )
             {
-                Preconditions.checkState( vHost.deploymentInfo().resource().getSpec().nodeGroups().containsKey( mapping.nodeGroup() ),
+                Preconditions.checkState( vHost.xpDeploymentResource().getSpec().nodeGroups().containsKey( mapping.nodeGroup() ),
                                           String.format( "Xp7Deployment '%s' does not contain nodeGroup '%s'",
-                                                         vHost.deploymentInfo().deploymentName(), mapping.nodeGroup() ) );
+                                                         vHost.xpDeploymentResource().getMetadata().getName(), mapping.nodeGroup() ) );
             }
         }
 
@@ -174,9 +174,9 @@ public class AdmissionApi
         if ( !cfgStr( "operator.helm.charts.Values.allNodesKey" ).equals( config.resource().getSpec().nodeGroup() ) )
         {
             String nodeGroup = config.resource().getSpec().nodeGroup();
-            Preconditions.checkState( config.deploymentInfo().resource().getSpec().nodeGroups().containsKey( nodeGroup ),
+            Preconditions.checkState( config.xpDeploymentResource().getSpec().nodeGroups().containsKey( nodeGroup ),
                                       String.format( "Xp7Deployment '%s' does not contain nodeGroup '%s'",
-                                                     config.deploymentInfo().deploymentName(), nodeGroup ) );
+                                                     config.xpDeploymentResource().getMetadata().getName(), nodeGroup ) );
         }
     }
 

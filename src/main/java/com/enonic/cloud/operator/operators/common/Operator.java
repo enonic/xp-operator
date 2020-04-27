@@ -5,11 +5,9 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.enonic.cloud.operator.common.Configuration;
 import com.enonic.cloud.operator.common.commands.ImmutableCombinedCommand;
 
 public abstract class Operator
-    extends Configuration
 {
     private final static Logger log = LoggerFactory.getLogger( Operator.class );
 

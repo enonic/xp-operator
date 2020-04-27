@@ -5,14 +5,12 @@ import org.immutables.value.Value;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.base.Preconditions;
 
-import com.enonic.cloud.operator.common.Configuration;
 import com.enonic.cloud.operator.crd.BuilderException;
 
 @JsonDeserialize(builder = ImmutableV1alpha2Xp7VHostSpecOptions.Builder.class)
 @Value.Immutable
 @Value.Style(throwForInvalidImmutableState = V1alpha2Xp7VHostSpecOptions.ExceptionMissing.class, throwForNullPointer = V1alpha2Xp7VHostSpecOptions.ExceptionMissing.class)
 public abstract class V1alpha2Xp7VHostSpecOptions
-    extends Configuration
 {
     @Value.Default
     public Boolean ingress()
@@ -38,7 +36,6 @@ public abstract class V1alpha2Xp7VHostSpecOptions
         return false;
     }
 
-    @SuppressWarnings("DuplicatedCode")
     @Value.Check
     protected void check()
     {

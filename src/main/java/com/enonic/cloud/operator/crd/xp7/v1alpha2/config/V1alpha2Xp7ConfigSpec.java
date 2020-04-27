@@ -4,14 +4,12 @@ import org.immutables.value.Value;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-import com.enonic.cloud.operator.common.Configuration;
 import com.enonic.cloud.operator.crd.BuilderException;
 
 @JsonDeserialize(builder = ImmutableV1alpha2Xp7ConfigSpec.Builder.class)
 @Value.Immutable
 @Value.Style(throwForInvalidImmutableState = V1alpha2Xp7ConfigSpec.ExceptionMissing.class, throwForNullPointer = V1alpha2Xp7ConfigSpec.ExceptionMissing.class)
 public abstract class V1alpha2Xp7ConfigSpec
-    extends Configuration
 {
     public abstract String file();
 

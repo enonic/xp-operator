@@ -6,15 +6,17 @@ import org.immutables.value.Value;
 
 import com.google.common.base.Preconditions;
 
-import com.enonic.cloud.operator.common.info.ResourceInfo;
 import com.enonic.cloud.operator.crd.xp7.v1alpha2.deployment.V1alpha2Xp7Deployment;
+import com.enonic.cloud.operator.operators.common.ResourceInfoNamespaced;
 
+import static com.enonic.cloud.operator.common.Configuration.cfgIfBool;
+import static com.enonic.cloud.operator.common.Configuration.cfgStr;
 import static com.enonic.cloud.operator.common.Validator.dns1035;
 import static com.enonic.cloud.operator.common.Validator.dns1123;
 
 @Value.Immutable
 public abstract class InfoXp7Deployment
-    extends ResourceInfo<V1alpha2Xp7Deployment, DiffXp7Deployment>
+    extends ResourceInfoNamespaced<V1alpha2Xp7Deployment, DiffXp7Deployment>
 {
     @Override
     protected DiffXp7Deployment createDiff( final Optional<V1alpha2Xp7Deployment> oldResource,
@@ -26,22 +28,22 @@ public abstract class InfoXp7Deployment
             build();
     }
 
-    @Value.Derived
-    public String deploymentName()
-    {
-        return resource().getMetadata().getName();
-    }
-
-    @Value.Derived
-    public String namespaceName()
-    {
-        return deploymentName();
-    }
-
-//    @Value.Derived
-//    public Map<String, String> defaultLabels()
+//    @Override
+//    public V1alpha2Xp7Deployment xpDeploymentResource()
 //    {
-//        return resource().getMetadata().getLabels();
+//        return resource();
+//    }
+//
+//    @Override
+//    public InfoXp7Deployment deploymentInfo()
+//    {
+//        return this;
+//    }
+//
+//    @Value.Derived
+//    public String deploymentName()
+//    {
+//        return resource().getMetadata().getName();
 //    }
 
     @Value.Check
@@ -70,7 +72,7 @@ public abstract class InfoXp7Deployment
 
             String fullName =
                 String.join( "-", resource().ecCloud(), resource().ecSolution(), resource().ecEnvironment(), resource().ecService() );
-            Preconditions.checkState( deploymentName().equals( fullName ),
+            Preconditions.checkState( name().equals( fullName ),
                                       "Xp7Deployment name must be equal to <Cloud>-<Solution>-<Environment>-<Service> according to labels, i.e: '" +
                                           fullName + "'" );
         } );

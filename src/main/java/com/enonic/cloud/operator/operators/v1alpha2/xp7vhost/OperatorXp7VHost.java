@@ -20,7 +20,7 @@ import com.enonic.cloud.operator.helm.ChartRepository;
 import com.enonic.cloud.operator.helm.Helm;
 import com.enonic.cloud.operator.helm.commands.ImmutableHelmKubeCmdBuilder;
 import com.enonic.cloud.operator.operators.common.OperatorNamespaced;
-import com.enonic.cloud.operator.operators.common.ResourceInfoNamespaced;
+import com.enonic.cloud.operator.operators.common.ResourceInfoXp7DeploymentDependant;
 import com.enonic.cloud.operator.operators.common.cache.Caches;
 import com.enonic.cloud.operator.operators.common.clients.Clients;
 import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.commands.ImmutableCommandXpVHostsApplyNodeMappings;
@@ -29,8 +29,6 @@ import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.info.DiffConfigMap;
 import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.info.DiffXp7VHost;
 import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.info.ImmutableInfoXp7ConfigMap;
 import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.info.ImmutableInfoXp7VHost;
-
-import static com.enonic.cloud.operator.operators.common.BackupRestore.isBeingRestored;
 
 @SuppressWarnings("WeakerAccess")
 @ApplicationScoped
@@ -69,15 +67,17 @@ public class OperatorXp7VHost
     private void watchVHosts( final String actionId, final Watcher.Action action, final Optional<V1alpha2Xp7VHost> oldResource,
                               final Optional<V1alpha2Xp7VHost> newResource )
     {
-        Optional<ResourceInfoNamespaced<V1alpha2Xp7VHost, DiffXp7VHost>> i = getInfo( action, () -> ImmutableInfoXp7VHost.builder().
-            caches( caches ).
-            oldResource( oldResource ).
-            newResource( newResource ).
-            build() );
+        // Get info of event
+        Optional<ResourceInfoXp7DeploymentDependant<V1alpha2Xp7VHost, DiffXp7VHost>> i =
+            getInfo( action, () -> ImmutableInfoXp7VHost.builder().
+                caches( caches ).
+                oldResource( oldResource ).
+                newResource( newResource ).
+                build() );
 
         i.ifPresent( info -> runCommands( actionId, ( commandBuilder ) -> {
-
-            if(isBeingRestored(actionId, action, info.resource())) {
+            if ( info.resourceBeingRestoredFromBackup() )
+            {
                 // This is a backup restore, just ignore
                 return;
             }
@@ -87,7 +87,7 @@ public class OperatorXp7VHost
                 clients( clients ).
                 helm( helm ).
                 chart( chartRepository.get( "v1alpha2/xp7vhost" ) ).
-                namespace( info.deploymentInfo().namespaceName() ).
+                namespace( info.namespace() ).
                 valueBuilder( ImmutableXp7VHostValues.builder().
                     baseValues( baseValues ).
                     info( info ).
@@ -127,11 +127,13 @@ public class OperatorXp7VHost
             // Ignore
         }
 
-        Optional<ResourceInfoNamespaced<ConfigMap, DiffConfigMap>> i = getInfo( action, () -> ImmutableInfoXp7ConfigMap.builder().
-            caches( caches ).
-            oldResource( oldResource ).
-            newResource( newResource ).
-            build() );
+        // Get info
+        Optional<ResourceInfoXp7DeploymentDependant<ConfigMap, DiffConfigMap>> i =
+            getInfo( action, () -> ImmutableInfoXp7ConfigMap.builder().
+                caches( caches ).
+                oldResource( oldResource ).
+                newResource( newResource ).
+                build() );
 
         // Update config
         i.ifPresent( info -> runCommands( actionId, ( commandBuilder ) -> ImmutableCommandXpVHostsApplyNodeMappings.builder().

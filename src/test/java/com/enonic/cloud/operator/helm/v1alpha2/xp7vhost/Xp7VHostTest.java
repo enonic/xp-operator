@@ -9,10 +9,12 @@ import com.enonic.cloud.operator.crd.xp7.v1alpha2.deployment.V1alpha2Xp7Deployme
 import com.enonic.cloud.operator.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHost;
 import com.enonic.cloud.operator.helm.BaseValues;
 import com.enonic.cloud.operator.helm.HelmTest;
+import com.enonic.cloud.operator.operators.common.ResourceInfoXp7DeploymentDependant;
+import com.enonic.cloud.operator.operators.common.cache.Caches;
 import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.ImmutableXp7VHostValues;
-import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.info.ImmutableInfoXp7VHost;
-import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.info.InfoXp7VHost;
+import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.info.DiffXp7VHost;
 
+@SuppressWarnings("WeakerAccess")
 public class Xp7VHostTest
     extends HelmTest
 {
@@ -31,7 +33,8 @@ public class Xp7VHostTest
             mapper.readValue( getFile( HelmTest.class, "v1alpha2/test_deployment.yaml" ), V1alpha2Xp7Deployment.class );
 
         V1alpha2Xp7VHost resource = mapper.readValue( input, V1alpha2Xp7VHost.class );
-        InfoXp7VHost info = ImmutableInfoXp7VHost.builder().
+        ResourceInfoXp7DeploymentDependant<V1alpha2Xp7VHost, DiffXp7VHost> info = ImmutableTestInfoXp7VHost.builder().
+            caches( new Caches( null, null, null, null, null, null, null ) ).
             newResource( resource ).
             overrideDeployment( deployment ).
             build();

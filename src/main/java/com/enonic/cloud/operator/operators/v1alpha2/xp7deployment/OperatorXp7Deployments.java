@@ -42,7 +42,7 @@ import com.enonic.cloud.operator.operators.common.clients.Clients;
 import com.enonic.cloud.operator.operators.v1alpha2.xp7deployment.info.ImmutableInfoXp7Deployment;
 import com.enonic.cloud.operator.operators.v1alpha2.xp7deployment.info.InfoXp7Deployment;
 
-import static com.enonic.cloud.operator.operators.common.BackupRestore.isBeingRestored;
+import static com.enonic.cloud.operator.common.Configuration.cfgStr;
 
 @Singleton
 public class OperatorXp7Deployments
@@ -85,7 +85,8 @@ public class OperatorXp7Deployments
             newResource( newResource ).
             build();
 
-        if(isBeingRestored(actionId, action, info.resource())) {
+        if ( info.resourceBeingRestoredFromBackup() )
+        {
             // This is a backup restore, just ignore
             return;
         }
@@ -93,26 +94,31 @@ public class OperatorXp7Deployments
         runCommands( actionId, commandBuilder -> {
             if ( action == Watcher.Action.DELETED )
             {
-                // Deployment namespace and all children will automatically be deleted
-                return;
+                // Find if namespace is annotated to be deleted with deployment
+                Optional<Namespace> ns = caches.getNamespaceCache().
+                    getCollection().
+                    stream().
+                    filter( n -> info.namespace().equals( n.getMetadata().getNamespace() ) ).
+                    filter( n -> n.getMetadata().getAnnotations() != null ).
+                    filter( n -> info.name().equals(
+                        n.getMetadata().getAnnotations().getOrDefault( cfgStr( "operator.namespace.delete.annotation" ), null ) ) ).
+                    findFirst();
+
+                ns.ifPresent( namespace -> ImmutableKubeCmd.builder().
+                    clients( clients ).
+                    resource( namespace ).
+                    build().
+                    delete( commandBuilder ) );
             }
 
             if ( action == Watcher.Action.ADDED )
             {
-                // Create namespace
-                ImmutableKubeCmd.builder().
-                    clients( clients ).
-                    resource( createNamespace( info ) ).
-                    options( ImmutableKubeCommandOptions.builder().neverOverwrite( true ).build() ).
-                    build().
-                    apply( commandBuilder );
-
                 // Create SA rules
                 ServiceAccount sa = getServiceAccount();
                 if ( sa != null )
                 {
                     // Create role && role binding
-                    Role role = createRole( info.namespaceName() );
+                    Role role = createRole( info.namespace() );
                     RoleBinding roleBinding = createRoleBinding( role, sa );
 
                     ImmutableKubeCmd.builder().
@@ -131,7 +137,7 @@ public class OperatorXp7Deployments
                 // Create su pass
                 ImmutableKubeCmd.builder().
                     clients( clients ).
-                    namespace( info.namespaceName() ).
+                    namespace( info.namespace() ).
                     resource( createSecret() ).
                     options( ImmutableKubeCommandOptions.builder().neverOverwrite( true ).build() ).
                     build().
@@ -145,7 +151,7 @@ public class OperatorXp7Deployments
                     clients( clients ).
                     helm( helm ).
                     chart( chartRepository.get( "v1alpha2/xp7deployment" ) ).
-                    namespace( info.namespaceName() ).
+                    namespace( info.namespace() ).
                     valueBuilder( ImmutableXp7DeploymentValues.builder().
                         baseValues( baseValues ).
                         imageTemplate( imageTemplate ).
@@ -155,17 +161,6 @@ public class OperatorXp7Deployments
                     addCommands( commandBuilder );
             }
         } );
-    }
-
-    private Namespace createNamespace( InfoXp7Deployment info )
-    {
-        ObjectMeta metaData = new ObjectMeta();
-        metaData.setName( info.namespaceName() );
-        metaData.setOwnerReferences( Collections.singletonList( info.ownerReference() ) );
-        metaData.setAnnotations( Map.of( cfgStr( "operator.helm.charts.Values.labels.managed" ), "true" ) );
-        Namespace namespace = new Namespace();
-        namespace.setMetadata( metaData );
-        return namespace;
     }
 
     private ServiceAccount getServiceAccount()

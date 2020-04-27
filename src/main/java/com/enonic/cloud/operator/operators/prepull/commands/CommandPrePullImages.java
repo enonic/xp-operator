@@ -22,15 +22,15 @@ import io.fabric8.kubernetes.api.model.VolumeMount;
 import io.fabric8.kubernetes.api.model.apps.DaemonSet;
 import io.fabric8.kubernetes.api.model.apps.DaemonSetSpec;
 
-import com.enonic.cloud.operator.common.Configuration;
 import com.enonic.cloud.operator.common.commands.CombinedCommandBuilder;
 import com.enonic.cloud.operator.common.commands.ImmutableCombinedCommand;
 import com.enonic.cloud.operator.kubectl.ImmutableKubeCmd;
 import com.enonic.cloud.operator.operators.common.clients.Clients;
 
+import static com.enonic.cloud.operator.common.Configuration.cfgStr;
+
 @Value.Immutable
 public abstract class CommandPrePullImages
-    extends Configuration
     implements CombinedCommandBuilder
 {
     protected abstract Clients clients();

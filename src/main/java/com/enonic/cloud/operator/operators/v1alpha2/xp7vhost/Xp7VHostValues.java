@@ -9,7 +9,7 @@ import org.immutables.value.Value;
 import com.enonic.cloud.operator.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHost;
 import com.enonic.cloud.operator.helm.commands.ValueBuilder;
 import com.enonic.cloud.operator.operators.common.DefaultValues;
-import com.enonic.cloud.operator.operators.common.ResourceInfoNamespaced;
+import com.enonic.cloud.operator.operators.common.ResourceInfoXp7DeploymentDependant;
 import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.info.DiffXp7VHost;
 
 import static com.enonic.cloud.operator.common.Configuration.cfgStr;
@@ -21,7 +21,7 @@ public abstract class Xp7VHostValues
 {
     protected abstract Map<String, Object> baseValues();
 
-    protected abstract ResourceInfoNamespaced<V1alpha2Xp7VHost, DiffXp7VHost> info();
+    protected abstract ResourceInfoXp7DeploymentDependant<V1alpha2Xp7VHost, DiffXp7VHost> info();
 
     private Object createValues( V1alpha2Xp7VHost resource )
     {

@@ -4,7 +4,7 @@ import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
 
 @SuppressWarnings({"OptionalGetWithoutIsPresent", "WeakerAccess", "unused"})
-public class Configuration
+public final class Configuration
 {
     private static Config _cfg;
 

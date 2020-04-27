@@ -8,7 +8,6 @@ import org.immutables.value.Value;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 
-import com.enonic.cloud.operator.common.Configuration;
 import com.enonic.cloud.operator.common.commands.CombinedCommandBuilder;
 import com.enonic.cloud.operator.common.commands.ImmutableCombinedCommand;
 import com.enonic.cloud.operator.crd.xp7.v1alpha2.config.V1alpha2Xp7Config;
@@ -17,7 +16,6 @@ import com.enonic.cloud.operator.operators.common.clients.Clients;
 
 @Value.Immutable
 public abstract class CommandConfigMapUpdate
-    extends Configuration
     implements CombinedCommandBuilder
 {
     protected abstract Clients clients();

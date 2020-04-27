@@ -6,7 +6,6 @@ import java.util.Map;
 import io.fabric8.kubernetes.api.KubernetesResourceMappingProvider;
 import io.fabric8.kubernetes.api.model.KubernetesResource;
 
-import com.enonic.cloud.operator.common.Configuration;
 import com.enonic.cloud.operator.crd.xp7.v1alpha1.app.V1alpha1Xp7App;
 import com.enonic.cloud.operator.crd.xp7.v1alpha1.config.V1alpha1Xp7Config;
 import com.enonic.cloud.operator.crd.xp7.v1alpha1.deployment.V1alpha1Xp7Deployment;
@@ -15,8 +14,9 @@ import com.enonic.cloud.operator.crd.xp7.v1alpha2.config.V1alpha2Xp7Config;
 import com.enonic.cloud.operator.crd.xp7.v1alpha2.deployment.V1alpha2Xp7Deployment;
 import com.enonic.cloud.operator.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHost;
 
+import static com.enonic.cloud.operator.common.Configuration.cfgStr;
+
 public class CrdMappingProvider
-    extends Configuration
     implements KubernetesResourceMappingProvider
 {
     private final String group;

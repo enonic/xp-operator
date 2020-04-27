@@ -45,7 +45,7 @@ public abstract class DiffXp7DeploymentSpec
     @Value.Check
     protected void check()
     {
-        if ( !shouldModify() )
+        if ( !modified() )
         {
             return;
         }

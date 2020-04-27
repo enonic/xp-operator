@@ -14,14 +14,13 @@ import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.cloud.operator.crd.xp7.v1alpha1.app.V1alpha1Xp7App;
 import com.enonic.cloud.operator.operators.common.OperatorNamespaced;
-import com.enonic.cloud.operator.operators.common.ResourceInfoNamespaced;
+import com.enonic.cloud.operator.operators.common.ResourceInfoXp7DeploymentDependant;
 import com.enonic.cloud.operator.operators.common.cache.Caches;
 import com.enonic.cloud.operator.operators.common.clients.Clients;
 import com.enonic.cloud.operator.operators.v1alpha1.xp7app.commands.ImmutableCommandXpAppsApply;
 import com.enonic.cloud.operator.operators.v1alpha1.xp7app.info.DiffXp7App;
 import com.enonic.cloud.operator.operators.v1alpha1.xp7app.info.ImmutableInfoXp7App;
 
-import static com.enonic.cloud.operator.operators.common.BackupRestore.isBeingRestored;
 
 @ApplicationScoped
 public class OperatorXp7App
@@ -46,14 +45,14 @@ public class OperatorXp7App
                             final Optional<V1alpha1Xp7App> newResource )
     {
         // Create info about the CRD
-        Optional<ResourceInfoNamespaced<V1alpha1Xp7App, DiffXp7App>> i = getInfo( action, () -> ImmutableInfoXp7App.builder().
+        Optional<ResourceInfoXp7DeploymentDependant<V1alpha1Xp7App, DiffXp7App>> i = getInfo( action, () -> ImmutableInfoXp7App.builder().
             caches( caches ).
             oldResource( oldResource ).
             newResource( newResource ).
             build() );
 
         i.ifPresent( info -> runCommands( actionId, commandBuilder -> {
-            if ( isBeingRestored( actionId, action, info.resource() ) )
+            if ( info.resourceBeingRestoredFromBackup() )
             {
                 // This is a backup restore, just ignore
                 return;

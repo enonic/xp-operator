@@ -8,7 +8,7 @@ import org.immutables.value.Value;
 
 import com.enonic.cloud.operator.common.commands.CombinedCommandBuilder;
 import com.enonic.cloud.operator.common.commands.ImmutableCombinedCommand;
-import com.enonic.cloud.operator.operators.common.ResourceInfoNamespaced;
+import com.enonic.cloud.operator.operators.common.ResourceInfoXp7DeploymentDependant;
 import com.enonic.cloud.operator.operators.common.cache.Caches;
 import com.enonic.cloud.operator.operators.common.clients.Clients;
 import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.helpers.Mapping;
@@ -26,7 +26,7 @@ public abstract class CommandXpVHostsApplyNodeMappings
 
     protected abstract Map<String, List<Mapping>> nodeMappings();
 
-    protected abstract ResourceInfoNamespaced info();
+    protected abstract ResourceInfoXp7DeploymentDependant info();
 
     @Override
     public void addCommands( final ImmutableCombinedCommand.Builder commandBuilder )

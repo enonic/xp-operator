@@ -2,6 +2,7 @@ apiVersion: enonic.cloud/v1alpha2
 kind: Xp7Deployment
 metadata:
   name: mycloud-mysolution-myenv-myservice
+  namespace: mycloud-mysolution-myenv-myservice
   labels:
     cloud: mycloud
     solution: mysolution

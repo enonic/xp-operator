@@ -9,7 +9,6 @@ import org.wildfly.common.annotation.Nullable;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.base.Preconditions;
 
-import com.enonic.cloud.operator.common.Configuration;
 import com.enonic.cloud.operator.common.Validator;
 import com.enonic.cloud.operator.crd.BuilderException;
 
@@ -17,12 +16,12 @@ import com.enonic.cloud.operator.crd.BuilderException;
 @Value.Immutable
 @Value.Style(throwForInvalidImmutableState = V1alpha2Xp7VHostSpec.ExceptionMissing.class, throwForNullPointer = V1alpha2Xp7VHostSpec.ExceptionMissing.class)
 public abstract class V1alpha2Xp7VHostSpec
-    extends Configuration
 {
     public abstract String host();
 
     @Value.Default
-    public V1alpha2Xp7VHostSpecOptions options() {
+    public V1alpha2Xp7VHostSpecOptions options()
+    {
         return ImmutableV1alpha2Xp7VHostSpecOptions.builder().build();
     }
 
@@ -31,7 +30,6 @@ public abstract class V1alpha2Xp7VHostSpec
 
     public abstract List<V1alpha2Xp7VHostSpecMapping> mappings();
 
-    @SuppressWarnings("DuplicatedCode")
     @Value.Check
     protected void check()
     {

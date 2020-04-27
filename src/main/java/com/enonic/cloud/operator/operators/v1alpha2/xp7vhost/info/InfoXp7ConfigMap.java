@@ -6,11 +6,11 @@ import org.immutables.value.Value;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 
-import com.enonic.cloud.operator.operators.common.ResourceInfoNamespaced;
+import com.enonic.cloud.operator.operators.common.ResourceInfoXp7DeploymentDependant;
 
 @Value.Immutable
 public abstract class InfoXp7ConfigMap
-    extends ResourceInfoNamespaced<ConfigMap, DiffConfigMap>
+    extends ResourceInfoXp7DeploymentDependant<ConfigMap, DiffConfigMap>
 {
     @Override
     protected DiffConfigMap createDiff( final Optional<ConfigMap> oldResource, final Optional<ConfigMap> newResource )

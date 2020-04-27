@@ -10,14 +10,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.base.Preconditions;
 
-import com.enonic.cloud.operator.common.Configuration;
 import com.enonic.cloud.operator.crd.BuilderException;
 
 @JsonDeserialize(builder = ImmutableV1alpha1Xp7DeploymentSpecNode.Builder.class)
 @Value.Immutable
 @Value.Style(throwForInvalidImmutableState = V1alpha1Xp7DeploymentSpecNode.ExceptionMissing.class, throwForNullPointer = V1alpha1Xp7DeploymentSpecNode.ExceptionMissing.class)
 public abstract class V1alpha1Xp7DeploymentSpecNode
-    extends Configuration
 {
     @Nullable
     public abstract String displayName(); // TODO: Remove this from equals check

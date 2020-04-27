@@ -8,14 +8,12 @@ import org.wildfly.common.annotation.Nullable;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.base.Preconditions;
 
-import com.enonic.cloud.operator.common.Configuration;
 import com.enonic.cloud.operator.crd.BuilderException;
 
 @JsonDeserialize(builder = ImmutableV1alpha2Xp7DeploymentSpecNode.Builder.class)
 @Value.Immutable
 @Value.Style(throwForInvalidImmutableState = V1alpha2Xp7DeploymentSpecNode.ExceptionMissing.class, throwForNullPointer = V1alpha2Xp7DeploymentSpecNode.ExceptionMissing.class)
 public abstract class V1alpha2Xp7DeploymentSpecNode
-    extends Configuration
 {
     @Nullable
     public abstract String displayName();

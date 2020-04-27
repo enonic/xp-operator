@@ -16,18 +16,22 @@ public class Caches
 
     private final IngressCache ingressCache;
 
+    private final NamespaceCache namespaceCache;
+
     private final VHostCache vHostCache;
 
     @SuppressWarnings("CdiInjectionPointsInspection") // Inspection thinks the test classes clash with the real ones
     @Inject
     public Caches( final AppCache appCache, final ConfigCache configCache, final ConfigMapCache configMapCache,
-                   final DeploymentCache deploymentCache, final IngressCache ingressCache, final VHostCache vHostCache )
+                   final DeploymentCache deploymentCache, final IngressCache ingressCache, final NamespaceCache namespaceCache,
+                   final VHostCache vHostCache )
     {
         this.appCache = appCache;
         this.configCache = configCache;
         this.configMapCache = configMapCache;
         this.deploymentCache = deploymentCache;
         this.ingressCache = ingressCache;
+        this.namespaceCache = namespaceCache;
         this.vHostCache = vHostCache;
     }
 
@@ -54,6 +58,11 @@ public class Caches
     public IngressCache getIngressCache()
     {
         return ingressCache;
+    }
+
+    public NamespaceCache getNamespaceCache()
+    {
+        return namespaceCache;
     }
 
     public VHostCache getVHostCache()
