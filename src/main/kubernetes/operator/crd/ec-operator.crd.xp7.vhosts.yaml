@@ -10,6 +10,7 @@ spec:
     plural: xp7vhosts
     singular: xp7vhost
   scope: Namespaced
+  preserveUnknownFields: false
   versions:
     - name: v1alpha2
       served: true

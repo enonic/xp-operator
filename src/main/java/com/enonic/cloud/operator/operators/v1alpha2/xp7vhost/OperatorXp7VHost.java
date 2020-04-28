@@ -1,7 +1,10 @@
 package com.enonic.cloud.operator.operators.v1alpha2.xp7vhost;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -11,7 +14,7 @@ import javax.inject.Named;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.client.Watcher;
 import io.quarkus.runtime.StartupEvent;
 
@@ -23,12 +26,12 @@ import com.enonic.cloud.operator.operators.common.OperatorNamespaced;
 import com.enonic.cloud.operator.operators.common.ResourceInfoXp7DeploymentDependant;
 import com.enonic.cloud.operator.operators.common.cache.Caches;
 import com.enonic.cloud.operator.operators.common.clients.Clients;
-import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.commands.ImmutableCommandXpVHostsApplyNodeMappings;
-import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.helpers.MappingBuilder;
-import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.info.DiffConfigMap;
+import com.enonic.cloud.operator.operators.common.queues.OperatorChangeQueues;
 import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.info.DiffXp7VHost;
-import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.info.ImmutableInfoXp7ConfigMap;
 import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.info.ImmutableInfoXp7VHost;
+
+import static com.enonic.cloud.operator.common.Configuration.cfgStr;
+import static com.enonic.cloud.operator.common.Configuration.cfgStrFmt;
 
 @SuppressWarnings("WeakerAccess")
 @ApplicationScoped
@@ -42,6 +45,9 @@ public class OperatorXp7VHost
 
     @Inject
     Caches caches;
+
+    @Inject
+    OperatorChangeQueues changeQueues;
 
     @Inject
     Helm helm;
@@ -58,9 +64,6 @@ public class OperatorXp7VHost
     {
         caches.getVHostCache().addEventListener( this::watchVHosts );
         log.info( "Started listening for Xp7VHost events" );
-
-        caches.getConfigMapCache().addEventListener( this::watchConfigMap );
-        log.info( "Started listening for ConfigMap events" );
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -95,53 +98,43 @@ public class OperatorXp7VHost
                 build().
                 addCommands( commandBuilder );
 
-            // Update config
-            ImmutableCommandXpVHostsApplyNodeMappings.builder().
-                caches( caches ).
-                clients( clients ).
-                info( info ).
-                nodeMappings( MappingBuilder.getNodeMappings( caches, info ) ).
-                build().
-                addCommands( commandBuilder );
+            Set<String> affectedNodeGroups = new HashSet<>();
+            info.oldResource().ifPresent( r -> r.getSpec().mappings().forEach( m -> affectedNodeGroups.add( m.nodeGroup() ) ) );
+            info.newResource().ifPresent( r -> r.getSpec().mappings().forEach( m -> affectedNodeGroups.add( m.nodeGroup() ) ) );
+
+            if ( affectedNodeGroups.contains( cfgStr( "operator.helm.charts.Values.allNodesKey" ) ) )
+            {
+                info.xpDeploymentResource().getSpec().nodeGroups().keySet().
+                    forEach( nodeGroup -> updateNodeGroup( actionId, info, nodeGroup ) );
+            }
+            else
+            {
+                affectedNodeGroups.
+                    forEach( nodeGroup -> updateNodeGroup( actionId, info, nodeGroup ) );
+            }
         } ) );
     }
 
-    // This watcher is to make sure new node config maps get the correct vhost configuration
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private void watchConfigMap( final String actionId, final Watcher.Action action, final Optional<ConfigMap> oldResource,
-                                 final Optional<ConfigMap> newResource )
+    private void updateNodeGroup( final String actionId, final ResourceInfoXp7DeploymentDependant<V1alpha2Xp7VHost, DiffXp7VHost> info,
+                                  final String nodeGroup )
     {
-        // We only care about new ConfigMaps
-        if ( action != Watcher.Action.ADDED )
-        {
-            return;
-        }
-
-        // Give other process some slack to finish its thing
-        try
-        {
-            Thread.sleep( 2000L );
-        }
-        catch ( InterruptedException e )
-        {
-            // Ignore
-        }
-
-        // Get info
-        Optional<ResourceInfoXp7DeploymentDependant<ConfigMap, DiffConfigMap>> i =
-            getInfo( action, () -> ImmutableInfoXp7ConfigMap.builder().
+        changeQueues.getV1alpha2Xp7ConfigResourceChangeQueue().
+            enqueue( actionId, ImmutableXp7VHostAggregator.builder().
+                clients( clients ).
                 caches( caches ).
-                oldResource( oldResource ).
-                newResource( newResource ).
+                metadata( createMetadata( info, nodeGroup ) ).
+                nodeGroup( nodeGroup ).
                 build() );
+    }
 
-        // Update config
-        i.ifPresent( info -> runCommands( actionId, ( commandBuilder ) -> ImmutableCommandXpVHostsApplyNodeMappings.builder().
-            caches( caches ).
-            clients( clients ).
-            info( info ).
-            nodeMappings( MappingBuilder.getNodeMappings( caches, info ) ).
-            build().
-            addCommands( commandBuilder ) ) );
+    private ObjectMeta createMetadata( final ResourceInfoXp7DeploymentDependant<V1alpha2Xp7VHost, DiffXp7VHost> info,
+                                       final String nodeGroup )
+    {
+        ObjectMeta meta = new ObjectMeta();
+        meta.setNamespace( info.namespace() );
+        meta.setName( cfgStrFmt( "operator.deployment.xp.config.vhosts.nameTemplate", nodeGroup ) );
+        meta.setLabels( new HashMap<>( info.xpDeploymentResource().getMetadata().getLabels() ) );
+        meta.getLabels().put( cfgStr( "operator.helm.charts.Values.labels.managed" ), "true" );
+        return meta;
     }
 }

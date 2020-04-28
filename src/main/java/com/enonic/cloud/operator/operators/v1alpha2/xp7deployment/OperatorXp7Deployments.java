@@ -95,20 +95,28 @@ public class OperatorXp7Deployments
             if ( action == Watcher.Action.DELETED )
             {
                 // Find if namespace is annotated to be deleted with deployment
+                String annotationKey = cfgStr( "operator.namespace.delete.annotation" );
+
                 Optional<Namespace> ns = caches.getNamespaceCache().
                     getCollection().
                     stream().
-                    filter( n -> info.namespace().equals( n.getMetadata().getNamespace() ) ).
+                    filter( n -> info.namespace().equals( n.getMetadata().getName() ) ).
                     filter( n -> n.getMetadata().getAnnotations() != null ).
-                    filter( n -> info.name().equals(
-                        n.getMetadata().getAnnotations().getOrDefault( cfgStr( "operator.namespace.delete.annotation" ), null ) ) ).
+                    filter( n -> info.name().equals( n.getMetadata().getAnnotations().getOrDefault( annotationKey, null ) ) ).
                     findFirst();
 
-                ns.ifPresent( namespace -> ImmutableKubeCmd.builder().
-                    clients( clients ).
-                    resource( namespace ).
-                    build().
-                    delete( commandBuilder ) );
+                ns.ifPresent( namespace -> {
+                    if ( !namespace.getStatus().getPhase().equals( "Terminating" ) )
+                    {
+                        log.info( String.format( "%s: Deleting NS '%s' because it is annotated with '%s: %s'", actionId,
+                                                 namespace.getMetadata().getName(), annotationKey, info.name() ) );
+                        ImmutableKubeCmd.builder().
+                            clients( clients ).
+                            resource( namespace ).
+                            build().
+                            delete( commandBuilder );
+                    }
+                } );
             }
 
             if ( action == Watcher.Action.ADDED )

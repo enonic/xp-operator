@@ -10,6 +10,7 @@ spec:
     plural: xp7apps
     singular: xp7app
   scope: Namespaced
+  preserveUnknownFields: false
   versions:
     - name: v1alpha1
       served: true

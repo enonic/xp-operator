@@ -1,7 +1,15 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mycloud-mysolution-myenv-myservice
+  annotations:
+    enonic.cloud/remove.with.xp7deployment: mycloud-mysolution-myenv-myservice
+---
 apiVersion: enonic.cloud/v1alpha2
 kind: Xp7Deployment
 metadata:
   name: mycloud-mysolution-myenv-myservice
+  namespace: mycloud-mysolution-myenv-myservice
   labels:
     cloud: mycloud
     solution: mysolution
@@ -9,7 +17,7 @@ metadata:
     service: myservice
 spec:
   enabled: true
-  xpVersion: unstable
+  xpVersion: 7.1.2
 
   nodesSharedDisks:
     blobstore: 100Mi
@@ -21,7 +29,7 @@ spec:
       master: true
       replicas: 1
       env:
-        test: test13
+        test: test133
       resources:
         cpu: "1"
         memory: 512Mi
@@ -29,16 +37,16 @@ spec:
           export: 100Mi
           index: 100Mi
           work: 100Mi
-#    ost:
-#      data: true
-#      master: true
-#      replicas: 2
-#      env:
-#        test: test131
-#      resources:
-#        cpu: "1"
-#        memory: 512Mi
-#        disks:
-#          export: 100Mi
-#          index: 100Mi
-#          work: 100Mi
+    ost:
+      data: true
+      master: true
+      replicas: 2
+      env:
+        test: test131
+      resources:
+        cpu: "1"
+        memory: 512Mi
+        disks:
+          export: 100Mi
+          index: 100Mi
+          work: 100Mi

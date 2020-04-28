@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.immutables.value.Value;
+import org.wildfly.common.annotation.Nullable;
 
 import com.google.common.base.Preconditions;
 
@@ -19,6 +20,7 @@ public abstract class ResourceInfoXp7DeploymentDependant<T extends HasMetadata, 
 {
     public abstract Caches caches();
 
+    @Nullable
     @Value.Derived
     public V1alpha2Xp7Deployment xpDeploymentResource()
     {
@@ -26,19 +28,16 @@ public abstract class ResourceInfoXp7DeploymentDependant<T extends HasMetadata, 
         List<V1alpha2Xp7Deployment> res = caches().getDeploymentCache().getByNamespace( namespace() ).collect( Collectors.toList() );
         if ( res.isEmpty() )
         {
-            throw new Xp7DeploymentNotFound( namespace() );
+            if ( resourceBeingRestoredFromBackup() )
+            {
+                return null;
+            }
+            else
+            {
+                throw new Xp7DeploymentNotFound( namespace() );
+            }
         }
         Preconditions.checkState( res.size() == 1, "Multiple Xp7Deployments found in the same namespace" );
         return res.get( 0 );
     }
-
-//    @Value.Derived
-//    public InfoXp7Deployment deploymentInfo()
-//    {
-//        V1alpha2Xp7Deployment r = xpDeploymentResource();
-//        return ImmutableInfoXp7Deployment.builder().
-//            oldResource( r ).
-//            newResource( r ).
-//            build();
-//    }
 }

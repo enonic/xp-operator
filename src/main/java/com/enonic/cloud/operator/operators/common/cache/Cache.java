@@ -73,59 +73,59 @@ public abstract class Cache<T extends HasMetadata, L extends KubernetesResourceL
     }
 
     @Override
-    public void eventReceived( Action action, final T resource )
+    public void eventReceived( final Action action, final T resource )
     {
-        try
-        {
-            String uid = resource.getMetadata().getUid();
-            log.debug( "Resource " + uid + " " + action + " " + resource.getKind() + ": " + resource.getMetadata().getName() );
-
-            T oldResource = null;
-
-            if ( cache.containsKey( uid ) )
+        executorService.execute( () -> {
+            try
             {
-                oldResource = cache.get( uid );
-                int knownResourceVersion = Integer.parseInt( oldResource.getMetadata().getResourceVersion() );
-                int receivedResourceVersion = Integer.parseInt( resource.getMetadata().getResourceVersion() );
-                log.debug( "Resource " + uid + " version known(" + knownResourceVersion + ") received(" + receivedResourceVersion + ")" );
-                if ( knownResourceVersion >= receivedResourceVersion )
+                String uid = resource.getMetadata().getUid();
+                log.debug( "Resource " + uid + " " + action + " " + resource.getKind() + ": " + resource.getMetadata().getName() );
+
+                T oldResource = null;
+
+                if ( cache.containsKey( uid ) )
                 {
-                    return;
+                    oldResource = cache.get( uid );
+                    int knownResourceVersion = Integer.parseInt( oldResource.getMetadata().getResourceVersion() );
+                    int receivedResourceVersion = Integer.parseInt( resource.getMetadata().getResourceVersion() );
+                    log.debug(
+                        "Resource " + uid + " version known(" + knownResourceVersion + ") received(" + receivedResourceVersion + ")" );
+                    if ( knownResourceVersion >= receivedResourceVersion )
+                    {
+                        return;
+                    }
                 }
-            }
 
-            if ( action == Watcher.Action.ADDED )
-            {
-                cache.put( uid, resource );
-            }
-            else if ( action == Watcher.Action.MODIFIED )
-            {
-                if ( oldResource == null )
+                if ( action == Watcher.Action.ADDED )
                 {
-                    action = Action.ADDED;
+                    cache.put( uid, resource );
                 }
-                cache.put( uid, resource );
+                else if ( action == Watcher.Action.MODIFIED )
+                {
+                    cache.put( uid, resource );
+                }
+                else if ( action == Watcher.Action.DELETED )
+                {
+                    cache.remove( uid );
+                }
+                else
+                {
+                    // This should never happen, best just to let kubernetes restart the operator
+                    log.error(
+                        "Received unexpected event " + action + " for " + resource.getMetadata().getUid() + " " + resource.getKind() +
+                            ": " + resource.getMetadata().getName() );
+                    System.exit( -1 );
+                }
+                sendToListeners( action, resource, Optional.ofNullable( oldResource ),
+                                 Optional.ofNullable( action == Watcher.Action.DELETED ? null : resource ) );
             }
-            else if ( action == Watcher.Action.DELETED )
+            catch ( Exception e )
             {
-                cache.remove( uid );
-            }
-            else
-            {
-                // This should never happen, best just to let kubernetes restart the operator
-                log.error(
-                    "Received unexpected event " + action + " for " + resource.getMetadata().getUid() + " " + resource.getKind() + ": " +
-                        resource.getMetadata().getName() );
+                // Best just to let kubernetes restart the operator
+                log.error( "Something when terribly wrong", e );
                 System.exit( -1 );
             }
-            runExecutor( action, resource, oldResource, action == Watcher.Action.DELETED ? null : resource );
-        }
-        catch ( Exception e )
-        {
-            // Best just to let kubernetes restart the operator
-            log.error( "Something when terribly wrong", e );
-            System.exit( -1 );
-        }
+        } );
     }
 
     @Override
@@ -139,41 +139,33 @@ public abstract class Cache<T extends HasMetadata, L extends KubernetesResourceL
         }
     }
 
-    private void runExecutor( final Watcher.Action action, final T resource, final T oldResource, final T newResource )
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    private void sendToListeners( final Watcher.Action action, final T resource, final Optional<T> oldResource,
+                                  final Optional<T> newResource )
     {
-        executorService.execute( () -> {
-            if ( eventListeners.size() == 0 )
-            {
-                return;
-            }
+        if ( eventListeners.size() == 0 )
+        {
+            return;
+        }
+        final String actionId = UUID.randomUUID().toString().substring( 0, 8 );
 
-            final String actionId = UUID.randomUUID().toString().substring( 0, 8 );
-            if ( resource.getMetadata().getNamespace() != null )
-            {
-                log.info(
-                    String.format( "%s: Event in NS '%s': %s '%s' %s", actionId, resource.getMetadata().getNamespace(), resource.getKind(),
-                                   resource.getMetadata().getName(), action ) );
-            }
-            else
-            {
-                log.info(
-                    String.format( "%s: Event: %s '%s' %s", actionId, resource.getKind(), resource.getMetadata().getName(), action ) );
-            }
-            eventListeners.forEach(
-                watcher -> watcher.accept( actionId, action, Optional.ofNullable( oldResource ), Optional.ofNullable( newResource ) ) );
-        } );
+        if ( resource.getMetadata().getNamespace() != null )
+        {
+            log.debug(
+                String.format( "%s: Event in NS '%s': %s '%s' %s", actionId, resource.getMetadata().getNamespace(), resource.getKind(),
+                               resource.getMetadata().getName(), action ) );
+        }
+        else
+        {
+            log.debug( String.format( "%s: Event: %s '%s' %s", actionId, resource.getKind(), resource.getMetadata().getName(), action ) );
+        }
+
+        eventListeners.forEach( watcher -> watcher.accept( actionId, action, oldResource, newResource ) );
     }
 
     public Collection<T> getCollection()
     {
         return cache.values();
-    }
-
-    public Optional<T> get( String namespace, String name )
-    {
-        return getCollection().stream().
-            filter( r -> Objects.equals( namespace, r.getMetadata().getNamespace() ) ).
-            filter( r -> name.equals( r.getMetadata().getName() ) ).findFirst();
     }
 
     public Stream<T> getByNamespace( String namespace )

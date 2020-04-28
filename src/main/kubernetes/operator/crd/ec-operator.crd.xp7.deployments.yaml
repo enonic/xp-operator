@@ -9,7 +9,7 @@ spec:
     listKind: Xp7DeploymentList
     plural: xp7deployments
     singular: xp7deployment
-  scope: Cluster
+  scope: Namespaced
   preserveUnknownFields: false
   versions:
     - name: v1alpha2
@@ -131,7 +131,3 @@ spec:
       type: string
       description: XP version running
       JSONPath: .spec.xpVersion
-    - name: Shared Disk
-      type: string
-      description: Size of XP shared disk
-      JSONPath: .spec.nodesSharedDisk

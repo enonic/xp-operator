@@ -22,9 +22,9 @@ spec:
     node.name=${env.XP_NODE_NAME}
     network.publish.host=${env.XP_NODE_NAME}.{{ $.Values.allNodesKey }}
   {{- if $.Values.extensions.linkerd.enabled }}
-      network.host=127.0.0.1
+    network.host=127.0.0.1
     {{- else }}
-      network.host=${env.XP_NODE_NAME}.{{ $.Values.allNodesKey }}
+    network.host=${env.XP_NODE_NAME}.{{ $.Values.allNodesKey }}
     {{- end }}
   {{- end }}
 

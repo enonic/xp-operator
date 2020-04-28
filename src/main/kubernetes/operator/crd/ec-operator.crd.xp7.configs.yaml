@@ -10,6 +10,7 @@ spec:
     plural: xp7configs
     singular: xp7config
   scope: Namespaced
+  preserveUnknownFields: false
   versions:
     - name: v1alpha2
       served: true

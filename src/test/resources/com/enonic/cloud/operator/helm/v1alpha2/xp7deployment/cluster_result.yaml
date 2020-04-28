@@ -1009,7 +1009,7 @@ spec:
   file: "com.enonic.xp.cluster.cfg"
   nodeGroup: "data"
   data: "cluster.enabled=true\nnode.name=${env.XP_NODE_NAME}\nnetwork.publish.host=${env.XP_NODE_NAME}.all\n\
-    \  network.host=${env.XP_NODE_NAME}.all"
+    network.host=${env.XP_NODE_NAME}.all"
 ---
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
@@ -1062,7 +1062,7 @@ spec:
   file: "com.enonic.xp.cluster.cfg"
   nodeGroup: "frontend"
   data: "cluster.enabled=true\nnode.name=${env.XP_NODE_NAME}\nnetwork.publish.host=${env.XP_NODE_NAME}.all\n\
-    \  network.host=${env.XP_NODE_NAME}.all"
+    network.host=${env.XP_NODE_NAME}.all"
 ---
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
@@ -1115,7 +1115,7 @@ spec:
   file: "com.enonic.xp.cluster.cfg"
   nodeGroup: "master"
   data: "cluster.enabled=true\nnode.name=${env.XP_NODE_NAME}\nnetwork.publish.host=${env.XP_NODE_NAME}.all\n\
-    \  network.host=${env.XP_NODE_NAME}.all"
+    network.host=${env.XP_NODE_NAME}.all"
 ---
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"

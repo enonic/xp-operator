@@ -11,7 +11,7 @@ spec:
   certificate:
     authority: selfSigned
   mappings:
-    - nodeGroup: all
+    - nodeGroup: fisk
       source: /
       target: /admin
       idProviders:

@@ -31,7 +31,8 @@ public abstract class Diff<T>
     @Value.Derived
     public boolean modified()
     {
-        if(oldValue().isPresent() && newValue().isPresent()) {
+        if ( oldValue().isPresent() && newValue().isPresent() )
+        {
             return !Objects.equals( oldValue(), newValue() );
         }
         return false;

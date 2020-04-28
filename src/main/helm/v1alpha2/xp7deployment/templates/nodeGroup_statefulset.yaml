@@ -12,7 +12,7 @@ metadata:
     {{- end }}
 spec:
   serviceName: all
-  replicas: {{ $nodeGroup.replicas }}
+  replicas: {{ if $.Values.deployment.spec.enabled }}{{ $nodeGroup.replicas }}{{ else }}0{{end}}
   revisionHistoryLimit: 10
   podManagementPolicy: Parallel
   updateStrategy:

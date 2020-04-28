@@ -1,5 +1,6 @@
 package com.enonic.cloud.operator.operators.v1alpha1.xp7app;
 
+import java.util.HashMap;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -9,6 +10,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.client.Watcher;
 import io.quarkus.runtime.StartupEvent;
 
@@ -17,9 +19,12 @@ import com.enonic.cloud.operator.operators.common.OperatorNamespaced;
 import com.enonic.cloud.operator.operators.common.ResourceInfoXp7DeploymentDependant;
 import com.enonic.cloud.operator.operators.common.cache.Caches;
 import com.enonic.cloud.operator.operators.common.clients.Clients;
-import com.enonic.cloud.operator.operators.v1alpha1.xp7app.commands.ImmutableCommandXpAppsApply;
+import com.enonic.cloud.operator.operators.common.queues.OperatorChangeQueues;
 import com.enonic.cloud.operator.operators.v1alpha1.xp7app.info.DiffXp7App;
 import com.enonic.cloud.operator.operators.v1alpha1.xp7app.info.ImmutableInfoXp7App;
+
+import static com.enonic.cloud.operator.common.Configuration.cfgStr;
+import static com.enonic.cloud.operator.common.Configuration.cfgStrFmt;
 
 
 @ApplicationScoped
@@ -33,6 +38,9 @@ public class OperatorXp7App
 
     @Inject
     Clients clients;
+
+    @Inject
+    OperatorChangeQueues changeQueues;
 
     void onStartup( @Observes StartupEvent _ev )
     {
@@ -58,12 +66,24 @@ public class OperatorXp7App
                 return;
             }
 
-            ImmutableCommandXpAppsApply.builder().
-                clients( clients ).
-                caches( caches ).
-                info( info ).
-                build().
-                addCommands( commandBuilder );
+            String nodeGroup = cfgStr( "operator.helm.charts.Values.allNodesKey" );
+            changeQueues.getV1alpha2Xp7ConfigResourceChangeQueue().
+                enqueue( actionId, ImmutableXp7AppAggregator.builder().
+                    caches( caches ).
+                    clients( clients ).
+                    metadata( createMetadata( info, nodeGroup ) ).
+                    nodeGroup( nodeGroup ).
+                    build() );
         } ) );
+    }
+
+    private ObjectMeta createMetadata( final ResourceInfoXp7DeploymentDependant<V1alpha1Xp7App, DiffXp7App> info, final String nodeGroup )
+    {
+        ObjectMeta meta = new ObjectMeta();
+        meta.setNamespace( info.namespace() );
+        meta.setName( cfgStrFmt( "operator.deployment.xp.config.deploy.nameTemplate", nodeGroup ) );
+        meta.setLabels( new HashMap<>( info.xpDeploymentResource().getMetadata().getLabels() ) );
+        meta.getLabels().put( cfgStr( "operator.helm.charts.Values.labels.managed" ), "true" );
+        return meta;
     }
 }

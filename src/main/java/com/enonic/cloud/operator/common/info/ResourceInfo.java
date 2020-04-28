@@ -1,5 +1,7 @@
 package com.enonic.cloud.operator.common.info;
 
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 import org.immutables.value.Value;
@@ -13,6 +15,8 @@ import static com.enonic.cloud.operator.common.Configuration.cfgStr;
 
 public abstract class ResourceInfo<T extends HasMetadata, D extends Diff<T>>
 {
+    private static final DateTimeFormatter timeFormatter = DateTimeFormatter.ISO_DATE_TIME;
+
     public abstract Optional<T> oldResource();
 
     public abstract Optional<T> newResource();
@@ -37,7 +41,19 @@ public abstract class ResourceInfo<T extends HasMetadata, D extends Diff<T>>
         {
             return false;
         }
-        return diff().added() && resource().getMetadata().getLabels().containsKey( cfgStr( "operator.deployment.backup.label" ) );
+
+        if ( !( diff().added() && resource().getMetadata().getLabels().containsKey( cfgStr( "operator.deployment.backup.label" ) ) ) )
+        {
+            return false;
+        }
+
+        if ( createdAt() == null )
+        {
+            return true;
+        }
+
+        // Less than 1 minute old
+        return createdAt().isAfter( Instant.now().minusSeconds( 60 ) );
     }
 
     @Value.Derived
@@ -50,6 +66,16 @@ public abstract class ResourceInfo<T extends HasMetadata, D extends Diff<T>>
     public OwnerReference createResourceOwnerReference()
     {
         return createOwnerReference( resource() );
+    }
+
+    @Value.Derived
+    public Instant createdAt()
+    {
+        if ( resource().getMetadata().getCreationTimestamp() != null )
+        {
+            return Instant.from( timeFormatter.parse( resource().getMetadata().getCreationTimestamp() ) );
+        }
+        return Instant.now();
     }
 
     @SuppressWarnings("WeakerAccess")
