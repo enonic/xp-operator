@@ -342,6 +342,7 @@ spec:
     kind: "PersistentVolumeClaim"
     metadata:
       labels:
+        velero.io/exclude-from-backup: "true"
         enonic.managed: "true"
         nodeGroup: "fisk"
         cloud: "mycloud"
@@ -361,6 +362,7 @@ spec:
     kind: "PersistentVolumeClaim"
     metadata:
       labels:
+        velero.io/exclude-from-backup: "true"
         enonic.managed: "true"
         nodeGroup: "fisk"
         cloud: "mycloud"
@@ -380,6 +382,7 @@ spec:
     kind: "PersistentVolumeClaim"
     metadata:
       labels:
+        velero.io/exclude-from-backup: "true"
         enonic.managed: "true"
         nodeGroup: "fisk"
         cloud: "mycloud"

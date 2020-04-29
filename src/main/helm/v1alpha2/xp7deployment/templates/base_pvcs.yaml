@@ -6,6 +6,9 @@ kind: PersistentVolumeClaim
 metadata:
   name: {{ $name }}
   labels:
+    {{- if not (has $name $.Values.volumeBackups) }}
+    velero.io/exclude-from-backup: true
+    {{- end }}
     {{ $.Values.labels.managed }}: true
     {{- with $.Values.defaultLabels }}
     {{- toYaml . | nindent 4 }}

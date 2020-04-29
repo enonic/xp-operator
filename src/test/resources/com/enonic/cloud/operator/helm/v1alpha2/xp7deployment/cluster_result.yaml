@@ -451,6 +451,7 @@ spec:
     kind: "PersistentVolumeClaim"
     metadata:
       labels:
+        velero.io/exclude-from-backup: "true"
         enonic.managed: "true"
         nodeGroup: "data"
         cloud: "mycloud"
@@ -470,6 +471,7 @@ spec:
     kind: "PersistentVolumeClaim"
     metadata:
       labels:
+        velero.io/exclude-from-backup: "true"
         enonic.managed: "true"
         nodeGroup: "data"
         cloud: "mycloud"
@@ -678,6 +680,7 @@ spec:
     kind: "PersistentVolumeClaim"
     metadata:
       labels:
+        velero.io/exclude-from-backup: "true"
         enonic.managed: "true"
         nodeGroup: "frontend"
         cloud: "mycloud"
@@ -697,6 +700,7 @@ spec:
     kind: "PersistentVolumeClaim"
     metadata:
       labels:
+        velero.io/exclude-from-backup: "true"
         enonic.managed: "true"
         nodeGroup: "frontend"
         cloud: "mycloud"
@@ -901,6 +905,7 @@ spec:
     kind: "PersistentVolumeClaim"
     metadata:
       labels:
+        velero.io/exclude-from-backup: "true"
         enonic.managed: "true"
         nodeGroup: "master"
         cloud: "mycloud"

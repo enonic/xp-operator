@@ -208,6 +208,9 @@ spec:
     - metadata:
         name: {{ $volumeName }}
         labels:
+          {{- if not (has $volumeName $.Values.volumeBackups) }}
+          velero.io/exclude-from-backup: true
+          {{- end }}
           {{ $.Values.labels.managed }}: true
           nodeGroup: {{ $nodeGroupName }}
           {{- with $.Values.defaultLabels }}
