@@ -24,7 +24,7 @@ public class OperatorChangeQueues
         this.configMapResourceChangeQueue = new ResourceChangeQueue<>( Duration.ofMillis( 1500 ) );
         timer.schedule( configMapResourceChangeQueue, 0L, 500L );
 
-        this.v1alpha2Xp7ConfigResourceChangeQueue = new ResourceChangeQueue<>( Duration.ofMillis( 750 ) );
+        this.v1alpha2Xp7ConfigResourceChangeQueue = new ResourceChangeQueue<>( Duration.ofMillis( 600 ) );
         timer.schedule( v1alpha2Xp7ConfigResourceChangeQueue, 0L, 500L );
     }
 

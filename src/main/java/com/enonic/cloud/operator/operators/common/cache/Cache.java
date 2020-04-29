@@ -168,6 +168,11 @@ public abstract class Cache<T extends HasMetadata, L extends KubernetesResourceL
         return cache.values();
     }
 
+    public Optional<T> getByName( String name )
+    {
+        return getCollection().stream().filter( r -> name.equals( r.getMetadata().getName() ) ).findFirst();
+    }
+
     public Stream<T> getByNamespace( String namespace )
     {
         return getCollection().stream().filter( r -> Objects.equals( namespace, r.getMetadata().getNamespace() ) );

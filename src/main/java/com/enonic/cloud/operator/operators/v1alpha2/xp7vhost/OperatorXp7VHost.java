@@ -24,7 +24,6 @@ import com.enonic.cloud.operator.helm.Helm;
 import com.enonic.cloud.operator.helm.commands.ImmutableHelmKubeCmdBuilder;
 import com.enonic.cloud.operator.operators.common.OperatorNamespaced;
 import com.enonic.cloud.operator.operators.common.ResourceInfoXp7DeploymentDependant;
-import com.enonic.cloud.operator.operators.common.cache.Caches;
 import com.enonic.cloud.operator.operators.common.clients.Clients;
 import com.enonic.cloud.operator.operators.common.queues.OperatorChangeQueues;
 import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.info.DiffXp7VHost;
@@ -42,9 +41,6 @@ public class OperatorXp7VHost
 
     @Inject
     Clients clients;
-
-    @Inject
-    Caches caches;
 
     @Inject
     OperatorChangeQueues changeQueues;
@@ -79,9 +75,15 @@ public class OperatorXp7VHost
                 build() );
 
         i.ifPresent( info -> runCommands( actionId, ( commandBuilder ) -> {
+            if ( isNamespaceBeingTerminated( info ) )
+            {
+                // Everything is about to be deleted, just ignore
+                return;
+            }
+
             if ( info.resourceBeingRestoredFromBackup() )
             {
-                // This is a backup restore, just ignore
+                // This is a backup/restore event, just ignore
                 return;
             }
 
@@ -98,10 +100,12 @@ public class OperatorXp7VHost
                 build().
                 addCommands( commandBuilder );
 
+            // Collect all affected nodeGroups
             Set<String> affectedNodeGroups = new HashSet<>();
             info.oldResource().ifPresent( r -> r.getSpec().mappings().forEach( m -> affectedNodeGroups.add( m.nodeGroup() ) ) );
             info.newResource().ifPresent( r -> r.getSpec().mappings().forEach( m -> affectedNodeGroups.add( m.nodeGroup() ) ) );
 
+            // If all are affected, update all, else update just the affected ones
             if ( affectedNodeGroups.contains( cfgStr( "operator.helm.charts.Values.allNodesKey" ) ) )
             {
                 info.xpDeploymentResource().getSpec().nodeGroups().keySet().

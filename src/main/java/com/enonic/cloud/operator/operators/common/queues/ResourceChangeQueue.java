@@ -8,6 +8,9 @@ import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.fabric8.kubernetes.api.model.HasMetadata;
 
 import com.enonic.cloud.operator.common.commands.ImmutableCombinedCommand;
@@ -15,6 +18,8 @@ import com.enonic.cloud.operator.common.commands.ImmutableCombinedCommand;
 public class ResourceChangeQueue<R extends HasMetadata>
     extends TimerTask
 {
+    private static final Logger log = LoggerFactory.getLogger( ResourceChangeQueue.class );
+
     private final ReentrantLock lock;
 
     private final Map<String, QueuedAggregator> changeMap;
@@ -59,9 +64,7 @@ public class ResourceChangeQueue<R extends HasMetadata>
         }
         catch ( Exception e )
         {
-            // TODO: What to do?
-            e.printStackTrace();
-            System.exit( 1 );
+            log.error( e.getMessage(), e );
         }
     }
 

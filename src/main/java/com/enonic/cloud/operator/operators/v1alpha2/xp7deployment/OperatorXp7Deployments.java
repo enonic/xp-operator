@@ -37,7 +37,6 @@ import com.enonic.cloud.operator.helm.commands.ImmutableHelmKubeCmdBuilder;
 import com.enonic.cloud.operator.kubectl.ImmutableKubeCmd;
 import com.enonic.cloud.operator.kubectl.base.ImmutableKubeCommandOptions;
 import com.enonic.cloud.operator.operators.common.OperatorNamespaced;
-import com.enonic.cloud.operator.operators.common.cache.Caches;
 import com.enonic.cloud.operator.operators.common.clients.Clients;
 import com.enonic.cloud.operator.operators.v1alpha2.xp7deployment.info.ImmutableInfoXp7Deployment;
 import com.enonic.cloud.operator.operators.v1alpha2.xp7deployment.info.InfoXp7Deployment;
@@ -52,9 +51,6 @@ public class OperatorXp7Deployments
 
     @Inject
     Clients clients;
-
-    @Inject
-    Caches caches;
 
     @Inject
     Helm helm;
@@ -80,10 +76,17 @@ public class OperatorXp7Deployments
     private void watch( final String actionId, final Watcher.Action action, final Optional<V1alpha2Xp7Deployment> oldResource,
                         final Optional<V1alpha2Xp7Deployment> newResource )
     {
+        // Get info of event
         InfoXp7Deployment info = ImmutableInfoXp7Deployment.builder().
             oldResource( oldResource ).
             newResource( newResource ).
             build();
+
+        if ( isNamespaceBeingTerminated( info ) )
+        {
+            // Everything is about to be deleted, just ignore
+            return;
+        }
 
         if ( info.resourceBeingRestoredFromBackup() )
         {
@@ -106,16 +109,13 @@ public class OperatorXp7Deployments
                     findFirst();
 
                 ns.ifPresent( namespace -> {
-                    if ( !namespace.getStatus().getPhase().equals( "Terminating" ) )
-                    {
-                        log.info( String.format( "%s: Deleting NS '%s' because it is annotated with '%s: %s'", actionId,
-                                                 namespace.getMetadata().getName(), annotationKey, info.name() ) );
-                        ImmutableKubeCmd.builder().
-                            clients( clients ).
-                            resource( namespace ).
-                            build().
-                            delete( commandBuilder );
-                    }
+                    log.info( String.format( "%s: Deleting NS '%s' because it is annotated with '%s: %s'", actionId,
+                                             namespace.getMetadata().getName(), annotationKey, info.name() ) );
+                    ImmutableKubeCmd.builder().
+                        clients( clients ).
+                        resource( namespace ).
+                        build().
+                        delete( commandBuilder );
                 } );
             }
 

@@ -5,6 +5,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 import org.immutables.value.Value;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 
@@ -16,6 +18,8 @@ import static com.enonic.cloud.operator.common.Configuration.cfgStr;
 public abstract class ResourceInfo<T extends HasMetadata, D extends Diff<T>>
 {
     private static final DateTimeFormatter timeFormatter = DateTimeFormatter.ISO_DATE_TIME;
+
+    private static final Logger log = LoggerFactory.getLogger( ResourceInfo.class );
 
     public abstract Optional<T> oldResource();
 
@@ -42,7 +46,9 @@ public abstract class ResourceInfo<T extends HasMetadata, D extends Diff<T>>
             return false;
         }
 
-        if ( !( diff().added() && resource().getMetadata().getLabels().containsKey( cfgStr( "operator.deployment.backup.label" ) ) ) )
+        String backup = resource().getMetadata().getLabels().getOrDefault( cfgStr( "operator.deployment.backupRestore.label" ), null );
+
+        if ( !( diff().added() && backup != null ) )
         {
             return false;
         }
@@ -53,7 +59,15 @@ public abstract class ResourceInfo<T extends HasMetadata, D extends Diff<T>>
         }
 
         // Less than 1 minute old
-        return createdAt().isAfter( Instant.now().minusSeconds( 60 ) );
+        boolean res = createdAt().isAfter( Instant.now().minusSeconds( 60 ) );
+
+        if ( res )
+        {
+            log.info( String.format( "Restore from backup '%s' detected: %s '%s' in NS '%s'", backup, resource().getKind(), name(),
+                                     resource().getMetadata().getNamespace() ) );
+        }
+
+        return res;
     }
 
     @Value.Derived

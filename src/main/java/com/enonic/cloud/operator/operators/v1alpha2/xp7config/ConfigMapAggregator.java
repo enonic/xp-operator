@@ -9,13 +9,11 @@ import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 
 import com.enonic.cloud.operator.operators.common.cache.Caches;
-import com.enonic.cloud.operator.operators.common.queues.ResourceChangeAggregator;
-
-import static com.enonic.cloud.operator.common.Configuration.cfgStr;
+import com.enonic.cloud.operator.operators.common.queues.NodeGroupChangeAggregator;
 
 @Value.Immutable
 public abstract class ConfigMapAggregator
-    extends ResourceChangeAggregator<ConfigMap>
+    extends NodeGroupChangeAggregator<ConfigMap>
 {
     protected abstract Caches caches();
 
@@ -31,8 +29,7 @@ public abstract class ConfigMapAggregator
 
         caches().getConfigCache().
             getByNamespace( metadata().getNamespace() ).
-            filter( c -> metadata().getName().equals( c.getSpec().nodeGroup() ) ||
-                cfgStr( "operator.helm.charts.Values.allNodesKey" ).equals( c.getSpec().nodeGroup() ) ).
+            filter( c -> matchNodeGroup( metadata().getName(), c.getSpec().nodeGroup() ) ).
             forEach( c -> data.put( c.getSpec().file(), c.getSpec().data() ) );
 
         cm.setData( data );

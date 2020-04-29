@@ -17,7 +17,6 @@ import io.quarkus.runtime.StartupEvent;
 import com.enonic.cloud.operator.crd.xp7.v1alpha1.app.V1alpha1Xp7App;
 import com.enonic.cloud.operator.operators.common.OperatorNamespaced;
 import com.enonic.cloud.operator.operators.common.ResourceInfoXp7DeploymentDependant;
-import com.enonic.cloud.operator.operators.common.cache.Caches;
 import com.enonic.cloud.operator.operators.common.clients.Clients;
 import com.enonic.cloud.operator.operators.common.queues.OperatorChangeQueues;
 import com.enonic.cloud.operator.operators.v1alpha1.xp7app.info.DiffXp7App;
@@ -32,9 +31,6 @@ public class OperatorXp7App
     extends OperatorNamespaced
 {
     private static final Logger log = LoggerFactory.getLogger( OperatorXp7App.class );
-
-    @Inject
-    Caches caches;
 
     @Inject
     Clients clients;
@@ -60,6 +56,12 @@ public class OperatorXp7App
             build() );
 
         i.ifPresent( info -> runCommands( actionId, commandBuilder -> {
+            if ( isNamespaceBeingTerminated( info ) )
+            {
+                // Everything is about to be deleted, just ignore
+                return;
+            }
+
             if ( info.resourceBeingRestoredFromBackup() )
             {
                 // This is a backup restore, just ignore
