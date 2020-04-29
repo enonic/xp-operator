@@ -23,3 +23,27 @@ metadata:
     {{- end }}
 spec:
   url: https://repo.enonic.com/public/com/enonic/app/snapshotter/2.1.1/snapshotter-2.1.1.jar
+---
+apiVersion: enonic.cloud/v1alpha1
+kind: Xp7App
+metadata:
+  name: datatoolbox
+  labels:
+    {{ $.Values.labels.managed }}: true
+    {{- with .Values.defaultLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  url: https://dl.bintray.com/rcd-systems/rcd-repo/systems/rcd/enonic/datatoolbox/4.0.2/datatoolbox-4.0.2.jar
+---
+apiVersion: enonic.cloud/v1alpha1
+kind: Xp7App
+metadata:
+  name: status
+  labels:
+    {{ $.Values.labels.managed }}: true
+    {{- with .Values.defaultLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  url: https://repo.enonic.com/public/com/enonic/app/status/2.1.0/status-2.1.0.jar

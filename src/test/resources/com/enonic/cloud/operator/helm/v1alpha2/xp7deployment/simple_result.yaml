@@ -418,9 +418,35 @@ metadata:
     environment: "myenv"
     service: "myservice"
     solution: "mysolution"
+  name: "datatoolbox"
+spec:
+  url: "https://dl.bintray.com/rcd-systems/rcd-repo/systems/rcd/enonic/datatoolbox/4.0.2/datatoolbox-4.0.2.jar"
+---
+kind: "Xp7App"
+apiVersion: "enonic.cloud/v1alpha1"
+metadata:
+  labels:
+    enonic.managed: "true"
+    cloud: "mycloud"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
   name: "snapshotter"
 spec:
   url: "https://repo.enonic.com/public/com/enonic/app/snapshotter/2.1.1/snapshotter-2.1.1.jar"
+---
+kind: "Xp7App"
+apiVersion: "enonic.cloud/v1alpha1"
+metadata:
+  labels:
+    enonic.managed: "true"
+    cloud: "mycloud"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
+  name: "status"
+spec:
+  url: "https://repo.enonic.com/public/com/enonic/app/status/2.1.0/status-2.1.0.jar"
 ---
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
@@ -438,6 +464,21 @@ spec:
   file: "com.enonic.xp.app.main.cfg"
   nodeGroup: "all"
   data: "tourDisabled = true"
+---
+kind: "Xp7Config"
+apiVersion: "enonic.cloud/v1alpha2"
+metadata:
+  labels:
+    enonic.managed: "true"
+    cloud: "mycloud"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
+  name: "all-appstatus"
+spec:
+  file: "com.enonic.app.status.cfg"
+  nodeGroup: "all"
+  data: "metricsUrl = http://localhost:2609/"
 ---
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
@@ -471,8 +512,8 @@ metadata:
 spec:
   file: "system.properties"
   nodeGroup: "all"
-  data: "xp.suPassword = {sha512}${env.SU_PASS_HASH}\nxp.init.adminUserCreation =\
-    \ false"
+  data: "xp.name = mycloud-mysolution-myenv-myservice\nxp.suPassword = {sha512}${env.SU_PASS_HASH}\n\
+    xp.init.adminUserCreation = false"
 ---
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
@@ -502,7 +543,7 @@ metadata:
 spec:
   file: "com.enonic.xp.elasticsearch.cfg"
   nodeGroup: "fisk"
-  data: "http.enabled=false"
+  data: "http.enabled=false\ncluster.name=mycloud-mysolution-myenv-myservice"
 ---
 kind: "Xp7VHost"
 apiVersion: "enonic.cloud/v1alpha2"

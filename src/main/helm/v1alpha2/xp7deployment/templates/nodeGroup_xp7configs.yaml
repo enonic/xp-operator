@@ -45,10 +45,10 @@ spec:
   file: com.enonic.xp.elasticsearch.cfg
   data: |-
     http.enabled=false
+    cluster.name={{ $.Values.deployment.name }}
   {{- if $.Values.deployment.clustered }}
     node.master={{ if $nodeGroup.master }}true{{ else }}false{{ end }}
     node.data={{ if $nodeGroup.data }}true{{ else }}false{{ end }}
-    cluster.name={{ $.Values.deployment.name }}
     gateway.expected_master_nodes={{ $.Values.deployment.minimumMasterNodes }}
     gateway.expected_data_nodes={{ $.Values.deployment.minimumDataNodes }}
     gateway.recover_after_time=5m
