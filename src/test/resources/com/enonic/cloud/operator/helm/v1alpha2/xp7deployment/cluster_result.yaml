@@ -295,6 +295,9 @@ spec:
         enonic.cloud/metrics.xp7: "true"
         enonic.cloud/logs.xp7: "true"
         backup.velero.io/backup-volumes: "blobstore,snapshots"
+        pre.hook.backup.velero.io/container: "exp"
+        pre.hook.backup.velero.io/command: "[\"bash\", \"-c\", \"/usr/local/bin/backup.sh\"\
+          ]"
       labels:
         nodeGroup: "data"
         cloud: "mycloud"
@@ -517,6 +520,9 @@ spec:
         enonic.cloud/metrics.xp7: "true"
         enonic.cloud/logs.xp7: "true"
         backup.velero.io/backup-volumes: "blobstore,snapshots"
+        pre.hook.backup.velero.io/container: "exp"
+        pre.hook.backup.velero.io/command: "[\"bash\", \"-c\", \"/usr/local/bin/backup.sh\"\
+          ]"
       labels:
         nodeGroup: "frontend"
         cloud: "mycloud"
@@ -746,6 +752,9 @@ spec:
         enonic.cloud/metrics.xp7: "true"
         enonic.cloud/logs.xp7: "true"
         backup.velero.io/backup-volumes: "blobstore,snapshots"
+        pre.hook.backup.velero.io/container: "exp"
+        pre.hook.backup.velero.io/command: "[\"bash\", \"-c\", \"/usr/local/bin/backup.sh\"\
+          ]"
       labels:
         nodeGroup: "master"
         cloud: "mycloud"
@@ -1217,6 +1226,7 @@ spec:
     ingressMaxBodySize: "100m"
     dnsRecord: false
     statusCake: false
+    caching: false
   certificate: null
   mappings:
   - nodeGroup: "all"
@@ -1241,6 +1251,7 @@ spec:
     ingressMaxBodySize: "100m"
     dnsRecord: false
     statusCake: false
+    caching: false
   certificate: null
   mappings:
   - nodeGroup: "all"

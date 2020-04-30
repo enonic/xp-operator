@@ -9,6 +9,7 @@ vhost:
       ingressMaxBodySize: "8m"
       dnsRecord: true
       statusCake: false
+      caching: false
     certificate:
       authority: "selfSigned"
     mappings:
@@ -25,8 +26,6 @@ extensions:
       enabled: false
       limitRpm: "100"
     stickySession:
-      enabled: false
-    caching:
       enabled: false
   linkerd:
     enabled: false

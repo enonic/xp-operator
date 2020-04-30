@@ -8,8 +8,6 @@ extensions:
       limitRpm: "100"
     stickySession:
       enabled: false
-    caching:
-      enabled: false
   linkerd:
     enabled: false
 allNodesKey: "all"

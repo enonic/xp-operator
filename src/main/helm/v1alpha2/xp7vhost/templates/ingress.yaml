@@ -35,29 +35,17 @@ metadata:
     nginx.ingress.kubernetes.io/session-cookie-name: {{ .Values.vhost.name }}
     {{- end }}
 
-    {{- if .Values.extensions.ingress.caching.enabled }}
+    {{- if .Values.vhost.spec.options.caching }}
     nginx.ingress.kubernetes.io/proxy-buffering: "on"
     {{- end }}
 
     # https://www.nginx.com/blog/nginx-caching-guide/
     nginx.ingress.kubernetes.io/configuration-snippet: |
       # Extra config
-      {{- if .Values.extensions.ingress.caching.enabled }}
-      # Use defined in nginx deployment
+      {{- if .Values.vhost.spec.options.caching }}
       proxy_cache static-cache;
-
-      # Serve proxied resources when server is down
       proxy_cache_use_stale error timeout updating http_404 http_500 http_502 http_503 http_504;
-
-      # Use only cache when the request with this key has been done min amount of times
       proxy_cache_key $proxy_host$request_uri$cookie_jessionid;
-      proxy_cache_min_uses 3;
-
-      # Update cache in the background
-      proxy_cache_background_update on;
-
-      # Only send 1 request to origin server while updating cache
-      proxy_cache_lock on;
 
       # Allow to bypass cache with Pragma header
       proxy_cache_bypass $http_pragma;

@@ -36,6 +36,12 @@ public abstract class V1alpha2Xp7VHostSpecOptions
         return false;
     }
 
+    @Value.Default
+    public Boolean caching()
+    {
+        return false;
+    }
+
     @Value.Check
     protected void check()
     {

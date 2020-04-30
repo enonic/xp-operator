@@ -40,6 +40,9 @@ spec:
                     statusCake:
                       type: boolean
                       nullable: true
+                    caching:
+                      type: boolean
+                      nullable: true
                 certificate:
                   type: object
                   nullable: true

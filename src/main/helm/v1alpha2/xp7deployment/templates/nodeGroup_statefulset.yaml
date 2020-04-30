@@ -29,6 +29,8 @@ spec:
         enonic.cloud/metrics.xp7: "true"
         enonic.cloud/logs.xp7: "true"
         backup.velero.io/backup-volumes: "{{- join "," $.Values.volumeBackups }}"
+        pre.hook.backup.velero.io/container: "exp"
+        pre.hook.backup.velero.io/command: '["bash", "-c", "/usr/local/bin/backup.sh"]'
         {{- if index $.Values "extensions.linkerd" }}
         linkerd.io/inject: enabled
         {{- end }}
