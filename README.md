@@ -4,12 +4,7 @@
 
 ### Setup minikube
 
-See https://github.com/enonic/ec-terraform/tree/master/clusters/minikube-dev
-
-### Run operator locally
-
-* Create jar run configuration with mvn pre step: `-DskipTests clean package`
-* Run the project
+See https://github.com/enonic/ec-terraform
 
 ## Create new release
 
