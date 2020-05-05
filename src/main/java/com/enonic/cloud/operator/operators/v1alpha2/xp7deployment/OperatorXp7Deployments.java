@@ -217,7 +217,7 @@ public class OperatorXp7Deployments
         String passHash = Hashing.sha512().hashString( password, Charsets.UTF_8 ).toString();
 
         ObjectMeta metaData = new ObjectMeta();
-        metaData.setAnnotations( Map.of( cfgStr( "operator.helm.charts.Values.labels.managed" ), "true" ) );
+        metaData.setAnnotations( Map.of( cfgStr( "operator.helm.charts.Values.labelKeys.managed" ), "true" ) );
         metaData.setName( "su" );
         Secret secret = new Secret();
         secret.setMetadata( metaData );

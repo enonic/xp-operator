@@ -97,13 +97,13 @@ public abstract class HelmKubeCmdBuilder
             return builder.build();
         }
 
-        String neverOverwrite = cfgStr( "operator.helm.charts.Values.annotations.neverOverwrite" );
+        String neverOverwrite = cfgStr( "operator.helm.charts.Values.annotationKeys.neverOverwrite" );
         if ( annotations.containsKey( neverOverwrite ) )
         {
             builder.neverOverwrite( annotations.get( neverOverwrite ).equals( "true" ) );
         }
 
-        String alwaysOverwrite = cfgStr( "operator.helm.charts.Values.annotations.alwaysOverwrite" );
+        String alwaysOverwrite = cfgStr( "operator.helm.charts.Values.annotationKeys.alwaysOverwrite" );
         if ( annotations.containsKey( alwaysOverwrite ) )
         {
             builder.alwaysOverwrite( annotations.get( alwaysOverwrite ).equals( "true" ) );

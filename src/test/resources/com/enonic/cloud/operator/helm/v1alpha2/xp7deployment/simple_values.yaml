@@ -1,7 +1,7 @@
 ---
-annotations:
-  alwaysOverwrite: "enonic.alwaysOverwrite"
-  neverOverwrite: "enonic.neverOverwrite"
+labelKeys:
+  managed: "enonic.managed"
+  nodeGroup: "enonic.nodeGroup"
 allNodesKey: "all"
 defaultLabels:
   cloud: "mycloud"
@@ -9,8 +9,9 @@ defaultLabels:
   environment: "myenv"
   service: "myservice"
 imageTemplate: "gbbirkisson/xp:%s-ubuntu"
-labels:
-  managed: "enonic.managed"
+annotationKeys:
+  alwaysOverwrite: "enonic.alwaysOverwrite"
+  neverOverwrite: "enonic.neverOverwrite"
 deployment:
   clustered: false
   name: "mycloud-mysolution-myenv-myservice"

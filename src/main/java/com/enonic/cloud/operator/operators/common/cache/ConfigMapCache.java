@@ -23,6 +23,6 @@ public class ConfigMapCache
             getDefaultClient().
             configMaps().
             inAnyNamespace().
-            withLabel( cfgStr( "operator.helm.charts.Values.labels.managed" ), "true" ) );
+            withLabel( cfgStr( "operator.helm.charts.Values.labelKeys.managed" ), "true" ) );
     }
 }

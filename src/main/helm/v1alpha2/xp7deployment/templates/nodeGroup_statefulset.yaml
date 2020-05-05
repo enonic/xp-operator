@@ -5,8 +5,8 @@ kind: StatefulSet
 metadata:
   name: {{ $nodeGroupName }}
   labels:
-    {{ $.Values.labels.managed }}: true
-    nodeGroup: {{ $nodeGroupName }}
+    {{ $.Values.labelKeys.managed }}: true
+    {{ $.Values.labelKeys.nodeGroup }}: {{ $nodeGroupName }}
     {{- with $.Values.defaultLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
@@ -19,7 +19,8 @@ spec:
     type: {{ $.Values.updateStrategy }}
   selector:
     matchLabels:
-      nodeGroup: {{ $nodeGroupName }}
+      {{ $.Values.labelKeys.managed }}: true
+      {{ $.Values.labelKeys.nodeGroup }}: {{ $nodeGroupName }}
       {{- with $.Values.defaultLabels }}
       {{- toYaml . | nindent 6 }}
       {{- end }}
@@ -35,7 +36,8 @@ spec:
         linkerd.io/inject: enabled
         {{- end }}
       labels:
-        nodeGroup: {{ $nodeGroupName }}
+        {{ $.Values.labelKeys.managed }}: true
+        {{ $.Values.labelKeys.nodeGroup }}: {{ $nodeGroupName }}
         {{- with $.Values.defaultLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -46,8 +48,7 @@ spec:
       terminationGracePeriodSeconds: {{ $.Values.terminationGracePeriodSeconds }}
 
       securityContext:
-        fsGroup: {{ $.Values.fsGroup }}
-        runAsUser: {{ $.Values.user }}
+        fsGroup: {{ $.Values.securityContext.fsGroup }}
 
       initContainers:
         # This init container waits for the Kube DNS entry so the XP node does not get the exception: Cannot create host entry for value
@@ -80,7 +81,7 @@ spec:
               drop:
                 - ALL
             runAsNonRoot: true
-            runAsUser: {{ $.Values.user }}
+            runAsUser: {{ $.Values.securityContext.user }}
             sysctls:
               - name: vm.max_map_count
                 value: "262144"
@@ -186,8 +187,8 @@ spec:
           {{- if not (has $volumeName $.Values.volumeBackups) }}
           velero.io/exclude-from-backup: true
           {{- end }}
-          {{ $.Values.labels.managed }}: true
-          nodeGroup: {{ $nodeGroupName }}
+          {{ $.Values.labelKeys.managed }}: true
+          {{ $.Values.labelKeys.nodeGroup }}: {{ $nodeGroupName }}
           {{- with $.Values.defaultLabels }}
           {{- toYaml . | nindent 10 }}
           {{- end }}

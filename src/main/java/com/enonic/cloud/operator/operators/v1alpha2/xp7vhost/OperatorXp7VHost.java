@@ -157,7 +157,7 @@ public class OperatorXp7VHost
         meta.setNamespace( info.namespace() );
         meta.setName( cfgStrFmt( "operator.deployment.xp.config.vhosts.nameTemplate", nodeGroup ) );
         meta.setLabels( new HashMap<>( info.xpDeploymentResource().getMetadata().getLabels() ) );
-        meta.getLabels().put( cfgStr( "operator.helm.charts.Values.labels.managed" ), "true" );
+        meta.getLabels().put( cfgStr( "operator.helm.charts.Values.labelKeys.managed" ), "true" );
         return meta;
     }
 }

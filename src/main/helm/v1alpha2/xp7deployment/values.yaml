@@ -40,8 +40,9 @@ heapDumpLocation: /enonic-xp/home/exports/dumps
 configLocation: /enonic-xp/home/config
 extraConfigLocation: /enonic-xp/home/extra-config
 
-user: 1337
-fsGroup: 0
+securityContext:
+  user: 1337
+  fsGroup: 0
 
 terminationGracePeriodSeconds: 30
 updateStrategy: RollingUpdate
@@ -61,13 +62,13 @@ storage:
     storageClassName: standard
     annotations: {}
 
+extensions:
+  linkerd:
+    enabled: false
+
 # Filled in by operator
 # deployment:
 #   name: gbb-tests-qa
 #   clustered: false
 #   spec:
 #     ...
-
-extensions:
-  linkerd:
-    enabled: false

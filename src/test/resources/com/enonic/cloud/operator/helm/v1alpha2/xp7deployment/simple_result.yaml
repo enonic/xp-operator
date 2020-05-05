@@ -21,7 +21,7 @@ metadata:
     enonic.neverOverwrite: "true"
   labels:
     enonic.managed: "true"
-    nodeGroup: "fisk"
+    enonic.nodeGroup: "fisk"
     cloud: "mycloud"
     environment: "myenv"
     service: "myservice"
@@ -111,7 +111,7 @@ kind: "Service"
 metadata:
   labels:
     enonic.managed: "true"
-    nodeGroup: "fisk"
+    enonic.nodeGroup: "fisk"
     cloud: "mycloud"
     environment: "myenv"
     service: "myservice"
@@ -142,7 +142,7 @@ spec:
     targetPort: 9300
   publishNotReadyAddresses: true
   selector:
-    nodeGroup: "fisk"
+    enonic.nodeGroup: "fisk"
     cloud: "mycloud"
     environment: "myenv"
     service: "myservice"
@@ -155,7 +155,7 @@ kind: "StatefulSet"
 metadata:
   labels:
     enonic.managed: "true"
-    nodeGroup: "fisk"
+    enonic.nodeGroup: "fisk"
     cloud: "mycloud"
     environment: "myenv"
     service: "myservice"
@@ -167,7 +167,8 @@ spec:
   revisionHistoryLimit: 10
   selector:
     matchLabels:
-      nodeGroup: "fisk"
+      enonic.managed: "true"
+      enonic.nodeGroup: "fisk"
       cloud: "mycloud"
       environment: "myenv"
       service: "myservice"
@@ -183,7 +184,8 @@ spec:
         pre.hook.backup.velero.io/command: "[\"bash\", \"-c\", \"/usr/local/bin/backup.sh\"\
           ]"
       labels:
-        nodeGroup: "fisk"
+        enonic.managed: "true"
+        enonic.nodeGroup: "fisk"
         cloud: "mycloud"
         environment: "myenv"
         service: "myservice"
@@ -311,7 +313,6 @@ spec:
       schedulerName: "default-scheduler"
       securityContext:
         fsGroup: 0
-        runAsUser: 1337
       terminationGracePeriodSeconds: 30
       volumes:
       - configMap:
@@ -337,7 +338,7 @@ spec:
       labels:
         velero.io/exclude-from-backup: "true"
         enonic.managed: "true"
-        nodeGroup: "fisk"
+        enonic.nodeGroup: "fisk"
         cloud: "mycloud"
         environment: "myenv"
         service: "myservice"
@@ -357,7 +358,7 @@ spec:
       labels:
         velero.io/exclude-from-backup: "true"
         enonic.managed: "true"
-        nodeGroup: "fisk"
+        enonic.nodeGroup: "fisk"
         cloud: "mycloud"
         environment: "myenv"
         service: "myservice"
@@ -377,7 +378,7 @@ spec:
       labels:
         velero.io/exclude-from-backup: "true"
         enonic.managed: "true"
-        nodeGroup: "fisk"
+        enonic.nodeGroup: "fisk"
         cloud: "mycloud"
         environment: "myenv"
         service: "myservice"

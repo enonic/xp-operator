@@ -4,7 +4,7 @@ kind: Xp7App
 metadata:
   name: alive
   labels:
-    {{ $.Values.labels.managed }}: true
+    {{ $.Values.labelKeys.managed }}: true
     {{- with .Values.defaultLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
@@ -17,7 +17,7 @@ kind: Xp7App
 metadata:
   name: snapshotter
   labels:
-    {{ $.Values.labels.managed }}: true
+    {{ $.Values.labelKeys.managed }}: true
     {{- with .Values.defaultLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
@@ -29,7 +29,7 @@ kind: Xp7App
 metadata:
   name: datatoolbox
   labels:
-    {{ $.Values.labels.managed }}: true
+    {{ $.Values.labelKeys.managed }}: true
     {{- with .Values.defaultLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
@@ -41,7 +41,7 @@ kind: Xp7App
 metadata:
   name: status
   labels:
-    {{ $.Values.labels.managed }}: true
+    {{ $.Values.labelKeys.managed }}: true
     {{- with .Values.defaultLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}

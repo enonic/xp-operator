@@ -4,7 +4,7 @@ kind: Service
 metadata:
   name: {{ .Values.allNodesKey }}
   labels:
-    {{ $.Values.labels.managed }}: true
+    {{ $.Values.labelKeys.managed }}: true
     {{- with .Values.defaultLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
