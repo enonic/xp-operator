@@ -102,6 +102,8 @@ public class AdmissionApi
     private AdmissionReview createReview( String uid, String errorMessage )
     {
         AdmissionReview review = new AdmissionReview();
+        review.setKind( "AdmissionReview" );
+
         AdmissionResponse response = new AdmissionResponse();
         review.setResponse( response );
 
