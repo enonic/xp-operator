@@ -338,6 +338,7 @@ spec:
             path: "/"
             port: 8080
             scheme: "HTTP"
+          initialDelaySeconds: 60
           periodSeconds: 15
           successThreshold: 1
           timeoutSeconds: 1
@@ -356,7 +357,7 @@ spec:
           name: "es-transport"
           protocol: "TCP"
         readinessProbe:
-          failureThreshold: 5
+          failureThreshold: 12
           httpGet:
             httpHeaders:
             - name: "Host"
@@ -364,8 +365,8 @@ spec:
             path: "/"
             port: 8080
             scheme: "HTTP"
-          initialDelaySeconds: 30
-          periodSeconds: 5
+          initialDelaySeconds: 45
+          periodSeconds: 10
           successThreshold: 1
           timeoutSeconds: 1
         resources:
@@ -561,6 +562,7 @@ spec:
             path: "/"
             port: 8080
             scheme: "HTTP"
+          initialDelaySeconds: 60
           periodSeconds: 15
           successThreshold: 1
           timeoutSeconds: 1
@@ -579,7 +581,7 @@ spec:
           name: "es-transport"
           protocol: "TCP"
         readinessProbe:
-          failureThreshold: 5
+          failureThreshold: 12
           httpGet:
             httpHeaders:
             - name: "Host"
@@ -587,8 +589,8 @@ spec:
             path: "/"
             port: 8080
             scheme: "HTTP"
-          initialDelaySeconds: 30
-          periodSeconds: 5
+          initialDelaySeconds: 45
+          periodSeconds: 10
           successThreshold: 1
           timeoutSeconds: 1
         resources:
@@ -782,6 +784,7 @@ spec:
             path: "/"
             port: 8080
             scheme: "HTTP"
+          initialDelaySeconds: 60
           periodSeconds: 15
           successThreshold: 1
           timeoutSeconds: 1
@@ -800,7 +803,7 @@ spec:
           name: "es-transport"
           protocol: "TCP"
         readinessProbe:
-          failureThreshold: 5
+          failureThreshold: 12
           httpGet:
             httpHeaders:
             - name: "Host"
@@ -808,8 +811,8 @@ spec:
             path: "/"
             port: 8080
             scheme: "HTTP"
-          initialDelaySeconds: 30
-          periodSeconds: 5
+          initialDelaySeconds: 45
+          periodSeconds: 10
           successThreshold: 1
           timeoutSeconds: 1
         resources:

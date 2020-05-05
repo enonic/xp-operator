@@ -1,5 +1,6 @@
 imagePullPolicy: IfNotPresent
 
+# Fails after 2 minutes
 livenessProbe:
   failureThreshold: 4
   httpGet:
@@ -9,12 +10,14 @@ livenessProbe:
     path: /
     port: 8080
     scheme: HTTP
+  initialDelaySeconds: 60
   periodSeconds: 15
   successThreshold: 1
   timeoutSeconds: 1
 
+# Fails after 2 minutes
 readinessProbe:
-  failureThreshold: 5
+  failureThreshold: 12
   httpGet:
     httpHeaders:
       - name: Host
@@ -22,8 +25,8 @@ readinessProbe:
     path: /
     port: 8080
     scheme: HTTP
-  initialDelaySeconds: 30
-  periodSeconds: 5
+  initialDelaySeconds: 45
+  periodSeconds: 10
   successThreshold: 1
   timeoutSeconds: 1
 
