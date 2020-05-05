@@ -5,12 +5,14 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Timer;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +28,7 @@ import com.enonic.cloud.operator.operators.common.OperatorNamespaced;
 import com.enonic.cloud.operator.operators.common.ResourceInfoXp7DeploymentDependant;
 import com.enonic.cloud.operator.operators.common.clients.Clients;
 import com.enonic.cloud.operator.operators.common.queues.OperatorChangeQueues;
+import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.doh.DohService;
 import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.info.DiffXp7VHost;
 import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.info.ImmutableInfoXp7VHost;
 
@@ -48,6 +51,14 @@ public class OperatorXp7VHost
     @Inject
     Helm helm;
 
+    @RestClient
+    @Inject
+    DohService dnsOverHttps;
+
+    @Inject
+    @Named("tasks")
+    Timer timer;
+
     @Inject
     @Named("local")
     ChartRepository chartRepository;
@@ -60,6 +71,14 @@ public class OperatorXp7VHost
     {
         caches.getVHostCache().addEventListener( this::watchVHosts );
         log.info( "Started listening for Xp7VHost events" );
+
+//        timer.schedule( ImmutableXp7VHostStatusHandler.builder().
+//            caches( caches ).
+//            clients( clients ).
+//            dns( dnsOverHttps ).
+//            actionId( "dnsPoll" ).
+//            build(), 5000L, 10000L );
+//        log.info( "VHost status poller started" );
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")

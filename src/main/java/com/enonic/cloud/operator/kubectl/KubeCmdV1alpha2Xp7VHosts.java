@@ -51,6 +51,6 @@ public abstract class KubeCmdV1alpha2Xp7VHosts
     @Override
     protected boolean equalsSpec( final V1alpha2Xp7VHost o, final V1alpha2Xp7VHost n )
     {
-        return Objects.equals( o.getSpec(), n.getSpec() );
+        return Objects.equals( o.getSpec(), n.getSpec() ) && Objects.equals( o.getStatus(), n.getStatus() );
     }
 }

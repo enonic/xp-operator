@@ -10,6 +10,8 @@ public class V1alpha2Xp7VHost
 {
     private V1alpha2Xp7VHostSpec spec;
 
+    private V1alpha2Xp7VHostStatus status;
+
     public V1alpha2Xp7VHostSpec getSpec()
     {
         return spec;
@@ -19,6 +21,16 @@ public class V1alpha2Xp7VHost
     public void setSpec( V1alpha2Xp7VHostSpec spec )
     {
         this.spec = spec;
+    }
+
+    public V1alpha2Xp7VHostStatus getStatus()
+    {
+        return status;
+    }
+
+    public void setStatus( final V1alpha2Xp7VHostStatus status )
+    {
+        this.status = status;
     }
 
     @Override

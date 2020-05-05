@@ -70,6 +70,25 @@ spec:
                             type: array
                             items:
                               type: string
+            status:
+              type: object
+              nullable: true
+              properties:
+                state:
+                  type: string
+                message:
+                  nullable: true
+                  type: string
+                fields:
+                  type: object
+                  nullable: true
+                  properties:
+                    ipsAssigned:
+                      type: array
+                      items:
+                        type: string
+                    dnsRecordCreated:
+                      type: boolean
     - name: v1alpha1
       served: true
       storage: false

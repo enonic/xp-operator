@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.util.Timer;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
@@ -18,9 +19,8 @@ public class OperatorChangeQueues
     private final ResourceChangeQueue<V1alpha2Xp7Config> v1alpha2Xp7ConfigResourceChangeQueue;
 
     @Inject
-    public OperatorChangeQueues()
+    public OperatorChangeQueues( @Named("tasks") Timer timer )
     {
-        Timer timer = new Timer();
         this.configMapResourceChangeQueue = new ResourceChangeQueue<>( Duration.ofMillis( 1500 ) );
         timer.schedule( configMapResourceChangeQueue, 0L, 500L );
 

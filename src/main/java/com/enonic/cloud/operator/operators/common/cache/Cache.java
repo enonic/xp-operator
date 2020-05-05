@@ -177,4 +177,9 @@ public abstract class Cache<T extends HasMetadata, L extends KubernetesResourceL
     {
         return getCollection().stream().filter( r -> Objects.equals( namespace, r.getMetadata().getNamespace() ) );
     }
+
+    public Optional<T> getByNamespaceAndName( String namespace, String name )
+    {
+        return getByNamespace( namespace ).filter( r -> Objects.equals( name, r.getMetadata().getName() ) ).findFirst();
+    }
 }
