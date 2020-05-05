@@ -24,6 +24,8 @@ import com.enonic.cloud.operator.operators.v1alpha2.xp7config.info.DiffXp7Config
 import com.enonic.cloud.operator.operators.v1alpha2.xp7config.info.ImmutableInfoConfigMap;
 import com.enonic.cloud.operator.operators.v1alpha2.xp7config.info.ImmutableInfoXp7Config;
 
+import static com.enonic.cloud.operator.common.Configuration.cfgStr;
+
 
 @SuppressWarnings("WeakerAccess")
 @ApplicationScoped
@@ -123,6 +125,7 @@ public class OperatorXp7Config
 
     private boolean filterNodeGroupConfigMaps( final ConfigMap configMap )
     {
-        return configMap.getMetadata().getLabels() != null && configMap.getMetadata().getLabels().containsKey( "nodeGroup" );
+        return configMap.getMetadata().getLabels() != null &&
+            configMap.getMetadata().getLabels().containsKey( cfgStr( "operator.helm.charts.Values.labelKeys.nodeGroup" ) );
     }
 }
