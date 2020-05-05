@@ -22,7 +22,6 @@ import com.enonic.cloud.operator.crd.xp7.v1alpha2.vhost.ImmutableV1alpha2Xp7VHos
 import com.enonic.cloud.operator.crd.xp7.v1alpha2.vhost.ImmutableV1alpha2Xp7VHostStatusFields;
 import com.enonic.cloud.operator.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHost;
 import com.enonic.cloud.operator.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHostStatus;
-import com.enonic.cloud.operator.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHostStatusFields;
 import com.enonic.cloud.operator.kubectl.ImmutableKubeCmd;
 import com.enonic.cloud.operator.operators.common.cache.Caches;
 import com.enonic.cloud.operator.operators.common.clients.Clients;
@@ -47,6 +46,7 @@ public abstract class Xp7VHostStatusHandler
     @Override
     public void run()
     {
+        log.debug( "Running vHost status handler" );
         caches().getVHostCache().getCollection().forEach( this::handleVHost );
     }
 
@@ -57,6 +57,8 @@ public abstract class Xp7VHostStatusHandler
         // If status field is missing, create it
         if ( oldStatus == null )
         {
+            log.debug( String.format( "Creating new status object for vHost '%s' in NS '%s'", vHost.getMetadata().getName(),
+                                      vHost.getMetadata().getNamespace() ) );
             oldStatus = ImmutableV1alpha2Xp7VHostStatus.
                 builder().
                 fields( ImmutableV1alpha2Xp7VHostStatusFields.builder().build() ).
@@ -66,6 +68,8 @@ public abstract class Xp7VHostStatusHandler
         // If vHost already is ready just exit
         if ( oldStatus.state().equals( CrdStatusState.READY ) )
         {
+            log.debug( String.format( "vHost '%s' in NS '%s' already in READY state", vHost.getMetadata().getName(),
+                                      vHost.getMetadata().getNamespace() ) );
             return;
         }
 
@@ -73,15 +77,17 @@ public abstract class Xp7VHostStatusHandler
             ImmutableV1alpha2Xp7VHostStatusFields.builder().from( oldStatus.fields() );
 
         // Handle assigned ips
+        log.debug( String.format( "Checking provisioned ips for vHost '%s' in NS '%s'", vHost.getMetadata().getName(),
+                                  vHost.getMetadata().getNamespace() ) );
         Map.Entry<CrdStatusState, String> state = handleAssignedIps( vHost, fieldsBuilder );
 
         // If IPs are ready, check DNS
         if ( state.getKey().equals( CrdStatusState.READY ) )
         {
+            log.debug( String.format( "Checking DNS records for vHost '%s' in NS '%s'", vHost.getMetadata().getName(),
+                                      vHost.getMetadata().getNamespace() ) );
             state = handleDns( vHost, fieldsBuilder );
         }
-
-        V1alpha2Xp7VHostStatusFields fields = fieldsBuilder.build();
 
         V1alpha2Xp7VHostStatus newStatus = ImmutableV1alpha2Xp7VHostStatus.builder().
             from( oldStatus ).
@@ -90,8 +96,10 @@ public abstract class Xp7VHostStatusHandler
             fields( fieldsBuilder.build() ).
             build();
 
-        if ( !Objects.equals( oldStatus, newStatus ) )
+        if ( !Objects.equals( vHost.getStatus(), newStatus ) )
         {
+            log.debug( String.format( "Updating status for vHost '%s' in NS '%s'", vHost.getMetadata().getName(),
+                                      vHost.getMetadata().getNamespace() ) );
             vHost.setStatus( newStatus );
             updateVHostStatus( vHost );
         }

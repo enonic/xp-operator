@@ -8,13 +8,13 @@ import javax.ws.rs.QueryParam;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
 @SuppressWarnings("CdiManagedBeanInconsistencyInspection")
-@Path("/dns-query")
+//@Path("/")
 @RegisterRestClient(configKey = "dns.doh")
 public interface DohService
 {
     @GET
-    @Path("/")
-    @Produces("application/json")
+    @Path("/dns-query")
+    @Produces("application/dns-json")
     DohResponse query( @QueryParam("type") String type, @QueryParam("name") String name );
 
 }

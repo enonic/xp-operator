@@ -72,13 +72,13 @@ public class OperatorXp7VHost
         caches.getVHostCache().addEventListener( this::watchVHosts );
         log.info( "Started listening for Xp7VHost events" );
 
-//        timer.schedule( ImmutableXp7VHostStatusHandler.builder().
-//            caches( caches ).
-//            clients( clients ).
-//            dns( dnsOverHttps ).
-//            actionId( "dnsPoll" ).
-//            build(), 5000L, 10000L );
-//        log.info( "VHost status poller started" );
+        timer.schedule( ImmutableXp7VHostStatusHandler.builder().
+            caches( caches ).
+            clients( clients ).
+            dns( dnsOverHttps ).
+            actionId( "dnsPoll" ).
+            build(), 5000L, 10000L );
+        log.info( "VHost status poller started" );
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
