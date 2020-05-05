@@ -2,6 +2,7 @@ package com.enonic.cloud.operator.helm;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -60,6 +61,43 @@ public class BaseValues
 
     private void handleKey( Map<String, Object> values, final String name, final String value )
     {
-        handleKeySplit( values, Arrays.asList( name.split( "\\." ) ), value );
+        handleKeySplit( values, createSplit( name ), value );
+    }
+
+    private List<String> createSplit( final String name )
+    {
+        List<Integer> quoteIndexes = new LinkedList<>();
+        for ( int i = 0; i < name.length(); i++ )
+        {
+            if ( name.charAt( i ) == '"' )
+            {
+                quoteIndexes.add( i );
+                if ( quoteIndexes.size() == 0 )
+                {
+                    break;
+                }
+            }
+        }
+        Preconditions.checkState( quoteIndexes.size() % 2 == 0, String.format( "Number of quotes in '%s' in not an event number", name ) );
+
+        List<String> res = new LinkedList<>();
+
+        if ( quoteIndexes.isEmpty() )
+        {
+            for(String s: name.split( "\\." )) {
+                if (!"".equals( s )) {
+                    res.add( s );
+                }
+            }
+            return res;
+        }
+
+        res.addAll( createSplit( name.substring( 0, quoteIndexes.get( 0 ) ) ) );
+        res.add( name.substring( quoteIndexes.get( 0 ) + 1, quoteIndexes.get( 1 ) ) );
+        if ( quoteIndexes.get( 1 ) != name.length() -1 )
+        {
+            res.addAll( createSplit( name.substring( quoteIndexes.get( 1 ) + 1 ) ) );
+        }
+        return res;
     }
 }

@@ -33,7 +33,6 @@ public class Xp7DeploymentTest
             build();
         return ImmutableXp7DeploymentValues.builder().
             baseValues( new BaseValues() ).
-            imageTemplate( "%s" ).
             info( info ).
             build().
             buildNewValues().

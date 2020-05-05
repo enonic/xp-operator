@@ -325,7 +325,7 @@ spec:
               optional: false
         - name: "JAVA_OPTS"
           value: "My java opts"
-        image: "7.1.2"
+        image: "gbbirkisson/xp:7.1.2-ubuntu"
         imagePullPolicy: "IfNotPresent"
         livenessProbe:
           failureThreshold: 4
@@ -379,6 +379,9 @@ spec:
             - "ALL"
           runAsNonRoot: true
           runAsUser: 1337
+          sysctls:
+          - name: "vm.max_map_count"
+            value: "262144"
         terminationMessagePath: "/dev/termination-log"
         terminationMessagePolicy: "File"
         volumeMounts:
@@ -396,19 +399,6 @@ spec:
           name: "snapshots"
       dnsPolicy: "ClusterFirst"
       initContainers:
-      - command:
-        - "sysctl"
-        - "-w"
-        - "vm.max_map_count=262144"
-        image: "7.1.2"
-        imagePullPolicy: "IfNotPresent"
-        name: "configure-sysctl"
-        resources: {}
-        securityContext:
-          privileged: true
-          runAsUser: 0
-        terminationMessagePath: "/dev/termination-log"
-        terminationMessagePolicy: "File"
       - command:
         - "ash"
         - "-c"
@@ -557,7 +547,7 @@ spec:
             \ -XX:+CMSParallelRemarkEnabled -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=60\
             \ -XX:+ScavengeBeforeFullGC -XX:+CMSScavengeBeforeRemark -XX:-HeapDumpOnOutOfMemoryError\
             \ -XX:HeapDumpPath=/enonic-xp/home/exports/dumps/oom.hprof"
-        image: "7.1.2"
+        image: "gbbirkisson/xp:7.1.2-ubuntu"
         imagePullPolicy: "IfNotPresent"
         livenessProbe:
           failureThreshold: 4
@@ -611,6 +601,9 @@ spec:
             - "ALL"
           runAsNonRoot: true
           runAsUser: 1337
+          sysctls:
+          - name: "vm.max_map_count"
+            value: "262144"
         terminationMessagePath: "/dev/termination-log"
         terminationMessagePolicy: "File"
         volumeMounts:
@@ -628,19 +621,6 @@ spec:
           name: "snapshots"
       dnsPolicy: "ClusterFirst"
       initContainers:
-      - command:
-        - "sysctl"
-        - "-w"
-        - "vm.max_map_count=262144"
-        image: "7.1.2"
-        imagePullPolicy: "IfNotPresent"
-        name: "configure-sysctl"
-        resources: {}
-        securityContext:
-          privileged: true
-          runAsUser: 0
-        terminationMessagePath: "/dev/termination-log"
-        terminationMessagePolicy: "File"
       - command:
         - "ash"
         - "-c"
@@ -787,7 +767,7 @@ spec:
             \ -XX:+CMSParallelRemarkEnabled -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=60\
             \ -XX:+ScavengeBeforeFullGC -XX:+CMSScavengeBeforeRemark -XX:-HeapDumpOnOutOfMemoryError\
             \ -XX:HeapDumpPath=/enonic-xp/home/exports/dumps/oom.hprof"
-        image: "7.1.2"
+        image: "gbbirkisson/xp:7.1.2-ubuntu"
         imagePullPolicy: "IfNotPresent"
         livenessProbe:
           failureThreshold: 4
@@ -841,6 +821,9 @@ spec:
             - "ALL"
           runAsNonRoot: true
           runAsUser: 1337
+          sysctls:
+          - name: "vm.max_map_count"
+            value: "262144"
         terminationMessagePath: "/dev/termination-log"
         terminationMessagePolicy: "File"
         volumeMounts:
@@ -856,19 +839,6 @@ spec:
           name: "snapshots"
       dnsPolicy: "ClusterFirst"
       initContainers:
-      - command:
-        - "sysctl"
-        - "-w"
-        - "vm.max_map_count=262144"
-        image: "7.1.2"
-        imagePullPolicy: "IfNotPresent"
-        name: "configure-sysctl"
-        resources: {}
-        securityContext:
-          privileged: true
-          runAsUser: 0
-        terminationMessagePath: "/dev/termination-log"
-        terminationMessagePolicy: "File"
       - command:
         - "ash"
         - "-c"
@@ -1233,6 +1203,7 @@ spec:
     source: "/"
     target: "/webapp/com.enonic.app.alive"
     idProviders: null
+status: null
 ---
 kind: "Xp7VHost"
 apiVersion: "enonic.cloud/v1alpha2"
@@ -1260,3 +1231,4 @@ spec:
     idProviders:
       default: "system"
       enabled: []
+status: null

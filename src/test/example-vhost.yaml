@@ -16,3 +16,9 @@ spec:
       target: /admin
       idProviders:
         default: system
+status:
+  state: PENDING
+  message: null
+  fields:
+    ipAssigned: [xxx]
+    dnsRecordCreated: true

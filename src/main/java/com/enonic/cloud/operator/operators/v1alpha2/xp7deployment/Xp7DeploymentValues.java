@@ -1,8 +1,6 @@
 package com.enonic.cloud.operator.operators.v1alpha2.xp7deployment;
 
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -23,8 +21,6 @@ public abstract class Xp7DeploymentValues
 {
     protected abstract Map<String, Object> baseValues();
 
-    protected abstract String imageTemplate();
-
     protected abstract InfoXp7Deployment info();
 
     private Map<String, Object> values( V1alpha2Xp7Deployment resource )
@@ -39,34 +35,15 @@ public abstract class Xp7DeploymentValues
         deployment.put( "clustered", isClustered );
         if ( isClustered )
         {
-            List<String> discoveryHosts = createDiscoveryHosts( resource );
-            deployment.put( "discoveryHosts", discoveryHosts );
             deployment.put( "minimumMasterNodes", minimumMasterNodes( resource ) );
             deployment.put( "minimumDataNodes", minimumDataNodes( resource ) );
         }
         deployment.put( "spec", resource.getSpec() );
 
-        values.put( "image", String.format( imageTemplate(), resource.getSpec().xpVersion() ) );
         values.put( "defaultLabels", defaultLabels( resource ) );
         values.put( "deployment", deployment );
         //values.put( "ownerReferences", Collections.singletonList( info.ownerReference() ) );
         return values;
-    }
-
-    private List<String> createDiscoveryHosts( V1alpha2Xp7Deployment resource )
-    {
-        List<String> res = new LinkedList<>();
-        for ( Map.Entry<String, V1alpha2Xp7DeploymentSpecNode> node : resource.getSpec().nodeGroups().entrySet() )
-        {
-            if ( node.getValue().master() )
-            {
-                for ( int i = 0; i < node.getValue().replicas(); i++ )
-                {
-                    res.add( node.getKey() + "-" + i + "." + allNodeGroupsKey() );
-                }
-            }
-        }
-        return res;
     }
 
     private boolean isClustered( V1alpha2Xp7Deployment resource )

@@ -1,30 +1,14 @@
 ---
-image: "7.1.2"
-extensions:
-  ingress:
-    DDOS:
-      limitConnections: "5"
-      enabled: false
-      limitRpm: "100"
-    stickySession:
-      enabled: false
-  linkerd:
-    enabled: false
+annotations:
+  alwaysOverwrite: "enonic.alwaysOverwrite"
+  neverOverwrite: "enonic.neverOverwrite"
 allNodesKey: "all"
 defaultLabels:
   cloud: "mycloud"
   solution: "mysolution"
   environment: "myenv"
   service: "myservice"
-annotations:
-  alwaysOverwrite: "enonic.alwaysOverwrite"
-  neverOverwrite: "enonic.neverOverwrite"
-storage:
-  shared:
-    storageClassName: "standard"
-    forcePermissions: false
-  default:
-    storageClassName: "standard"
+imageTemplate: "gbbirkisson/xp:%s-ubuntu"
 labels:
   managed: "enonic.managed"
 deployment:

@@ -46,45 +46,11 @@ spec:
       terminationGracePeriodSeconds: {{ $.Values.terminationGracePeriodSeconds }}
 
       securityContext:
-        fsGroup: 0
+        fsGroup: {{ $.Values.fsGroup }}
         runAsUser: {{ $.Values.user }}
 
       initContainers:
-        {{- if $.Values.storage.shared.forcePermissions }}
-        - name: shared-storage-permissions
-          image: {{ $.Values.initContainersImage }}
-          imagePullPolicy: IfNotPresent
-          terminationMessagePath: /dev/termination-log
-          terminationMessagePolicy: File
-          securityContext:
-            privileged: true
-            runAsUser: 0
-          resources: {}
-          volumeMounts:
-            {{- range $volumeName, $volumeSize := $.Values.deployment.spec.nodesSharedDisks }}
-            - name: {{ $volumeName }}
-              mountPath: {{ index $.Values.volumeMounts $volumeName }}
-            {{- end }}
-          command:
-            - ash
-            - -c
-            - {{ range $volumeName, $volumeSize := $.Values.deployment.spec.nodesSharedDisks }}chown 1337:0 {{ index $.Values.volumeMounts $volumeName }}; {{ end }}
-        {{- end }}
-        - name: configure-sysctl
-          image: {{ $.Values.image }}
-          imagePullPolicy: {{ $.Values.imagePullPolicy }}
-          terminationMessagePath: /dev/termination-log
-          terminationMessagePolicy: File
-          securityContext:
-            privileged: true
-            runAsUser: 0
-          resources: {}
-          command:
-            - sysctl
-            - -w
-            - vm.max_map_count=262144
-
-        # This init container so the node does not get the exception: Cannot create host entry for value
+        # This init container waits for the Kube DNS entry so the XP node does not get the exception: Cannot create host entry for value
         - name: wait-for-dns
           image: {{ $.Values.initContainersImage }}
           imagePullPolicy: IfNotPresent
@@ -104,7 +70,7 @@ spec:
 
       containers:
         - name: exp
-          image: {{ $.Values.image }}
+          image: {{ $.Values.imageTemplate | replace "%s" $.Values.deployment.spec.xpVersion }}
           imagePullPolicy: {{ $.Values.imagePullPolicy }}
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
@@ -115,6 +81,9 @@ spec:
                 - ALL
             runAsNonRoot: true
             runAsUser: {{ $.Values.user }}
+            sysctls:
+              - name: vm.max_map_count
+                value: "262144"
 
           resources:
             requests:
@@ -209,6 +178,10 @@ spec:
     {{- range $volumeName, $volumeSize := $nodeGroup.resources.disks }}
     - metadata:
         name: {{ $volumeName }}
+        annotations:
+          {{- with $.Values.storage.default.annotations }}
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
         labels:
           {{- if not (has $volumeName $.Values.volumeBackups) }}
           velero.io/exclude-from-backup: true

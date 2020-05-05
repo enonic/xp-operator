@@ -55,9 +55,6 @@ public class OperatorXp7Deployments
     @Inject
     Helm helm;
 
-    @ConfigProperty(name = "operator.helm.imageTemplate")
-    String imageTemplate;
-
     @Inject
     @Named("local")
     ChartRepository chartRepository;
@@ -162,7 +159,6 @@ public class OperatorXp7Deployments
                     namespace( info.namespace() ).
                     valueBuilder( ImmutableXp7DeploymentValues.builder().
                         baseValues( baseValues ).
-                        imageTemplate( imageTemplate ).
                         info( info ).
                         build() ).
                     build().

@@ -41,6 +41,8 @@ configLocation: /enonic-xp/home/config
 extraConfigLocation: /enonic-xp/home/extra-config
 
 user: 1337
+fsGroup: 0
+
 terminationGracePeriodSeconds: 30
 updateStrategy: RollingUpdate
 initContainersImage: alpine:3.10
@@ -51,10 +53,21 @@ resources:
   memory:
     defaultRequests: null
 
+storage:
+  default:
+    storageClassName: standard
+    annotations: {}
+  shared:
+    storageClassName: standard
+    annotations: {}
+
 # Filled in by operator
 # deployment:
 #   name: gbb-tests-qa
 #   clustered: false
-#   discoveryHosts:
 #   spec:
 #     ...
+
+extensions:
+  linkerd:
+    enabled: false
