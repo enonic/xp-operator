@@ -16,26 +16,26 @@ public abstract class BaseApi<T>
     protected T getResult( String request, Class<T> k )
         throws IOException
     {
-        Map<String, Object> admission = mapper.readValue( request, Map.class );
-        // We have to extract the uid this way if there is a validation error during
-        // mapping of the actual objects.
-        String uid = (String) ( (Map) admission.get( "request" ) ).get( "uid" );
+        Map<String, Object> r = mapper.readValue( request, Map.class );
 
         // Hack until this is fixed: https://github.com/fabric8io/kubernetes-client/issues/1898
-        ( (Map<String, Object>) admission.get( "request" ) ).remove( "options" );
-        request = mapper.writeValueAsString( admission );
+        ( (Map<String, Object>) r.get( "request" ) ).remove( "options" );
+        request = mapper.writeValueAsString( r );
 
         try
         {
-            return process( uid, mapper.readValue( request, k ) );
+            return process( mapper.readValue( request, k ) );
         }
         catch ( Exception e )
         {
-            return failure( uid, ApiExceptionHandler.extractSerializationExceptionMessage( e ) );
+            Map<String, Object> admission = mapper.readValue( request, Map.class );
+            return failure( createOnFailure( admission ), ApiExceptionHandler.extractSerializationExceptionMessage( e ) );
         }
     }
 
-    protected abstract T process( final String uid, T obj );
+    protected abstract T createOnFailure( Map<String, Object> request );
 
-    protected abstract T failure( final String uid, String message );
+    protected abstract T process( T obj );
+
+    protected abstract T failure( T obj, String message );
 }

@@ -21,6 +21,7 @@ import com.google.common.base.Preconditions;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.Status;
+import io.fabric8.kubernetes.api.model.admission.AdmissionRequest;
 import io.fabric8.kubernetes.api.model.admission.AdmissionResponse;
 import io.fabric8.kubernetes.api.model.admission.AdmissionReview;
 
@@ -77,7 +78,18 @@ public class AdmissionApi
     }
 
     @Override
-    protected AdmissionReview process( final String uid, final AdmissionReview review )
+    protected AdmissionReview createOnFailure( final Map<String, Object> request )
+    {
+        AdmissionReview admissionReview = new AdmissionReview();
+        admissionReview.setApiVersion( (String) request.get( "apiVersion" ) );
+        admissionReview.setKind( (String) request.get( "kind" ) );
+        admissionReview.setRequest( new AdmissionRequest() );
+        admissionReview.getRequest().setUid( (String) ( (Map) request.get( "request" ) ).get( "uid" ) );
+        return admissionReview;
+    }
+
+    @Override
+    protected AdmissionReview process( final AdmissionReview review )
     {
         if ( review.getRequest().getOperation().equals( "CREATE" ) || review.getRequest().getOperation().equals( "UPDATE" ) )
         {
@@ -90,24 +102,21 @@ public class AdmissionApi
             Preconditions.checkState( func != null, "Admission review sent to endpoint that has unknown object" );
             func.accept( review );
         }
-        return createReview( uid, null );
+        return createReview( review, null );
     }
 
     @Override
-    protected AdmissionReview failure( final String uid, final String message )
+    protected AdmissionReview failure( final AdmissionReview review, final String message )
     {
-        return createReview( uid, message );
+        return createReview( review, message );
     }
 
-    private AdmissionReview createReview( String uid, String errorMessage )
+    private AdmissionReview createReview( final AdmissionReview review, String errorMessage )
     {
-        AdmissionReview review = new AdmissionReview();
-        review.setKind( "AdmissionReview" );
-
         AdmissionResponse response = new AdmissionResponse();
         review.setResponse( response );
 
-        response.setUid( uid );
+        response.setUid( review.getRequest().getUid() );
 
         Status status = new Status();
         response.setStatus( status );
