@@ -27,6 +27,7 @@ public class DnsJsonBodyReader
         return mediaType.getType().equals( "application" ) && mediaType.getSubtype().equals( "dns-json" );
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Object readFrom( final Class aClass, final Type type, final Annotation[] annotations, final MediaType mediaType,
                             final MultivaluedMap multivaluedMap, final InputStream inputStream )

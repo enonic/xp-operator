@@ -34,7 +34,7 @@ public class Xp7VHostTest
 
         V1alpha2Xp7VHost resource = mapper.readValue( input, V1alpha2Xp7VHost.class );
         ResourceInfoXp7DeploymentDependant<V1alpha2Xp7VHost, DiffXp7VHost> info = ImmutableTestInfoXp7VHost.builder().
-            caches( new Caches( null, null, null, null, null, null, null ) ).
+            caches( new Caches( null, null, null, null, null, null, null, null ) ).
             newResource( resource ).
             overrideDeployment( deployment ).
             build();

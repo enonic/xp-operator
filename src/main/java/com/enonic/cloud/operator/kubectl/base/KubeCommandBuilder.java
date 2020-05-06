@@ -49,31 +49,61 @@ public abstract class KubeCommandBuilder<T extends HasMetadata>
 
     public Optional<KubeCommand> apply()
     {
-        // If always overwrite flag is not true and old resource is present
-        if ( !options().alwaysOverwrite().orElse( false ) && oldResource().isPresent() )
+        KubeCommandAction action;
+
+        // If old resource is present
+        if ( oldResource().isPresent() )
         {
-            if ( options().neverOverwrite().orElse( false ) ||
-                equalsResourcesWithMetadata( oldResource().get(), maybeNamespacedResource() ) )
+            // If neverOverwrite flag is set, ignore
+            if ( options().neverOverwrite().orElse( false ) )
             {
-                // If never overwrite is set
-                return Optional.empty();
+                action = KubeCommandAction.NONE;
             }
+            // If always override is set replace
+            else if ( options().alwaysOverwrite().orElse( false ) )
+            {
+                action = KubeCommandAction.REPLACE;
+            }
+            // Else just update
             else
             {
-                // Otherwise just update
-                return Optional.of( ImmutableKubeCommand.builder().
-                    action( KubeCommandAction.UPDATE ).
-                    resource( maybeNamespacedResource() ).
-                    cmd( () -> patch( maybeNamespacedResource() ) ).
-                    build() );
+                action = KubeCommandAction.UPDATE;
+            }
+        }
+        // There is no old resource
+        else
+        {
+            action = KubeCommandAction.CREATE;
+        }
+
+        // If action is update but resources are identical
+        if ( action == KubeCommandAction.UPDATE && equalsResourcesWithMetadata( oldResource().get(), maybeNamespacedResource() ) )
+        {
+            // If we are not forcing an update
+            if ( !options().alwaysUpdate().orElse( false ) )
+            {
+                action = KubeCommandAction.NONE;
             }
         }
 
-        return Optional.of( ImmutableKubeCommand.builder().
-            action( oldResource().isPresent() ? KubeCommandAction.REPLACE : KubeCommandAction.CREATE ).
-            resource( maybeNamespacedResource() ).
-            cmd( () -> createOrReplace( maybeNamespacedResource() ) ).
-            build() );
+        switch ( action )
+        {
+            case CREATE:
+            case REPLACE:
+                return Optional.of( ImmutableKubeCommand.builder().
+                    action( action ).
+                    resource( maybeNamespacedResource() ).
+                    cmd( () -> createOrReplace( maybeNamespacedResource() ) ).
+                    build() );
+            case UPDATE:
+                return Optional.of( ImmutableKubeCommand.builder().
+                    action( action ).
+                    resource( maybeNamespacedResource() ).
+                    cmd( () -> patch( maybeNamespacedResource() ) ).
+                    build() );
+            default:
+                return Optional.empty();
+        }
     }
 
     public Optional<KubeCommand> delete()

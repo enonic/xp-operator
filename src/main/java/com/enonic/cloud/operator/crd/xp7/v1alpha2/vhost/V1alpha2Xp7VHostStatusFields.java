@@ -13,7 +13,7 @@ import com.enonic.cloud.operator.crd.BuilderException;
 @Value.Style(throwForInvalidImmutableState = V1alpha2Xp7VHostStatusFields.ExceptionMissing.class, throwForNullPointer = V1alpha2Xp7VHostStatusFields.ExceptionMissing.class)
 public abstract class V1alpha2Xp7VHostStatusFields
 {
-    public abstract List<String> ipsAssigned();
+    public abstract List<String> publicIps();
 
     @Value.Default
     public boolean dnsRecordCreated()

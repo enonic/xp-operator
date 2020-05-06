@@ -12,6 +12,9 @@ docker-push: docker-build
 mvn-dependencies:
 	mvn versions:display-plugin-updates
 
+crds-create:
+	@ls --color=none src/main/kubernetes/operator/crd/ec-operator.crd.xp7.* | xargs -I {} kubectl apply -f {}
+
 deployment-create:
 	kubectl apply -f src/test/example-deployment.yaml
 

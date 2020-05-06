@@ -26,7 +26,7 @@ public abstract class DiffXp7Deployment
     @Value.Check
     protected void check()
     {
-        if ( !modified() )
+        if ( newValueCreated() || oldValueRemoved() )
         {
             return;
         }

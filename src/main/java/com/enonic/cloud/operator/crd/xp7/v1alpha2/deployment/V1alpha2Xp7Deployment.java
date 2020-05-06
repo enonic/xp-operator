@@ -4,12 +4,12 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import io.fabric8.kubernetes.client.CustomResource;
+import com.enonic.cloud.operator.crd.HasStatus;
 
 import static com.enonic.cloud.operator.common.Configuration.cfgStr;
 
 public class V1alpha2Xp7Deployment
-    extends CustomResource
+    extends HasStatus<V1alpha2Xp7DeploymentStatusFields, V1alpha2Xp7DeploymentStatus>
 {
     private V1alpha2Xp7DeploymentSpec spec;
 

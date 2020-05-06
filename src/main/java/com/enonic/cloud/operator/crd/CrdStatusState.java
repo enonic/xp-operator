@@ -2,5 +2,5 @@ package com.enonic.cloud.operator.crd;
 
 public enum CrdStatusState
 {
-    PENDING, READY, ERROR
+    PENDING, READY, ERROR, RUNNING, STOPPED
 }

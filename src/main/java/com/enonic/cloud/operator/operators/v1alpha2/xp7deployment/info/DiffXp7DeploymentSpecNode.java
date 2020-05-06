@@ -40,7 +40,7 @@ public abstract class DiffXp7DeploymentSpecNode
     @Value.Check
     protected void check()
     {
-        if ( !modified() )
+        if ( newValueCreated() || oldValueRemoved() )
         {
             return;
         }

@@ -48,7 +48,8 @@ public abstract class ResourceInfo<T extends HasMetadata, D extends Diff<T>>
 
         String backup = resource().getMetadata().getLabels().getOrDefault( cfgStr( "operator.deployment.backupRestore.label" ), null );
 
-        if ( !( diff().added() && backup != null ) )
+        // If this is not a brand new resource or backup is being restored
+        if ( !( diff().newValueCreated() && backup != null ) )
         {
             return false;
         }

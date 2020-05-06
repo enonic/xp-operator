@@ -59,6 +59,28 @@ spec:
                             type: object
                             additionalProperties:
                               type: string
+            status:
+              type: object
+              nullable: true
+              properties:
+                state:
+                  type: string
+                message:
+                  nullable: true
+                  type: string
+                fields:
+                  type: object
+                  nullable: true
+                  properties:
+                    pods:
+                      type: object
+                      additionalProperties:
+                        type: object
+                        properties:
+                          phase:
+                            type: string
+                          ready:
+                            type: boolean
     - name: v1alpha1
       served: true
       storage: false
@@ -131,3 +153,11 @@ spec:
       type: string
       description: XP version running
       JSONPath: .spec.xpVersion
+    - name: State
+      type: string
+      description: State
+      JSONPath: .status.state
+    - name: Msg
+      type: string
+      description: Message
+      JSONPath: .status.message

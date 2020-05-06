@@ -1195,6 +1195,7 @@ metadata:
     service: "myservice"
     solution: "mysolution"
   name: "healthcheck"
+status: null
 spec:
   host: "healthcheck"
   options:
@@ -1209,7 +1210,6 @@ spec:
     source: "/"
     target: "/webapp/com.enonic.app.alive"
     idProviders: null
-status: null
 ---
 kind: "Xp7VHost"
 apiVersion: "enonic.cloud/v1alpha2"
@@ -1221,6 +1221,7 @@ metadata:
     service: "myservice"
     solution: "mysolution"
   name: "localhost"
+status: null
 spec:
   host: "localhost"
   options:
@@ -1237,4 +1238,3 @@ spec:
     idProviders:
       default: "system"
       enabled: []
-status: null

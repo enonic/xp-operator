@@ -83,7 +83,7 @@ spec:
                   type: object
                   nullable: true
                   properties:
-                    ipsAssigned:
+                    publicIps:
                       type: array
                       items:
                         type: string
@@ -126,23 +126,11 @@ spec:
       type: string
       description: Host
       JSONPath: .spec.host
-    - name: Skip Ingress
-      type: boolean
-      description: Skip Ingress
-      JSONPath: .spec.skipIngress
-    - name: Nodes
+    - name: State
       type: string
-      description: Nodes
-      JSONPath: .spec.mappings[*].nodeGroup
-    - name: Sources
+      description: State
+      JSONPath: .status.state
+    - name: Msg
       type: string
-      description: Sources
-      JSONPath: .spec.mappings[*].source
-    - name: Targets
-      type: string
-      description: Targets
-      JSONPath: .spec.mappings[*].target
-    - name: IdProviders
-      type: string
-      description: IdProviders
-      JSONPath: .spec.mappings[*].idProvider
+      description: Message
+      JSONPath: .status.message

@@ -22,24 +22,19 @@ public abstract class Diff<T>
     public abstract Optional<T> newValue();
 
     @Value.Derived
-    public boolean added()
+    public boolean newValueCreated()
     {
         return oldValue().isEmpty() && newValue().isPresent();
     }
 
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     @Value.Derived
-    public boolean modified()
+    public boolean oldValueChanged()
     {
-        if ( oldValue().isPresent() && newValue().isPresent() )
-        {
-            return !Objects.equals( oldValue(), newValue() );
-        }
-        return false;
+        return !Objects.equals( oldValue(), newValue() );
     }
 
     @Value.Derived
-    public boolean removed()
+    public boolean oldValueRemoved()
     {
         return oldValue().isPresent() && newValue().isEmpty();
     }
@@ -54,13 +49,14 @@ public abstract class Diff<T>
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     protected <B> boolean equals( Function<T, B> func )
     {
-        if ( !modified() )
+        if ( !newValueCreated() && !oldValueRemoved() && oldValueChanged() )
         {
-            return true;
+            B v1 = func.apply( oldValue().get() );
+            B v2 = func.apply( newValue().get() );
+            return Objects.equals( v1, v2 );
         }
-        B v1 = func.apply( oldValue().get() );
-        B v2 = func.apply( newValue().get() );
-        return Objects.equals( v1, v2 );
+
+        return true;
     }
 
     protected <C, D extends Diff<C>> List<D> mergeLists( List<C> oldList, List<C> newList, BiFunction<Optional<C>, Optional<C>, D> creator )

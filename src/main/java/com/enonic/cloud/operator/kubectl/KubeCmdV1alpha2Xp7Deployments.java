@@ -5,51 +5,51 @@ import java.util.Optional;
 
 import org.immutables.value.Value;
 
-import com.enonic.cloud.operator.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHost;
+import com.enonic.cloud.operator.crd.xp7.v1alpha2.deployment.V1alpha2Xp7Deployment;
 import com.enonic.cloud.operator.kubectl.base.KubeCommandBuilder;
 
 
 @Value.Immutable
-public abstract class KubeCmdV1alpha2Xp7VHosts
-    extends KubeCommandBuilder<V1alpha2Xp7VHost>
+public abstract class KubeCmdV1alpha2Xp7Deployments
+    extends KubeCommandBuilder<V1alpha2Xp7Deployment>
 {
     @Override
-    protected Optional<V1alpha2Xp7VHost> fetch( final V1alpha2Xp7VHost resource )
+    protected Optional<V1alpha2Xp7Deployment> fetch( final V1alpha2Xp7Deployment resource )
     {
-        return Optional.ofNullable( clients().getVHostClient().
+        return Optional.ofNullable( clients().getDeploymentClient().
             inNamespace( resource.getMetadata().getNamespace() ).
             withName( resource.getMetadata().getName() ).
             get() );
     }
 
     @Override
-    protected void createOrReplace( final V1alpha2Xp7VHost resource )
+    protected void createOrReplace( final V1alpha2Xp7Deployment resource )
     {
-        clients().getVHostClient().
+        clients().getDeploymentClient().
             inNamespace( resource.getMetadata().getNamespace() ).
             createOrReplace( resource );
     }
 
     @Override
-    protected void patch( final V1alpha2Xp7VHost resource )
+    protected void patch( final V1alpha2Xp7Deployment resource )
     {
-        clients().getVHostClient().
+        clients().getDeploymentClient().
             inNamespace( resource.getMetadata().getNamespace() ).
             withName( resource.getMetadata().getName() ).
             patch( resource );
     }
 
     @Override
-    protected void delete( final V1alpha2Xp7VHost resource )
+    protected void delete( final V1alpha2Xp7Deployment resource )
     {
-        clients().getVHostClient().
+        clients().getDeploymentClient().
             inNamespace( resource.getMetadata().getNamespace() ).
             withName( resource.getMetadata().getName() ).
             delete();
     }
 
     @Override
-    protected boolean equalsSpec( final V1alpha2Xp7VHost o, final V1alpha2Xp7VHost n )
+    protected boolean equalsSpec( final V1alpha2Xp7Deployment o, final V1alpha2Xp7Deployment n )
     {
         return Objects.equals( o.getSpec(), n.getSpec() );
     }

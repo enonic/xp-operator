@@ -36,7 +36,7 @@ class TestAdmissionApi
         allNodesPicker = cfgStr( "operator.helm.charts.Values.allNodesKey" );
         deploymentCache = new TestXp7DeploymentCache();
         vHostCache = new TestXp7VHostCache();
-        caches = new Caches( null, null, null, deploymentCache, null, null, vHostCache );
+        caches = new Caches( null, null, null, deploymentCache, null, null, null, vHostCache );
     }
 
     @TestFactory

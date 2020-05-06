@@ -51,6 +51,7 @@ public class OperatorXp7VHost
     @Inject
     Helm helm;
 
+    @SuppressWarnings("CdiInjectionPointsInspection")
     @RestClient
     @Inject
     DohService dnsOverHttps;
@@ -67,17 +68,21 @@ public class OperatorXp7VHost
     @Named("baseValues")
     Map<String, Object> baseValues;
 
+    Xp7VHostStatusHandler statusHandler;
+
     void onStartup( @Observes StartupEvent _ev )
     {
         caches.getVHostCache().addEventListener( this::watchVHosts );
         log.info( "Started listening for Xp7VHost events" );
 
-        timer.schedule( ImmutableXp7VHostStatusHandler.builder().
+        statusHandler = ImmutableXp7VHostStatusHandler.builder().
             caches( caches ).
             clients( clients ).
             dns( dnsOverHttps ).
-            actionId( "dnsPoll" ).
-            build(), 5000L, 10000L );
+            actionId( "pollVHosts" ).
+            build();
+
+        timer.schedule( statusHandler, 5000L, 10000L );
         log.info( "VHost status poller started" );
     }
 
@@ -103,6 +108,18 @@ public class OperatorXp7VHost
             if ( info.resourceBeingRestoredFromBackup() )
             {
                 // This is a backup/restore event, just ignore
+                return;
+            }
+
+            if ( info.diff().newValueCreated() )
+            {
+                // This is a new vHost
+                statusHandler.updateStatus( info.resource() );
+            }
+
+            if ( !info.diff().diffSpec().oldValueChanged() )
+            {
+                // There is no change to the spec
                 return;
             }
 

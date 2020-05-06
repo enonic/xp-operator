@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Timer;
 
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
@@ -55,6 +56,10 @@ public class OperatorXp7Deployments
     Helm helm;
 
     @Inject
+    @Named("tasks")
+    Timer timer;
+
+    @Inject
     @Named("local")
     ChartRepository chartRepository;
 
@@ -62,10 +67,21 @@ public class OperatorXp7Deployments
     @Named("baseValues")
     Map<String, Object> baseValues;
 
+    private Xp7DeploymentStatusHandler statusHandler;
+
     void onStartup( @Observes StartupEvent _ev )
     {
         caches.getDeploymentCache().addEventListener( this::watch );
         log.info( "Started listening for Xp7Deployment events" );
+
+        statusHandler = ImmutableXp7DeploymentStatusHandler.builder().
+            caches( caches ).
+            clients( clients ).
+            actionId( "pollDeployments" ).
+            build();
+
+        timer.schedule( statusHandler, 2500L, 10000L );
+        log.info( "Deployment status poller started" );
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -87,6 +103,18 @@ public class OperatorXp7Deployments
         if ( info.resourceBeingRestoredFromBackup() )
         {
             // This is a backup restore, just ignore
+            return;
+        }
+
+        if ( info.diff().newValueCreated() )
+        {
+            // This is a new deployment
+            statusHandler.updateStatus( info.resource() );
+        }
+
+        if ( !info.diff().diffSpec().oldValueChanged() )
+        {
+            // There is no change to the spec
             return;
         }
 

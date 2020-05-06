@@ -2,15 +2,13 @@ package com.enonic.cloud.operator.crd.xp7.v1alpha2.vhost;
 
 import java.util.Objects;
 
-import io.fabric8.kubernetes.client.CustomResource;
+import com.enonic.cloud.operator.crd.HasStatus;
 
 
 public class V1alpha2Xp7VHost
-    extends CustomResource
+    extends HasStatus<V1alpha2Xp7VHostStatusFields, V1alpha2Xp7VHostStatus>
 {
     private V1alpha2Xp7VHostSpec spec;
-
-    private V1alpha2Xp7VHostStatus status;
 
     public V1alpha2Xp7VHostSpec getSpec()
     {
@@ -21,16 +19,6 @@ public class V1alpha2Xp7VHost
     public void setSpec( V1alpha2Xp7VHostSpec spec )
     {
         this.spec = spec;
-    }
-
-    public V1alpha2Xp7VHostStatus getStatus()
-    {
-        return status;
-    }
-
-    public void setStatus( final V1alpha2Xp7VHostStatus status )
-    {
-        this.status = status;
     }
 
     @Override

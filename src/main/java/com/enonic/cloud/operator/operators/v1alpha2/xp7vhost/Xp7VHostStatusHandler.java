@@ -4,10 +4,9 @@ import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.TimerTask;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.immutables.value.Value;
 import org.slf4j.Logger;
@@ -16,61 +15,51 @@ import org.slf4j.LoggerFactory;
 import io.fabric8.kubernetes.api.model.LoadBalancerIngress;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 
-import com.enonic.cloud.operator.common.commands.ImmutableCombinedCommand;
 import com.enonic.cloud.operator.crd.CrdStatusState;
 import com.enonic.cloud.operator.crd.xp7.v1alpha2.vhost.ImmutableV1alpha2Xp7VHostStatus;
 import com.enonic.cloud.operator.crd.xp7.v1alpha2.vhost.ImmutableV1alpha2Xp7VHostStatusFields;
 import com.enonic.cloud.operator.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHost;
 import com.enonic.cloud.operator.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHostStatus;
-import com.enonic.cloud.operator.kubectl.ImmutableKubeCmd;
+import com.enonic.cloud.operator.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHostStatusFields;
+import com.enonic.cloud.operator.operators.common.StatusHandler;
 import com.enonic.cloud.operator.operators.common.cache.Caches;
-import com.enonic.cloud.operator.operators.common.clients.Clients;
 import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.doh.DohAnswer;
 import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.doh.DohResponse;
 import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.doh.DohService;
 
 @Value.Immutable
 public abstract class Xp7VHostStatusHandler
-    extends TimerTask
+    extends StatusHandler<V1alpha2Xp7VHostStatusFields, V1alpha2Xp7VHostStatus, V1alpha2Xp7VHost>
 {
     private static final Logger log = LoggerFactory.getLogger( Xp7VHostStatusHandler.class );
 
-    protected abstract Caches caches();
-
-    protected abstract Clients clients();
-
     protected abstract DohService dns();
 
-    protected abstract String actionId();
-
     @Override
-    public void run()
+    protected Stream<V1alpha2Xp7VHost> getResourcesToUpdate( final Caches caches )
     {
-        log.debug( "Running vHost status handler" );
-        caches().getVHostCache().getCollection().forEach( this::handleVHost );
+        return caches.getVHostCache().getCollection().stream();
     }
 
-    private void handleVHost( final V1alpha2Xp7VHost vHost )
+    @Override
+    protected V1alpha2Xp7VHostStatus createDefaultStatus( final V1alpha2Xp7VHost r )
     {
-        V1alpha2Xp7VHostStatus oldStatus = vHost.getStatus();
+        return ImmutableV1alpha2Xp7VHostStatus.
+            builder().
+            fields( ImmutableV1alpha2Xp7VHostStatusFields.builder().build() ).
+            build();
+    }
 
-        // If status field is missing, create it
-        if ( oldStatus == null )
-        {
-            log.debug( String.format( "Creating new status object for vHost '%s' in NS '%s'", vHost.getMetadata().getName(),
-                                      vHost.getMetadata().getNamespace() ) );
-            oldStatus = ImmutableV1alpha2Xp7VHostStatus.
-                builder().
-                fields( ImmutableV1alpha2Xp7VHostStatusFields.builder().build() ).
-                build();
-        }
-
+    @Override
+    protected V1alpha2Xp7VHostStatus createNewStatus( final Caches caches, final V1alpha2Xp7VHost vHost,
+                                                      final V1alpha2Xp7VHostStatus oldStatus )
+    {
         // If vHost already is ready just exit
         if ( oldStatus.state().equals( CrdStatusState.READY ) )
         {
             log.debug( String.format( "vHost '%s' in NS '%s' already in READY state", vHost.getMetadata().getName(),
                                       vHost.getMetadata().getNamespace() ) );
-            return;
+            return oldStatus;
         }
 
         ImmutableV1alpha2Xp7VHostStatusFields.Builder fieldsBuilder =
@@ -79,7 +68,7 @@ public abstract class Xp7VHostStatusHandler
         // Handle assigned ips
         log.debug( String.format( "Checking provisioned ips for vHost '%s' in NS '%s'", vHost.getMetadata().getName(),
                                   vHost.getMetadata().getNamespace() ) );
-        Map.Entry<CrdStatusState, String> state = handleAssignedIps( vHost, fieldsBuilder );
+        Map.Entry<CrdStatusState, String> state = handleAssignedIps( caches, vHost, fieldsBuilder );
 
         // If IPs are ready, check DNS
         if ( state.getKey().equals( CrdStatusState.READY ) )
@@ -89,24 +78,15 @@ public abstract class Xp7VHostStatusHandler
             state = handleDns( vHost, fieldsBuilder );
         }
 
-        V1alpha2Xp7VHostStatus newStatus = ImmutableV1alpha2Xp7VHostStatus.builder().
+        return ImmutableV1alpha2Xp7VHostStatus.builder().
             from( oldStatus ).
             state( state.getKey() ).
-            message( state.getValue() ).
+            message( state.getValue() == null ? "OK" : state.getValue() ).
             fields( fieldsBuilder.build() ).
             build();
-
-        if ( !Objects.equals( vHost.getStatus(), newStatus ) )
-        {
-            log.debug( String.format( "Updating status for vHost '%s' in NS '%s'", vHost.getMetadata().getName(),
-                                      vHost.getMetadata().getNamespace() ) );
-            vHost.setStatus( newStatus );
-            updateVHostStatus( vHost );
-        }
     }
 
-
-    private Map.Entry<CrdStatusState, String> handleAssignedIps( final V1alpha2Xp7VHost vHost,
+    private Map.Entry<CrdStatusState, String> handleAssignedIps( final Caches caches, final V1alpha2Xp7VHost vHost,
                                                                  final ImmutableV1alpha2Xp7VHostStatusFields.Builder builder )
     {
         if ( !vHost.getSpec().options().ingress() )
@@ -114,12 +94,12 @@ public abstract class Xp7VHostStatusHandler
             return new AbstractMap.SimpleEntry<>( CrdStatusState.READY, null );
         }
 
-        Optional<Ingress> optionalIngress = caches().getIngressCache().
+        Optional<Ingress> optionalIngress = caches.getIngressCache().
             getByNamespaceAndName( vHost.getMetadata().getNamespace(), vHost.getMetadata().getName() );
 
         if ( optionalIngress.isEmpty() )
         {
-            builder.ipsAssigned( Collections.emptyList() );
+            builder.publicIps( Collections.emptyList() );
             return new AbstractMap.SimpleEntry<>( CrdStatusState.ERROR, "Ingress not created" );
         }
 
@@ -127,13 +107,13 @@ public abstract class Xp7VHostStatusHandler
         if ( ingress.getStatus() == null || ingress.getStatus().getLoadBalancer() == null ||
             ingress.getStatus().getLoadBalancer().getIngress() == null )
         {
-            builder.ipsAssigned( Collections.emptyList() );
+            builder.publicIps( Collections.emptyList() );
             return new AbstractMap.SimpleEntry<>( CrdStatusState.PENDING, "Waiting for assigned IPs" );
         }
 
         List<String> ips =
             ingress.getStatus().getLoadBalancer().getIngress().stream().map( LoadBalancerIngress::getIp ).collect( Collectors.toList() );
-        builder.ipsAssigned( ips );
+        builder.publicIps( ips );
 
         if ( ips.isEmpty() )
         {
@@ -173,25 +153,5 @@ public abstract class Xp7VHostStatusHandler
             }
         }
         return new AbstractMap.SimpleEntry<>( CrdStatusState.PENDING, "DNS not updated" );
-    }
-
-    private void updateVHostStatus( final V1alpha2Xp7VHost vHost )
-    {
-        ImmutableCombinedCommand.Builder commandBuilder = ImmutableCombinedCommand.builder().id( actionId() );
-        ImmutableKubeCmd.builder().
-            clients( clients() ).
-            namespace( vHost.getMetadata().getNamespace() ).
-            resource( vHost ).
-            build().
-            apply( commandBuilder );
-
-        try
-        {
-            commandBuilder.build().execute();
-        }
-        catch ( Exception e )
-        {
-            log.error( String.format( "Failed updating vHost status '%s'", vHost.getMetadata().getName() ), e );
-        }
     }
 }

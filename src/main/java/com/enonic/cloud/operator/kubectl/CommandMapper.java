@@ -16,6 +16,7 @@ import io.fabric8.kubernetes.api.model.rbac.RoleBinding;
 
 import com.enonic.cloud.operator.crd.xp7.v1alpha1.app.V1alpha1Xp7App;
 import com.enonic.cloud.operator.crd.xp7.v1alpha2.config.V1alpha2Xp7Config;
+import com.enonic.cloud.operator.crd.xp7.v1alpha2.deployment.V1alpha2Xp7Deployment;
 import com.enonic.cloud.operator.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHost;
 import com.enonic.cloud.operator.kubectl.base.KubeCommandBuilder;
 import com.enonic.cloud.operator.kubectl.base.KubeCommandOptions;
@@ -131,6 +132,15 @@ class CommandMapper
                 clients( clients ).
                 namespace( namespace ).
                 resource( (V1alpha2Xp7Config) resource ).
+                options( options ).
+                build();
+        }
+        else if ( resource instanceof V1alpha2Xp7Deployment )
+        {
+            return (KubeCommandBuilder<T>) ImmutableKubeCmdV1alpha2Xp7Deployments.builder().
+                clients( clients ).
+                namespace( namespace ).
+                resource( (V1alpha2Xp7Deployment) resource ).
                 options( options ).
                 build();
         }

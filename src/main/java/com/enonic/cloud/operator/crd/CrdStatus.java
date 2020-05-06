@@ -18,6 +18,7 @@ public abstract class CrdStatus<F>
     @Nullable
     public abstract F fields();
 
+    @SuppressWarnings("WeakerAccess")
     public static class ExceptionMissing
         extends BuilderException
     {

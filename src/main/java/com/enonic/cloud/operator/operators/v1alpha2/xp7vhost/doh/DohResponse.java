@@ -34,4 +34,7 @@ public abstract class DohResponse
 
     @JsonProperty("Answer")
     public abstract List<DohAnswer> answers();
+
+    @JsonProperty("Authority")
+    public abstract List<DohAnswer> authorities();
 }
