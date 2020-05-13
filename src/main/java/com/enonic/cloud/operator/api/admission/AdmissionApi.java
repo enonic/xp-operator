@@ -155,6 +155,11 @@ public class AdmissionApi
 
         V1alpha2Xp7Deployment r = n.orElse( o.orElse( null ) );
 
+        if ( r.getMetadata().getDeletionTimestamp() != null )
+        {
+            return;
+        }
+
         r.getSpec().nodeGroups().keySet().forEach( k -> dns1123( "nodeId", k ) );
 
         r.getSpec().nodeGroups().keySet().forEach( nodeGroup -> Preconditions.checkState( !allNodesPicker.equals( nodeGroup ),
@@ -211,6 +216,12 @@ public class AdmissionApi
         n.ifPresent( r -> Preconditions.checkState( r.getSpec() != null, specMissing ) );
 
         V1alpha2Xp7VHost r = n.orElse( o.orElse( null ) );
+
+        if ( r.getMetadata().getDeletionTimestamp() != null )
+        {
+            return;
+        }
+
         Optional<V1alpha2Xp7Deployment> deployment =
             v1alpha2Xp7DeploymentCache.get( r.getMetadata().getNamespace(), r.getMetadata().getNamespace() );
         Preconditions.checkState( deployment.isPresent(), String.format( deploymentMissing, r.getMetadata().getNamespace() ) );
@@ -245,6 +256,10 @@ public class AdmissionApi
         n.ifPresent( r -> Preconditions.checkState( r.getSpec() != null, specMissing ) );
 
         V1alpha2Xp7Config r = n.orElse( o.orElse( null ) );
+        if ( r.getMetadata().getDeletionTimestamp() != null )
+        {
+            return;
+        }
         Optional<V1alpha2Xp7Deployment> deployment =
             v1alpha2Xp7DeploymentCache.get( r.getMetadata().getNamespace(), r.getMetadata().getNamespace() );
         Preconditions.checkState( deployment.isPresent(), String.format( deploymentMissing, r.getMetadata().getNamespace() ) );
@@ -268,6 +283,10 @@ public class AdmissionApi
         n.ifPresent( r -> Preconditions.checkState( r.getSpec() != null, specMissing ) );
 
         V1alpha1Xp7App r = n.orElse( o.orElse( null ) );
+        if ( r.getMetadata().getDeletionTimestamp() != null )
+        {
+            return;
+        }
         Optional<V1alpha2Xp7Deployment> deployment =
             v1alpha2Xp7DeploymentCache.get( r.getMetadata().getNamespace(), r.getMetadata().getNamespace() );
         Preconditions.checkState( deployment.isPresent(), String.format( deploymentMissing, r.getMetadata().getNamespace() ) );
