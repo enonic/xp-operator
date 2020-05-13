@@ -25,8 +25,8 @@ import com.enonic.cloud.operator.dns.functions.DomainMapperImpl;
 import com.enonic.cloud.operator.dns.functions.DomainSyncer;
 import com.enonic.cloud.operator.dns.functions.DomainSyncerParams;
 import com.enonic.cloud.operator.dns.functions.DomainSyncerParamsImpl;
-import com.enonic.cloud.operator.dns.functions.info.IngressEnabledHosts;
 import com.enonic.cloud.operator.dns.functions.RelevantIngressPredicateImpl;
+import com.enonic.cloud.operator.dns.functions.info.IngressEnabledHosts;
 import com.enonic.cloud.operator.dns.model.Domain;
 import com.enonic.cloud.operator.dns.model.DomainImpl;
 import com.enonic.cloud.operator.dns.model.Record;
@@ -38,6 +38,8 @@ import static com.enonic.cloud.common.Configuration.cfgStr;
 public class OperatorDns
     implements ResourceEventHandler<Ingress>
 {
+    private final IngressEnabledHosts ingressEnabledHosts = new IngressEnabledHosts();
+
     @Inject
     IngressCache ingressCache;
 
@@ -52,8 +54,6 @@ public class OperatorDns
 
     @Inject
     RunnableListExecutor runnableListExecutor;
-
-    private final IngressEnabledHosts ingressEnabledHosts = new IngressEnabledHosts();
 
     private DomainFromIngress domainFromIngress;
 

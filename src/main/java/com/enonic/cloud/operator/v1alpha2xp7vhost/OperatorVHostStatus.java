@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TimerTask;
 import java.util.function.Function;
 
 import javax.enterprise.event.Observes;
@@ -33,8 +32,12 @@ import static com.enonic.cloud.common.Configuration.cfgIfBool;
 
 
 public class OperatorVHostStatus
-    extends TimerTask
+    implements Runnable
 {
+    private final IngressAssignedIps ingressAssignedIps = new IngressAssignedIps();
+
+    private final IngressEnabledHosts ingressEnabledHosts = new IngressEnabledHosts();
+
     @SuppressWarnings("CdiInjectionPointsInspection")
     @Inject
     CrdClient crdClient;
@@ -53,13 +56,9 @@ public class OperatorVHostStatus
     @Inject
     TaskRunner taskRunner;
 
-    private final IngressAssignedIps ingressAssignedIps = new IngressAssignedIps();
-
-    private final IngressEnabledHosts ingressEnabledHosts = new IngressEnabledHosts();
-
     void onStartup( @Observes StartupEvent _ev )
     {
-        cfgIfBool("operator.status.enabled",  () -> taskRunner.schedule( this ) );
+        cfgIfBool( "operator.status.enabled", () -> taskRunner.scheduleAtFixedRate( this ) );
     }
 
     @Override

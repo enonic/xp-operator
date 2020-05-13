@@ -4,12 +4,11 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.TimerTask;
 import java.util.concurrent.locks.ReentrantLock;
 
 
 public class RunnableStaller
-    extends TimerTask
+    implements Runnable
 {
     private final ReentrantLock lock;
 

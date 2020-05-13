@@ -49,6 +49,12 @@ public class AdmissionApi
 {
     private final static Logger log = LoggerFactory.getLogger( AdmissionApi.class );
 
+    private final static String specMissing = "Old and new resource can not be empty, is 'spec' missing?";
+
+    private final static String deploymentMissing = "Xp7Deployment '%s' not found";
+
+    private final static String missingNodeGroup = "Xp7Deployment '%s' does not contain nodeGroup '%s'";
+
     private final Map<Class<? extends HasMetadata>, Consumer<AdmissionReview>> admissionFunctionMap;
 
     @ConfigProperty(name = "operator.helm.charts.Values.allNodesKey")
@@ -138,12 +144,6 @@ public class AdmissionApi
 
         return review;
     }
-
-    private final static String specMissing = "Old and new resource can not be empty, is 'spec' missing?";
-
-    private final static String deploymentMissing = "Xp7Deployment '%s' not found";
-
-    private final static String missingNodeGroup = "Xp7Deployment '%s' does not contain nodeGroup '%s'";
 
     private void xpDeploymentReview( final AdmissionReview review )
     {

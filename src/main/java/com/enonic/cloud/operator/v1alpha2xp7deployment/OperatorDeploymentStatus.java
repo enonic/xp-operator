@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.TimerTask;
 import java.util.stream.Collectors;
 
 import javax.enterprise.event.Observes;
@@ -33,7 +32,7 @@ import static com.enonic.cloud.common.Configuration.cfgIfBool;
 
 
 public class OperatorDeploymentStatus
-    extends TimerTask
+    implements Runnable
 {
     @SuppressWarnings("CdiInjectionPointsInspection")
     @Inject
@@ -51,7 +50,7 @@ public class OperatorDeploymentStatus
 
     void onStartup( @Observes StartupEvent _ev )
     {
-        cfgIfBool( "operator.status.enabled", () -> taskRunner.schedule( this ) );
+        cfgIfBool( "operator.status.enabled", () -> taskRunner.scheduleAtFixedRate( this ) );
     }
 
     @Override

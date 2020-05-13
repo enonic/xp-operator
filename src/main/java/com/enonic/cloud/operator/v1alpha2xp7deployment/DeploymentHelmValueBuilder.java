@@ -53,7 +53,7 @@ public abstract class DeploymentHelmValueBuilder
 
         values.put( "defaultLabels", defaultLabels( resource ) );
         values.put( "deployment", deployment );
-        
+
         ServiceAccount sa = cloudApiServiceAccountProvider().get();
         if ( sa != null )
         {

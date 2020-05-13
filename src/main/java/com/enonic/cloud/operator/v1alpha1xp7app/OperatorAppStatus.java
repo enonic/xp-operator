@@ -1,7 +1,6 @@
 package com.enonic.cloud.operator.v1alpha1xp7app;
 
 import java.util.Optional;
-import java.util.TimerTask;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -30,7 +29,7 @@ import static com.enonic.cloud.common.Configuration.cfgIfBool;
 
 @ApplicationScoped
 public class OperatorAppStatus
-    extends TimerTask
+    implements Runnable
 {
     private static final Logger log = LoggerFactory.getLogger( OperatorAppStatus.class );
 
@@ -53,7 +52,7 @@ public class OperatorAppStatus
 
     void onStartup( @Observes StartupEvent _ev )
     {
-        cfgIfBool( "operator.status.enabled", () -> taskRunner.schedule( this ) );
+        cfgIfBool( "operator.status.enabled", () -> taskRunner.scheduleAtFixedRate( this ) );
     }
 
     @Override
@@ -114,7 +113,8 @@ public class OperatorAppStatus
 
     private V1alpha1Xp7AppStatus checkXp( final V1alpha1Xp7App app, final V1alpha1Xp7AppStatus currentStatus )
     {
-        if(!xpRunning( app )) {
+        if ( !xpRunning( app ) )
+        {
             return getBuilder( currentStatus ).
                 state( CrdStatusState.PENDING ).
                 message( "Deployment not in RUNNING state" ).

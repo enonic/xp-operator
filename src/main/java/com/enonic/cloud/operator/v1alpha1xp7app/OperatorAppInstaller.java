@@ -2,7 +2,6 @@ package com.enonic.cloud.operator.v1alpha1xp7app;
 
 import java.util.Collections;
 import java.util.Optional;
-import java.util.TimerTask;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -36,8 +35,7 @@ import static com.enonic.cloud.common.Configuration.cfgStr;
 
 @ApplicationScoped
 public class OperatorAppInstaller
-    extends TimerTask
-    implements ResourceEventHandler<V1alpha1Xp7App>
+    implements ResourceEventHandler<V1alpha1Xp7App>, Runnable
 {
     private static final Logger log = LoggerFactory.getLogger( OperatorAppInstaller.class );
 
@@ -65,7 +63,7 @@ public class OperatorAppInstaller
     {
         cfgIfBool( "operator.status.enabled", () -> {
             v1alpha1Xp7AppCache.addEventListener( this );
-            taskRunner.schedule( this );
+            taskRunner.scheduleAtFixedRate( this );
         } );
     }
 

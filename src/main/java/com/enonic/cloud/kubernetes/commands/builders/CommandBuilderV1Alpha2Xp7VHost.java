@@ -51,7 +51,7 @@ public abstract class CommandBuilderV1Alpha2Xp7VHost
             withName( resource.getMetadata().getName() ).
             delete();
     }
-    
+
     @Override
     protected boolean equalsSpec( final V1alpha2Xp7VHost o, final V1alpha2Xp7VHost n )
     {
