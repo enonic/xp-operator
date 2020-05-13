@@ -7,7 +7,8 @@ import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.fasterxml.jackson.databind.exc.ValueInstantiationException;
 
-import com.enonic.cloud.operator.crd.BuilderException;
+import com.enonic.cloud.kubernetes.crd.BuilderException;
+
 
 class ApiExceptionHandler
 {

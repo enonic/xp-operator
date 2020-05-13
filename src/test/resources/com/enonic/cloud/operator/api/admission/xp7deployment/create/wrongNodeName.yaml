@@ -10,8 +10,9 @@ testReview:
         namespace: mycloud-mysolution-myenv-myservice
         labels:
           cloud: mycloud
-          project: myproject
-          name: qaxp
+          solution: mysolution
+          environment: myenv
+          service: myservice
       spec:
         enabled: true
         xpVersion: 7.1.2

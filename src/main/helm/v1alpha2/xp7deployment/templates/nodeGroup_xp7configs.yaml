@@ -1,11 +1,13 @@
 # Setup Xp7Config for each node
 {{- range $nodeGroupName, $nodeGroup := .Values.deployment.spec.nodeGroups }}
-
-# Cluster configuration
+# VHost configuration
 apiVersion: enonic.cloud/v1alpha2
 kind: Xp7Config
 metadata:
-  name: {{ $nodeGroupName }}-cluster
+  name: {{ $nodeGroupName }}-vhosts
+  namespace: {{ $.Values.deployment.namespace }}
+  annotations:
+    {{ $.Values.annotationKeys.neverOverwrite }}: true
   labels:
     {{ $.Values.labelKeys.managed }}: true
     {{- with $.Values.defaultLabels }}
@@ -13,28 +15,15 @@ metadata:
     {{- end }}
 spec:
   nodeGroup: {{ $nodeGroupName }}
-  file: com.enonic.xp.cluster.cfg
-  data: |-
-  {{- if not $.Values.deployment.clustered }}
-    cluster.enabled=false
-  {{- else }}
-    cluster.enabled=true
-    node.name=${env.XP_NODE_NAME}
-    network.publish.host=${env.XP_NODE_NAME}.{{ $.Values.allNodesKey }}
-  {{- if $.Values.extensions.linkerd.enabled }}
-    network.host=127.0.0.1
-    {{- else }}
-    network.host=${env.XP_NODE_NAME}.{{ $.Values.allNodesKey }}
-    {{- end }}
-  {{- end }}
-
+  file: com.enonic.xp.web.vhost.cfg
+  data: ""
 ---
-
 # Elastic Search configuration
 apiVersion: enonic.cloud/v1alpha2
 kind: Xp7Config
 metadata:
   name: {{ $nodeGroupName }}-elasticsearch
+  namespace: {{ $.Values.deployment.namespace }}
   labels:
     {{ $.Values.labelKeys.managed }}: true
     {{- with $.Values.defaultLabels }}
@@ -56,31 +45,5 @@ spec:
     discovery.unicast.sockets={{ $.Values.allNodesKey }}.{{ $.Values.deployment.namespace }}.svc.cluster.local
     network.tcp.keep_alive=true
   {{- end }}
-
 ---
-{{- if $.Values.deployment.clustered }}
-# Hazelcast configuration
-apiVersion: enonic.cloud/v1alpha2
-kind: Xp7Config
-metadata:
-  name: {{ $nodeGroupName }}-hazelcast
-  annotations:
-    {{ $.Values.annotationKeys.neverOverwrite }}: true
-  labels:
-    {{ $.Values.labelKeys.managed }}: true
-    {{- with $.Values.defaultLabels }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
-spec:
-  nodeGroup: {{ $nodeGroupName }}
-  file: com.enonic.xp.hazelcast.cfg
-  data: |-
-    clusterConfigDefaults=false
-    system.hazelcast.initial.min.cluster.size=2
-    network.join.kubernetes.serviceDns={{ $.Values.allNodesKey }}.{{ $.Values.deployment.namespace }}.svc.cluster.local
-    network.join.kubernetes.enabled=true
-    network.join.tcpIp.enabled=false
-
----
-{{- end }}
 {{- end }}

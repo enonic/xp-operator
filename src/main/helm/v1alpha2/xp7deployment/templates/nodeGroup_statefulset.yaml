@@ -4,6 +4,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ $nodeGroupName }}
+  namespace: {{ $.Values.deployment.namespace }}
   labels:
     {{ $.Values.labelKeys.managed }}: true
     {{ $.Values.labelKeys.nodeGroup }}: {{ $nodeGroupName }}

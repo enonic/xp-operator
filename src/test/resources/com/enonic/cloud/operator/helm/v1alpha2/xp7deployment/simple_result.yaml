@@ -11,6 +11,7 @@ metadata:
     service: "myservice"
     solution: "mysolution"
   name: "extra-config"
+  namespace: "mycloud-mysolution-myenv-myservice"
 data:
   java.security.properties: "networkaddress.cache.ttl=30"
 ---
@@ -27,6 +28,7 @@ metadata:
     service: "myservice"
     solution: "mysolution"
   name: "fisk"
+  namespace: "mycloud-mysolution-myenv-myservice"
 ---
 apiVersion: "v1"
 kind: "PersistentVolumeClaim"
@@ -38,6 +40,7 @@ metadata:
     service: "myservice"
     solution: "mysolution"
   name: "blobstore"
+  namespace: "mycloud-mysolution-myenv-myservice"
 spec:
   accessModes:
   - "ReadWriteMany"
@@ -56,6 +59,7 @@ metadata:
     service: "myservice"
     solution: "mysolution"
   name: "snapshots"
+  namespace: "mycloud-mysolution-myenv-myservice"
 spec:
   accessModes:
   - "ReadWriteMany"
@@ -63,6 +67,23 @@ spec:
     requests:
       storage: "3Gi"
   storageClassName: "standard"
+---
+apiVersion: "v1"
+kind: "Secret"
+metadata:
+  annotations:
+    enonic.neverOverwrite: "true"
+  labels:
+    enonic.managed: "true"
+    cloud: "mycloud"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
+  name: "su"
+  namespace: "mycloud-mysolution-myenv-myservice"
+data:
+  pass: "cGFzc3dvcmQ="
+  passHash: "YjEwOWYzYmJiYzI0NGViODI0NDE5MTdlZDA2ZDYxOGI5MDA4ZGQwOWIzYmVmZDFiNWUwNzM5NGM3MDZhOGJiOTgwYjFkNzc4NWU1OTc2ZWMwNDliNDZkZjVmMTMyNmFmNWEyZWE2ZDEwM2ZkMDdjOTUzODVmZmFiMGNhY2JjODY="
 ---
 apiVersion: "v1"
 kind: "Service"
@@ -74,6 +95,7 @@ metadata:
     service: "myservice"
     solution: "mysolution"
   name: "all"
+  namespace: "mycloud-mysolution-myenv-myservice"
 spec:
   clusterIP: "None"
   ports:
@@ -117,6 +139,7 @@ metadata:
     service: "myservice"
     solution: "mysolution"
   name: "fisk"
+  namespace: "mycloud-mysolution-myenv-myservice"
 spec:
   clusterIP: "None"
   ports:
@@ -161,6 +184,7 @@ metadata:
     service: "myservice"
     solution: "mysolution"
   name: "fisk"
+  namespace: "mycloud-mysolution-myenv-myservice"
 spec:
   podManagementPolicy: "Parallel"
   replicas: 1
@@ -404,21 +428,13 @@ metadata:
     service: "myservice"
     solution: "mysolution"
   name: "alive"
+  namespace: "mycloud-mysolution-myenv-myservice"
+status: null
 spec:
   url: "https://repo.enonic.com/public/com/enonic/app/alive/2.0.0/alive-2.0.0.jar"
----
-kind: "Xp7App"
-apiVersion: "enonic.cloud/v1alpha1"
-metadata:
-  labels:
-    enonic.managed: "true"
-    cloud: "mycloud"
-    environment: "myenv"
-    service: "myservice"
-    solution: "mysolution"
-  name: "datatoolbox"
-spec:
-  url: "https://dl.bintray.com/rcd-systems/rcd-repo/systems/rcd/enonic/datatoolbox/4.0.2/datatoolbox-4.0.2.jar"
+  options:
+    bootstrap: true
+    appKey: "com.enonic.app.alive"
 ---
 kind: "Xp7App"
 apiVersion: "enonic.cloud/v1alpha1"
@@ -430,21 +446,13 @@ metadata:
     service: "myservice"
     solution: "mysolution"
   name: "snapshotter"
+  namespace: "mycloud-mysolution-myenv-myservice"
+status: null
 spec:
   url: "https://repo.enonic.com/public/com/enonic/app/snapshotter/2.1.1/snapshotter-2.1.1.jar"
----
-kind: "Xp7App"
-apiVersion: "enonic.cloud/v1alpha1"
-metadata:
-  labels:
-    enonic.managed: "true"
-    cloud: "mycloud"
-    environment: "myenv"
-    service: "myservice"
-    solution: "mysolution"
-  name: "status"
-spec:
-  url: "https://repo.enonic.com/public/com/enonic/app/status/2.1.0/status-2.1.0.jar"
+  options:
+    bootstrap: true
+    appKey: "com.enonic.app.snapshotter"
 ---
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
@@ -458,6 +466,7 @@ metadata:
     service: "myservice"
     solution: "mysolution"
   name: "all-admin"
+  namespace: "mycloud-mysolution-myenv-myservice"
 spec:
   file: "com.enonic.xp.app.main.cfg"
   nodeGroup: "all"
@@ -473,10 +482,45 @@ metadata:
     service: "myservice"
     solution: "mysolution"
   name: "all-appstatus"
+  namespace: "mycloud-mysolution-myenv-myservice"
 spec:
   file: "com.enonic.app.status.cfg"
   nodeGroup: "all"
   data: "metricsUrl = http://localhost:2609/"
+---
+kind: "Xp7Config"
+apiVersion: "enonic.cloud/v1alpha2"
+metadata:
+  labels:
+    enonic.managed: "true"
+    cloud: "mycloud"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
+  name: "all-cluster"
+  namespace: "mycloud-mysolution-myenv-myservice"
+spec:
+  file: "com.enonic.xp.cluster.cfg"
+  nodeGroup: "all"
+  data: "cluster.enabled=false"
+---
+kind: "Xp7Config"
+apiVersion: "enonic.cloud/v1alpha2"
+metadata:
+  annotations:
+    enonic.neverOverwrite: "true"
+  labels:
+    enonic.managed: "true"
+    cloud: "mycloud"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
+  name: "all-deploy"
+  namespace: "mycloud-mysolution-myenv-myservice"
+spec:
+  file: "com.enonic.xp.server.deploy.cfg"
+  nodeGroup: "all"
+  data: ""
 ---
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
@@ -490,6 +534,7 @@ metadata:
     service: "myservice"
     solution: "mysolution"
   name: "all-sessionstore"
+  namespace: "mycloud-mysolution-myenv-myservice"
 spec:
   file: "com.enonic.xp.web.sessionstore.cfg"
   nodeGroup: "all"
@@ -507,6 +552,7 @@ metadata:
     service: "myservice"
     solution: "mysolution"
   name: "all-system"
+  namespace: "mycloud-mysolution-myenv-myservice"
 spec:
   file: "system.properties"
   nodeGroup: "all"
@@ -522,26 +568,30 @@ metadata:
     environment: "myenv"
     service: "myservice"
     solution: "mysolution"
-  name: "fisk-cluster"
+  name: "fisk-elasticsearch"
+  namespace: "mycloud-mysolution-myenv-myservice"
 spec:
-  file: "com.enonic.xp.cluster.cfg"
+  file: "com.enonic.xp.elasticsearch.cfg"
   nodeGroup: "fisk"
-  data: "cluster.enabled=false"
+  data: "http.enabled=false\ncluster.name=mycloud-mysolution-myenv-myservice"
 ---
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
+  annotations:
+    enonic.neverOverwrite: "true"
   labels:
     enonic.managed: "true"
     cloud: "mycloud"
     environment: "myenv"
     service: "myservice"
     solution: "mysolution"
-  name: "fisk-elasticsearch"
+  name: "fisk-vhosts"
+  namespace: "mycloud-mysolution-myenv-myservice"
 spec:
-  file: "com.enonic.xp.elasticsearch.cfg"
+  file: "com.enonic.xp.web.vhost.cfg"
   nodeGroup: "fisk"
-  data: "http.enabled=false\ncluster.name=mycloud-mysolution-myenv-myservice"
+  data: ""
 ---
 kind: "Xp7VHost"
 apiVersion: "enonic.cloud/v1alpha2"
@@ -553,6 +603,7 @@ metadata:
     service: "myservice"
     solution: "mysolution"
   name: "healthcheck"
+  namespace: "mycloud-mysolution-myenv-myservice"
 status: null
 spec:
   host: "healthcheck"
@@ -562,6 +613,7 @@ spec:
     dnsRecord: false
     statusCake: false
     caching: false
+    cdn: false
   certificate: null
   mappings:
   - nodeGroup: "all"
@@ -579,6 +631,7 @@ metadata:
     service: "myservice"
     solution: "mysolution"
   name: "localhost"
+  namespace: "mycloud-mysolution-myenv-myservice"
 status: null
 spec:
   host: "localhost"
@@ -588,6 +641,7 @@ spec:
     dnsRecord: false
     statusCake: false
     caching: false
+    cdn: false
   certificate: null
   mappings:
   - nodeGroup: "all"

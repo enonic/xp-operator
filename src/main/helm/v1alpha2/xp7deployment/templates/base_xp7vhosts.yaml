@@ -5,6 +5,7 @@ apiVersion: enonic.cloud/v1alpha2
 kind: Xp7VHost
 metadata:
   name: healthcheck
+  namespace: {{ $.Values.deployment.namespace }}
   labels:
     {{ $.Values.labelKeys.managed }}: true
     {{- with .Values.defaultLabels }}
@@ -26,6 +27,7 @@ apiVersion: enonic.cloud/v1alpha2
 kind: Xp7VHost
 metadata:
   name: localhost
+  namespace: {{ $.Values.deployment.namespace }}
   labels:
     {{ $.Values.labelKeys.managed }}: true
     {{- with .Values.defaultLabels }}

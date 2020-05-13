@@ -2,6 +2,7 @@ package com.enonic.cloud.operator.api.conversion.converters;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 
+@SuppressWarnings("ALL")
 public interface Converter<S extends HasMetadata, R extends HasMetadata>
 {
     Class<S> consumes();

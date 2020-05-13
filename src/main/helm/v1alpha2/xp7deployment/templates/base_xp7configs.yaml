@@ -3,6 +3,7 @@ apiVersion: enonic.cloud/v1alpha2
 kind: Xp7Config
 metadata:
   name: all-system
+  namespace: {{ $.Values.deployment.namespace }}
   annotations:
     {{ $.Values.annotationKeys.neverOverwrite }}: true
   labels:
@@ -17,14 +18,13 @@ spec:
     xp.name = {{ .Values.deployment.name }}
     xp.suPassword = {sha512}${env.SU_PASS_HASH}
     xp.init.adminUserCreation = false
-
 ---
-
 # Disable tour in admin
 apiVersion: enonic.cloud/v1alpha2
 kind: Xp7Config
 metadata:
   name: all-admin
+  namespace: {{ $.Values.deployment.namespace }}
   annotations:
     {{ $.Values.annotationKeys.neverOverwrite }}: true
   labels:
@@ -37,14 +37,13 @@ spec:
   file: com.enonic.xp.app.main.cfg
   data: |-
     tourDisabled = true
-
 ---
-
 # Set session store
 apiVersion: enonic.cloud/v1alpha2
 kind: Xp7Config
 metadata:
   name: all-sessionstore
+  namespace: {{ $.Values.deployment.namespace }}
   annotations:
     {{ $.Values.annotationKeys.neverOverwrite }}: true
   labels:
@@ -61,14 +60,13 @@ spec:
     {{- else }}
     storeMode=non-persistent
     {{- end }}
-
 ---
-
 # Set app status endpoint
 apiVersion: enonic.cloud/v1alpha2
 kind: Xp7Config
 metadata:
   name: all-appstatus
+  namespace: {{ $.Values.deployment.namespace }}
   labels:
     {{ $.Values.labelKeys.managed }}: true
     {{- with .Values.defaultLabels }}
@@ -79,3 +77,74 @@ spec:
   file: com.enonic.app.status.cfg
   data: |-
     metricsUrl = http://localhost:2609/
+---
+# Deploy configuration
+apiVersion: enonic.cloud/v1alpha2
+kind: Xp7Config
+metadata:
+  name: all-deploy
+  namespace: {{ $.Values.deployment.namespace }}
+  annotations:
+    {{ $.Values.annotationKeys.neverOverwrite }}: true
+  labels:
+    {{ $.Values.labelKeys.managed }}: true
+    {{- with $.Values.defaultLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  nodeGroup: all
+  file: com.enonic.xp.server.deploy.cfg
+  data: ""
+---
+# Cluster configuration
+apiVersion: enonic.cloud/v1alpha2
+kind: Xp7Config
+metadata:
+  name: all-cluster
+  namespace: {{ $.Values.deployment.namespace }}
+  labels:
+    {{ $.Values.labelKeys.managed }}: true
+    {{- with $.Values.defaultLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  nodeGroup: all
+  file: com.enonic.xp.cluster.cfg
+  data: |-
+    {{- if not $.Values.deployment.clustered }}
+    cluster.enabled=false
+    {{- else }}
+    cluster.enabled=true
+    node.name=${env.XP_NODE_NAME}
+    network.publish.host=${env.XP_NODE_NAME}.{{ $.Values.allNodesKey }}
+    {{- if $.Values.extensions.linkerd.enabled }}
+    network.host=127.0.0.1
+    {{- else }}
+    network.host=${env.XP_NODE_NAME}.{{ $.Values.allNodesKey }}
+    {{- end }}
+    {{- end }}
+---
+{{- if $.Values.deployment.clustered }}
+# Hazelcast configuration
+apiVersion: enonic.cloud/v1alpha2
+kind: Xp7Config
+metadata:
+  name: all-hazelcast
+  namespace: {{ $.Values.deployment.namespace }}
+  annotations:
+    {{ $.Values.annotationKeys.neverOverwrite }}: true
+  labels:
+    {{ $.Values.labelKeys.managed }}: true
+    {{- with $.Values.defaultLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  nodeGroup: all
+  file: com.enonic.xp.hazelcast.cfg
+  data: |-
+    clusterConfigDefaults=false
+    system.hazelcast.initial.min.cluster.size=2
+    network.join.kubernetes.serviceDns={{ $.Values.allNodesKey }}.{{ $.Values.deployment.namespace }}.svc.cluster.local
+    network.join.kubernetes.enabled=true
+    network.join.tcpIp.enabled=false
+{{- end }}

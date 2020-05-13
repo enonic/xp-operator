@@ -43,6 +43,9 @@ spec:
                     caching:
                       type: boolean
                       nullable: true
+                    cdn:
+                      type: boolean
+                      nullable: true
                 certificate:
                   type: object
                   nullable: true

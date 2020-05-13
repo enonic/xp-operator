@@ -9,6 +9,8 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 
+import com.enonic.cloud.operator.api.conversion.model.ImmutableConversionReviewResponse;
+
 @JsonDeserialize(builder = ImmutableConversionReviewResponse.Builder.class)
 @Value.Immutable
 public abstract class ConversionReviewResponse

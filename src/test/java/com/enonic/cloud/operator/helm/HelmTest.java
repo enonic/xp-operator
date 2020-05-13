@@ -14,9 +14,12 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 
-import com.enonic.cloud.operator.common.Configuration;
+import com.enonic.cloud.helm.Helm;
+import com.enonic.cloud.helm.charts.ChartRepository;
+import com.enonic.cloud.helm.charts.LocalRepository;
 import com.enonic.cloud.testutils.TestFileSupplier;
 
+import static com.enonic.cloud.common.Configuration.cfgStr;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public abstract class HelmTest
@@ -32,7 +35,7 @@ public abstract class HelmTest
     {
         mapper = new ObjectMapper( new YAMLFactory() );
         helm = new Helm();
-        chartRepository = new LocalRepository( new File( Configuration.cfgStr( "operator.helm.charts.path" ) ) );
+        chartRepository = new LocalRepository( new File( cfgStr( "operator.helm.charts.path" ) ) );
     }
 
     void test( String chartName, Object values, String expectedValuesFile, String expectedResultFile )

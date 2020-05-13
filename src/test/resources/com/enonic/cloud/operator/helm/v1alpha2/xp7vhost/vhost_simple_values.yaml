@@ -1,6 +1,8 @@
 ---
 vhost:
+  uid: "54edf212-742d-44f5-9fef-6749da7fd534"
   name: "test-purplejs-io"
+  namespace: "mycloud-mysolution-myenv-myservice"
   issuer: "selfsigned"
   spec:
     host: "test.purplejs.io"
@@ -10,6 +12,7 @@ vhost:
       dnsRecord: true
       statusCake: false
       caching: false
+      cdn: false
     certificate:
       authority: "selfSigned"
     mappings:
@@ -23,11 +26,7 @@ labelKeys:
   managed: "enonic.managed"
   nodeGroup: "enonic.nodeGroup"
 allNodesKey: "all"
-defaultLabels:
-  cloud: "mycloud"
-  solution: "mysolution"
-  environment: "myenv"
-  service: "myservice"
+defaultLabels: {}
 imageTemplate: "gbbirkisson/xp:%s-ubuntu"
 annotationKeys:
   alwaysOverwrite: "enonic.alwaysOverwrite"

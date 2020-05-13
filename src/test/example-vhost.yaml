@@ -8,11 +8,12 @@ spec:
   options:
     ingressMaxBodySize: 8m
     statusCake: true
+    cdn: false
   certificate:
     authority: selfSigned
   mappings:
     - nodeGroup: fisk
-      source: /
+      source: /a
       target: /admin
       idProviders:
         default: system

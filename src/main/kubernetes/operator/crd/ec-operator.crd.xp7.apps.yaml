@@ -24,8 +24,37 @@ spec:
           properties:
             url:
               type: string
+            options:
+              type: object
+              nullable: true
+              properties:
+                bootstrap:
+                  type: boolean
+                appKey:
+                  type: string
+                  nullable: true
+        status:
+          type: object
+          nullable: true
+          properties:
+            state:
+              type: string
+            message:
+              nullable: true
+              type: string
+            fields:
+              type: object
+              nullable: true
+              properties:
+                appKey:
+                  type: string
+                  nullable: true
   additionalPrinterColumns:
-    - name: Url
+    - name: State
       type: string
-      description: Url to jar
-      JSONPath: .spec.url
+      description: State
+      JSONPath: .status.state
+    - name: Msg
+      type: string
+      description: Message
+      JSONPath: .status.message

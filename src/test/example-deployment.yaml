@@ -42,7 +42,7 @@ spec:
 #      master: true
 #      replicas: 2
 #      env:
-#        test: test131
+#        test: test1311
 #      resources:
 #        cpu: "1"
 #        memory: 512Mi

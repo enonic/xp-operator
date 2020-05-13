@@ -5,6 +5,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: {{ $name }}
+  namespace: {{ $.Values.deployment.namespace }}
   annotations:
     {{- with $.Values.storage.shared.annotations }}
     {{- toYaml . | nindent 4 }}

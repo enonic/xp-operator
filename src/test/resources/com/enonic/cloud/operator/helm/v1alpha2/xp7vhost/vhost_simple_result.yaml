@@ -7,16 +7,14 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-body-size: "8m"
     ingress.kubernetes.io/rewrite-target: "/"
     enonic.cloud/dns.hostname: "test.purplejs.io"
+    enonic.cloud/dns.heritage: "heritage=ec-operator,id=54edf212-742d-44f5-9fef-6749da7fd534"
     cert-manager.io/cluster-issuer: "selfsigned"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/configuration-snippet: "# Extra config\n"
   labels:
     enonic.managed: "true"
-    cloud: "mycloud"
-    environment: "myenv"
-    service: "myservice"
-    solution: "mysolution"
   name: "test-purplejs-io"
+  namespace: "mycloud-mysolution-myenv-myservice"
 spec:
   rules:
   - host: "test.purplejs.io"

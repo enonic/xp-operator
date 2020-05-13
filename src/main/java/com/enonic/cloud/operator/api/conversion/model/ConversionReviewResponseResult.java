@@ -7,6 +7,8 @@ import org.wildfly.common.annotation.Nullable;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
+import com.enonic.cloud.operator.api.conversion.model.ImmutableConversionReviewResponseResult;
+
 @JsonDeserialize(builder = ImmutableConversionReviewResponseResult.Builder.class)
 @Value.Immutable
 public abstract class ConversionReviewResponseResult

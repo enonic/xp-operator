@@ -4,6 +4,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ $nodeGroupName }}
+  namespace: {{ $.Values.deployment.namespace }}
   labels:
     {{ $.Values.labelKeys.managed }}: true
     {{ $.Values.labelKeys.nodeGroup }}: {{ $nodeGroupName }}

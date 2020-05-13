@@ -2,8 +2,10 @@ package com.enonic.cloud.operator.api.admission;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -25,23 +27,21 @@ import io.fabric8.kubernetes.api.model.admission.AdmissionRequest;
 import io.fabric8.kubernetes.api.model.admission.AdmissionResponse;
 import io.fabric8.kubernetes.api.model.admission.AdmissionReview;
 
+import com.enonic.cloud.kubernetes.caches.V1alpha2Xp7DeploymentCache;
+import com.enonic.cloud.kubernetes.caches.V1alpha2Xp7VHostCache;
+import com.enonic.cloud.kubernetes.crd.xp7.v1alpha1.app.V1alpha1Xp7App;
+import com.enonic.cloud.kubernetes.crd.xp7.v1alpha2.config.V1alpha2Xp7Config;
+import com.enonic.cloud.kubernetes.crd.xp7.v1alpha2.deployment.V1alpha2Xp7Deployment;
+import com.enonic.cloud.kubernetes.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHost;
+import com.enonic.cloud.kubernetes.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHostSpecMapping;
 import com.enonic.cloud.operator.api.BaseApi;
-import com.enonic.cloud.operator.crd.xp7.v1alpha1.app.V1alpha1Xp7App;
-import com.enonic.cloud.operator.crd.xp7.v1alpha2.config.V1alpha2Xp7Config;
-import com.enonic.cloud.operator.crd.xp7.v1alpha2.deployment.V1alpha2Xp7Deployment;
-import com.enonic.cloud.operator.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHost;
-import com.enonic.cloud.operator.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHostSpecMapping;
-import com.enonic.cloud.operator.operators.common.cache.Caches;
-import com.enonic.cloud.operator.operators.v1alpha1.xp7app.info.ImmutableInfoXp7App;
-import com.enonic.cloud.operator.operators.v1alpha2.xp7config.info.ImmutableInfoXp7Config;
-import com.enonic.cloud.operator.operators.v1alpha2.xp7config.info.InfoXp7Config;
-import com.enonic.cloud.operator.operators.v1alpha2.xp7deployment.info.ImmutableInfoXp7Deployment;
-import com.enonic.cloud.operator.operators.v1alpha2.xp7deployment.info.InfoXp7Deployment;
-import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.info.ImmutableInfoXp7VHost;
-import com.enonic.cloud.operator.operators.v1alpha2.xp7vhost.info.InfoXp7VHost;
 
-import static com.enonic.cloud.operator.common.Configuration.cfgStr;
+import static com.enonic.cloud.common.Configuration.cfgIfBool;
+import static com.enonic.cloud.common.Configuration.cfgStr;
+import static com.enonic.cloud.common.Validator.dns1035;
+import static com.enonic.cloud.common.Validator.dns1123;
 
+@SuppressWarnings("ConstantConditions")
 @ApplicationScoped
 @Path("/apis/operator.enonic.cloud/v1alpha1")
 public class AdmissionApi
@@ -54,8 +54,13 @@ public class AdmissionApi
     @ConfigProperty(name = "operator.helm.charts.Values.allNodesKey")
     String allNodesPicker;
 
+    @SuppressWarnings("CdiInjectionPointsInspection")
     @Inject
-    Caches caches;
+    V1alpha2Xp7DeploymentCache v1alpha2Xp7DeploymentCache;
+
+    @SuppressWarnings("CdiInjectionPointsInspection")
+    @Inject
+    V1alpha2Xp7VHostCache v1alpha2Xp7VHostCache;
 
     public AdmissionApi()
     {
@@ -134,41 +139,98 @@ public class AdmissionApi
         return review;
     }
 
+    private final static String specMissing = "Old and new resource can not be empty, is 'spec' missing?";
+
+    private final static String deploymentMissing = "Xp7Deployment '%s' not found";
+
+    private final static String missingNodeGroup = "Xp7Deployment '%s' does not contain nodeGroup '%s'";
+
     private void xpDeploymentReview( final AdmissionReview review )
     {
-        InfoXp7Deployment deployment = ImmutableInfoXp7Deployment.builder().
-            oldResource( Optional.ofNullable( review.getRequest().getOldObject() ).map( obj -> (V1alpha2Xp7Deployment) obj ) ).
-            newResource( Optional.ofNullable( review.getRequest().getObject() ).map( obj -> (V1alpha2Xp7Deployment) obj ) ).
-            build();
-        deployment.resource().getSpec().nodeGroups().keySet().forEach(
-            nodeGroup -> Preconditions.checkState( !allNodesPicker.equals( nodeGroup ), "Node groups cannot be named '" + allNodesPicker +
-                "' because that is the identifier for all nodeGroups" ) );
+        Optional<V1alpha2Xp7Deployment> o = Optional.ofNullable( review.getRequest().getOldObject() ).map( r -> (V1alpha2Xp7Deployment) r );
+        Optional<V1alpha2Xp7Deployment> n = Optional.ofNullable( review.getRequest().getObject() ).map( r -> (V1alpha2Xp7Deployment) r );
+
+        o.ifPresent( r -> Preconditions.checkState( r.getSpec() != null, specMissing ) );
+        n.ifPresent( r -> Preconditions.checkState( r.getSpec() != null, specMissing ) );
+
+        V1alpha2Xp7Deployment r = n.orElse( o.orElse( null ) );
+
+        r.getSpec().nodeGroups().keySet().forEach( k -> dns1123( "nodeId", k ) );
+
+        r.getSpec().nodeGroups().keySet().forEach( nodeGroup -> Preconditions.checkState( !allNodesPicker.equals( nodeGroup ),
+                                                                                          "Node groups cannot be named '" + allNodesPicker +
+                                                                                              "' because that is the identifier for all nodeGroups" ) );
+
+        cfgIfBool( "operator.deployment.xp.labels.strictValidation", () -> {
+            Preconditions.checkState( r.ecCloud() != null,
+                                      "Label '" + "metadata.labels." + cfgStr( "operator.deployment.xp.labels.cloud" ) + "' is missing" );
+            dns1035( "metadata.labels." + cfgStr( "operator.deployment.xp.labels.cloud" ), r.ecCloud() );
+
+            Preconditions.checkState( r.ecSolution() != null,
+                                      "Label '" + "metadata.labels." + cfgStr( "operator.deployment.xp.labels.solution" ) +
+                                          "' is missing" );
+            dns1035( "metadata.labels." + cfgStr( "operator.deployment.xp.labels.solution" ), r.ecSolution() );
+
+            Preconditions.checkState( r.ecEnvironment() != null,
+                                      "Label '" + "metadata.labels." + cfgStr( "operator.deployment.xp.labels.environment" ) +
+                                          "' is missing" );
+            dns1035( "metadata.labels." + cfgStr( "operator.deployment.xp.labels.environment" ), r.ecEnvironment() );
+
+            Preconditions.checkState( r.ecService() != null,
+                                      "Label '" + "metadata.labels." + cfgStr( "operator.deployment.xp.labels.service" ) + "' is missing" );
+            dns1035( "metadata.labels." + cfgStr( "operator.deployment.xp.labels.service" ), r.ecService() );
+
+            String fullName = String.join( "-", r.ecCloud(), r.ecSolution(), r.ecEnvironment(), r.ecService() );
+            Preconditions.checkState( r.getMetadata().getName().equals( fullName ),
+                                      "Xp7Deployment name must be equal to <Cloud>-<Solution>-<Environment>-<Service> according to labels, i.e: '" +
+                                          fullName + "'" );
+        } );
+
+        if ( o.isPresent() && n.isPresent() )
+        {
+            Preconditions.checkState( o.get().getSpec().nodesSharedDisks().equals( n.get().getSpec().nodesSharedDisks() ),
+                                      "Field 'spec.nodesSharedDisk' cannot be changed" );
+
+            Set<String> sameNodes = new HashSet<>( o.get().getSpec().nodeGroups().keySet() );
+            sameNodes.retainAll( o.get().getSpec().nodeGroups().keySet() );
+            for ( String node : sameNodes )
+            {
+                Preconditions.checkState( o.get().getSpec().nodeGroups().get( node ).resources().disks().equals(
+                    n.get().getSpec().nodeGroups().get( node ).resources().disks() ),
+                                          "Field 'spec.nodes.resources.disks' cannot be changed" );
+            }
+        }
     }
 
     private void xpVHostReview( final AdmissionReview review )
     {
-        InfoXp7VHost vHost = ImmutableInfoXp7VHost.builder().
-            caches( caches ).
-            oldResource( Optional.ofNullable( review.getRequest().getOldObject() ).map( obj -> (V1alpha2Xp7VHost) obj ) ).
-            newResource( Optional.ofNullable( review.getRequest().getObject() ).map( obj -> (V1alpha2Xp7VHost) obj ) ).
-            build();
+        Optional<V1alpha2Xp7VHost> o = Optional.ofNullable( review.getRequest().getOldObject() ).map( r -> (V1alpha2Xp7VHost) r );
+        Optional<V1alpha2Xp7VHost> n = Optional.ofNullable( review.getRequest().getObject() ).map( r -> (V1alpha2Xp7VHost) r );
 
-        for ( V1alpha2Xp7VHostSpecMapping mapping : vHost.resource().getSpec().mappings() )
+        o.ifPresent( r -> Preconditions.checkState( r.getSpec() != null, specMissing ) );
+        n.ifPresent( r -> Preconditions.checkState( r.getSpec() != null, specMissing ) );
+
+        V1alpha2Xp7VHost r = n.orElse( o.orElse( null ) );
+        Optional<V1alpha2Xp7Deployment> deployment =
+            v1alpha2Xp7DeploymentCache.get( r.getMetadata().getNamespace(), r.getMetadata().getNamespace() );
+        Preconditions.checkState( deployment.isPresent(), String.format( deploymentMissing, r.getMetadata().getNamespace() ) );
+
+        for ( V1alpha2Xp7VHostSpecMapping mapping : r.getSpec().mappings() )
         {
             if ( !cfgStr( "operator.helm.charts.Values.allNodesKey" ).equals( mapping.nodeGroup() ) )
             {
-                Preconditions.checkState( vHost.xpDeploymentResource().getSpec().nodeGroups().containsKey( mapping.nodeGroup() ),
+                Preconditions.checkState( deployment.get().getSpec().nodeGroups().containsKey( mapping.nodeGroup() ),
                                           String.format( "Xp7Deployment '%s' does not contain nodeGroup '%s'",
-                                                         vHost.xpDeploymentResource().getMetadata().getName(), mapping.nodeGroup() ) );
+                                                         deployment.get().getMetadata().getName(), mapping.nodeGroup() ) );
             }
         }
 
-        if ( vHost.resource().getSpec().options().ingress() )
+        if ( r.getSpec().options().ingress() )
         {
-            long sameHost = caches.getVHostCache().getCollection().stream().
-                filter( r -> !r.getMetadata().getUid().equals( vHost.resource().getMetadata().getUid() ) ).
-                filter( r -> vHost.resource().getSpec().options().ingress() ).
-                filter( r -> r.getSpec().host().equals( vHost.resource().getSpec().host() ) ).
+            long sameHost = v1alpha2Xp7VHostCache.getStream().
+                filter( v -> !v.getMetadata().getUid().equals( r.getMetadata().getUid() ) ).
+                filter( v -> r.getSpec().options().ingress() ).
+                filter( v -> v.getSpec().host().equals( r.getSpec().host() ) ).
                 count();
             Preconditions.checkState( sameHost < 1L, "This host is being used by another Xp7VHost" );
         }
@@ -176,27 +238,38 @@ public class AdmissionApi
 
     private void xpConfigReview( final AdmissionReview review )
     {
-        InfoXp7Config config = ImmutableInfoXp7Config.builder().
-            caches( caches ).
-            oldResource( Optional.ofNullable( review.getRequest().getOldObject() ).map( obj -> (V1alpha2Xp7Config) obj ) ).
-            newResource( Optional.ofNullable( review.getRequest().getObject() ).map( obj -> (V1alpha2Xp7Config) obj ) ).
-            build();
+        Optional<V1alpha2Xp7Config> o = Optional.ofNullable( review.getRequest().getOldObject() ).map( r -> (V1alpha2Xp7Config) r );
+        Optional<V1alpha2Xp7Config> n = Optional.ofNullable( review.getRequest().getObject() ).map( r -> (V1alpha2Xp7Config) r );
 
-        if ( !cfgStr( "operator.helm.charts.Values.allNodesKey" ).equals( config.resource().getSpec().nodeGroup() ) )
-        {
-            String nodeGroup = config.resource().getSpec().nodeGroup();
-            Preconditions.checkState( config.xpDeploymentResource().getSpec().nodeGroups().containsKey( nodeGroup ),
-                                      String.format( "Xp7Deployment '%s' does not contain nodeGroup '%s'",
-                                                     config.xpDeploymentResource().getMetadata().getName(), nodeGroup ) );
-        }
+        o.ifPresent( r -> Preconditions.checkState( r.getSpec() != null, specMissing ) );
+        n.ifPresent( r -> Preconditions.checkState( r.getSpec() != null, specMissing ) );
+
+        V1alpha2Xp7Config r = n.orElse( o.orElse( null ) );
+        Optional<V1alpha2Xp7Deployment> deployment =
+            v1alpha2Xp7DeploymentCache.get( r.getMetadata().getNamespace(), r.getMetadata().getNamespace() );
+        Preconditions.checkState( deployment.isPresent(), String.format( deploymentMissing, r.getMetadata().getNamespace() ) );
+
+        deployment.ifPresent( d -> {
+            if ( !r.getSpec().nodeGroup().equals( cfgStr( "operator.helm.charts.Values.allNodesKey" ) ) )
+            {
+                Preconditions.checkState( deployment.get().getSpec().nodeGroups().containsKey( r.getSpec().nodeGroup() ),
+                                          String.format( missingNodeGroup, d.getMetadata().getName(), r.getSpec().nodeGroup() ) );
+
+            }
+        } );
     }
 
     private void xpAppReview( final AdmissionReview review )
     {
-        ImmutableInfoXp7App.builder().
-            caches( caches ).
-            oldResource( Optional.ofNullable( review.getRequest().getOldObject() ).map( obj -> (V1alpha1Xp7App) obj ) ).
-            newResource( Optional.ofNullable( review.getRequest().getObject() ).map( obj -> (V1alpha1Xp7App) obj ) ).
-            build();
+        Optional<V1alpha1Xp7App> o = Optional.ofNullable( review.getRequest().getOldObject() ).map( r -> (V1alpha1Xp7App) r );
+        Optional<V1alpha1Xp7App> n = Optional.ofNullable( review.getRequest().getObject() ).map( r -> (V1alpha1Xp7App) r );
+
+        o.ifPresent( r -> Preconditions.checkState( r.getSpec() != null, specMissing ) );
+        n.ifPresent( r -> Preconditions.checkState( r.getSpec() != null, specMissing ) );
+
+        V1alpha1Xp7App r = n.orElse( o.orElse( null ) );
+        Optional<V1alpha2Xp7Deployment> deployment =
+            v1alpha2Xp7DeploymentCache.get( r.getMetadata().getNamespace(), r.getMetadata().getNamespace() );
+        Preconditions.checkState( deployment.isPresent(), String.format( deploymentMissing, r.getMetadata().getNamespace() ) );
     }
 }

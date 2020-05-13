@@ -3,6 +3,7 @@ apiVersion: enonic.cloud/v1alpha1
 kind: Xp7App
 metadata:
   name: alive
+  namespace: {{ $.Values.deployment.namespace }}
   labels:
     {{ $.Values.labelKeys.managed }}: true
     {{- with .Values.defaultLabels }}
@@ -10,12 +11,15 @@ metadata:
     {{- end }}
 spec:
   url: https://repo.enonic.com/public/com/enonic/app/alive/2.0.0/alive-2.0.0.jar
-
+  options:
+    bootstrap: true
+    appKey: com.enonic.app.alive
 ---
 apiVersion: enonic.cloud/v1alpha1
 kind: Xp7App
 metadata:
   name: snapshotter
+  namespace: {{ $.Values.deployment.namespace }}
   labels:
     {{ $.Values.labelKeys.managed }}: true
     {{- with .Values.defaultLabels }}
@@ -23,27 +27,6 @@ metadata:
     {{- end }}
 spec:
   url: https://repo.enonic.com/public/com/enonic/app/snapshotter/2.1.1/snapshotter-2.1.1.jar
----
-apiVersion: enonic.cloud/v1alpha1
-kind: Xp7App
-metadata:
-  name: datatoolbox
-  labels:
-    {{ $.Values.labelKeys.managed }}: true
-    {{- with .Values.defaultLabels }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
-spec:
-  url: https://dl.bintray.com/rcd-systems/rcd-repo/systems/rcd/enonic/datatoolbox/4.0.2/datatoolbox-4.0.2.jar
----
-apiVersion: enonic.cloud/v1alpha1
-kind: Xp7App
-metadata:
-  name: status
-  labels:
-    {{ $.Values.labelKeys.managed }}: true
-    {{- with .Values.defaultLabels }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
-spec:
-  url: https://repo.enonic.com/public/com/enonic/app/status/2.1.0/status-2.1.0.jar
+  options:
+    bootstrap: true
+    appKey: com.enonic.app.snapshotter

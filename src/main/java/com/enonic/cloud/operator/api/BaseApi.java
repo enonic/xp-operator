@@ -12,7 +12,7 @@ public abstract class BaseApi<T>
     @Inject
     public ObjectMapper mapper;
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "SameParameterValue"})
     protected T getResult( String request, Class<T> k )
         throws IOException
     {

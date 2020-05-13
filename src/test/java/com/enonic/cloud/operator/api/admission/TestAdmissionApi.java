@@ -16,27 +16,21 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import io.fabric8.kubernetes.api.model.admission.AdmissionReview;
 
-import com.enonic.cloud.operator.crd.xp7.v1alpha2.deployment.V1alpha2Xp7Deployment;
-import com.enonic.cloud.operator.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHost;
-import com.enonic.cloud.operator.operators.common.cache.Caches;
+import com.enonic.cloud.kubernetes.crd.xp7.v1alpha2.deployment.V1alpha2Xp7Deployment;
+import com.enonic.cloud.kubernetes.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHost;
 import com.enonic.cloud.testutils.TestFileSupplier;
 
-import static com.enonic.cloud.operator.common.Configuration.cfgStr;
+import static com.enonic.cloud.common.Configuration.cfgStr;
 
 class TestAdmissionApi
     extends AdmissionApi
 {
-    private final TestXp7DeploymentCache deploymentCache;
-
-    private final TestXp7VHostCache vHostCache;
-
     TestAdmissionApi()
     {
         mapper = new ObjectMapper( new YAMLFactory() );
         allNodesPicker = cfgStr( "operator.helm.charts.Values.allNodesKey" );
-        deploymentCache = new TestXp7DeploymentCache();
-        vHostCache = new TestXp7VHostCache();
-        caches = new Caches( null, null, null, deploymentCache, null, null, null, vHostCache );
+        v1alpha2Xp7DeploymentCache = new TestXp7DeploymentCache();
+        v1alpha2Xp7VHostCache = new TestXp7VHostCache();
     }
 
     @TestFactory
@@ -50,14 +44,14 @@ class TestAdmissionApi
         List<V1alpha2Xp7Deployment> deployments = this.mapper.readValue( cache, new TypeReference<>()
         {
         } );
-        deployments.forEach( deploymentCache::put );
+        deployments.forEach( d -> ( (TestXp7DeploymentCache) v1alpha2Xp7DeploymentCache ).put( d ) );
 
         // Add vhosts to cache
         cache = testFileSupplier.getFile( TestAdmissionApi.class, "xp7VHostCache.yaml" );
         List<V1alpha2Xp7VHost> vHosts = this.mapper.readValue( cache, new TypeReference<>()
         {
         } );
-        vHosts.forEach( vHostCache::put );
+        vHosts.forEach( v -> ( (TestXp7VHostCache) v1alpha2Xp7VHostCache ).put( v ) );
 
         return testFileSupplier.createTests( TestAdmissionApi.class, this::runTest, "xp7deploymentsCache.yaml", "xp7VHostCache.yaml" );
     }

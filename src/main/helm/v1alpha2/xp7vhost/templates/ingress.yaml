@@ -5,6 +5,7 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: {{ .Values.vhost.name }}
+  namespace: {{ .Values.vhost.namespace }}
   labels:
     {{ $.Values.labelKeys.managed }}: true
     {{- with $.Values.defaultLabels }}
@@ -16,6 +17,10 @@ metadata:
     ingress.kubernetes.io/rewrite-target: /
     {{- if .Values.vhost.spec.options.dnsRecord }}
     enonic.cloud/dns.hostname: {{ .Values.vhost.spec.host }}
+    enonic.cloud/dns.heritage: {{ list "heritage=ec-operator,id=" .Values.vhost.uid | join "" }}
+    {{- end }}
+    {{- if .Values.vhost.spec.options.cdn }}
+    enonic.cloud/dns.cdn: "true"
     {{- end }}
     {{- if .Values.vhost.spec.options.statusCake }}
     monitor.stakater.com/enabled: "true"
