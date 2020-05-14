@@ -59,6 +59,7 @@ public class OperatorDeploymentStatus
     public void run()
     {
         v1alpha2Xp7DeploymentCache.getStream().
+            filter( deployment -> deployment.getMetadata().getDeletionTimestamp() == null ).
             forEach( deployment -> updateStatus( deployment, pollStatus( deployment ) ) );
     }
 
