@@ -1,6 +1,7 @@
 package com.enonic.cloud.operator.v1alpha1xp7app;
 
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -26,6 +27,7 @@ import com.enonic.cloud.kubernetes.crd.xp7.v1alpha1.app.V1alpha1Xp7AppStatus;
 import com.enonic.cloud.kubernetes.crd.xp7.v1alpha2.deployment.V1alpha2Xp7Deployment;
 
 import static com.enonic.cloud.common.Configuration.cfgIfBool;
+import static com.enonic.cloud.common.Configuration.cfgLong;
 
 @ApplicationScoped
 public class OperatorAppStatus
@@ -52,7 +54,9 @@ public class OperatorAppStatus
 
     void onStartup( @Observes StartupEvent _ev )
     {
-        cfgIfBool( "operator.status.enabled", () -> taskRunner.scheduleAtFixedRate( this ) );
+        cfgIfBool( "operator.status.enabled", () -> taskRunner.scheduleAtFixedRate( this, cfgLong( "operator.tasks.initialDelayMs" ),
+                                                                                    cfgLong( "operator.tasks.app.status.periodMs" ),
+                                                                                    TimeUnit.MILLISECONDS ) );
     }
 
     @Override

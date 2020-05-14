@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.enterprise.event.Observes;
@@ -29,6 +30,7 @@ import com.enonic.cloud.kubernetes.crd.xp7.v1alpha2.deployment.V1alpha2Xp7Deploy
 import com.enonic.cloud.kubernetes.crd.xp7.v1alpha2.deployment.V1alpha2Xp7DeploymentStatusFieldsPod;
 
 import static com.enonic.cloud.common.Configuration.cfgIfBool;
+import static com.enonic.cloud.common.Configuration.cfgLong;
 
 
 public class OperatorDeploymentStatus
@@ -50,7 +52,7 @@ public class OperatorDeploymentStatus
 
     void onStartup( @Observes StartupEvent _ev )
     {
-        cfgIfBool( "operator.status.enabled", () -> taskRunner.scheduleAtFixedRate( this ) );
+        cfgIfBool( "operator.status.enabled", () -> taskRunner.scheduleAtFixedRate( this, cfgLong( "operator.tasks.initialDelayMs" ), cfgLong( "operator.tasks.deployment.status.periodMs" ), TimeUnit.MILLISECONDS ) );
     }
 
     @Override

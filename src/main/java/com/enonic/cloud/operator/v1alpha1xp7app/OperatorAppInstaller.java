@@ -2,6 +2,7 @@ package com.enonic.cloud.operator.v1alpha1xp7app;
 
 import java.util.Collections;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -31,6 +32,7 @@ import com.enonic.cloud.kubernetes.crd.xp7.v1alpha1.app.V1alpha1Xp7AppStatus;
 import com.enonic.cloud.kubernetes.crd.xp7.v1alpha2.deployment.V1alpha2Xp7Deployment;
 
 import static com.enonic.cloud.common.Configuration.cfgIfBool;
+import static com.enonic.cloud.common.Configuration.cfgLong;
 import static com.enonic.cloud.common.Configuration.cfgStr;
 
 @ApplicationScoped
@@ -63,7 +65,7 @@ public class OperatorAppInstaller
     {
         cfgIfBool( "operator.status.enabled", () -> {
             v1alpha1Xp7AppCache.addEventListener( this );
-            taskRunner.scheduleAtFixedRate( this );
+            taskRunner.scheduleAtFixedRate( this, cfgLong( "operator.tasks.initialDelayMs" ), cfgLong( "operator.tasks.app.install.periodMs" ), TimeUnit.MILLISECONDS );
         } );
     }
 

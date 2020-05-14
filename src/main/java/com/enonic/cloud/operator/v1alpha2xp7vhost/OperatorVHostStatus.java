@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import javax.enterprise.event.Observes;
@@ -29,6 +30,7 @@ import com.enonic.cloud.operator.dns.functions.info.IngressAssignedIps;
 import com.enonic.cloud.operator.dns.functions.info.IngressEnabledHosts;
 
 import static com.enonic.cloud.common.Configuration.cfgIfBool;
+import static com.enonic.cloud.common.Configuration.cfgLong;
 
 
 public class OperatorVHostStatus
@@ -58,7 +60,7 @@ public class OperatorVHostStatus
 
     void onStartup( @Observes StartupEvent _ev )
     {
-        cfgIfBool( "operator.status.enabled", () -> taskRunner.scheduleAtFixedRate( this ) );
+        cfgIfBool( "operator.status.enabled", () -> taskRunner.scheduleAtFixedRate( this, cfgLong( "operator.tasks.initialDelayMs" ), cfgLong( "operator.tasks.vHost.status.periodMs" ), TimeUnit.MILLISECONDS ) );
     }
 
     @Override
