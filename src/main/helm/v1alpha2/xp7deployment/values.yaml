@@ -42,6 +42,7 @@ volumeBackups: ["blobstore", "snapshots"]
 heapDumpLocation: /enonic-xp/home/exports/dumps
 configLocation: /enonic-xp/home/config
 extraConfigLocation: /enonic-xp/home/extra-config
+deployLocation: /enonic-xp/home/deploy
 
 securityContext:
   user: 1337
@@ -68,6 +69,10 @@ storage:
 extensions:
   linkerd:
     enabled: false
+
+initApps:
+  - https://repo.enonic.com/public/com/enonic/app/alive/2.0.0/alive-2.0.0.jar
+  - https://repo.enonic.com/public/com/enonic/app/snapshotter/2.1.1/snapshotter-2.1.1.jar
 
 # Filled in by operator
 # deployment:

@@ -12,5 +12,12 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
 data:
+  init.sh: |-
+    # Install initApps
+    cat {{ $.Values.extraConfigLocation }}/initApps.txt | xargs -I {} app.sh add {}
+  initApps.txt: |-
+    {{- range $app := .Values.initApps }}
+    {{ $app }}
+    {{- end }}
   java.security.properties: |-
     networkaddress.cache.ttl=30
