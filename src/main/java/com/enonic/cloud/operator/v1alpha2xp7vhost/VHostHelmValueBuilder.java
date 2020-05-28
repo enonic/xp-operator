@@ -62,6 +62,8 @@ public abstract class VHostHelmValueBuilder
                 return cfgStr( "operator.certissuer.letsencrypt.staging" );
             case LETS_ENCRYPT_PROD:
                 return cfgStr( "operator.certissuer.letsencrypt.prod" );
+            case ISSUER:
+                return resource.getSpec().certificate().identifier();
         }
         return null;
     }

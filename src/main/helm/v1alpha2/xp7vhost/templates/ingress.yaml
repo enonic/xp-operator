@@ -78,11 +78,11 @@ spec:
               servicePort: 8080
             path: {{ $mapping.source }}
           {{- end }}
-  {{- if .Values.vhost.issuer }}
+  {{- if .Values.vhost.spec.certificate }}
   tls:
     - hosts:
         - {{ .Values.vhost.spec.host }}
-      secretName: {{ .Values.vhost.name }}
+      secretName: {{ if .Values.vhost.issuer }}{{ .Values.vhost.name }}{{ else }}{{ .Values.vhost.spec.certificate.identifier }}{{ end }}
   {{- end }}
 ---
 {{- end }}

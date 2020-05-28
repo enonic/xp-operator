@@ -18,6 +18,7 @@ vhost:
       ipWhitelist: ""
     certificate:
       authority: "selfSigned"
+      identifier: null
     mappings:
     - nodeGroup: "all"
       source: "/"
