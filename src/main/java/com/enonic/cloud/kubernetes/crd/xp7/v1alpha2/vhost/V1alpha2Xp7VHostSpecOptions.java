@@ -48,6 +48,12 @@ public abstract class V1alpha2Xp7VHostSpecOptions
         return false;
     }
 
+    @Value.Default
+    public String ipWhitelist()
+    {
+        return "";
+    }
+
     @Value.Check
     protected void check()
     {

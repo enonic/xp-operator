@@ -46,6 +46,9 @@ spec:
                     cdn:
                       type: boolean
                       nullable: true
+                    ipWhitelist:
+                      type: string
+                      nullable: true
                 certificate:
                   type: object
                   nullable: true

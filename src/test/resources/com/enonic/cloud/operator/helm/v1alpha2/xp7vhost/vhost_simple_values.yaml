@@ -15,6 +15,7 @@ vhost:
       statusCake: false
       caching: false
       cdn: false
+      ipWhitelist: ""
     certificate:
       authority: "selfSigned"
     mappings:

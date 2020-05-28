@@ -9,6 +9,7 @@ spec:
     ingressMaxBodySize: 8m
     statusCake: true
     cdn: false
+    ipWhitelist: ""
   certificate:
     authority: selfSigned
   mappings:

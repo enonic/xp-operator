@@ -30,6 +30,10 @@ metadata:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     {{- end }}
 
+    {{- if .Values.vhost.spec.options.ipWhitelist }}
+    nginx.ingress.kubernetes.io/whitelist-source-range: {{ quote .Values.vhost.spec.options.ipWhitelist }}
+    {{- end }}
+
     {{- if .Values.extensions.ingress.DDOS.enabled }}
     nginx.ingress.kubernetes.io/limit-connections: {{ .Values.extensions.ingress.DDOS.limitConnections }}
     nginx.ingress.kubernetes.io/limit-rpm: {{ .Values.extensions.ingress.DDOS.limitRpm }}
