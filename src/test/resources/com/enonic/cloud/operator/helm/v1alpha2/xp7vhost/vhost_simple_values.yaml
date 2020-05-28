@@ -1,4 +1,6 @@
 ---
+settings:
+  nodeGroupAntiAffinity: false
 vhost:
   uid: "54edf212-742d-44f5-9fef-6749da7fd534"
   name: "test-purplejs-io"
@@ -22,11 +24,11 @@ vhost:
       idProviders:
         default: "system"
         enabled: []
+allNodesKey: "all"
+defaultLabels: {}
 labelKeys:
   managed: "enonic.managed"
   nodeGroup: "enonic.nodeGroup"
-allNodesKey: "all"
-defaultLabels: {}
 imageTemplate: "gbbirkisson/xp:%s-ubuntu"
 annotationKeys:
   alwaysOverwrite: "enonic.alwaysOverwrite"

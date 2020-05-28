@@ -24,12 +24,25 @@ spec:
     snapshots: 100Mi
 
   nodeGroups:
-    fisk:
+    main:
       data: true
       master: true
       replicas: 1
       env:
-        test: test133
+        test: test1
+      resources:
+        cpu: "1"
+        memory: 512Mi
+        disks:
+          export: 100Mi
+          index: 100Mi
+          work: 100Mi
+    front:
+      data: false
+      master: false
+      replicas: 2
+      env:
+        test: test2
       resources:
         cpu: "1"
         memory: 512Mi

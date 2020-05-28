@@ -43,6 +43,18 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
+      {{- if $.Values.settings.nodeGroupAntiAffinity }}
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: {{ $.Values.labelKeys.nodeGroup }}
+                    operator: In
+                    values:
+                      - {{ $nodeGroupName }}
+              topologyKey: "kubernetes.io/hostname"
+      {{- end }}
       restartPolicy: Always
       dnsPolicy: ClusterFirst
       schedulerName: default-scheduler

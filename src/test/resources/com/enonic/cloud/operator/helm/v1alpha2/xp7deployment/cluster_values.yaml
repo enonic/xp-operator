@@ -1,13 +1,15 @@
 ---
-labelKeys:
-  managed: "enonic.managed"
-  nodeGroup: "enonic.nodeGroup"
+settings:
+  nodeGroupAntiAffinity: false
 allNodesKey: "all"
 defaultLabels:
   cloud: "mycloud"
   solution: "mysolution"
   environment: "myenv"
   service: "myservice"
+labelKeys:
+  managed: "enonic.managed"
+  nodeGroup: "enonic.nodeGroup"
 imageTemplate: "gbbirkisson/xp:%s-ubuntu"
 annotationKeys:
   alwaysOverwrite: "enonic.alwaysOverwrite"
