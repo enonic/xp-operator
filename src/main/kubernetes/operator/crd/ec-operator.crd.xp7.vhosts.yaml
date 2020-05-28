@@ -55,6 +55,9 @@ spec:
                   properties:
                     authority:
                       type: string
+                    identifier:
+                      type: string
+                      nullable: true
                 mappings:
                   type: array
                   items:
