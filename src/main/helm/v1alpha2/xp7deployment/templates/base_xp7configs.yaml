@@ -116,11 +116,11 @@ spec:
     {{- else }}
     cluster.enabled=true
     node.name=${env.XP_NODE_NAME}
-    network.publish.host=${env.XP_NODE_NAME}.{{ $.Values.allNodesKey }}
+    network.publish.host=${env.XP_NODE_IP}
     {{- if $.Values.extensions.linkerd.enabled }}
     network.host=127.0.0.1
     {{- else }}
-    network.host=${env.XP_NODE_NAME}.{{ $.Values.allNodesKey }}
+    network.host=${env.XP_NODE_IP}
     {{- end }}
     {{- end }}
 ---
@@ -144,7 +144,7 @@ spec:
   data: |-
     clusterConfigDefaults=false
     system.hazelcast.initial.min.cluster.size=2
-    network.join.kubernetes.serviceDns={{ $.Values.allNodesKey }}.{{ $.Values.deployment.namespace }}.svc.cluster.local
+    network.join.kubernetes.serviceDns={{ $.Values.discoveryService }}.{{ $.Values.deployment.namespace }}.svc.cluster.local
     network.join.kubernetes.enabled=true
     network.join.tcpIp.enabled=false
 {{- end }}

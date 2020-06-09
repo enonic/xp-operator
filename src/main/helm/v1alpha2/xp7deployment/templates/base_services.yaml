@@ -1,3 +1,34 @@
+# Setup ES / Hazelcast discovery
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $.Values.discoveryService }}
+  namespace: {{ $.Values.deployment.namespace }}
+  labels:
+    {{ $.Values.labelKeys.managed }}: true
+    {{- with .Values.defaultLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  publishNotReadyAddresses: true
+  sessionAffinity: None
+  selector:
+    {{- with .Values.defaultLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  ports:
+    - name: hazelcast
+      port: 5701
+      targetPort: 5701
+      protocol: TCP
+    - name: es
+      port: 9300
+      targetPort: 9300
+      protocol: TCP
+---
+
 # Setup service that points to all nodes in the cluster
 apiVersion: v1
 kind: Service
@@ -12,7 +43,7 @@ metadata:
 spec:
   type: ClusterIP
   clusterIP: None
-  publishNotReadyAddresses: true
+  publishNotReadyAddresses: false
   sessionAffinity: None
   selector:
     {{- with .Values.defaultLabels }}
@@ -34,8 +65,4 @@ spec:
     - name: es-api
       port: 9200
       targetPort: 9200
-      protocol: TCP
-    - name: es-transport
-      port: 9300
-      targetPort: 9300
       protocol: TCP

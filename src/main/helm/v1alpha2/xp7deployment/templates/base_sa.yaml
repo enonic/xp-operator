@@ -1,3 +1,36 @@
+# Setup SA for nodes
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: xp-node-sa
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: xp-node-role
+  namespace: {{ $.Values.deployment.namespace }}
+rules:
+  - apiGroups:
+      - '*'
+    resources:
+      - endpoints # For preStopHook
+    verbs:
+      - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: xp-node-role-bindings
+  namespace: {{ $.Values.deployment.namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: xp-node-role
+subjects:
+  - kind: ServiceAccount
+    name: xp-node-sa
+    namespace: {{ $.Values.deployment.namespace }}
+---
 # Setup cloud api service account
 {{- if $.Values.cloudApiSa }}
 apiVersion: rbac.authorization.k8s.io/v1

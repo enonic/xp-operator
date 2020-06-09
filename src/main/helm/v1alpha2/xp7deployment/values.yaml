@@ -1,8 +1,8 @@
 imagePullPolicy: IfNotPresent
 
-# Fails after 2 minutes
-livenessProbe:
-  failureThreshold: 4
+# Fails after 3:30 minutes
+startupProbe:
+  failureThreshold: 36
   httpGet:
     httpHeaders:
       - name: Host
@@ -10,14 +10,13 @@ livenessProbe:
     path: /
     port: 8080
     scheme: HTTP
-  initialDelaySeconds: 60
-  periodSeconds: 15
+  initialDelaySeconds: 30
+  periodSeconds: 5
   successThreshold: 1
   timeoutSeconds: 1
 
-# Fails after 2 minutes
 readinessProbe:
-  failureThreshold: 12
+  failureThreshold: 3
   httpGet:
     httpHeaders:
       - name: Host
@@ -25,10 +24,25 @@ readinessProbe:
     path: /
     port: 8080
     scheme: HTTP
-  initialDelaySeconds: 45
-  periodSeconds: 10
-  successThreshold: 1
+  initialDelaySeconds: 0
+  periodSeconds: 5
+  successThreshold: 3
   timeoutSeconds: 1
+
+# Fails after 2 minutes
+#livenessProbe:
+#  failureThreshold: 4
+#  httpGet:
+#    httpHeaders:
+#      - name: Host
+#        value: healthcheck
+#    path: /
+#    port: 8080
+#    scheme: HTTP
+#  initialDelaySeconds: 60
+#  periodSeconds: 15
+#  successThreshold: 1
+#  timeoutSeconds: 1
 
 volumeMounts:
   export: /enonic-xp/home/data
@@ -36,19 +50,22 @@ volumeMounts:
   work: /enonic-xp/home/work
   blobstore: /enonic-xp/home/repo/blob
   snapshots: /enonic-xp/home/snapshots
+  deploy: /enonic-xp/home/deploy
 
 volumeBackups: ["blobstore", "snapshots"]
 
-heapDumpLocation: /enonic-xp/home/exports/dumps
+heapDumpLocation: /enonic-xp/home/data
 configLocation: /enonic-xp/home/config
 extraConfigLocation: /enonic-xp/home/extra-config
-deployLocation: /enonic-xp/home/deploy
+setEnvLocation: /enonic-xp/home/setenv.sh
+
+discoveryService: cluster-discovery
 
 securityContext:
   user: 1337
   fsGroup: 0
 
-terminationGracePeriodSeconds: 30
+terminationGracePeriodSeconds: 600 # 10 minutes
 updateStrategy: RollingUpdate
 initContainersImage: alpine:3.10
 

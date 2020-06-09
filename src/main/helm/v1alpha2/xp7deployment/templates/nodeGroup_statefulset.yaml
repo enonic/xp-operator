@@ -12,7 +12,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  serviceName: all
+  serviceName: {{ $.Values.discoveryService }}
   replicas: {{ if $.Values.deployment.spec.enabled }}{{ $nodeGroup.replicas }}{{ else }}0{{end}}
   revisionHistoryLimit: 10
   podManagementPolicy: Parallel
@@ -43,6 +43,7 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
+      serviceAccountName: xp-node-sa
       {{- if $.Values.settings.nodeGroupAntiAffinity }}
       affinity:
         podAntiAffinity:
@@ -62,41 +63,6 @@ spec:
 
       securityContext:
         fsGroup: {{ $.Values.securityContext.fsGroup }}
-
-      initContainers:
-        # Run init script in the extra-config configmap
-        - name: init-script
-          image: {{ $.Values.imageTemplate | replace "%s" $.Values.deployment.spec.xpVersion }}
-          imagePullPolicy: IfNotPresent
-          terminationMessagePath: /dev/termination-log
-          terminationMessagePolicy: File
-          resources: {}
-          volumeMounts:
-            - name: extra-config
-              mountPath: {{ $.Values.extraConfigLocation }}
-            - name: deploy
-              mountPath: {{ $.Values.deployLocation }}
-          command:
-            - bash
-            - {{ $.Values.extraConfigLocation }}/init.sh
-
-        # This init container waits for the Kube DNS entry so the XP node does not get the exception: Cannot create host entry for value
-        - name: wait-for-dns
-          image: {{ $.Values.initContainersImage }}
-          imagePullPolicy: IfNotPresent
-          terminationMessagePath: /dev/termination-log
-          terminationMessagePolicy: File
-          resources: {}
-          env:
-            - name: XP_NODE_NAME
-              valueFrom:
-                fieldRef:
-                  apiVersion: v1
-                  fieldPath: metadata.name
-          command:
-            - ash
-            - -c
-            - sleep 2; x="0"; while [ "$x" == "0" ]; do nslookup ${XP_NODE_NAME}.{{ $.Values.allNodesKey }}.{{ $.Values.deployment.namespace }}.svc.cluster.local && x="1"; sleep 2; done
 
       containers:
         - name: exp
@@ -138,11 +104,18 @@ spec:
               protocol: TCP
 
           env:
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
             - name: XP_NODE_NAME
               valueFrom:
                 fieldRef:
                   apiVersion: v1
                   fieldPath: metadata.name
+            - name: XP_NODE_GROUP
+              value: {{ $nodeGroupName }}
             - name: XP_NODE_IP
               valueFrom:
                 fieldRef:
@@ -161,28 +134,46 @@ spec:
           {{- if not (index $nodeGroup.env "JAVA_OPTS") }}
             - name: JAVA_OPTS
               value: '-Djava.security.properties={{ $.Values.extraConfigLocation }}/java.security.properties -XX:+UseContainerSupport -XX:MinRAMPercentage=20 -XX:InitialRAMPercentage=30
-                          -XX:MaxRAMPercentage={{ if and $nodeGroup.master (not $nodeGroup.data) }}75{{ else }}50{{ end }} -Djsse.enableSNIExtension=true -XX:+UseConcMarkSweepGC
+                          -XX:MaxRAMPercentage={{ if and $nodeGroup.master (not $nodeGroup.data) }}75{{ else }}50{{ end }} -XX:+UseConcMarkSweepGC
                           -XX:+CMSParallelRemarkEnabled -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=60
                           -XX:+ScavengeBeforeFullGC -XX:+CMSScavengeBeforeRemark -XX:-HeapDumpOnOutOfMemoryError
                           -XX:HeapDumpPath={{ $.Values.heapDumpLocation }}/oom.hprof'
           {{- end }}
+
+          {{- if $.Values.startupProbe }}
+          startupProbe:
+            {{- with $.Values.startupProbe }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- end }}
+
+          {{- if $.Values.livenessProbe }}
           livenessProbe:
             {{- with $.Values.livenessProbe }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
+          {{- end }}
 
+          {{- if $.Values.readinessProbe }}
           readinessProbe:
             {{- with $.Values.readinessProbe }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
+          {{- end }}
+
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/bash","{{ $.Values.extraConfigLocation }}/preStop.sh"]
 
           volumeMounts:
             - name: config
               mountPath: {{ $.Values.configLocation }}
             - name: extra-config
               mountPath: {{ $.Values.extraConfigLocation }}
-            - name: deploy
-              mountPath: {{ $.Values.deployLocation }}
+            - name: extra-config
+              mountPath: {{ $.Values.setEnvLocation }}
+              subPath: preStart.sh
             {{- range $volumeName, $volumeSize := $nodeGroup.resources.disks }}
             - name: {{ $volumeName }}
               mountPath: {{ index $.Values.volumeMounts $volumeName }}
@@ -200,8 +191,6 @@ spec:
           configMap:
             defaultMode: "420"
             name: extra-config
-        - name: deploy
-          emptyDir: {}
         {{- range $volumeName, $volumeSize := $.Values.deployment.spec.nodesSharedDisks }}
         - name: {{ $volumeName }}
           persistentVolumeClaim:

@@ -33,7 +33,7 @@ spec:
   nodeGroup: {{ $nodeGroupName }}
   file: com.enonic.xp.elasticsearch.cfg
   data: |-
-    http.enabled=false
+    http.enabled=true
     cluster.name={{ $.Values.deployment.name }}
   {{- if $.Values.deployment.clustered }}
     node.master={{ if $nodeGroup.master }}true{{ else }}false{{ end }}
@@ -42,7 +42,7 @@ spec:
     gateway.expected_data_nodes={{ $.Values.deployment.minimumDataNodes }}
     gateway.recover_after_time=5m
     discovery.zen.minimum_master_nodes={{ $.Values.deployment.minimumMasterNodes }}
-    discovery.unicast.sockets={{ $.Values.allNodesKey }}.{{ $.Values.deployment.namespace }}.svc.cluster.local
+    discovery.unicast.sockets={{ $.Values.discoveryService }}.{{ $.Values.deployment.namespace }}.svc.cluster.local
     network.tcp.keep_alive=true
   {{- end }}
 ---

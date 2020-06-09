@@ -2,6 +2,6 @@ apiVersion: enonic.cloud/v1alpha1
 kind: Xp7App
 metadata:
   name: contentstudio
-  namespace: mycloud-mysolution-myenv-myservice
+  namespace: enonic-cloudapi-qa-xp7
 spec:
   url: https://repo.enonic.com/public/com/enonic/app/contentstudio/2.2.3/contentstudio-2.2.3.jar

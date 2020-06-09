@@ -17,7 +17,7 @@ metadata:
     service: myservice
 spec:
   enabled: true
-  xpVersion: unstable
+  xpVersion: 7.2.0
 
   nodesSharedDisks:
     blobstore: 100Mi
@@ -27,29 +27,30 @@ spec:
     main:
       data: true
       master: true
-      replicas: 1
+      replicas: 3
       env:
         test: test1
       resources:
         cpu: "1"
         memory: 512Mi
         disks:
+          deploy: 100Mi
           export: 100Mi
           index: 100Mi
           work: 100Mi
-    front:
-      data: false
-      master: false
-      replicas: 2
-      env:
-        test: test2
-      resources:
-        cpu: "1"
-        memory: 512Mi
-        disks:
-          export: 100Mi
-          index: 100Mi
-          work: 100Mi
+#    front:
+#      data: false
+#      master: false
+#      replicas: 2
+#      env:
+#        test: test2
+#      resources:
+#        cpu: "1"
+#        memory: 512Mi
+#        disks:
+#          export: 100Mi
+#          index: 100Mi
+#          work: 100Mi
 #    ost:
 #      data: true
 #      master: true

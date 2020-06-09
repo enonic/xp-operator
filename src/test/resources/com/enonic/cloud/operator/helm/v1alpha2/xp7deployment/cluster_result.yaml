@@ -28,8 +28,82 @@ metadata:
   name: "extra-config"
   namespace: "mycloud-mysolution-myenv-myservice"
 data:
-  init.sh: "# Install initApps\ncat /enonic-xp/home/extra-config/initApps.txt | xargs\
-    \ -I {} app.sh add {}"
+  dns.sh: "#!/bin/bash\n\nset -e\n\nusage () {\n    echo \"Usage: $SCRIPT_NAME [OPTIONS]\"\
+    \n    echo \"Wait until DNS record is present\"\n    echo \"\"\n    echo \"Options:\"\
+    \n    echo \"  -d, --dns=         Record to poll\"\n    echo \"  -t, --timeout=\
+    \     Script timeout\"\n    echo \"  -a, --additional=  Additional seconds to\
+    \ wait at end\"\n    echo \"  -r, --reverse      Wait until record is gone\"\n\
+    \    echo \"  -h, --help         Print usage\"\n    exit 1\n}\n\nDNS=\"\"\nTIMEOUT=\"\
+    20\"\nADDITIONAL_WAIT_SECONDS=\"0\"\nREVERSE=\"0\"\n\nwhile [ \"$#\" -gt 0 ];\
+    \ do\n    case $1 in\n        -h | --help)\n            usage ;;\n        -d)\n\
+    \            shift; DNS=\"$1\" ;;\n        --dns=*)\n            DNS=$(echo $1\
+    \ | awk '{split($0,r,\"=\"); print r[2]}') ;;\n        -t)\n            shift;\
+    \ TIMEOUT=\"$1\" ;;\n        --timeout=*)\n            STATE=$(echo $1 | awk '{split($0,r,\"\
+    =\"); print r[2]}') ;;\n        -a)\n            shift; ADDITIONAL_WAIT_SECONDS=\"\
+    $1\" ;;\n        --additional=*)\n            ADDITIONAL_WAIT_SECONDS=$(echo $1\
+    \ | awk '{split($0,r,\"=\"); print r[2]}') ;;\n        -r | --reverse)\n     \
+    \       REVERSE=\"1\" ;;\n        *)\n            usage\n            ;;\n    esac\n\
+    \    shift\ndone\n\nif [ \"${DNS}\" == \"\" ]; then\n    echo \"Missing dns parameter!\"\
+    \n    usage\nfi\n\nif [ \"$REVERSE\" = \"0\" ]; then\n    echo -n \"Waiting for\
+    \ DNS record to appear: \"\nelse\n    echo -n \"Waiting for DNS record to be removed:\
+    \ \"\nfi\n\necho \"${DNS} [timeout: ${TIMEOUT}, additional: ${ADDITIONAL_WAIT_SECONDS}]\"\
+    \n\nOK=\"0\"\nFOUND=\"0\"\n\nSTART_TIME=$(date +%s)\nwhile [ \"$OK\" == \"0\"\
+    \ ]; do\n    (dig +short ${DNS} | grep -v -e '^$' > /dev/null) && FOUND=\"1\"\
+    \ || true\n\n    if [ \"$FOUND\" == \"1\" ]; then\n        echo \"Record ${DNS}\
+    \ found!\"\n        if [ \"${REVERSE}\" == \"0\" ]; then\n            OK=\"1\"\
+    \n        fi\n    else\n        echo \"Record ${DNS} not found!\"\n        if\
+    \ [ \"${REVERSE}\" == \"1\" ]; then\n            OK=\"1\"\n        fi\n    fi\n\
+    \n    TIME=`printf \"%s\\n\" $(( $(date +%s) - ${START_TIME} ))`\n    if [ \"\
+    $TIME\" -gt \"$TIMEOUT\" ]; then\n        echo \"Operation timed out!\"\n    \
+    \    break\n    fi\n\n    if [ \"$OK\" == \"0\" ]; then\n        sleep 2\n   \
+    \ fi\ndone\n\nif [ \"${ADDITIONAL_WAIT_SECONDS}\" != \"0\" ]; then\n    echo \"\
+    Waiting for additional ${ADDITIONAL_WAIT_SECONDS} seconds\"\n    sleep ${ADDITIONAL_WAIT_SECONDS}\n\
+    fi\n\nif [ \"${OK}\" != \"1\" ]; then\n    exit 1\nfi"
+  endpoints.sh: "#!/bin/bash\n\nset -e\n\nusage () {\n    echo \"Usage: $SCRIPT_NAME\
+    \ [OPTIONS]\"\n    echo \"Wait until IP has been added to endpoints\"\n    echo\
+    \ \"\"\n    echo \"Options:\"\n    echo \"  -s, --service=     Service name\"\n\
+    \    echo \"  -i, --ip=          IP address\"\n    echo \"  -t, --timeout=   \
+    \  Script timeout\"\n    echo \"  -a, --additional=  Additional seconds to wait\
+    \ at end\"\n    echo \"  -r, --reverse      Wait until endpoint is gone\"\n  \
+    \  echo \"  -h, --help         Print usage\"\n    exit 1\n}\n\nSERVICE=\"\"\n\
+    IP=\"\"\nTIMEOUT=\"20\"\nADDITIONAL_WAIT_SECONDS=\"0\"\nREVERSE=\"0\"\n\nwhile\
+    \ [ \"$#\" -gt 0 ]; do\n    case $1 in\n        -h | --help)\n            usage\
+    \ ;;\n        -s)\n            shift; SERVICE=\"$1\" ;;\n        --service=*)\n\
+    \            SERVICE=$(echo $1 | awk '{split($0,r,\"=\"); print r[2]}') ;;\n \
+    \       -i)\n            shift; IP=\"$1\" ;;\n        --ip=*)\n            IP=$(echo\
+    \ $1 | awk '{split($0,r,\"=\"); print r[2]}') ;;\n        -t)\n            shift;\
+    \ TIMEOUT=\"$1\" ;;\n        --timeout=*)\n            STATE=$(echo $1 | awk '{split($0,r,\"\
+    =\"); print r[2]}') ;;\n        -a)\n            shift; ADDITIONAL_WAIT_SECONDS=\"\
+    $1\" ;;\n        --additional=*)\n            ADDITIONAL_WAIT_SECONDS=$(echo $1\
+    \ | awk '{split($0,r,\"=\"); print r[2]}') ;;\n        -r | --reverse)\n     \
+    \       REVERSE=\"1\" ;;\n        *)\n            usage\n            ;;\n    esac\n\
+    \    shift\ndone\n\nif [ \"${SERVICE}\" == \"\" ]; then\n    echo \"Missing service\
+    \ parameter!\"\n    usage\nfi\n\nif [ \"${IP}\" == \"\" ]; then\n    echo \"Missing\
+    \ ip parameter!\"\n    usage\nfi\n\nif [ \"$REVERSE\" = \"0\" ]; then\n    echo\
+    \ -n \"Waiting for endpoint ${IP} to appear in service ${SERVICE}: \"\nelse\n\
+    \    echo -n \"Waiting for endpoint ${IP} to be removed in service ${SERVICE}:\
+    \ \"\nfi\n\necho \"${SERVICE} [timeout: ${TIMEOUT}, additional: ${ADDITIONAL_WAIT_SECONDS}]\"\
+    \n\nOK=\"0\"\nFOUND=\"0\"\n\nSTART_TIME=$(date +%s)\nwhile [ \"$OK\" == \"0\"\
+    \ ]; do\n    (curl -s -H \"Authorization: Bearer `cat /run/secrets/kubernetes.io/serviceaccount/token`\"\
+    \ --cacert /run/secrets/kubernetes.io/serviceaccount/ca.crt https://kubernetes.default.svc.cluster.local/api/v1/namespaces/`cat\
+    \ /run/secrets/kubernetes.io/serviceaccount/namespace`/endpoints/${SERVICE} |\
+    \ grep ${IP} > /dev/null) && FOUND=\"1\" || true\n\n    if [ \"$FOUND\" == \"\
+    1\" ]; then\n        echo \"IP ${IP} in service ${SERVICE} found!\"\n        if\
+    \ [ \"${REVERSE}\" == \"0\" ]; then\n            OK=\"1\"\n        fi\n    else\n\
+    \        echo \"IP ${IP} in service ${SERVICE} not found!\"\n        if [ \"${REVERSE}\"\
+    \ == \"1\" ]; then\n            OK=\"1\"\n        fi\n    fi\n\n    TIME=`printf\
+    \ \"%s\\n\" $(( $(date +%s) - ${START_TIME} ))`\n    if [ \"$TIME\" -gt \"$TIMEOUT\"\
+    \ ]; then\n        echo \"Operation timed out!\"\n        break\n    fi\n\n  \
+    \  if [ \"$OK\" == \"0\" ]; then\n        sleep 2\n    fi\ndone\n\nif [ \"${ADDITIONAL_WAIT_SECONDS}\"\
+    \ != \"0\" ]; then\n    echo \"Waiting for additional ${ADDITIONAL_WAIT_SECONDS}\
+    \ seconds\"\n    sleep ${ADDITIONAL_WAIT_SECONDS}\nfi\n\nif [ \"${OK}\" != \"\
+    1\" ]; then\n    exit 1\nfi"
+  preStart.sh: "echo \"Running prescript for node ${XP_NODE_NAME} (${XP_NODE_IP})\"\
+    \necho \"Bootstrap deploy folder apps\"\ncat /enonic-xp/home/extra-config/initApps.txt\
+    \ | xargs -I {} app.sh add {}\nbash /enonic-xp/home/extra-config/dns.sh -d ${XP_NODE_NAME}.cluster-discovery.${NAMESPACE}.svc.cluster.local"
+  preStop.sh: "echo \"Wait for endpoints to be deleted\"\nbash /enonic-xp/home/extra-config/endpoints.sh\
+    \ -r -s all -i ${XP_NODE_IP} -t 10\nbash /enonic-xp/home/extra-config/endpoints.sh\
+    \ -r -s ${XP_NODE_GROUP} -i ${XP_NODE_IP} -t 10 -a 20"
   initApps.txt: "https://repo.enonic.com/public/com/enonic/app/alive/2.0.0/alive-2.0.0.jar\n\
     https://repo.enonic.com/public/com/enonic/app/snapshotter/2.1.1/snapshotter-2.1.1.jar"
   java.security.properties: "networkaddress.cache.ttl=30"
@@ -102,6 +176,33 @@ spec:
       storage: "2Gi"
   storageClassName: "standard"
 ---
+apiVersion: "rbac.authorization.k8s.io/v1"
+kind: "Role"
+metadata:
+  name: "xp-node-role"
+  namespace: "mycloud-mysolution-myenv-myservice"
+rules:
+- apiGroups:
+  - "*"
+  resources:
+  - "endpoints"
+  verbs:
+  - "get"
+---
+apiVersion: "rbac.authorization.k8s.io/v1"
+kind: "RoleBinding"
+metadata:
+  name: "xp-node-role-bindings"
+  namespace: "mycloud-mysolution-myenv-myservice"
+roleRef:
+  kind: "Role"
+  apiGroup: "rbac.authorization.k8s.io"
+  name: "xp-node-role"
+subjects:
+- kind: "ServiceAccount"
+  name: "xp-node-sa"
+  namespace: "mycloud-mysolution-myenv-myservice"
+---
 apiVersion: "v1"
 kind: "Secret"
 metadata:
@@ -149,7 +250,34 @@ spec:
     port: 9200
     protocol: "TCP"
     targetPort: 9200
-  - name: "es-transport"
+  publishNotReadyAddresses: false
+  selector:
+    cloud: "mycloud"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
+  sessionAffinity: "None"
+  type: "ClusterIP"
+---
+apiVersion: "v1"
+kind: "Service"
+metadata:
+  labels:
+    enonic.managed: "true"
+    cloud: "mycloud"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
+  name: "cluster-discovery"
+  namespace: "mycloud-mysolution-myenv-myservice"
+spec:
+  clusterIP: "None"
+  ports:
+  - name: "hazelcast"
+    port: 5701
+    protocol: "TCP"
+    targetPort: 5701
+  - name: "es"
     port: 9300
     protocol: "TCP"
     targetPort: 9300
@@ -197,7 +325,7 @@ spec:
     port: 9300
     protocol: "TCP"
     targetPort: 9300
-  publishNotReadyAddresses: true
+  publishNotReadyAddresses: false
   selector:
     enonic.nodeGroup: "data"
     cloud: "mycloud"
@@ -242,7 +370,7 @@ spec:
     port: 9300
     protocol: "TCP"
     targetPort: 9300
-  publishNotReadyAddresses: true
+  publishNotReadyAddresses: false
   selector:
     enonic.nodeGroup: "frontend"
     cloud: "mycloud"
@@ -287,7 +415,7 @@ spec:
     port: 9300
     protocol: "TCP"
     targetPort: 9300
-  publishNotReadyAddresses: true
+  publishNotReadyAddresses: false
   selector:
     enonic.nodeGroup: "master"
     cloud: "mycloud"
@@ -296,6 +424,11 @@ spec:
     solution: "mysolution"
   sessionAffinity: "None"
   type: "ClusterIP"
+---
+apiVersion: "v1"
+kind: "ServiceAccount"
+metadata:
+  name: "xp-node-sa"
 ---
 apiVersion: "apps/v1"
 kind: "StatefulSet"
@@ -321,7 +454,7 @@ spec:
       environment: "myenv"
       service: "myservice"
       solution: "mysolution"
-  serviceName: "all"
+  serviceName: "cluster-discovery"
   template:
     metadata:
       annotations:
@@ -341,11 +474,18 @@ spec:
     spec:
       containers:
       - env:
+        - name: "NAMESPACE"
+          valueFrom:
+            fieldRef:
+              apiVersion: "v1"
+              fieldPath: "metadata.namespace"
         - name: "XP_NODE_NAME"
           valueFrom:
             fieldRef:
               apiVersion: "v1"
               fieldPath: "metadata.name"
+        - name: "XP_NODE_GROUP"
+          value: "data"
         - name: "XP_NODE_IP"
           valueFrom:
             fieldRef:
@@ -361,19 +501,12 @@ spec:
           value: "My java opts"
         image: "gbbirkisson/xp:7.1.2-ubuntu"
         imagePullPolicy: "IfNotPresent"
-        livenessProbe:
-          failureThreshold: 4
-          httpGet:
-            httpHeaders:
-            - name: "Host"
-              value: "healthcheck"
-            path: "/"
-            port: 8080
-            scheme: "HTTP"
-          initialDelaySeconds: 60
-          periodSeconds: 15
-          successThreshold: 1
-          timeoutSeconds: 1
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - "/bin/bash"
+              - "/enonic-xp/home/extra-config/preStop.sh"
         name: "exp"
         ports:
         - containerPort: 2609
@@ -389,7 +522,7 @@ spec:
           name: "es-transport"
           protocol: "TCP"
         readinessProbe:
-          failureThreshold: 12
+          failureThreshold: 3
           httpGet:
             httpHeaders:
             - name: "Host"
@@ -397,9 +530,9 @@ spec:
             path: "/"
             port: 8080
             scheme: "HTTP"
-          initialDelaySeconds: 45
-          periodSeconds: 10
-          successThreshold: 1
+          initialDelaySeconds: 0
+          periodSeconds: 5
+          successThreshold: 3
           timeoutSeconds: 1
         resources:
           limits:
@@ -417,6 +550,19 @@ spec:
           sysctls:
           - name: "vm.max_map_count"
             value: "262144"
+        startupProbe:
+          failureThreshold: 36
+          httpGet:
+            httpHeaders:
+            - name: "Host"
+              value: "healthcheck"
+            path: "/"
+            port: 8080
+            scheme: "HTTP"
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 1
         terminationMessagePath: "/dev/termination-log"
         terminationMessagePolicy: "File"
         volumeMounts:
@@ -424,8 +570,9 @@ spec:
           name: "config"
         - mountPath: "/enonic-xp/home/extra-config"
           name: "extra-config"
-        - mountPath: "/enonic-xp/home/deploy"
-          name: "deploy"
+        - mountPath: "/enonic-xp/home/setenv.sh"
+          name: "extra-config"
+          subPath: "preStart.sh"
         - mountPath: "/enonic-xp/home/data"
           name: "export"
         - mountPath: "/enonic-xp/home/repo/index"
@@ -435,43 +582,12 @@ spec:
         - mountPath: "/enonic-xp/home/snapshots"
           name: "snapshots"
       dnsPolicy: "ClusterFirst"
-      initContainers:
-      - command:
-        - "bash"
-        - "/enonic-xp/home/extra-config/init.sh"
-        image: "gbbirkisson/xp:7.1.2-ubuntu"
-        imagePullPolicy: "IfNotPresent"
-        name: "init-script"
-        resources: {}
-        terminationMessagePath: "/dev/termination-log"
-        terminationMessagePolicy: "File"
-        volumeMounts:
-        - mountPath: "/enonic-xp/home/extra-config"
-          name: "extra-config"
-        - mountPath: "/enonic-xp/home/deploy"
-          name: "deploy"
-      - command:
-        - "ash"
-        - "-c"
-        - "sleep 2; x=\"0\"; while [ \"$x\" == \"0\" ]; do nslookup ${XP_NODE_NAME}.all.mycloud-mysolution-myenv-myservice.svc.cluster.local\
-          \ && x=\"1\"; sleep 2; done"
-        env:
-        - name: "XP_NODE_NAME"
-          valueFrom:
-            fieldRef:
-              apiVersion: "v1"
-              fieldPath: "metadata.name"
-        image: "alpine:3.10"
-        imagePullPolicy: "IfNotPresent"
-        name: "wait-for-dns"
-        resources: {}
-        terminationMessagePath: "/dev/termination-log"
-        terminationMessagePolicy: "File"
       restartPolicy: "Always"
       schedulerName: "default-scheduler"
       securityContext:
         fsGroup: 0
-      terminationGracePeriodSeconds: 30
+      serviceAccountName: "xp-node-sa"
+      terminationGracePeriodSeconds: 600
       volumes:
       - configMap:
           defaultMode: 420
@@ -481,8 +597,6 @@ spec:
           defaultMode: 420
           name: "extra-config"
         name: "extra-config"
-      - emptyDir: {}
-        name: "deploy"
       - name: "blobstore"
         persistentVolumeClaim:
           claimName: "blobstore"
@@ -557,7 +671,7 @@ spec:
       environment: "myenv"
       service: "myservice"
       solution: "mysolution"
-  serviceName: "all"
+  serviceName: "cluster-discovery"
   template:
     metadata:
       annotations:
@@ -577,11 +691,18 @@ spec:
     spec:
       containers:
       - env:
+        - name: "NAMESPACE"
+          valueFrom:
+            fieldRef:
+              apiVersion: "v1"
+              fieldPath: "metadata.namespace"
         - name: "XP_NODE_NAME"
           valueFrom:
             fieldRef:
               apiVersion: "v1"
               fieldPath: "metadata.name"
+        - name: "XP_NODE_GROUP"
+          value: "frontend"
         - name: "XP_NODE_IP"
           valueFrom:
             fieldRef:
@@ -598,25 +719,18 @@ spec:
         - name: "JAVA_OPTS"
           value: "-Djava.security.properties=/enonic-xp/home/extra-config/java.security.properties\
             \ -XX:+UseContainerSupport -XX:MinRAMPercentage=20 -XX:InitialRAMPercentage=30\
-            \ -XX:MaxRAMPercentage=50 -Djsse.enableSNIExtension=true -XX:+UseConcMarkSweepGC\
-            \ -XX:+CMSParallelRemarkEnabled -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=60\
+            \ -XX:MaxRAMPercentage=50 -XX:+UseConcMarkSweepGC -XX:+CMSParallelRemarkEnabled\
+            \ -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=60\
             \ -XX:+ScavengeBeforeFullGC -XX:+CMSScavengeBeforeRemark -XX:-HeapDumpOnOutOfMemoryError\
-            \ -XX:HeapDumpPath=/enonic-xp/home/exports/dumps/oom.hprof"
+            \ -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof"
         image: "gbbirkisson/xp:7.1.2-ubuntu"
         imagePullPolicy: "IfNotPresent"
-        livenessProbe:
-          failureThreshold: 4
-          httpGet:
-            httpHeaders:
-            - name: "Host"
-              value: "healthcheck"
-            path: "/"
-            port: 8080
-            scheme: "HTTP"
-          initialDelaySeconds: 60
-          periodSeconds: 15
-          successThreshold: 1
-          timeoutSeconds: 1
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - "/bin/bash"
+              - "/enonic-xp/home/extra-config/preStop.sh"
         name: "exp"
         ports:
         - containerPort: 2609
@@ -632,7 +746,7 @@ spec:
           name: "es-transport"
           protocol: "TCP"
         readinessProbe:
-          failureThreshold: 12
+          failureThreshold: 3
           httpGet:
             httpHeaders:
             - name: "Host"
@@ -640,9 +754,9 @@ spec:
             path: "/"
             port: 8080
             scheme: "HTTP"
-          initialDelaySeconds: 45
-          periodSeconds: 10
-          successThreshold: 1
+          initialDelaySeconds: 0
+          periodSeconds: 5
+          successThreshold: 3
           timeoutSeconds: 1
         resources:
           limits:
@@ -660,6 +774,19 @@ spec:
           sysctls:
           - name: "vm.max_map_count"
             value: "262144"
+        startupProbe:
+          failureThreshold: 36
+          httpGet:
+            httpHeaders:
+            - name: "Host"
+              value: "healthcheck"
+            path: "/"
+            port: 8080
+            scheme: "HTTP"
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 1
         terminationMessagePath: "/dev/termination-log"
         terminationMessagePolicy: "File"
         volumeMounts:
@@ -667,8 +794,9 @@ spec:
           name: "config"
         - mountPath: "/enonic-xp/home/extra-config"
           name: "extra-config"
-        - mountPath: "/enonic-xp/home/deploy"
-          name: "deploy"
+        - mountPath: "/enonic-xp/home/setenv.sh"
+          name: "extra-config"
+          subPath: "preStart.sh"
         - mountPath: "/enonic-xp/home/data"
           name: "export"
         - mountPath: "/enonic-xp/home/work"
@@ -678,43 +806,12 @@ spec:
         - mountPath: "/enonic-xp/home/snapshots"
           name: "snapshots"
       dnsPolicy: "ClusterFirst"
-      initContainers:
-      - command:
-        - "bash"
-        - "/enonic-xp/home/extra-config/init.sh"
-        image: "gbbirkisson/xp:7.1.2-ubuntu"
-        imagePullPolicy: "IfNotPresent"
-        name: "init-script"
-        resources: {}
-        terminationMessagePath: "/dev/termination-log"
-        terminationMessagePolicy: "File"
-        volumeMounts:
-        - mountPath: "/enonic-xp/home/extra-config"
-          name: "extra-config"
-        - mountPath: "/enonic-xp/home/deploy"
-          name: "deploy"
-      - command:
-        - "ash"
-        - "-c"
-        - "sleep 2; x=\"0\"; while [ \"$x\" == \"0\" ]; do nslookup ${XP_NODE_NAME}.all.mycloud-mysolution-myenv-myservice.svc.cluster.local\
-          \ && x=\"1\"; sleep 2; done"
-        env:
-        - name: "XP_NODE_NAME"
-          valueFrom:
-            fieldRef:
-              apiVersion: "v1"
-              fieldPath: "metadata.name"
-        image: "alpine:3.10"
-        imagePullPolicy: "IfNotPresent"
-        name: "wait-for-dns"
-        resources: {}
-        terminationMessagePath: "/dev/termination-log"
-        terminationMessagePolicy: "File"
       restartPolicy: "Always"
       schedulerName: "default-scheduler"
       securityContext:
         fsGroup: 0
-      terminationGracePeriodSeconds: 30
+      serviceAccountName: "xp-node-sa"
+      terminationGracePeriodSeconds: 600
       volumes:
       - configMap:
           defaultMode: 420
@@ -724,8 +821,6 @@ spec:
           defaultMode: 420
           name: "extra-config"
         name: "extra-config"
-      - emptyDir: {}
-        name: "deploy"
       - name: "blobstore"
         persistentVolumeClaim:
           claimName: "blobstore"
@@ -800,7 +895,7 @@ spec:
       environment: "myenv"
       service: "myservice"
       solution: "mysolution"
-  serviceName: "all"
+  serviceName: "cluster-discovery"
   template:
     metadata:
       annotations:
@@ -820,11 +915,18 @@ spec:
     spec:
       containers:
       - env:
+        - name: "NAMESPACE"
+          valueFrom:
+            fieldRef:
+              apiVersion: "v1"
+              fieldPath: "metadata.namespace"
         - name: "XP_NODE_NAME"
           valueFrom:
             fieldRef:
               apiVersion: "v1"
               fieldPath: "metadata.name"
+        - name: "XP_NODE_GROUP"
+          value: "master"
         - name: "XP_NODE_IP"
           valueFrom:
             fieldRef:
@@ -839,25 +941,18 @@ spec:
         - name: "JAVA_OPTS"
           value: "-Djava.security.properties=/enonic-xp/home/extra-config/java.security.properties\
             \ -XX:+UseContainerSupport -XX:MinRAMPercentage=20 -XX:InitialRAMPercentage=30\
-            \ -XX:MaxRAMPercentage=75 -Djsse.enableSNIExtension=true -XX:+UseConcMarkSweepGC\
-            \ -XX:+CMSParallelRemarkEnabled -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=60\
+            \ -XX:MaxRAMPercentage=75 -XX:+UseConcMarkSweepGC -XX:+CMSParallelRemarkEnabled\
+            \ -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=60\
             \ -XX:+ScavengeBeforeFullGC -XX:+CMSScavengeBeforeRemark -XX:-HeapDumpOnOutOfMemoryError\
-            \ -XX:HeapDumpPath=/enonic-xp/home/exports/dumps/oom.hprof"
+            \ -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof"
         image: "gbbirkisson/xp:7.1.2-ubuntu"
         imagePullPolicy: "IfNotPresent"
-        livenessProbe:
-          failureThreshold: 4
-          httpGet:
-            httpHeaders:
-            - name: "Host"
-              value: "healthcheck"
-            path: "/"
-            port: 8080
-            scheme: "HTTP"
-          initialDelaySeconds: 60
-          periodSeconds: 15
-          successThreshold: 1
-          timeoutSeconds: 1
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - "/bin/bash"
+              - "/enonic-xp/home/extra-config/preStop.sh"
         name: "exp"
         ports:
         - containerPort: 2609
@@ -873,7 +968,7 @@ spec:
           name: "es-transport"
           protocol: "TCP"
         readinessProbe:
-          failureThreshold: 12
+          failureThreshold: 3
           httpGet:
             httpHeaders:
             - name: "Host"
@@ -881,9 +976,9 @@ spec:
             path: "/"
             port: 8080
             scheme: "HTTP"
-          initialDelaySeconds: 45
-          periodSeconds: 10
-          successThreshold: 1
+          initialDelaySeconds: 0
+          periodSeconds: 5
+          successThreshold: 3
           timeoutSeconds: 1
         resources:
           limits:
@@ -901,6 +996,19 @@ spec:
           sysctls:
           - name: "vm.max_map_count"
             value: "262144"
+        startupProbe:
+          failureThreshold: 36
+          httpGet:
+            httpHeaders:
+            - name: "Host"
+              value: "healthcheck"
+            path: "/"
+            port: 8080
+            scheme: "HTTP"
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 1
         terminationMessagePath: "/dev/termination-log"
         terminationMessagePolicy: "File"
         volumeMounts:
@@ -908,8 +1016,9 @@ spec:
           name: "config"
         - mountPath: "/enonic-xp/home/extra-config"
           name: "extra-config"
-        - mountPath: "/enonic-xp/home/deploy"
-          name: "deploy"
+        - mountPath: "/enonic-xp/home/setenv.sh"
+          name: "extra-config"
+          subPath: "preStart.sh"
         - mountPath: "/enonic-xp/home/data"
           name: "export"
         - mountPath: "/enonic-xp/home/repo/blob"
@@ -917,43 +1026,12 @@ spec:
         - mountPath: "/enonic-xp/home/snapshots"
           name: "snapshots"
       dnsPolicy: "ClusterFirst"
-      initContainers:
-      - command:
-        - "bash"
-        - "/enonic-xp/home/extra-config/init.sh"
-        image: "gbbirkisson/xp:7.1.2-ubuntu"
-        imagePullPolicy: "IfNotPresent"
-        name: "init-script"
-        resources: {}
-        terminationMessagePath: "/dev/termination-log"
-        terminationMessagePolicy: "File"
-        volumeMounts:
-        - mountPath: "/enonic-xp/home/extra-config"
-          name: "extra-config"
-        - mountPath: "/enonic-xp/home/deploy"
-          name: "deploy"
-      - command:
-        - "ash"
-        - "-c"
-        - "sleep 2; x=\"0\"; while [ \"$x\" == \"0\" ]; do nslookup ${XP_NODE_NAME}.all.mycloud-mysolution-myenv-myservice.svc.cluster.local\
-          \ && x=\"1\"; sleep 2; done"
-        env:
-        - name: "XP_NODE_NAME"
-          valueFrom:
-            fieldRef:
-              apiVersion: "v1"
-              fieldPath: "metadata.name"
-        image: "alpine:3.10"
-        imagePullPolicy: "IfNotPresent"
-        name: "wait-for-dns"
-        resources: {}
-        terminationMessagePath: "/dev/termination-log"
-        terminationMessagePolicy: "File"
       restartPolicy: "Always"
       schedulerName: "default-scheduler"
       securityContext:
         fsGroup: 0
-      terminationGracePeriodSeconds: 30
+      serviceAccountName: "xp-node-sa"
+      terminationGracePeriodSeconds: 600
       volumes:
       - configMap:
           defaultMode: 420
@@ -963,8 +1041,6 @@ spec:
           defaultMode: 420
           name: "extra-config"
         name: "extra-config"
-      - emptyDir: {}
-        name: "deploy"
       - name: "blobstore"
         persistentVolumeClaim:
           claimName: "blobstore"
@@ -1043,8 +1119,8 @@ metadata:
 spec:
   file: "com.enonic.xp.cluster.cfg"
   nodeGroup: "all"
-  data: "cluster.enabled=true\nnode.name=${env.XP_NODE_NAME}\nnetwork.publish.host=${env.XP_NODE_NAME}.all\n\
-    network.host=${env.XP_NODE_NAME}.all"
+  data: "cluster.enabled=true\nnode.name=${env.XP_NODE_NAME}\nnetwork.publish.host=${env.XP_NODE_IP}\n\
+    network.host=${env.XP_NODE_IP}"
 ---
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
@@ -1081,7 +1157,7 @@ spec:
   file: "com.enonic.xp.hazelcast.cfg"
   nodeGroup: "all"
   data: "clusterConfigDefaults=false\nsystem.hazelcast.initial.min.cluster.size=2\n\
-    network.join.kubernetes.serviceDns=all.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
+    network.join.kubernetes.serviceDns=cluster-discovery.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
     network.join.kubernetes.enabled=true\nnetwork.join.tcpIp.enabled=false"
 ---
 kind: "Xp7Config"
@@ -1135,9 +1211,9 @@ metadata:
 spec:
   file: "com.enonic.xp.elasticsearch.cfg"
   nodeGroup: "data"
-  data: "http.enabled=false\ncluster.name=mycloud-mysolution-myenv-myservice\nnode.master=false\n\
+  data: "http.enabled=true\ncluster.name=mycloud-mysolution-myenv-myservice\nnode.master=false\n\
     node.data=true\ngateway.expected_master_nodes=2\ngateway.expected_data_nodes=2\n\
-    gateway.recover_after_time=5m\ndiscovery.zen.minimum_master_nodes=2\ndiscovery.unicast.sockets=all.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
+    gateway.recover_after_time=5m\ndiscovery.zen.minimum_master_nodes=2\ndiscovery.unicast.sockets=cluster-discovery.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
     network.tcp.keep_alive=true"
 ---
 kind: "Xp7Config"
@@ -1172,9 +1248,9 @@ metadata:
 spec:
   file: "com.enonic.xp.elasticsearch.cfg"
   nodeGroup: "frontend"
-  data: "http.enabled=false\ncluster.name=mycloud-mysolution-myenv-myservice\nnode.master=false\n\
+  data: "http.enabled=true\ncluster.name=mycloud-mysolution-myenv-myservice\nnode.master=false\n\
     node.data=false\ngateway.expected_master_nodes=2\ngateway.expected_data_nodes=2\n\
-    gateway.recover_after_time=5m\ndiscovery.zen.minimum_master_nodes=2\ndiscovery.unicast.sockets=all.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
+    gateway.recover_after_time=5m\ndiscovery.zen.minimum_master_nodes=2\ndiscovery.unicast.sockets=cluster-discovery.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
     network.tcp.keep_alive=true"
 ---
 kind: "Xp7Config"
@@ -1209,9 +1285,9 @@ metadata:
 spec:
   file: "com.enonic.xp.elasticsearch.cfg"
   nodeGroup: "master"
-  data: "http.enabled=false\ncluster.name=mycloud-mysolution-myenv-myservice\nnode.master=true\n\
+  data: "http.enabled=true\ncluster.name=mycloud-mysolution-myenv-myservice\nnode.master=true\n\
     node.data=false\ngateway.expected_master_nodes=2\ngateway.expected_data_nodes=2\n\
-    gateway.recover_after_time=5m\ndiscovery.zen.minimum_master_nodes=2\ndiscovery.unicast.sockets=all.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
+    gateway.recover_after_time=5m\ndiscovery.zen.minimum_master_nodes=2\ndiscovery.unicast.sockets=cluster-discovery.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
     network.tcp.keep_alive=true"
 ---
 kind: "Xp7Config"

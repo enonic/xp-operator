@@ -15,6 +15,7 @@ import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.ServiceAccount;
 import io.fabric8.kubernetes.api.model.apps.DaemonSet;
 import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
@@ -31,6 +32,7 @@ import com.enonic.cloud.kubernetes.commands.builders.ImmutableCommandBuilderRole
 import com.enonic.cloud.kubernetes.commands.builders.ImmutableCommandBuilderRoleBinding;
 import com.enonic.cloud.kubernetes.commands.builders.ImmutableCommandBuilderSecret;
 import com.enonic.cloud.kubernetes.commands.builders.ImmutableCommandBuilderService;
+import com.enonic.cloud.kubernetes.commands.builders.ImmutableCommandBuilderServiceAccount;
 import com.enonic.cloud.kubernetes.commands.builders.ImmutableCommandBuilderStatefulSet;
 import com.enonic.cloud.kubernetes.commands.builders.ImmutableCommandBuilderV1Alpha1Xp7App;
 import com.enonic.cloud.kubernetes.commands.builders.ImmutableCommandBuilderV1Alpha2Xp7Config;
@@ -68,6 +70,7 @@ public class K8sCommandMapper
         this.builderMap.put( RoleBinding.class, this::roleBinding );
         this.builderMap.put( Secret.class, this::secret );
         this.builderMap.put( Service.class, this::service );
+        this.builderMap.put( ServiceAccount.class, this::serviceAccount );
         this.builderMap.put( StatefulSet.class, this::statefulSet );
         this.builderMap.put( V1alpha1Xp7App.class, this::v1alpha1Xp7App );
         this.builderMap.put( V1alpha2Xp7Config.class, this::v1alpha2Xp7Config );
@@ -142,6 +145,14 @@ public class K8sCommandMapper
     private Optional<K8sCommand> service( final GenericBuilderParams params )
     {
         return ImmutableCommandBuilderService.builder().
+            client( kubernetesClient ).
+            build().
+            apply( params );
+    }
+
+    private Optional<K8sCommand> serviceAccount( final GenericBuilderParams params )
+    {
+        return ImmutableCommandBuilderServiceAccount.builder().
             client( kubernetesClient ).
             build().
             apply( params );
