@@ -5,6 +5,8 @@ kind: StatefulSet
 metadata:
   name: {{ $nodeGroupName }}
   namespace: {{ $.Values.deployment.namespace }}
+  annotations:
+    {{ $.Values.annotationKeys.applyPriority }}: "90"
   labels:
     {{ $.Values.labelKeys.managed }}: true
     {{ $.Values.labelKeys.nodeGroup }}: {{ $nodeGroupName }}

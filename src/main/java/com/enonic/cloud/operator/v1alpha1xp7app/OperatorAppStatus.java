@@ -1,5 +1,8 @@
 package com.enonic.cloud.operator.v1alpha1xp7app;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -7,6 +10,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +56,9 @@ public class OperatorAppStatus
     @Inject
     TaskRunner taskRunner;
 
+    @ConfigProperty(name = "operator.tasks.statusDelaySeconds")
+    Long statusDelay;
+
     void onStartup( @Observes StartupEvent _ev )
     {
         cfgIfBool( "operator.status.enabled", () -> taskRunner.scheduleAtFixedRate( this, cfgLong( "operator.tasks.initialDelayMs" ),
@@ -64,6 +71,7 @@ public class OperatorAppStatus
     {
         v1alpha1Xp7AppCache.getStream().
             filter( app -> app.getMetadata().getDeletionTimestamp() == null ).
+            filter( app -> Duration.between( Instant.parse( app.getMetadata().getCreationTimestamp() ), Instant.now() ).getSeconds() > statusDelay ).
             forEach( app -> updateStatus( app, pollStatus( app ) ) );
     }
 

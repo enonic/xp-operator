@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.immutables.value.Value;
 import org.wildfly.common.annotation.Nullable;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.base.Preconditions;
 
@@ -31,17 +32,31 @@ public abstract class V1alpha2Xp7VHostSpec
 
     public abstract List<V1alpha2Xp7VHostSpecMapping> mappings();
 
+    @JsonIgnore
+    @Value.Derived
+    public boolean hasIngress()
+    {
+        for ( V1alpha2Xp7VHostSpecMapping m : mappings() )
+        {
+            if ( m.options().ingress() )
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Value.Check
     protected void check()
     {
         Validator.dns1123( "spec.host", host() );
         Preconditions.checkState( mappings().size() > 0, "Field 'spec.mappings' has to contain more than 0 mappings" );
-        if ( !options().ingress() )
+        if ( !hasIngress() )
         {
             Preconditions.checkState( certificate() == null, "Field 'spec.certificate' cannot be set if ingress is skipped" );
         }
         mappings().stream().collect( Collectors.groupingBy( V1alpha2Xp7VHostSpecMapping::source ) ).forEach(
-            ( key, value ) -> Preconditions.checkState( value.size() == 1, "Field 'spec.mappings.target' has to be unique" ) );
+            ( key, value ) -> Preconditions.checkState( value.size() == 1, "Field 'spec.mappings.source' has to be unique" ) );
     }
 
     public static class ExceptionMissing

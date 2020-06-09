@@ -28,26 +28,11 @@ spec:
                   type: object
                   nullable: true
                   properties:
-                    ingress:
-                      type: boolean
-                      nullable: true
-                    ingressMaxBodySize:
-                      type: string
-                      nullable: true
                     dnsRecord:
-                      type: boolean
-                      nullable: true
-                    statusCake:
-                      type: boolean
-                      nullable: true
-                    caching:
                       type: boolean
                       nullable: true
                     cdn:
                       type: boolean
-                      nullable: true
-                    ipWhitelist:
-                      type: string
                       nullable: true
                 certificate:
                   type: object
@@ -79,6 +64,31 @@ spec:
                             type: array
                             items:
                               type: string
+                      options:
+                        type: object
+                        nullable: true
+                        properties:
+                          ingress:
+                            type: boolean
+                            nullable: true
+                          ingressMaxBodySize:
+                            type: string
+                            nullable: true
+                          statusCake:
+                            type: boolean
+                            nullable: true
+                          caching:
+                            type: boolean
+                            nullable: true
+                          ipWhitelist:
+                            type: string
+                            nullable: true
+                          stickySession:
+                            type: boolean
+                            nullable: true
+                          sslRedirect:
+                            type: boolean
+                            nullable: true
             status:
               type: object
               nullable: true

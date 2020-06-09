@@ -18,6 +18,12 @@ public abstract class V1alpha2Xp7VHostSpecMapping
 
     public abstract String target();
 
+    @Value.Default
+    public V1alpha2Xp7VHostSpecMappingOptions options()
+    {
+        return ImmutableV1alpha2Xp7VHostSpecMappingOptions.builder().build();
+    }
+
     @Nullable
     public abstract V1alpha2Xp7VHostSpecMappingIdProviders idProviders();
 

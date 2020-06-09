@@ -27,7 +27,7 @@ spec:
     main:
       data: true
       master: true
-      replicas: 3
+      replicas: 1
       env:
         test: test1
       resources:

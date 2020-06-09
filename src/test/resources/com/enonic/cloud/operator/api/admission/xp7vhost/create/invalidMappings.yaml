@@ -1,4 +1,4 @@
-testResult: "Field 'spec.mappings.target' has to be unique"
+testResult: "Field 'spec.mappings.source' has to be unique"
 testReview:
   request:
     operation: CREATE

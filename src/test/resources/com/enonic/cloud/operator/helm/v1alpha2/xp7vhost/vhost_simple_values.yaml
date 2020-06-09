@@ -9,23 +9,50 @@ vhost:
   spec:
     host: "test.purplejs.io"
     options:
-      ingress: true
-      ingressMaxBodySize: "8m"
       dnsRecord: true
-      statusCake: false
-      caching: false
-      cdn: false
-      ipWhitelist: ""
+      cdn: true
     certificate:
       authority: "selfSigned"
       identifier: null
     mappings:
     - nodeGroup: "all"
-      source: "/"
+      source: "/a"
       target: "/admin"
+      options:
+        ingress: true
+        ingressMaxBodySize: "100m"
+        statusCake: false
+        caching: false
+        ipWhitelist: ""
+        stickySession: false
+        sslRedirect: true
       idProviders:
         default: "system"
         enabled: []
+    - nodeGroup: "frontend"
+      source: "/b"
+      target: "/"
+      options:
+        ingress: true
+        ingressMaxBodySize: "8m"
+        statusCake: true
+        caching: true
+        ipWhitelist: "1.1.1.1"
+        stickySession: true
+        sslRedirect: false
+      idProviders: null
+    - nodeGroup: "all"
+      source: "/c"
+      target: "/admin"
+      options:
+        ingress: false
+        ingressMaxBodySize: "100m"
+        statusCake: false
+        caching: false
+        ipWhitelist: ""
+        stickySession: false
+        sslRedirect: true
+      idProviders: null
 allNodesKey: "all"
 defaultLabels: {}
 labelKeys:
@@ -33,5 +60,6 @@ labelKeys:
   nodeGroup: "enonic.nodeGroup"
 imageTemplate: "gbbirkisson/xp:%s-ubuntu"
 annotationKeys:
+  applyPriority: "enonic.applyPriority"
   alwaysOverwrite: "enonic.alwaysOverwrite"
   neverOverwrite: "enonic.neverOverwrite"

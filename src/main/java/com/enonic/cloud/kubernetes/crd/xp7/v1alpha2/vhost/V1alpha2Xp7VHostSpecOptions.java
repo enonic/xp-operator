@@ -13,59 +13,22 @@ import com.enonic.cloud.kubernetes.crd.BuilderException;
 public abstract class V1alpha2Xp7VHostSpecOptions
 {
     @Value.Default
-    public Boolean ingress()
+    public Boolean dnsRecord()
     {
         return true;
     }
 
     @Value.Default
-    public String ingressMaxBodySize()
-    {
-        return "100m";
-    }
-
-    @Value.Default
-    public Boolean dnsRecord()
-    {
-        return ingress();
-    }
-
-    @Value.Default
-    public Boolean statusCake()
-    {
-        return false;
-    }
-
-    @Value.Default
-    public Boolean caching()
-    {
-        return false;
-    }
-
-    @Value.Default
     public Boolean cdn()
     {
-        return false;
-    }
-
-    @Value.Default
-    public String ipWhitelist()
-    {
-        return "";
+        return true;
     }
 
     @Value.Check
     protected void check()
     {
-        if ( !ingress() )
-        {
-            Preconditions.checkState( !dnsRecord(), "Field 'spec.options.dnsRecord' cannot be true if 'spec.options.ingress' is false" );
-        }
-
         if ( !dnsRecord() )
         {
-            Preconditions.checkState( !statusCake(),
-                                      "Field 'spec.options.statusCake' cannot be true if 'spec.options.dnsRecord' is false" );
             Preconditions.checkState( !cdn(), "Field 'spec.options.cdn' cannot be true if 'spec.options.dnsRecord' is false" );
         }
     }
@@ -82,7 +45,7 @@ public abstract class V1alpha2Xp7VHostSpecOptions
         @Override
         protected String getFieldPath()
         {
-            return "spec";
+            return "spec.options";
         }
     }
 }

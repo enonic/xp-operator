@@ -12,6 +12,7 @@ labelKeys:
   nodeGroup: "enonic.nodeGroup"
 imageTemplate: "gbbirkisson/xp:%s-ubuntu"
 annotationKeys:
+  applyPriority: "enonic.applyPriority"
   alwaysOverwrite: "enonic.alwaysOverwrite"
   neverOverwrite: "enonic.neverOverwrite"
 deployment:

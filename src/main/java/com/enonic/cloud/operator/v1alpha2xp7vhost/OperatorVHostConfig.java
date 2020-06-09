@@ -1,5 +1,8 @@
 package com.enonic.cloud.operator.v1alpha2xp7vhost;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -7,6 +10,8 @@ import java.util.stream.Collectors;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
+
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
@@ -45,6 +50,9 @@ public class OperatorVHostConfig
     @Named("400ms")
     RunnableStaller runnableStaller;
 
+    @ConfigProperty(name = "operator.tasks.statusDelaySeconds")
+    Long statusDelay;
+
     void onStartup( @Observes StartupEvent _ev )
     {
         v1alpha2Xp7VHostCache.addEventListener( this );
@@ -79,6 +87,7 @@ public class OperatorVHostConfig
         v1alpha2Xp7ConfigCache.
             get( namespace ).
             filter( xp7config -> Objects.equals( xp7config.getSpec().file(), file ) ).
+            filter( xp7Config -> Duration.between( Instant.parse( xp7Config.getMetadata().getCreationTimestamp() ), Instant.now() ).getSeconds() > statusDelay ).
             forEach( vHostConfig -> runnableStaller.put( vHostConfig.getMetadata().getUid(), updateVHostConfig( vHostConfig ) ) );
     }
 
@@ -167,6 +176,6 @@ public class OperatorVHostConfig
     @SuppressWarnings("UnstableApiUsage")
     private String createName( final String host, final V1alpha2Xp7VHostSpecMapping mapping )
     {
-        return Hashing.sha512().hashString( host + mapping.source(), Charsets.UTF_8 ).toString().substring( 0, 10 );
+        return Hashing.sha256().hashString( host + mapping.source(), Charsets.UTF_8 ).toString().substring( 0, 10 );
     }
 }

@@ -10,9 +10,9 @@ testReview:
         namespace: mycloud-mysolution-myenv-myservice
       spec:
         host: healthcheck
-        options:
-          ingress: false
         mappings:
           - nodeGroup: main
             source: /
             target: /admin
+            options:
+              ingress: false

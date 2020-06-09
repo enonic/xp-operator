@@ -1,14 +1,20 @@
 package com.enonic.cloud.operator.v1alpha2xp7vhost;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
+
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.quarkus.runtime.StartupEvent;
@@ -31,6 +37,7 @@ import com.enonic.cloud.operator.dns.functions.info.IngressEnabledHosts;
 
 import static com.enonic.cloud.common.Configuration.cfgIfBool;
 import static com.enonic.cloud.common.Configuration.cfgLong;
+import static com.enonic.cloud.common.Configuration.cfgStr;
 
 
 public class OperatorVHostStatus
@@ -58,9 +65,14 @@ public class OperatorVHostStatus
     @Inject
     TaskRunner taskRunner;
 
+    @ConfigProperty(name = "operator.tasks.statusDelaySeconds")
+    Long statusDelay;
+
     void onStartup( @Observes StartupEvent _ev )
     {
-        cfgIfBool( "operator.status.enabled", () -> taskRunner.scheduleAtFixedRate( this, cfgLong( "operator.tasks.initialDelayMs" ), cfgLong( "operator.tasks.vHost.status.periodMs" ), TimeUnit.MILLISECONDS ) );
+        cfgIfBool( "operator.status.enabled", () -> taskRunner.scheduleAtFixedRate( this, cfgLong( "operator.tasks.initialDelayMs" ),
+                                                                                    cfgLong( "operator.tasks.vHost.status.periodMs" ),
+                                                                                    TimeUnit.MILLISECONDS ) );
     }
 
     @Override
@@ -69,6 +81,8 @@ public class OperatorVHostStatus
         v1alpha2Xp7VHostCache.
             getStream().
             filter( vHost -> vHost.getMetadata().getDeletionTimestamp() == null ).
+            filter( vHost -> Duration.between( Instant.parse( vHost.getMetadata().getCreationTimestamp() ), Instant.now() ).getSeconds() >
+                statusDelay ).
             forEach( vhost -> updateStatus( vhost, pollStatus( vhost ) ) );
     }
 
@@ -78,7 +92,7 @@ public class OperatorVHostStatus
             fields( ImmutableV1alpha2Xp7VHostStatusFields.builder().build() ).
             build();
 
-        if ( !vHost.getSpec().options().ingress() )
+        if ( !vHost.getSpec().hasIngress() )
         {
             return getBuilder( currentStatus ).
                 message( "OK" ).
@@ -86,9 +100,15 @@ public class OperatorVHostStatus
                 build();
         }
 
-        Optional<Ingress> ingress = ingressCache.get( vHost.getMetadata().getNamespace(), vHost.getMetadata().getName() );
+        List<Ingress> createdIngresses = ingressCache.get( vHost.getMetadata().getNamespace() ).
+            filter( ingress -> ingress.getMetadata().getAnnotations() != null ).
+            filter( ingress -> Objects.equals( vHost.getMetadata().getName(), ingress.getMetadata().getAnnotations().get(
+                cfgStr( "operator.helm.charts.Values.annotationKeys.vHostName" ) ) ) ).
+            collect( Collectors.toList() );
 
-        if ( ingress.isEmpty() )
+        long expectedIngresses = vHost.getSpec().mappings().stream().filter( m -> m.options().ingress() ).count();
+
+        if ( expectedIngresses != createdIngresses.size() )
         {
             return getBuilder( currentStatus ).
                 state( CrdStatusState.PENDING ).
@@ -98,7 +118,9 @@ public class OperatorVHostStatus
 
         if ( currentStatus.fields().publicIps().isEmpty() )
         {
-            Set<String> assignedIps = ingressAssignedIps.apply( ingress.get() );
+            Set<String> assignedIps = createdIngresses.stream().
+                map( ingressAssignedIps ).
+                flatMap( Collection::stream ).collect( Collectors.toSet() );
             if ( assignedIps.size() == 0 )
             {
                 return getBuilder( currentStatus ).
@@ -120,7 +142,7 @@ public class OperatorVHostStatus
         if ( vHost.getSpec().options().dnsRecord() && !currentStatus.fields().publicIps().isEmpty() &&
             !currentStatus.fields().dnsRecordCreated() )
         {
-            currentStatus = dnsStatus( ingress.get(), currentStatus );
+            currentStatus = dnsStatus( createdIngresses.get( 0 ), currentStatus );
         }
         else
         {

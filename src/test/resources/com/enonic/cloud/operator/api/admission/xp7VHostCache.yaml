@@ -21,8 +21,11 @@
   spec:
     host: healthcheck
     options:
-      ingress: false
+      dnsRecord: false
+      cdn: false
     mappings:
       - nodeGroup: main
         source: /
         target: /admin
+        options:
+          ingress: false

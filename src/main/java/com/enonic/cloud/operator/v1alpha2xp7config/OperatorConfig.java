@@ -74,6 +74,7 @@ public class OperatorConfig
             filter( configMap -> configMap.getMetadata().getLabels() != null ).
             filter( configMap -> configMap.getMetadata().getLabels().get( cfgStr( "operator.helm.charts.Values.labelKeys.nodeGroup" ) ) !=
                 null ).
+            filter( configMap -> configMap.getMetadata().getDeletionTimestamp() == null ).
             forEach( cm -> runnableStaller.put( cm.getMetadata().getUid(), updateCm( cm ) ) );
     }
 

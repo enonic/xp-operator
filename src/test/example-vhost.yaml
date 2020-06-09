@@ -4,17 +4,24 @@ metadata:
   name: test-purplejs-io
   namespace: mycloud-mysolution-myenv-myservice
 spec:
-  host: test.purplejs.io
+  host: tmptest.purplejs.io
   options:
-    ingressMaxBodySize: 8m
-    statusCake: true
+    dnsRecord: true
     cdn: false
-    ipWhitelist: ""
   certificate:
     authority: selfSigned
   mappings:
-    - nodeGroup: fisk
+    - nodeGroup: main
       source: /a
       target: /admin
       idProviders:
         default: system
+      options:
+        sslRedirect: false
+    - nodeGroup: main
+      source: /b
+      target: /admin
+      idProviders:
+        default: system
+      options:
+        sslRedirect: false

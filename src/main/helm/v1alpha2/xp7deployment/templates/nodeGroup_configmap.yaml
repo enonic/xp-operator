@@ -7,12 +7,13 @@ metadata:
   namespace: {{ $.Values.deployment.namespace }}
   annotations:
     {{ $.Values.annotationKeys.neverOverwrite }}: true
+    {{ $.Values.annotationKeys.applyPriority }}: "50"
   labels:
     {{ $.Values.labelKeys.managed }}: true
     {{ $.Values.labelKeys.nodeGroup }}: {{ $nodeGroupName }}
     {{- with $.Values.defaultLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
-data: null # Operator will manage this ConfigMap so leave data empty
+data: {} # Operator will manage this ConfigMap so leave data empty
 ---
 {{- end }}

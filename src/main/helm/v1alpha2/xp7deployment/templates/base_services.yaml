@@ -4,6 +4,8 @@ kind: Service
 metadata:
   name: {{ $.Values.discoveryService }}
   namespace: {{ $.Values.deployment.namespace }}
+  annotations:
+    {{ $.Values.annotationKeys.applyPriority }}: "100"
   labels:
     {{ $.Values.labelKeys.managed }}: true
     {{- with .Values.defaultLabels }}
@@ -35,6 +37,8 @@ kind: Service
 metadata:
   name: {{ .Values.allNodesKey }}
   namespace: {{ $.Values.deployment.namespace }}
+  annotations:
+    {{ $.Values.annotationKeys.applyPriority }}: "100"
   labels:
     {{ $.Values.labelKeys.managed }}: true
     {{- with .Values.defaultLabels }}

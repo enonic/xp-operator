@@ -4,8 +4,10 @@
 apiVersion: enonic.cloud/v1alpha2
 kind: Xp7VHost
 metadata:
-  name: healthcheck
+  name: {{ .Values.allNodesKey }}-healthcheck
   namespace: {{ $.Values.deployment.namespace }}
+  annotations:
+    {{ $.Values.annotationKeys.applyPriority }}: "80"
   labels:
     {{ $.Values.labelKeys.managed }}: true
     {{- with .Values.defaultLabels }}
@@ -14,11 +16,14 @@ metadata:
 spec:
   host: healthcheck
   options:
-    ingress: false
+    dnsRecord: false
+    cdn: false
   mappings:
-    - nodeGroup: all
+    - nodeGroup: {{ .Values.allNodesKey }}
       source: /
       target: /webapp/com.enonic.app.alive
+      options:
+        ingress: false
 
 ---
 
@@ -26,8 +31,10 @@ spec:
 apiVersion: enonic.cloud/v1alpha2
 kind: Xp7VHost
 metadata:
-  name: localhost
+  name: {{ .Values.allNodesKey }}-localhost
   namespace: {{ $.Values.deployment.namespace }}
+  annotations:
+    {{ $.Values.annotationKeys.applyPriority }}: "80"
   labels:
     {{ $.Values.labelKeys.managed }}: true
     {{- with .Values.defaultLabels }}
@@ -36,10 +43,13 @@ metadata:
 spec:
   host: localhost
   options:
-    ingress: false
+    dnsRecord: false
+    cdn: false
   mappings:
-    - nodeGroup: all
+    - nodeGroup: {{ .Values.allNodesKey }}
       source: /
       target: /
       idProviders:
         default: system
+      options:
+        ingress: false

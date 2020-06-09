@@ -8,6 +8,7 @@ metadata:
   namespace: {{ $.Values.deployment.namespace }}
   annotations:
     {{ $.Values.annotationKeys.neverOverwrite }}: true
+    {{ $.Values.annotationKeys.applyPriority }}: "71"
   labels:
     {{ $.Values.labelKeys.managed }}: true
     {{- with $.Values.defaultLabels }}
@@ -16,7 +17,8 @@ metadata:
 spec:
   nodeGroup: {{ $nodeGroupName }}
   file: com.enonic.xp.web.vhost.cfg
-  data: ""
+  data: |-
+    enabled = true
 ---
 # Elastic Search configuration
 apiVersion: enonic.cloud/v1alpha2
@@ -24,6 +26,8 @@ kind: Xp7Config
 metadata:
   name: {{ $nodeGroupName }}-elasticsearch
   namespace: {{ $.Values.deployment.namespace }}
+  annotations:
+    {{ $.Values.annotationKeys.applyPriority }}: "71"
   labels:
     {{ $.Values.labelKeys.managed }}: true
     {{- with $.Values.defaultLabels }}

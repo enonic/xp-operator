@@ -2,17 +2,18 @@
 apiVersion: enonic.cloud/v1alpha2
 kind: Xp7Config
 metadata:
-  name: all-system
+  name: {{ .Values.allNodesKey }}-system
   namespace: {{ $.Values.deployment.namespace }}
   annotations:
     {{ $.Values.annotationKeys.neverOverwrite }}: true
+    {{ $.Values.annotationKeys.applyPriority }}: "70"
   labels:
     {{ $.Values.labelKeys.managed }}: true
     {{- with .Values.defaultLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  nodeGroup: all
+  nodeGroup: {{ .Values.allNodesKey }}
   file: system.properties
   data: |-
     xp.name = {{ .Values.deployment.name }}
@@ -23,17 +24,18 @@ spec:
 apiVersion: enonic.cloud/v1alpha2
 kind: Xp7Config
 metadata:
-  name: all-admin
+  name: {{ .Values.allNodesKey }}-admin
   namespace: {{ $.Values.deployment.namespace }}
   annotations:
     {{ $.Values.annotationKeys.neverOverwrite }}: true
+    {{ $.Values.annotationKeys.applyPriority }}: "70"
   labels:
     {{ $.Values.labelKeys.managed }}: true
     {{- with .Values.defaultLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  nodeGroup: all
+  nodeGroup: {{ .Values.allNodesKey }}
   file: com.enonic.xp.app.main.cfg
   data: |-
     tourDisabled = true
@@ -42,17 +44,18 @@ spec:
 apiVersion: enonic.cloud/v1alpha2
 kind: Xp7Config
 metadata:
-  name: all-sessionstore
+  name: {{ .Values.allNodesKey }}-sessionstore
   namespace: {{ $.Values.deployment.namespace }}
   annotations:
     {{ $.Values.annotationKeys.neverOverwrite }}: true
+    {{ $.Values.annotationKeys.applyPriority }}: "70"
   labels:
     {{ $.Values.labelKeys.managed }}: true
     {{- with .Values.defaultLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  nodeGroup: all
+  nodeGroup: {{ .Values.allNodesKey }}
   file: com.enonic.xp.web.sessionstore.cfg
   data: |-
     {{- if $.Values.deployment.clustered }}
@@ -65,50 +68,36 @@ spec:
 apiVersion: enonic.cloud/v1alpha2
 kind: Xp7Config
 metadata:
-  name: all-appstatus
+  name: {{ .Values.allNodesKey }}-appstatus
   namespace: {{ $.Values.deployment.namespace }}
+  annotations:
+    {{ $.Values.annotationKeys.applyPriority }}: "70"
   labels:
     {{ $.Values.labelKeys.managed }}: true
     {{- with .Values.defaultLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  nodeGroup: all
+  nodeGroup: {{ .Values.allNodesKey }}
   file: com.enonic.app.status.cfg
   data: |-
     metricsUrl = http://localhost:2609/
----
-# Deploy configuration
-apiVersion: enonic.cloud/v1alpha2
-kind: Xp7Config
-metadata:
-  name: all-deploy
-  namespace: {{ $.Values.deployment.namespace }}
-  annotations:
-    {{ $.Values.annotationKeys.neverOverwrite }}: true
-  labels:
-    {{ $.Values.labelKeys.managed }}: true
-    {{- with $.Values.defaultLabels }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
-spec:
-  nodeGroup: all
-  file: com.enonic.xp.server.deploy.cfg
-  data: ""
 ---
 # Cluster configuration
 apiVersion: enonic.cloud/v1alpha2
 kind: Xp7Config
 metadata:
-  name: all-cluster
+  name: {{ .Values.allNodesKey }}-cluster
   namespace: {{ $.Values.deployment.namespace }}
+  annotations:
+    {{ $.Values.annotationKeys.applyPriority }}: "70"
   labels:
     {{ $.Values.labelKeys.managed }}: true
     {{- with $.Values.defaultLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  nodeGroup: all
+  nodeGroup: {{ .Values.allNodesKey }}
   file: com.enonic.xp.cluster.cfg
   data: |-
     {{- if not $.Values.deployment.clustered }}
@@ -124,22 +113,80 @@ spec:
     {{- end }}
     {{- end }}
 ---
-{{- if $.Values.deployment.clustered }}
-# Hazelcast configuration
 apiVersion: enonic.cloud/v1alpha2
 kind: Xp7Config
 metadata:
-  name: all-hazelcast
+  name: {{ .Values.allNodesKey }}-logback
   namespace: {{ $.Values.deployment.namespace }}
   annotations:
     {{ $.Values.annotationKeys.neverOverwrite }}: true
+    {{ $.Values.annotationKeys.applyPriority }}: "70"
   labels:
     {{ $.Values.labelKeys.managed }}: true
     {{- with $.Values.defaultLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  nodeGroup: all
+  nodeGroup: {{ .Values.allNodesKey }}
+  file: logback.xml
+  data: |-
+    <?xml version="1.0"?>
+    <configuration scan="true" scanPeriod="60 seconds">
+
+      <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${xp.home}/logs/server.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+          <fileNamePattern>${xp.home}/logs/server.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+          <maxFileSize>100MB</maxFileSize>
+          <maxHistory>7</maxHistory>
+          <totalSizeCap>3GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+          <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+      </appender>
+
+      <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <withJansi>true</withJansi>
+        <encoder>
+          <pattern>%date{ISO8601} %highlight(%-5level) %cyan(%logger{36}) - %msg%n</pattern>
+        </encoder>
+      </appender>
+
+      <root level="info">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="FILE"/>
+      </root>
+
+      <logger name="Events.Service" level="WARN" additivity="false">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="FILE"/>
+      </logger>
+
+      <logger name="Events.Bundle" level="WARN" additivity="false">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="FILE"/>
+      </logger>
+
+    </configuration>
+---
+{{- if $.Values.deployment.clustered }}
+# Hazelcast configuration
+apiVersion: enonic.cloud/v1alpha2
+kind: Xp7Config
+metadata:
+  name: {{ .Values.allNodesKey }}-hazelcast
+  namespace: {{ $.Values.deployment.namespace }}
+  annotations:
+    {{ $.Values.annotationKeys.neverOverwrite }}: true
+    {{ $.Values.annotationKeys.applyPriority }}: "70"
+  labels:
+    {{ $.Values.labelKeys.managed }}: true
+    {{- with $.Values.defaultLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  nodeGroup: {{ .Values.allNodesKey }}
   file: com.enonic.xp.hazelcast.cfg
   data: |-
     clusterConfigDefaults=false

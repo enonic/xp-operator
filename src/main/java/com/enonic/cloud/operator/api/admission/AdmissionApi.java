@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -236,11 +237,12 @@ public class AdmissionApi
             }
         }
 
-        if ( r.getSpec().options().ingress() )
+
+        if ( r.getSpec().hasIngress() )
         {
             long sameHost = v1alpha2Xp7VHostCache.getStream().
                 filter( v -> !v.getMetadata().getUid().equals( r.getMetadata().getUid() ) ).
-                filter( v -> r.getSpec().options().ingress() ).
+                filter( v -> v.getSpec().hasIngress() ).
                 filter( v -> v.getSpec().host().equals( r.getSpec().host() ) ).
                 count();
             Preconditions.checkState( sameHost < 1L, "This host is being used by another Xp7VHost" );

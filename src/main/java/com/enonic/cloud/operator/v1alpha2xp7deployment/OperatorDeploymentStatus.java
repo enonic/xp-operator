@@ -1,5 +1,8 @@
 package com.enonic.cloud.operator.v1alpha2xp7deployment;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -9,6 +12,8 @@ import java.util.stream.Collectors;
 
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
+
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import io.fabric8.kubernetes.api.model.ContainerStatus;
 import io.fabric8.kubernetes.api.model.Pod;
@@ -50,6 +55,9 @@ public class OperatorDeploymentStatus
     @Inject
     TaskRunner taskRunner;
 
+    @ConfigProperty(name = "operator.tasks.statusDelaySeconds")
+    Long statusDelay;
+
     void onStartup( @Observes StartupEvent _ev )
     {
         cfgIfBool( "operator.status.enabled", () -> taskRunner.scheduleAtFixedRate( this, cfgLong( "operator.tasks.initialDelayMs" ), cfgLong( "operator.tasks.deployment.status.periodMs" ), TimeUnit.MILLISECONDS ) );
@@ -60,6 +68,8 @@ public class OperatorDeploymentStatus
     {
         v1alpha2Xp7DeploymentCache.getStream().
             filter( deployment -> deployment.getMetadata().getDeletionTimestamp() == null ).
+            filter(
+                deployment -> Duration.between( Instant.parse( deployment.getMetadata().getCreationTimestamp() ), Instant.now() ).getSeconds() > statusDelay ).
             forEach( deployment -> updateStatus( deployment, pollStatus( deployment ) ) );
     }
 

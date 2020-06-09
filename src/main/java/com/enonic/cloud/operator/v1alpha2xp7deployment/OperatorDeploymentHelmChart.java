@@ -20,6 +20,7 @@ import com.enonic.cloud.helm.functions.HelmToK8s;
 import com.enonic.cloud.helm.functions.HelmToK8sImpl;
 import com.enonic.cloud.helm.functions.HelmToK8sParamsImpl;
 import com.enonic.cloud.helm.functions.K8sCommandBuilder;
+import com.enonic.cloud.helm.functions.K8sCommandSorter;
 import com.enonic.cloud.helm.functions.Templator;
 import com.enonic.cloud.helm.values.BaseValues;
 import com.enonic.cloud.kubernetes.caches.V1alpha2Xp7DeploymentCache;
@@ -56,6 +57,9 @@ public class OperatorDeploymentHelmChart
 
     @Inject
     OptionalListPruner<K8sCommand> listPruner;
+
+    @Inject
+    K8sCommandSorter commandSorter;
 
     @Inject
     RunnableListExecutor runnableListExecutor;
@@ -97,6 +101,7 @@ public class OperatorDeploymentHelmChart
         helmToK8s.
             andThen( k8sCommandBuilder ).
             andThen( listPruner ).
+            andThen( commandSorter ).
             andThen( runnableListExecutor ).
             apply( HelmToK8sParamsImpl.of( Optional.ofNullable( oldResource ), Optional.ofNullable( newResource ) ) );
     }

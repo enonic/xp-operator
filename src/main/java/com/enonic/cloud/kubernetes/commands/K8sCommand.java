@@ -10,9 +10,9 @@ import com.enonic.cloud.common.logwrappers.LoggedRunnable;
 public abstract class K8sCommand
     extends LoggedRunnable
 {
-    protected abstract K8sCommandAction action();
+    public abstract K8sCommandAction action();
 
-    protected abstract HasMetadata resource();
+    public abstract HasMetadata resource();
 
     @Override
     protected String beforeMessage()

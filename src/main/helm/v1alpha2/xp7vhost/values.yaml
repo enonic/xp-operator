@@ -1,14 +1,6 @@
 extensions:
   linkerd:
     enabled: false
-  # TODO: Move to vHOST
-  ingress:
-    DDOS:
-      enabled: false
-      limitConnections: 5
-      limitRpm: 100
-    stickySession:
-      enabled: false
 
 # Filled in by operator
 # vhost:

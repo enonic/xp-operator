@@ -5,6 +5,8 @@ kind: Service
 metadata:
   name: {{ $nodeGroupName }}
   namespace: {{ $.Values.deployment.namespace }}
+  annotations:
+    {{ $.Values.annotationKeys.applyPriority }}: "100"
   labels:
     {{ $.Values.labelKeys.managed }}: true
     {{ $.Values.labelKeys.nodeGroup }}: {{ $nodeGroupName }}
@@ -37,10 +39,6 @@ spec:
     - name: es-api
       port: 9200
       targetPort: 9200
-      protocol: TCP
-    - name: es-transport
-      port: 9300
-      targetPort: 9300
       protocol: TCP
 ---
 {{- end }}

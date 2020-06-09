@@ -1323,18 +1323,21 @@ status: null
 spec:
   host: "healthcheck"
   options:
-    ingress: false
-    ingressMaxBodySize: "100m"
     dnsRecord: false
-    statusCake: false
-    caching: false
     cdn: false
-    ipWhitelist: ""
   certificate: null
   mappings:
   - nodeGroup: "all"
     source: "/"
     target: "/webapp/com.enonic.app.alive"
+    options:
+      ingress: false
+      ingressMaxBodySize: "100m"
+      statusCake: false
+      caching: false
+      ipWhitelist: ""
+      stickySession: false
+      sslRedirect: true
     idProviders: null
 ---
 kind: "Xp7VHost"
@@ -1352,18 +1355,21 @@ status: null
 spec:
   host: "localhost"
   options:
-    ingress: false
-    ingressMaxBodySize: "100m"
     dnsRecord: false
-    statusCake: false
-    caching: false
     cdn: false
-    ipWhitelist: ""
   certificate: null
   mappings:
   - nodeGroup: "all"
     source: "/"
     target: "/"
+    options:
+      ingress: false
+      ingressMaxBodySize: "100m"
+      statusCake: false
+      caching: false
+      ipWhitelist: ""
+      stickySession: false
+      sslRedirect: true
     idProviders:
       default: "system"
       enabled: []
