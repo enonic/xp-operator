@@ -2,7 +2,6 @@ package com.enonic.cloud.operator.v1alpha2xp7deployment;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -10,6 +9,8 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
+import io.fabric8.kubernetes.api.model.Namespace;
+import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.informers.ResourceEventHandler;
 import io.quarkus.runtime.StartupEvent;
 
@@ -19,8 +20,6 @@ import com.enonic.cloud.kubernetes.caches.NamespaceCache;
 import com.enonic.cloud.kubernetes.caches.V1alpha2Xp7DeploymentCache;
 import com.enonic.cloud.kubernetes.commands.K8sCommand;
 import com.enonic.cloud.kubernetes.commands.K8sCommandMapper;
-import com.enonic.cloud.kubernetes.commands.builders.GenericBuilderAction;
-import com.enonic.cloud.kubernetes.commands.builders.GenericBuilderParamsImpl;
 import com.enonic.cloud.kubernetes.crd.xp7.v1alpha2.deployment.V1alpha2Xp7Deployment;
 
 import static com.enonic.cloud.common.Configuration.cfgStr;
@@ -32,6 +31,9 @@ public class OperatorDeleteNamespace
 {
     @Inject
     NamespaceCache namespaceCache;
+
+    @Inject
+    KubernetesClient client;
 
     @SuppressWarnings("CdiInjectionPointsInspection")
     @Inject
@@ -66,16 +68,16 @@ public class OperatorDeleteNamespace
     @Override
     public void onDelete( final V1alpha2Xp7Deployment oldResource, final boolean b )
     {
-        deleteAnnotatedNamespace().
-            andThen( listPruner ).
-            andThen( runnableListExecutor ).
+        collectAnnotatedNamespace().
+            andThen( this::deleteNamespaces ).
             apply( oldResource );
     }
 
-    private Function<V1alpha2Xp7Deployment, List<Optional<K8sCommand>>> deleteAnnotatedNamespace()
+    private Function<V1alpha2Xp7Deployment, List<Namespace>> collectAnnotatedNamespace()
     {
         return ( resource ) -> namespaceCache.getStream().
             // Get namespaces with annotations
+                filter( namespace -> namespace.getMetadata().getDeletionTimestamp() != null ).
                 filter( namespace -> namespace.getMetadata().getAnnotations() != null ).
             // Get with delete annotation matching this deployment
                 filter( namespace -> Objects.equals(
@@ -83,10 +85,13 @@ public class OperatorDeleteNamespace
                 resource.getMetadata().getName() ) ).
             // Get only those that are not terminating
                 filter( namespace -> !Objects.equals( namespace.getStatus().getPhase(), "Terminating" ) ).
-            // Map to delete command
-                map( namespace -> k8sCommandMapper.getCommand(
-                GenericBuilderParamsImpl.of( namespace, GenericBuilderAction.DELETE, false, false ) ) ).
-            // Collect commands
+            // Collect
                 collect( Collectors.toList() );
+    }
+
+    private Void deleteNamespaces( final List<Namespace> namespaces )
+    {
+        client.namespaces().delete( namespaces );
+        return null;
     }
 }

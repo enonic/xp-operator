@@ -93,7 +93,7 @@ public class OperatorDeploymentHelmChart
     @Override
     public void onDelete( final V1alpha2Xp7Deployment oldResource, final boolean b )
     {
-        handle( oldResource, null );
+        // Do nothing
     }
 
     private void handle( final V1alpha2Xp7Deployment oldResource, final V1alpha2Xp7Deployment newResource )
