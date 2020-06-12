@@ -65,12 +65,11 @@ spec:
               properties:
                 state:
                   type: string
+                  enum : ["ERROR", "PENDING", "STOPPED", "RUNNING"]
                 message:
-                  nullable: true
                   type: string
                 fields:
                   type: object
-                  nullable: true
                   properties:
                     pods:
                       type: object
@@ -130,20 +129,20 @@ spec:
                             type: object
                             additionalProperties:
                               type: string
-#  conversion:
-#    strategy: Webhook
-#    webhookClientConfig:
-#      url: https://8e04e3dd.ngrok.io/apis/operator.enonic.cloud/v1alpha1/conversions
-#  conversion:
-#    strategy: Webhook
-#    webhook:
-#      conversionReviewVersions: ["v1beta1"]
-#      clientConfig:
-#        caBundle: "{CA_CERT}"
-#        service:
-#          name: kubernetes
-#          namespace: default
-#          path: /apis/operator.enonic.cloud/conversion
+  #  conversion:
+  #    strategy: Webhook
+  #    webhookClientConfig:
+  #      url: https://8e04e3dd.ngrok.io/apis/operator.enonic.cloud/v1alpha1/conversions
+  #  conversion:
+  #    strategy: Webhook
+  #    webhook:
+  #      conversionReviewVersions: ["v1beta1"]
+  #      clientConfig:
+  #        caBundle: "{CA_CERT}"
+  #        service:
+  #          name: kubernetes
+  #          namespace: default
+  #          path: /apis/operator.enonic.cloud/conversion
   additionalPrinterColumns:
     - name: Enabled
       type: boolean

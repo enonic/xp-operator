@@ -14,7 +14,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-    <quarkus.version>1.4.1.Final</quarkus.version>
+    <quarkus.version>1.5.0.Final</quarkus.version>
     <immutables.version>2.8.2</immutables.version>
     <jackson-yaml.version>2.11.0</jackson-yaml.version>
 
@@ -52,6 +52,12 @@
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-kubernetes-client</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>io.fabric8</groupId>
+          <artifactId>kubernetes-client</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
@@ -76,6 +82,11 @@
       <artifactId>jackson-dataformat-yaml</artifactId>
       <version>${jackson-yaml.version}</version>
       <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.enonic.cloud</groupId>
+      <artifactId>operator-client</artifactId>
+      <version>0.1.2</version>
     </dependency>
   </dependencies>
   <build>

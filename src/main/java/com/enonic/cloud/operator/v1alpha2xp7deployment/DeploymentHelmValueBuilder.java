@@ -16,13 +16,13 @@ import com.enonic.cloud.helm.values.BaseValues;
 import com.enonic.cloud.helm.values.MapValues;
 import com.enonic.cloud.helm.values.ValueBuilder;
 import com.enonic.cloud.helm.values.Values;
-import com.enonic.cloud.kubernetes.crd.xp7.v1alpha2.deployment.V1alpha2Xp7Deployment;
-import com.enonic.cloud.kubernetes.crd.xp7.v1alpha2.deployment.V1alpha2Xp7DeploymentSpecNode;
+import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
+import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentSpecNodeGroup;
 
 @Value.Immutable
 @Params
 public abstract class DeploymentHelmValueBuilder
-    implements ValueBuilder<V1alpha2Xp7Deployment>
+    implements ValueBuilder<Xp7Deployment>
 {
     protected abstract BaseValues baseValues();
 
@@ -31,7 +31,7 @@ public abstract class DeploymentHelmValueBuilder
     protected abstract Supplier<ServiceAccount> cloudApiServiceAccountProvider();
 
     @Override
-    public Values apply( final V1alpha2Xp7Deployment resource )
+    public Values apply( final Xp7Deployment resource )
     {
         MapValues values = new MapValues( baseValues() );
 
@@ -49,7 +49,7 @@ public abstract class DeploymentHelmValueBuilder
             deployment.put( "minimumMasterNodes", minimumMasterNodes( resource ) );
             deployment.put( "minimumDataNodes", minimumDataNodes( resource ) );
         }
-        deployment.put( "spec", resource.getSpec() );
+        deployment.put( "spec", resource.getXp7DeploymentSpec() );
 
         values.put( "defaultLabels", defaultLabels( resource ) );
         values.put( "deployment", deployment );
@@ -72,24 +72,27 @@ public abstract class DeploymentHelmValueBuilder
         return Hashing.sha512().hashString( s, Charsets.UTF_8 ).toString();
     }
 
-    private Object defaultLabels( final V1alpha2Xp7Deployment resource )
+    private Object defaultLabels( final Xp7Deployment resource )
     {
         return resource.getMetadata().getLabels();
     }
 
-    private boolean isClustered( V1alpha2Xp7Deployment resource )
+    private boolean isClustered( Xp7Deployment resource )
     {
-        return resource.getSpec().nodeGroups().values().stream().mapToInt( V1alpha2Xp7DeploymentSpecNode::replicas ).sum() > 1;
+        return resource.getXp7DeploymentSpec().
+            getXp7DeploymentSpecNodeGroups().
+            getAdditionalProperties().values().stream().
+            mapToInt( Xp7DeploymentSpecNodeGroup::getReplicas ).sum() > 1;
     }
 
-    private Integer minimumMasterNodes( V1alpha2Xp7Deployment resource )
+    private Integer minimumMasterNodes( Xp7Deployment resource )
     {
-        return defaultMinimumAvailable( resource.getSpec().totalMasterNodes() );
+        return defaultMinimumAvailable( 3 );
     }
 
-    private Integer minimumDataNodes( V1alpha2Xp7Deployment resource )
+    private Integer minimumDataNodes( Xp7Deployment resource )
     {
-        return defaultMinimumAvailable( resource.getSpec().totalDataNodes() );
+        return 2;
     }
 
     private Integer defaultMinimumAvailable( int total )

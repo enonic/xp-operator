@@ -1,8 +1,5 @@
 package com.enonic.cloud.operator.v1alpha2xp7vhost;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -16,35 +13,35 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
 
-import io.fabric8.kubernetes.client.informers.ResourceEventHandler;
+import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
 import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.cloud.common.staller.RunnableStaller;
-import com.enonic.cloud.kubernetes.caches.V1alpha2Xp7ConfigCache;
-import com.enonic.cloud.kubernetes.caches.V1alpha2Xp7VHostCache;
+import com.enonic.cloud.kubernetes.Clients;
+import com.enonic.cloud.kubernetes.InformerSearcher;
 import com.enonic.cloud.kubernetes.commands.K8sLogHelper;
-import com.enonic.cloud.kubernetes.crd.client.CrdClient;
-import com.enonic.cloud.kubernetes.crd.xp7.v1alpha2.config.ImmutableV1alpha2Xp7ConfigSpec;
-import com.enonic.cloud.kubernetes.crd.xp7.v1alpha2.config.V1alpha2Xp7Config;
-import com.enonic.cloud.kubernetes.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHost;
-import com.enonic.cloud.kubernetes.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHostSpecMapping;
+import com.enonic.cloud.kubernetes.model.v1alpha2.xp7config.Xp7Config;
+import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHost;
+import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHostSpecMapping;
+import com.enonic.cloud.operator.InformerEventHandler;
 
 import static com.enonic.cloud.common.Configuration.cfgStr;
 
 
 public class OperatorVHostConfig
-    implements ResourceEventHandler<V1alpha2Xp7VHost>
+    extends InformerEventHandler<Xp7VHost>
 {
-    @SuppressWarnings("CdiInjectionPointsInspection")
     @Inject
-    CrdClient crdClient;
-
-    @SuppressWarnings("CdiInjectionPointsInspection")
-    @Inject
-    V1alpha2Xp7VHostCache v1alpha2Xp7VHostCache;
+    Clients clients;
 
     @Inject
-    V1alpha2Xp7ConfigCache v1alpha2Xp7ConfigCache;
+    SharedIndexInformer<Xp7VHost> xp7VHostSharedIndexInformer;
+
+    @Inject
+    InformerSearcher<Xp7VHost> xp7VHostInformerSearcher;
+
+    @Inject
+    InformerSearcher<Xp7Config> xp7ConfigInformerSearcher;
 
     @Inject
     @Named("400ms")
@@ -55,19 +52,19 @@ public class OperatorVHostConfig
 
     void onStartup( @Observes StartupEvent _ev )
     {
-        v1alpha2Xp7VHostCache.addEventListener( this );
+        listenToInformer( xp7VHostSharedIndexInformer );
     }
 
     @Override
-    public void onAdd( final V1alpha2Xp7VHost newResource )
+    public void onAdd( final Xp7VHost newResource )
     {
         handle( newResource.getMetadata().getNamespace() );
     }
 
     @Override
-    public void onUpdate( final V1alpha2Xp7VHost oldResource, final V1alpha2Xp7VHost newResource )
+    public void onUpdate( final Xp7VHost oldResource, final Xp7VHost newResource )
     {
-        if ( Objects.equals( oldResource.getSpec(), newResource.getSpec() ) )
+        if ( Objects.equals( oldResource.getXp7VHostSpec(), newResource.getXp7VHostSpec() ) )
         {
             return;
         }
@@ -75,7 +72,7 @@ public class OperatorVHostConfig
     }
 
     @Override
-    public void onDelete( final V1alpha2Xp7VHost oldResource, final boolean b )
+    public void onDelete( final Xp7VHost oldResource, final boolean b )
     {
         handle( oldResource.getMetadata().getNamespace() );
     }
@@ -84,49 +81,45 @@ public class OperatorVHostConfig
     {
         // Trigger update on each vHost config in the namespace
         final String file = cfgStr( "operator.deployment.xp.config.vhosts.file" );
-        v1alpha2Xp7ConfigCache.
+        xp7ConfigInformerSearcher.
             get( namespace ).
-            filter( xp7config -> Objects.equals( xp7config.getSpec().file(), file ) ).
-            filter( xp7Config -> Duration.between( Instant.parse( xp7Config.getMetadata().getCreationTimestamp() ), Instant.now() ).getSeconds() > statusDelay ).
+            filter( xp7config -> Objects.equals( xp7config.getXp7ConfigSpec().getFile(), file ) ).
             forEach( vHostConfig -> runnableStaller.put( vHostConfig.getMetadata().getUid(), updateVHostConfig( vHostConfig ) ) );
     }
 
-    private Runnable updateVHostConfig( final V1alpha2Xp7Config vHostConfig )
+    private Runnable updateVHostConfig( final Xp7Config vHostConfig )
     {
         return () -> {
-            final String nodeGroup = vHostConfig.getSpec().nodeGroup();
+            final String nodeGroup = vHostConfig.getXp7ConfigSpec().getNodeGroup();
 
-            List<V1alpha2Xp7VHost> vHosts = v1alpha2Xp7VHostCache.
+            List<Xp7VHost> vHosts = xp7VHostInformerSearcher.
                 get( vHostConfig.getMetadata().getNamespace() ).
                 filter( vHost -> filterRelevantVhost( nodeGroup, vHost ) ).
                 collect( Collectors.toList() );
 
             final String data = buildVHostConfigData( nodeGroup, vHosts );
 
-            v1alpha2Xp7ConfigCache.get( vHostConfig ).
+            xp7ConfigInformerSearcher.get( vHostConfig ).
                 ifPresent( xp7Config -> {
-                    if ( !Objects.equals( xp7Config.getSpec().data(), data ) )
+                    if ( !Objects.equals( xp7Config.getXp7ConfigSpec().getData(), data ) )
                     {
-                        K8sLogHelper.logDoneable( crdClient.
-                            xp7Configs().
+                        K8sLogHelper.logDoneable( clients.
+                            xp7Configs().crdClient().
                             inNamespace( xp7Config.getMetadata().getNamespace() ).
                             withName( xp7Config.getMetadata().getName() ).
                             edit().
-                            withSpec( ImmutableV1alpha2Xp7ConfigSpec.builder().
-                                from( xp7Config.getSpec() ).
-                                data( data ).
-                                build() ) );
+                            withSpec( xp7Config.getXp7ConfigSpec().withData( data ) ) );
                     }
                 } );
         };
     }
 
-    private boolean filterRelevantVhost( final String nodegroup, final V1alpha2Xp7VHost vHost )
+    private boolean filterRelevantVhost( final String nodegroup, final Xp7VHost vHost )
     {
         final String allNodes = cfgStr( "operator.helm.charts.Values.allNodesKey" );
-        for ( V1alpha2Xp7VHostSpecMapping m : vHost.getSpec().mappings() )
+        for ( Xp7VHostSpecMapping m : vHost.getXp7VHostSpec().getXp7VHostSpecMappings() )
         {
-            if ( m.nodeGroup().equals( nodegroup ) || m.nodeGroup().equals( allNodes ) )
+            if ( m.getNodeGroup().equals( nodegroup ) || m.getNodeGroup().equals( allNodes ) )
             {
                 return true;
             }
@@ -134,19 +127,19 @@ public class OperatorVHostConfig
         return false;
     }
 
-    private String buildVHostConfigData( final String nodeGroup, final List<V1alpha2Xp7VHost> vHosts )
+    private String buildVHostConfigData( final String nodeGroup, final List<Xp7VHost> vHosts )
     {
         final String allNodes = cfgStr( "operator.helm.charts.Values.allNodesKey" );
 
         StringBuilder sb = new StringBuilder( "enabled = true" );
 
-        for ( V1alpha2Xp7VHost vHost : vHosts )
+        for ( Xp7VHost vHost : vHosts )
         {
-            for ( V1alpha2Xp7VHostSpecMapping mapping : vHost.getSpec().mappings() )
+            for ( Xp7VHostSpecMapping mapping : vHost.getXp7VHostSpec().getXp7VHostSpecMappings() )
             {
-                if ( mapping.nodeGroup().equals( allNodes ) || mapping.nodeGroup().equals( nodeGroup ) )
+                if ( mapping.getNodeGroup().equals( allNodes ) || mapping.getNodeGroup().equals( nodeGroup ) )
                 {
-                    addVHostMapping( sb, vHost.getSpec().host(), mapping );
+                    addVHostMapping( sb, vHost.getXp7VHostSpec().getHost(), mapping );
                 }
             }
         }
@@ -154,28 +147,28 @@ public class OperatorVHostConfig
         return sb.toString();
     }
 
-    private void addVHostMapping( final StringBuilder sb, final String host, final V1alpha2Xp7VHostSpecMapping mapping )
+    private void addVHostMapping( final StringBuilder sb, final String host, final Xp7VHostSpecMapping mapping )
     {
         String name = createName( host, mapping );
 
         sb.append( "\n\n" );
         sb.append( String.format( "mapping.%s.host=%s\n", name, host ) );
-        sb.append( String.format( "mapping.%s.source=%s\n", name, mapping.source() ) );
-        sb.append( String.format( "mapping.%s.target=%s", name, mapping.target() ) );
-        if ( mapping.idProviders() != null )
+        sb.append( String.format( "mapping.%s.source=%s\n", name, mapping.getSource() ) );
+        sb.append( String.format( "mapping.%s.target=%s", name, mapping.getTarget() ) );
+        if ( mapping.getXp7VHostSpecMappingIdProvider() != null )
         {
             sb.append( "\n" );
-            sb.append( String.format( "mapping.%s.idProvider.%s=default", name, mapping.idProviders().defaultIdProvider() ) );
-            mapping.idProviders().enabled().forEach( p -> {
+            sb.append( String.format( "mapping.%s.idProvider.%s=default", name, mapping.getXp7VHostSpecMappingIdProvider().getDefault() ) );
+            mapping.getXp7VHostSpecMappingIdProvider().getEnabled().forEach( p -> {
                 sb.append( "\n" );
-                sb.append( String.format( "mapping.%s.idProvider.%s=enabled", name, mapping.idProviders().defaultIdProvider() ) );
+                sb.append( String.format( "mapping.%s.idProvider.%s=enabled", name, p ) );
             } );
         }
     }
 
     @SuppressWarnings("UnstableApiUsage")
-    private String createName( final String host, final V1alpha2Xp7VHostSpecMapping mapping )
+    private String createName( final String host, final Xp7VHostSpecMapping mapping )
     {
-        return Hashing.sha256().hashString( host + mapping.source(), Charsets.UTF_8 ).toString().substring( 0, 10 );
+        return Hashing.sha256().hashString( host + mapping.getSource(), Charsets.UTF_8 ).toString().substring( 0, 10 );
     }
 }

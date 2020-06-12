@@ -2,7 +2,6 @@ package com.enonic.cloud.operator.v1alpha2xp7deployment;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -20,19 +19,15 @@ import io.fabric8.kubernetes.api.model.Pod;
 import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.cloud.common.staller.TaskRunner;
-import com.enonic.cloud.kubernetes.caches.PodCache;
-import com.enonic.cloud.kubernetes.caches.V1alpha2Xp7DeploymentCache;
+import com.enonic.cloud.kubernetes.Clients;
+import com.enonic.cloud.kubernetes.InformerSearcher;
 import com.enonic.cloud.kubernetes.commands.K8sLogHelper;
-import com.enonic.cloud.kubernetes.crd.client.CrdClient;
-import com.enonic.cloud.kubernetes.crd.status.CrdStatusState;
-import com.enonic.cloud.kubernetes.crd.xp7.v1alpha2.deployment.ImmutableV1alpha2Xp7DeploymentStatus;
-import com.enonic.cloud.kubernetes.crd.xp7.v1alpha2.deployment.ImmutableV1alpha2Xp7DeploymentStatusFields;
-import com.enonic.cloud.kubernetes.crd.xp7.v1alpha2.deployment.ImmutableV1alpha2Xp7DeploymentStatusFieldsPod;
-import com.enonic.cloud.kubernetes.crd.xp7.v1alpha2.deployment.V1alpha2Xp7Deployment;
-import com.enonic.cloud.kubernetes.crd.xp7.v1alpha2.deployment.V1alpha2Xp7DeploymentSpecNode;
-import com.enonic.cloud.kubernetes.crd.xp7.v1alpha2.deployment.V1alpha2Xp7DeploymentStatus;
-import com.enonic.cloud.kubernetes.crd.xp7.v1alpha2.deployment.V1alpha2Xp7DeploymentStatusFields;
-import com.enonic.cloud.kubernetes.crd.xp7.v1alpha2.deployment.V1alpha2Xp7DeploymentStatusFieldsPod;
+import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
+import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentSpecNodeGroup;
+import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentStatus;
+import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentStatusFields;
+import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentStatusFieldsPod;
+import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentStatusFieldsPods;
 
 import static com.enonic.cloud.common.Configuration.cfgIfBool;
 import static com.enonic.cloud.common.Configuration.cfgLong;
@@ -41,16 +36,14 @@ import static com.enonic.cloud.common.Configuration.cfgLong;
 public class OperatorDeploymentStatus
     implements Runnable
 {
-    @SuppressWarnings("CdiInjectionPointsInspection")
     @Inject
-    CrdClient crdClient;
-
-    @SuppressWarnings("CdiInjectionPointsInspection")
-    @Inject
-    V1alpha2Xp7DeploymentCache v1alpha2Xp7DeploymentCache;
+    Clients clients;
 
     @Inject
-    PodCache podCache;
+    InformerSearcher<Xp7Deployment> xp7DeploymentInformerSearcher;
+
+    @Inject
+    InformerSearcher<Pod> podInformerSearcher;
 
     @Inject
     TaskRunner taskRunner;
@@ -60,81 +53,80 @@ public class OperatorDeploymentStatus
 
     void onStartup( @Observes StartupEvent _ev )
     {
-        cfgIfBool( "operator.status.enabled", () -> taskRunner.scheduleAtFixedRate( this, cfgLong( "operator.tasks.initialDelayMs" ), cfgLong( "operator.tasks.deployment.status.periodMs" ), TimeUnit.MILLISECONDS ) );
+        cfgIfBool( "operator.status.enabled", () -> taskRunner.scheduleAtFixedRate( this, cfgLong( "operator.tasks.initialDelayMs" ),
+                                                                                    cfgLong( "operator.tasks.deployment.status.periodMs" ),
+                                                                                    TimeUnit.MILLISECONDS ) );
     }
 
     @Override
     public void run()
     {
-        v1alpha2Xp7DeploymentCache.getStream().
+        xp7DeploymentInformerSearcher.getStream().
             filter( deployment -> deployment.getMetadata().getDeletionTimestamp() == null ).
-            filter(
-                deployment -> Duration.between( Instant.parse( deployment.getMetadata().getCreationTimestamp() ), Instant.now() ).getSeconds() > statusDelay ).
+            filter( deployment ->
+                        Duration.between( Instant.parse( deployment.getMetadata().getCreationTimestamp() ), Instant.now() ).getSeconds() >
+                            statusDelay ).
             forEach( deployment -> updateStatus( deployment, pollStatus( deployment ) ) );
     }
 
-    private V1alpha2Xp7DeploymentStatus pollStatus( final V1alpha2Xp7Deployment deployment )
+    private Xp7DeploymentStatus pollStatus( final Xp7Deployment deployment )
     {
-        List<Pod> pods = podCache.getStream().
+        List<Pod> pods = podInformerSearcher.getStream().
             filter( pod -> filterPods( deployment, pod ) ).
             collect( Collectors.toList() );
 
-        V1alpha2Xp7DeploymentStatusFields fields = buildFields( pods );
-
-        ImmutableV1alpha2Xp7DeploymentStatus.Builder statusBuilder = ImmutableV1alpha2Xp7DeploymentStatus.builder().
-            fields( fields );
+        Xp7DeploymentStatusFields fields = buildFields( pods );
 
         int expectedNumberOfPods = expectedNumberOfPods( deployment );
 
         if ( pods.size() != expectedNumberOfPods )
         {
-            return statusBuilder.
-                state( CrdStatusState.PENDING ).
-                message( "Pod count mismatch" ).
-                build();
+            return new Xp7DeploymentStatus().
+                withState( Xp7DeploymentStatus.State.PENDING ).
+                withMessage( "Pod count mismatch" ).
+                withXp7DeploymentStatusFields( fields );
         }
 
-        if ( !deployment.getSpec().enabled() )
+        if ( !deployment.getXp7DeploymentSpec().getEnabled() )
         {
-            return statusBuilder.
-                state( CrdStatusState.STOPPED ).
-                message( "OK" ).
-                build();
+            return new Xp7DeploymentStatus().
+                withState( Xp7DeploymentStatus.State.STOPPED ).
+                withMessage( "OK" ).
+                withXp7DeploymentStatusFields( fields );
         }
 
-        for ( V1alpha2Xp7DeploymentStatusFieldsPod s : fields.pods().values() )
+        for ( Xp7DeploymentStatusFieldsPod s : fields.getXp7DeploymentStatusFieldsPods().getAdditionalProperties().values() )
         {
-            if ( !s.phase().equals( "Running" ) || !s.ready() )
+            if ( !s.getPhase().equals( "Running" ) || !s.getReady() )
             {
-                return statusBuilder.
-                    state( CrdStatusState.PENDING ).
-                    message( "Waiting for pods" ).
-                    build();
+                return new Xp7DeploymentStatus().
+                    withState( Xp7DeploymentStatus.State.PENDING ).
+                    withMessage( "Waiting for pods" ).
+                    withXp7DeploymentStatusFields( fields );
             }
         }
 
-        return statusBuilder.
-            state( CrdStatusState.RUNNING ).
-            message( "OK" ).
-            build();
+        return new Xp7DeploymentStatus().
+            withState( Xp7DeploymentStatus.State.RUNNING ).
+            withMessage( "OK" ).
+            withXp7DeploymentStatusFields( fields );
     }
 
-    private V1alpha2Xp7DeploymentStatusFields buildFields( final List<Pod> pods )
+    private Xp7DeploymentStatusFields buildFields( final List<Pod> pods )
     {
-        ImmutableV1alpha2Xp7DeploymentStatusFields.Builder fieldsBuilder = ImmutableV1alpha2Xp7DeploymentStatusFields.builder();
+        Xp7DeploymentStatusFieldsPods fieldPods = new Xp7DeploymentStatusFieldsPods();
         for ( Pod pod : pods )
         {
             Optional<ContainerStatus> cs =
                 pod.getStatus().getContainerStatuses().stream().filter( s -> s.getName().equals( "exp" ) ).findFirst();
-            fieldsBuilder.putPods( pod.getMetadata().getName(), ImmutableV1alpha2Xp7DeploymentStatusFieldsPod.builder().
-                phase( pod.getStatus().getPhase() ).
-                ready( cs.isPresent() && cs.get().getReady() ).
-                build() );
+            fieldPods.setAdditionalProperty( pod.getMetadata().getName(), new Xp7DeploymentStatusFieldsPod().
+                withPhase( pod.getStatus().getPhase() ).
+                withReady( cs.isPresent() && cs.get().getReady() ) );
         }
-        return fieldsBuilder.build();
+        return new Xp7DeploymentStatusFields().withXp7DeploymentStatusFieldsPods( fieldPods );
     }
 
-    private boolean filterPods( final V1alpha2Xp7Deployment deployment, final Pod pod )
+    private boolean filterPods( final Xp7Deployment deployment, final Pod pod )
     {
         for ( Map.Entry<String, String> l : deployment.getMetadata().getLabels().entrySet() )
         {
@@ -146,30 +138,31 @@ public class OperatorDeploymentStatus
         return true;
     }
 
-    private int expectedNumberOfPods( final V1alpha2Xp7Deployment deployment )
+    private int expectedNumberOfPods( final Xp7Deployment deployment )
     {
-        if ( !deployment.getSpec().enabled() )
+        if ( !deployment.getXp7DeploymentSpec().getEnabled() )
         {
             return 0;
         }
 
-        return deployment.getSpec().
-            nodeGroups().
+        return deployment.getXp7DeploymentSpec().
+            getXp7DeploymentSpecNodeGroups().
+            getAdditionalProperties().
             values().
             stream().
-            mapToInt( V1alpha2Xp7DeploymentSpecNode::replicas ).
+            mapToInt( Xp7DeploymentSpecNodeGroup::getReplicas ).
             sum();
     }
 
 
-    private void updateStatus( final V1alpha2Xp7Deployment deployment, final V1alpha2Xp7DeploymentStatus status )
+    private void updateStatus( final Xp7Deployment deployment, final Xp7DeploymentStatus status )
     {
-        if ( status.equals( deployment.getStatus() ) )
+        if ( status.equals( deployment.getXp7DeploymentStatus() ) )
         {
             return;
         }
 
-        K8sLogHelper.logDoneable( crdClient.xp7Deployments().
+        K8sLogHelper.logDoneable( clients.xp7Deployments().crdClient().
             inNamespace( deployment.getMetadata().getNamespace() ).
             withName( deployment.getMetadata().getName() ).
             edit().

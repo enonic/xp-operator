@@ -7,7 +7,7 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import io.fabric8.kubernetes.client.informers.ResourceEventHandler;
+import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
 import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.cloud.common.functions.OptionalListPruner;
@@ -18,18 +18,17 @@ import com.enonic.cloud.helm.functions.HelmToK8sParamsImpl;
 import com.enonic.cloud.helm.functions.K8sCommandBuilder;
 import com.enonic.cloud.helm.functions.Templator;
 import com.enonic.cloud.helm.values.BaseValues;
-import com.enonic.cloud.kubernetes.caches.V1alpha2Xp7VHostCache;
 import com.enonic.cloud.kubernetes.commands.K8sCommand;
 import com.enonic.cloud.kubernetes.commands.K8sCommandMapper;
-import com.enonic.cloud.kubernetes.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHost;
+import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHost;
+import com.enonic.cloud.operator.InformerEventHandler;
 
 
 public class OperatorIngressHelmChart
-    implements ResourceEventHandler<V1alpha2Xp7VHost>
+    extends InformerEventHandler<Xp7VHost>
 {
-    @SuppressWarnings("CdiInjectionPointsInspection")
     @Inject
-    V1alpha2Xp7VHostCache v1alpha2Xp7VHostCache;
+    SharedIndexInformer<Xp7VHost> xp7VHostSharedIndexInformer;
 
     @Inject
     K8sCommandMapper k8sCommandMapper;
@@ -50,24 +49,24 @@ public class OperatorIngressHelmChart
     @Inject
     RunnableListExecutor runnableListExecutor;
 
-    private HelmToK8s<V1alpha2Xp7VHost> helmToK8s;
+    private HelmToK8s<Xp7VHost> helmToK8s;
 
     void onStartup( @Observes StartupEvent _ev )
     {
         helmToK8s = HelmToK8sImpl.of( k8sCommandMapper, VHostHelmValueBuilderImpl.of( baseValues ), templator );
-        v1alpha2Xp7VHostCache.addEventListener( this );
+        listenToInformer( xp7VHostSharedIndexInformer );
     }
 
     @Override
-    public void onAdd( final V1alpha2Xp7VHost newResource )
+    public void onAdd( final Xp7VHost newResource )
     {
         handle( null, newResource );
     }
 
     @Override
-    public void onUpdate( final V1alpha2Xp7VHost oldResource, final V1alpha2Xp7VHost newResource )
+    public void onUpdate( final Xp7VHost oldResource, final Xp7VHost newResource )
     {
-        if ( Objects.equals( oldResource.getSpec(), newResource.getSpec() ) )
+        if ( Objects.equals( oldResource.getXp7VHostSpec(), newResource.getXp7VHostSpec() ) )
         {
             return;
         }
@@ -75,12 +74,12 @@ public class OperatorIngressHelmChart
     }
 
     @Override
-    public void onDelete( final V1alpha2Xp7VHost oldResource, final boolean b )
+    public void onDelete( final Xp7VHost oldResource, final boolean b )
     {
         handle( oldResource, null );
     }
 
-    private void handle( final V1alpha2Xp7VHost oldResource, final V1alpha2Xp7VHost newResource )
+    private void handle( final Xp7VHost oldResource, final Xp7VHost newResource )
     {
         helmToK8s.
             andThen( k8sCommandBuilder ).

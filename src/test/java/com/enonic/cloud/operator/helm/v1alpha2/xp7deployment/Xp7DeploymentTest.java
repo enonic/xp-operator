@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.enonic.cloud.helm.values.BaseValues;
 import com.enonic.cloud.helm.values.ValueBuilder;
-import com.enonic.cloud.kubernetes.crd.xp7.v1alpha2.deployment.V1alpha2Xp7Deployment;
+import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
 import com.enonic.cloud.operator.helm.HelmTest;
 import com.enonic.cloud.operator.v1alpha2xp7deployment.DeploymentHelmValueBuilderImpl;
 
@@ -15,7 +15,7 @@ import com.enonic.cloud.operator.v1alpha2xp7deployment.DeploymentHelmValueBuilde
 public class Xp7DeploymentTest
     extends HelmTest
 {
-    final ValueBuilder<V1alpha2Xp7Deployment> valueBuilder;
+    final ValueBuilder<Xp7Deployment> valueBuilder;
 
     public Xp7DeploymentTest()
     {
@@ -33,6 +33,6 @@ public class Xp7DeploymentTest
     protected Object createValues( final ObjectMapper mapper, final File input )
         throws IOException
     {
-        return valueBuilder.apply( mapper.readValue( input, V1alpha2Xp7Deployment.class ) );
+        return valueBuilder.apply( mapper.readValue( input, Xp7Deployment.class ) );
     }
 }

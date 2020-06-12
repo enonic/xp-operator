@@ -3,11 +3,46 @@ apiVersion: "extensions/v1beta1"
 kind: "Ingress"
 metadata:
   annotations:
+    enonic.vhost: "test-purplejs-io"
+    enonic.applyPriority: "100"
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+    ingress.kubernetes.io/rewrite-target: "/"
+    enonic.cloud/dns.hostname: "test.purplejs.io"
+    enonic.cloud/dns.heritage: "heritage=ec-operator,id=54edf212-742d-44f5-9fef-6749da7fd534"
+    enonic.cloud/dns.cdn: "true"
+    cert-manager.io/cluster-issuer: "selfsigned"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/configuration-snippet: "# Extra config\n"
+  labels:
+    enonic.managed: "true"
+  name: "test-purplejs-io-e406cf2116"
+  namespace: "mycloud-mysolution-myenv-myservice"
+spec:
+  rules:
+  - host: "test.purplejs.io"
+    http:
+      paths:
+      - backend:
+          serviceName: "all"
+          servicePort: 8080
+        path: "/a"
+  tls:
+  - hosts:
+    - "test.purplejs.io"
+    secretName: "54edf212-742d-44f5-9fef-6749da7fd534"
+---
+apiVersion: "extensions/v1beta1"
+kind: "Ingress"
+metadata:
+  annotations:
+    enonic.vhost: "test-purplejs-io"
+    enonic.applyPriority: "100"
     kubernetes.io/ingress.class: "nginx"
     nginx.ingress.kubernetes.io/proxy-body-size: "8m"
     ingress.kubernetes.io/rewrite-target: "/"
     enonic.cloud/dns.hostname: "test.purplejs.io"
-    enonic.cloud/dns.heritage: "heritage=ec-operator,id= 54edf212-742d-44f5-9fef-6749da7fd534"
+    enonic.cloud/dns.heritage: "heritage=ec-operator,id=54edf212-742d-44f5-9fef-6749da7fd534"
     enonic.cloud/dns.cdn: "true"
     monitor.stakater.com/enabled: "true"
     monitor.stakater.com/overridePath: "/b"
@@ -27,7 +62,7 @@ metadata:
       \n# Send cache status header back\nadd_header X-Cache-Status $upstream_cache_status;\n"
   labels:
     enonic.managed: "true"
-  name: "test-purplejs-io-001af4f0a7"
+  name: "test-purplejs-io-419420aa0e"
   namespace: "mycloud-mysolution-myenv-myservice"
 spec:
   rules:
@@ -38,37 +73,6 @@ spec:
           serviceName: "frontend"
           servicePort: 8080
         path: "/b"
-  tls:
-  - hosts:
-    - "test.purplejs.io"
-    secretName: "54edf212-742d-44f5-9fef-6749da7fd534"
----
-apiVersion: "extensions/v1beta1"
-kind: "Ingress"
-metadata:
-  annotations:
-    kubernetes.io/ingress.class: "nginx"
-    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
-    ingress.kubernetes.io/rewrite-target: "/"
-    enonic.cloud/dns.hostname: "test.purplejs.io"
-    enonic.cloud/dns.heritage: "heritage=ec-operator,id= 54edf212-742d-44f5-9fef-6749da7fd534"
-    enonic.cloud/dns.cdn: "true"
-    cert-manager.io/cluster-issuer: "selfsigned"
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/configuration-snippet: "# Extra config\n"
-  labels:
-    enonic.managed: "true"
-  name: "test-purplejs-io-a6ac1f2c27"
-  namespace: "mycloud-mysolution-myenv-myservice"
-spec:
-  rules:
-  - host: "test.purplejs.io"
-    http:
-      paths:
-      - backend:
-          serviceName: "all"
-          servicePort: 8080
-        path: "/a"
   tls:
   - hosts:
     - "test.purplejs.io"

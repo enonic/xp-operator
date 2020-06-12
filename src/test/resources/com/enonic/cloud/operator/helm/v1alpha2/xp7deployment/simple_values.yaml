@@ -13,6 +13,7 @@ labelKeys:
 imageTemplate: "gbbirkisson/xp:%s-ubuntu"
 annotationKeys:
   applyPriority: "enonic.applyPriority"
+  vHostName: "enonic.vhost"
   alwaysOverwrite: "enonic.alwaysOverwrite"
   neverOverwrite: "enonic.neverOverwrite"
 deployment:
@@ -22,22 +23,20 @@ deployment:
   name: "mycloud-mysolution-myenv-myservice"
   namespace: "mycloud-mysolution-myenv-myservice"
   spec:
-    xpVersion: "7.1.2"
     enabled: true
+    xpVersion: "7.1.2"
     nodesSharedDisks:
-      blobstore: "2Gi"
       snapshots: "3Gi"
+      blobstore: "2Gi"
     nodeGroups:
       fisk:
-        displayName: null
-        master: true
         data: true
+        master: true
         replicas: 1
         resources:
           cpu: "1"
           memory: "512Mi"
           disks:
-            export: "234Mi"
-            index: "200Mi"
             work: "400Mi"
-        env: {}
+            index: "200Mi"
+            export: "234Mi"

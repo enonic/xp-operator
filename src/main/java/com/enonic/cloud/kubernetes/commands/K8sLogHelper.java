@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import io.fabric8.kubernetes.api.model.Doneable;
 import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.client.dsl.Resource;
 
 public class K8sLogHelper
 {
@@ -20,5 +21,11 @@ public class K8sLogHelper
     {
         T res = doneable.done();
         log.info( log( K8sCommandAction.UPDATE, res ) );
+    }
+
+    public static <T extends HasMetadata, D extends Doneable<T>> void logDelete( Resource<T, D> r )
+    {
+        T res = r.get();
+        log.info( log( K8sCommandAction.DELETE, res ) );
     }
 }

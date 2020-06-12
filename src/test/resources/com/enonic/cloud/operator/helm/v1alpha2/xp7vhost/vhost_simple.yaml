@@ -18,6 +18,7 @@ spec:
       source: /b
       target: /
       options:
+        ingress: true
         ingressMaxBodySize: 8m
         statusCake: true
         caching: true

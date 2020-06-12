@@ -5,56 +5,52 @@ import java.util.Optional;
 
 import org.immutables.value.Value;
 
-import com.enonic.cloud.kubernetes.crd.client.CrdClient;
-import com.enonic.cloud.kubernetes.crd.xp7.v1alpha2.deployment.V1alpha2Xp7Deployment;
+import com.enonic.cloud.kubernetes.client.v1alpha2.xp7deployment.Xp7DeploymentClient;
+import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
 
 
 @Value.Immutable
 public abstract class CommandBuilderV1Alpha2Xp7Deployment
-    extends GenericBuilder<CrdClient, V1alpha2Xp7Deployment>
+    extends GenericBuilder<Xp7DeploymentClient, Xp7Deployment>
 {
     @Override
-    protected Optional<V1alpha2Xp7Deployment> getOldResource( final String namespace, final String name )
+    protected Optional<Xp7Deployment> getOldResource( final String namespace, final String name )
     {
-        return Optional.ofNullable( client().
-            xp7Deployments().
+        return Optional.ofNullable( client().crdClient().
             inNamespace( namespace ).
             withName( name ).
             get() );
     }
 
     @Override
-    protected Runnable createOrReplaceCommand( final String namespace, final V1alpha2Xp7Deployment resource )
+    protected Runnable createOrReplaceCommand( final String namespace, final Xp7Deployment resource )
     {
-        return () -> client().
-            xp7Deployments().
+        return () -> client().crdClient().
             inNamespace( namespace ).
             createOrReplace( resource );
     }
 
     @Override
-    protected Runnable updateCommand( final String namespace, final V1alpha2Xp7Deployment resource )
+    protected Runnable updateCommand( final String namespace, final Xp7Deployment resource )
     {
-        return () -> client().
-            xp7Deployments().
+        return () -> client().crdClient().
             inNamespace( namespace ).
             withName( resource.getMetadata().getName() ).
             patch( resource );
     }
 
     @Override
-    protected Runnable deleteCommand( final String namespace, final V1alpha2Xp7Deployment resource )
+    protected Runnable deleteCommand( final String namespace, final Xp7Deployment resource )
     {
-        return () -> client().
-            xp7Deployments().
+        return () -> client().crdClient().
             inNamespace( namespace ).
             withName( resource.getMetadata().getName() ).
             delete();
     }
 
     @Override
-    protected boolean equalsSpec( final V1alpha2Xp7Deployment o, final V1alpha2Xp7Deployment n )
+    protected boolean equalsSpec( final Xp7Deployment o, final Xp7Deployment n )
     {
-        return Objects.equals( o.getSpec(), n.getSpec() );
+        return Objects.equals( o.getXp7DeploymentSpec(), n.getXp7DeploymentSpec() );
     }
 }

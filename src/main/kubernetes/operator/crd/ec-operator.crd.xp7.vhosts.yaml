@@ -30,16 +30,15 @@ spec:
                   properties:
                     dnsRecord:
                       type: boolean
-                      nullable: true
                     cdn:
                       type: boolean
-                      nullable: true
                 certificate:
                   type: object
                   nullable: true
                   properties:
                     authority:
                       type: string
+                      enum: ["selfSigned", "letsEncrypt", "letsEncryptStaging", "secret", "clusterIssuer"]
                     identifier:
                       type: string
                       nullable: true
@@ -62,6 +61,7 @@ spec:
                             type: string
                           enabled:
                             type: array
+                            nullable: true
                             items:
                               type: string
                       options:
@@ -70,37 +70,27 @@ spec:
                         properties:
                           ingress:
                             type: boolean
-                            nullable: true
                           ingressMaxBodySize:
                             type: string
-                            nullable: true
                           statusCake:
                             type: boolean
-                            nullable: true
-                          caching:
-                            type: boolean
-                            nullable: true
                           ipWhitelist:
                             type: string
-                            nullable: true
                           stickySession:
                             type: boolean
-                            nullable: true
                           sslRedirect:
                             type: boolean
-                            nullable: true
             status:
               type: object
               nullable: true
               properties:
                 state:
                   type: string
+                  enum : ["ERROR", "PENDING", "READY"]
                 message:
-                  nullable: true
                   type: string
                 fields:
                   type: object
-                  nullable: true
                   properties:
                     publicIps:
                       type: array

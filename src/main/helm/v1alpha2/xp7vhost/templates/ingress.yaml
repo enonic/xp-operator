@@ -85,6 +85,5 @@ spec:
         - {{ $.Values.vhost.spec.host }}
       secretName: {{ if $.Values.vhost.issuer }}{{ $.Values.vhost.uid }}{{ else }}{{ $.Values.vhost.spec.certificate.identifier }}{{ end }}
   {{- end }}
----
 {{- end }}
 {{- end }}

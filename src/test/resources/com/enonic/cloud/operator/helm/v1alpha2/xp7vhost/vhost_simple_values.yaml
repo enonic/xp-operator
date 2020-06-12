@@ -13,22 +13,20 @@ vhost:
       cdn: true
     certificate:
       authority: "selfSigned"
-      identifier: null
     mappings:
     - nodeGroup: "all"
       source: "/a"
       target: "/admin"
+      idProviders:
+        default: "system"
+        enabled: []
       options:
         ingress: true
         ingressMaxBodySize: "100m"
         statusCake: false
-        caching: false
         ipWhitelist: ""
         stickySession: false
         sslRedirect: true
-      idProviders:
-        default: "system"
-        enabled: []
     - nodeGroup: "frontend"
       source: "/b"
       target: "/"
@@ -36,23 +34,15 @@ vhost:
         ingress: true
         ingressMaxBodySize: "8m"
         statusCake: true
-        caching: true
         ipWhitelist: "1.1.1.1"
         stickySession: true
         sslRedirect: false
-      idProviders: null
+        caching: true
     - nodeGroup: "all"
       source: "/c"
       target: "/admin"
       options:
         ingress: false
-        ingressMaxBodySize: "100m"
-        statusCake: false
-        caching: false
-        ipWhitelist: ""
-        stickySession: false
-        sslRedirect: true
-      idProviders: null
 allNodesKey: "all"
 defaultLabels: {}
 labelKeys:
@@ -61,5 +51,6 @@ labelKeys:
 imageTemplate: "gbbirkisson/xp:%s-ubuntu"
 annotationKeys:
   applyPriority: "enonic.applyPriority"
+  vHostName: "enonic.vhost"
   alwaysOverwrite: "enonic.alwaysOverwrite"
   neverOverwrite: "enonic.neverOverwrite"

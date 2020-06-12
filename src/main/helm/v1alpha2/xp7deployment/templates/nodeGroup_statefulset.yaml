@@ -129,6 +129,7 @@ spec:
                   name: su
                   key: passHash
                   optional: false
+          {{- if $nodeGroup.env }}
           {{- range $key, $value := $nodeGroup.env }}
             - name: {{ $key }}
               value: {{ $value }}
@@ -141,7 +142,7 @@ spec:
                           -XX:+ScavengeBeforeFullGC -XX:+CMSScavengeBeforeRemark -XX:-HeapDumpOnOutOfMemoryError
                           -XX:HeapDumpPath={{ $.Values.heapDumpLocation }}/oom.hprof'
           {{- end }}
-
+          {{- end }}
           {{- if $.Values.startupProbe }}
           startupProbe:
             {{- with $.Values.startupProbe }}

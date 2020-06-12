@@ -1,9 +1,36 @@
 ---
 apiVersion: "v1"
+kind: "ServiceAccount"
+metadata:
+  annotations:
+    enonic.applyPriority: "20"
+  name: "xp-node-sa"
+  namespace: "mycloud-mysolution-myenv-myservice"
+---
+apiVersion: "v1"
+kind: "Secret"
+metadata:
+  annotations:
+    enonic.neverOverwrite: "true"
+    enonic.applyPriority: "60"
+  labels:
+    enonic.managed: "true"
+    cloud: "mycloud"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
+  name: "su"
+  namespace: "mycloud-mysolution-myenv-myservice"
+data:
+  pass: "cGFzc3dvcmQ="
+  passHash: "YjEwOWYzYmJiYzI0NGViODI0NDE5MTdlZDA2ZDYxOGI5MDA4ZGQwOWIzYmVmZDFiNWUwNzM5NGM3MDZhOGJiOTgwYjFkNzc4NWU1OTc2ZWMwNDliNDZkZjVmMTMyNmFmNWEyZWE2ZDEwM2ZkMDdjOTUzODVmZmFiMGNhY2JjODY="
+---
+apiVersion: "v1"
 kind: "ConfigMap"
 metadata:
   annotations:
     enonic.neverOverwrite: "true"
+    enonic.applyPriority: "60"
   labels:
     enonic.managed: "true"
     cloud: "mycloud"
@@ -98,6 +125,7 @@ kind: "ConfigMap"
 metadata:
   annotations:
     enonic.neverOverwrite: "true"
+    enonic.applyPriority: "50"
   labels:
     enonic.managed: "true"
     enonic.nodeGroup: "fisk"
@@ -107,10 +135,13 @@ metadata:
     solution: "mysolution"
   name: "fisk"
   namespace: "mycloud-mysolution-myenv-myservice"
+data: {}
 ---
 apiVersion: "v1"
 kind: "PersistentVolumeClaim"
 metadata:
+  annotations:
+    enonic.applyPriority: "10"
   labels:
     enonic.managed: "true"
     cloud: "mycloud"
@@ -130,6 +161,8 @@ spec:
 apiVersion: "v1"
 kind: "PersistentVolumeClaim"
 metadata:
+  annotations:
+    enonic.applyPriority: "10"
   labels:
     enonic.managed: "true"
     cloud: "mycloud"
@@ -149,6 +182,8 @@ spec:
 apiVersion: "rbac.authorization.k8s.io/v1"
 kind: "Role"
 metadata:
+  annotations:
+    enonic.applyPriority: "30"
   name: "xp-node-role"
   namespace: "mycloud-mysolution-myenv-myservice"
 rules:
@@ -162,6 +197,8 @@ rules:
 apiVersion: "rbac.authorization.k8s.io/v1"
 kind: "RoleBinding"
 metadata:
+  annotations:
+    enonic.applyPriority: "40"
   name: "xp-node-role-bindings"
   namespace: "mycloud-mysolution-myenv-myservice"
 roleRef:
@@ -174,25 +211,43 @@ subjects:
   namespace: "mycloud-mysolution-myenv-myservice"
 ---
 apiVersion: "v1"
-kind: "Secret"
+kind: "Service"
 metadata:
   annotations:
-    enonic.neverOverwrite: "true"
+    enonic.applyPriority: "100"
   labels:
     enonic.managed: "true"
     cloud: "mycloud"
     environment: "myenv"
     service: "myservice"
     solution: "mysolution"
-  name: "su"
+  name: "cluster-discovery"
   namespace: "mycloud-mysolution-myenv-myservice"
-data:
-  pass: "cGFzc3dvcmQ="
-  passHash: "YjEwOWYzYmJiYzI0NGViODI0NDE5MTdlZDA2ZDYxOGI5MDA4ZGQwOWIzYmVmZDFiNWUwNzM5NGM3MDZhOGJiOTgwYjFkNzc4NWU1OTc2ZWMwNDliNDZkZjVmMTMyNmFmNWEyZWE2ZDEwM2ZkMDdjOTUzODVmZmFiMGNhY2JjODY="
+spec:
+  clusterIP: "None"
+  ports:
+  - name: "hazelcast"
+    port: 5701
+    protocol: "TCP"
+    targetPort: 5701
+  - name: "es"
+    port: 9300
+    protocol: "TCP"
+    targetPort: 9300
+  publishNotReadyAddresses: true
+  selector:
+    cloud: "mycloud"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
+  sessionAffinity: "None"
+  type: "ClusterIP"
 ---
 apiVersion: "v1"
 kind: "Service"
 metadata:
+  annotations:
+    enonic.applyPriority: "100"
   labels:
     enonic.managed: "true"
     cloud: "mycloud"
@@ -232,37 +287,8 @@ spec:
 apiVersion: "v1"
 kind: "Service"
 metadata:
-  labels:
-    enonic.managed: "true"
-    cloud: "mycloud"
-    environment: "myenv"
-    service: "myservice"
-    solution: "mysolution"
-  name: "cluster-discovery"
-  namespace: "mycloud-mysolution-myenv-myservice"
-spec:
-  clusterIP: "None"
-  ports:
-  - name: "hazelcast"
-    port: 5701
-    protocol: "TCP"
-    targetPort: 5701
-  - name: "es"
-    port: 9300
-    protocol: "TCP"
-    targetPort: 9300
-  publishNotReadyAddresses: true
-  selector:
-    cloud: "mycloud"
-    environment: "myenv"
-    service: "myservice"
-    solution: "mysolution"
-  sessionAffinity: "None"
-  type: "ClusterIP"
----
-apiVersion: "v1"
-kind: "Service"
-metadata:
+  annotations:
+    enonic.applyPriority: "100"
   labels:
     enonic.managed: "true"
     enonic.nodeGroup: "fisk"
@@ -291,10 +317,6 @@ spec:
     port: 9200
     protocol: "TCP"
     targetPort: 9200
-  - name: "es-transport"
-    port: 9300
-    protocol: "TCP"
-    targetPort: 9300
   publishNotReadyAddresses: false
   selector:
     enonic.nodeGroup: "fisk"
@@ -305,14 +327,11 @@ spec:
   sessionAffinity: "None"
   type: "ClusterIP"
 ---
-apiVersion: "v1"
-kind: "ServiceAccount"
-metadata:
-  name: "xp-node-sa"
----
 apiVersion: "apps/v1"
 kind: "StatefulSet"
 metadata:
+  annotations:
+    enonic.applyPriority: "90"
   labels:
     enonic.managed: "true"
     enonic.nodeGroup: "fisk"
@@ -377,13 +396,6 @@ spec:
               key: "passHash"
               name: "su"
               optional: false
-        - name: "JAVA_OPTS"
-          value: "-Djava.security.properties=/enonic-xp/home/extra-config/java.security.properties\
-            \ -XX:+UseContainerSupport -XX:MinRAMPercentage=20 -XX:InitialRAMPercentage=30\
-            \ -XX:MaxRAMPercentage=50 -XX:+UseConcMarkSweepGC -XX:+CMSParallelRemarkEnabled\
-            \ -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=60\
-            \ -XX:+ScavengeBeforeFullGC -XX:+CMSScavengeBeforeRemark -XX:-HeapDumpOnOutOfMemoryError\
-            \ -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof"
         image: "gbbirkisson/xp:7.1.2-ubuntu"
         imagePullPolicy: "IfNotPresent"
         lifecycle:
@@ -554,97 +566,17 @@ spec:
       storageClassName: "standard"
       volumeMode: "Filesystem"
 ---
+spec:
+  nodeGroup: "all"
+  file: "system.properties"
+  data: "xp.name = mycloud-mysolution-myenv-myservice\nxp.suPassword = {sha512}${env.SU_PASS_HASH}\n\
+    xp.init.adminUserCreation = false"
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   annotations:
     enonic.neverOverwrite: "true"
-  labels:
-    enonic.managed: "true"
-    cloud: "mycloud"
-    environment: "myenv"
-    service: "myservice"
-    solution: "mysolution"
-  name: "all-admin"
-  namespace: "mycloud-mysolution-myenv-myservice"
-spec:
-  file: "com.enonic.xp.app.main.cfg"
-  nodeGroup: "all"
-  data: "tourDisabled = true"
----
-kind: "Xp7Config"
-apiVersion: "enonic.cloud/v1alpha2"
-metadata:
-  labels:
-    enonic.managed: "true"
-    cloud: "mycloud"
-    environment: "myenv"
-    service: "myservice"
-    solution: "mysolution"
-  name: "all-appstatus"
-  namespace: "mycloud-mysolution-myenv-myservice"
-spec:
-  file: "com.enonic.app.status.cfg"
-  nodeGroup: "all"
-  data: "metricsUrl = http://localhost:2609/"
----
-kind: "Xp7Config"
-apiVersion: "enonic.cloud/v1alpha2"
-metadata:
-  labels:
-    enonic.managed: "true"
-    cloud: "mycloud"
-    environment: "myenv"
-    service: "myservice"
-    solution: "mysolution"
-  name: "all-cluster"
-  namespace: "mycloud-mysolution-myenv-myservice"
-spec:
-  file: "com.enonic.xp.cluster.cfg"
-  nodeGroup: "all"
-  data: "cluster.enabled=false"
----
-kind: "Xp7Config"
-apiVersion: "enonic.cloud/v1alpha2"
-metadata:
-  annotations:
-    enonic.neverOverwrite: "true"
-  labels:
-    enonic.managed: "true"
-    cloud: "mycloud"
-    environment: "myenv"
-    service: "myservice"
-    solution: "mysolution"
-  name: "all-deploy"
-  namespace: "mycloud-mysolution-myenv-myservice"
-spec:
-  file: "com.enonic.xp.server.deploy.cfg"
-  nodeGroup: "all"
-  data: ""
----
-kind: "Xp7Config"
-apiVersion: "enonic.cloud/v1alpha2"
-metadata:
-  annotations:
-    enonic.neverOverwrite: "true"
-  labels:
-    enonic.managed: "true"
-    cloud: "mycloud"
-    environment: "myenv"
-    service: "myservice"
-    solution: "mysolution"
-  name: "all-sessionstore"
-  namespace: "mycloud-mysolution-myenv-myservice"
-spec:
-  file: "com.enonic.xp.web.sessionstore.cfg"
-  nodeGroup: "all"
-  data: "storeMode=non-persistent"
----
-kind: "Xp7Config"
-apiVersion: "enonic.cloud/v1alpha2"
-metadata:
-  annotations:
-    enonic.neverOverwrite: "true"
+    enonic.applyPriority: "70"
   labels:
     enonic.managed: "true"
     cloud: "mycloud"
@@ -653,33 +585,125 @@ metadata:
     solution: "mysolution"
   name: "all-system"
   namespace: "mycloud-mysolution-myenv-myservice"
-spec:
-  file: "system.properties"
-  nodeGroup: "all"
-  data: "xp.name = mycloud-mysolution-myenv-myservice\nxp.suPassword = {sha512}${env.SU_PASS_HASH}\n\
-    xp.init.adminUserCreation = false"
 ---
+spec:
+  nodeGroup: "all"
+  file: "com.enonic.xp.app.main.cfg"
+  data: "tourDisabled = true"
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
+  annotations:
+    enonic.neverOverwrite: "true"
+    enonic.applyPriority: "70"
   labels:
     enonic.managed: "true"
     cloud: "mycloud"
     environment: "myenv"
     service: "myservice"
     solution: "mysolution"
-  name: "fisk-elasticsearch"
+  name: "all-admin"
   namespace: "mycloud-mysolution-myenv-myservice"
-spec:
-  file: "com.enonic.xp.elasticsearch.cfg"
-  nodeGroup: "fisk"
-  data: "http.enabled=true\ncluster.name=mycloud-mysolution-myenv-myservice"
 ---
+spec:
+  nodeGroup: "all"
+  file: "com.enonic.xp.web.sessionstore.cfg"
+  data: "storeMode=non-persistent"
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   annotations:
     enonic.neverOverwrite: "true"
+    enonic.applyPriority: "70"
+  labels:
+    enonic.managed: "true"
+    cloud: "mycloud"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
+  name: "all-sessionstore"
+  namespace: "mycloud-mysolution-myenv-myservice"
+---
+spec:
+  nodeGroup: "all"
+  file: "com.enonic.app.status.cfg"
+  data: "metricsUrl = http://localhost:2609/"
+kind: "Xp7Config"
+apiVersion: "enonic.cloud/v1alpha2"
+metadata:
+  annotations:
+    enonic.applyPriority: "70"
+  labels:
+    enonic.managed: "true"
+    cloud: "mycloud"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
+  name: "all-appstatus"
+  namespace: "mycloud-mysolution-myenv-myservice"
+---
+spec:
+  nodeGroup: "all"
+  file: "com.enonic.xp.cluster.cfg"
+  data: "cluster.enabled=false"
+kind: "Xp7Config"
+apiVersion: "enonic.cloud/v1alpha2"
+metadata:
+  annotations:
+    enonic.applyPriority: "70"
+  labels:
+    enonic.managed: "true"
+    cloud: "mycloud"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
+  name: "all-cluster"
+  namespace: "mycloud-mysolution-myenv-myservice"
+---
+spec:
+  nodeGroup: "all"
+  file: "logback.xml"
+  data: "<?xml version=\"1.0\"?>\n<configuration scan=\"true\" scanPeriod=\"60 seconds\"\
+    >\n\n  <appender name=\"FILE\" class=\"ch.qos.logback.core.rolling.RollingFileAppender\"\
+    >\n    <file>${xp.home}/logs/server.log</file>\n    <rollingPolicy class=\"ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy\"\
+    >\n      <fileNamePattern>${xp.home}/logs/server.%d{yyyy-MM-dd}.%i.log</fileNamePattern>\n\
+    \      <maxFileSize>100MB</maxFileSize>\n      <maxHistory>7</maxHistory>\n  \
+    \    <totalSizeCap>3GB</totalSizeCap>\n    </rollingPolicy>\n    <encoder>\n \
+    \     <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>\n    </encoder>\n\
+    \  </appender>\n\n  <appender name=\"STDOUT\" class=\"ch.qos.logback.core.ConsoleAppender\"\
+    >\n    <withJansi>true</withJansi>\n    <encoder>\n      <pattern>%date{ISO8601}\
+    \ %highlight(%-5level) %cyan(%logger{36}) - %msg%n</pattern>\n    </encoder>\n\
+    \  </appender>\n\n  <root level=\"info\">\n    <appender-ref ref=\"STDOUT\"/>\n\
+    \    <appender-ref ref=\"FILE\"/>\n  </root>\n\n  <logger name=\"Events.Service\"\
+    \ level=\"WARN\" additivity=\"false\">\n    <appender-ref ref=\"STDOUT\"/>\n \
+    \   <appender-ref ref=\"FILE\"/>\n  </logger>\n\n  <logger name=\"Events.Bundle\"\
+    \ level=\"WARN\" additivity=\"false\">\n    <appender-ref ref=\"STDOUT\"/>\n \
+    \   <appender-ref ref=\"FILE\"/>\n  </logger>\n\n</configuration>"
+kind: "Xp7Config"
+apiVersion: "enonic.cloud/v1alpha2"
+metadata:
+  annotations:
+    enonic.neverOverwrite: "true"
+    enonic.applyPriority: "70"
+  labels:
+    enonic.managed: "true"
+    cloud: "mycloud"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
+  name: "all-logback"
+  namespace: "mycloud-mysolution-myenv-myservice"
+---
+spec:
+  nodeGroup: "fisk"
+  file: "com.enonic.xp.web.vhost.cfg"
+  data: "enabled = true"
+kind: "Xp7Config"
+apiVersion: "enonic.cloud/v1alpha2"
+metadata:
+  annotations:
+    enonic.neverOverwrite: "true"
+    enonic.applyPriority: "71"
   labels:
     enonic.managed: "true"
     cloud: "mycloud"
@@ -688,73 +712,74 @@ metadata:
     solution: "mysolution"
   name: "fisk-vhosts"
   namespace: "mycloud-mysolution-myenv-myservice"
-spec:
-  file: "com.enonic.xp.web.vhost.cfg"
-  nodeGroup: "fisk"
-  data: ""
 ---
-kind: "Xp7VHost"
+spec:
+  nodeGroup: "fisk"
+  file: "com.enonic.xp.elasticsearch.cfg"
+  data: "http.enabled=true\ncluster.name=mycloud-mysolution-myenv-myservice"
+kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
+  annotations:
+    enonic.applyPriority: "71"
   labels:
     enonic.managed: "true"
     cloud: "mycloud"
     environment: "myenv"
     service: "myservice"
     solution: "mysolution"
-  name: "healthcheck"
+  name: "fisk-elasticsearch"
   namespace: "mycloud-mysolution-myenv-myservice"
-status: null
+---
 spec:
   host: "healthcheck"
   options:
     dnsRecord: false
     cdn: false
-  certificate: null
   mappings:
   - nodeGroup: "all"
     source: "/"
     target: "/webapp/com.enonic.app.alive"
     options:
       ingress: false
-      ingressMaxBodySize: "100m"
-      statusCake: false
-      caching: false
-      ipWhitelist: ""
-      stickySession: false
-      sslRedirect: true
-    idProviders: null
----
 kind: "Xp7VHost"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
+  annotations:
+    enonic.applyPriority: "80"
   labels:
     enonic.managed: "true"
     cloud: "mycloud"
     environment: "myenv"
     service: "myservice"
     solution: "mysolution"
-  name: "localhost"
+  name: "all-healthcheck"
   namespace: "mycloud-mysolution-myenv-myservice"
-status: null
+---
 spec:
   host: "localhost"
   options:
     dnsRecord: false
     cdn: false
-  certificate: null
   mappings:
   - nodeGroup: "all"
     source: "/"
     target: "/"
-    options:
-      ingress: false
-      ingressMaxBodySize: "100m"
-      statusCake: false
-      caching: false
-      ipWhitelist: ""
-      stickySession: false
-      sslRedirect: true
     idProviders:
       default: "system"
       enabled: []
+    options:
+      ingress: false
+kind: "Xp7VHost"
+apiVersion: "enonic.cloud/v1alpha2"
+metadata:
+  annotations:
+    enonic.applyPriority: "80"
+  labels:
+    enonic.managed: "true"
+    cloud: "mycloud"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
+  name: "all-localhost"
+  namespace: "mycloud-mysolution-myenv-myservice"

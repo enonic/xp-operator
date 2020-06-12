@@ -10,30 +10,33 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.informers.ResourceEventHandler;
+import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
 import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.cloud.common.staller.RunnableStaller;
-import com.enonic.cloud.kubernetes.caches.ConfigMapCache;
-import com.enonic.cloud.kubernetes.caches.V1alpha2Xp7ConfigCache;
+import com.enonic.cloud.kubernetes.Clients;
+import com.enonic.cloud.kubernetes.InformerSearcher;
 import com.enonic.cloud.kubernetes.commands.K8sLogHelper;
-import com.enonic.cloud.kubernetes.crd.xp7.v1alpha2.config.V1alpha2Xp7Config;
+import com.enonic.cloud.kubernetes.model.v1alpha2.xp7config.Xp7Config;
+import com.enonic.cloud.operator.InformerEventHandler;
 
 import static com.enonic.cloud.common.Configuration.cfgStr;
 
 @ApplicationScoped
 public class OperatorConfig
-    implements ResourceEventHandler<V1alpha2Xp7Config>
+    extends InformerEventHandler<Xp7Config>
 {
     @Inject
-    KubernetesClient client;
+    Clients clients;
 
     @Inject
-    ConfigMapCache configMapCache;
+    SharedIndexInformer<Xp7Config> xp7ConfigSharedIndexInformer;
 
     @Inject
-    V1alpha2Xp7ConfigCache v1alpha2Xp7ConfigCache;
+    InformerSearcher<Xp7Config> xp7ConfigInformerSearcher;
+
+    @Inject
+    InformerSearcher<ConfigMap> configMapInformerSearcher;
 
     @Inject
     @Named("1200ms")
@@ -41,19 +44,20 @@ public class OperatorConfig
 
     void onStartup( @Observes StartupEvent _ev )
     {
-        v1alpha2Xp7ConfigCache.addEventListener( this );
+        listenToInformer( xp7ConfigSharedIndexInformer );
+        ;
     }
 
     @Override
-    public void onAdd( final V1alpha2Xp7Config newResource )
+    public void onAdd( final Xp7Config newResource )
     {
         handle( newResource.getMetadata().getNamespace() );
     }
 
     @Override
-    public void onUpdate( final V1alpha2Xp7Config oldResource, final V1alpha2Xp7Config newResource )
+    public void onUpdate( final Xp7Config oldResource, final Xp7Config newResource )
     {
-        if ( Objects.equals( oldResource.getSpec(), newResource.getSpec() ) )
+        if ( Objects.equals( oldResource.getXp7ConfigSpec(), newResource.getXp7ConfigSpec() ) )
         {
             return;
         }
@@ -61,7 +65,7 @@ public class OperatorConfig
     }
 
     @Override
-    public void onDelete( final V1alpha2Xp7Config oldResource, final boolean b )
+    public void onDelete( final Xp7Config oldResource, final boolean b )
     {
         handle( oldResource.getMetadata().getNamespace() );
     }
@@ -69,7 +73,7 @@ public class OperatorConfig
     private void handle( final String namespace )
     {
         // Stall for a bit while changes are happening
-        configMapCache.
+        configMapInformerSearcher.
             get( namespace ).
             filter( configMap -> configMap.getMetadata().getLabels() != null ).
             filter( configMap -> configMap.getMetadata().getLabels().get( cfgStr( "operator.helm.charts.Values.labelKeys.nodeGroup" ) ) !=
@@ -82,18 +86,18 @@ public class OperatorConfig
     {
         return () -> {
             // Generate new data
-            final Map<String, String> data = v1alpha2Xp7ConfigCache.
+            final Map<String, String> data = xp7ConfigInformerSearcher.
                 get( cm.getMetadata().getNamespace() ).
                 filter( c -> filterRelevantXp7Config( c, cm ) ).
-                collect( Collectors.toMap( c -> c.getSpec().file(), c -> c.getSpec().data() ) );
+                collect( Collectors.toMap( c -> c.getXp7ConfigSpec().getFile(), c -> c.getXp7ConfigSpec().getData() ) );
 
             // Get newest version of ConfigMap
-            configMapCache.get( cm ).
+            configMapInformerSearcher.get( cm ).
                 ifPresent( configMap -> {
                     if ( !Objects.equals( configMap.getData(), data ) )
                     {
                         // If there is a difference, update
-                        K8sLogHelper.logDoneable( client.
+                        K8sLogHelper.logDoneable( clients.k8s().
                             configMaps().
                             inNamespace( configMap.getMetadata().getNamespace() ).
                             withName( configMap.getMetadata().getName() ).
@@ -104,10 +108,10 @@ public class OperatorConfig
         };
     }
 
-    private boolean filterRelevantXp7Config( final V1alpha2Xp7Config c, final ConfigMap cm )
+    private boolean filterRelevantXp7Config( final Xp7Config c, final ConfigMap cm )
     {
         // This config is for all node groups
-        if ( Objects.equals( c.getSpec().nodeGroup(), cfgStr( "operator.helm.charts.Values.allNodesKey" ) ) )
+        if ( Objects.equals( c.getXp7ConfigSpec().getNodeGroup(), cfgStr( "operator.helm.charts.Values.allNodesKey" ) ) )
         {
             return true;
         }
@@ -123,6 +127,6 @@ public class OperatorConfig
         }
 
         // Check if node groups match
-        return Objects.equals( nodeGroup, c.getSpec().nodeGroup() );
+        return Objects.equals( nodeGroup, c.getXp7ConfigSpec().getNodeGroup() );
     }
 }

@@ -24,27 +24,17 @@ spec:
           properties:
             url:
               type: string
-            options:
-              type: object
-              nullable: true
-              properties:
-                bootstrap:
-                  type: boolean
-                appKey:
-                  type: string
-                  nullable: true
         status:
           type: object
           nullable: true
           properties:
             state:
               type: string
+              enum : ["ERROR", "PENDING", "STOPPED", "RUNNING"]
             message:
-              nullable: true
               type: string
             fields:
               type: object
-              nullable: true
               properties:
                 appKey:
                   type: string

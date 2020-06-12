@@ -10,8 +10,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import io.fabric8.kubernetes.api.model.ServiceAccount;
-import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.informers.ResourceEventHandler;
+import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
 import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.cloud.common.functions.OptionalListPruner;
@@ -23,24 +22,24 @@ import com.enonic.cloud.helm.functions.K8sCommandBuilder;
 import com.enonic.cloud.helm.functions.K8sCommandSorter;
 import com.enonic.cloud.helm.functions.Templator;
 import com.enonic.cloud.helm.values.BaseValues;
-import com.enonic.cloud.kubernetes.caches.V1alpha2Xp7DeploymentCache;
+import com.enonic.cloud.kubernetes.Clients;
 import com.enonic.cloud.kubernetes.commands.K8sCommand;
 import com.enonic.cloud.kubernetes.commands.K8sCommandMapper;
-import com.enonic.cloud.kubernetes.crd.xp7.v1alpha2.deployment.V1alpha2Xp7Deployment;
+import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
+import com.enonic.cloud.operator.InformerEventHandler;
 
 import static com.enonic.cloud.common.Configuration.cfgStr;
 
 
 @ApplicationScoped
 public class OperatorDeploymentHelmChart
-    implements ResourceEventHandler<V1alpha2Xp7Deployment>
+    extends InformerEventHandler<Xp7Deployment>
 {
     @Inject
-    KubernetesClient client;
+    Clients clients;
 
-    @SuppressWarnings("CdiInjectionPointsInspection")
     @Inject
-    V1alpha2Xp7DeploymentCache v1alpha2Xp7DeploymentCache;
+    SharedIndexInformer<Xp7Deployment> xp7DeploymentSharedIndexInformer;
 
     @Inject
     K8sCommandMapper k8sCommandMapper;
@@ -64,39 +63,40 @@ public class OperatorDeploymentHelmChart
     @Inject
     RunnableListExecutor runnableListExecutor;
 
-    private HelmToK8s<V1alpha2Xp7Deployment> helmToK8s;
+    private HelmToK8s<Xp7Deployment> helmToK8s;
 
     void onStartup( @Observes StartupEvent _ev )
     {
         helmToK8s =
             HelmToK8sImpl.of( k8sCommandMapper, DeploymentHelmValueBuilderImpl.of( baseValues, this::createSuPass, this::cloudApiSa ),
                               templator );
-        v1alpha2Xp7DeploymentCache.addEventListener( this );
+        listenToInformer( xp7DeploymentSharedIndexInformer );
     }
 
     @Override
-    public void onAdd( final V1alpha2Xp7Deployment newResource )
+    public void onAdd( final Xp7Deployment newResource )
     {
         handle( null, newResource );
     }
 
     @Override
-    public void onUpdate( final V1alpha2Xp7Deployment oldResource, final V1alpha2Xp7Deployment newResource )
+    public void onUpdate( final Xp7Deployment oldResource, final Xp7Deployment newResource )
     {
-        if ( Objects.equals( oldResource.getSpec(), newResource.getSpec() ) )
+        if ( Objects.equals( oldResource.getXp7DeploymentSpec(), newResource.getXp7DeploymentSpec() ) )
         {
             return;
         }
+
         handle( oldResource, newResource );
     }
 
     @Override
-    public void onDelete( final V1alpha2Xp7Deployment oldResource, final boolean b )
+    public void onDelete( final Xp7Deployment oldResource, final boolean b )
     {
         // Do nothing
     }
 
-    private void handle( final V1alpha2Xp7Deployment oldResource, final V1alpha2Xp7Deployment newResource )
+    private void handle( final Xp7Deployment oldResource, final Xp7Deployment newResource )
     {
         helmToK8s.
             andThen( k8sCommandBuilder ).
@@ -113,7 +113,7 @@ public class OperatorDeploymentHelmChart
 
     private ServiceAccount cloudApiSa()
     {
-        return client.serviceAccounts().
+        return clients.k8s().serviceAccounts().
             inNamespace( cfgStr( "operator.deployment.adminServiceAccount.namespace" ) ).
             withName( cfgStr( "operator.deployment.adminServiceAccount.name" ) ).
             get();

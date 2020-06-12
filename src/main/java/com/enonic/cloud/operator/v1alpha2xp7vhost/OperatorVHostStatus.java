@@ -2,8 +2,10 @@ package com.enonic.cloud.operator.v1alpha2xp7vhost;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -23,15 +25,13 @@ import com.enonic.cloud.apis.doh.DohQueryParams;
 import com.enonic.cloud.apis.doh.DohQueryParamsImpl;
 import com.enonic.cloud.apis.doh.service.DohAnswer;
 import com.enonic.cloud.common.staller.TaskRunner;
-import com.enonic.cloud.kubernetes.caches.IngressCache;
-import com.enonic.cloud.kubernetes.caches.V1alpha2Xp7VHostCache;
+import com.enonic.cloud.kubernetes.Clients;
+import com.enonic.cloud.kubernetes.InformerSearcher;
 import com.enonic.cloud.kubernetes.commands.K8sLogHelper;
-import com.enonic.cloud.kubernetes.crd.client.CrdClient;
-import com.enonic.cloud.kubernetes.crd.status.CrdStatusState;
-import com.enonic.cloud.kubernetes.crd.xp7.v1alpha2.vhost.ImmutableV1alpha2Xp7VHostStatus;
-import com.enonic.cloud.kubernetes.crd.xp7.v1alpha2.vhost.ImmutableV1alpha2Xp7VHostStatusFields;
-import com.enonic.cloud.kubernetes.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHost;
-import com.enonic.cloud.kubernetes.crd.xp7.v1alpha2.vhost.V1alpha2Xp7VHostStatus;
+import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHost;
+import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHostSpecMapping;
+import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHostStatus;
+import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHostStatusFields;
 import com.enonic.cloud.operator.dns.functions.info.IngressAssignedIps;
 import com.enonic.cloud.operator.dns.functions.info.IngressEnabledHosts;
 
@@ -47,16 +47,14 @@ public class OperatorVHostStatus
 
     private final IngressEnabledHosts ingressEnabledHosts = new IngressEnabledHosts();
 
-    @SuppressWarnings("CdiInjectionPointsInspection")
     @Inject
-    CrdClient crdClient;
-
-    @SuppressWarnings("CdiInjectionPointsInspection")
-    @Inject
-    V1alpha2Xp7VHostCache v1alpha2Xp7VHostCache;
+    Clients clients;
 
     @Inject
-    IngressCache ingressCache;
+    InformerSearcher<Xp7VHost> xp7VHostInformerSearcher;
+
+    @Inject
+    InformerSearcher<Ingress> ingressInformerSearcher;
 
     @SuppressWarnings("CdiInjectionPointsInspection")
     @Inject
@@ -78,84 +76,94 @@ public class OperatorVHostStatus
     @Override
     public void run()
     {
-        v1alpha2Xp7VHostCache.
+        xp7VHostInformerSearcher.
             getStream().
             filter( vHost -> vHost.getMetadata().getDeletionTimestamp() == null ).
             filter( vHost -> Duration.between( Instant.parse( vHost.getMetadata().getCreationTimestamp() ), Instant.now() ).getSeconds() >
                 statusDelay ).
-            forEach( vhost -> updateStatus( vhost, pollStatus( vhost ) ) );
+            forEach( vhost -> updateStatus( vhost, vhost.getXp7VHostSpec().hashCode(), pollStatus( vhost ) ) );
     }
 
-    private V1alpha2Xp7VHostStatus pollStatus( final V1alpha2Xp7VHost vHost )
+    private Xp7VHostStatus pollStatus( final Xp7VHost vHost )
     {
-        V1alpha2Xp7VHostStatus currentStatus = vHost.getStatus() != null ? vHost.getStatus() : ImmutableV1alpha2Xp7VHostStatus.builder().
-            fields( ImmutableV1alpha2Xp7VHostStatusFields.builder().build() ).
-            build();
+        Xp7VHostStatus currentStatus = vHost.getXp7VHostStatus() != null ? vHost.getXp7VHostStatus() : new Xp7VHostStatus().
+            withState( Xp7VHostStatus.State.PENDING ).
+            withMessage( "Created" ).
+            withXp7VHostStatusFields( new Xp7VHostStatusFields().
+                withPublicIps( new LinkedList<>() ).
+                withDnsRecordCreated( false ) );
 
-        if ( !vHost.getSpec().hasIngress() )
+        long expectedIngresses = countIngresses( vHost );
+
+        if ( expectedIngresses == 0 )
         {
-            return getBuilder( currentStatus ).
-                message( "OK" ).
-                state( CrdStatusState.READY ).
-                build();
+            return currentStatus.
+                withMessage( "OK" ).
+                withState( Xp7VHostStatus.State.READY );
         }
 
-        List<Ingress> createdIngresses = ingressCache.get( vHost.getMetadata().getNamespace() ).
+        List<Ingress> createdIngresses = ingressInformerSearcher.get( vHost.getMetadata().getNamespace() ).
             filter( ingress -> ingress.getMetadata().getAnnotations() != null ).
             filter( ingress -> Objects.equals( vHost.getMetadata().getName(), ingress.getMetadata().getAnnotations().get(
                 cfgStr( "operator.helm.charts.Values.annotationKeys.vHostName" ) ) ) ).
             collect( Collectors.toList() );
 
-        long expectedIngresses = vHost.getSpec().mappings().stream().filter( m -> m.options().ingress() ).count();
-
         if ( expectedIngresses != createdIngresses.size() )
         {
-            return getBuilder( currentStatus ).
-                state( CrdStatusState.PENDING ).
-                message( "Waiting for Ingress creation" ).
-                build();
+            return currentStatus.
+                withMessage( "Waiting for Ingress creation" ).
+                withState( Xp7VHostStatus.State.PENDING );
         }
 
-        if ( currentStatus.fields().publicIps().isEmpty() )
+        if ( currentStatus.getXp7VHostStatusFields().getPublicIps().isEmpty() )
         {
             Set<String> assignedIps = createdIngresses.stream().
                 map( ingressAssignedIps ).
                 flatMap( Collection::stream ).collect( Collectors.toSet() );
             if ( assignedIps.size() == 0 )
             {
-                return getBuilder( currentStatus ).
-                    state( CrdStatusState.PENDING ).
-                    message( "Waiting for IP address" ).
-                    build();
+                return currentStatus.
+                    withMessage( "Waiting for IP address" ).
+                    withState( Xp7VHostStatus.State.PENDING );
             }
             else
             {
-                currentStatus = getBuilder( currentStatus ).
-                    fields( ImmutableV1alpha2Xp7VHostStatusFields.builder().
-                        from( currentStatus.fields() ).
-                        addAllPublicIps( assignedIps ).
-                        build() ).
-                    build();
+                currentStatus.getXp7VHostStatusFields().withPublicIps( new ArrayList<>( assignedIps ) );
             }
         }
 
-        if ( vHost.getSpec().options().dnsRecord() && !currentStatus.fields().publicIps().isEmpty() &&
-            !currentStatus.fields().dnsRecordCreated() )
+        boolean dnsRecordExpected =
+            vHost.getXp7VHostSpec().getXp7VHostSpecOptions() == null || vHost.getXp7VHostSpec().getXp7VHostSpecOptions().getDnsRecord();
+
+        if ( dnsRecordExpected && !currentStatus.getXp7VHostStatusFields().getPublicIps().isEmpty() &&
+            !currentStatus.getXp7VHostStatusFields().getDnsRecordCreated() )
         {
             currentStatus = dnsStatus( createdIngresses.get( 0 ), currentStatus );
         }
         else
         {
-            currentStatus = getBuilder( currentStatus ).
-                state( CrdStatusState.READY ).
-                message( "OK" ).
-                build();
+            currentStatus = currentStatus.
+                withState( Xp7VHostStatus.State.READY ).
+                withMessage( "OK" );
         }
 
         return currentStatus;
     }
 
-    private V1alpha2Xp7VHostStatus dnsStatus( final Ingress ingress, final V1alpha2Xp7VHostStatus currentStatus )
+    private int countIngresses( final Xp7VHost vHost )
+    {
+        int count = 0;
+        for ( Xp7VHostSpecMapping m : vHost.getXp7VHostSpec().getXp7VHostSpecMappings() )
+        {
+            if ( m.getXp7VHostSpecMappingOptions() == null || m.getXp7VHostSpecMappingOptions().getIngress() )
+            {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private Xp7VHostStatus dnsStatus( final Ingress ingress, final Xp7VHostStatus currentStatus )
     {
         Set<String> hosts = ingressEnabledHosts.apply( ingress );
         Set<String> found = new HashSet<>();
@@ -168,42 +176,30 @@ public class OperatorVHostStatus
         }
         if ( hosts.size() != found.size() )
         {
-            return getBuilder( currentStatus ).
-                from( currentStatus ).
-                state( CrdStatusState.PENDING ).
-                message( "Waiting for DNS records" ).
-                build();
+            return currentStatus.
+                withState( Xp7VHostStatus.State.PENDING ).
+                withMessage( "Waiting for DNS records" );
         }
         else
         {
-            return getBuilder( currentStatus ).
-                from( currentStatus ).
-                fields( ImmutableV1alpha2Xp7VHostStatusFields.builder().
-                    from( currentStatus.fields() ).
-                    dnsRecordCreated( true ).
-                    build() ).
-                state( CrdStatusState.READY ).
-                message( "OK" ).
-                build();
+            return currentStatus.
+                withXp7VHostStatusFields( currentStatus.getXp7VHostStatusFields().withDnsRecordCreated( true ) ).
+                withMessage( "OK" ).
+                withState( Xp7VHostStatus.State.READY );
         }
     }
 
-    private void updateStatus( final V1alpha2Xp7VHost vHost, final V1alpha2Xp7VHostStatus status )
+    private void updateStatus( final Xp7VHost vHost, final int oldStatusHashCode, final Xp7VHostStatus status )
     {
-        if ( status.equals( vHost.getStatus() ) )
+        if ( status.equals( vHost.getXp7VHostStatus() ) )
         {
             return;
         }
 
-        K8sLogHelper.logDoneable( crdClient.xp7VHosts().
+        K8sLogHelper.logDoneable( clients.xp7VHosts().crdClient().
             inNamespace( vHost.getMetadata().getNamespace() ).
             withName( vHost.getMetadata().getName() ).
             edit().
             withStatus( status ) );
-    }
-
-    private ImmutableV1alpha2Xp7VHostStatus.Builder getBuilder( V1alpha2Xp7VHostStatus status )
-    {
-        return ImmutableV1alpha2Xp7VHostStatus.builder().from( status );
     }
 }
