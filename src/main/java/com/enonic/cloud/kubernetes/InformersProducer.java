@@ -5,13 +5,11 @@ import javax.ws.rs.Produces;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapList;
-import io.fabric8.kubernetes.api.model.Namespace;
-import io.fabric8.kubernetes.api.model.NamespaceList;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodList;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.kubernetes.api.model.extensions.IngressList;
-import io.fabric8.kubernetes.client.dsl.base.OperationContext;
+import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
 import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
 import io.fabric8.kubernetes.client.informers.SharedInformerFactory;
 
@@ -46,7 +44,16 @@ public class InformersProducer
     @Produces
     SharedIndexInformer<Ingress> ingressSharedIndexInformer( final Clients clients, final SharedInformerFactory sf )
     {
-        return sf.sharedIndexInformerFor( Ingress.class, IngressList.class, informerReSync );
+        return sf.sharedIndexInformerForCustomResource( new CustomResourceDefinitionContext.Builder().
+            withGroup( "extensions" ).
+            withVersion( "v1beta1" ).
+            withName( "Ingress" ).
+            withScope( "Namespaced" ).
+            withPlural( "ingresses" ).
+            build(), Ingress.class, IngressList.class, informerReSync );
+//        return sf.sharedIndexInformerFor( Ingress.class, IngressList.class, new OperationContext().
+//            withApiGroupVersion( "v1" ).
+//            withPlural( "ingresses" ), informerReSync );
     }
 
     @Singleton

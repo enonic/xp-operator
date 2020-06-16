@@ -19,13 +19,10 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Comparators;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 
 import com.enonic.cloud.helm.charts.Chart;
-
-import static com.enonic.cloud.common.Configuration.cfgStr;
 
 
 @SuppressWarnings("unused")

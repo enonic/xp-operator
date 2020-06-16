@@ -45,7 +45,6 @@ public class OperatorConfig
     void onStartup( @Observes StartupEvent _ev )
     {
         listenToInformer( xp7ConfigSharedIndexInformer );
-        ;
     }
 
     @Override

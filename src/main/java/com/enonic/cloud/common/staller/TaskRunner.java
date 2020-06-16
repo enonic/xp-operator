@@ -15,9 +15,9 @@ import static com.enonic.cloud.common.Configuration.cfgInt;
 @Singleton
 public class TaskRunner
 {
-    private static Logger log = LoggerFactory.getLogger( TaskRunner.class );
+    private static final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor( cfgInt( "operator.tasks.threads" ) );
 
-    private static final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor( cfgInt("operator.tasks.threads") );
+    private static Logger log = LoggerFactory.getLogger( TaskRunner.class );
 
     public ScheduledFuture<?> scheduleAtFixedRate( final Runnable command, final long initialDelay, final long period, final TimeUnit unit )
     {

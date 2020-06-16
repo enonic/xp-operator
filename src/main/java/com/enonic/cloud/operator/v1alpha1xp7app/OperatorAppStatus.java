@@ -1,204 +1,168 @@
-//package com.enonic.cloud.operator.v1alpha1xp7app;
-//
-//import java.time.Duration;
-//import java.time.Instant;
-//import java.time.temporal.ChronoUnit;
-//import java.util.Optional;
-//import java.util.concurrent.TimeUnit;
-//
-//import javax.enterprise.context.ApplicationScoped;
-//import javax.enterprise.event.Observes;
-//import javax.inject.Inject;
-//
-//import org.eclipse.microprofile.config.inject.ConfigProperty;
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
-//
-//import io.quarkus.runtime.StartupEvent;
-//
-//import com.enonic.cloud.apis.xp.XpClientCache;
-//import com.enonic.cloud.apis.xp.service.AppInfo;
-//import com.enonic.cloud.common.staller.TaskRunner;
-//import com.enonic.cloud.kubernetes.caches.V1alpha1Xp7AppCache;
-//import com.enonic.cloud.kubernetes.caches.V1alpha2Xp7DeploymentCache;
-//import com.enonic.cloud.kubernetes.commands.K8sLogHelper;
-//import com.enonic.cloud.kubernetes.crd.client.CrdClient;
-//import com.enonic.cloud.kubernetes.crd.status.CrdStatusState;
-//import com.enonic.cloud.kubernetes.crd.xp7.v1alpha1.app.ImmutableV1alpha1Xp7AppStatus;
-//import com.enonic.cloud.kubernetes.crd.xp7.v1alpha1.app.ImmutableV1alpha1Xp7AppStatusFields;
-//import com.enonic.cloud.kubernetes.crd.xp7.v1alpha1.app.V1alpha1Xp7App;
-//import com.enonic.cloud.kubernetes.crd.xp7.v1alpha1.app.V1alpha1Xp7AppStatus;
-//import com.enonic.cloud.kubernetes.crd.xp7.v1alpha2.deployment.V1alpha2Xp7Deployment;
-//
-//import static com.enonic.cloud.common.Configuration.cfgIfBool;
-//import static com.enonic.cloud.common.Configuration.cfgLong;
-//
-//@ApplicationScoped
-//public class OperatorAppStatus
-//    implements Runnable
-//{
-//    private static final Logger log = LoggerFactory.getLogger( OperatorAppStatus.class );
-//
-//    @SuppressWarnings("CdiInjectionPointsInspection")
-//    @Inject
-//    CrdClient crdClient;
-//
-//    @Inject
-//    V1alpha1Xp7AppCache v1alpha1Xp7AppCache;
-//
-//    @SuppressWarnings("CdiInjectionPointsInspection")
-//    @Inject
-//    V1alpha2Xp7DeploymentCache v1alpha2Xp7DeploymentCache;
-//
-//    @Inject
-//    XpClientCache xpClientCache;
-//
-//    @Inject
-//    TaskRunner taskRunner;
-//
-//    @ConfigProperty(name = "operator.tasks.statusDelaySeconds")
-//    Long statusDelay;
-//
-//    void onStartup( @Observes StartupEvent _ev )
-//    {
-//        cfgIfBool( "operator.status.enabled", () -> taskRunner.scheduleAtFixedRate( this, cfgLong( "operator.tasks.initialDelayMs" ),
-//                                                                                    cfgLong( "operator.tasks.app.status.periodMs" ),
-//                                                                                    TimeUnit.MILLISECONDS ) );
-//    }
-//
-//    @Override
-//    public void run()
-//    {
-//        v1alpha1Xp7AppCache.getStream().
-//            filter( app -> app.getMetadata().getDeletionTimestamp() == null ).
-//            filter( app -> Duration.between( Instant.parse( app.getMetadata().getCreationTimestamp() ), Instant.now() ).getSeconds() > statusDelay ).
-//            forEach( app -> updateStatus( app, pollStatus( app ) ) );
-//    }
-//
-//    private V1alpha1Xp7AppStatus pollStatus( final V1alpha1Xp7App app )
-//    {
-//        V1alpha1Xp7AppStatus currentStatus = app.getStatus() != null ? app.getStatus() : ImmutableV1alpha1Xp7AppStatus.builder().
-//            fields( ImmutableV1alpha1Xp7AppStatusFields.builder().build() ).
-//            build();
-//
-//        if ( currentStatus.fields().appKey() == null && app.getSpec().options().bootstrap() )
-//        {
-//            currentStatus = getBuilder( currentStatus ).
-//                fields( ImmutableV1alpha1Xp7AppStatusFields.builder().
-//                    appKey( app.getSpec().options().appKey() ).
-//                    build() ).
-//                build();
-//        }
-//
-//        if ( currentStatus.fields().appKey() == null )
-//        {
-//            if ( app.getSpec().options().bootstrap() )
-//            {
-//                return getBuilder( currentStatus ).
-//                    state( CrdStatusState.ERROR ).
-//                    message( "Missing app key" ).
-//                    build();
-//            }
-//            else
-//            {
-//                return getBuilder( currentStatus ).
-//                    state( CrdStatusState.PENDING ).
-//                    message( "Pending install" ).
-//                    build();
-//            }
-//        }
-//
-//        try
-//        {
-//            return checkXp( app, currentStatus );
-//        }
-//        catch ( Exception e )
-//        {
-//            log.warn( String.format( "Failed calling XP for app '%s' in NS '%s': %s", app.getMetadata().getName(),
-//                                     app.getMetadata().getNamespace(), e.getMessage() ) );
-//            return getBuilder( currentStatus ).
-//                state( CrdStatusState.ERROR ).
-//                message( "Failed calling XP" ).
-//                build();
-//        }
-//    }
-//
-//    private V1alpha1Xp7AppStatus checkXp( final V1alpha1Xp7App app, final V1alpha1Xp7AppStatus currentStatus )
-//    {
-//        if ( !xpRunning( app ) )
-//        {
-//            return getBuilder( currentStatus ).
-//                state( CrdStatusState.PENDING ).
-//                message( "Deployment not in RUNNING state" ).
-//                build();
-//        }
-//
-//        for ( AppInfo appInfo : xpClientCache.list( app ).
-//            get().
-//            applications() )
-//        {
-//            if ( appInfo.key().equals( currentStatus.fields().appKey() ) )
-//            {
-//                ImmutableV1alpha1Xp7AppStatus.Builder builder = getBuilder( currentStatus );
-//                switch ( appInfo.state() )
-//                {
-//                    case "started":
-//                        return builder.
-//                            state( CrdStatusState.RUNNING ).
-//                            message( "Started" ).
-//                            build();
-//                    case "stopped":
-//                        return builder.
-//                            state( CrdStatusState.STOPPED ).
-//                            message( "Stopped" ).
-//                            build();
-//                    default:
-//                        return builder.
-//                            state( CrdStatusState.ERROR ).
-//                            message( "Invalid app state" ).
-//                            build();
-//                }
-//            }
-//        }
-//
-//        return getBuilder( currentStatus ).
-//            state( CrdStatusState.PENDING ).
-//            message( "Pending install" ).
-//            build();
-//    }
-//
-//    private void updateStatus( final V1alpha1Xp7App app, final V1alpha1Xp7AppStatus status )
-//    {
-//        if ( status.equals( app.getStatus() ) )
-//        {
-//            return;
-//        }
-//
-//        K8sLogHelper.logDoneable( crdClient.xp7Apps().
-//            inNamespace( app.getMetadata().getNamespace() ).
-//            withName( app.getMetadata().getName() ).
-//            edit().
-//            withStatus( status ) );
-//    }
-//
-//    private boolean xpRunning( final V1alpha1Xp7App app )
-//    {
-//        Optional<V1alpha2Xp7Deployment> deployment = v1alpha2Xp7DeploymentCache.get( app.getMetadata().getNamespace() ).findFirst();
-//        if ( deployment.isEmpty() )
-//        {
-//            return false;
-//        }
-//
-//        if ( deployment.get().getStatus() == null )
-//        {
-//            return false;
-//        }
-//
-//        return deployment.get().getStatus().state().equals( CrdStatusState.RUNNING );
-//    }
-//
-//    private ImmutableV1alpha1Xp7AppStatus.Builder getBuilder( V1alpha1Xp7AppStatus status )
-//    {
-//        return ImmutableV1alpha1Xp7AppStatus.builder().from( status );
-//    }
-//}
+package com.enonic.cloud.operator.v1alpha1xp7app;
+
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.quarkus.runtime.StartupEvent;
+
+import com.enonic.cloud.apis.xp.XpClientCache;
+import com.enonic.cloud.apis.xp.service.AppInfo;
+import com.enonic.cloud.common.staller.TaskRunner;
+import com.enonic.cloud.kubernetes.Clients;
+import com.enonic.cloud.kubernetes.InformerSearcher;
+import com.enonic.cloud.kubernetes.commands.K8sLogHelper;
+import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7App;
+import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7AppStatus;
+import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7AppStatusFields;
+import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
+import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentStatus;
+
+import static com.enonic.cloud.common.Configuration.cfgIfBool;
+import static com.enonic.cloud.common.Configuration.cfgLong;
+
+@ApplicationScoped
+public class OperatorAppStatus
+    implements Runnable
+{
+    private static final Logger log = LoggerFactory.getLogger( OperatorAppStatus.class );
+
+    @SuppressWarnings("CdiInjectionPointsInspection")
+    @Inject
+    Clients clients;
+
+    @Inject
+    InformerSearcher<Xp7App> xp7AppInformerSearcher;
+
+    @Inject
+    InformerSearcher<Xp7Deployment> xp7DeploymentInformerSearcher;
+
+    @Inject
+    XpClientCache xpClientCache;
+
+    @Inject
+    TaskRunner taskRunner;
+
+    @ConfigProperty(name = "operator.tasks.statusDelaySeconds")
+    Long statusDelay;
+
+    void onStartup( @Observes StartupEvent _ev )
+    {
+        cfgIfBool( "operator.status.enabled", () -> taskRunner.scheduleAtFixedRate( this, cfgLong( "operator.tasks.initialDelayMs" ),
+                                                                                    cfgLong( "operator.tasks.app.status.periodMs" ),
+                                                                                    TimeUnit.MILLISECONDS ) );
+    }
+
+    @Override
+    public void run()
+    {
+        xp7AppInformerSearcher.getStream().
+            filter( app -> app.getMetadata().getDeletionTimestamp() == null ).
+            filter( app -> Duration.between( Instant.parse( app.getMetadata().getCreationTimestamp() ), Instant.now() ).getSeconds() >
+                statusDelay ).
+            forEach( app -> updateStatus( app, pollStatus( app ) ) );
+    }
+
+    private Xp7AppStatus pollStatus( final Xp7App app )
+    {
+        Xp7AppStatus currentStatus =
+            app.getXp7AppStatus() != null ? app.getXp7AppStatus() : new Xp7AppStatus().withXp7AppStatusFields( new Xp7AppStatusFields() );
+
+        if ( currentStatus.getXp7AppStatusFields().getAppKey() == null )
+        {
+            return currentStatus.
+                withState( Xp7AppStatus.State.PENDING ).
+                withMessage( "Pending install" );
+        }
+
+        try
+        {
+            return checkXp( app, currentStatus );
+        }
+        catch ( Exception e )
+        {
+            log.warn( String.format( "Failed calling XP for app '%s' in NS '%s': %s", app.getMetadata().getName(),
+                                     app.getMetadata().getNamespace(), e.getMessage() ) );
+            return currentStatus.
+                withState( Xp7AppStatus.State.ERROR ).
+                withMessage( "Failed calling XP" );
+        }
+    }
+
+    private Xp7AppStatus checkXp( final Xp7App app, final Xp7AppStatus currentStatus )
+    {
+        if ( !xpRunning( app ) )
+        {
+            return currentStatus.
+                withState( Xp7AppStatus.State.PENDING ).
+                withMessage( "Deployment not in RUNNING state" );
+        }
+
+        for ( AppInfo appInfo : xpClientCache.list( app ).
+            get().
+            applications() )
+        {
+            if ( appInfo.key().equals( currentStatus.getXp7AppStatusFields().getAppKey() ) )
+            {
+                switch ( appInfo.state() )
+                {
+                    case "started":
+                        return currentStatus.
+                            withState( Xp7AppStatus.State.RUNNING ).
+                            withMessage( "Started" );
+                    case "stopped":
+                        return currentStatus.
+                            withState( Xp7AppStatus.State.STOPPED ).
+                            withMessage( "Stopped" );
+                    default:
+                        return currentStatus.
+                            withState( Xp7AppStatus.State.ERROR ).
+                            withMessage( "Invalid app state" );
+                }
+            }
+        }
+
+        return currentStatus.
+            withState( Xp7AppStatus.State.PENDING ).
+            withMessage( "Pending install" );
+    }
+
+    private void updateStatus( final Xp7App app, final Xp7AppStatus status )
+    {
+        if ( status.equals( app.getXp7AppStatus() ) )
+        {
+            return;
+        }
+
+        K8sLogHelper.logDoneable( clients.xp7Apps().crdClient().
+            inNamespace( app.getMetadata().getNamespace() ).
+            withName( app.getMetadata().getName() ).
+            edit().
+            withStatus( status ) );
+    }
+
+    private boolean xpRunning( final Xp7App app )
+    {
+        Optional<Xp7Deployment> deployment = xp7DeploymentInformerSearcher.get( app.getMetadata().getNamespace() ).findFirst();
+        if ( deployment.isEmpty() )
+        {
+            return false;
+        }
+
+        if ( deployment.get().getXp7DeploymentStatus() == null )
+        {
+            return false;
+        }
+
+        return deployment.get().getXp7DeploymentStatus().getState().equals( Xp7DeploymentStatus.State.RUNNING );
+    }
+}

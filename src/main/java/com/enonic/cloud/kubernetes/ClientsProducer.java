@@ -16,12 +16,7 @@ public class ClientsProducer
     @Produces
     Clients crdClient( final KubernetesClient client )
     {
-        return ClientsImpl.of(
-            client,
-            new Xp7AppClient( client ),
-            new Xp7ConfigClient( client ),
-            new Xp7DeploymentClient( client ),
-            new Xp7VHostClient( client )
-        );
+        return ClientsImpl.of( client, new Xp7AppClient( client ), new Xp7ConfigClient( client ), new Xp7DeploymentClient( client ),
+                               new Xp7VHostClient( client ) );
     }
 }

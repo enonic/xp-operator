@@ -4,7 +4,6 @@ import javax.inject.Singleton;
 import javax.ws.rs.Produces;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.kubernetes.client.informers.SharedIndexInformer;

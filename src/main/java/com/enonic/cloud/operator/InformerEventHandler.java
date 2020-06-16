@@ -27,8 +27,8 @@ public abstract class InformerEventHandler<R extends HasMetadata>
                     // Ignore
                 }
             }
-            //log.info( String.format( "Adding listener %s", this.getClass().getSimpleName() ) );
-            //indexInformer.addEventHandler( this );
+            log.info( String.format( "Adding listener %s", this.getClass().getSimpleName() ) );
+            indexInformer.addEventHandler( this );
         } ).start();
     }
 }

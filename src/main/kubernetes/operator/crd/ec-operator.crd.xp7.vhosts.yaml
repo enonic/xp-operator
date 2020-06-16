@@ -75,7 +75,9 @@ spec:
                           statusCake:
                             type: boolean
                           ipWhitelist:
-                            type: string
+                            type: array
+                            items:
+                              type: string
                           stickySession:
                             type: boolean
                           sslRedirect:

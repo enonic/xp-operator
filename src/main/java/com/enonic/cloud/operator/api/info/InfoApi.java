@@ -39,20 +39,29 @@ public class InfoApi
         admissionResource.put( "verbs", Collections.singletonList( "create" ) );
         admissionResource.put( "version", "v1beta1" );
 
-        Map<String, Object> conversionResource = new HashMap<>();
-        conversionResource.put( "group", "apiextensions.k8s.io" );
-        conversionResource.put( "kind", "ConversionReview" );
-        conversionResource.put( "name", "conversions" );
-        conversionResource.put( "namespaced", false );
-        conversionResource.put( "singularName", "" );
-        conversionResource.put( "verbs", Collections.singletonList( "create" ) );
-        conversionResource.put( "version", "v1beta1" );
+        Map<String, Object> mutationResource = new HashMap<>();
+        mutationResource.put( "group", "admission.k8s.io" );
+        mutationResource.put( "kind", "AdmissionReview" );
+        mutationResource.put( "name", "mutations" );
+        mutationResource.put( "namespaced", false );
+        mutationResource.put( "singularName", "" );
+        mutationResource.put( "verbs", Collections.singletonList( "create" ) );
+        mutationResource.put( "version", "v1beta1" );
+
+//        Map<String, Object> conversionResource = new HashMap<>();
+//        conversionResource.put( "group", "apiextensions.k8s.io" );
+//        conversionResource.put( "kind", "ConversionReview" );
+//        conversionResource.put( "name", "conversions" );
+//        conversionResource.put( "namespaced", false );
+//        conversionResource.put( "singularName", "" );
+//        conversionResource.put( "verbs", Collections.singletonList( "create" ) );
+//        conversionResource.put( "version", "v1beta1" );
 
         Map<String, Object> res = new HashMap<>();
         res.put( "apiVersion", "v1" );
         res.put( "groupVersion", group + "/" + apiVersion );
         res.put( "kind", "APIResourceList" );
-        res.put( "resources", Arrays.asList( admissionResource, conversionResource ) );
+        res.put( "resources", Arrays.asList( admissionResource, mutationResource ) );
         return res;
     }
 

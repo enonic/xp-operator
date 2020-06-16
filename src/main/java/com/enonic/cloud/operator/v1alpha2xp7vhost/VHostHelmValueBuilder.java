@@ -11,7 +11,7 @@ import com.enonic.cloud.helm.values.BaseValues;
 import com.enonic.cloud.helm.values.MapValues;
 import com.enonic.cloud.helm.values.ValueBuilder;
 import com.enonic.cloud.helm.values.Values;
-import com.enonic.cloud.kubernetes.crd.Xp7VHostDefault;
+import com.enonic.cloud.kubernetes.client.v1alpha2.xp7vhost.Xp7VHostCrd;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHost;
 
 import static com.enonic.cloud.common.Configuration.cfgStr;
@@ -26,7 +26,7 @@ public abstract class VHostHelmValueBuilder
     @Override
     public Values apply( final Xp7VHost in )
     {
-        Xp7VHost resource = Xp7VHostDefault.addDefaultValues( in );
+        Xp7VHost resource = Xp7VHostCrd.withDefaultValues( in );
         MapValues values = new MapValues( baseValues() );
 
         Map<String, Object> vhost = new HashMap<>();
