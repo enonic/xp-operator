@@ -1,15 +1,15 @@
 # Create StatefulSet for each nodeGroup
-{{- range $nodeGroupName, $nodeGroup := .Values.deployment.spec.nodeGroups }}
+{{- range $nodeGroup := .Values.deployment.spec.nodeGroups }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ $nodeGroupName }}
+  name: {{ $nodeGroup.name }}
   namespace: {{ $.Values.deployment.namespace }}
   annotations:
     {{ $.Values.annotationKeys.applyPriority }}: "90"
   labels:
     {{ $.Values.labelKeys.managed }}: true
-    {{ $.Values.labelKeys.nodeGroup }}: {{ $nodeGroupName }}
+    {{ $.Values.labelKeys.nodeGroup }}: {{ $nodeGroup.name }}
     {{- with $.Values.defaultLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
@@ -27,7 +27,7 @@ spec:
   selector:
     matchLabels:
       {{ $.Values.labelKeys.managed }}: true
-      {{ $.Values.labelKeys.nodeGroup }}: {{ $nodeGroupName }}
+      {{ $.Values.labelKeys.nodeGroup }}: {{ $nodeGroup.name }}
       {{- with $.Values.defaultLabels }}
       {{- toYaml . | nindent 6 }}
       {{- end }}
@@ -44,7 +44,7 @@ spec:
         {{- end }}
       labels:
         {{ $.Values.labelKeys.managed }}: true
-        {{ $.Values.labelKeys.nodeGroup }}: {{ $nodeGroupName }}
+        {{ $.Values.labelKeys.nodeGroup }}: {{ $nodeGroup.name }}
         {{- with $.Values.defaultLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -59,7 +59,7 @@ spec:
                   - key: {{ $.Values.labelKeys.nodeGroup }}
                     operator: In
                     values:
-                      - {{ $nodeGroupName }}
+                      - {{ $nodeGroup.name }}
               topologyKey: "kubernetes.io/hostname"
       {{- end }}
       restartPolicy: Always
@@ -121,7 +121,7 @@ spec:
                   apiVersion: v1
                   fieldPath: metadata.name
             - name: XP_NODE_GROUP
-              value: {{ $nodeGroupName }}
+              value: {{ $nodeGroup.name }}
             - name: XP_NODE_IP
               valueFrom:
                 fieldRef:
@@ -133,19 +133,9 @@ spec:
                   name: su
                   key: passHash
                   optional: false
-          {{- if $nodeGroup.env }}
-          {{- range $key, $value := $nodeGroup.env }}
-            - name: {{ $key }}
-              value: {{ $value }}
-          {{- end }}
-          {{- if not (index $nodeGroup.env "JAVA_OPTS") }}
-            - name: JAVA_OPTS
-              value: '-Djava.security.properties={{ $.Values.extraConfigLocation }}/java.security.properties -XX:+UseContainerSupport -XX:MinRAMPercentage=20 -XX:InitialRAMPercentage=30
-                          -XX:MaxRAMPercentage={{ if and $nodeGroup.master (not $nodeGroup.data) }}75{{ else }}50{{ end }} -XX:+UseConcMarkSweepGC
-                          -XX:+CMSParallelRemarkEnabled -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=60
-                          -XX:+ScavengeBeforeFullGC -XX:+CMSScavengeBeforeRemark -XX:-HeapDumpOnOutOfMemoryError
-                          -XX:HeapDumpPath={{ $.Values.heapDumpLocation }}/oom.hprof'
-          {{- end }}
+          {{- range $env := $nodeGroup.env }}
+            - name: {{ $env.name }}
+              value: {{ $env.value }}
           {{- end }}
           {{- if $.Values.startupProbe }}
           startupProbe:
@@ -181,43 +171,43 @@ spec:
             - name: extra-config
               mountPath: {{ $.Values.setEnvLocation }}
               subPath: preStart.sh
-            {{- range $volumeName, $volumeSize := $nodeGroup.resources.disks }}
-            - name: {{ $volumeName }}
-              mountPath: {{ index $.Values.volumeMounts $volumeName }}
+            {{- range $volume := $nodeGroup.resources.disks }}
+            - name: {{ $volume.name }}
+              mountPath: {{ index $.Values.volumeMounts $volume.name }}
             {{- end }}
-            {{- range $volumeName, $volumeSize := $.Values.deployment.spec.nodesSharedDisks }}
-            - name: {{ $volumeName }}
-              mountPath: {{ index $.Values.volumeMounts $volumeName }}
+            {{- range $volume := $.Values.deployment.spec.nodesSharedDisks }}
+            - name: {{ $volume.name }}
+              mountPath: {{ index $.Values.volumeMounts $volume.name }}
             {{- end }}
       volumes:
         - name: config
           configMap:
             defaultMode: "420"
-            name: {{ $nodeGroupName }}
+            name: {{ $nodeGroup.name }}
         - name: extra-config
           configMap:
             defaultMode: "420"
             name: extra-config
-        {{- range $volumeName, $volumeSize := $.Values.deployment.spec.nodesSharedDisks }}
-        - name: {{ $volumeName }}
+        {{- range $volume := $.Values.deployment.spec.nodesSharedDisks }}
+        - name: {{ $volume.name }}
           persistentVolumeClaim:
-            claimName: {{ $volumeName }}
+            claimName: {{ $volume.name }}
         {{- end }}
 
   volumeClaimTemplates:
-    {{- range $volumeName, $volumeSize := $nodeGroup.resources.disks }}
+    {{- range $volume := $nodeGroup.resources.disks }}
     - metadata:
-        name: {{ $volumeName }}
+        name: {{ $volume.name }}
         annotations:
           {{- with $.Values.storage.default.annotations }}
           {{- toYaml . | nindent 10 }}
           {{- end }}
         labels:
-          {{- if not (has $volumeName $.Values.volumeBackups) }}
+          {{- if not (has $volume.name $.Values.volumeBackups) }}
           velero.io/exclude-from-backup: true
           {{- end }}
           {{ $.Values.labelKeys.managed }}: true
-          {{ $.Values.labelKeys.nodeGroup }}: {{ $nodeGroupName }}
+          {{ $.Values.labelKeys.nodeGroup }}: {{ $nodeGroup.name }}
           {{- with $.Values.defaultLabels }}
           {{- toYaml . | nindent 10 }}
           {{- end }}
@@ -228,7 +218,7 @@ spec:
           - ReadWriteOnce
         resources:
           requests:
-            storage: {{ $volumeSize }}
+            storage: {{ $volume.size }}
     {{- end }}
 ---
 {{- end }}

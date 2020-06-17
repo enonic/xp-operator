@@ -146,6 +146,29 @@ metadata:
     enonic.applyPriority: "50"
   labels:
     enonic.managed: "true"
+    enonic.nodeGroup: "master"
+    cloud: "mycloud"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
+  name: "master"
+  namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
+data: {}
+---
+apiVersion: "v1"
+kind: "ConfigMap"
+metadata:
+  annotations:
+    enonic.neverOverwrite: "true"
+    enonic.applyPriority: "50"
+  labels:
+    enonic.managed: "true"
     enonic.nodeGroup: "data"
     cloud: "mycloud"
     environment: "myenv"
@@ -175,29 +198,6 @@ metadata:
     service: "myservice"
     solution: "mysolution"
   name: "frontend"
-  namespace: "mycloud-mysolution-myenv-myservice"
-  ownerReferences:
-  - apiVersion: "enonic.cloud/v1alpha2"
-    kind: "Xp7Deployment"
-    blockOwnerDeletion: false
-    controller: true
-    name: "mycloud-mysolution-myenv-myservice"
-data: {}
----
-apiVersion: "v1"
-kind: "ConfigMap"
-metadata:
-  annotations:
-    enonic.neverOverwrite: "true"
-    enonic.applyPriority: "50"
-  labels:
-    enonic.managed: "true"
-    enonic.nodeGroup: "master"
-    cloud: "mycloud"
-    environment: "myenv"
-    service: "myservice"
-    solution: "mysolution"
-  name: "master"
   namespace: "mycloud-mysolution-myenv-myservice"
   ownerReferences:
   - apiVersion: "enonic.cloud/v1alpha2"
@@ -397,6 +397,55 @@ metadata:
     enonic.applyPriority: "100"
   labels:
     enonic.managed: "true"
+    enonic.nodeGroup: "master"
+    cloud: "mycloud"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
+  name: "master"
+  namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
+spec:
+  clusterIP: "None"
+  ports:
+  - name: "xp-metrics"
+    port: 2609
+    protocol: "TCP"
+    targetPort: 2609
+  - name: "xp-management"
+    port: 4848
+    protocol: "TCP"
+    targetPort: 4848
+  - name: "xp-main"
+    port: 8080
+    protocol: "TCP"
+    targetPort: 8080
+  - name: "es-api"
+    port: 9200
+    protocol: "TCP"
+    targetPort: 9200
+  publishNotReadyAddresses: false
+  selector:
+    enonic.nodeGroup: "master"
+    cloud: "mycloud"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
+  sessionAffinity: "None"
+  type: "ClusterIP"
+---
+apiVersion: "v1"
+kind: "Service"
+metadata:
+  annotations:
+    enonic.applyPriority: "100"
+  labels:
+    enonic.managed: "true"
     enonic.nodeGroup: "data"
     cloud: "mycloud"
     environment: "myenv"
@@ -488,11 +537,11 @@ spec:
   sessionAffinity: "None"
   type: "ClusterIP"
 ---
-apiVersion: "v1"
-kind: "Service"
+apiVersion: "apps/v1"
+kind: "StatefulSet"
 metadata:
   annotations:
-    enonic.applyPriority: "100"
+    enonic.applyPriority: "90"
   labels:
     enonic.managed: "true"
     enonic.nodeGroup: "master"
@@ -509,33 +558,192 @@ metadata:
     controller: true
     name: "mycloud-mysolution-myenv-myservice"
 spec:
-  clusterIP: "None"
-  ports:
-  - name: "xp-metrics"
-    port: 2609
-    protocol: "TCP"
-    targetPort: 2609
-  - name: "xp-management"
-    port: 4848
-    protocol: "TCP"
-    targetPort: 4848
-  - name: "xp-main"
-    port: 8080
-    protocol: "TCP"
-    targetPort: 8080
-  - name: "es-api"
-    port: 9200
-    protocol: "TCP"
-    targetPort: 9200
-  publishNotReadyAddresses: false
+  podManagementPolicy: "Parallel"
+  replicas: 3
+  revisionHistoryLimit: 10
   selector:
-    enonic.nodeGroup: "master"
-    cloud: "mycloud"
-    environment: "myenv"
-    service: "myservice"
-    solution: "mysolution"
-  sessionAffinity: "None"
-  type: "ClusterIP"
+    matchLabels:
+      enonic.managed: "true"
+      enonic.nodeGroup: "master"
+      cloud: "mycloud"
+      environment: "myenv"
+      service: "myservice"
+      solution: "mysolution"
+  serviceName: "cluster-discovery"
+  template:
+    metadata:
+      annotations:
+        enonic.cloud/metrics.xp7: "true"
+        enonic.cloud/logs.xp7: "true"
+        backup.velero.io/backup-volumes: "blobstore,snapshots"
+        pre.hook.backup.velero.io/container: "exp"
+        pre.hook.backup.velero.io/command: "[\"bash\", \"-c\", \"/usr/local/bin/backup.sh\"\
+          ]"
+      labels:
+        enonic.managed: "true"
+        enonic.nodeGroup: "master"
+        cloud: "mycloud"
+        environment: "myenv"
+        service: "myservice"
+        solution: "mysolution"
+    spec:
+      containers:
+      - env:
+        - name: "NAMESPACE"
+          valueFrom:
+            fieldRef:
+              apiVersion: "v1"
+              fieldPath: "metadata.namespace"
+        - name: "XP_NODE_NAME"
+          valueFrom:
+            fieldRef:
+              apiVersion: "v1"
+              fieldPath: "metadata.name"
+        - name: "XP_NODE_GROUP"
+          value: "master"
+        - name: "XP_NODE_IP"
+          valueFrom:
+            fieldRef:
+              apiVersion: "v1"
+              fieldPath: "status.podIP"
+        - name: "SU_PASS_HASH"
+          valueFrom:
+            secretKeyRef:
+              key: "passHash"
+              name: "su"
+              optional: false
+        - name: "JAVA_OPTS"
+          value: "-Djava.security.properties=/enonic-xp/home/extra-config/java.security.properties\
+            \ -XX:+UseContainerSupport -XX:MinRAMPercentage=20 -XX:InitialRAMPercentage=30\
+            \ -XX:MaxRAMPercentage=75 -XX:+UseConcMarkSweepGC -XX:+CMSParallelRemarkEnabled\
+            \ -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=60\
+            \ -XX:+ScavengeBeforeFullGC -XX:+CMSScavengeBeforeRemark -XX:-HeapDumpOnOutOfMemoryError\
+            \ -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof"
+        image: "enonic/xp:7.1.2-ubuntu"
+        imagePullPolicy: "IfNotPresent"
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - "/bin/bash"
+              - "/enonic-xp/home/extra-config/preStop.sh"
+        name: "exp"
+        ports:
+        - containerPort: 2609
+          name: "xp-stats"
+          protocol: "TCP"
+        - containerPort: 8080
+          name: "xp-main"
+          protocol: "TCP"
+        - containerPort: 9200
+          name: "es-http"
+          protocol: "TCP"
+        - containerPort: 9300
+          name: "es-transport"
+          protocol: "TCP"
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            httpHeaders:
+            - name: "Host"
+              value: "healthcheck"
+            path: "/"
+            port: 8080
+            scheme: "HTTP"
+          initialDelaySeconds: 0
+          periodSeconds: 5
+          successThreshold: 3
+          timeoutSeconds: 1
+        resources:
+          limits:
+            cpu: "1"
+            memory: "1Gi"
+          requests:
+            cpu: "1"
+            memory: "1Gi"
+        securityContext:
+          capabilities:
+            drop:
+            - "ALL"
+          runAsNonRoot: true
+          runAsUser: 1337
+          sysctls:
+          - name: "vm.max_map_count"
+            value: "262144"
+        startupProbe:
+          failureThreshold: 36
+          httpGet:
+            httpHeaders:
+            - name: "Host"
+              value: "healthcheck"
+            path: "/"
+            port: 8080
+            scheme: "HTTP"
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 1
+        terminationMessagePath: "/dev/termination-log"
+        terminationMessagePolicy: "File"
+        volumeMounts:
+        - mountPath: "/enonic-xp/home/config"
+          name: "config"
+        - mountPath: "/enonic-xp/home/extra-config"
+          name: "extra-config"
+        - mountPath: "/enonic-xp/home/setenv.sh"
+          name: "extra-config"
+          subPath: "preStart.sh"
+        - mountPath: "/enonic-xp/home/data"
+          name: "export"
+        - mountPath: "/enonic-xp/home/repo/blob"
+          name: "blobstore"
+        - mountPath: "/enonic-xp/home/snapshots"
+          name: "snapshots"
+      dnsPolicy: "ClusterFirst"
+      restartPolicy: "Always"
+      schedulerName: "default-scheduler"
+      securityContext:
+        fsGroup: 0
+      serviceAccountName: "xp-node-sa"
+      terminationGracePeriodSeconds: 600
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: "master"
+        name: "config"
+      - configMap:
+          defaultMode: 420
+          name: "extra-config"
+        name: "extra-config"
+      - name: "blobstore"
+        persistentVolumeClaim:
+          claimName: "blobstore"
+      - name: "snapshots"
+        persistentVolumeClaim:
+          claimName: "snapshots"
+  updateStrategy:
+    type: "RollingUpdate"
+  volumeClaimTemplates:
+  - apiVersion: "v1"
+    kind: "PersistentVolumeClaim"
+    metadata:
+      labels:
+        velero.io/exclude-from-backup: "true"
+        enonic.managed: "true"
+        enonic.nodeGroup: "master"
+        cloud: "mycloud"
+        environment: "myenv"
+        service: "myservice"
+        solution: "mysolution"
+      name: "export"
+    spec:
+      accessModes:
+      - "ReadWriteOnce"
+      resources:
+        requests:
+          storage: "3Gi"
+      storageClassName: "standard"
+      volumeMode: "Filesystem"
 ---
 apiVersion: "apps/v1"
 kind: "StatefulSet"
@@ -970,7 +1178,7 @@ spec:
       - "ReadWriteOnce"
       resources:
         requests:
-          storage: "6Gi"
+          storage: null
       storageClassName: "standard"
       volumeMode: "Filesystem"
   - apiVersion: "v1"
@@ -990,208 +1198,7 @@ spec:
       - "ReadWriteOnce"
       resources:
         requests:
-          storage: "7Gi"
-      storageClassName: "standard"
-      volumeMode: "Filesystem"
----
-apiVersion: "apps/v1"
-kind: "StatefulSet"
-metadata:
-  annotations:
-    enonic.applyPriority: "90"
-  labels:
-    enonic.managed: "true"
-    enonic.nodeGroup: "master"
-    cloud: "mycloud"
-    environment: "myenv"
-    service: "myservice"
-    solution: "mysolution"
-  name: "master"
-  namespace: "mycloud-mysolution-myenv-myservice"
-  ownerReferences:
-  - apiVersion: "enonic.cloud/v1alpha2"
-    kind: "Xp7Deployment"
-    blockOwnerDeletion: false
-    controller: true
-    name: "mycloud-mysolution-myenv-myservice"
-spec:
-  podManagementPolicy: "Parallel"
-  replicas: 3
-  revisionHistoryLimit: 10
-  selector:
-    matchLabels:
-      enonic.managed: "true"
-      enonic.nodeGroup: "master"
-      cloud: "mycloud"
-      environment: "myenv"
-      service: "myservice"
-      solution: "mysolution"
-  serviceName: "cluster-discovery"
-  template:
-    metadata:
-      annotations:
-        enonic.cloud/metrics.xp7: "true"
-        enonic.cloud/logs.xp7: "true"
-        backup.velero.io/backup-volumes: "blobstore,snapshots"
-        pre.hook.backup.velero.io/container: "exp"
-        pre.hook.backup.velero.io/command: "[\"bash\", \"-c\", \"/usr/local/bin/backup.sh\"\
-          ]"
-      labels:
-        enonic.managed: "true"
-        enonic.nodeGroup: "master"
-        cloud: "mycloud"
-        environment: "myenv"
-        service: "myservice"
-        solution: "mysolution"
-    spec:
-      containers:
-      - env:
-        - name: "NAMESPACE"
-          valueFrom:
-            fieldRef:
-              apiVersion: "v1"
-              fieldPath: "metadata.namespace"
-        - name: "XP_NODE_NAME"
-          valueFrom:
-            fieldRef:
-              apiVersion: "v1"
-              fieldPath: "metadata.name"
-        - name: "XP_NODE_GROUP"
-          value: "master"
-        - name: "XP_NODE_IP"
-          valueFrom:
-            fieldRef:
-              apiVersion: "v1"
-              fieldPath: "status.podIP"
-        - name: "SU_PASS_HASH"
-          valueFrom:
-            secretKeyRef:
-              key: "passHash"
-              name: "su"
-              optional: false
-        image: "enonic/xp:7.1.2-ubuntu"
-        imagePullPolicy: "IfNotPresent"
-        lifecycle:
-          preStop:
-            exec:
-              command:
-              - "/bin/bash"
-              - "/enonic-xp/home/extra-config/preStop.sh"
-        name: "exp"
-        ports:
-        - containerPort: 2609
-          name: "xp-stats"
-          protocol: "TCP"
-        - containerPort: 8080
-          name: "xp-main"
-          protocol: "TCP"
-        - containerPort: 9200
-          name: "es-http"
-          protocol: "TCP"
-        - containerPort: 9300
-          name: "es-transport"
-          protocol: "TCP"
-        readinessProbe:
-          failureThreshold: 3
-          httpGet:
-            httpHeaders:
-            - name: "Host"
-              value: "healthcheck"
-            path: "/"
-            port: 8080
-            scheme: "HTTP"
-          initialDelaySeconds: 0
-          periodSeconds: 5
-          successThreshold: 3
-          timeoutSeconds: 1
-        resources:
-          limits:
-            cpu: "1"
-            memory: "1Gi"
-          requests:
-            cpu: "1"
-            memory: "1Gi"
-        securityContext:
-          capabilities:
-            drop:
-            - "ALL"
-          runAsNonRoot: true
-          runAsUser: 1337
-          sysctls:
-          - name: "vm.max_map_count"
-            value: "262144"
-        startupProbe:
-          failureThreshold: 36
-          httpGet:
-            httpHeaders:
-            - name: "Host"
-              value: "healthcheck"
-            path: "/"
-            port: 8080
-            scheme: "HTTP"
-          initialDelaySeconds: 30
-          periodSeconds: 5
-          successThreshold: 1
-          timeoutSeconds: 1
-        terminationMessagePath: "/dev/termination-log"
-        terminationMessagePolicy: "File"
-        volumeMounts:
-        - mountPath: "/enonic-xp/home/config"
-          name: "config"
-        - mountPath: "/enonic-xp/home/extra-config"
-          name: "extra-config"
-        - mountPath: "/enonic-xp/home/setenv.sh"
-          name: "extra-config"
-          subPath: "preStart.sh"
-        - mountPath: "/enonic-xp/home/data"
-          name: "export"
-        - mountPath: "/enonic-xp/home/repo/blob"
-          name: "blobstore"
-        - mountPath: "/enonic-xp/home/snapshots"
-          name: "snapshots"
-      dnsPolicy: "ClusterFirst"
-      restartPolicy: "Always"
-      schedulerName: "default-scheduler"
-      securityContext:
-        fsGroup: 0
-      serviceAccountName: "xp-node-sa"
-      terminationGracePeriodSeconds: 600
-      volumes:
-      - configMap:
-          defaultMode: 420
-          name: "master"
-        name: "config"
-      - configMap:
-          defaultMode: 420
-          name: "extra-config"
-        name: "extra-config"
-      - name: "blobstore"
-        persistentVolumeClaim:
-          claimName: "blobstore"
-      - name: "snapshots"
-        persistentVolumeClaim:
-          claimName: "snapshots"
-  updateStrategy:
-    type: "RollingUpdate"
-  volumeClaimTemplates:
-  - apiVersion: "v1"
-    kind: "PersistentVolumeClaim"
-    metadata:
-      labels:
-        velero.io/exclude-from-backup: "true"
-        enonic.managed: "true"
-        enonic.nodeGroup: "master"
-        cloud: "mycloud"
-        environment: "myenv"
-        service: "myservice"
-        solution: "mysolution"
-      name: "export"
-    spec:
-      accessModes:
-      - "ReadWriteOnce"
-      resources:
-        requests:
-          storage: "3Gi"
+          storage: null
       storageClassName: "standard"
       volumeMode: "Filesystem"
 ---
@@ -1388,6 +1395,58 @@ metadata:
     name: "mycloud-mysolution-myenv-myservice"
 ---
 spec:
+  nodeGroup: "master"
+  file: "com.enonic.xp.web.vhost.cfg"
+  data: "enabled = true"
+kind: "Xp7Config"
+apiVersion: "enonic.cloud/v1alpha2"
+metadata:
+  annotations:
+    enonic.neverOverwrite: "true"
+    enonic.applyPriority: "71"
+  labels:
+    enonic.managed: "true"
+    cloud: "mycloud"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
+  name: "master-vhosts"
+  namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
+---
+spec:
+  nodeGroup: "master"
+  file: "com.enonic.xp.elasticsearch.cfg"
+  data: "http.enabled=true\ncluster.name=mycloud-mysolution-myenv-myservice\nnode.master=true\n\
+    node.data=false\ngateway.expected_master_nodes=2\ngateway.expected_data_nodes=2\n\
+    gateway.recover_after_time=5m\ndiscovery.zen.minimum_master_nodes=2\ndiscovery.unicast.sockets=cluster-discovery.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
+    network.tcp.keep_alive=true"
+kind: "Xp7Config"
+apiVersion: "enonic.cloud/v1alpha2"
+metadata:
+  annotations:
+    enonic.applyPriority: "71"
+  labels:
+    enonic.managed: "true"
+    cloud: "mycloud"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
+  name: "master-elasticsearch"
+  namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
+---
+spec:
   nodeGroup: "data"
   file: "com.enonic.xp.web.vhost.cfg"
   data: "enabled = true"
@@ -1483,58 +1542,6 @@ metadata:
     service: "myservice"
     solution: "mysolution"
   name: "frontend-elasticsearch"
-  namespace: "mycloud-mysolution-myenv-myservice"
-  ownerReferences:
-  - apiVersion: "enonic.cloud/v1alpha2"
-    kind: "Xp7Deployment"
-    blockOwnerDeletion: false
-    controller: true
-    name: "mycloud-mysolution-myenv-myservice"
----
-spec:
-  nodeGroup: "master"
-  file: "com.enonic.xp.web.vhost.cfg"
-  data: "enabled = true"
-kind: "Xp7Config"
-apiVersion: "enonic.cloud/v1alpha2"
-metadata:
-  annotations:
-    enonic.neverOverwrite: "true"
-    enonic.applyPriority: "71"
-  labels:
-    enonic.managed: "true"
-    cloud: "mycloud"
-    environment: "myenv"
-    service: "myservice"
-    solution: "mysolution"
-  name: "master-vhosts"
-  namespace: "mycloud-mysolution-myenv-myservice"
-  ownerReferences:
-  - apiVersion: "enonic.cloud/v1alpha2"
-    kind: "Xp7Deployment"
-    blockOwnerDeletion: false
-    controller: true
-    name: "mycloud-mysolution-myenv-myservice"
----
-spec:
-  nodeGroup: "master"
-  file: "com.enonic.xp.elasticsearch.cfg"
-  data: "http.enabled=true\ncluster.name=mycloud-mysolution-myenv-myservice\nnode.master=true\n\
-    node.data=false\ngateway.expected_master_nodes=2\ngateway.expected_data_nodes=2\n\
-    gateway.recover_after_time=5m\ndiscovery.zen.minimum_master_nodes=2\ndiscovery.unicast.sockets=cluster-discovery.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
-    network.tcp.keep_alive=true"
-kind: "Xp7Config"
-apiVersion: "enonic.cloud/v1alpha2"
-metadata:
-  annotations:
-    enonic.applyPriority: "71"
-  labels:
-    enonic.managed: "true"
-    cloud: "mycloud"
-    environment: "myenv"
-    service: "myservice"
-    solution: "mysolution"
-  name: "master-elasticsearch"
   namespace: "mycloud-mysolution-myenv-myservice"
   ownerReferences:
   - apiVersion: "enonic.cloud/v1alpha2"

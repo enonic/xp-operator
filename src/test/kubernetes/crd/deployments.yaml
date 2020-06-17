@@ -27,14 +27,21 @@ spec:
                 xpVersion:
                   type: string
                 nodesSharedDisks:
-                  type: object
-                  additionalProperties:
-                    type: string
-                nodeGroups:
-                  type: object
-                  additionalProperties:
+                  type: array
+                  items:
                     type: object
                     properties:
+                      name:
+                        type: string
+                      size:
+                        type: string
+                nodeGroups:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
                       displayName:
                         type: string
                       data:
@@ -45,9 +52,14 @@ spec:
                         type: integer
                         format: int32
                       env:
-                        type: object
-                        additionalProperties:
-                          type: string
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                            value:
+                              type: string
                       resources:
                         type: object
                         properties:
@@ -56,9 +68,14 @@ spec:
                           memory:
                             type: string
                           disks:
-                            type: object
-                            additionalProperties:
-                              type: string
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                                size:
+                                  type: string
             status:
               type: object
               nullable: true
@@ -72,10 +89,12 @@ spec:
                   type: object
                   properties:
                     pods:
-                      type: object
-                      additionalProperties:
+                      type: array
+                      items:
                         type: object
                         properties:
+                          name:
+                            type: string
                           phase:
                             type: string
                           ready:

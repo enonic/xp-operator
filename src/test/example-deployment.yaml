@@ -13,24 +13,28 @@ spec:
   xpVersion: 7.3.0
 
   nodesSharedDisks:
-    blobstore: 100Mi
-    snapshots: 100Mi
+    - name: blobstore
+      size: 100Mi
+    - name: snapshots
+      size: 100Mi
 
   nodeGroups:
-    main:
+    - name: main
       data: true
       master: true
       replicas: 1
-      env:
-        test: test1
       resources:
         cpu: "1"
         memory: 512Mi
         disks:
-          deploy: 100Mi
-          export: 100Mi
-          index: 100Mi
-          work: 100Mi
+          - name: deploy
+            size: 100Mi
+          - name: export
+            size: 100Mi
+          - name: index
+            size: 100Mi
+          - name: work
+            size: 100Mi
 #    front:
 #      data: false
 #      master: false

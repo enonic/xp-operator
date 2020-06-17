@@ -4,6 +4,6 @@ metadata:
   name: test
   namespace: mycloud-mysolution-myenv-myservice
 spec:
-  file: com.enonic.app.status.cfg
+  file: test
   data: |
     metricsUrl = http://asdf:2609/

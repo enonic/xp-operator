@@ -1,10 +1,10 @@
 # Setup shared volumes persistent claims
-{{- range $name, $size := .Values.deployment.spec.nodesSharedDisks }}
+{{- range $volume := .Values.deployment.spec.nodesSharedDisks }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ $name }}
+  name: {{ $volume.name }}
   namespace: {{ $.Values.deployment.namespace }}
   annotations:
     {{ $.Values.annotationKeys.applyPriority }}: "10"
@@ -12,7 +12,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
   labels:
-    {{- if not (has $name $.Values.volumeBackups) }}
+    {{- if not (has $volume.name $.Values.volumeBackups) }}
     velero.io/exclude-from-backup: true
     {{- end }}
     {{ $.Values.labelKeys.managed }}: true
@@ -29,5 +29,5 @@ spec:
     - ReadWriteMany
   resources:
     requests:
-      storage: {{ $size }}
+      storage: {{ $volume.size }}
 {{- end }}

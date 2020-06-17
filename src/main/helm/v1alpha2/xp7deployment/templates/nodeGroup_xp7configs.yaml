@@ -1,10 +1,10 @@
 # Setup Xp7Config for each node
-{{- range $nodeGroupName, $nodeGroup := .Values.deployment.spec.nodeGroups }}
+{{- range $nodeGroup := .Values.deployment.spec.nodeGroups }}
 # VHost configuration
 apiVersion: enonic.cloud/v1alpha2
 kind: Xp7Config
 metadata:
-  name: {{ $nodeGroupName }}-vhosts
+  name: {{ $nodeGroup.name }}-vhosts
   namespace: {{ $.Values.deployment.namespace }}
   annotations:
     {{ $.Values.annotationKeys.neverOverwrite }}: true
@@ -19,7 +19,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  nodeGroup: {{ $nodeGroupName }}
+  nodeGroup: {{ $nodeGroup.name }}
   file: com.enonic.xp.web.vhost.cfg
   data: |-
     enabled = true
@@ -28,7 +28,7 @@ spec:
 apiVersion: enonic.cloud/v1alpha2
 kind: Xp7Config
 metadata:
-  name: {{ $nodeGroupName }}-elasticsearch
+  name: {{ $nodeGroup.name }}-elasticsearch
   namespace: {{ $.Values.deployment.namespace }}
   annotations:
     {{ $.Values.annotationKeys.applyPriority }}: "71"
@@ -42,7 +42,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  nodeGroup: {{ $nodeGroupName }}
+  nodeGroup: {{ $nodeGroup.name }}
   file: com.enonic.xp.elasticsearch.cfg
   data: |-
     http.enabled=true

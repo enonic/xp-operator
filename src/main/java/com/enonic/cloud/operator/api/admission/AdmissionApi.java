@@ -1,7 +1,6 @@
 package com.enonic.cloud.operator.api.admission;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -91,7 +90,7 @@ public class AdmissionApi
                 filter( c -> !c.getMetadata().getName().equals( newConfig.getMetadata().getName() ) ).
                 filter( c -> c.getXp7ConfigSpec().getFile().equals( newConfig.getXp7ConfigSpec().getFile() ) ).
                 filter( c -> c.getXp7ConfigSpec().getNodeGroup().equals( newConfig.getXp7ConfigSpec().getFile() ) ||
-                    c.getXp7ConfigSpec().getNodeGroup().equals( cfgStr( "" ) ) ).
+                    c.getXp7ConfigSpec().getNodeGroup().equals( cfgStr( "operator.helm.charts.Values.allNodesKey" ) ) ).
                 collect( Collectors.toList() );
             if ( !presentConfigs.isEmpty() )
             {
@@ -118,24 +117,24 @@ public class AdmissionApi
             Preconditions.checkState( newDeployment.getXp7DeploymentSpec().getXp7DeploymentSpecNodeGroups() != null,
                                       "'spec.nodeGroups' cannot be null" );
 
-            for ( Map.Entry<String, Xp7DeploymentSpecNodeGroup> e : newDeployment.getXp7DeploymentSpec().getXp7DeploymentSpecNodeGroups().getAdditionalProperties().entrySet() )
+            int i = 0;
+            for ( Xp7DeploymentSpecNodeGroup ng : newDeployment.getXp7DeploymentSpec().getXp7DeploymentSpecNodeGroups() )
             {
-                dns1035( "spec.nodeGroups[" + e.getKey() + "]", e.getKey() );
-                Preconditions.checkState( e.getValue().getData() != null, "'spec.nodeGroups[" + e.getKey() + "].data cannot be null'" );
-                Preconditions.checkState( e.getValue().getMaster() != null, "'spec.nodeGroups[" + e.getKey() + "].master cannot be null'" );
-                Preconditions.checkState( e.getValue().getReplicas() != null,
-                                          "'spec.nodeGroups[" + e.getKey() + "].replicas cannot be null'" );
-                Preconditions.checkState( e.getValue().getXp7DeploymentSpecNodeGroupEnvironment() != null,
-                                          "'spec.nodeGroups[" + e.getKey() + "].env cannot be null'" );
-                Preconditions.checkState( e.getValue().getXp7DeploymentSpecNodeGroupResources() != null,
-                                          "'spec.nodeGroups[" + e.getKey() + "].resources cannot be null'" );
-                Preconditions.checkState( e.getValue().getXp7DeploymentSpecNodeGroupResources().getCpu() != null,
-                                          "'spec.nodeGroups[" + e.getKey() + "].resources.cpu cannot be null'" );
-                Preconditions.checkState( e.getValue().getXp7DeploymentSpecNodeGroupResources().getMemory() != null,
-                                          "'spec.nodeGroups[" + e.getKey() + "].resources.memory cannot be null'" );
-                Preconditions.checkState(
-                    e.getValue().getXp7DeploymentSpecNodeGroupResources().getXp7DeploymentSpecNodeGroupDisks() != null,
-                    "'spec.nodeGroups[" + e.getKey() + "].resources.disks cannot be null'" );
+                dns1035( "spec.nodeGroups[" + i + "]", ng.getName() );
+                Preconditions.checkState( ng.getData() != null, "'spec.nodeGroups[" + i + "].data cannot be null'" );
+                Preconditions.checkState( ng.getMaster() != null, "'spec.nodeGroups[" + i + "].master cannot be null'" );
+                Preconditions.checkState( ng.getReplicas() != null, "'spec.nodeGroups[" + i + "].replicas cannot be null'" );
+                Preconditions.checkState( ng.getXp7DeploymentSpecNodeGroupEnvironment() != null,
+                                          "'spec.nodeGroups[" + i + "].env cannot be null'" );
+                Preconditions.checkState( ng.getXp7DeploymentSpecNodeGroupResources() != null,
+                                          "'spec.nodeGroups[" + i + "].resources cannot be null'" );
+                Preconditions.checkState( ng.getXp7DeploymentSpecNodeGroupResources().getCpu() != null,
+                                          "'spec.nodeGroups[" + i + "].resources.cpu cannot be null'" );
+                Preconditions.checkState( ng.getXp7DeploymentSpecNodeGroupResources().getMemory() != null,
+                                          "'spec.nodeGroups[" + i + "].resources.memory cannot be null'" );
+                Preconditions.checkState( ng.getXp7DeploymentSpecNodeGroupResources().getXp7DeploymentSpecNodeGroupDisks() != null,
+                                          "'spec.nodeGroups[" + i + "].resources.disks cannot be null'" );
+                i++;
             }
         }
 
@@ -166,7 +165,7 @@ public class AdmissionApi
                 Xp7VHostSpecCertificate.Authority authority = newVHost.getXp7VHostSpec().getXp7VHostSpecCertificate().getAuthority();
                 Preconditions.checkState( authority != null, "'spec.certificate.authority' cannot be null" );
 
-                if ( authority.equals( Xp7VHostSpecCertificate.Authority.SELF_SIGNED ) )
+                if ( authority.equals( Xp7VHostSpecCertificate.Authority.CLUSTER_ISSUER ) )
                 {
                     Preconditions.checkState( newVHost.getXp7VHostSpec().getXp7VHostSpecCertificate().getIdentifier() != null,
                                               "'spec.certificate.identifier' cannot be null when authority is '%s'", authority );

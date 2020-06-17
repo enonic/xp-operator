@@ -6,7 +6,6 @@ metadata:
 spec:
   host: tmptest.purplejs.io
   options:
-    dnsRecord: true
     cdn: false
   certificate:
     authority: selfSigned

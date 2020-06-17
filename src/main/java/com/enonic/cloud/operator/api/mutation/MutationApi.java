@@ -23,11 +23,10 @@ import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7AppStatus;
 import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7AppStatusFields;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7config.Xp7Config;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentSpecNodeGroups;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentStatus;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentStatusFields;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentStatusFieldsPods;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHost;
+import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHostSpec;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHostSpecMapping;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHostSpecMappingOptions;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHostSpecOptions;
@@ -80,134 +79,95 @@ public class MutationApi
         }
     }
 
-    public void xp7app( MutationRequest mutationRequest )
+    public void xp7app( MutationRequest mt )
     {
-        Xp7App oldApp = (Xp7App) mutationRequest.getAdmissionReview().getRequest().getOldObject();
-        Xp7App newApp = (Xp7App) mutationRequest.getAdmissionReview().getRequest().getObject();
+        Xp7App oldR = (Xp7App) mt.getAdmissionReview().getRequest().getOldObject();
+        Xp7App newR = (Xp7App) mt.getAdmissionReview().getRequest().getObject();
 
-        Xp7AppStatus defaultStatus = new Xp7AppStatus().
+        Xp7AppStatus defStatus = new Xp7AppStatus().
             withMessage( "Created" ).
             withState( Xp7AppStatus.State.PENDING ).
             withXp7AppStatusFields( new Xp7AppStatusFields() );
 
         // This is an update => set default status to old status
-        if ( oldApp != null )
+        if ( oldR != null )
         {
-            defaultStatus = oldApp.getXp7AppStatus();
+            defStatus = oldR.getXp7AppStatus();
         }
 
         // Ensure status
-        if ( newApp.getXp7AppStatus() == null )
+        if ( !patchDefault( mt, defStatus, newR.getXp7AppStatus(), "/status" ) )
         {
-            mutationRequest.addPatch( "add", "/status", defaultStatus );
-        }
-        else
-        {
-            if ( newApp.getXp7AppStatus().getMessage() == null )
-            {
-                mutationRequest.addPatch( "add", "/status/message", defaultStatus.getMessage() );
-            }
-            if ( newApp.getXp7AppStatus().getState() == null )
-            {
-                mutationRequest.addPatch( "add", "/status/state", defaultStatus.getState() );
-            }
-            if ( newApp.getXp7AppStatus().getXp7AppStatusFields() == null )
-            {
-                mutationRequest.addPatch( "add", "/status/fields", defaultStatus.getXp7AppStatusFields() );
-            }
+            patchDefault( mt, defStatus.getMessage(), newR.getXp7AppStatus().getMessage(), "/status/message" );
+            patchDefault( mt, defStatus.getState(), newR.getXp7AppStatus().getState(), "/status/state" );
+            patchDefault( mt, defStatus.getXp7AppStatusFields(), newR.getXp7AppStatus().getXp7AppStatusFields(), "/status/fields" );
         }
 
         // Ensure finalizers
-        if ( mutationRequest.getAdmissionReview().getRequest().getOperation().equals( "CREATE" ) )
+        if ( mt.getAdmissionReview().getRequest().getOperation().equals( "CREATE" ) )
         {
-            List<String> finalizers = mutationRequest.getAdmissionReview().getRequest().getObject().getMetadata().getFinalizers();
+            List<String> finalizers = mt.getAdmissionReview().getRequest().getObject().getMetadata().getFinalizers();
             String uninstallFinalizer = cfgStr( "operator.finalizer.app.uninstall" );
             if ( finalizers == null )
             {
-                mutationRequest.addPatch( "add", "/metadata/finalizers", Collections.singletonList( uninstallFinalizer ) );
+                mt.addPatch( "add", "/metadata/finalizers", Collections.singletonList( uninstallFinalizer ) );
             }
             else if ( !finalizers.contains( uninstallFinalizer ) )
             {
                 finalizers.add( uninstallFinalizer );
-                mutationRequest.addPatch( "replace", "/metadata/finalizers", finalizers );
+                mt.addPatch( "replace", "/metadata/finalizers", finalizers );
             }
         }
 
-        ensureOwnerReference( mutationRequest );
+        ensureOwnerReference( mt );
     }
 
     public void xp7config( MutationRequest mutationRequest )
     {
-        Xp7Config newConfig = (Xp7Config) mutationRequest.getAdmissionReview().getRequest().getObject();
+        Xp7Config newR = (Xp7Config) mutationRequest.getAdmissionReview().getRequest().getObject();
 
-        // Set missing node group to allNodesKey
-        if ( newConfig.getXp7ConfigSpec().getNodeGroup() == null )
+        if ( newR.getXp7ConfigSpec() != null )
         {
-            mutationRequest.addPatch( "add", "/spec/nodeGroup", cfgStr( "operator.helm.charts.Values.allNodesKey" ) );
+            patchDefault( mutationRequest, cfgStr( "operator.helm.charts.Values.allNodesKey" ), newR.getXp7ConfigSpec().getNodeGroup(),
+                          "/spec/nodeGroup" );
         }
 
         ensureOwnerReference( mutationRequest );
     }
 
-    public void xp7deployment( MutationRequest mutationRequest )
+    public void xp7deployment( MutationRequest mt )
     {
-        Xp7Deployment oldDeployment = (Xp7Deployment) mutationRequest.getAdmissionReview().getRequest().getOldObject();
-        Xp7Deployment newDeployment = (Xp7Deployment) mutationRequest.getAdmissionReview().getRequest().getObject();
+        Xp7Deployment oldR = (Xp7Deployment) mt.getAdmissionReview().getRequest().getOldObject();
+        Xp7Deployment newR = (Xp7Deployment) mt.getAdmissionReview().getRequest().getObject();
 
-        Xp7DeploymentStatus defaultStatus = new Xp7DeploymentStatus().
+        Xp7DeploymentStatus defStatus = new Xp7DeploymentStatus().
             withMessage( "Created" ).
             withState( Xp7DeploymentStatus.State.PENDING ).
             withXp7DeploymentStatusFields( new Xp7DeploymentStatusFields().
-                withXp7DeploymentStatusFieldsPods( new Xp7DeploymentStatusFieldsPods() ) );
+                withXp7DeploymentStatusFieldsPods( new LinkedList<>() ) );
 
         // This is an update => set default status to old status
-        if ( oldDeployment != null )
+        if ( oldR != null )
         {
-            defaultStatus = oldDeployment.getXp7DeploymentStatus();
+            defStatus = oldR.getXp7DeploymentStatus();
         }
 
         // Ensure status
-        if ( newDeployment.getXp7DeploymentStatus() == null )
+        if ( !patchDefault( mt, defStatus, newR.getXp7DeploymentStatus(), "/status" ) )
         {
-            mutationRequest.addPatch( "add", "/status", defaultStatus );
-        }
-        else
-        {
-            if ( newDeployment.getXp7DeploymentStatus().getMessage() == null )
-            {
-                mutationRequest.addPatch( "add", "/status/message", defaultStatus.getMessage() );
-            }
-            if ( newDeployment.getXp7DeploymentStatus().getState() == null )
-            {
-                mutationRequest.addPatch( "add", "/status/state", defaultStatus.getState() );
-            }
-            if ( newDeployment.getXp7DeploymentStatus().getXp7DeploymentStatusFields() == null )
-            {
-                mutationRequest.addPatch( "add", "/status/fields", defaultStatus.getXp7DeploymentStatusFields() );
-            }
-        }
-
-        // Ensure spec
-        if ( newDeployment.getXp7DeploymentSpec() != null )
-        {
-            if ( newDeployment.getXp7DeploymentSpec().getXp7DeploymentSpecNodesSharedDisks() == null )
-            {
-                mutationRequest.addPatch( "add", "/spec/nodesSharedDisks", Collections.emptyList() );
-            }
-
-            if ( newDeployment.getXp7DeploymentSpec().getXp7DeploymentSpecNodeGroups() == null )
-            {
-                mutationRequest.addPatch( "add", "/spec/nodeGroups", new Xp7DeploymentSpecNodeGroups() );
-            }
+            patchDefault( mt, defStatus.getMessage(), newR.getXp7DeploymentStatus().getMessage(), "/status/message" );
+            patchDefault( mt, defStatus.getState(), newR.getXp7DeploymentStatus().getState(), "/status/state" );
+            patchDefault( mt, defStatus.getXp7DeploymentStatusFields(), newR.getXp7DeploymentStatus().getXp7DeploymentStatusFields(),
+                          "/status/fields" );
         }
     }
 
-    public void xp7VHost( MutationRequest mutationRequest )
+    public void xp7VHost( MutationRequest mt )
     {
-        Xp7VHost oldVHost = (Xp7VHost) mutationRequest.getAdmissionReview().getRequest().getOldObject();
-        Xp7VHost newVHost = (Xp7VHost) mutationRequest.getAdmissionReview().getRequest().getObject();
+        Xp7VHost oldR = (Xp7VHost) mt.getAdmissionReview().getRequest().getOldObject();
+        Xp7VHost newR = (Xp7VHost) mt.getAdmissionReview().getRequest().getObject();
 
-        Xp7VHostStatus defaultStatus = new Xp7VHostStatus().
+        Xp7VHostStatus defStatus = new Xp7VHostStatus().
             withMessage( "Created" ).
             withState( Xp7VHostStatus.State.PENDING ).
             withXp7VHostStatusFields( new Xp7VHostStatusFields().
@@ -215,90 +175,75 @@ public class MutationApi
                 withDnsRecordCreated( false ) );
 
         // This is an update => set default status to old status
-        if ( oldVHost != null )
+        if ( oldR != null )
         {
-            defaultStatus = oldVHost.getXp7VHostStatus();
+            defStatus = oldR.getXp7VHostStatus();
         }
 
         // Ensure status
-        if ( newVHost.getXp7VHostStatus() == null )
+        if ( !patchDefault( mt, defStatus, newR.getXp7VHostStatus(), "/status" ) )
         {
-            mutationRequest.addPatch( "add", "/status", defaultStatus );
-        }
-        else
-        {
-            if ( newVHost.getXp7VHostStatus().getMessage() == null )
-            {
-                mutationRequest.addPatch( "add", "/status/message", defaultStatus.getMessage() );
-            }
-            if ( newVHost.getXp7VHostStatus().getState() == null )
-            {
-                mutationRequest.addPatch( "add", "/status/state", defaultStatus.getState() );
-            }
-            if ( newVHost.getXp7VHostStatus().getXp7VHostStatusFields() == null )
-            {
-                mutationRequest.addPatch( "add", "/status/fields", defaultStatus.getXp7VHostStatusFields() );
-            }
-            else
-            {
-                if ( newVHost.getXp7VHostStatus().getXp7VHostStatusFields().getPublicIps() == null )
-                {
-                    mutationRequest.addPatch( "add", "/status/fields/publicIps", defaultStatus.getXp7VHostStatusFields().getPublicIps() );
-                }
-                if ( newVHost.getXp7VHostStatus().getXp7VHostStatusFields().getDnsRecordCreated() == null )
-                {
-                    mutationRequest.addPatch( "add", "/status/fields/dnsRecordCreated",
-                                              defaultStatus.getXp7VHostStatusFields().getDnsRecordCreated() );
-                }
-            }
+            patchDefault( mt, defStatus.getMessage(), newR.getXp7VHostStatus().getMessage(), "/status/message" );
+            patchDefault( mt, defStatus.getState(), newR.getXp7VHostStatus().getState(), "/status/state" );
+            patchDefault( mt, defStatus.getXp7VHostStatusFields(), newR.getXp7VHostStatus().getXp7VHostStatusFields(), "/status/fields" );
         }
 
         // Ensure spec
-        if ( newVHost.getXp7VHostSpec() != null )
+        if ( newR.getXp7VHostSpec() != null )
         {
+            Xp7VHostSpec spec = newR.getXp7VHostSpec();
             Xp7VHostSpecOptions defaultVHostSpecOptions = new Xp7VHostSpecOptions().
                 withDnsRecord( true ).
                 withCdn( true );
 
-            if ( newVHost.getXp7VHostSpec().getXp7VHostSpecOptions() == null )
+            if ( !patchDefault( mt, defaultVHostSpecOptions, spec.getXp7VHostSpecOptions(), "/spec/options" ) )
             {
-                mutationRequest.addPatch( "add", "/spec/options", defaultVHostSpecOptions );
+                patchDefault( mt, defaultVHostSpecOptions.getCdn(), spec.getXp7VHostSpecOptions().getCdn(), "/spec/options/cdn" );
+                patchDefault( mt, defaultVHostSpecOptions.getDnsRecord(), spec.getXp7VHostSpecOptions().getDnsRecord(),
+                              "/spec/options/dnsRecord" );
             }
 
-            for ( int i = 0; i < newVHost.getXp7VHostSpec().getXp7VHostSpecMappings().size(); i++ )
+            for ( int i = 0; i < newR.getXp7VHostSpec().getXp7VHostSpecMappings().size(); i++ )
             {
-                Xp7VHostSpecMapping m = newVHost.getXp7VHostSpec().getXp7VHostSpecMappings().get( i );
+                Xp7VHostSpecMapping m = newR.getXp7VHostSpec().getXp7VHostSpecMappings().get( i );
 
                 final int finalI = i;
                 Function<String, String> pathFunc = ( p ) -> String.format( "/spec/mappings/%d%s", finalI, p );
 
-                if ( m.getNodeGroup() == null )
-                {
-                    mutationRequest.addPatch( "add", pathFunc.apply( "/nodeGroup" ), cfgStr( "operator.helm.charts.Values.allNodesKey" ) );
-                }
+                patchDefault( mt, cfgStr( "operator.helm.charts.Values.allNodesKey" ), m.getNodeGroup(), pathFunc, "/nodeGroup" );
 
                 if ( m.getXp7VHostSpecMappingIdProvider() != null )
                 {
-                    if ( m.getXp7VHostSpecMappingIdProvider().getDefault() == null )
-                    {
-                        mutationRequest.addPatch( "add", pathFunc.apply( "/idProviders/default" ), "system" );
-                    }
+                    patchDefault( mt, "system", m.getNodeGroup(), pathFunc, "/idProviders/default" );
                 }
 
-                if ( m.getXp7VHostSpecMappingOptions() == null )
+                Xp7VHostSpecMappingOptions defSpecOpt = new Xp7VHostSpecMappingOptions().
+                    withIngress( true ).
+                    withIngressMaxBodySize( "100m" ).
+                    withIpWhitelist( new LinkedList<>() ).
+                    withSslRedirect( newR.getXp7VHostSpec().getXp7VHostSpecCertificate() != null ).
+                    withStatusCake( false ).
+                    withStickySession( false );
+
+                if ( !patchDefault( mt, defSpecOpt, m.getXp7VHostSpecMappingOptions(), pathFunc, "/options" ) )
                 {
-                    mutationRequest.addPatch( "add", pathFunc.apply( "/options" ), new Xp7VHostSpecMappingOptions().
-                        withIngress( true ).
-                        withIngressMaxBodySize( "100m" ).
-                        withIpWhitelist( new LinkedList<>() ).
-                        withSslRedirect( newVHost.getXp7VHostSpec().getXp7VHostSpecCertificate() != null ).
-                        withStatusCake( false ).
-                        withStickySession( false ) );
+                    patchDefault( mt, defSpecOpt.getIngress(), m.getXp7VHostSpecMappingOptions().getIngress(), pathFunc,
+                                  "/options/ingress" );
+                    patchDefault( mt, defSpecOpt.getIngressMaxBodySize(), m.getXp7VHostSpecMappingOptions().getIngressMaxBodySize(),
+                                  pathFunc, "/options/ingressMaxBodySize" );
+                    patchDefault( mt, defSpecOpt.getIpWhitelist(), m.getXp7VHostSpecMappingOptions().getIpWhitelist(), pathFunc,
+                                  "/options/ipWhitelist" );
+                    patchDefault( mt, defSpecOpt.getSslRedirect(), m.getXp7VHostSpecMappingOptions().getSslRedirect(), pathFunc,
+                                  "/options/sslRedirect" );
+                    patchDefault( mt, defSpecOpt.getStatusCake(), m.getXp7VHostSpecMappingOptions().getStatusCake(), pathFunc,
+                                  "/options/statusCake" );
+                    patchDefault( mt, defSpecOpt.getStickySession(), m.getXp7VHostSpecMappingOptions().getStickySession(), pathFunc,
+                                  "/options/stickySession" );
                 }
             }
         }
 
-        ensureOwnerReference( mutationRequest );
+        ensureOwnerReference( mt );
     }
 
     private void ensureOwnerReference( MutationRequest mutationRequest )
@@ -326,6 +271,22 @@ public class MutationApi
             return;
         }
 
-        mutationRequest.addPatch( "add", "/metadata/ownerReferences/0", createOwnerReference.apply( xp7Deployments.get( 0 ) ) );
+        mutationRequest.addPatch( "add", "/metadata/ownerReferences",
+                                  Collections.singletonList( createOwnerReference.apply( xp7Deployments.get( 0 ) ) ) );
+    }
+
+    private <T> boolean patchDefault( MutationRequest mt, T defaultValue, T currentValue, String path )
+    {
+        if ( currentValue == null )
+        {
+            mt.addPatch( "add", path, defaultValue );
+            return true;
+        }
+        return false;
+    }
+
+    private <T> boolean patchDefault( MutationRequest mt, T defaultValue, T currentValue, Function<String, String> pathFunc, String path )
+    {
+        return patchDefault( mt, defaultValue, currentValue, pathFunc.apply( path ) );
     }
 }

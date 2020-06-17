@@ -19,6 +19,7 @@ import com.enonic.cloud.helm.values.ValueBuilder;
 import com.enonic.cloud.helm.values.Values;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentSpecNodeGroup;
+import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentSpecNodeGroupEnvVar;
 import com.enonic.cloud.operator.functions.CreateOwnerReference;
 
 @Value.Immutable
@@ -37,6 +38,22 @@ public abstract class DeploymentHelmValueBuilder
     {
         MapValues values = new MapValues( baseValues() );
 
+        for ( Xp7DeploymentSpecNodeGroup ng : resource.getXp7DeploymentSpec().getXp7DeploymentSpecNodeGroups() )
+        {
+            if ( ng.getXp7DeploymentSpecNodeGroupEnvironment().stream().filter(
+                e -> e.getName().equals( "JAVA_OPTS" ) ).findFirst().isEmpty() )
+            {
+                int maxRamPercent = ng.getMaster() ? 75 : 50;
+
+                ng.getXp7DeploymentSpecNodeGroupEnvironment().add( new Xp7DeploymentSpecNodeGroupEnvVar().
+                    withName( "JAVA_OPTS" ).
+                    withValue(
+                        "-Djava.security.properties=/enonic-xp/home/extra-config/java.security.properties -XX:+UseContainerSupport -XX:MinRAMPercentage=20 -XX:InitialRAMPercentage=30 -XX:MaxRAMPercentage=" +
+                            maxRamPercent +
+                            " -XX:+UseConcMarkSweepGC -XX:+CMSParallelRemarkEnabled -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=60 -XX:+ScavengeBeforeFullGC -XX:+CMSScavengeBeforeRemark -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof" ) );
+            }
+        }
+
         boolean isClustered = isClustered( resource );
         String pass = suPassProvider().get();
 
@@ -51,6 +68,7 @@ public abstract class DeploymentHelmValueBuilder
             deployment.put( "minimumMasterNodes", minimumMasterNodes( resource ) );
             deployment.put( "minimumDataNodes", minimumDataNodes( resource ) );
         }
+
         deployment.put( "spec", resource.getXp7DeploymentSpec() );
 
         values.put( "defaultLabels", defaultLabels( resource ) );
@@ -85,7 +103,7 @@ public abstract class DeploymentHelmValueBuilder
     {
         return resource.getXp7DeploymentSpec().
             getXp7DeploymentSpecNodeGroups().
-            getAdditionalProperties().values().stream().
+            stream().
             mapToInt( Xp7DeploymentSpecNodeGroup::getReplicas ).sum() > 1;
     }
 

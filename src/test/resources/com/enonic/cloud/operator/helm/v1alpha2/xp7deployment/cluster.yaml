@@ -13,11 +13,13 @@ spec:
   xpVersion: 7.1.2
 
   nodesSharedDisks:
-    blobstore: 1Gi
-    snapshots: 2Gi
+    - name: blobstore
+      size: 1Gi
+    - name: snapshots
+      size: 2Gi
 
   nodeGroups:
-    master:
+    - name: master
       data: false
       master: true
       replicas: 3
@@ -25,8 +27,9 @@ spec:
         cpu: "1"
         memory: 1Gi
         disks:
-          export: 3Gi
-    data:
+          - name: export
+            size: 3Gi
+    - name: data
       data: true
       master: false
       replicas: 2
@@ -34,11 +37,14 @@ spec:
         cpu: "2"
         memory: 2Gi
         disks:
-          export: 4Gi
-          index: 5Gi
+          - name: export
+            size: 4Gi
+          - name: index
+            size: 5Gi
       env:
-        JAVA_OPTS: "My java opts"
-    frontend:
+        - name: JAVA_OPTS
+          value: "My java opts"
+    - name: frontend
       data: false
       master: false
       replicas: 3
@@ -46,7 +52,10 @@ spec:
         cpu: "3"
         memory: 3Gi
         disks:
-          export: 6Gi
-          work: 7Gi
+          - name: export
+            value: 6Gi
+          - name: work
+            value: 7Gi
       env:
-        CUSTOM_ENV: "myenvvar"
+        - name: CUSTOM_ENV
+          value: "myenvvar"

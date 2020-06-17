@@ -1,5 +1,6 @@
 package com.enonic.cloud.operator.v1alpha2xp7deployment;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -19,7 +20,6 @@ import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentSpe
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentStatus;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentStatusFields;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentStatusFieldsPod;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentStatusFieldsPods;
 import com.enonic.cloud.operator.helpers.StatusHandler;
 
 
@@ -89,9 +89,7 @@ public class OperatorDeploymentStatus
 
         for ( Xp7DeploymentStatusFieldsPod s : currentStatus.
             getXp7DeploymentStatusFields().
-            getXp7DeploymentStatusFieldsPods().
-            getAdditionalProperties().
-            values() )
+            getXp7DeploymentStatusFieldsPods() )
         {
             if ( !s.getPhase().equals( "Running" ) || !s.getReady() )
             {
@@ -120,14 +118,15 @@ public class OperatorDeploymentStatus
 
     private Xp7DeploymentStatusFields buildFields( final List<Pod> pods )
     {
-        Xp7DeploymentStatusFieldsPods fieldPods = new Xp7DeploymentStatusFieldsPods();
+        List<Xp7DeploymentStatusFieldsPod> fieldPods = new LinkedList<>();
         for ( Pod pod : pods )
         {
             Optional<ContainerStatus> cs =
                 pod.getStatus().getContainerStatuses().stream().filter( s -> s.getName().equals( "exp" ) ).findFirst();
-            fieldPods.setAdditionalProperty( pod.getMetadata().getName(), new Xp7DeploymentStatusFieldsPod().
-                withPhase( pod.getStatus().getPhase() ).
-                withReady( cs.isPresent() && cs.get().getReady() ) );
+            fieldPods.add( new Xp7DeploymentStatusFieldsPod().
+                withName( pod.getMetadata().getName() ).
+                withReady( cs.isPresent() && cs.get().getReady() ).
+                withPhase( pod.getStatus().getPhase() ) );
         }
         return new Xp7DeploymentStatusFields().withXp7DeploymentStatusFieldsPods( fieldPods );
     }
@@ -140,10 +139,7 @@ public class OperatorDeploymentStatus
         }
 
         return deployment.getXp7DeploymentSpec().
-            getXp7DeploymentSpecNodeGroups().
-            getAdditionalProperties().
-            values().
-            stream().
+            getXp7DeploymentSpecNodeGroups().stream().
             mapToInt( Xp7DeploymentSpecNodeGroup::getReplicas ).
             sum();
     }

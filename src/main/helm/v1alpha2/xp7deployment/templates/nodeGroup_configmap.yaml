@@ -1,16 +1,16 @@
 # Setup ConfigMap for each node group
-{{- range $nodeGroupName, $nodeGroup := .Values.deployment.spec.nodeGroups }}
+{{- range $nodeGroup := .Values.deployment.spec.nodeGroups }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ $nodeGroupName }}
+  name: {{ $nodeGroup.name }}
   namespace: {{ $.Values.deployment.namespace }}
   annotations:
     {{ $.Values.annotationKeys.neverOverwrite }}: true
     {{ $.Values.annotationKeys.applyPriority }}: "50"
   labels:
     {{ $.Values.labelKeys.managed }}: true
-    {{ $.Values.labelKeys.nodeGroup }}: {{ $nodeGroupName }}
+    {{ $.Values.labelKeys.nodeGroup }}: {{ $nodeGroup.name }}
     {{- with $.Values.defaultLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}

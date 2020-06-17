@@ -1,15 +1,15 @@
 # Setup service pointing to each nodeGroup
-{{- range $nodeGroupName, $nodeGroup := .Values.deployment.spec.nodeGroups }}
+{{- range $nodeGroup := .Values.deployment.spec.nodeGroups }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ $nodeGroupName }}
+  name: {{ $nodeGroup.name }}
   namespace: {{ $.Values.deployment.namespace }}
   annotations:
     {{ $.Values.annotationKeys.applyPriority }}: "100"
   labels:
     {{ $.Values.labelKeys.managed }}: true
-    {{ $.Values.labelKeys.nodeGroup }}: {{ $nodeGroupName }}
+    {{ $.Values.labelKeys.nodeGroup }}: {{ $nodeGroup.name }}
     {{- with $.Values.defaultLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
@@ -23,7 +23,7 @@ spec:
   publishNotReadyAddresses: false
   sessionAffinity: None
   selector:
-    {{ $.Values.labelKeys.nodeGroup }}: {{ $nodeGroupName }}
+    {{ $.Values.labelKeys.nodeGroup }}: {{ $nodeGroup.name }}
     {{- with $.Values.defaultLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
