@@ -19,9 +19,11 @@
     <jackson-yaml.version>2.11.0</jackson-yaml.version>
 
     <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+
     <surefire-plugin.version>3.0.0-M4</surefire-plugin.version>
     <versions-maven-plugin.version>2.7</versions-maven-plugin.version>
     <git-plugin.version>4.0.0</git-plugin.version>
+    <operator-client.version>0.1.0-SNAPSHOT</operator-client.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -62,10 +64,6 @@
       <artifactId>quarkus-resteasy-jackson</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.fasterxml.jackson.datatype</groupId>
-      <artifactId>jackson-datatype-jdk8</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.immutables</groupId>
       <artifactId>value</artifactId>
       <version>${immutables.version}</version>
@@ -80,7 +78,7 @@
     <dependency>
       <groupId>com.enonic.cloud</groupId>
       <artifactId>operator-client</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
+      <version>${operator-client.version}</version>
       <exclusions>
         <exclusion>
           <groupId>io.fabric8</groupId>
