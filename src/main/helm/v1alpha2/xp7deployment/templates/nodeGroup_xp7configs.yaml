@@ -14,6 +14,10 @@ metadata:
     {{- with $.Values.defaultLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
+  ownerReferences:
+    {{- with $.Values.ownerReferences }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   nodeGroup: {{ $nodeGroupName }}
   file: com.enonic.xp.web.vhost.cfg
@@ -31,6 +35,10 @@ metadata:
   labels:
     {{ $.Values.labelKeys.managed }}: true
     {{- with $.Values.defaultLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  ownerReferences:
+    {{- with $.Values.ownerReferences }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:

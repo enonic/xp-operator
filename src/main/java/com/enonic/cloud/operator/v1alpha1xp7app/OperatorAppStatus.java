@@ -1,42 +1,37 @@
 package com.enonic.cloud.operator.v1alpha1xp7app;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Predicate;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.fabric8.kubernetes.api.model.Doneable;
+import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.cloud.apis.xp.XpClientCache;
 import com.enonic.cloud.apis.xp.service.AppInfo;
-import com.enonic.cloud.common.staller.TaskRunner;
 import com.enonic.cloud.kubernetes.Clients;
 import com.enonic.cloud.kubernetes.InformerSearcher;
-import com.enonic.cloud.kubernetes.commands.K8sLogHelper;
 import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7App;
 import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7AppStatus;
-import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7AppStatusFields;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentStatus;
-
-import static com.enonic.cloud.common.Configuration.cfgIfBool;
-import static com.enonic.cloud.common.Configuration.cfgLong;
+import com.enonic.cloud.operator.functions.XpRunningImpl;
+import com.enonic.cloud.operator.helpers.StatusHandler;
 
 @ApplicationScoped
 public class OperatorAppStatus
-    implements Runnable
+    extends StatusHandler<Xp7App, Xp7AppStatus>
 {
     private static final Logger log = LoggerFactory.getLogger( OperatorAppStatus.class );
 
-    @SuppressWarnings("CdiInjectionPointsInspection")
     @Inject
     Clients clients;
 
@@ -49,33 +44,49 @@ public class OperatorAppStatus
     @Inject
     XpClientCache xpClientCache;
 
-    @Inject
-    TaskRunner taskRunner;
+    Map<String, List<AppInfo>> appInfoMap;
 
-    @ConfigProperty(name = "operator.tasks.statusDelaySeconds")
-    Long statusDelay;
+    Predicate<HasMetadata> xpRunning;
 
-    void onStartup( @Observes StartupEvent _ev )
+    @Override
+    public void onStartup( @Observes final StartupEvent _ev )
     {
-        cfgIfBool( "operator.status.enabled", () -> taskRunner.scheduleAtFixedRate( this, cfgLong( "operator.tasks.initialDelayMs" ),
-                                                                                    cfgLong( "operator.tasks.app.status.periodMs" ),
-                                                                                    TimeUnit.MILLISECONDS ) );
+        xpRunning = XpRunningImpl.of( xp7DeploymentInformerSearcher );
+        super.onStartup( _ev );
     }
 
     @Override
-    public void run()
+    protected void preRun()
     {
-        xp7AppInformerSearcher.getStream().
-            filter( app -> app.getMetadata().getDeletionTimestamp() == null ).
-            filter( app -> Duration.between( Instant.parse( app.getMetadata().getCreationTimestamp() ), Instant.now() ).getSeconds() >
-                statusDelay ).
-            forEach( app -> updateStatus( app, pollStatus( app ) ) );
+        appInfoMap = new HashMap<>();
     }
 
-    private Xp7AppStatus pollStatus( final Xp7App app )
+    @Override
+    protected InformerSearcher<Xp7App> informerSearcher()
     {
-        Xp7AppStatus currentStatus =
-            app.getXp7AppStatus() != null ? app.getXp7AppStatus() : new Xp7AppStatus().withXp7AppStatusFields( new Xp7AppStatusFields() );
+        return xp7AppInformerSearcher;
+    }
+
+    @Override
+    protected Xp7AppStatus getStatus( final Xp7App resource )
+    {
+        return resource.getXp7AppStatus();
+    }
+
+    @Override
+    protected Doneable<Xp7App> updateStatus( final Xp7App resource, final Xp7AppStatus newStatus )
+    {
+        return clients.xp7Apps().crdClient().
+            inNamespace( resource.getMetadata().getNamespace() ).
+            withName( resource.getMetadata().getName() ).
+            edit().
+            withStatus( newStatus );
+    }
+
+    @Override
+    protected Xp7AppStatus pollStatus( final Xp7App resource )
+    {
+        Xp7AppStatus currentStatus = resource.getXp7AppStatus();
 
         if ( currentStatus.getXp7AppStatusFields().getAppKey() == null )
         {
@@ -84,32 +95,46 @@ public class OperatorAppStatus
                 withMessage( "Pending install" );
         }
 
-        try
+        return checkXp( resource, currentStatus );
+    }
+
+    private Xp7AppStatus checkXp( final Xp7App resource, final Xp7AppStatus currentStatus )
+    {
+        if ( !xpRunning.test( resource ) )
         {
-            return checkXp( app, currentStatus );
+            return currentStatus.
+                withState( Xp7AppStatus.State.PENDING ).
+                withMessage( "Xp7Deployment not in RUNNING state" );
         }
-        catch ( Exception e )
+
+        String mapKey = resource.getMetadata().getNamespace();
+        if ( !appInfoMap.containsKey( mapKey ) )
         {
-            log.warn( String.format( "Failed calling XP for app '%s' in NS '%s': %s", app.getMetadata().getName(),
-                                     app.getMetadata().getNamespace(), e.getMessage() ) );
+            List<AppInfo> appInfo = null;
+            try
+            {
+                appInfo = xpClientCache.list( resource ).
+                    get().
+                    applications();
+            }
+            catch ( Exception e )
+            {
+                log.warn( String.format( "Failed calling XP for app '%s' in NS '%s': %s", resource.getMetadata().getName(),
+                                         resource.getMetadata().getNamespace(), e.getMessage() ) );
+            }
+            appInfoMap.put( mapKey, appInfo );
+        }
+
+        List<AppInfo> info = appInfoMap.get( mapKey );
+
+        if ( info == null )
+        {
             return currentStatus.
                 withState( Xp7AppStatus.State.ERROR ).
                 withMessage( "Failed calling XP" );
         }
-    }
 
-    private Xp7AppStatus checkXp( final Xp7App app, final Xp7AppStatus currentStatus )
-    {
-        if ( !xpRunning( app ) )
-        {
-            return currentStatus.
-                withState( Xp7AppStatus.State.PENDING ).
-                withMessage( "Deployment not in RUNNING state" );
-        }
-
-        for ( AppInfo appInfo : xpClientCache.list( app ).
-            get().
-            applications() )
+        for ( AppInfo appInfo : info )
         {
             if ( appInfo.key().equals( currentStatus.getXp7AppStatusFields().getAppKey() ) )
             {
@@ -132,37 +157,7 @@ public class OperatorAppStatus
         }
 
         return currentStatus.
-            withState( Xp7AppStatus.State.PENDING ).
-            withMessage( "Pending install" );
-    }
-
-    private void updateStatus( final Xp7App app, final Xp7AppStatus status )
-    {
-        if ( status.equals( app.getXp7AppStatus() ) )
-        {
-            return;
-        }
-
-        K8sLogHelper.logDoneable( clients.xp7Apps().crdClient().
-            inNamespace( app.getMetadata().getNamespace() ).
-            withName( app.getMetadata().getName() ).
-            edit().
-            withStatus( status ) );
-    }
-
-    private boolean xpRunning( final Xp7App app )
-    {
-        Optional<Xp7Deployment> deployment = xp7DeploymentInformerSearcher.get( app.getMetadata().getNamespace() ).findFirst();
-        if ( deployment.isEmpty() )
-        {
-            return false;
-        }
-
-        if ( deployment.get().getXp7DeploymentStatus() == null )
-        {
-            return false;
-        }
-
-        return deployment.get().getXp7DeploymentStatus().getState().equals( Xp7DeploymentStatus.State.RUNNING );
+            withState( Xp7AppStatus.State.ERROR ).
+            withMessage( "App not found in XP" );
     }
 }

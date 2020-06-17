@@ -1,5 +1,6 @@
 package com.enonic.cloud.operator.v1alpha2xp7deployment;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -18,6 +19,7 @@ import com.enonic.cloud.helm.values.ValueBuilder;
 import com.enonic.cloud.helm.values.Values;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentSpecNodeGroup;
+import com.enonic.cloud.operator.functions.CreateOwnerReference;
 
 @Value.Immutable
 @Params
@@ -62,6 +64,8 @@ public abstract class DeploymentHelmValueBuilder
             cloudApiSa.put( "name", sa.getMetadata().getName() );
             values.put( "cloudApiSa", cloudApiSa );
         }
+
+        values.put( "ownerReferences", Collections.singletonList( new CreateOwnerReference().apply( resource ) ) );
 
         return values;
     }

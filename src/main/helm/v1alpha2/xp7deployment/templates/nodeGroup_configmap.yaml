@@ -14,6 +14,10 @@ metadata:
     {{- with $.Values.defaultLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
+  ownerReferences:
+    {{- with $.Values.ownerReferences }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 data: {} # Operator will manage this ConfigMap so leave data empty
 ---
 {{- end }}

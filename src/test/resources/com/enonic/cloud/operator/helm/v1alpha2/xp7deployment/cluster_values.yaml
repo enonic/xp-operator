@@ -10,7 +10,7 @@ defaultLabels:
 labelKeys:
   managed: "enonic.managed"
   nodeGroup: "enonic.nodeGroup"
-imageTemplate: "gbbirkisson/xp:%s-ubuntu"
+imageTemplate: "enonic/xp:%s-ubuntu"
 annotationKeys:
   applyPriority: "enonic.applyPriority"
   vHostName: "enonic.vhost"
@@ -64,3 +64,9 @@ deployment:
           memory: "1Gi"
           disks:
             export: "3Gi"
+ownerReferences:
+- apiVersion: "enonic.cloud/v1alpha2"
+  kind: "Xp7Deployment"
+  blockOwnerDeletion: false
+  controller: true
+  name: "mycloud-mysolution-myenv-myservice"

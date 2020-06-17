@@ -5,6 +5,5 @@ metadata:
   namespace: mycloud-mysolution-myenv-myservice
 spec:
   file: com.enonic.app.status.cfg
-  nodeGroup: all
   data: |
     metricsUrl = http://asdf:2609/

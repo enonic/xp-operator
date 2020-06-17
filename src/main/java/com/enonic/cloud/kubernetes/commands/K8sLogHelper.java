@@ -27,5 +27,6 @@ public class K8sLogHelper
     {
         T res = r.get();
         log.info( log( K8sCommandAction.DELETE, res ) );
+        r.delete();
     }
 }

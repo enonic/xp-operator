@@ -2,11 +2,13 @@ package com.enonic.cloud.operator.v1alpha2xp7vhost;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
 import io.quarkus.runtime.StartupEvent;
 
@@ -21,7 +23,8 @@ import com.enonic.cloud.helm.values.BaseValues;
 import com.enonic.cloud.kubernetes.commands.K8sCommand;
 import com.enonic.cloud.kubernetes.commands.K8sCommandMapper;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHost;
-import com.enonic.cloud.operator.InformerEventHandler;
+import com.enonic.cloud.operator.functions.HasMetadataOlderThanImpl;
+import com.enonic.cloud.operator.helpers.InformerEventHandler;
 
 
 public class OperatorIngressHelmChart
@@ -49,18 +52,24 @@ public class OperatorIngressHelmChart
     @Inject
     RunnableListExecutor runnableListExecutor;
 
-    private HelmToK8s<Xp7VHost> helmToK8s;
+    HelmToK8s<Xp7VHost> helmToK8s;
+
+    Predicate<HasMetadata> olderThanFiveSeconds;
 
     void onStartup( @Observes StartupEvent _ev )
     {
         helmToK8s = HelmToK8sImpl.of( k8sCommandMapper, VHostHelmValueBuilderImpl.of( baseValues ), templator );
+        olderThanFiveSeconds = HasMetadataOlderThanImpl.of( 5L );
         listenToInformer( xp7VHostSharedIndexInformer );
     }
 
     @Override
     public void onAdd( final Xp7VHost newResource )
     {
-        handle( null, newResource );
+        if ( !olderThanFiveSeconds.test( newResource ) )
+        {
+            handle( null, newResource );
+        }
     }
 
     @Override

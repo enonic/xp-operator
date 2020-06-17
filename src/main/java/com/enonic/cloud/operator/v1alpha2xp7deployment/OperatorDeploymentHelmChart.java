@@ -3,12 +3,14 @@ package com.enonic.cloud.operator.v1alpha2xp7deployment;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.ServiceAccount;
 import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
 import io.quarkus.runtime.StartupEvent;
@@ -26,7 +28,8 @@ import com.enonic.cloud.kubernetes.Clients;
 import com.enonic.cloud.kubernetes.commands.K8sCommand;
 import com.enonic.cloud.kubernetes.commands.K8sCommandMapper;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
-import com.enonic.cloud.operator.InformerEventHandler;
+import com.enonic.cloud.operator.functions.HasMetadataOlderThanImpl;
+import com.enonic.cloud.operator.helpers.InformerEventHandler;
 
 import static com.enonic.cloud.common.Configuration.cfgStr;
 
@@ -63,20 +66,26 @@ public class OperatorDeploymentHelmChart
     @Inject
     RunnableListExecutor runnableListExecutor;
 
-    private HelmToK8s<Xp7Deployment> helmToK8s;
+    HelmToK8s<Xp7Deployment> helmToK8s;
+
+    Predicate<HasMetadata> olderThanFiveSeconds;
 
     void onStartup( @Observes StartupEvent _ev )
     {
         helmToK8s =
             HelmToK8sImpl.of( k8sCommandMapper, DeploymentHelmValueBuilderImpl.of( baseValues, this::createSuPass, this::cloudApiSa ),
                               templator );
+        olderThanFiveSeconds = HasMetadataOlderThanImpl.of( 5L );
         listenToInformer( xp7DeploymentSharedIndexInformer );
     }
 
     @Override
     public void onAdd( final Xp7Deployment newResource )
     {
-        handle( null, newResource );
+        if ( !olderThanFiveSeconds.test( newResource ) )
+        {
+            handle( null, newResource );
+        }
     }
 
     @Override

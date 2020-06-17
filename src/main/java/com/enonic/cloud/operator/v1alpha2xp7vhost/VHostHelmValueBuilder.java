@@ -13,6 +13,7 @@ import com.enonic.cloud.helm.values.ValueBuilder;
 import com.enonic.cloud.helm.values.Values;
 import com.enonic.cloud.kubernetes.client.v1alpha2.xp7vhost.Xp7VHostCrd;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHost;
+import com.enonic.cloud.operator.functions.CreateOwnerReference;
 
 import static com.enonic.cloud.common.Configuration.cfgStr;
 
@@ -24,9 +25,8 @@ public abstract class VHostHelmValueBuilder
     protected abstract BaseValues baseValues();
 
     @Override
-    public Values apply( final Xp7VHost in )
+    public Values apply( final Xp7VHost resource )
     {
-        Xp7VHost resource = Xp7VHostCrd.withDefaultValues( in );
         MapValues values = new MapValues( baseValues() );
 
         Map<String, Object> vhost = new HashMap<>();
@@ -37,6 +37,7 @@ public abstract class VHostHelmValueBuilder
         vhost.put( "spec", resource.getXp7VHostSpec() );
 
         values.put( "vhost", vhost );
+        values.put( "ownerReferences", Collections.singletonList( new CreateOwnerReference().apply( resource ) ) );
         values.put( "defaultLabels", defaultLabels( resource ) );
         return values;
     }

@@ -6,6 +6,12 @@ metadata:
     enonic.applyPriority: "20"
   name: "xp-node-sa"
   namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
 ---
 apiVersion: "v1"
 kind: "Secret"
@@ -21,6 +27,12 @@ metadata:
     solution: "mysolution"
   name: "su"
   namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
 data:
   pass: "cGFzc3dvcmQ="
   passHash: "YjEwOWYzYmJiYzI0NGViODI0NDE5MTdlZDA2ZDYxOGI5MDA4ZGQwOWIzYmVmZDFiNWUwNzM5NGM3MDZhOGJiOTgwYjFkNzc4NWU1OTc2ZWMwNDliNDZkZjVmMTMyNmFmNWEyZWE2ZDEwM2ZkMDdjOTUzODVmZmFiMGNhY2JjODY="
@@ -39,6 +51,12 @@ metadata:
     solution: "mysolution"
   name: "extra-config"
   namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
 data:
   dns.sh: "#!/bin/bash\n\nset -e\n\nusage () {\n    echo \"Usage: $SCRIPT_NAME [OPTIONS]\"\
     \n    echo \"Wait until DNS record is present\"\n    echo \"\"\n    echo \"Options:\"\
@@ -135,6 +153,12 @@ metadata:
     solution: "mysolution"
   name: "data"
   namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
 data: {}
 ---
 apiVersion: "v1"
@@ -152,6 +176,12 @@ metadata:
     solution: "mysolution"
   name: "frontend"
   namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
 data: {}
 ---
 apiVersion: "v1"
@@ -169,6 +199,12 @@ metadata:
     solution: "mysolution"
   name: "master"
   namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
 data: {}
 ---
 apiVersion: "v1"
@@ -184,6 +220,12 @@ metadata:
     solution: "mysolution"
   name: "blobstore"
   namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
 spec:
   accessModes:
   - "ReadWriteMany"
@@ -205,6 +247,12 @@ metadata:
     solution: "mysolution"
   name: "snapshots"
   namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
 spec:
   accessModes:
   - "ReadWriteMany"
@@ -220,6 +268,12 @@ metadata:
     enonic.applyPriority: "30"
   name: "xp-node-role"
   namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
 rules:
 - apiGroups:
   - "*"
@@ -235,6 +289,12 @@ metadata:
     enonic.applyPriority: "40"
   name: "xp-node-role-bindings"
   namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
 roleRef:
   kind: "Role"
   apiGroup: "rbac.authorization.k8s.io"
@@ -257,6 +317,12 @@ metadata:
     solution: "mysolution"
   name: "cluster-discovery"
   namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
 spec:
   clusterIP: "None"
   ports:
@@ -290,6 +356,12 @@ metadata:
     solution: "mysolution"
   name: "all"
   namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
 spec:
   clusterIP: "None"
   ports:
@@ -332,6 +404,12 @@ metadata:
     solution: "mysolution"
   name: "data"
   namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
 spec:
   clusterIP: "None"
   ports:
@@ -375,6 +453,12 @@ metadata:
     solution: "mysolution"
   name: "frontend"
   namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
 spec:
   clusterIP: "None"
   ports:
@@ -418,6 +502,12 @@ metadata:
     solution: "mysolution"
   name: "master"
   namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
 spec:
   clusterIP: "None"
   ports:
@@ -461,6 +551,12 @@ metadata:
     solution: "mysolution"
   name: "data"
   namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
 spec:
   podManagementPolicy: "Parallel"
   replicas: 2
@@ -518,7 +614,7 @@ spec:
               optional: false
         - name: "JAVA_OPTS"
           value: "My java opts"
-        image: "gbbirkisson/xp:7.1.2-ubuntu"
+        image: "enonic/xp:7.1.2-ubuntu"
         imagePullPolicy: "IfNotPresent"
         lifecycle:
           preStop:
@@ -680,6 +776,12 @@ metadata:
     solution: "mysolution"
   name: "frontend"
   namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
 spec:
   podManagementPolicy: "Parallel"
   replicas: 3
@@ -744,7 +846,7 @@ spec:
             \ -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=60\
             \ -XX:+ScavengeBeforeFullGC -XX:+CMSScavengeBeforeRemark -XX:-HeapDumpOnOutOfMemoryError\
             \ -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof"
-        image: "gbbirkisson/xp:7.1.2-ubuntu"
+        image: "enonic/xp:7.1.2-ubuntu"
         imagePullPolicy: "IfNotPresent"
         lifecycle:
           preStop:
@@ -906,6 +1008,12 @@ metadata:
     solution: "mysolution"
   name: "master"
   namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
 spec:
   podManagementPolicy: "Parallel"
   replicas: 3
@@ -961,7 +1069,7 @@ spec:
               key: "passHash"
               name: "su"
               optional: false
-        image: "gbbirkisson/xp:7.1.2-ubuntu"
+        image: "enonic/xp:7.1.2-ubuntu"
         imagePullPolicy: "IfNotPresent"
         lifecycle:
           preStop:
@@ -1106,6 +1214,12 @@ metadata:
     solution: "mysolution"
   name: "all-system"
   namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
 ---
 spec:
   nodeGroup: "all"
@@ -1125,6 +1239,12 @@ metadata:
     solution: "mysolution"
   name: "all-admin"
   namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
 ---
 spec:
   nodeGroup: "all"
@@ -1144,6 +1264,12 @@ metadata:
     solution: "mysolution"
   name: "all-sessionstore"
   namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
 ---
 spec:
   nodeGroup: "all"
@@ -1162,6 +1288,12 @@ metadata:
     solution: "mysolution"
   name: "all-appstatus"
   namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
 ---
 spec:
   nodeGroup: "all"
@@ -1181,6 +1313,12 @@ metadata:
     solution: "mysolution"
   name: "all-cluster"
   namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
 ---
 spec:
   nodeGroup: "all"
@@ -1215,6 +1353,12 @@ metadata:
     solution: "mysolution"
   name: "all-logback"
   namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
 ---
 spec:
   nodeGroup: "all"
@@ -1236,6 +1380,12 @@ metadata:
     solution: "mysolution"
   name: "all-hazelcast"
   namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
 ---
 spec:
   nodeGroup: "data"
@@ -1255,6 +1405,12 @@ metadata:
     solution: "mysolution"
   name: "data-vhosts"
   namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
 ---
 spec:
   nodeGroup: "data"
@@ -1276,6 +1432,12 @@ metadata:
     solution: "mysolution"
   name: "data-elasticsearch"
   namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
 ---
 spec:
   nodeGroup: "frontend"
@@ -1295,6 +1457,12 @@ metadata:
     solution: "mysolution"
   name: "frontend-vhosts"
   namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
 ---
 spec:
   nodeGroup: "frontend"
@@ -1316,6 +1484,12 @@ metadata:
     solution: "mysolution"
   name: "frontend-elasticsearch"
   namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
 ---
 spec:
   nodeGroup: "master"
@@ -1335,6 +1509,12 @@ metadata:
     solution: "mysolution"
   name: "master-vhosts"
   namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
 ---
 spec:
   nodeGroup: "master"
@@ -1356,6 +1536,12 @@ metadata:
     solution: "mysolution"
   name: "master-elasticsearch"
   namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
 ---
 spec:
   host: "healthcheck"
@@ -1368,6 +1554,7 @@ spec:
     target: "/webapp/com.enonic.app.alive"
     options:
       ingress: false
+      ipWhitelist: []
 kind: "Xp7VHost"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
@@ -1381,6 +1568,12 @@ metadata:
     solution: "mysolution"
   name: "all-healthcheck"
   namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
 ---
 spec:
   host: "localhost"
@@ -1396,6 +1589,7 @@ spec:
       enabled: []
     options:
       ingress: false
+      ipWhitelist: []
 kind: "Xp7VHost"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
@@ -1409,3 +1603,9 @@ metadata:
     solution: "mysolution"
   name: "all-localhost"
   namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"

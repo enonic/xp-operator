@@ -12,6 +12,10 @@ metadata:
     {{- with .Values.defaultLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
+  ownerReferences:
+    {{- with $.Values.ownerReferences }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   nodeGroup: {{ .Values.allNodesKey }}
   file: system.properties
@@ -34,6 +38,10 @@ metadata:
     {{- with .Values.defaultLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
+  ownerReferences:
+    {{- with $.Values.ownerReferences }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   nodeGroup: {{ .Values.allNodesKey }}
   file: com.enonic.xp.app.main.cfg
@@ -52,6 +60,10 @@ metadata:
   labels:
     {{ $.Values.labelKeys.managed }}: true
     {{- with .Values.defaultLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  ownerReferences:
+    {{- with $.Values.ownerReferences }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
@@ -77,6 +89,10 @@ metadata:
     {{- with .Values.defaultLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
+  ownerReferences:
+    {{- with $.Values.ownerReferences }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   nodeGroup: {{ .Values.allNodesKey }}
   file: com.enonic.app.status.cfg
@@ -94,6 +110,10 @@ metadata:
   labels:
     {{ $.Values.labelKeys.managed }}: true
     {{- with $.Values.defaultLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  ownerReferences:
+    {{- with $.Values.ownerReferences }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
@@ -124,6 +144,10 @@ metadata:
   labels:
     {{ $.Values.labelKeys.managed }}: true
     {{- with $.Values.defaultLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  ownerReferences:
+    {{- with $.Values.ownerReferences }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
@@ -183,6 +207,10 @@ metadata:
   labels:
     {{ $.Values.labelKeys.managed }}: true
     {{- with $.Values.defaultLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  ownerReferences:
+    {{- with $.Values.ownerReferences }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:

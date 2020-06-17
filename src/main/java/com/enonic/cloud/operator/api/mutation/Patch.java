@@ -1,9 +1,13 @@
 package com.enonic.cloud.operator.api.mutation;
 
 import org.immutables.value.Value;
+import org.wildfly.common.annotation.Nullable;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import com.enonic.cloud.common.annotations.Params;
 
+@JsonDeserialize(builder = PatchImpl.Builder.class)
 @Value.Immutable
 @Params
 public abstract class Patch
@@ -12,5 +16,6 @@ public abstract class Patch
 
     public abstract String path();
 
-    public abstract String value();
+    @Nullable
+    public abstract Object value();
 }

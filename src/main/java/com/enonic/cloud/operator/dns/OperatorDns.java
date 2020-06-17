@@ -18,7 +18,6 @@ import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.cloud.common.functions.RunnableListExecutor;
 import com.enonic.cloud.kubernetes.InformerSearcher;
-import com.enonic.cloud.operator.InformerEventHandler;
 import com.enonic.cloud.operator.dns.functions.DomainFromIngress;
 import com.enonic.cloud.operator.dns.functions.DomainFromIngressImpl;
 import com.enonic.cloud.operator.dns.functions.DomainMapper;
@@ -31,6 +30,7 @@ import com.enonic.cloud.operator.dns.functions.info.IngressEnabledHosts;
 import com.enonic.cloud.operator.dns.model.Domain;
 import com.enonic.cloud.operator.dns.model.DomainImpl;
 import com.enonic.cloud.operator.dns.model.Record;
+import com.enonic.cloud.operator.helpers.InformerEventHandler;
 
 import static com.enonic.cloud.common.Configuration.cfgStr;
 

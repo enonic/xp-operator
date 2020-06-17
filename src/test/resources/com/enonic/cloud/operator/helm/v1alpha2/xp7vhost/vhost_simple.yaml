@@ -6,6 +6,9 @@ metadata:
   namespace: mycloud-mysolution-myenv-myservice
 spec:
   host: test.purplejs.io
+  options:
+    dnsRecord: true
+    cdn: true
   certificate:
     authority: selfSigned
   mappings:
@@ -14,6 +17,13 @@ spec:
       target: /admin
       idProviders:
         default: system
+      options:
+        ingress: true
+        ingressMaxBodySize: "100m"
+        statusCake: false
+        ipWhitelist: []
+        stickySession: false
+        sslRedirect: true
     - nodeGroup: frontend
       source: /b
       target: /
@@ -22,7 +32,8 @@ spec:
         ingressMaxBodySize: 8m
         statusCake: true
         caching: true
-        ipWhitelist: 1.1.1.1
+        ipWhitelist:
+          - 1.1.1.1
         stickySession: true
         sslRedirect: false
     - nodeGroup: all
@@ -30,3 +41,8 @@ spec:
       target: /admin
       options:
         ingress: false
+        ingressMaxBodySize: "100m"
+        statusCake: false
+        ipWhitelist: []
+        stickySession: false
+        sslRedirect: true

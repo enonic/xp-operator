@@ -8,7 +8,7 @@ import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.cloud.apis.xp.XpClientCache;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
-import com.enonic.cloud.operator.InformerEventHandler;
+import com.enonic.cloud.operator.helpers.InformerEventHandler;
 
 public class OperatorInvalidateXpClientCache
     extends InformerEventHandler<Xp7Deployment>
@@ -25,20 +25,20 @@ public class OperatorInvalidateXpClientCache
     }
 
     @Override
-    public void onAdd( final Xp7Deployment v1alpha2Xp7Deployment )
+    public void onAdd( final Xp7Deployment newResource )
     {
         // Do nothing
     }
 
     @Override
-    public void onUpdate( final Xp7Deployment v1alpha2Xp7Deployment, final Xp7Deployment t1 )
+    public void onUpdate( final Xp7Deployment oldResource, final Xp7Deployment newResource )
     {
         // Do nothing
     }
 
     @Override
-    public void onDelete( final Xp7Deployment v1alpha2Xp7Deployment, final boolean b )
+    public void onDelete( final Xp7Deployment oldResource, final boolean b )
     {
-        xpClientCache.invalidateCache( v1alpha2Xp7Deployment );
+        xpClientCache.invalidateCache( oldResource );
     }
 }

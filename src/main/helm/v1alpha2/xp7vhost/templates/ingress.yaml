@@ -13,6 +13,10 @@ metadata:
     {{- with $.Values.defaultLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
+  ownerReferences:
+    {{- with $.Values.ownerReferences }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
   annotations:
     {{ $.Values.annotationKeys.vHostName }}: {{ $.Values.vhost.name }}
     {{ $.Values.annotationKeys.applyPriority }}: "100"
@@ -36,7 +40,7 @@ metadata:
     {{- end }}
 
     {{- if $mapping.options.ipWhitelist }}
-    nginx.ingress.kubernetes.io/whitelist-source-range: {{ quote $mapping.options.ipWhitelist }}
+    nginx.ingress.kubernetes.io/whitelist-source-range: {{ $mapping.options.ipWhitelist | join "," }}
     {{- end }}
 
     {{- if $mapping.options.stickySession }}

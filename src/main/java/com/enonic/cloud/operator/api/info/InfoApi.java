@@ -25,6 +25,7 @@ public class InfoApi
     @ConfigProperty(name = "operator.api.group")
     String group;
 
+    @SuppressWarnings("DuplicatedCode")
     @GET
     @Path("/")
     @Produces("application/json")
@@ -47,15 +48,6 @@ public class InfoApi
         mutationResource.put( "singularName", "" );
         mutationResource.put( "verbs", Collections.singletonList( "create" ) );
         mutationResource.put( "version", "v1beta1" );
-
-//        Map<String, Object> conversionResource = new HashMap<>();
-//        conversionResource.put( "group", "apiextensions.k8s.io" );
-//        conversionResource.put( "kind", "ConversionReview" );
-//        conversionResource.put( "name", "conversions" );
-//        conversionResource.put( "namespaced", false );
-//        conversionResource.put( "singularName", "" );
-//        conversionResource.put( "verbs", Collections.singletonList( "create" ) );
-//        conversionResource.put( "version", "v1beta1" );
 
         Map<String, Object> res = new HashMap<>();
         res.put( "apiVersion", "v1" );

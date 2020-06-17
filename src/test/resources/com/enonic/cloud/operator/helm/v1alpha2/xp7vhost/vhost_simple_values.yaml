@@ -24,7 +24,7 @@ vhost:
         ingress: true
         ingressMaxBodySize: "100m"
         statusCake: false
-        ipWhitelist: ""
+        ipWhitelist: []
         stickySession: false
         sslRedirect: true
     - nodeGroup: "frontend"
@@ -34,7 +34,8 @@ vhost:
         ingress: true
         ingressMaxBodySize: "8m"
         statusCake: true
-        ipWhitelist: "1.1.1.1"
+        ipWhitelist:
+        - "1.1.1.1"
         stickySession: true
         sslRedirect: false
         caching: true
@@ -43,14 +44,26 @@ vhost:
       target: "/admin"
       options:
         ingress: false
+        ingressMaxBodySize: "100m"
+        statusCake: false
+        ipWhitelist: []
+        stickySession: false
+        sslRedirect: true
 allNodesKey: "all"
 defaultLabels: {}
 labelKeys:
   managed: "enonic.managed"
   nodeGroup: "enonic.nodeGroup"
-imageTemplate: "gbbirkisson/xp:%s-ubuntu"
+imageTemplate: "enonic/xp:%s-ubuntu"
 annotationKeys:
   applyPriority: "enonic.applyPriority"
   vHostName: "enonic.vhost"
   alwaysOverwrite: "enonic.alwaysOverwrite"
   neverOverwrite: "enonic.neverOverwrite"
+ownerReferences:
+- apiVersion: "enonic.cloud/v1alpha2"
+  kind: "Xp7VHost"
+  blockOwnerDeletion: false
+  controller: true
+  name: "test-purplejs-io"
+  uid: "54edf212-742d-44f5-9fef-6749da7fd534"

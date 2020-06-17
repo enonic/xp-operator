@@ -1,47 +1,36 @@
 package com.enonic.cloud.operator.v1alpha2xp7vhost;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
-import org.eclipse.microprofile.config.inject.ConfigProperty;
-
+import io.fabric8.kubernetes.api.model.Doneable;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
-import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.cloud.apis.doh.DohQueryParams;
 import com.enonic.cloud.apis.doh.DohQueryParamsImpl;
 import com.enonic.cloud.apis.doh.service.DohAnswer;
-import com.enonic.cloud.common.staller.TaskRunner;
 import com.enonic.cloud.kubernetes.Clients;
 import com.enonic.cloud.kubernetes.InformerSearcher;
-import com.enonic.cloud.kubernetes.commands.K8sLogHelper;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHost;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHostSpecMapping;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHostStatus;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHostStatusFields;
 import com.enonic.cloud.operator.dns.functions.info.IngressAssignedIps;
 import com.enonic.cloud.operator.dns.functions.info.IngressEnabledHosts;
+import com.enonic.cloud.operator.helpers.StatusHandler;
 
-import static com.enonic.cloud.common.Configuration.cfgIfBool;
-import static com.enonic.cloud.common.Configuration.cfgLong;
 import static com.enonic.cloud.common.Configuration.cfgStr;
 
 
 public class OperatorVHostStatus
-    implements Runnable
+    extends StatusHandler<Xp7VHost, Xp7VHostStatus>
 {
     private final IngressAssignedIps ingressAssignedIps = new IngressAssignedIps();
 
@@ -60,41 +49,41 @@ public class OperatorVHostStatus
     @Inject
     Function<DohQueryParams, List<DohAnswer>> doh;
 
-    @Inject
-    TaskRunner taskRunner;
-
-    @ConfigProperty(name = "operator.tasks.statusDelaySeconds")
-    Long statusDelay;
-
-    void onStartup( @Observes StartupEvent _ev )
+    @Override
+    protected InformerSearcher<Xp7VHost> informerSearcher()
     {
-        cfgIfBool( "operator.status.enabled", () -> taskRunner.scheduleAtFixedRate( this, cfgLong( "operator.tasks.initialDelayMs" ),
-                                                                                    cfgLong( "operator.tasks.vHost.status.periodMs" ),
-                                                                                    TimeUnit.MILLISECONDS ) );
+        return xp7VHostInformerSearcher;
     }
 
     @Override
-    public void run()
+    protected Xp7VHostStatus getStatus( final Xp7VHost resource )
     {
-        xp7VHostInformerSearcher.
-            getStream().
-            filter( vHost -> vHost.getMetadata().getDeletionTimestamp() == null ).
-            filter( vHost -> Duration.between( Instant.parse( vHost.getMetadata().getCreationTimestamp() ), Instant.now() ).getSeconds() >
-                statusDelay ).
-            forEach( vhost -> updateStatus( vhost, vhost.getXp7VHostSpec().hashCode(), pollStatus( vhost ) ) );
+        return resource.getXp7VHostStatus();
     }
 
-    private Xp7VHostStatus pollStatus( final Xp7VHost vHost )
+    @Override
+    protected Doneable<Xp7VHost> updateStatus( final Xp7VHost resource, final Xp7VHostStatus newStatus )
     {
-        Xp7VHostStatus currentStatus = vHost.getXp7VHostStatus() != null ? vHost.getXp7VHostStatus() : new Xp7VHostStatus().
+        return clients.xp7VHosts().crdClient().
+            inNamespace( resource.getMetadata().getNamespace() ).
+            withName( resource.getMetadata().getName() ).
+            edit().
+            withStatus( newStatus );
+    }
+
+    @Override
+    protected Xp7VHostStatus pollStatus( final Xp7VHost resource )
+    {
+        // Get old status or create new one
+        Xp7VHostStatus currentStatus = resource.getXp7VHostStatus() != null ? resource.getXp7VHostStatus() : new Xp7VHostStatus().
             withState( Xp7VHostStatus.State.PENDING ).
             withMessage( "Created" ).
             withXp7VHostStatusFields( new Xp7VHostStatusFields().
                 withPublicIps( new LinkedList<>() ).
                 withDnsRecordCreated( false ) );
 
-        long expectedIngresses = countIngresses( vHost );
-
+        // Check for expected ingresses
+        long expectedIngresses = countIngresses( resource );
         if ( expectedIngresses == 0 )
         {
             return currentStatus.
@@ -102,10 +91,12 @@ public class OperatorVHostStatus
                 withState( Xp7VHostStatus.State.READY );
         }
 
-        List<Ingress> createdIngresses = ingressInformerSearcher.get( vHost.getMetadata().getNamespace() ).
+        // List created ingresses
+        List<Ingress> createdIngresses = ingressInformerSearcher.
+            get( resource.getMetadata().getNamespace() ).
             filter( ingress -> ingress.getMetadata().getAnnotations() != null ).
-            filter( ingress -> Objects.equals( vHost.getMetadata().getName(), ingress.getMetadata().getAnnotations().get(
-                cfgStr( "operator.helm.charts.Values.annotationKeys.vHostName" ) ) ) ).
+            filter( ingress -> resource.getMetadata().getName().equals(
+                ingress.getMetadata().getAnnotations().get( cfgStr( "operator.helm.charts.Values.annotationKeys.vHostName" ) ) ) ).
             collect( Collectors.toList() );
 
         if ( expectedIngresses != createdIngresses.size() )
@@ -115,6 +106,7 @@ public class OperatorVHostStatus
                 withState( Xp7VHostStatus.State.PENDING );
         }
 
+        // Check for public IPs
         if ( currentStatus.getXp7VHostStatusFields().getPublicIps().isEmpty() )
         {
             Set<String> assignedIps = createdIngresses.stream().
@@ -128,12 +120,13 @@ public class OperatorVHostStatus
             }
             else
             {
-                currentStatus.getXp7VHostStatusFields().withPublicIps( new ArrayList<>( assignedIps ) );
+                currentStatus.getXp7VHostStatusFields().withPublicIps( new LinkedList<>( assignedIps ) );
             }
         }
 
-        boolean dnsRecordExpected =
-            vHost.getXp7VHostSpec().getXp7VHostSpecOptions() == null || vHost.getXp7VHostSpec().getXp7VHostSpecOptions().getDnsRecord();
+        // Check for DNS
+        boolean dnsRecordExpected = resource.getXp7VHostSpec().getXp7VHostSpecOptions() == null ||
+            resource.getXp7VHostSpec().getXp7VHostSpecOptions().getDnsRecord();
 
         if ( dnsRecordExpected && !currentStatus.getXp7VHostStatusFields().getPublicIps().isEmpty() &&
             !currentStatus.getXp7VHostStatusFields().getDnsRecordCreated() )
@@ -150,10 +143,10 @@ public class OperatorVHostStatus
         return currentStatus;
     }
 
-    private int countIngresses( final Xp7VHost vHost )
+    private int countIngresses( final Xp7VHost resource )
     {
         int count = 0;
-        for ( Xp7VHostSpecMapping m : vHost.getXp7VHostSpec().getXp7VHostSpecMappings() )
+        for ( Xp7VHostSpecMapping m : resource.getXp7VHostSpec().getXp7VHostSpecMappings() )
         {
             if ( m.getXp7VHostSpecMappingOptions() == null || m.getXp7VHostSpecMappingOptions().getIngress() )
             {
@@ -187,19 +180,5 @@ public class OperatorVHostStatus
                 withMessage( "OK" ).
                 withState( Xp7VHostStatus.State.READY );
         }
-    }
-
-    private void updateStatus( final Xp7VHost vHost, final int oldStatusHashCode, final Xp7VHostStatus status )
-    {
-        if ( status.equals( vHost.getXp7VHostStatus() ) )
-        {
-            return;
-        }
-
-        K8sLogHelper.logDoneable( clients.xp7VHosts().crdClient().
-            inNamespace( vHost.getMetadata().getNamespace() ).
-            withName( vHost.getMetadata().getName() ).
-            edit().
-            withStatus( status ) );
     }
 }

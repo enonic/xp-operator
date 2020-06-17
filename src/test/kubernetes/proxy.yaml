@@ -1,0 +1,241 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: proxy
+  namespace: default
+data:
+  cert.pem: |-
+    -----BEGIN CERTIFICATE-----
+    MIIFGTCCAwGgAwIBAgIUaaMOCrHyxjT2TddfGBkH3RVKI/MwDQYJKoZIhvcNAQEL
+    BQAwHDEaMBgGA1UEAwwRcHJveHkuZGVmYXVsdC5zdmMwHhcNMjAwNjE3MTEyMjQ3
+    WhcNMzAwNjE1MTEyMjQ3WjAcMRowGAYDVQQDDBFwcm94eS5kZWZhdWx0LnN2YzCC
+    AiIwDQYJKoZIhvcNAQEBBQADggIPADCCAgoCggIBAME9TMofMrZ8VYlNqafq/jhe
+    nqFdUlQoLgN8ubnbcXMYRHZhVnrtb9+r0WrAi8P1SFrO+1gXakiD27B+63m5EKnn
+    NoFkuQC9TgPaqkHTarx+ZyLo7SlgZsAj8aiFDQ4e9VVOX5eZXEMl1rRz0whAThti
+    VgpuyG59EQQDdAKxcx2dqq2Dss7ZbmM1R9LwtFqhCSp47b8PrhFLg/yOjif8qFDV
+    BGGgAf9JSM3qCkf+FtzKiUgnuNms3A7Ss3btIzM+3iSBZO0qMd9ASZDpZA/8M76u
+    ZjXzPgLpVqUNLT6jJ3p3qHn9Q9+qXiRUBQ99JU/s5zMseLpxesEUdfJxypnvfKSr
+    uzr5hodx9QTO97J/YVBXj2fwoiDMo9KOOFY4/F3n3/1N+yggdqThvQSrUhryGBji
+    eT6V28kPpJuUhqfjGyroeFWavNjSd/EtoJ0DA2yjGcNJzVR29wB9j3JLXPqmdexT
+    XsGIdbkTl9S3ICl0rMfZiJ3IC+4kEXE5J2JmbHRdSGeCcplJ5/pikCwBGWPEcQxN
+    zDRDrOK2MwrpLd2XGU5C39rPjfBe71FUPOMNeqvGF0TRcCb7d3oGd1sxZqUeLKaS
+    IcFp2LcGRyMjk7FsjDop4/kfuwELCO6+60HqQR6ygWZYwEtg1z2SilpfyGZyaj2P
+    q4VD6a3cOgX9xjM9G7QRAgMBAAGjUzBRMB0GA1UdDgQWBBQS/dU7d+JlOgbznzuD
+    IR6N9nPrmTAfBgNVHSMEGDAWgBQS/dU7d+JlOgbznzuDIR6N9nPrmTAPBgNVHRMB
+    Af8EBTADAQH/MA0GCSqGSIb3DQEBCwUAA4ICAQAY3ZwBE4poXQZK3hIEnJbAqmOL
+    csZ3/zXouhp/Kd0Vt2jvOExlyrjGUWnmN9dj94XAhXkkW/FClnhXnmlc0guVQcux
+    jRpbtrQPXUgv3e6WwTprW9ReWzVLm9CEXQdRJAb0zA/R8vrKJukcN5VE40lZ8NBd
+    aa8sK/vSvQEVdXDOoZykBn+qUHKh/tpxe9z6J7iTBLxPG42Ut3VIMC6nCygfuRqa
+    rAaPuAPXzkZber8ok83gZ8IbYXezFqSnASJOqR4ywn5fMyyOOHJz3c5YFk22pdRA
+    zDxVVt8nKtXZYLwx2eDNHvzkNaNL/GzeZGO3vsAp3SnqizgtRI0FLWoYBouextYN
+    hpiidSUTmaWLcujVYWj5xAQS/vL5AmEL743O7aNcDFwgSCnHpz7OMgesuR96wMkJ
+    nFkavPu3LOZcXsvHZOfusH8q8lDdt89gkEVd0HDZxfpNKlzYhmpj/0RWMFGRNSGk
+    Kbr5IInsVLDYaWAv9zdZffQ/p/2+vfbj8fmr+1MkgGsP1JJrJK7XeUWSc2ctSFgD
+    k+2rJmv63KR6GiZly+EZptY4q24d60pfPf1CNYuLdeshQVXJSbjSZ0fKx7AarxP6
+    oJSR8mDe+2oAe6Tb8prg8RlgbwWoVZq1wp2hv7FZ1mOnBjPFGc2j2gC3wTB6LARy
+    uzohcPgHAfcMAXpsaw==
+    -----END CERTIFICATE-----
+  key.pem: |-
+    -----BEGIN PRIVATE KEY-----
+    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
+    ZUc0tZ7nCRHbm1F0skvhcjiQGf8DDy+Y
+    -----END PRIVATE KEY-----
+  nginx.conf: |-
+    user  nginx;
+    worker_processes  1;
+
+    error_log  /var/log/nginx/error.log warn;
+    pid        /var/run/nginx.pid;
+
+    events {
+      worker_connections  1024;  ## Default: 1024, increase if you have lots of clients
+    }
+
+    http {
+      # fallback in case we can't determine a type
+      default_type  application/octet-stream;
+
+      log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+      '$status $body_bytes_sent "$http_referer" '
+      '"$http_user_agent" "$http_x_forwarded_for"';
+
+      access_log  /var/log/nginx/access.log  main;
+
+      sendfile        on;
+      #tcp_nopush     on;
+
+      keepalive_timeout  65;
+
+      server {
+        listen 443 ssl;
+        server_name proxy.default.svc.cluster.local;
+
+        ssl_certificate           /etc/nginx/cert.pem;
+        ssl_certificate_key       /etc/nginx/key.pem;
+
+        ssl_session_cache  builtin:1000  shared:SSL:10m;
+        ssl_protocols  TLSv1 TLSv1.1 TLSv1.2;
+        ssl_ciphers HIGH:!aNULL:!eNULL:!EXPORT:!CAMELLIA:!DES:!MD5:!PSK:!RC4;
+        ssl_prefer_server_ciphers on;
+
+        access_log            /var/log/nginx/proxy.access.log;
+
+        location / {
+          proxy_set_header        Host $host;
+          proxy_set_header        X-Real-IP $remote_addr;
+          proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header        X-Forwarded-Proto $scheme;
+
+          # Fix the “It appears that your reverse proxy set up is broken" error.
+          proxy_pass          http://10.0.10.147:8081;
+          proxy_read_timeout  90;
+        }
+      }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: proxy
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: proxy
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: proxy
+    spec:
+      containers:
+        - image: nginx:latest
+          name: proxy
+          imagePullPolicy: Always
+          volumeMounts:
+          - name: config
+            mountPath: /etc/nginx
+            readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: proxy
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: proxy
+  namespace: default
+spec:
+  selector:
+    app: proxy
+  ports:
+  - name: https
+    protocol: TCP
+    port: 443
+    targetPort: 443
+---
+apiVersion: apiregistration.k8s.io/v1beta1
+kind: APIService
+metadata:
+  name: v1alpha1.operator.enonic.cloud
+spec:
+  group: operator.enonic.cloud
+  groupPriorityMinimum: 1000
+  versionPriority: 15
+  caBundle: "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUZHVENDQXdHZ0F3SUJBZ0lVYWFNT0NySHl4alQyVGRkZkdCa0gzUlZLSS9Nd0RRWUpLb1pJaHZjTkFRRUwKQlFBd0hERWFNQmdHQTFVRUF3d1JjSEp2ZUhrdVpHVm1ZWFZzZEM1emRtTXdIaGNOTWpBd05qRTNNVEV5TWpRMwpXaGNOTXpBd05qRTFNVEV5TWpRM1dqQWNNUm93R0FZRFZRUUREQkZ3Y205NGVTNWtaV1poZFd4MExuTjJZekNDCkFpSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnSVBBRENDQWdvQ2dnSUJBTUU5VE1vZk1yWjhWWWxOcWFmcS9qaGUKbnFGZFVsUW9MZ044dWJuYmNYTVlSSFpoVm5ydGI5K3IwV3JBaThQMVNGck8rMWdYYWtpRDI3Qis2M201RUtubgpOb0ZrdVFDOVRnUGFxa0hUYXJ4K1p5TG83U2xnWnNBajhhaUZEUTRlOVZWT1g1ZVpYRU1sMXJSejB3aEFUaHRpClZncHV5RzU5RVFRRGRBS3hjeDJkcXEyRHNzN1pibU0xUjlMd3RGcWhDU3A0N2I4UHJoRkxnL3lPamlmOHFGRFYKQkdHZ0FmOUpTTTNxQ2tmK0Z0ektpVWdudU5tczNBN1NzM2J0SXpNKzNpU0JaTzBxTWQ5QVNaRHBaQS84TTc2dQpaalh6UGdMcFZxVU5MVDZqSjNwM3FIbjlROStxWGlSVUJROTlKVS9zNXpNc2VMcHhlc0VVZGZKeHlwbnZmS1NyCnV6cjVob2R4OVFUTzk3Si9ZVkJYajJmd29pRE1vOUtPT0ZZNC9GM24zLzFOK3lnZ2RxVGh2UVNyVWhyeUdCamkKZVQ2VjI4a1BwSnVVaHFmakd5cm9lRldhdk5qU2QvRXRvSjBEQTJ5akdjTkp6VlIyOXdCOWozSkxYUHFtZGV4VApYc0dJZGJrVGw5UzNJQ2wwck1mWmlKM0lDKzRrRVhFNUoySm1iSFJkU0dlQ2NwbEo1L3Bpa0N3QkdXUEVjUXhOCnpEUkRyT0syTXdycExkMlhHVTVDMzlyUGpmQmU3MUZVUE9NTmVxdkdGMFRSY0NiN2Qzb0dkMXN4WnFVZUxLYVMKSWNGcDJMY0dSeU1qazdGc2pEb3A0L2tmdXdFTENPNis2MEhxUVI2eWdXWll3RXRnMXoyU2lscGZ5R1p5YWoyUApxNFZENmEzY09nWDl4ak05RzdRUkFnTUJBQUdqVXpCUk1CMEdBMVVkRGdRV0JCUVMvZFU3ZCtKbE9nYnpuenVECklSNk45blBybVRBZkJnTlZIU01FR0RBV2dCUVMvZFU3ZCtKbE9nYnpuenVESVI2TjluUHJtVEFQQmdOVkhSTUIKQWY4RUJUQURBUUgvTUEwR0NTcUdTSWIzRFFFQkN3VUFBNElDQVFBWTNad0JFNHBvWFFaSzNoSUVuSmJBcW1PTApjc1ozL3pYb3VocC9LZDBWdDJqdk9FeGx5cmpHVVdubU45ZGo5NFhBaFhra1cvRkNsbmhYbm1sYzBndVZRY3V4CmpScGJ0clFQWFVndjNlNld3VHByVzlSZVd6VkxtOUNFWFFkUkpBYjB6QS9SOHZyS0p1a2NONVZFNDBsWjhOQmQKYWE4c0svdlN2UUVWZFhET29aeWtCbitxVUhLaC90cHhlOXo2SjdpVEJMeFBHNDJVdDNWSU1DNm5DeWdmdVJxYQpyQWFQdUFQWHprWmJlcjhvazgzZ1o4SWJZWGV6RnFTbkFTSk9xUjR5d241Zk15eU9PSEp6M2M1WUZrMjJwZFJBCnpEeFZWdDhuS3RYWllMd3gyZUROSHZ6a05hTkwvR3plWkdPM3ZzQXAzU25xaXpndFJJMEZMV29ZQm91ZXh0WU4KaHBpaWRTVVRtYVdMY3VqVllXajV4QVFTL3ZMNUFtRUw3NDNPN2FOY0RGd2dTQ25IcHo3T01nZXN1Ujk2d01rSgpuRmthdlB1M0xPWmNYc3ZIWk9mdXNIOHE4bERkdDg5Z2tFVmQwSERaeGZwTktsellobXBqLzBSV01GR1JOU0drCkticjVJSW5zVkxEWWFXQXY5emRaZmZRL3AvMit2ZmJqOGZtcisxTWtnR3NQMUpKckpLN1hlVVdTYzJjdFNGZ0QKaysyckptdjYzS1I2R2labHkrRVpwdFk0cTI0ZDYwcGZQZjFDTll1TGRlc2hRVlhKU2JqU1owZkt4N0FhcnhQNgpvSlNSOG1EZSsyb0FlNlRiOHByZzhSbGdid1dvVlpxMXdwMmh2N0ZaMW1PbkJqUEZHYzJqMmdDM3dUQjZMQVJ5CnV6b2hjUGdIQWZjTUFYcHNhdz09Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K"
+  service:
+    name: proxy
+    namespace: default
+  version: v1alpha1
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: ec-operator-validation-webhook
+webhooks:
+- name: operator.enonic.cloud
+  rules:
+    - apiGroups: ["enonic.cloud"]
+      operations: ["*"]
+      apiVersions: ["*"]
+      resources: ["xp7deployments", "xp7vhosts", "xp7apps", "xp7configs"]
+      scope: "*"
+  admissionReviewVersions: ["v1", "v1beta1"]
+  failurePolicy: Fail
+  sideEffects: None
+  timeoutSeconds: 5
+  clientConfig:
+    caBundle: "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUZHVENDQXdHZ0F3SUJBZ0lVYWFNT0NySHl4alQyVGRkZkdCa0gzUlZLSS9Nd0RRWUpLb1pJaHZjTkFRRUwKQlFBd0hERWFNQmdHQTFVRUF3d1JjSEp2ZUhrdVpHVm1ZWFZzZEM1emRtTXdIaGNOTWpBd05qRTNNVEV5TWpRMwpXaGNOTXpBd05qRTFNVEV5TWpRM1dqQWNNUm93R0FZRFZRUUREQkZ3Y205NGVTNWtaV1poZFd4MExuTjJZekNDCkFpSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnSVBBRENDQWdvQ2dnSUJBTUU5VE1vZk1yWjhWWWxOcWFmcS9qaGUKbnFGZFVsUW9MZ044dWJuYmNYTVlSSFpoVm5ydGI5K3IwV3JBaThQMVNGck8rMWdYYWtpRDI3Qis2M201RUtubgpOb0ZrdVFDOVRnUGFxa0hUYXJ4K1p5TG83U2xnWnNBajhhaUZEUTRlOVZWT1g1ZVpYRU1sMXJSejB3aEFUaHRpClZncHV5RzU5RVFRRGRBS3hjeDJkcXEyRHNzN1pibU0xUjlMd3RGcWhDU3A0N2I4UHJoRkxnL3lPamlmOHFGRFYKQkdHZ0FmOUpTTTNxQ2tmK0Z0ektpVWdudU5tczNBN1NzM2J0SXpNKzNpU0JaTzBxTWQ5QVNaRHBaQS84TTc2dQpaalh6UGdMcFZxVU5MVDZqSjNwM3FIbjlROStxWGlSVUJROTlKVS9zNXpNc2VMcHhlc0VVZGZKeHlwbnZmS1NyCnV6cjVob2R4OVFUTzk3Si9ZVkJYajJmd29pRE1vOUtPT0ZZNC9GM24zLzFOK3lnZ2RxVGh2UVNyVWhyeUdCamkKZVQ2VjI4a1BwSnVVaHFmakd5cm9lRldhdk5qU2QvRXRvSjBEQTJ5akdjTkp6VlIyOXdCOWozSkxYUHFtZGV4VApYc0dJZGJrVGw5UzNJQ2wwck1mWmlKM0lDKzRrRVhFNUoySm1iSFJkU0dlQ2NwbEo1L3Bpa0N3QkdXUEVjUXhOCnpEUkRyT0syTXdycExkMlhHVTVDMzlyUGpmQmU3MUZVUE9NTmVxdkdGMFRSY0NiN2Qzb0dkMXN4WnFVZUxLYVMKSWNGcDJMY0dSeU1qazdGc2pEb3A0L2tmdXdFTENPNis2MEhxUVI2eWdXWll3RXRnMXoyU2lscGZ5R1p5YWoyUApxNFZENmEzY09nWDl4ak05RzdRUkFnTUJBQUdqVXpCUk1CMEdBMVVkRGdRV0JCUVMvZFU3ZCtKbE9nYnpuenVECklSNk45blBybVRBZkJnTlZIU01FR0RBV2dCUVMvZFU3ZCtKbE9nYnpuenVESVI2TjluUHJtVEFQQmdOVkhSTUIKQWY4RUJUQURBUUgvTUEwR0NTcUdTSWIzRFFFQkN3VUFBNElDQVFBWTNad0JFNHBvWFFaSzNoSUVuSmJBcW1PTApjc1ozL3pYb3VocC9LZDBWdDJqdk9FeGx5cmpHVVdubU45ZGo5NFhBaFhra1cvRkNsbmhYbm1sYzBndVZRY3V4CmpScGJ0clFQWFVndjNlNld3VHByVzlSZVd6VkxtOUNFWFFkUkpBYjB6QS9SOHZyS0p1a2NONVZFNDBsWjhOQmQKYWE4c0svdlN2UUVWZFhET29aeWtCbitxVUhLaC90cHhlOXo2SjdpVEJMeFBHNDJVdDNWSU1DNm5DeWdmdVJxYQpyQWFQdUFQWHprWmJlcjhvazgzZ1o4SWJZWGV6RnFTbkFTSk9xUjR5d241Zk15eU9PSEp6M2M1WUZrMjJwZFJBCnpEeFZWdDhuS3RYWllMd3gyZUROSHZ6a05hTkwvR3plWkdPM3ZzQXAzU25xaXpndFJJMEZMV29ZQm91ZXh0WU4KaHBpaWRTVVRtYVdMY3VqVllXajV4QVFTL3ZMNUFtRUw3NDNPN2FOY0RGd2dTQ25IcHo3T01nZXN1Ujk2d01rSgpuRmthdlB1M0xPWmNYc3ZIWk9mdXNIOHE4bERkdDg5Z2tFVmQwSERaeGZwTktsellobXBqLzBSV01GR1JOU0drCkticjVJSW5zVkxEWWFXQXY5emRaZmZRL3AvMit2ZmJqOGZtcisxTWtnR3NQMUpKckpLN1hlVVdTYzJjdFNGZ0QKaysyckptdjYzS1I2R2labHkrRVpwdFk0cTI0ZDYwcGZQZjFDTll1TGRlc2hRVlhKU2JqU1owZkt4N0FhcnhQNgpvSlNSOG1EZSsyb0FlNlRiOHByZzhSbGdid1dvVlpxMXdwMmh2N0ZaMW1PbkJqUEZHYzJqMmdDM3dUQjZMQVJ5CnV6b2hjUGdIQWZjTUFYcHNhdz09Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K"
+    service:
+      name: kubernetes
+      namespace: default
+      path: /apis/operator.enonic.cloud/v1alpha1/validations
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: ec-operator-mutation-webhook
+webhooks:
+  - name: operator.enonic.cloud
+    rules:
+      - apiGroups: ["enonic.cloud"]
+        operations: ["*"]
+        apiVersions: ["*"]
+        resources: ["xp7deployments", "xp7vhosts", "xp7apps", "xp7configs"]
+        scope: "*"
+    clientConfig:
+      caBundle: "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUZHVENDQXdHZ0F3SUJBZ0lVYWFNT0NySHl4alQyVGRkZkdCa0gzUlZLSS9Nd0RRWUpLb1pJaHZjTkFRRUwKQlFBd0hERWFNQmdHQTFVRUF3d1JjSEp2ZUhrdVpHVm1ZWFZzZEM1emRtTXdIaGNOTWpBd05qRTNNVEV5TWpRMwpXaGNOTXpBd05qRTFNVEV5TWpRM1dqQWNNUm93R0FZRFZRUUREQkZ3Y205NGVTNWtaV1poZFd4MExuTjJZekNDCkFpSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnSVBBRENDQWdvQ2dnSUJBTUU5VE1vZk1yWjhWWWxOcWFmcS9qaGUKbnFGZFVsUW9MZ044dWJuYmNYTVlSSFpoVm5ydGI5K3IwV3JBaThQMVNGck8rMWdYYWtpRDI3Qis2M201RUtubgpOb0ZrdVFDOVRnUGFxa0hUYXJ4K1p5TG83U2xnWnNBajhhaUZEUTRlOVZWT1g1ZVpYRU1sMXJSejB3aEFUaHRpClZncHV5RzU5RVFRRGRBS3hjeDJkcXEyRHNzN1pibU0xUjlMd3RGcWhDU3A0N2I4UHJoRkxnL3lPamlmOHFGRFYKQkdHZ0FmOUpTTTNxQ2tmK0Z0ektpVWdudU5tczNBN1NzM2J0SXpNKzNpU0JaTzBxTWQ5QVNaRHBaQS84TTc2dQpaalh6UGdMcFZxVU5MVDZqSjNwM3FIbjlROStxWGlSVUJROTlKVS9zNXpNc2VMcHhlc0VVZGZKeHlwbnZmS1NyCnV6cjVob2R4OVFUTzk3Si9ZVkJYajJmd29pRE1vOUtPT0ZZNC9GM24zLzFOK3lnZ2RxVGh2UVNyVWhyeUdCamkKZVQ2VjI4a1BwSnVVaHFmakd5cm9lRldhdk5qU2QvRXRvSjBEQTJ5akdjTkp6VlIyOXdCOWozSkxYUHFtZGV4VApYc0dJZGJrVGw5UzNJQ2wwck1mWmlKM0lDKzRrRVhFNUoySm1iSFJkU0dlQ2NwbEo1L3Bpa0N3QkdXUEVjUXhOCnpEUkRyT0syTXdycExkMlhHVTVDMzlyUGpmQmU3MUZVUE9NTmVxdkdGMFRSY0NiN2Qzb0dkMXN4WnFVZUxLYVMKSWNGcDJMY0dSeU1qazdGc2pEb3A0L2tmdXdFTENPNis2MEhxUVI2eWdXWll3RXRnMXoyU2lscGZ5R1p5YWoyUApxNFZENmEzY09nWDl4ak05RzdRUkFnTUJBQUdqVXpCUk1CMEdBMVVkRGdRV0JCUVMvZFU3ZCtKbE9nYnpuenVECklSNk45blBybVRBZkJnTlZIU01FR0RBV2dCUVMvZFU3ZCtKbE9nYnpuenVESVI2TjluUHJtVEFQQmdOVkhSTUIKQWY4RUJUQURBUUgvTUEwR0NTcUdTSWIzRFFFQkN3VUFBNElDQVFBWTNad0JFNHBvWFFaSzNoSUVuSmJBcW1PTApjc1ozL3pYb3VocC9LZDBWdDJqdk9FeGx5cmpHVVdubU45ZGo5NFhBaFhra1cvRkNsbmhYbm1sYzBndVZRY3V4CmpScGJ0clFQWFVndjNlNld3VHByVzlSZVd6VkxtOUNFWFFkUkpBYjB6QS9SOHZyS0p1a2NONVZFNDBsWjhOQmQKYWE4c0svdlN2UUVWZFhET29aeWtCbitxVUhLaC90cHhlOXo2SjdpVEJMeFBHNDJVdDNWSU1DNm5DeWdmdVJxYQpyQWFQdUFQWHprWmJlcjhvazgzZ1o4SWJZWGV6RnFTbkFTSk9xUjR5d241Zk15eU9PSEp6M2M1WUZrMjJwZFJBCnpEeFZWdDhuS3RYWllMd3gyZUROSHZ6a05hTkwvR3plWkdPM3ZzQXAzU25xaXpndFJJMEZMV29ZQm91ZXh0WU4KaHBpaWRTVVRtYVdMY3VqVllXajV4QVFTL3ZMNUFtRUw3NDNPN2FOY0RGd2dTQ25IcHo3T01nZXN1Ujk2d01rSgpuRmthdlB1M0xPWmNYc3ZIWk9mdXNIOHE4bERkdDg5Z2tFVmQwSERaeGZwTktsellobXBqLzBSV01GR1JOU0drCkticjVJSW5zVkxEWWFXQXY5emRaZmZRL3AvMit2ZmJqOGZtcisxTWtnR3NQMUpKckpLN1hlVVdTYzJjdFNGZ0QKaysyckptdjYzS1I2R2labHkrRVpwdFk0cTI0ZDYwcGZQZjFDTll1TGRlc2hRVlhKU2JqU1owZkt4N0FhcnhQNgpvSlNSOG1EZSsyb0FlNlRiOHByZzhSbGdid1dvVlpxMXdwMmh2N0ZaMW1PbkJqUEZHYzJqMmdDM3dUQjZMQVJ5CnV6b2hjUGdIQWZjTUFYcHNhdz09Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K"
+      service:
+        name: kubernetes
+        namespace: default
+        path: /apis/operator.enonic.cloud/v1alpha1/mutations
+# kubectl run --rm --restart=Never --image-pull-policy=IfNotPresent -i -t --image gbbirkisson/httpie test2 -- --verify=no -b https://proxy.default.svc.cluster.local/apis/operator.enonic.cloud/v1alpha1

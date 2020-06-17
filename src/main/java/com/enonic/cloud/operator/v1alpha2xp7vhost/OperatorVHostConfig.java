@@ -23,7 +23,7 @@ import com.enonic.cloud.kubernetes.commands.K8sLogHelper;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7config.Xp7Config;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHost;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHostSpecMapping;
-import com.enonic.cloud.operator.InformerEventHandler;
+import com.enonic.cloud.operator.helpers.InformerEventHandler;
 
 import static com.enonic.cloud.common.Configuration.cfgStr;
 

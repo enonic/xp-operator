@@ -1,4 +1,4 @@
-package com.enonic.cloud.operator;
+package com.enonic.cloud.operator.helpers;
 
 import io.quarkus.runtime.Quarkus;
 import io.quarkus.runtime.annotations.QuarkusMain;

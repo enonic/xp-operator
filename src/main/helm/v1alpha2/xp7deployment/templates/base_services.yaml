@@ -11,6 +11,10 @@ metadata:
     {{- with .Values.defaultLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
+  ownerReferences:
+    {{- with $.Values.ownerReferences }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   type: ClusterIP
   clusterIP: None
@@ -42,6 +46,10 @@ metadata:
   labels:
     {{ $.Values.labelKeys.managed }}: true
     {{- with .Values.defaultLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  ownerReferences:
+    {{- with $.Values.ownerReferences }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:

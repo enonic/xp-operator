@@ -48,3 +48,7 @@ spec:
       type: string
       description: Message
       JSONPath: .status.message
+    - name: Key
+      type: string
+      description: Key
+      JSONPath: .status.fields.appKey

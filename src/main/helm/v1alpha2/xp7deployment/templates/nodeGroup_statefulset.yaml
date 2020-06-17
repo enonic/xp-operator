@@ -13,6 +13,10 @@ metadata:
     {{- with $.Values.defaultLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
+  ownerReferences:
+    {{- with $.Values.ownerReferences }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   serviceName: {{ $.Values.discoveryService }}
   replicas: {{ if $.Values.deployment.spec.enabled }}{{ $nodeGroup.replicas }}{{ else }}0{{end}}

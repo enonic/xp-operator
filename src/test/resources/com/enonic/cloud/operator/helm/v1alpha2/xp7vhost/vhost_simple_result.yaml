@@ -18,6 +18,13 @@ metadata:
     enonic.managed: "true"
   name: "test-purplejs-io-e406cf2116"
   namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7VHost"
+    blockOwnerDeletion: false
+    controller: true
+    name: "test-purplejs-io"
+    uid: "54edf212-742d-44f5-9fef-6749da7fd534"
 spec:
   rules:
   - host: "test.purplejs.io"
@@ -64,6 +71,13 @@ metadata:
     enonic.managed: "true"
   name: "test-purplejs-io-419420aa0e"
   namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7VHost"
+    blockOwnerDeletion: false
+    controller: true
+    name: "test-purplejs-io"
+    uid: "54edf212-742d-44f5-9fef-6749da7fd534"
 spec:
   rules:
   - host: "test.purplejs.io"
