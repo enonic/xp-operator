@@ -3,6 +3,7 @@ package com.enonic.cloud.kubernetes;
 import javax.inject.Singleton;
 import javax.ws.rs.Produces;
 
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
 import com.enonic.cloud.kubernetes.client.v1alpha1.xp7app.Xp7AppClient;
@@ -14,8 +15,9 @@ public class ClientsProducer
 {
     @Singleton
     @Produces
-    Clients crdClient( final KubernetesClient client )
+    Clients crdClient()
     {
+        KubernetesClient client = new DefaultKubernetesClient().inAnyNamespace();
         return ClientsImpl.of( client, new Xp7AppClient( client ), new Xp7ConfigClient( client ), new Xp7DeploymentClient( client ),
                                new Xp7VHostClient( client ) );
     }

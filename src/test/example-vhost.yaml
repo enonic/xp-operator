@@ -2,7 +2,7 @@ apiVersion: enonic.cloud/v1alpha2
 kind: Xp7VHost
 metadata:
   name: test-purplejs-io
-  namespace: mycloud-mysolution-myenv-myservice
+  namespace: mycloud-mysolution-myenv-myservice2
 spec:
   host: tmptest.purplejs.io
   options:

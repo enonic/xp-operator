@@ -51,9 +51,6 @@ public class InformersProducer
             withScope( "Namespaced" ).
             withPlural( "ingresses" ).
             build(), Ingress.class, IngressList.class, informerReSync );
-//        return sf.sharedIndexInformerFor( Ingress.class, IngressList.class, new OperationContext().
-//            withApiGroupVersion( "v1" ).
-//            withPlural( "ingresses" ), informerReSync );
     }
 
     @Singleton

@@ -27,7 +27,7 @@ public abstract class InformerEventHandler<R extends HasMetadata>
             {
                 try
                 {
-                    Thread.sleep( 1000L );
+                    Thread.sleep( 100L );
                 }
                 catch ( InterruptedException e )
                 {

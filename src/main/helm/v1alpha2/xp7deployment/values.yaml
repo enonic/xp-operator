@@ -1,19 +1,19 @@
 imagePullPolicy: IfNotPresent
 
 # Fails after 3:30 minutes
-startupProbe:
-  failureThreshold: 36
-  httpGet:
-    httpHeaders:
-      - name: Host
-        value: healthcheck
-    path: /
-    port: 8080
-    scheme: HTTP
-  initialDelaySeconds: 30
-  periodSeconds: 5
-  successThreshold: 1
-  timeoutSeconds: 1
+#startupProbe:
+#  failureThreshold: 36
+#  httpGet:
+#    httpHeaders:
+#      - name: Host
+#        value: healthcheck
+#    path: /
+#    port: 8080
+#    scheme: HTTP
+#  initialDelaySeconds: 30
+#  periodSeconds: 5
+#  successThreshold: 1
+#  timeoutSeconds: 1
 
 readinessProbe:
   failureThreshold: 3
