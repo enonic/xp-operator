@@ -52,6 +52,7 @@ public class K8sCommandMapper
     private final Clients clients;
 
     @SuppressWarnings("CdiInjectionPointsInspection")
+
     @Inject
     public K8sCommandMapper( final Clients clients )
     {

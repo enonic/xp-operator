@@ -1,9 +1,9 @@
-package com.enonic.cloud.common.staller;
+package com.enonic.cloud.common;
 
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Singleton;
 
 import org.slf4j.Logger;
@@ -17,11 +17,11 @@ public class TaskRunner
 {
     private static final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor( cfgInt( "operator.tasks.threads" ) );
 
-    private static Logger log = LoggerFactory.getLogger( TaskRunner.class );
+    private static final Logger log = LoggerFactory.getLogger( TaskRunner.class );
 
-    public ScheduledFuture<?> scheduleAtFixedRate( final Runnable command, final long initialDelay, final long period, final TimeUnit unit )
+    public void scheduleAtFixedRate( final Runnable command, final long initialDelay, final long period, final TimeUnit unit )
     {
-        return executor.scheduleAtFixedRate( () -> {
+        executor.scheduleAtFixedRate( () -> {
             try
             {
                 command.run();

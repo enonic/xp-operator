@@ -1,89 +1,56 @@
 package com.enonic.cloud.operator.v1alpha1xp7app;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Predicate;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import io.fabric8.kubernetes.api.model.HasMetadata;
-import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
-import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.cloud.apis.xp.XpClientCache;
 import com.enonic.cloud.apis.xp.service.AppInstallResponse;
 import com.enonic.cloud.apis.xp.service.ImmutableAppInstallRequest;
 import com.enonic.cloud.apis.xp.service.ImmutableAppUninstallRequest;
-import com.enonic.cloud.common.staller.TaskRunner;
 import com.enonic.cloud.kubernetes.Clients;
-import com.enonic.cloud.kubernetes.InformerSearcher;
+import com.enonic.cloud.kubernetes.Searchers;
 import com.enonic.cloud.kubernetes.commands.K8sLogHelper;
 import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7App;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
-import com.enonic.cloud.operator.functions.HasMetadataOlderThanImpl;
-import com.enonic.cloud.operator.functions.XpDeletedImpl;
-import com.enonic.cloud.operator.functions.XpRunningImpl;
 import com.enonic.cloud.operator.helpers.InformerEventHandler;
+import com.enonic.cloud.operator.helpers.Xp7DeploymentInfo;
 
-import static com.enonic.cloud.common.Configuration.cfgIfBool;
-import static com.enonic.cloud.common.Configuration.cfgLong;
 import static com.enonic.cloud.common.Configuration.cfgStr;
 
-@ApplicationScoped
-public class OperatorAppInstaller
+
+@Singleton
+public class OperatorXp7AppInstaller
     extends InformerEventHandler<Xp7App>
     implements Runnable
 {
-    private static final Logger log = LoggerFactory.getLogger( OperatorAppInstaller.class );
+    private static final Logger log = LoggerFactory.getLogger( OperatorXp7AppInstaller.class );
 
     @Inject
     Clients clients;
 
     @Inject
-    SharedIndexInformer<Xp7App> xp7AppSharedIndexInformer;
-
-    @Inject
-    InformerSearcher<Xp7App> xp7AppInformerSearcher;
-
-    @Inject
-    InformerSearcher<Xp7Deployment> xp7DeploymentInformerSearcher;
+    Searchers searchers;
 
     @Inject
     XpClientCache xpClientCache;
 
     @Inject
-    TaskRunner taskRunner;
+    Xp7DeploymentInfo xp7DeploymentInfo;
 
-    Predicate<HasMetadata> xpDeleted;
-
-    Predicate<HasMetadata> xpRunning;
-
-    Predicate<HasMetadata> olderThanFiveSeconds;
-
-    void onStartup( @Observes StartupEvent _ev )
+    @Override
+    protected void init()
     {
-        xpDeleted = XpDeletedImpl.of( xp7DeploymentInformerSearcher );
-        xpRunning = XpRunningImpl.of( xp7DeploymentInformerSearcher );
-        olderThanFiveSeconds = HasMetadataOlderThanImpl.of( 5L );
-        cfgIfBool( "operator.status.enabled", () -> {
-            listenToInformer( xp7AppSharedIndexInformer );
-            taskRunner.scheduleAtFixedRate( this, cfgLong( "operator.tasks.initialDelayMs" ),
-                                            cfgLong( "operator.tasks.app.install.periodMs" ), TimeUnit.MILLISECONDS );
-        } );
+        // Do nothing
     }
 
     @Override
-    public void onAdd( final Xp7App newResource )
+    public void onNewAdd( final Xp7App newResource )
     {
-        if ( !olderThanFiveSeconds.test( newResource ) )
-        {
-            installApp( newResource );
-        }
+        installApp( newResource );
     }
 
     @Override
@@ -110,21 +77,21 @@ public class OperatorAppInstaller
     @Override
     public void run()
     {
-        xp7AppInformerSearcher.getStream().
-            filter( app -> app.getMetadata().getDeletionTimestamp() == null ).
-            filter( app -> !app.getMetadata().getFinalizers().isEmpty() ).
+        searchers.xp7App().query().
+            hasNotBeenDeleted().
+            hasFinalizer( cfgStr( "operator.finalizer.app.uninstall" ) ).
             filter( this::appKeyIsNull ).
             forEach( this::installApp );
 
-        xp7AppInformerSearcher.getStream().
-            filter( app -> app.getMetadata().getDeletionTimestamp() != null ).
-            filter( app -> !app.getMetadata().getFinalizers().isEmpty() ).
+        searchers.xp7App().query().
+            hasBeenDeleted().
+            hasFinalizer( cfgStr( "operator.finalizer.app.uninstall" ) ).
             forEach( this::uninstallApp );
     }
 
     private synchronized boolean installApp( final Xp7App app )
     {
-        if ( !xpRunning.test( app ) )
+        if ( !xp7DeploymentInfo.xpRunning( app.getMetadata().getNamespace() ) )
         {
             return false;
         }
@@ -133,9 +100,10 @@ public class OperatorAppInstaller
         String appKey = null;
         try
         {
-            AppInstallResponse response = xpClientCache.install( app ).apply( ImmutableAppInstallRequest.builder().
-                url( app.getXp7AppSpec().getUrl() ).
-                build() );
+            AppInstallResponse response =
+                xpClientCache.install( app.getMetadata().getNamespace() ).apply( ImmutableAppInstallRequest.builder().
+                    url( app.getXp7AppSpec().getUrl() ).
+                    build() );
             if ( response.failure() != null )
             {
                 failure = response.failure();
@@ -162,7 +130,8 @@ public class OperatorAppInstaller
         return false;
     }
 
-    private synchronized boolean uninstallApp( final Xp7App app )
+    @SuppressWarnings("UnusedReturnValue")
+    private boolean uninstallApp( final Xp7App app )
     {
         if ( namespaceBeingTerminated( app ) )
         {
@@ -174,16 +143,16 @@ public class OperatorAppInstaller
             return removeFinalizer( app );
         }
 
-        if ( xpDeleted.test( app ) )
+        if ( xp7DeploymentInfo.xpDeleted( app.getMetadata().getNamespace() ) )
         {
             return removeFinalizer( app );
         }
 
-        if ( xpRunning.test( app ) )
+        if ( xp7DeploymentInfo.xpRunning( app.getMetadata().getNamespace() ) )
         {
             try
             {
-                xpClientCache.uninstall( app ).accept(
+                xpClientCache.uninstall( app.getMetadata().getNamespace() ).accept(
                     ImmutableAppUninstallRequest.builder().addKey( app.getXp7AppStatus().getXp7AppStatusFields().getAppKey() ).build() );
                 return removeFinalizer( app );
             }

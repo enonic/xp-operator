@@ -3,6 +3,7 @@ package com.enonic.cloud.operator.api.mutation;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -33,17 +34,15 @@ import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHostSpecOptions;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHostStatus;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHostStatusFields;
 import com.enonic.cloud.operator.api.BaseAdmissionApi;
-import com.enonic.cloud.operator.functions.CreateOwnerReference;
 
 import static com.enonic.cloud.common.Configuration.cfgStr;
+import static com.enonic.cloud.common.Utils.createOwnerReference;
 
 @ApplicationScoped
 @Path("/apis/operator.enonic.cloud/v1alpha1")
 public class MutationApi
     extends BaseAdmissionApi<MutationRequest>
 {
-    private static CreateOwnerReference createOwnerReference = new CreateOwnerReference();
-
     public MutationApi()
     {
         super();
@@ -79,7 +78,7 @@ public class MutationApi
         }
     }
 
-    public void xp7app( MutationRequest mt )
+    private void xp7app( MutationRequest mt )
     {
         Xp7App oldR = (Xp7App) mt.getAdmissionReview().getRequest().getOldObject();
         Xp7App newR = (Xp7App) mt.getAdmissionReview().getRequest().getObject();
@@ -122,7 +121,7 @@ public class MutationApi
         ensureOwnerReference( mt );
     }
 
-    public void xp7config( MutationRequest mutationRequest )
+    private void xp7config( MutationRequest mutationRequest )
     {
         Xp7Config newR = (Xp7Config) mutationRequest.getAdmissionReview().getRequest().getObject();
 
@@ -135,7 +134,7 @@ public class MutationApi
         ensureOwnerReference( mutationRequest );
     }
 
-    public void xp7deployment( MutationRequest mt )
+    private void xp7deployment( MutationRequest mt )
     {
         Xp7Deployment oldR = (Xp7Deployment) mt.getAdmissionReview().getRequest().getOldObject();
         Xp7Deployment newR = (Xp7Deployment) mt.getAdmissionReview().getRequest().getObject();
@@ -162,7 +161,7 @@ public class MutationApi
         }
     }
 
-    public void xp7VHost( MutationRequest mt )
+    private void xp7VHost( MutationRequest mt )
     {
         Xp7VHost oldR = (Xp7VHost) mt.getAdmissionReview().getRequest().getOldObject();
         Xp7VHost newR = (Xp7VHost) mt.getAdmissionReview().getRequest().getObject();
@@ -265,14 +264,14 @@ public class MutationApi
             return;
         }
 
-        List<Xp7Deployment> xp7Deployments = getXp7Deployment( obj );
+        Optional<Xp7Deployment> xp7Deployments = getXp7Deployment( obj );
         if ( xp7Deployments.isEmpty() )
         {
             return;
         }
 
         mutationRequest.addPatch( "add", "/metadata/ownerReferences",
-                                  Collections.singletonList( createOwnerReference.apply( xp7Deployments.get( 0 ) ) ) );
+                                  Collections.singletonList( createOwnerReference( xp7Deployments.get() ) ) );
     }
 
     private <T> boolean patchDefault( MutationRequest mt, T defaultValue, T currentValue, String path )

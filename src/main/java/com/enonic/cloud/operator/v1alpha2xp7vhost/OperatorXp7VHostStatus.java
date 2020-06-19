@@ -9,6 +9,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import io.fabric8.kubernetes.api.model.Doneable;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
@@ -18,19 +19,20 @@ import com.enonic.cloud.apis.doh.DohQueryParamsImpl;
 import com.enonic.cloud.apis.doh.service.DohAnswer;
 import com.enonic.cloud.kubernetes.Clients;
 import com.enonic.cloud.kubernetes.InformerSearcher;
+import com.enonic.cloud.kubernetes.Searchers;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHost;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHostSpecMapping;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHostStatus;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHostStatusFields;
 import com.enonic.cloud.operator.dns.functions.info.IngressAssignedIps;
 import com.enonic.cloud.operator.dns.functions.info.IngressEnabledHosts;
-import com.enonic.cloud.operator.helpers.StatusHandler;
+import com.enonic.cloud.operator.helpers.HandlerStatus;
 
 import static com.enonic.cloud.common.Configuration.cfgStr;
 
-
-public class OperatorVHostStatus
-    extends StatusHandler<Xp7VHost, Xp7VHostStatus>
+@Singleton
+public class OperatorXp7VHostStatus
+    extends HandlerStatus<Xp7VHost, Xp7VHostStatus>
 {
     private final IngressAssignedIps ingressAssignedIps = new IngressAssignedIps();
 
@@ -40,10 +42,7 @@ public class OperatorVHostStatus
     Clients clients;
 
     @Inject
-    InformerSearcher<Xp7VHost> xp7VHostInformerSearcher;
-
-    @Inject
-    InformerSearcher<Ingress> ingressInformerSearcher;
+    Searchers searchers;
 
     @SuppressWarnings("CdiInjectionPointsInspection")
     @Inject
@@ -52,7 +51,7 @@ public class OperatorVHostStatus
     @Override
     protected InformerSearcher<Xp7VHost> informerSearcher()
     {
-        return xp7VHostInformerSearcher;
+        return searchers.xp7VHost();
     }
 
     @Override
@@ -92,13 +91,12 @@ public class OperatorVHostStatus
         }
 
         // List created ingresses
-        List<Ingress> createdIngresses = ingressInformerSearcher.
-            get( resource.getMetadata().getNamespace() ).
-            filter( ingress -> ingress.getMetadata().getAnnotations() != null ).
-            filter( ingress -> resource.getMetadata().getName().equals(
-                ingress.getMetadata().getAnnotations().get( cfgStr( "operator.helm.charts.Values.annotationKeys.vHostName" ) ) ) ).
-            collect( Collectors.toList() );
+        List<Ingress> createdIngresses = searchers.ingress().query().
+            inNamespace( resource.getMetadata().getNamespace() ).
+            hasAnnotation( cfgStr( "operator.helm.charts.Values.annotationKeys.vHostName" ), resource.getMetadata().getName() ).
+            list();
 
+        // Check ingress count
         if ( expectedIngresses != createdIngresses.size() )
         {
             return currentStatus.

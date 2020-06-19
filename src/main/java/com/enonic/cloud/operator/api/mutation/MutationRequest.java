@@ -7,9 +7,9 @@ import io.fabric8.kubernetes.api.model.admission.AdmissionReview;
 
 public class MutationRequest
 {
-    private AdmissionReview admissionReview;
+    private final AdmissionReview admissionReview;
 
-    private List<Patch> patches;
+    private final List<Patch> patches;
 
     public MutationRequest( final AdmissionReview admissionReview )
     {
@@ -32,7 +32,7 @@ public class MutationRequest
         addPatch( PatchImpl.of( op, path, value ) );
     }
 
-    public void addPatch( Patch patch )
+    private void addPatch( Patch patch )
     {
         patches.add( patch );
     }

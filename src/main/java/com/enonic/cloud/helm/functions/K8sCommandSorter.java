@@ -3,6 +3,7 @@ package com.enonic.cloud.helm.functions;
 import java.util.List;
 import java.util.function.Function;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Singleton;
 
 import com.google.common.base.Preconditions;
@@ -23,6 +24,7 @@ public class K8sCommandSorter
         return o;
     }
 
+    @SuppressWarnings("DuplicatedCode")
     private int sort( final K8sCommand a, final K8sCommand b )
     {
         if ( a.action() != b.action() )
@@ -51,6 +53,7 @@ public class K8sCommandSorter
 
         if ( api > bpi )
         {
+            //noinspection PointlessArithmeticExpression
             return 1 * multiplier;
         }
         else if ( api == bpi )

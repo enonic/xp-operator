@@ -1,31 +1,27 @@
 package com.enonic.cloud.operator.v1alpha2xp7deployment;
 
-import javax.enterprise.event.Observes;
 import javax.inject.Inject;
-
-import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
-import io.quarkus.runtime.StartupEvent;
+import javax.inject.Singleton;
 
 import com.enonic.cloud.apis.xp.XpClientCache;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
 import com.enonic.cloud.operator.helpers.InformerEventHandler;
 
-public class OperatorInvalidateXpClientCache
+@Singleton
+public class OperatorXpClientCacheInvalidate
     extends InformerEventHandler<Xp7Deployment>
 {
     @Inject
-    SharedIndexInformer<Xp7Deployment> xp7DeploymentSharedIndexInformer;
-
-    @Inject
     XpClientCache xpClientCache;
 
-    void onStartup( @Observes StartupEvent _ev )
+    @Override
+    protected void init()
     {
-        listenToInformer( xp7DeploymentSharedIndexInformer );
+        // Do nothing
     }
 
     @Override
-    public void onAdd( final Xp7Deployment newResource )
+    public void onNewAdd( final Xp7Deployment newResource )
     {
         // Do nothing
     }
@@ -39,6 +35,6 @@ public class OperatorInvalidateXpClientCache
     @Override
     public void onDelete( final Xp7Deployment oldResource, final boolean b )
     {
-        xpClientCache.invalidateCache( oldResource );
+        xpClientCache.invalidateCache( oldResource.getMetadata().getNamespace() );
     }
 }

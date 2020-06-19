@@ -9,7 +9,7 @@ import com.enonic.cloud.helm.values.BaseValues;
 import com.enonic.cloud.helm.values.ValueBuilder;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHost;
 import com.enonic.cloud.operator.helm.HelmTest;
-import com.enonic.cloud.operator.v1alpha2xp7vhost.VHostHelmValueBuilderImpl;
+import com.enonic.cloud.operator.v1alpha2xp7vhost.OperatorXp7VHostHelm;
 
 @SuppressWarnings("WeakerAccess")
 public class Xp7VHostTest
@@ -20,7 +20,7 @@ public class Xp7VHostTest
     public Xp7VHostTest()
     {
         super();
-        valueBuilder = VHostHelmValueBuilderImpl.of( new BaseValues() );
+        valueBuilder = new OperatorXp7VHostHelm.Xp7VHostValueBuilder( new BaseValues() );
     }
 
     @Override

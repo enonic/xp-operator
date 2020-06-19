@@ -2,6 +2,7 @@ package com.enonic.cloud.common;
 
 import com.google.common.base.Preconditions;
 
+@SuppressWarnings("unused")
 public class Validator
 {
     public static void dns1035( String name, String value )

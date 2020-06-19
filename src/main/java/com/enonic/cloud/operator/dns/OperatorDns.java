@@ -7,17 +7,15 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
-import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
-import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.cloud.common.functions.RunnableListExecutor;
-import com.enonic.cloud.kubernetes.InformerSearcher;
+import com.enonic.cloud.kubernetes.Searchers;
 import com.enonic.cloud.operator.dns.functions.DomainFromIngress;
 import com.enonic.cloud.operator.dns.functions.DomainFromIngressImpl;
 import com.enonic.cloud.operator.dns.functions.DomainMapper;
@@ -35,23 +33,14 @@ import com.enonic.cloud.operator.helpers.InformerEventHandler;
 import static com.enonic.cloud.common.Configuration.cfgStr;
 
 
-@ApplicationScoped
+@Singleton
 public class OperatorDns
     extends InformerEventHandler<Ingress>
 {
     private final IngressEnabledHosts ingressEnabledHosts = new IngressEnabledHosts();
 
     @Inject
-    SharedIndexInformer<Ingress> ingressSharedIndexInformer;
-
-    @Inject
-    InformerSearcher<Ingress> ingressInformerSearcher;
-
-    @ConfigProperty(name = "dns.enabled")
-    Boolean enabled;
-
-    @ConfigProperty(name = "dns.allowedDomains.keys")
-    List<String> allowedDomainKeys;
+    Searchers searchers;
 
     @Inject
     DomainSyncer domainSyncer;
@@ -59,33 +48,26 @@ public class OperatorDns
     @Inject
     RunnableListExecutor runnableListExecutor;
 
+    @ConfigProperty(name = "dns.allowedDomains.keys")
+    List<String> allowedDomainKeys;
+
     private DomainFromIngress domainFromIngress;
 
     private DomainMapper domainMapper;
 
-    void onStartup( @Observes StartupEvent _ev )
+    @Override
+    public void init()
     {
-        if ( !enabled )
-        {
-            // If DNS is disabled, do not start listener
-            return;
-        }
-
-        // Collect allowed domains
-        final List<Domain> allowedDomains = allowedDomainKeys.stream().
+        List<Domain> allowedDomains = allowedDomainKeys.stream().
             map( k -> DomainImpl.of( cfgStr( "dns.domain." + k ), cfgStr( "dns.zoneId." + k ) ) ).
             collect( Collectors.toList() );
 
-        // Setup helper functions
         domainFromIngress = DomainFromIngressImpl.of( allowedDomains );
         domainMapper = DomainMapperImpl.of( domainFromIngress );
-
-        // Start listening to events
-        listenToInformer( ingressSharedIndexInformer );
     }
 
     @Override
-    public void onAdd( final Ingress newResource )
+    public void onNewAdd( final Ingress newResource )
     {
         // Ignore because ingresses are never assigned ips instantly
     }
@@ -104,9 +86,9 @@ public class OperatorDns
 
     private void handle( final Ingress ingress, boolean deleted )
     {
-        Set<Ingress> ingresses = ingressInformerSearcher.getStream().
+        Set<Ingress> ingresses = searchers.ingress().query().
             filter( RelevantIngressPredicateImpl.of( ingress, ingressEnabledHosts ) ).
-            collect( Collectors.toSet() );
+            set();
 
         domainMapper.
             andThen( createDomainSyncerParamsFunc( ingress, deleted ) ).

@@ -1,14 +1,13 @@
 package com.enonic.cloud.operator.api;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,8 +19,10 @@ import io.fabric8.kubernetes.api.model.StatusBuilder;
 import io.fabric8.kubernetes.api.model.admission.AdmissionResponseBuilder;
 import io.fabric8.kubernetes.api.model.admission.AdmissionReview;
 
-import com.enonic.cloud.kubernetes.InformerSearcher;
+import com.enonic.cloud.kubernetes.Searchers;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
+
+import static com.enonic.cloud.common.Configuration.cfgIfBool;
 
 
 public abstract class BaseAdmissionApi<R>
@@ -34,14 +35,11 @@ public abstract class BaseAdmissionApi<R>
     public ObjectMapper mapper;
 
     @Inject
-    public InformerSearcher<Xp7Deployment> xp7DeploymentInformerSearcher;
+    public Searchers searchers;
 
-    @ConfigProperty(name = "operator.api.debug")
-    Boolean debug;
-
-    protected BaseAdmissionApi()
+    public BaseAdmissionApi()
     {
-        functionMap = new HashMap<>();
+        this.functionMap = new HashMap<>();
     }
 
     protected void addFunction( Class<? extends HasMetadata> k, Consumer<R> func )
@@ -49,15 +47,21 @@ public abstract class BaseAdmissionApi<R>
         functionMap.put( k, func );
     }
 
-    public AdmissionReview handle( AdmissionReview admissionReview )
+    protected AdmissionReview handle( AdmissionReview admissionReview )
         throws JsonProcessingException
     {
         String apiName = this.getClass().getSimpleName();
-        if ( debug )
-        {
-            log.info(
-                String.format( "%s Request: %s", apiName, mapper.writerWithDefaultPrettyPrinter().writeValueAsString( admissionReview ) ) );
-        }
+        cfgIfBool( "operator.api.debug", () -> {
+            try
+            {
+                log.info( String.format( "%s Request: %s", apiName,
+                                         mapper.writerWithDefaultPrettyPrinter().writeValueAsString( admissionReview ) ) );
+            }
+            catch ( JsonProcessingException e )
+            {
+                // Ignore
+            }
+        } );
 
         HasMetadata obj = getObject( admissionReview );
 
@@ -78,11 +82,12 @@ public abstract class BaseAdmissionApi<R>
             try
             {
                 apiObject = createApiObject( admissionReview );
-                func.accept( apiObject );
+                Objects.requireNonNull( func ).accept( apiObject );
             }
             catch ( Throwable e )
             {
                 error = e.getMessage();
+                log.error( error, e );
             }
         }
 
@@ -101,11 +106,17 @@ public abstract class BaseAdmissionApi<R>
         }
 
         admissionReview.setResponse( builder.build() );
-        if ( debug )
-        {
-            log.info( String.format( "%s Response: %s", apiName,
-                                     mapper.writerWithDefaultPrettyPrinter().writeValueAsString( admissionReview ) ) );
-        }
+        cfgIfBool( "operator.api.debug", () -> {
+            try
+            {
+                log.info( String.format( "%s Response: %s", apiName,
+                                         mapper.writerWithDefaultPrettyPrinter().writeValueAsString( admissionReview ) ) );
+            }
+            catch ( JsonProcessingException e )
+            {
+                // Ignore
+            }
+        } );
         return admissionReview;
     }
 
@@ -120,7 +131,7 @@ public abstract class BaseAdmissionApi<R>
         // Do nothing
     }
 
-    protected HasMetadata getObject( final AdmissionReview admissionReview )
+    private HasMetadata getObject( final AdmissionReview admissionReview )
     {
         if ( admissionReview.getRequest().getObject() != null )
         {
@@ -131,8 +142,10 @@ public abstract class BaseAdmissionApi<R>
 
     protected abstract R createApiObject( final AdmissionReview admissionReview );
 
-    protected List<Xp7Deployment> getXp7Deployment( HasMetadata hasMetadata )
+    protected Optional<Xp7Deployment> getXp7Deployment( HasMetadata hasMetadata )
     {
-        return xp7DeploymentInformerSearcher.get( hasMetadata.getMetadata().getNamespace() ).collect( Collectors.toList() );
+        return searchers.xp7Deployment().query().
+            inNamespace( hasMetadata.getMetadata().getNamespace() ).
+            get();
     }
 }

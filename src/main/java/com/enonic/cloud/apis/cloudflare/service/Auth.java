@@ -1,7 +1,5 @@
 package com.enonic.cloud.apis.cloudflare.service;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import javax.enterprise.event.Observes;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;

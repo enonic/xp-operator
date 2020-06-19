@@ -3,57 +3,44 @@ package com.enonic.cloud.operator.v1alpha1xp7app;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.fabric8.kubernetes.api.model.Doneable;
-import io.fabric8.kubernetes.api.model.HasMetadata;
-import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.cloud.apis.xp.XpClientCache;
 import com.enonic.cloud.apis.xp.service.AppInfo;
 import com.enonic.cloud.kubernetes.Clients;
 import com.enonic.cloud.kubernetes.InformerSearcher;
+import com.enonic.cloud.kubernetes.Searchers;
 import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7App;
 import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7AppStatus;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
-import com.enonic.cloud.operator.functions.XpRunningImpl;
-import com.enonic.cloud.operator.helpers.StatusHandler;
+import com.enonic.cloud.operator.helpers.HandlerStatus;
+import com.enonic.cloud.operator.helpers.Xp7DeploymentInfo;
 
-@ApplicationScoped
-public class OperatorAppStatus
-    extends StatusHandler<Xp7App, Xp7AppStatus>
+@Singleton
+public class OperatorXp7AppStatus
+    extends HandlerStatus<Xp7App, Xp7AppStatus>
 {
-    private static final Logger log = LoggerFactory.getLogger( OperatorAppStatus.class );
+    private static final Logger log = LoggerFactory.getLogger( OperatorXp7AppStatus.class );
 
     @Inject
     Clients clients;
 
     @Inject
-    InformerSearcher<Xp7App> xp7AppInformerSearcher;
-
-    @Inject
-    InformerSearcher<Xp7Deployment> xp7DeploymentInformerSearcher;
+    Searchers searchers;
 
     @Inject
     XpClientCache xpClientCache;
 
-    Map<String, List<AppInfo>> appInfoMap;
+    @Inject
+    Xp7DeploymentInfo xp7DeploymentInfo;
 
-    Predicate<HasMetadata> xpRunning;
-
-    @Override
-    public void onStartup( @Observes final StartupEvent _ev )
-    {
-        xpRunning = XpRunningImpl.of( xp7DeploymentInformerSearcher );
-        super.onStartup( _ev );
-    }
+    private Map<String, List<AppInfo>> appInfoMap;
 
     @Override
     protected void preRun()
@@ -64,7 +51,7 @@ public class OperatorAppStatus
     @Override
     protected InformerSearcher<Xp7App> informerSearcher()
     {
-        return xp7AppInformerSearcher;
+        return searchers.xp7App();
     }
 
     @Override
@@ -98,29 +85,29 @@ public class OperatorAppStatus
         return checkXp( resource, currentStatus );
     }
 
-    private Xp7AppStatus checkXp( final Xp7App resource, final Xp7AppStatus currentStatus )
+    private Xp7AppStatus checkXp( final Xp7App app, final Xp7AppStatus currentStatus )
     {
-        if ( !xpRunning.test( resource ) )
+        if ( !xp7DeploymentInfo.xpRunning( app.getMetadata().getNamespace() ) )
         {
             return currentStatus.
                 withState( Xp7AppStatus.State.PENDING ).
                 withMessage( "Xp7Deployment not in RUNNING state" );
         }
 
-        String mapKey = resource.getMetadata().getNamespace();
+        String mapKey = app.getMetadata().getNamespace();
         if ( !appInfoMap.containsKey( mapKey ) )
         {
             List<AppInfo> appInfo = null;
             try
             {
-                appInfo = xpClientCache.list( resource ).
+                appInfo = xpClientCache.list( app.getMetadata().getNamespace() ).
                     get().
                     applications();
             }
             catch ( Exception e )
             {
-                log.warn( String.format( "Failed calling XP for app '%s' in NS '%s': %s", resource.getMetadata().getName(),
-                                         resource.getMetadata().getNamespace(), e.getMessage() ) );
+                log.warn( String.format( "Failed calling XP for app '%s' in NS '%s': %s", app.getMetadata().getName(),
+                                         app.getMetadata().getNamespace(), e.getMessage() ) );
             }
             appInfoMap.put( mapKey, appInfo );
         }

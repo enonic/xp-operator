@@ -1,48 +1,36 @@
 package com.enonic.cloud.operator.helpers;
 
-import java.util.Comparator;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Predicate;
-
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.fabric8.kubernetes.api.model.Doneable;
 import io.fabric8.kubernetes.api.model.HasMetadata;
-import io.quarkus.runtime.StartupEvent;
 
-import com.enonic.cloud.common.staller.TaskRunner;
 import com.enonic.cloud.kubernetes.InformerSearcher;
 import com.enonic.cloud.kubernetes.commands.K8sLogHelper;
-import com.enonic.cloud.operator.functions.HasMetadataSorterImpl;
-import com.enonic.cloud.operator.functions.StatusUpdateFilterImpl;
+
+import static com.enonic.cloud.common.Utils.hasMetadataComparator;
 
 
-public abstract class StatusHandler<R extends HasMetadata, S>
+public abstract class HandlerStatus<R extends HasMetadata, S>
     implements Runnable
 {
-    @Inject
-    TaskRunner taskRunner;
+    private static final Logger log = LoggerFactory.getLogger( HandlerStatus.class );
 
-    Predicate<HasMetadata> statusFilter;
-
-    Comparator<HasMetadata> sorter;
-
-    public void onStartup( @Observes StartupEvent _ev )
-    {
-        statusFilter = StatusUpdateFilterImpl.builder().build();
-        sorter = HasMetadataSorterImpl.builder().build();
-        taskRunner.scheduleAtFixedRate( this, initialDelayMs(), periodMs(), TimeUnit.MILLISECONDS );
-    }
+    @ConfigProperty(name = "operator.tasks.status.delay")
+    long delay;
 
     @Override
     public void run()
     {
         preRun();
         informerSearcher().
-            getStream().
-            filter( statusFilter ).
-            sorted( sorter ).
+            query().
+            hasNotBeenDeleted().
+            olderThen( delay / 1000 ).
+            stream().
+            sorted( hasMetadataComparator() ).
             forEach( this::handle );
     }
 
@@ -57,18 +45,9 @@ public abstract class StatusHandler<R extends HasMetadata, S>
         if ( oldStatusHashCode != newStatus.hashCode() )
         {
             // Create status update
+            log.debug( String.format( "Updating status of %s '%s'", resource.getKind(), resource.getMetadata().getName() ) );
             K8sLogHelper.logDoneable( updateStatus( resource, newStatus ) );
         }
-    }
-
-    protected Long periodMs()
-    {
-        return 3000L;
-    }
-
-    protected Long initialDelayMs()
-    {
-        return 5000L;
     }
 
     protected void preRun()

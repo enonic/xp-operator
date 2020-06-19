@@ -17,7 +17,7 @@ spec:
         default: system
       options:
         sslRedirect: false
-    - nodeGroup: main
+    - nodeGroup: all
       source: /b
       target: /admin
       idProviders:

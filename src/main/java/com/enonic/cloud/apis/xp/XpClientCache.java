@@ -20,7 +20,6 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.io.BaseEncoding;
 
-import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
@@ -29,6 +28,7 @@ import com.enonic.cloud.apis.xp.service.AppInstallRequest;
 import com.enonic.cloud.apis.xp.service.AppInstallResponse;
 import com.enonic.cloud.apis.xp.service.AppListResponse;
 import com.enonic.cloud.apis.xp.service.AppUninstallRequest;
+import com.enonic.cloud.kubernetes.Clients;
 
 @Singleton
 public class XpClientCache
@@ -43,29 +43,24 @@ public class XpClientCache
     private final LoadingCache<String, XpClientCreator> clientCreatorCache;
 
     @Inject
-    public XpClientCache( final KubernetesClient client )
+    public XpClientCache( final Clients clients )
     {
-        this.client = client;
+        this.client = clients.k8s();
         clientCreatorCache = CacheBuilder.newBuilder().
             maximumSize( 1000 ).
             expireAfterWrite( 10, TimeUnit.MINUTES ).
             build( this );
     }
 
-    public void invalidateCache( HasMetadata r )
+    public void invalidateCache( String namespace )
     {
-        clientCreatorCache.invalidate( r.getMetadata().getNamespace() );
+        clientCreatorCache.invalidate( namespace );
     }
 
     @SuppressWarnings("WeakerAccess")
     public Supplier<AppListResponse> list( final String namespace )
     {
         return () -> getAdminApi( namespace ).appList();
-    }
-
-    public Supplier<AppListResponse> list( final HasMetadata resource )
-    {
-        return list( resource.getMetadata().getNamespace() );
     }
 
     @SuppressWarnings("WeakerAccess")
@@ -81,11 +76,6 @@ public class XpClientCache
         };
     }
 
-    public Function<AppInstallRequest, AppInstallResponse> install( final HasMetadata resource )
-    {
-        return install( resource.getMetadata().getNamespace() );
-    }
-
     @SuppressWarnings("WeakerAccess")
     public Consumer<AppUninstallRequest> uninstall( final String namespace )
     {
@@ -93,11 +83,6 @@ public class XpClientCache
             log( namespace, "UNINSTALL apps", req.key() );
             getAdminApi( namespace ).appUninstall( req );
         };
-    }
-
-    public Consumer<AppUninstallRequest> uninstall( final HasMetadata resource )
-    {
-        return uninstall( resource.getMetadata().getNamespace() );
     }
 
     private void log( String namespace, String action, List<String> keys )

@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import io.fabric8.kubernetes.api.model.ContainerStatus;
 import io.fabric8.kubernetes.api.model.Doneable;
@@ -15,30 +16,28 @@ import io.fabric8.kubernetes.api.model.Pod;
 
 import com.enonic.cloud.kubernetes.Clients;
 import com.enonic.cloud.kubernetes.InformerSearcher;
+import com.enonic.cloud.kubernetes.Searchers;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentSpecNodeGroup;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentStatus;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentStatusFields;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentStatusFieldsPod;
-import com.enonic.cloud.operator.helpers.StatusHandler;
+import com.enonic.cloud.operator.helpers.HandlerStatus;
 
-
-public class OperatorDeploymentStatus
-    extends StatusHandler<Xp7Deployment, Xp7DeploymentStatus>
+@Singleton
+public class OperatorXp7DeploymentStatus
+    extends HandlerStatus<Xp7Deployment, Xp7DeploymentStatus>
 {
     @Inject
     Clients clients;
 
     @Inject
-    InformerSearcher<Xp7Deployment> xp7DeploymentInformerSearcher;
-
-    @Inject
-    InformerSearcher<Pod> podInformerSearcher;
+    Searchers searchers;
 
     @Override
     protected InformerSearcher<Xp7Deployment> informerSearcher()
     {
-        return xp7DeploymentInformerSearcher;
+        return searchers.xp7Deployment();
     }
 
     @Override
@@ -65,7 +64,7 @@ public class OperatorDeploymentStatus
                 withState( Xp7DeploymentStatus.State.PENDING ).
                 withMessage( "Created" );
 
-        List<Pod> pods = podInformerSearcher.getStream().
+        List<Pod> pods = searchers.pod().query().stream().
             filter( pod -> filterPods( resource, pod ) ).
             collect( Collectors.toList() );
 

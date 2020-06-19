@@ -1,21 +1,21 @@
 package com.enonic.cloud.operator.api.admission;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 
 import io.fabric8.kubernetes.api.model.admission.AdmissionReview;
 
-import com.enonic.cloud.kubernetes.InformerSearcher;
+import com.enonic.cloud.kubernetes.Searchers;
 import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7App;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7config.Xp7Config;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
@@ -33,9 +33,6 @@ import static com.enonic.cloud.common.Validator.dns1035;
 public class AdmissionApi
     extends BaseAdmissionApi<AdmissionReview>
 {
-    @Inject
-    InformerSearcher<Xp7Config> xp7ConfigInformerSearcher;
-
     public AdmissionApi()
     {
         super();
@@ -61,7 +58,7 @@ public class AdmissionApi
         return admissionReview;
     }
 
-    public void xp7app( AdmissionReview admissionReview )
+    private void xp7app( AdmissionReview admissionReview )
     {
         Xp7App newApp = (Xp7App) admissionReview.getRequest().getObject();
 
@@ -74,7 +71,7 @@ public class AdmissionApi
         }
     }
 
-    public void xp7config( AdmissionReview admissionReview )
+    private void xp7config( AdmissionReview admissionReview )
     {
         Xp7Config newConfig = (Xp7Config) admissionReview.getRequest().getObject();
 
@@ -86,15 +83,17 @@ public class AdmissionApi
             Preconditions.checkState( newConfig.getXp7ConfigSpec().getFile() != null, "'spec.file' cannot be null" );
 
             // Check for file clash
-            List<Xp7Config> presentConfigs = xp7ConfigInformerSearcher.get( newConfig.getMetadata().getNamespace() ).
+            List<Xp7Config> presentConfigs = searchers.xp7Config().query().
+                inNamespace( newConfig.getMetadata().getNamespace() ).
                 filter( c -> !c.getMetadata().getName().equals( newConfig.getMetadata().getName() ) ).
                 filter( c -> c.getXp7ConfigSpec().getFile().equals( newConfig.getXp7ConfigSpec().getFile() ) ).
                 filter( c -> c.getXp7ConfigSpec().getNodeGroup().equals( newConfig.getXp7ConfigSpec().getFile() ) ||
                     c.getXp7ConfigSpec().getNodeGroup().equals( cfgStr( "operator.helm.charts.Values.allNodesKey" ) ) ).
-                collect( Collectors.toList() );
-            if ( !presentConfigs.isEmpty() )
-            {
-                Preconditions.checkState( false, "XpConfig '%s' already defines file '%s'", presentConfigs.get( 0 ).getMetadata().getName(),
+                list();
+
+            if(!presentConfigs.isEmpty()) {
+                Preconditions.checkState( !presentConfigs.isEmpty(), "XpConfig '%s' already defines file '%s'",
+                                          presentConfigs.get( 0 ).getMetadata().getName(),
                                           presentConfigs.get( 0 ).getXp7ConfigSpec().getFile() );
             }
 
@@ -103,7 +102,7 @@ public class AdmissionApi
         }
     }
 
-    public void xp7deployment( AdmissionReview admissionReview )
+    private void xp7deployment( AdmissionReview admissionReview )
     {
         Xp7Deployment newDeployment = (Xp7Deployment) admissionReview.getRequest().getObject();
 
@@ -141,13 +140,13 @@ public class AdmissionApi
         if ( admissionReview.getRequest().getOperation().equals( "CREATE" ) )
         {
 
-            List<Xp7Deployment> xp7Deployments = getXp7Deployment( admissionReview.getRequest().getObject() );
-            Preconditions.checkState( xp7Deployments.size() == 0, "There is already an Xp7Deployment in NS '%s'",
+            Optional<Xp7Deployment> xp7Deployments = getXp7Deployment( admissionReview.getRequest().getObject() );
+            Preconditions.checkState( xp7Deployments.isEmpty(), "There is already an Xp7Deployment in NS '%s'",
                                       admissionReview.getRequest().getObject().getMetadata().getNamespace() );
         }
     }
 
-    public void xp7VHost( AdmissionReview admissionReview )
+    private void xp7VHost( AdmissionReview admissionReview )
     {
         Xp7VHost newVHost = (Xp7VHost) admissionReview.getRequest().getObject();
         if ( newVHost != null )
@@ -196,8 +195,8 @@ public class AdmissionApi
     {
         if ( admissionReview.getRequest().getOperation().equals( "CREATE" ) )
         {
-            List<Xp7Deployment> xp7Deployments = getXp7Deployment( admissionReview.getRequest().getObject() );
-            Preconditions.checkState( xp7Deployments.size() == 1, "No Xp7Deployment found in NS '%s'",
+            Optional<Xp7Deployment> xp7Deployments = getXp7Deployment( admissionReview.getRequest().getObject() );
+            Preconditions.checkState( xp7Deployments.isPresent(), "No Xp7Deployment found in NS '%s'",
                                       admissionReview.getRequest().getObject().getMetadata().getNamespace() );
         }
     }

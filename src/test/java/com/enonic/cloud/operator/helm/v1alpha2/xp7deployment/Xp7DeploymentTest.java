@@ -9,7 +9,7 @@ import com.enonic.cloud.helm.values.BaseValues;
 import com.enonic.cloud.helm.values.ValueBuilder;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
 import com.enonic.cloud.operator.helm.HelmTest;
-import com.enonic.cloud.operator.v1alpha2xp7deployment.DeploymentHelmValueBuilderImpl;
+import com.enonic.cloud.operator.v1alpha2xp7deployment.OperatorXp7DeploymentHelm;
 
 @SuppressWarnings("WeakerAccess")
 public class Xp7DeploymentTest
@@ -20,7 +20,7 @@ public class Xp7DeploymentTest
     public Xp7DeploymentTest()
     {
         super();
-        valueBuilder = DeploymentHelmValueBuilderImpl.of( new BaseValues(), () -> "password", () -> null );
+        valueBuilder = new OperatorXp7DeploymentHelm.Xp7DeploymentValueBuilder( new BaseValues(), () -> "password", () -> null );
     }
 
     @Override
