@@ -4,6 +4,8 @@ import javax.inject.Singleton;
 import javax.ws.rs.Produces;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapList;
@@ -28,6 +30,8 @@ import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHost;
 
 public class InformersProducer
 {
+    private static final Logger log = LoggerFactory.getLogger( InformersProducer.class );
+
     @ConfigProperty(name = "operator.informers.reSync")
     long informerReSync;
 
@@ -36,18 +40,29 @@ public class InformersProducer
     Informers createInformers( final Clients clients )
     {
         SharedInformerFactory sf = clients.k8s().informers();
-        // Todo Fix!
-        return InformersImpl.of( clients, sf, configInformer( sf ), ingressInformer( sf ), namespaceInformer( sf ), podInformer( sf ),
-                                 xp7AppInformer( clients, sf ), xp7ConfigInformer( clients, sf ), xp7DeploymentInformer( clients, sf ),
-                                 xp7VHostInformer( clients, sf ) );
+
+        sf.addSharedInformerEventListener( e -> log.error( "Informer exception: " + e.getMessage(), e ) );
+
+        return InformersImpl.builder().
+            clients( clients ).
+            informerFactory( sf ).
+            configMapInformer( configInformer( sf ) ).
+            ingressInformer( ingressInformer( sf ) ).
+            namespaceInformer( namespaceInformer( sf ) ).
+            podInformer( podInformer( sf ) ).
+            xp7AppInformer( xp7AppInformer( clients, sf ) ).
+            xp7ConfigInformer( xp7ConfigInformer( clients, sf ) ).
+            xp7DeploymentInformer( xp7DeploymentInformer( clients, sf ) ).
+            xp7VHostInformer( xp7VHostInformer( clients, sf ) ).
+            build();
     }
 
-    SharedIndexInformer<ConfigMap> configInformer( final SharedInformerFactory sf )
+    private SharedIndexInformer<ConfigMap> configInformer( final SharedInformerFactory sf )
     {
         return sf.sharedIndexInformerFor( ConfigMap.class, ConfigMapList.class, informerReSync );
     }
 
-    SharedIndexInformer<Ingress> ingressInformer( final SharedInformerFactory sf )
+    private SharedIndexInformer<Ingress> ingressInformer( final SharedInformerFactory sf )
     {
         return sf.sharedIndexInformerForCustomResource( new CustomResourceDefinitionContext.Builder().
             withGroup( "extensions" ).
@@ -58,34 +73,34 @@ public class InformersProducer
             build(), Ingress.class, IngressList.class, informerReSync );
     }
 
-    SharedIndexInformer<Namespace> namespaceInformer( final SharedInformerFactory sf )
+    private SharedIndexInformer<Namespace> namespaceInformer( final SharedInformerFactory sf )
     {
         return sf.sharedIndexInformerFor( Namespace.class, NamespaceList.class, informerReSync );
     }
 
-    SharedIndexInformer<Pod> podInformer( final SharedInformerFactory sf )
+    private SharedIndexInformer<Pod> podInformer( final SharedInformerFactory sf )
     {
         return sf.sharedIndexInformerFor( Pod.class, PodList.class, informerReSync );
     }
 
-    SharedIndexInformer<Xp7App> xp7AppInformer( final Clients clients, final SharedInformerFactory sf )
+    private SharedIndexInformer<Xp7App> xp7AppInformer( final Clients clients, final SharedInformerFactory sf )
     {
         return sf.sharedIndexInformerForCustomResource( clients.xp7Apps().createContext(), Xp7App.class, Xp7AppList.class, informerReSync );
     }
 
-    SharedIndexInformer<Xp7Config> xp7ConfigInformer( final Clients clients, final SharedInformerFactory sf )
+    private SharedIndexInformer<Xp7Config> xp7ConfigInformer( final Clients clients, final SharedInformerFactory sf )
     {
         return sf.sharedIndexInformerForCustomResource( clients.xp7Configs().createContext(), Xp7Config.class, Xp7ConfigList.class,
                                                         informerReSync );
     }
 
-    SharedIndexInformer<Xp7Deployment> xp7DeploymentInformer( final Clients clients, final SharedInformerFactory sf )
+    private SharedIndexInformer<Xp7Deployment> xp7DeploymentInformer( final Clients clients, final SharedInformerFactory sf )
     {
         return sf.sharedIndexInformerForCustomResource( clients.xp7Deployments().createContext(), Xp7Deployment.class,
                                                         Xp7DeploymentList.class, informerReSync );
     }
 
-    SharedIndexInformer<Xp7VHost> xp7VHostInformer( final Clients clients, final SharedInformerFactory sf )
+    private SharedIndexInformer<Xp7VHost> xp7VHostInformer( final Clients clients, final SharedInformerFactory sf )
     {
         return sf.sharedIndexInformerForCustomResource( clients.xp7VHosts().createContext(), Xp7VHost.class, Xp7VHostList.class,
                                                         informerReSync );
