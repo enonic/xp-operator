@@ -6,20 +6,36 @@ import java.util.function.Function;
 import javax.enterprise.inject.Produces;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import javax.ws.rs.WebApplicationException;
 
 import org.eclipse.microprofile.rest.client.inject.RestClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.enonic.cloud.apis.cloudflare.service.DnsRecordService;
 import com.enonic.cloud.apis.cloudflare.service.model.DnsRecord;
 
+import static com.enonic.cloud.apis.ApiUtils.formatWebApplicationException;
+
 @SuppressWarnings("CdiInjectionPointsInspection")
 public class CloudflareFunctionProducer
 {
+    private static final Logger log = LoggerFactory.getLogger( CloudflareFunctionProducer.class );
+
     @Produces
     @Singleton
     public Function<CloudflareListParams, List<DnsRecord>> producerListFunction( @RestClient DnsRecordService service )
     {
-        return ( params ) -> service.list( params.zoneId(), params.name(), params.type() ).result();
+        return ( params ) -> {
+            try
+            {
+                return service.list( params.zoneId(), params.name(), params.type() ).result();
+            }
+            catch ( WebApplicationException e )
+            {
+                throw formatWebApplicationException( e, "CF: LIST failed" );
+            }
+        };
     }
 
     @Produces

@@ -1,5 +1,7 @@
 package com.enonic.cloud.apis.cloudflare.service;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import javax.enterprise.event.Observes;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -13,6 +15,8 @@ import com.enonic.cloud.common.Configuration;
 
 public class Auth
 {
+    private static final AtomicBoolean tokenSet = new AtomicBoolean( false );
+
     private static String apiToken;
 
     @ConfigProperty(name = "dns.cloudflare.apiToken", defaultValue = "not_set")
@@ -21,6 +25,17 @@ public class Auth
     @SuppressWarnings("unused") // It is used
     public static String getApiToken()
     {
+        if ( !tokenSet.get() )
+        {
+            try
+            {
+                Thread.sleep( 1000 );
+            }
+            catch ( InterruptedException e )
+            {
+                // Not a big deal
+            }
+        }
         return "Bearer " + apiToken;
     }
 
@@ -35,6 +50,7 @@ public class Auth
             Preconditions.checkState( !token.equals( "not_set" ),
                                       "You have to set the DNS token with properties 'dns.cloudflare.apiToken'" );
             Auth.setApiToken( token );
+            tokenSet.set( true );
         } );
     }
 }
