@@ -89,7 +89,7 @@ extensions:
 
 initApps:
   - https://repo.enonic.com/public/com/enonic/app/alive/2.0.0/alive-2.0.0.jar
-  - https://repo.enonic.com/public/com/enonic/app/snapshotter/2.1.1/snapshotter-2.1.1.jar
+  - https://repo.enonic.com/public/com/enonic/app/snapshotter/3.0.0/snapshotter-3.0.0.jar
 
 # Filled in by operator
 # deployment:
