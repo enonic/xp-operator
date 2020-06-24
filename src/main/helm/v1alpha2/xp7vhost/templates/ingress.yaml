@@ -25,7 +25,7 @@ metadata:
     ingress.kubernetes.io/rewrite-target: /
     {{- if $.Values.vhost.spec.options.dnsRecord }}
     enonic.cloud/dns.hostname: {{ $.Values.vhost.spec.host }}
-    enonic.cloud/dns.heritage: {{ list "heritage=ec-operator,id=" $.Values.vhost.uid | join "" }}
+    enonic.cloud/dns.heritage: {{ list "heritage=ec-operator,id=" $.Values.clusterId | join "" }}
     {{- end }}
     {{- if $.Values.vhost.spec.options.cdn }}
     enonic.cloud/dns.cdn: "true"
@@ -87,7 +87,7 @@ spec:
   tls:
     - hosts:
         - {{ $.Values.vhost.spec.host }}
-      secretName: {{ if $.Values.vhost.issuer }}{{ $.Values.vhost.uid }}{{ else }}{{ $.Values.vhost.spec.certificate.identifier }}{{ end }}
+      secretName: {{ if $.Values.vhost.issuer }}{{ $.Values.vhost.name }}-cert{{ else }}{{ $.Values.vhost.spec.certificate.identifier }}{{ end }}
   {{- end }}
 {{- end }}
 {{- end }}

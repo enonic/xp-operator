@@ -7,6 +7,7 @@ import java.util.Map;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import com.google.common.base.Preconditions;
@@ -21,9 +22,10 @@ public class BaseValues
     private static final String keyPrefix = "operator.helm.charts.Values.";
 
     @Inject
-    public BaseValues()
+    public BaseValues( @Named("clusterId") String clusterId )
     {
         super();
+        put( "clusterId", clusterId );
         globalConfig().getPropertyNames().forEach( name -> {
             if ( name.startsWith( keyPrefix ) )
             {

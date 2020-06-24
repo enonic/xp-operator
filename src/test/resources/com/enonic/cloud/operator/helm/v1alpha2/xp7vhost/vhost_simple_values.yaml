@@ -54,6 +54,7 @@ defaultLabels: {}
 labelKeys:
   managed: "enonic.managed"
   nodeGroup: "enonic.nodeGroup"
+clusterId: "44ddc40b-266c-4c99-b094-e758328fc6ba"
 imageTemplate: "enonic/xp:%s-ubuntu"
 annotationKeys:
   applyPriority: "enonic.applyPriority"

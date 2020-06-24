@@ -20,7 +20,7 @@ public class Xp7VHostTest
     public Xp7VHostTest()
     {
         super();
-        valueBuilder = new OperatorXp7VHostHelm.Xp7VHostValueBuilder( new BaseValues() );
+        valueBuilder = new OperatorXp7VHostHelm.Xp7VHostValueBuilder( new BaseValues( "44ddc40b-266c-4c99-b094-e758328fc6ba" ) );
     }
 
     @Override

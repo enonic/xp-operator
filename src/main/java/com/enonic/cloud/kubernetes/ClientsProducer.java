@@ -1,6 +1,5 @@
 package com.enonic.cloud.kubernetes;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Singleton;
 import javax.ws.rs.Produces;
 

@@ -135,7 +135,7 @@ data:
     \ -r -s all -i ${XP_NODE_IP} -t 10\nbash /enonic-xp/home/extra-config/endpoints.sh\
     \ -r -s ${XP_NODE_GROUP} -i ${XP_NODE_IP} -t 10 -a 20"
   initApps.txt: "https://repo.enonic.com/public/com/enonic/app/alive/2.0.0/alive-2.0.0.jar\n\
-    https://repo.enonic.com/public/com/enonic/app/snapshotter/2.1.1/snapshotter-2.1.1.jar"
+    https://repo.enonic.com/public/com/enonic/app/snapshotter/3.0.0/snapshotter-3.0.0.jar"
   java.security.properties: "networkaddress.cache.ttl=30"
 ---
 apiVersion: "v1"
