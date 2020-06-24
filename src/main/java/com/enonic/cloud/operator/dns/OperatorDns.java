@@ -1,17 +1,19 @@
 package com.enonic.cloud.operator.dns;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
+import io.fabric8.kubernetes.api.model.LoadBalancerIngress;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 
 import com.enonic.cloud.common.functions.RunnableListExecutor;
@@ -75,13 +77,19 @@ public class OperatorDns
     @Override
     public void onUpdate( final Ingress oldResource, final Ingress newResource )
     {
-        handle( newResource, false );
+        if ( !Objects.equals( getIPs( oldResource ), getIPs( newResource ) ) )
+        {
+            handle( newResource, false );
+        }
     }
 
     @Override
     public void onDelete( final Ingress oldResource, final boolean b )
     {
-        handle( oldResource, true );
+        if ( !getIPs( oldResource ).isEmpty() )
+        {
+            handle( oldResource, true );
+        }
     }
 
     private void handle( final Ingress ingress, boolean deleted )
@@ -108,5 +116,30 @@ public class OperatorDns
             }
             return builder.build();
         };
+    }
+
+    public List<String> getIPs( Ingress ingress )
+    {
+        List<String> res = new LinkedList<>();
+        if ( ingress.getStatus() == null )
+        {
+            return res;
+        }
+        if ( ingress.getStatus().getLoadBalancer() == null )
+        {
+            return res;
+        }
+        if ( ingress.getStatus().getLoadBalancer().getIngress() == null )
+        {
+            return res;
+        }
+        for ( LoadBalancerIngress i : ingress.getStatus().getLoadBalancer().getIngress() )
+        {
+            if ( i.getIp() != null )
+            {
+                res.add( i.getIp() );
+            }
+        }
+        return res;
     }
 }
