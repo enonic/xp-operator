@@ -17,6 +17,11 @@ public final class Configuration
         return _cfg;
     }
 
+    public static boolean cfgHasKey( String key )
+    {
+        return globalConfig().getOptionalValue( key, String.class ).isPresent();
+    }
+
     public static String cfgStr( String key )
     {
         return globalConfig().getOptionalValue( key, String.class ).get();

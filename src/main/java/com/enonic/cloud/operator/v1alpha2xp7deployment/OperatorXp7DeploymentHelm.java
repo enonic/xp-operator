@@ -26,6 +26,7 @@ import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentSpe
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentSpecNodeGroupEnvVar;
 import com.enonic.cloud.operator.helpers.HandlerHelm;
 
+import static com.enonic.cloud.common.Configuration.cfgHasKey;
 import static com.enonic.cloud.common.Configuration.cfgStr;
 import static com.enonic.cloud.common.Utils.createOwnerReference;
 import static com.enonic.cloud.kubernetes.client.Utils.cloneResource;
@@ -62,7 +63,14 @@ public class OperatorXp7DeploymentHelm
 
     private String createSuPass()
     {
-        return UUID.randomUUID().toString().replace( "-", "" ).toLowerCase();
+        if ( cfgHasKey( "operator.deployment.fixedSuPass" ) )
+        {
+            return cfgStr( "operator.deployment.fixedSuPass" );
+        }
+        else
+        {
+            return UUID.randomUUID().toString().replace( "-", "" ).toLowerCase();
+        }
     }
 
     private ServiceAccount cloudApiSa()
