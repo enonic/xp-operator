@@ -7,6 +7,11 @@ public class InformerSearcher<R extends HasMetadata>
 {
     private final SharedIndexInformer<R> informer;
 
+    protected InformerSearcher()
+    {
+        informer = null;
+    }
+
     public InformerSearcher( final SharedIndexInformer<R> informer )
     {
         this.informer = informer;
@@ -14,6 +19,6 @@ public class InformerSearcher<R extends HasMetadata>
 
     public ResourceQuery<R> query()
     {
-        return new ResourceQuery<>( informer );
+        return new ResourceQuery<>( informer.getIndexer().list().stream() );
     }
 }

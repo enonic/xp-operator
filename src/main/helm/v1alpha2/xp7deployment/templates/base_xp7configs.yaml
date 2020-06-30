@@ -124,14 +124,14 @@ spec:
     cluster.enabled=false
     {{- else }}
     cluster.enabled=true
-    node.name=${env.XP_NODE_NAME}
-    network.publish.host=${env.XP_NODE_IP}
+    {{- end }}
     {{- if $.Values.extensions.linkerd.enabled }}
     network.host=127.0.0.1
     {{- else }}
     network.host=${env.XP_NODE_IP}
     {{- end }}
-    {{- end }}
+    network.publish.host=${env.XP_NODE_IP}
+    node.name=${env.XP_NODE_NAME}
 ---
 apiVersion: enonic.cloud/v1alpha2
 kind: Xp7Config

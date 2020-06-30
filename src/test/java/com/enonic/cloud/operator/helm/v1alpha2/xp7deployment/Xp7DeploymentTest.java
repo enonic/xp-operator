@@ -20,7 +20,8 @@ public class Xp7DeploymentTest
     public Xp7DeploymentTest()
     {
         super();
-        valueBuilder = new OperatorXp7DeploymentHelm.Xp7DeploymentValueBuilder( new BaseValues("44ddc40b-266c-4c99-b094-e758328fc6ba"), () -> "password", () -> null );
+        valueBuilder = new OperatorXp7DeploymentHelm.Xp7DeploymentValueBuilder( new BaseValues( "44ddc40b-266c-4c99-b094-e758328fc6ba" ),
+                                                                                () -> "password", () -> null );
     }
 
     @Override

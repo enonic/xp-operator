@@ -12,6 +12,8 @@
       - nodeGroup: main
         source: /
         target: /admin
+        options:
+          ingress: true
 - apiVersion: enonic.cloud/v1alpha2
   kind: Xp7VHost
   metadata:

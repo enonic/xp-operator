@@ -18,9 +18,11 @@ public class ClusterIdProducer
     @Singleton
     @Produces
     @Named("clusterId")
-    String produceClusterId(Clients clients) {
+    String produceClusterId( Clients clients )
+    {
         Namespace ns = clients.k8s().namespaces().withName( "kube-system" ).get();
-        if(ns == null) {
+        if ( ns == null )
+        {
             log.warn( "Could not find namespace 'kube-system'. Using random UUID for clusterId" );
             return UUID.randomUUID().toString();
         }

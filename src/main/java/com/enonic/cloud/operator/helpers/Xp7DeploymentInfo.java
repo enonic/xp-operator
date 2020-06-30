@@ -1,6 +1,5 @@
 package com.enonic.cloud.operator.helpers;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 

@@ -1,4 +1,4 @@
-testResult: "Some fields in 'spec' are missing: [data]"
+testResult: "'spec.data' cannot be null"
 testReview:
   request:
     operation: CREATE

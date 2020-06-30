@@ -1,8 +1,8 @@
 apiVersion: enonic.cloud/v1alpha2
 kind: Xp7Deployment
 metadata:
-  name: mycloud-mysolution-myenv-myservice2
-  namespace: mycloud-mysolution-myenv-myservice2
+  name: mycloud-mysolution-myenv-myservice
+  namespace: mycloud-mysolution-myenv-myservice
   labels:
     cloud: mycloud
     solution: mysolution
@@ -19,10 +19,13 @@ spec:
       size: 100Mi
 
   nodeGroups:
-    - name: main
+    - name: master
       data: true
       master: true
       replicas: 1
+      env:
+        - name: ASD
+          value: asdasdadsa2
       resources:
         cpu: "1"
         memory: 512Mi
@@ -35,29 +38,35 @@ spec:
             size: 100Mi
           - name: work
             size: 100Mi
-#    front:
+#    - name: front
 #      data: false
 #      master: false
-#      replicas: 2
-#      env:
-#        test: test2
+#      replicas: 1
 #      resources:
-#        cpu: "1"
+#        cpu: "0.2"
 #        memory: 512Mi
 #        disks:
-#          export: 100Mi
-#          index: 100Mi
-#          work: 100Mi
-#    ost:
+#          - name: deploy
+#            size: 100Mi
+#          - name: export
+#            size: 100Mi
+#          - name: index
+#            size: 100Mi
+#          - name: work
+#            size: 100Mi
+#    - name: data
 #      data: true
-#      master: true
-#      replicas: 2
-#      env:
-#        test: test1311
+#      master: false
+#      replicas: 1
 #      resources:
-#        cpu: "1"
+#        cpu: "0.2"
 #        memory: 512Mi
 #        disks:
-#          export: 100Mi
-#          index: 100Mi
-#          work: 100Mi
+#          - name: deploy
+#            size: 100Mi
+#          - name: export
+#            size: 100Mi
+#          - name: index
+#            size: 100Mi
+#          - name: work
+#            size: 100Mi

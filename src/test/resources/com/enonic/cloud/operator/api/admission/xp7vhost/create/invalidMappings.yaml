@@ -1,4 +1,4 @@
-testResult: "Field 'spec.mappings.source' has to be unique"
+testResult: "'spec.mappings.source' has to be unique"
 testReview:
   request:
     operation: CREATE
@@ -10,6 +10,9 @@ testReview:
         namespace: mycloud-mysolution-myenv-myservice
       spec:
         host: test.purplejs.io
+        options:
+          dnsRecord: true
+          cdn: true
         mappings:
           - nodeGroup: main
             source: /

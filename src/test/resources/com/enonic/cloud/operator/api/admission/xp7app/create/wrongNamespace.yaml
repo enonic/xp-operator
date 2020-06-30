@@ -1,4 +1,4 @@
-testResult: "Xp7Deployment 'wrongnamespace' not found"
+testResult: "No Xp7Deployment found in NS 'wrongnamespace'"
 testReview:
   request:
     operation: CREATE

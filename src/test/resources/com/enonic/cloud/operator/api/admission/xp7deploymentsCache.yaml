@@ -13,10 +13,12 @@
     enabled: true
     xpVersion: 7.1.2
     nodesSharedDisks:
-      blobstore: 1Gi
-      snapshots: 1Gi
+      - name: blobstore
+        size: 1Gi
+      - name: snapshots
+        size: 1Gi
     nodeGroups:
-      main:
+      - name: main
         data: true
         master: true
         replicas: 1
@@ -24,6 +26,9 @@
           cpu: "1"
           memory: 512Mi
           disks:
-            export: 234Mi
-            index: 200Mi
-            work: 400Mi
+            - name: export
+              size: 234Mi
+            - name: index
+              size: 200Mi
+            - name: work
+              size: 400Mi

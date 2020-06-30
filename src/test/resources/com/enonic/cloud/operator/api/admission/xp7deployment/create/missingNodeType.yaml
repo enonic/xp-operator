@@ -1,4 +1,4 @@
-testResult: "Some fields in 'spec.nodes' are missing: [master, data]"
+testResult: "'spec.nodeGroups[0].data' cannot be null"
 testReview:
   request:
     operation: CREATE
@@ -6,8 +6,8 @@ testReview:
       apiVersion: enonic.cloud/v1alpha2
       kind: Xp7Deployment
       metadata:
-        name: mycloud-mysolution-myenv-myservice
-        namespace: mycloud-mysolution-myenv-myservice
+        name: mycloud-mysolution-myenv-myservice2
+        namespace: mycloud-mysolution-myenv-myservice2
         labels:
           cloud: mycloud
           project: myproject
@@ -16,10 +16,12 @@ testReview:
         enabled: true
         xpVersion: 7.1.2
         nodesSharedDisks:
-          blobstore: 1Gi
-          snapshots: 1Gi
+          - name: blobstore
+            size: 1Gi
+          - name: snapshots
+            size: 1Gi
         nodeGroups:
-          main:
+          - name: main
             #master: true
             #data: true
             replicas: 1
@@ -27,4 +29,5 @@ testReview:
               cpu: "1"
               memory: 512Mi
               disks:
-                index: 200Mi
+                - name: index
+                  size: 200Mi

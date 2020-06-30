@@ -2,7 +2,6 @@ package com.enonic.cloud.helm.charts;
 
 import java.io.File;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Named;
 import javax.inject.Singleton;

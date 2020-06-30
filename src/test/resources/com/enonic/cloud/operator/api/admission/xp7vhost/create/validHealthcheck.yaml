@@ -10,6 +10,9 @@ testReview:
         namespace: mycloud-mysolution-myenv-myservice
       spec:
         host: healthcheck
+        options:
+          dnsRecord: true
+          cdn: true
         mappings:
           - nodeGroup: main
             source: /

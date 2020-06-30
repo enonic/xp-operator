@@ -130,12 +130,12 @@ data:
     1\" ]; then\n    exit 1\nfi"
   preStart.sh: "echo \"Running prescript for node ${XP_NODE_NAME} (${XP_NODE_IP})\"\
     \necho \"Bootstrap deploy folder apps\"\ncat /enonic-xp/home/extra-config/initApps.txt\
-    \ | xargs -I {} app.sh add {}\nbash /enonic-xp/home/extra-config/dns.sh -d ${XP_NODE_NAME}.cluster-discovery.${NAMESPACE}.svc.cluster.local"
+    \ | xargs -I {} app.sh add {}\nbash /enonic-xp/home/extra-config/dns.sh -d cluster-discovery.${NAMESPACE}.svc.cluster.local\n\
+    bash /enonic-xp/home/extra-config/dns.sh -d ${XP_NODE_NAME}.cluster-discovery.${NAMESPACE}.svc.cluster.local"
   preStop.sh: "echo \"Wait for endpoints to be deleted\"\nbash /enonic-xp/home/extra-config/endpoints.sh\
     \ -r -s all -i ${XP_NODE_IP} -t 10\nbash /enonic-xp/home/extra-config/endpoints.sh\
     \ -r -s ${XP_NODE_GROUP} -i ${XP_NODE_IP} -t 10 -a 20"
-  initApps.txt: "https://repo.enonic.com/public/com/enonic/app/alive/2.0.0/alive-2.0.0.jar\n\
-    https://repo.enonic.com/public/com/enonic/app/snapshotter/3.0.0/snapshotter-3.0.0.jar"
+  initApps.txt: "https://repo.enonic.com/public/com/enonic/app/snapshotter/3.0.0/snapshotter-3.0.0.jar"
   java.security.properties: "networkaddress.cache.ttl=30"
 ---
 apiVersion: "v1"
@@ -601,6 +601,8 @@ spec:
               fieldPath: "metadata.name"
         - name: "XP_NODE_GROUP"
           value: "master"
+        - name: "XP_CLUSTERED"
+          value: "true"
         - name: "XP_NODE_IP"
           valueFrom:
             fieldRef:
@@ -642,18 +644,15 @@ spec:
           name: "es-transport"
           protocol: "TCP"
         readinessProbe:
-          failureThreshold: 3
+          failureThreshold: 2
           httpGet:
-            httpHeaders:
-            - name: "Host"
-              value: "healthcheck"
-            path: "/"
-            port: 8080
+            path: "/_cluster/health?wait_for_status=yellow&timeout=1s"
+            port: 9200
             scheme: "HTTP"
-          initialDelaySeconds: 0
+          initialDelaySeconds: 20
           periodSeconds: 5
           successThreshold: 3
-          timeoutSeconds: 1
+          timeoutSeconds: 5
         resources:
           limits:
             cpu: "1"
@@ -796,6 +795,8 @@ spec:
               fieldPath: "metadata.name"
         - name: "XP_NODE_GROUP"
           value: "data"
+        - name: "XP_CLUSTERED"
+          value: "true"
         - name: "XP_NODE_IP"
           valueFrom:
             fieldRef:
@@ -832,18 +833,15 @@ spec:
           name: "es-transport"
           protocol: "TCP"
         readinessProbe:
-          failureThreshold: 3
+          failureThreshold: 2
           httpGet:
-            httpHeaders:
-            - name: "Host"
-              value: "healthcheck"
-            path: "/"
-            port: 8080
+            path: "/_cluster/health?wait_for_status=green&timeout=1s"
+            port: 9200
             scheme: "HTTP"
-          initialDelaySeconds: 0
+          initialDelaySeconds: 20
           periodSeconds: 5
           successThreshold: 3
-          timeoutSeconds: 1
+          timeoutSeconds: 5
         resources:
           limits:
             cpu: "2"
@@ -1008,6 +1006,8 @@ spec:
               fieldPath: "metadata.name"
         - name: "XP_NODE_GROUP"
           value: "frontend"
+        - name: "XP_CLUSTERED"
+          value: "true"
         - name: "XP_NODE_IP"
           valueFrom:
             fieldRef:
@@ -1051,18 +1051,15 @@ spec:
           name: "es-transport"
           protocol: "TCP"
         readinessProbe:
-          failureThreshold: 3
+          failureThreshold: 2
           httpGet:
-            httpHeaders:
-            - name: "Host"
-              value: "healthcheck"
-            path: "/"
-            port: 8080
+            path: "/_cluster/health?wait_for_status=yellow&timeout=1s"
+            port: 9200
             scheme: "HTTP"
-          initialDelaySeconds: 0
+          initialDelaySeconds: 20
           periodSeconds: 5
           successThreshold: 3
-          timeoutSeconds: 1
+          timeoutSeconds: 5
         resources:
           limits:
             cpu: "3"
@@ -1266,8 +1263,8 @@ metadata:
 spec:
   nodeGroup: "all"
   file: "com.enonic.xp.cluster.cfg"
-  data: "cluster.enabled=true\nnode.name=${env.XP_NODE_NAME}\nnetwork.publish.host=${env.XP_NODE_IP}\n\
-    network.host=${env.XP_NODE_IP}"
+  data: "cluster.enabled=true\nnetwork.host=${env.XP_NODE_IP}\nnetwork.publish.host=${env.XP_NODE_IP}\n\
+    node.name=${env.XP_NODE_NAME}"
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:

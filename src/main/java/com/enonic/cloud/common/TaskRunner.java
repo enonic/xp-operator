@@ -3,7 +3,6 @@ package com.enonic.cloud.common;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Singleton;
 
 import org.slf4j.Logger;

@@ -12,20 +12,14 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
-import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
 
 public class ResourceQuery<T extends HasMetadata>
 {
     private Stream<T> stream;
 
-    private ResourceQuery( Stream<T> stream )
+    public ResourceQuery( Stream<T> stream )
     {
         this.stream = stream;
-    }
-
-    public ResourceQuery( SharedIndexInformer<T> informer )
-    {
-        this( informer.getIndexer().list().stream() );
     }
 
     public static <R extends HasMetadata> ResourceQuery<R> resourceQuery( R resource )

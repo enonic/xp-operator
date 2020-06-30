@@ -86,7 +86,7 @@ public abstract class BaseAdmissionApi<R>
             }
             catch ( Throwable e )
             {
-                error = e.getMessage();
+                error = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
                 log.error( error, e );
             }
         }
@@ -95,15 +95,17 @@ public abstract class BaseAdmissionApi<R>
             withUid( admissionReview.getRequest().getUid() ).
             withAllowed( error == null );
 
+        StatusBuilder statusBuilder = new StatusBuilder();
         if ( error != null )
         {
-            builder.withStatus( new StatusBuilder().withMessage( error ).build() );
+            statusBuilder.withMessage( error );
             log.error( String.format( "%s failed with error: %s", apiName, error ) );
         }
         else if ( apiObject != null )
         {
             postRequestHook( apiObject, builder );
         }
+        builder.withStatus( statusBuilder.build() );
 
         admissionReview.setResponse( builder.build() );
         cfgIfBool( "operator.api.debug", () -> {

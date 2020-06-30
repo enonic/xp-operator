@@ -16,10 +16,12 @@ testReview:
         enabled: true
         xpVersion: 7.1.2
         nodesSharedDisks:
-          blobstore: 1Gi
-          snapshots: 1Gi
+          - name: blobstore
+            size: 1Gi
+          - name: snapshots
+            size: 1Gi
         nodeGroups:
-          main:
+          - name: main
             master: true
             data: true
             replicas: 1
@@ -27,4 +29,5 @@ testReview:
               cpu: "1"
               memory: 512Mi
               disks:
-                index: 200Mi
+                - name: index
+                  size: 200Mi

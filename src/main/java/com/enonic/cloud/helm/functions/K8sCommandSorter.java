@@ -3,7 +3,6 @@ package com.enonic.cloud.helm.functions;
 import java.util.List;
 import java.util.function.Function;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Singleton;
 
 import com.google.common.base.Preconditions;

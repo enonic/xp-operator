@@ -122,6 +122,8 @@ spec:
                   fieldPath: metadata.name
             - name: XP_NODE_GROUP
               value: {{ $nodeGroup.name }}
+            - name: XP_CLUSTERED
+              value: {{ if $.Values.deployment.clustered }}true{{ else }}false{{ end }}
             - name: XP_NODE_IP
               valueFrom:
                 fieldRef:
@@ -137,26 +139,21 @@ spec:
             - name: {{ $env.name }}
               value: {{ $env.value }}
           {{- end }}
-          {{- if $.Values.startupProbe }}
-          startupProbe:
-            {{- with $.Values.startupProbe }}
-            {{- toYaml . | nindent 12 }}
-            {{- end }}
-          {{- end }}
 
-          {{- if $.Values.livenessProbe }}
-          livenessProbe:
-            {{- with $.Values.livenessProbe }}
-            {{- toYaml . | nindent 12 }}
-            {{- end }}
-          {{- end }}
-
-          {{- if $.Values.readinessProbe }}
           readinessProbe:
-            {{- with $.Values.readinessProbe }}
-            {{- toYaml . | nindent 12 }}
-            {{- end }}
-          {{- end }}
+            failureThreshold: 2
+            httpGet:
+              {{- if and $nodeGroup.data $.Values.deployment.clustered }}
+              path: /_cluster/health?wait_for_status=green&timeout=1s
+              {{ else }}
+              path: /_cluster/health?wait_for_status=yellow&timeout=1s
+              {{- end }}
+              port: 9200
+              scheme: HTTP
+            initialDelaySeconds: 20
+            periodSeconds: 5
+            successThreshold: 3
+            timeoutSeconds: 5
 
           lifecycle:
             preStop:

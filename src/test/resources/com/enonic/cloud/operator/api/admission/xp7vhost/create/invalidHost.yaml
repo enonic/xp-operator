@@ -10,7 +10,11 @@ testReview:
         namespace: mycloud-mysolution-myenv-myservice
       spec:
         host: t$est.purplejs.io
+        options:
+          dnsRecord: true
+          cdn: true
         mappings:
           - nodeGroup: main
             source: /
             target: /admin
+            options:

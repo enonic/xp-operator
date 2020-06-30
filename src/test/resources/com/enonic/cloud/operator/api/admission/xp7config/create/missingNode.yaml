@@ -1,4 +1,4 @@
-testResult: "Some fields in 'spec' are missing: [nodeGroup]"
+testResult: "'spec.nodeGroup' cannot be null"
 testReview:
   request:
     operation: CREATE

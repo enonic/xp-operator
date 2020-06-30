@@ -1,4 +1,4 @@
-testResult: "Some fields in 'spec.mappings' are missing: [nodeGroup]"
+testResult: "'spec.mappings[0].nodeGroup' cannot be null"
 testReview:
   request:
     operation: CREATE
@@ -10,6 +10,9 @@ testReview:
         namespace: mycloud-mysolution-myenv-myservice
       spec:
         host: test.purplejs.io
+        options:
+          dnsRecord: true
+          cdn: true
         mappings:
           #- nodeGroup: main
           - source: /

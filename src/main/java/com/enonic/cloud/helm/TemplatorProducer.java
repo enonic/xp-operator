@@ -1,6 +1,5 @@
 package com.enonic.cloud.helm;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Named;
 import javax.inject.Singleton;

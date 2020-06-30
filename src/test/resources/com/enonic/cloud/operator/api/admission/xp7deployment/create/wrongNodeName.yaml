@@ -1,4 +1,4 @@
-testResult: "Field 'nodeId' with value '1$234' is not valid, it must consist of lower case alphanumeric characters, '-' or '.', and must start and end with an alphanumeric character (e.g. 'my-name', regex used for validation is '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*')"
+testResult: "Field 'spec.nodeGroups[0].name' with value '1$234' is not valid, it must consist of lower case alphanumeric characters, '-' or '.', and must start and end with an alphanumeric character (e.g. 'my-name', regex used for validation is '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*')"
 testReview:
   request:
     operation: CREATE
@@ -6,8 +6,8 @@ testReview:
       apiVersion: enonic.cloud/v1alpha2
       kind: Xp7Deployment
       metadata:
-        name: mycloud-mysolution-myenv-myservice
-        namespace: mycloud-mysolution-myenv-myservice
+        name: mycloud-mysolution-myenv-myservice2
+        namespace: mycloud-mysolution-myenv-myservice2
         labels:
           cloud: mycloud
           solution: mysolution
@@ -17,10 +17,12 @@ testReview:
         enabled: true
         xpVersion: 7.1.2
         nodesSharedDisks:
-          blobstore: 1Gi
-          snapshots: 1Gi
+          - name: blobstore
+            size: 1Gi
+          - name: snapshots
+            size: 1Gi
         nodeGroups:
-          1$234:
+          - name: 1$234
             master: true
             data: true
             replicas: 1
@@ -28,4 +30,5 @@ testReview:
               cpu: "1"
               memory: 512Mi
               disks:
-                index: 200Mi
+                - name: index
+                  size: 200Mi

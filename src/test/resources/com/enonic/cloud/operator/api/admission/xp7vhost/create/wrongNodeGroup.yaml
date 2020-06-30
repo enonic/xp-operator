@@ -1,4 +1,4 @@
-testResult: "Xp7Deployment 'mycloud-mysolution-myenv-myservice' does not contain nodeGroup 'wrong'"
+testResult: "Xp7Deployment 'mycloud-mysolution-myenv-myservice' does not contain nodeGroups [wrong]"
 testReview:
   request:
     operation: CREATE
@@ -10,6 +10,9 @@ testReview:
         namespace: mycloud-mysolution-myenv-myservice
       spec:
         host: test.purplejs.io
+        options:
+          dnsRecord: true
+          cdn: true
         mappings:
           - nodeGroup: wrong
             source: /

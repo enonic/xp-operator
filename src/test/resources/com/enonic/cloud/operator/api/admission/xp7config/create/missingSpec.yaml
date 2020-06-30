@@ -1,4 +1,4 @@
-testResult: "Old and new resource can not be empty, is 'spec' missing?"
+testResult: "'spec' cannot be null"
 testReview:
   request:
     operation: CREATE

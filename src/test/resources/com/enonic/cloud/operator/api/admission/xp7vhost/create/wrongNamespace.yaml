@@ -1,4 +1,4 @@
-testResult: "Xp7Deployment 'wrongnamespace' not found"
+testResult: "No Xp7Deployment found in NS 'wrongnamespace'"
 testReview:
   request:
     operation: CREATE
@@ -10,6 +10,9 @@ testReview:
         namespace: wrongnamespace
       spec:
         host: test.purplejs.io
+        options:
+          dnsRecord: true
+          cdn: true
         certificate:
           authority: selfSigned
         mappings:

@@ -1,49 +1,5 @@
 imagePullPolicy: IfNotPresent
 
-# Fails after 3:30 minutes
-#startupProbe:
-#  failureThreshold: 36
-#  httpGet:
-#    httpHeaders:
-#      - name: Host
-#        value: healthcheck
-#    path: /
-#    port: 8080
-#    scheme: HTTP
-#  initialDelaySeconds: 30
-#  periodSeconds: 5
-#  successThreshold: 1
-#  timeoutSeconds: 1
-
-readinessProbe:
-  failureThreshold: 3
-  httpGet:
-    httpHeaders:
-      - name: Host
-        value: healthcheck
-    path: /
-    port: 8080
-    scheme: HTTP
-  initialDelaySeconds: 0
-  periodSeconds: 5
-  successThreshold: 3
-  timeoutSeconds: 1
-
-# Fails after 2 minutes
-#livenessProbe:
-#  failureThreshold: 4
-#  httpGet:
-#    httpHeaders:
-#      - name: Host
-#        value: healthcheck
-#    path: /
-#    port: 8080
-#    scheme: HTTP
-#  initialDelaySeconds: 60
-#  periodSeconds: 15
-#  successThreshold: 1
-#  timeoutSeconds: 1
-
 volumeMounts:
   export: /enonic-xp/home/data
   index: /enonic-xp/home/repo/index
@@ -88,7 +44,6 @@ extensions:
     enabled: false
 
 initApps:
-  - https://repo.enonic.com/public/com/enonic/app/alive/2.0.0/alive-2.0.0.jar
   - https://repo.enonic.com/public/com/enonic/app/snapshotter/3.0.0/snapshotter-3.0.0.jar
 
 # Filled in by operator

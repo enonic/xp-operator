@@ -10,6 +10,9 @@ testReview:
         namespace: mycloud-mysolution-myenv-myservice
       spec:
         host: test.purplejs.io
+        options:
+          dnsRecord: true
+          cdn: true
         certificate:
           authority: selfSigned
         mappings:
