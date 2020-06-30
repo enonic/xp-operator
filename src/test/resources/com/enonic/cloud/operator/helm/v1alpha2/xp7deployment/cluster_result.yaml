@@ -1263,8 +1263,8 @@ metadata:
 spec:
   nodeGroup: "all"
   file: "com.enonic.xp.cluster.cfg"
-  data: "cluster.enabled=true\nnetwork.host=${env.XP_NODE_IP}\nnetwork.publish.host=${env.XP_NODE_IP}\n\
-    node.name=${env.XP_NODE_NAME}"
+  data: "network.host=${env.XP_NODE_IP},127.0.0.1\nnetwork.publish.host=${env.XP_NODE_IP}\n\
+    node.name=${env.XP_NODE_NAME}\ncluster.enabled=true"
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
