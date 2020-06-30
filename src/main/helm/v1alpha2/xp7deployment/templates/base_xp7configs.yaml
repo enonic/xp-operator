@@ -120,19 +120,12 @@ spec:
   nodeGroup: {{ .Values.allNodesKey }}
   file: com.enonic.xp.cluster.cfg
   data: |-
-    {{- if not $.Values.deployment.clustered }}
-    cluster.enabled=false
-    {{- else }}
-    cluster.enabled=true
-    {{- end }}
-    {{- if $.Values.extensions.linkerd.enabled }}
-    network.host=127.0.0.1
-    {{- else }}
-    network.host=${env.XP_NODE_IP}
-    {{- end }}
+    network.host=${env.XP_NODE_IP},127.0.0.1
     network.publish.host=${env.XP_NODE_IP}
     node.name=${env.XP_NODE_NAME}
+    cluster.enabled={{ if $.Values.deployment.clustered }}true{{ else }}false{{ end }}
 ---
+# Logging
 apiVersion: enonic.cloud/v1alpha2
 kind: Xp7Config
 metadata:

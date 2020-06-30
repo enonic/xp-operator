@@ -43,7 +43,7 @@ spec:
 #      master: false
 #      replicas: 1
 #      resources:
-#        cpu: "0.2"
+#        cpu: "1"
 #        memory: 512Mi
 #        disks:
 #          - name: deploy
@@ -59,7 +59,7 @@ spec:
 #      master: false
 #      replicas: 1
 #      resources:
-#        cpu: "0.2"
+#        cpu: "1"
 #        memory: 512Mi
 #        disks:
 #          - name: deploy
