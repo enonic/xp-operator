@@ -18,11 +18,8 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
   annotations:
-    {{ $.Values.annotationKeys.vHostName }}: {{ $.Values.vhost.name }}
     {{ $.Values.annotationKeys.applyPriority }}: "100"
-    kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/proxy-body-size: {{ $mapping.options.ingressMaxBodySize }}
-    ingress.kubernetes.io/rewrite-target: /
+    {{ $.Values.annotationKeys.vHostName }}: {{ $.Values.vhost.name }}
     {{- if $.Values.vhost.spec.options.dnsRecord }}
     enonic.cloud/dns.hostname: {{ $.Values.vhost.spec.host }}
     enonic.cloud/dns.heritage: {{ list "heritage=ec-operator,id=" $.Values.clusterId | join "" }}
@@ -30,49 +27,12 @@ metadata:
     {{- if $.Values.vhost.spec.options.cdn }}
     enonic.cloud/dns.cdn: "true"
     {{- end }}
-    {{- if $mapping.options.statusCake }}
-    monitor.stakater.com/enabled: "true"
-    monitor.stakater.com/overridePath: {{ $mapping.source }}
-    {{- end }}
     {{- if $.Values.vhost.issuer }}
     cert-manager.io/cluster-issuer: {{ $.Values.vhost.issuer }}
-    nginx.ingress.kubernetes.io/ssl-redirect: {{ quote $mapping.options.sslRedirect }}
     {{- end }}
-
-    {{- if $mapping.options.ipWhitelist }}
-    nginx.ingress.kubernetes.io/whitelist-source-range: {{ $mapping.options.ipWhitelist | join "," }}
+    {{- with $mapping.options.ingressAnnotations }}
+    {{- toYaml . | nindent 4 }}
     {{- end }}
-
-    {{- if $mapping.options.stickySession }}
-    nginx.ingress.kubernetes.io/affinity: cookie
-    nginx.ingress.kubernetes.io/session-cookie-path: {{ quote $mapping.source }}
-    nginx.ingress.kubernetes.io/session-cookie-name: {{ $.Values.vhost.uid }}
-    nginx.ingress.kubernetes.io/session-cookie-change-on-failure: "true" # Switch to another server on failure
-    nginx.ingress.kubernetes.io/affinity-mode: "balanced" # Move affinity if pods are scaled up
-    {{- end }}
-
-    {{- if $mapping.options.caching }}
-    nginx.ingress.kubernetes.io/proxy-buffering: "on"
-    {{- end }}
-
-    # https://www.nginx.com/blog/nginx-caching-guide/
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      # Extra config
-      {{- if $mapping.options.caching }}
-      proxy_cache static-cache;
-      proxy_cache_use_stale error timeout updating http_404 http_500 http_502 http_503 http_504;
-      proxy_cache_key $proxy_host$request_uri$cookie_jessionid;
-
-      # Allow to bypass cache with Pragma header
-      proxy_cache_bypass $http_pragma;
-
-      # Send cache status header back
-      add_header X-Cache-Status $upstream_cache_status;
-      {{- end }}
-      {{- if $.Values.extensions.linkerd.enabled }}
-      proxy_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;
-      grpc_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;
-      {{- end }}
 
 spec:
   rules:

@@ -1,6 +1,9 @@
 ---
 settings:
   nodeGroupAntiAffinity: false
+extensions:
+  linkerd:
+    enabled: false
 allNodesKey: "all"
 defaultLabels:
   cloud: "mycloud"

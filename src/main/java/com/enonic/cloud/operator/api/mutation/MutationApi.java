@@ -30,11 +30,14 @@ import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHost;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHostSpec;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHostSpecMapping;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHostSpecMappingOptions;
+import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHostSpecMappingOptionsIngressAnnotations;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHostSpecOptions;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHostStatus;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHostStatusFields;
 import com.enonic.cloud.operator.api.BaseAdmissionApi;
 
+import static com.enonic.cloud.common.Configuration.cfgBool;
+import static com.enonic.cloud.common.Configuration.cfgIfBool;
 import static com.enonic.cloud.common.Configuration.cfgStr;
 import static com.enonic.cloud.common.Utils.createOwnerReference;
 
@@ -216,33 +219,65 @@ public class MutationApi
                     patchDefault( mt, "system", m.getNodeGroup(), pathFunc, "/idProviders/default" );
                 }
 
+                Xp7VHostSpecMappingOptionsIngressAnnotations defaultAnnotations = new Xp7VHostSpecMappingOptionsIngressAnnotations();
+                addDefaultIngressAnnotations( defaultAnnotations );
+
                 Xp7VHostSpecMappingOptions defSpecOpt = new Xp7VHostSpecMappingOptions().
                     withIngress( true ).
-                    withIngressMaxBodySize( "100m" ).
-                    withIpWhitelist( new LinkedList<>() ).
-                    withSslRedirect( newR.getXp7VHostSpec().getXp7VHostSpecCertificate() != null ).
-                    withStatusCake( false ).
-                    withStickySession( false );
+                    withXp7VHostSpecMappingOptionsIngressAnnotations( defaultAnnotations );
 
+                // Set default options
                 if ( !patchDefault( mt, defSpecOpt, m.getXp7VHostSpecMappingOptions(), pathFunc, "/options" ) )
                 {
                     patchDefault( mt, defSpecOpt.getIngress(), m.getXp7VHostSpecMappingOptions().getIngress(), pathFunc,
                                   "/options/ingress" );
-                    patchDefault( mt, defSpecOpt.getIngressMaxBodySize(), m.getXp7VHostSpecMappingOptions().getIngressMaxBodySize(),
-                                  pathFunc, "/options/ingressMaxBodySize" );
-                    patchDefault( mt, defSpecOpt.getIpWhitelist(), m.getXp7VHostSpecMappingOptions().getIpWhitelist(), pathFunc,
-                                  "/options/ipWhitelist" );
-                    patchDefault( mt, defSpecOpt.getSslRedirect(), m.getXp7VHostSpecMappingOptions().getSslRedirect(), pathFunc,
-                                  "/options/sslRedirect" );
-                    patchDefault( mt, defSpecOpt.getStatusCake(), m.getXp7VHostSpecMappingOptions().getStatusCake(), pathFunc,
-                                  "/options/statusCake" );
-                    patchDefault( mt, defSpecOpt.getStickySession(), m.getXp7VHostSpecMappingOptions().getStickySession(), pathFunc,
-                                  "/options/stickySession" );
+
+                    // Set default annotations
+                    if ( !patchDefault( mt, defSpecOpt.getXp7VHostSpecMappingOptionsIngressAnnotations(),
+                                        m.getXp7VHostSpecMappingOptions().getXp7VHostSpecMappingOptionsIngressAnnotations(), pathFunc,
+                                        "/options/ingressAnnotations" ) )
+                    {
+                        if ( addDefaultIngressAnnotations( m.getXp7VHostSpecMappingOptions().
+                            getXp7VHostSpecMappingOptionsIngressAnnotations() ) )
+                        {
+                            patchDefault( mt, m.getXp7VHostSpecMappingOptions().
+                                getXp7VHostSpecMappingOptionsIngressAnnotations(), null, pathFunc, "/options/ingressAnnotations" );
+                        }
+                    }
                 }
             }
         }
 
         ensureOwnerReference( mt );
+    }
+
+    private boolean addDefaultIngressAnnotations( final Xp7VHostSpecMappingOptionsIngressAnnotations annotations )
+    {
+        boolean change = false;
+        if ( annotations.getAdditionalProperties().get( "ingress.kubernetes.io/rewrite-target" ) == null )
+        {
+            annotations.setAdditionalProperty( "ingress.kubernetes.io/rewrite-target", "/" );
+            change = true;
+        }
+
+        if ( annotations.getAdditionalProperties().get( "kubernetes.io/ingress.class" ) == null )
+        {
+            annotations.setAdditionalProperty( "kubernetes.io/ingress.class", "nginx" );
+            change = true;
+        }
+
+        boolean linkerd = cfgBool( "operator.helm.charts.Values.extensions.linkerd.enabled" );
+        if(linkerd) {
+            String cfgSnippet = annotations.getAdditionalProperties().get( "nginx.ingress.kubernetes.io/configuration-snippet" );
+            StringBuilder sb = new StringBuilder( cfgSnippet != null ? cfgSnippet: "" ).
+                append( "\n" ).
+                append( "proxy_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;" ).
+                append("grpc_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;");
+            annotations.setAdditionalProperty( "nginx.ingress.kubernetes.io/configuration-snippet", sb.toString() );
+            change = true;
+        }
+
+        return change;
     }
 
     private void ensureOwnerReference( MutationRequest mutationRequest )

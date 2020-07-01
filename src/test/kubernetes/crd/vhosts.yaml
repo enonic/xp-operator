@@ -70,18 +70,10 @@ spec:
                         properties:
                           ingress:
                             type: boolean
-                          ingressMaxBodySize:
-                            type: string
-                          statusCake:
-                            type: boolean
-                          ipWhitelist:
-                            type: array
-                            items:
+                          ingressAnnotations:
+                            type: object
+                            additionalProperties:
                               type: string
-                          stickySession:
-                            type: boolean
-                          sslRedirect:
-                            type: boolean
             status:
               type: object
               nullable: true

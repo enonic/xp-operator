@@ -1519,7 +1519,6 @@ spec:
     target: "/webapp/com.enonic.app.alive"
     options:
       ingress: false
-      ipWhitelist: []
 kind: "Xp7VHost"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
@@ -1554,7 +1553,6 @@ spec:
       enabled: []
     options:
       ingress: false
-      ipWhitelist: []
 kind: "Xp7VHost"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:

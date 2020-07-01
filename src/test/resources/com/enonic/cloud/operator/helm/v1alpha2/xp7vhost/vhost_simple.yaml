@@ -19,30 +19,13 @@ spec:
         default: system
       options:
         ingress: true
-        ingressMaxBodySize: "100m"
-        statusCake: false
-        ipWhitelist: []
-        stickySession: false
-        sslRedirect: true
     - nodeGroup: frontend
       source: /b
       target: /
       options:
         ingress: true
-        ingressMaxBodySize: 8m
-        statusCake: true
-        caching: true
-        ipWhitelist:
-          - 1.1.1.1
-        stickySession: true
-        sslRedirect: false
     - nodeGroup: all
       source: /c
       target: /admin
       options:
         ingress: false
-        ingressMaxBodySize: "100m"
-        statusCake: false
-        ipWhitelist: []
-        stickySession: false
-        sslRedirect: true

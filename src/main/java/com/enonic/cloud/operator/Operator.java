@@ -1,5 +1,7 @@
 package com.enonic.cloud.operator;
 
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -97,32 +99,41 @@ public class Operator
 
     void onStartup( @Observes StartupEvent _ev )
     {
-        long statusInterval = cfgLong( "operator.tasks.status.interval" );
-        long syncInterval = cfgLong( "operator.tasks.sync.interval" );
+        // The timer is here to give the operator api time to start up
+        new Timer().schedule(
+            new java.util.TimerTask() {
+                @Override
+                public void run() {
+                    long statusInterval = cfgLong( "operator.tasks.status.interval" );
+                    long syncInterval = cfgLong( "operator.tasks.sync.interval" );
 
-        cfgIfBool( "dns.enabled", () -> {
-            listen( operatorDns, informers.ingressInformer() );
-        } );
+                    cfgIfBool( "dns.enabled", () -> {
+                        listen( operatorDns, informers.ingressInformer() );
+                    } );
 
-        listen( operatorXp7AppInstaller, informers.xp7AppInformer() );
-        schedule( operatorXp7AppInstaller, syncInterval );
-        schedule( operatorXp7AppStatus, statusInterval );
+                    listen( operatorXp7AppInstaller, informers.xp7AppInformer() );
+                    schedule( operatorXp7AppInstaller, syncInterval );
+                    schedule( operatorXp7AppStatus, statusInterval );
 
-        listen( operatorXp7Config, informers.xp7ConfigInformer() );
-        schedule( operatorConfigMapSync, syncInterval );
+                    listen( operatorXp7Config, informers.xp7ConfigInformer() );
+                    schedule( operatorConfigMapSync, syncInterval );
 
-        listen( operatorNamespaceDelete, informers.xp7DeploymentInformer() );
-        listen( operatorXp7DeploymentHelm, informers.xp7DeploymentInformer() );
-        schedule( operatorXp7DeploymentStatus, statusInterval );
-        listen( operatorXpClientCacheInvalidate, informers.xp7DeploymentInformer() );
+                    listen( operatorNamespaceDelete, informers.xp7DeploymentInformer() );
+                    listen( operatorXp7DeploymentHelm, informers.xp7DeploymentInformer() );
+                    schedule( operatorXp7DeploymentStatus, statusInterval );
+                    listen( operatorXpClientCacheInvalidate, informers.xp7DeploymentInformer() );
 
-        listen( operatorXp7VHostHelm, informers.xp7VHostInformer() );
-        listen( operatorXp7VHost, informers.xp7VHostInformer() );
-        schedule( operatorXp7VHostStatus, statusInterval );
-        schedule( operatorXp7ConfigSync, syncInterval );
+                    listen( operatorXp7VHostHelm, informers.xp7VHostInformer() );
+                    listen( operatorXp7VHost, informers.xp7VHostInformer() );
+                    schedule( operatorXp7VHostStatus, statusInterval );
+                    schedule( operatorXp7ConfigSync, syncInterval );
 
-        log.info( "Starting informers" );
-        informers.informerFactory().startAllRegisteredInformers();
+                    log.info( "Starting informers" );
+                    informers.informerFactory().startAllRegisteredInformers();
+                }
+            },
+            5000
+        );
     }
 
     private <T> void listen( ResourceEventHandler<T> handler, SharedIndexInformer<T> informer )

@@ -22,33 +22,19 @@ vhost:
         enabled: []
       options:
         ingress: true
-        ingressMaxBodySize: "100m"
-        statusCake: false
-        ipWhitelist: []
-        stickySession: false
-        sslRedirect: true
     - nodeGroup: "frontend"
       source: "/b"
       target: "/"
       options:
         ingress: true
-        ingressMaxBodySize: "8m"
-        statusCake: true
-        ipWhitelist:
-        - "1.1.1.1"
-        stickySession: true
-        sslRedirect: false
-        caching: true
     - nodeGroup: "all"
       source: "/c"
       target: "/admin"
       options:
         ingress: false
-        ingressMaxBodySize: "100m"
-        statusCake: false
-        ipWhitelist: []
-        stickySession: false
-        sslRedirect: true
+extensions:
+  linkerd:
+    enabled: false
 allNodesKey: "all"
 defaultLabels: {}
 labelKeys:

@@ -16,11 +16,11 @@ spec:
       idProviders:
         default: system
       options:
-        sslRedirect: false
+        ingressAnnotations:
+          nginx.ingress.kubernetes.io/configuration-snippet: |
+            add_header X-Robots-Tag noindex;
     - nodeGroup: all
       source: /b
       target: /admin
       idProviders:
         default: system
-      options:
-        sslRedirect: false
