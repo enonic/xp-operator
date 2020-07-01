@@ -110,7 +110,7 @@ public class OperatorXp7DeploymentHelm
                 Optional<Xp7DeploymentSpecNodeGroupEnvVar> optionalXpOpts =
                     ng.getXp7DeploymentSpecNodeGroupEnvironment().stream().filter( e -> e.getName().equals( "XP_OPTS" ) ).findFirst();
 
-                Xp7DeploymentSpecNodeGroupEnvVar xpOpts = null;
+                Xp7DeploymentSpecNodeGroupEnvVar xpOpts;
                 if ( optionalXpOpts.isEmpty() )
                 {
                     xpOpts = new Xp7DeploymentSpecNodeGroupEnvVar().
@@ -125,12 +125,13 @@ public class OperatorXp7DeploymentHelm
 
                 String opts = xpOpts.getValue();
 
-                if ( !(opts.contains( "-Xms" ) || opts.contains( "-Xmx" )) )
+                if ( !( opts.contains( "-Xms" ) || opts.contains( "-Xmx" ) ) )
                 {
                     opts = opts + getMemoryOpts( ng );
                 }
 
-                if ( !(opts.contains( "-XX:-HeapDumpOnOutOfMemoryError" ) || opts.contains( "-XX:HeapDumpPath" ))) {
+                if ( !( opts.contains( "-XX:-HeapDumpOnOutOfMemoryError" ) || opts.contains( "-XX:HeapDumpPath" ) ) )
+                {
                     opts = opts + " -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof";
                 }
 
@@ -184,8 +185,7 @@ public class OperatorXp7DeploymentHelm
             {
                 heapMemory = memoryInMb * 0.75f;
             }
-
-            int heap = Math.round( heapMemory );
+            int heap = Math.min( Math.round( heapMemory ), 26624 ); // No more then 26 gig
 
             return String.format( " -Xms%sm -Xmx%sm", heap, heap );
         }
