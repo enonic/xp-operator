@@ -136,7 +136,6 @@ data:
     \ -r -s all -i ${XP_NODE_IP} -t 10\nbash /enonic-xp/home/extra-config/endpoints.sh\
     \ -r -s ${XP_NODE_GROUP} -i ${XP_NODE_IP} -t 10 -a 20"
   initApps.txt: "https://repo.enonic.com/public/com/enonic/app/snapshotter/3.0.0/snapshotter-3.0.0.jar"
-  java.security.properties: "networkaddress.cache.ttl=30"
 ---
 apiVersion: "v1"
 kind: "ConfigMap"
@@ -614,13 +613,8 @@ spec:
               key: "passHash"
               name: "su"
               optional: false
-        - name: "JAVA_OPTS"
-          value: "-Djava.security.properties=/enonic-xp/home/extra-config/java.security.properties\
-            \ -XX:+UseContainerSupport -XX:MinRAMPercentage=20 -XX:InitialRAMPercentage=30\
-            \ -XX:MaxRAMPercentage=75 -XX:+UseConcMarkSweepGC -XX:+CMSParallelRemarkEnabled\
-            \ -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=60\
-            \ -XX:+ScavengeBeforeFullGC -XX:+CMSScavengeBeforeRemark -XX:-HeapDumpOnOutOfMemoryError\
-            \ -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof"
+        - name: "XP_OPTS"
+          value: "-Xms768m -Xmx768m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof"
         image: "enonic/xp:7.1.2-ubuntu"
         imagePullPolicy: "IfNotPresent"
         lifecycle:
@@ -808,8 +802,8 @@ spec:
               key: "passHash"
               name: "su"
               optional: false
-        - name: "JAVA_OPTS"
-          value: "My java opts"
+        - name: "XP_OPTS"
+          value: "-Xms1024m -Xmx1024m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof"
         image: "enonic/xp:7.1.2-ubuntu"
         imagePullPolicy: "IfNotPresent"
         lifecycle:
@@ -1021,13 +1015,8 @@ spec:
               optional: false
         - name: "CUSTOM_ENV"
           value: "myenvvar"
-        - name: "JAVA_OPTS"
-          value: "-Djava.security.properties=/enonic-xp/home/extra-config/java.security.properties\
-            \ -XX:+UseContainerSupport -XX:MinRAMPercentage=20 -XX:InitialRAMPercentage=30\
-            \ -XX:MaxRAMPercentage=50 -XX:+UseConcMarkSweepGC -XX:+CMSParallelRemarkEnabled\
-            \ -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=60\
-            \ -XX:+ScavengeBeforeFullGC -XX:+CMSScavengeBeforeRemark -XX:-HeapDumpOnOutOfMemoryError\
-            \ -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof"
+        - name: "XP_OPTS"
+          value: "-bla -Xms2304m -Xmx2304m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof"
         image: "enonic/xp:7.1.2-ubuntu"
         imagePullPolicy: "IfNotPresent"
         lifecycle:

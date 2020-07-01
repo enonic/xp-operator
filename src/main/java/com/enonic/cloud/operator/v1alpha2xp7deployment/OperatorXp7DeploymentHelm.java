@@ -3,6 +3,7 @@ package com.enonic.cloud.operator.v1alpha2xp7deployment;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 
@@ -106,18 +107,34 @@ public class OperatorXp7DeploymentHelm
 
             for ( Xp7DeploymentSpecNodeGroup ng : resource.getXp7DeploymentSpec().getXp7DeploymentSpecNodeGroups() )
             {
-                if ( ng.getXp7DeploymentSpecNodeGroupEnvironment().stream().filter(
-                    e -> e.getName().equals( "JAVA_OPTS" ) ).findFirst().isEmpty() )
-                {
-                    int maxRamPercent = ng.getMaster() ? 75 : 50;
+                Optional<Xp7DeploymentSpecNodeGroupEnvVar> optionalXpOpts =
+                    ng.getXp7DeploymentSpecNodeGroupEnvironment().stream().filter( e -> e.getName().equals( "XP_OPTS" ) ).findFirst();
 
-                    ng.getXp7DeploymentSpecNodeGroupEnvironment().add( new Xp7DeploymentSpecNodeGroupEnvVar().
-                        withName( "JAVA_OPTS" ).
-                        withValue(
-                            "-Djava.security.properties=/enonic-xp/home/extra-config/java.security.properties -XX:+UseContainerSupport -XX:MinRAMPercentage=20 -XX:InitialRAMPercentage=30 -XX:MaxRAMPercentage=" +
-                                maxRamPercent +
-                                " -XX:+UseConcMarkSweepGC -XX:+CMSParallelRemarkEnabled -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=60 -XX:+ScavengeBeforeFullGC -XX:+CMSScavengeBeforeRemark -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof" ) );
+                Xp7DeploymentSpecNodeGroupEnvVar xpOpts = null;
+                if ( optionalXpOpts.isEmpty() )
+                {
+                    xpOpts = new Xp7DeploymentSpecNodeGroupEnvVar().
+                        withName( "XP_OPTS" ).
+                        withValue( "" );
+                    ng.getXp7DeploymentSpecNodeGroupEnvironment().add( xpOpts );
                 }
+                else
+                {
+                    xpOpts = optionalXpOpts.get();
+                }
+
+                String opts = xpOpts.getValue();
+
+                if ( !(opts.contains( "-Xms" ) || opts.contains( "-Xmx" )) )
+                {
+                    opts = opts + getMemoryOpts( ng );
+                }
+
+                if ( !(opts.contains( "-XX:-HeapDumpOnOutOfMemoryError" ) || opts.contains( "-XX:HeapDumpPath" ))) {
+                    opts = opts + " -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof";
+                }
+
+                xpOpts.setValue( opts );
             }
 
             boolean isClustered = isClustered( resource );
@@ -152,6 +169,41 @@ public class OperatorXp7DeploymentHelm
             values.put( "ownerReferences", Collections.singletonList( createOwnerReference( resource ) ) );
 
             return values;
+        }
+
+        private String getMemoryOpts( final Xp7DeploymentSpecNodeGroup ng )
+        {
+            float memoryInMb = getMemory( ng.getXp7DeploymentSpecNodeGroupResources().getMemory() );
+
+            Float heapMemory;
+            if ( ng.getData() )
+            {
+                heapMemory = memoryInMb * 0.5f;
+            }
+            else
+            {
+                heapMemory = memoryInMb * 0.75f;
+            }
+
+            int heap = Math.round( heapMemory );
+
+            return String.format( " -Xms%sm -Xmx%sm", heap, heap );
+        }
+
+        private float getMemory( final String memory )
+        {
+            if ( memory.contains( "Gi" ) )
+            {
+                return Float.parseFloat( memory.replace( "Gi", "" ) ) * 1024F;
+            }
+            else if ( memory.contains( "Mi" ) )
+            {
+                return Float.parseFloat( memory.replace( "Mi", "" ) );
+            }
+            else
+            {
+                throw new RuntimeException( "Invalid memory mappings" );
+            }
         }
 
         @SuppressWarnings("UnstableApiUsage")

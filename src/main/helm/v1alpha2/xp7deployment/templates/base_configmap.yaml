@@ -240,5 +240,3 @@ data:
     {{- range $app := .Values.initApps }}
     {{ $app }}
     {{- end }}
-  java.security.properties: |-
-    networkaddress.cache.ttl=30

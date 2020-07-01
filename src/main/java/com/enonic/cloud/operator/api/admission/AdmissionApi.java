@@ -142,6 +142,7 @@ public class AdmissionApi
                                           "'spec.nodeGroups[" + i + "].resources.cpu' cannot be null" );
                 Preconditions.checkState( ng.getXp7DeploymentSpecNodeGroupResources().getMemory() != null,
                                           "'spec.nodeGroups[" + i + "].resources.memory' cannot be null" );
+                Preconditions.checkState( ng.getXp7DeploymentSpecNodeGroupResources().getMemory().contains( "Mi" ) || ng.getXp7DeploymentSpecNodeGroupResources().getMemory().contains( "Gi" ), "'spec.nodeGroups[" + i + "].resources.memory' can only be defined with Gi or Mi" );
                 Preconditions.checkState( ng.getXp7DeploymentSpecNodeGroupResources().getXp7DeploymentSpecNodeGroupDisks() != null,
                                           "'spec.nodeGroups[" + i + "].resources.disks' cannot be null" );
 
