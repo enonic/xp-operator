@@ -41,7 +41,7 @@ deployment:
       replicas: 1
       env:
       - name: "XP_OPTS"
-        value: " -Xms256m -Xmx256m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof"
+        value: " -Xms154m -Xmx154m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof"
       resources:
         cpu: "1"
         memory: "512Mi"

@@ -470,15 +470,9 @@ spec:
               name: "su"
               optional: false
         - name: "XP_OPTS"
-          value: "-Xms256m -Xmx256m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof"
+          value: "-Xms154m -Xmx154m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof"
         image: "enonic/xp:7.1.2-ubuntu"
         imagePullPolicy: "IfNotPresent"
-        lifecycle:
-          preStop:
-            exec:
-              command:
-              - "/bin/bash"
-              - "/enonic-xp/home/extra-config/preStop.sh"
         name: "exp"
         ports:
         - containerPort: 2609

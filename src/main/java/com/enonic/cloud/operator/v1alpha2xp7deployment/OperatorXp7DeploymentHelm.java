@@ -27,7 +27,9 @@ import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentSpe
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentSpecNodeGroupEnvVar;
 import com.enonic.cloud.operator.helpers.HandlerHelm;
 
+import static com.enonic.cloud.common.Configuration.cfgFloat;
 import static com.enonic.cloud.common.Configuration.cfgHasKey;
+import static com.enonic.cloud.common.Configuration.cfgInt;
 import static com.enonic.cloud.common.Configuration.cfgStr;
 import static com.enonic.cloud.common.Utils.createOwnerReference;
 import static com.enonic.cloud.kubernetes.client.Utils.cloneResource;
@@ -179,13 +181,13 @@ public class OperatorXp7DeploymentHelm
             Float heapMemory;
             if ( ng.getData() )
             {
-                heapMemory = memoryInMb * 0.5f;
+                heapMemory = memoryInMb * cfgFloat("operator.deployment.xp.heap.data");
             }
             else
             {
-                heapMemory = memoryInMb * 0.75f;
+                heapMemory = memoryInMb * cfgFloat("operator.deployment.xp.heap.other");
             }
-            int heap = Math.min( Math.round( heapMemory ), 26624 ); // No more then 26 gig
+            int heap = Math.min( Math.round( heapMemory ), cfgInt( "operator.deployment.xp.heap.max" ) );
 
             return String.format( " -Xms%sm -Xmx%sm", heap, heap );
         }

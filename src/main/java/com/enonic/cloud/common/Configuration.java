@@ -47,6 +47,11 @@ public final class Configuration
         return globalConfig().getOptionalValue( key, Boolean.class ).get();
     }
 
+    public static float cfgFloat( String key )
+    {
+        return globalConfig().getOptionalValue( key, Float.class ).get();
+    }
+
     public static void cfgIfBool( String key, Runnable func )
     {
         if ( cfgBool( key ) )
