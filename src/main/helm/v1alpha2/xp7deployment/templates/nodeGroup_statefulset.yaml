@@ -155,10 +155,12 @@ spec:
             successThreshold: 3
             timeoutSeconds: 5
 
+          {{- if $.Values.deployment.clustered }}
           lifecycle:
             preStop:
               exec:
                 command: ["/bin/bash","{{ $.Values.extraConfigLocation }}/preStop.sh"]
+          {{- end }}
 
           volumeMounts:
             - name: config
