@@ -77,6 +77,16 @@ public abstract class HandlerHelm<R extends HasMetadata>
             andThen( commandSorter ).
             andThen( runnableListExecutor ).
             apply( HelmToK8sParamsImpl.of( Optional.ofNullable( oldResource ), Optional.ofNullable( newResource ) ) );
+        Runnable postHandle = postHandle( newResource.getMetadata().getNamespace() );
+        if ( postHandle != null )
+        {
+            postHandle.run();
+        }
+    }
+
+    protected Runnable postHandle( final String namespace )
+    {
+        return null;
     }
 
     protected abstract ValueBuilder<R> getValueBuilder( final BaseValues baseValues );

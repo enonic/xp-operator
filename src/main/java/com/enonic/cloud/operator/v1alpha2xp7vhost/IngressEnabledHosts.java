@@ -1,4 +1,4 @@
-package com.enonic.cloud.operator.dns.functions.info;
+package com.enonic.cloud.operator.v1alpha2xp7vhost;
 
 import java.util.HashSet;
 import java.util.Map;

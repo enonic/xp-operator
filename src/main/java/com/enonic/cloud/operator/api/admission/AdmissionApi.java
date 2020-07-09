@@ -20,6 +20,7 @@ import io.fabric8.kubernetes.api.model.admission.AdmissionReview;
 
 import com.enonic.cloud.common.Validator;
 import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7App;
+import com.enonic.cloud.kubernetes.model.v1alpha2.domain.Domain;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7config.Xp7Config;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentSpecNodeGroup;
@@ -44,6 +45,7 @@ public class AdmissionApi
         addFunction( Xp7Config.class, this::xp7config );
         addFunction( Xp7Deployment.class, this::xp7deployment );
         addFunction( Xp7VHost.class, this::xp7VHost );
+        addFunction( Domain.class, this::domain );
     }
 
     @POST
@@ -142,7 +144,9 @@ public class AdmissionApi
                                           "'spec.nodeGroups[" + i + "].resources.cpu' cannot be null" );
                 Preconditions.checkState( ng.getXp7DeploymentSpecNodeGroupResources().getMemory() != null,
                                           "'spec.nodeGroups[" + i + "].resources.memory' cannot be null" );
-                Preconditions.checkState( ng.getXp7DeploymentSpecNodeGroupResources().getMemory().contains( "Mi" ) || ng.getXp7DeploymentSpecNodeGroupResources().getMemory().contains( "Gi" ), "'spec.nodeGroups[" + i + "].resources.memory' can only be defined with Gi or Mi" );
+                Preconditions.checkState( ng.getXp7DeploymentSpecNodeGroupResources().getMemory().contains( "Mi" ) ||
+                                              ng.getXp7DeploymentSpecNodeGroupResources().getMemory().contains( "Gi" ),
+                                          "'spec.nodeGroups[" + i + "].resources.memory' can only be defined with Gi or Mi" );
                 Preconditions.checkState( ng.getXp7DeploymentSpecNodeGroupResources().getXp7DeploymentSpecNodeGroupDisks() != null,
                                           "'spec.nodeGroups[" + i + "].resources.disks' cannot be null" );
 
@@ -278,6 +282,46 @@ public class AdmissionApi
                 Preconditions.checkState( tmp.isEmpty(), String.format( "Xp7Deployment '%s' does not contain nodeGroups %s",
                                                                         xp7Deployments.get().getMetadata().getName(), nodeGroups ) );
             }
+        }
+    }
+
+
+    private void domain( final AdmissionReview admissionReview )
+    {
+        Domain oldDomain = (Domain) admissionReview.getRequest().getOldObject();
+        Domain newDomain = (Domain) admissionReview.getRequest().getObject();
+        if ( newDomain == null )
+        {
+            return;
+        }
+
+        Preconditions.checkState( newDomain.getDomainSpec() != null, "'spec' cannot be null" );
+        Preconditions.checkState( newDomain.getDomainSpec().getHost() != null, "'spec.host' cannot be null" );
+        Validator.dns1123( "spec.host", newDomain.getDomainSpec().getHost() );
+        Preconditions.checkState( newDomain.getDomainSpec().getDnsRecord() != null, "'spec.dnsRecord' cannot be null" );
+        if ( newDomain.getDomainSpec().getDnsRecord() )
+        {
+            Preconditions.checkState( newDomain.getDomainSpec().getCdn() != null, "'spec.cdn' cannot be null if dnsRecord = true" );
+        }
+        if ( newDomain.getDomainSpec().getDomainSpecCertificate() != null )
+        {
+            Preconditions.checkState( newDomain.getDomainSpec().getDomainSpecCertificate().getAuthority() != null,
+                                      "'spec.certificate.authority' cannot be null" );
+            switch ( newDomain.getDomainSpec().getDomainSpecCertificate().getAuthority() )
+            {
+                case CUSTOM:
+                    Preconditions.checkState( newDomain.getDomainSpec().getDomainSpecCertificate().getIdentifier() != null,
+                                              "'spec.certificate.identifier' cannot be null when authority is CUSTOM" );
+                case CLUSTER_ISSUER:
+                    Preconditions.checkState( newDomain.getDomainSpec().getDomainSpecCertificate().getIdentifier() != null,
+                                              "'spec.certificate.identifier' cannot be null when authority is CLUSTER_ISSUER" );
+            }
+        }
+
+        if ( oldDomain != null && newDomain != null )
+        {
+            Preconditions.checkState( oldDomain.getDomainSpec().getHost().equals( newDomain.getDomainSpec().getHost() ),
+                                      "'spec.host' cannot be changed" );
         }
     }
 }

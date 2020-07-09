@@ -26,6 +26,7 @@ import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentSpecNodeGroup;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentSpecNodeGroupEnvVar;
 import com.enonic.cloud.operator.helpers.HandlerHelm;
+import com.enonic.cloud.operator.ingress.OperatorXp7ConfigSync;
 
 import static com.enonic.cloud.common.Configuration.cfgFloat;
 import static com.enonic.cloud.common.Configuration.cfgHasKey;
@@ -45,6 +46,9 @@ public class OperatorXp7DeploymentHelm
     @Inject
     @Named("v1alpha2/xp7deployment")
     Templator templator;
+
+    @Inject
+    OperatorXp7ConfigSync operatorXp7ConfigSync;
 
     @Override
     protected ValueBuilder<Xp7Deployment> getValueBuilder( final BaseValues baseValues )
@@ -82,6 +86,12 @@ public class OperatorXp7DeploymentHelm
             inNamespace( cfgStr( "operator.deployment.adminServiceAccount.namespace" ) ).
             withName( cfgStr( "operator.deployment.adminServiceAccount.name" ) ).
             get();
+    }
+
+    @Override
+    protected Runnable postHandle( final String namespace )
+    {
+        return () -> operatorXp7ConfigSync.handle( namespace );
     }
 
     public static class Xp7DeploymentValueBuilder
@@ -181,11 +191,11 @@ public class OperatorXp7DeploymentHelm
             Float heapMemory;
             if ( ng.getData() )
             {
-                heapMemory = memoryInMb * cfgFloat("operator.deployment.xp.heap.data");
+                heapMemory = memoryInMb * cfgFloat( "operator.deployment.xp.heap.data" );
             }
             else
             {
-                heapMemory = memoryInMb * cfgFloat("operator.deployment.xp.heap.other");
+                heapMemory = memoryInMb * cfgFloat( "operator.deployment.xp.heap.other" );
             }
             int heap = Math.min( Math.round( heapMemory ), cfgInt( "operator.deployment.xp.heap.max" ) );
 

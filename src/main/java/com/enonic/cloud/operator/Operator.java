@@ -1,7 +1,6 @@
 package com.enonic.cloud.operator;
 
 import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -17,8 +16,12 @@ import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.cloud.common.TaskRunner;
 import com.enonic.cloud.kubernetes.Informers;
-import com.enonic.cloud.operator.dns.OperatorDns;
+import com.enonic.cloud.operator.domain.OperatorDomainCertSync;
+import com.enonic.cloud.operator.domain.OperatorDomainDns;
+import com.enonic.cloud.operator.domain.OperatorIngressCertSync;
 import com.enonic.cloud.operator.helpers.InformerEventHandler;
+import com.enonic.cloud.operator.ingress.OperatorIngress;
+import com.enonic.cloud.operator.ingress.OperatorXp7ConfigSync;
 import com.enonic.cloud.operator.v1alpha1xp7app.OperatorXp7AppInstaller;
 import com.enonic.cloud.operator.v1alpha1xp7app.OperatorXp7AppStatus;
 import com.enonic.cloud.operator.v1alpha2xp7config.OperatorConfigMapSync;
@@ -27,8 +30,6 @@ import com.enonic.cloud.operator.v1alpha2xp7deployment.OperatorNamespaceDelete;
 import com.enonic.cloud.operator.v1alpha2xp7deployment.OperatorXp7DeploymentHelm;
 import com.enonic.cloud.operator.v1alpha2xp7deployment.OperatorXp7DeploymentStatus;
 import com.enonic.cloud.operator.v1alpha2xp7deployment.OperatorXpClientCacheInvalidate;
-import com.enonic.cloud.operator.v1alpha2xp7vhost.OperatorXp7ConfigSync;
-import com.enonic.cloud.operator.v1alpha2xp7vhost.OperatorXp7VHost;
 import com.enonic.cloud.operator.v1alpha2xp7vhost.OperatorXp7VHostHelm;
 import com.enonic.cloud.operator.v1alpha2xp7vhost.OperatorXp7VHostStatus;
 
@@ -44,7 +45,15 @@ public class Operator
 
     private final Informers informers;
 
-    private final OperatorDns operatorDns;
+    private final OperatorDomainCertSync operatorDomainCertSync;
+
+    private final OperatorDomainDns operatorDomainDns;
+
+    private final OperatorIngressCertSync operatorIngressCertSync;
+
+    private final OperatorIngress operatorIngress;
+
+    private final OperatorXp7ConfigSync operatorXp7ConfigSync;
 
     private final OperatorXp7AppInstaller operatorXp7AppInstaller;
 
@@ -64,25 +73,26 @@ public class Operator
 
     private final OperatorXp7VHostHelm operatorXp7VHostHelm;
 
-    private final OperatorXp7VHost operatorXp7VHost;
-
     private final OperatorXp7VHostStatus operatorXp7VHostStatus;
 
-    private final OperatorXp7ConfigSync operatorXp7ConfigSync;
-
     @Inject
-    public Operator( final TaskRunner taskRunner, final Informers informers, final OperatorDns operatorDns,
+    public Operator( final TaskRunner taskRunner, final Informers informers, final OperatorDomainCertSync operatorDomainCertSync,
+                     final OperatorDomainDns operatorDomainDns, final OperatorIngressCertSync operatorIngressCertSync,
+                     final OperatorIngress operatorIngress, final OperatorXp7ConfigSync operatorXp7ConfigSync,
                      final OperatorXp7AppInstaller operatorXp7AppInstaller, final OperatorXp7AppStatus operatorXp7AppStatus,
                      final OperatorXp7Config operatorXp7Config, final OperatorConfigMapSync operatorConfigMapSync,
                      final OperatorNamespaceDelete operatorNamespaceDelete, final OperatorXp7DeploymentHelm operatorXp7DeploymentHelm,
                      final OperatorXp7DeploymentStatus operatorXp7DeploymentStatus,
                      final OperatorXpClientCacheInvalidate operatorXpClientCacheInvalidate, final OperatorXp7VHostHelm operatorXp7VHostHelm,
-                     final OperatorXp7VHost operatorXp7VHost, final OperatorXp7VHostStatus operatorXp7VHostStatus,
-                     final OperatorXp7ConfigSync operatorXp7ConfigSync )
+                     final OperatorXp7VHostStatus operatorXp7VHostStatus )
     {
         this.taskRunner = taskRunner;
         this.informers = informers;
-        this.operatorDns = operatorDns;
+        this.operatorDomainCertSync = operatorDomainCertSync;
+        this.operatorDomainDns = operatorDomainDns;
+        this.operatorIngressCertSync = operatorIngressCertSync;
+        this.operatorIngress = operatorIngress;
+        this.operatorXp7ConfigSync = operatorXp7ConfigSync;
         this.operatorXp7AppInstaller = operatorXp7AppInstaller;
         this.operatorXp7AppStatus = operatorXp7AppStatus;
         this.operatorXp7Config = operatorXp7Config;
@@ -92,48 +102,48 @@ public class Operator
         this.operatorXp7DeploymentStatus = operatorXp7DeploymentStatus;
         this.operatorXpClientCacheInvalidate = operatorXpClientCacheInvalidate;
         this.operatorXp7VHostHelm = operatorXp7VHostHelm;
-        this.operatorXp7VHost = operatorXp7VHost;
         this.operatorXp7VHostStatus = operatorXp7VHostStatus;
-        this.operatorXp7ConfigSync = operatorXp7ConfigSync;
     }
 
     void onStartup( @Observes StartupEvent _ev )
     {
         // The timer is here to give the operator api time to start up
-        new Timer().schedule(
-            new java.util.TimerTask() {
-                @Override
-                public void run() {
-                    long statusInterval = cfgLong( "operator.tasks.status.interval" );
-                    long syncInterval = cfgLong( "operator.tasks.sync.interval" );
+        new Timer().schedule( new java.util.TimerTask()
+        {
+            @Override
+            public void run()
+            {
+                long statusInterval = cfgLong( "operator.tasks.status.interval" );
+                long syncInterval = cfgLong( "operator.tasks.sync.interval" );
 
-                    cfgIfBool( "dns.enabled", () -> {
-                        listen( operatorDns, informers.ingressInformer() );
-                    } );
+                listen( operatorDomainCertSync, informers.domainInformer() );
+                cfgIfBool( "dns.enabled", () -> {
+                    listen( operatorDomainDns, informers.domainInformer() );
+                } );
+                listen( operatorIngressCertSync, informers.ingressInformer() );
 
-                    listen( operatorXp7AppInstaller, informers.xp7AppInformer() );
-                    schedule( operatorXp7AppInstaller, syncInterval );
-                    schedule( operatorXp7AppStatus, statusInterval );
+                listen( operatorIngress, informers.ingressInformer() );
+                schedule( operatorXp7ConfigSync, syncInterval );
 
-                    listen( operatorXp7Config, informers.xp7ConfigInformer() );
-                    schedule( operatorConfigMapSync, syncInterval );
+                listen( operatorXp7AppInstaller, informers.xp7AppInformer() );
+                schedule( operatorXp7AppInstaller, syncInterval );
+                schedule( operatorXp7AppStatus, statusInterval );
 
-                    listen( operatorNamespaceDelete, informers.xp7DeploymentInformer() );
-                    listen( operatorXp7DeploymentHelm, informers.xp7DeploymentInformer() );
-                    schedule( operatorXp7DeploymentStatus, statusInterval );
-                    listen( operatorXpClientCacheInvalidate, informers.xp7DeploymentInformer() );
+                listen( operatorXp7Config, informers.xp7ConfigInformer() );
+                schedule( operatorConfigMapSync, syncInterval );
 
-                    listen( operatorXp7VHostHelm, informers.xp7VHostInformer() );
-                    listen( operatorXp7VHost, informers.xp7VHostInformer() );
-                    schedule( operatorXp7VHostStatus, statusInterval );
-                    schedule( operatorXp7ConfigSync, syncInterval );
+                listen( operatorNamespaceDelete, informers.xp7DeploymentInformer() );
+                listen( operatorXp7DeploymentHelm, informers.xp7DeploymentInformer() );
+                schedule( operatorXp7DeploymentStatus, statusInterval );
+                listen( operatorXpClientCacheInvalidate, informers.xp7DeploymentInformer() );
 
-                    log.info( "Starting informers" );
-                    informers.informerFactory().startAllRegisteredInformers();
-                }
-            },
-            5000
-        );
+                listen( operatorXp7VHostHelm, informers.xp7VHostInformer() );
+                schedule( operatorXp7VHostStatus, statusInterval );
+
+                log.info( "Starting informers" );
+                informers.informerFactory().startAllRegisteredInformers();
+            }
+        }, 5000 );
     }
 
     private <T> void listen( ResourceEventHandler<T> handler, SharedIndexInformer<T> informer )

@@ -208,7 +208,7 @@ webhooks:
     - apiGroups: ["enonic.cloud"]
       operations: ["*"]
       apiVersions: ["*"]
-      resources: ["xp7deployments", "xp7vhosts", "xp7apps", "xp7configs"]
+      resources: ["xp7deployments", "xp7vhosts", "xp7apps", "xp7configs", "domains"]
       scope: "*"
   admissionReviewVersions: ["v1", "v1beta1"]
   failurePolicy: Fail
@@ -231,7 +231,12 @@ webhooks:
       - apiGroups: ["enonic.cloud"]
         operations: ["*"]
         apiVersions: ["*"]
-        resources: ["xp7deployments", "xp7vhosts", "xp7apps", "xp7configs"]
+        resources: ["xp7deployments", "xp7vhosts", "xp7apps", "xp7configs", "domains"]
+        scope: "*"
+      - apiGroups: ["extensions"]
+        operations: ["*"]
+        apiVersions: ["v1beta1"]
+        resources: ["ingresses"]
         scope: "*"
     failurePolicy: Fail
     sideEffects: None

@@ -20,20 +20,13 @@ metadata:
   annotations:
     {{ $.Values.annotationKeys.applyPriority }}: "100"
     {{ $.Values.annotationKeys.vHostName }}: {{ $.Values.vhost.name }}
-    {{- if $.Values.vhost.spec.options.dnsRecord }}
-    enonic.cloud/dns.hostname: {{ $.Values.vhost.spec.host }}
-    enonic.cloud/dns.heritage: {{ list "heritage=ec-operator,id=" $.Values.clusterId | join "" }}
-    {{- end }}
-    {{- if $.Values.vhost.spec.options.cdn }}
-    enonic.cloud/dns.cdn: "true"
-    {{- end }}
-    {{- if $.Values.vhost.issuer }}
-    cert-manager.io/cluster-issuer: {{ $.Values.vhost.issuer }}
-    {{- end }}
-    {{- with $mapping.options.ingressAnnotations }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
-
+    enonic.cloud/ingress.cert.manage: "true"
+    enonic.cloud/xp7.vhost.mapping.1: |-
+      source = {{ $mapping.source }}
+      target = {{ $mapping.target }}
+      {{- if $mapping.idProviders }}
+      idproviders = {{ $mapping.idProviders.default }}
+      {{- end }}
 spec:
   rules:
     - host: {{ $.Values.vhost.spec.host }}
@@ -43,11 +36,5 @@ spec:
               serviceName: {{ $mapping.nodeGroup }}
               servicePort: 8080
             path: {{ $mapping.source }}
-  {{- if $.Values.vhost.spec.certificate }}
-  tls:
-    - hosts:
-        - {{ $.Values.vhost.spec.host }}
-      secretName: {{ if $.Values.vhost.issuer }}{{ $.Values.vhost.name }}-cert{{ else }}{{ $.Values.vhost.spec.certificate.identifier }}{{ end }}
-  {{- end }}
 {{- end }}
 {{- end }}

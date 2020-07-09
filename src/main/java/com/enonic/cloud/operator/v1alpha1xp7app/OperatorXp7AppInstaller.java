@@ -66,6 +66,13 @@ public class OperatorXp7AppInstaller
                 updateAppKey( newResource, null );
             }
         }
+
+        List<String> finalizers = newResource.getMetadata().getFinalizers();
+        if ( newResource.getMetadata().getDeletionTimestamp() != null &&
+            finalizers.contains( cfgStr( "operator.finalizer.app.uninstall" ) ) )
+        {
+            uninstallApp( newResource );
+        }
     }
 
     @Override

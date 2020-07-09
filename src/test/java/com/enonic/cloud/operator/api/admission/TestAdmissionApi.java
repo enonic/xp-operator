@@ -39,7 +39,7 @@ class TestAdmissionApi
         vHostTestInformerSearcher = new TestInformerSearcher<>();
         searchers = SearchersImpl.of( emptyInformerSearcher, emptyInformerSearcher, emptyInformerSearcher, emptyInformerSearcher,
                                       emptyInformerSearcher, emptyInformerSearcher, deploymentTestInformerSearcher,
-                                      vHostTestInformerSearcher );
+                                      vHostTestInformerSearcher, emptyInformerSearcher );
         cfgStr( "operator.helm.charts.Values.allNodesKey" );
     }
 

@@ -1,0 +1,21 @@
+apiVersion: enonic.cloud/v1alpha2
+kind: Domain
+metadata:
+  name: {{ $.Values.vhost.name }}
+  annotations:
+    {{ $.Values.annotationKeys.applyPriority }}: "0"
+  ownerReferences:
+    {{- with $.Values.ownerReferences }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  host: {{ $.Values.vhost.spec.host }}
+  dnsRecord: {{ $.Values.vhost.spec.options.dnsRecord }}
+  dnsTTL: 3600
+  cdn: {{ $.Values.vhost.spec.options.cdn }}
+  {{- if $.Values.vhost.spec.certificate }}
+  certificate:
+    {{- with $.Values.vhost.spec.certificate }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- end }}

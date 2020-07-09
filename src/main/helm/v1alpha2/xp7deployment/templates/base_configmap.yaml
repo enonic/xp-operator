@@ -17,6 +17,13 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
 data:
+  vhost-defaults.cfg: |-
+    enabled = true
+
+    mapping.localhost.host = localhost
+    mapping.localhost.source = /
+    mapping.localhost.target = /
+    mapping.localhost.idProvider.system = default
   dns.sh: |-
     #!/bin/bash
 

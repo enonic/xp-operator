@@ -35,10 +35,12 @@ import com.enonic.cloud.kubernetes.commands.builders.ImmutableCommandBuilderServ
 import com.enonic.cloud.kubernetes.commands.builders.ImmutableCommandBuilderServiceAccount;
 import com.enonic.cloud.kubernetes.commands.builders.ImmutableCommandBuilderStatefulSet;
 import com.enonic.cloud.kubernetes.commands.builders.ImmutableCommandBuilderV1Alpha1Xp7App;
+import com.enonic.cloud.kubernetes.commands.builders.ImmutableCommandBuilderV1Alpha2Domain;
 import com.enonic.cloud.kubernetes.commands.builders.ImmutableCommandBuilderV1Alpha2Xp7Config;
 import com.enonic.cloud.kubernetes.commands.builders.ImmutableCommandBuilderV1Alpha2Xp7Deployment;
 import com.enonic.cloud.kubernetes.commands.builders.ImmutableCommandBuilderV1Alpha2Xp7VHost;
 import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7App;
+import com.enonic.cloud.kubernetes.model.v1alpha2.domain.Domain;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7config.Xp7Config;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHost;
@@ -70,6 +72,7 @@ public class K8sCommandMapper
         this.builderMap.put( ServiceAccount.class, this::serviceAccount );
         this.builderMap.put( StatefulSet.class, this::statefulSet );
         this.builderMap.put( Xp7App.class, this::v1alpha1Xp7App );
+        this.builderMap.put( Domain.class, this::v1alpha2Domain );
         this.builderMap.put( Xp7Config.class, this::v1alpha2Xp7Config );
         this.builderMap.put( Xp7Deployment.class, this::v1alpha2Xp7Deployment );
         this.builderMap.put( Xp7VHost.class, this::v1alpha2Xp7VHost );
@@ -167,6 +170,14 @@ public class K8sCommandMapper
     {
         return ImmutableCommandBuilderV1Alpha1Xp7App.builder().
             client( clients.xp7Apps() ).
+            build().
+            apply( params );
+    }
+
+    private Optional<K8sCommand> v1alpha2Domain( final GenericBuilderParams params )
+    {
+        return ImmutableCommandBuilderV1Alpha2Domain.builder().
+            client( clients.domain() ).
             build().
             apply( params );
     }

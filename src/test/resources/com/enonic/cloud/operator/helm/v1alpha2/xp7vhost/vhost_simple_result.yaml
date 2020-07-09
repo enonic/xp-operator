@@ -5,10 +5,9 @@ metadata:
   annotations:
     enonic.applyPriority: "100"
     enonic.vhost: "test-purplejs-io"
-    enonic.cloud/dns.hostname: "test.purplejs.io"
-    enonic.cloud/dns.heritage: "heritage=ec-operator,id=44ddc40b-266c-4c99-b094-e758328fc6ba"
-    enonic.cloud/dns.cdn: "true"
-    cert-manager.io/cluster-issuer: "selfsigned"
+    enonic.cloud/ingress.cert.manage: "true"
+    enonic.cloud/xp7.vhost.mapping.1: "source = /a\ntarget = /admin\nidproviders =\
+      \ system"
   labels:
     enonic.managed: "true"
   name: "test-purplejs-io-e406cf2116"
@@ -29,10 +28,6 @@ spec:
           serviceName: "all"
           servicePort: 8080
         path: "/a"
-  tls:
-  - hosts:
-    - "test.purplejs.io"
-    secretName: "test-purplejs-io-cert"
 ---
 apiVersion: "extensions/v1beta1"
 kind: "Ingress"
@@ -40,10 +35,8 @@ metadata:
   annotations:
     enonic.applyPriority: "100"
     enonic.vhost: "test-purplejs-io"
-    enonic.cloud/dns.hostname: "test.purplejs.io"
-    enonic.cloud/dns.heritage: "heritage=ec-operator,id=44ddc40b-266c-4c99-b094-e758328fc6ba"
-    enonic.cloud/dns.cdn: "true"
-    cert-manager.io/cluster-issuer: "selfsigned"
+    enonic.cloud/ingress.cert.manage: "true"
+    enonic.cloud/xp7.vhost.mapping.1: "source = /b\ntarget = /"
   labels:
     enonic.managed: "true"
   name: "test-purplejs-io-419420aa0e"
@@ -64,7 +57,24 @@ spec:
           serviceName: "frontend"
           servicePort: 8080
         path: "/b"
-  tls:
-  - hosts:
-    - "test.purplejs.io"
-    secretName: "test-purplejs-io-cert"
+---
+spec:
+  host: "test.purplejs.io"
+  dnsRecord: true
+  dnsTTL: 3600
+  cdn: true
+  certificate:
+    authority: "selfSigned"
+kind: "Domain"
+apiVersion: "enonic.cloud/v1alpha2"
+metadata:
+  annotations:
+    enonic.applyPriority: "0"
+  name: "test-purplejs-io"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7VHost"
+    blockOwnerDeletion: false
+    controller: true
+    name: "test-purplejs-io"
+    uid: "54edf212-742d-44f5-9fef-6749da7fd534"

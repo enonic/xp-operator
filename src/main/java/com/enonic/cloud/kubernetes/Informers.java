@@ -11,6 +11,7 @@ import io.fabric8.kubernetes.client.informers.SharedInformerFactory;
 
 import com.enonic.cloud.common.annotations.Params;
 import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7App;
+import com.enonic.cloud.kubernetes.model.v1alpha2.domain.Domain;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7config.Xp7Config;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHost;
@@ -40,4 +41,5 @@ public abstract class Informers
 
     public abstract SharedIndexInformer<Xp7VHost> xp7VHostInformer();
 
+    public abstract SharedIndexInformer<Domain> domainInformer();
 }

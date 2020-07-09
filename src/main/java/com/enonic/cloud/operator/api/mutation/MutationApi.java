@@ -1,8 +1,10 @@
 package com.enonic.cloud.operator.api.mutation;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -18,10 +20,14 @@ import com.google.common.io.BaseEncoding;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.admission.AdmissionResponseBuilder;
 import io.fabric8.kubernetes.api.model.admission.AdmissionReview;
+import io.fabric8.kubernetes.api.model.extensions.Ingress;
 
 import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7App;
 import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7AppStatus;
 import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7AppStatusFields;
+import com.enonic.cloud.kubernetes.model.v1alpha2.domain.Domain;
+import com.enonic.cloud.kubernetes.model.v1alpha2.domain.DomainStatus;
+import com.enonic.cloud.kubernetes.model.v1alpha2.domain.DomainStatusFields;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7config.Xp7Config;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentStatus;
@@ -37,7 +43,6 @@ import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHostStatusFields;
 import com.enonic.cloud.operator.api.BaseAdmissionApi;
 
 import static com.enonic.cloud.common.Configuration.cfgBool;
-import static com.enonic.cloud.common.Configuration.cfgIfBool;
 import static com.enonic.cloud.common.Configuration.cfgStr;
 import static com.enonic.cloud.common.Utils.createOwnerReference;
 
@@ -53,6 +58,8 @@ public class MutationApi
         addFunction( Xp7Config.class, this::xp7config );
         addFunction( Xp7Deployment.class, this::xp7deployment );
         addFunction( Xp7VHost.class, this::xp7VHost );
+        addFunction( Domain.class, this::domain );
+        addFunction( io.fabric8.kubernetes.api.model.extensions.Ingress.class, this::ingress );
     }
 
     @POST
@@ -164,6 +171,47 @@ public class MutationApi
         }
     }
 
+    private void domain( final MutationRequest mt )
+    {
+        Domain newR = (Domain) mt.getAdmissionReview().getRequest().getObject();
+        if ( newR == null )
+        {
+            return;
+        }
+
+        DomainStatus defStatus = new DomainStatus().
+            withState( DomainStatus.State.PENDING ).
+            withMessage( "Created" ).
+            withDomainStatusFields( new DomainStatusFields( new LinkedList<>(), false ) );
+
+        if ( !patchDefault( mt, defStatus, newR.getDomainStatus(), "/status" ) )
+        {
+            patchDefault( mt, defStatus.getMessage(), newR.getDomainStatus().getMessage(), "/status/message" );
+            patchDefault( mt, defStatus.getState(), newR.getDomainStatus().getState(), "/status/state" );
+            patchDefault( mt, defStatus.getDomainStatusFields(), newR.getDomainStatus().getDomainStatusFields(), "/status/fields" );
+        }
+
+        patchDefault( mt, 3600, newR.getDomainSpec().getDnsTTL(), "/spec/dnsTTL" );
+    }
+
+    private void ingress( final MutationRequest mt )
+    {
+        Ingress newR = (Ingress) mt.getAdmissionReview().getRequest().getObject();
+        if ( newR == null )
+        {
+            return;
+        }
+
+        Map<String, String> oldAnnotations =
+            newR.getMetadata().getAnnotations() != null ? newR.getMetadata().getAnnotations() : new HashMap<>();
+        Map<String, String> newAnnotations = new HashMap<>( oldAnnotations );
+
+        if ( !newAnnotations.containsKey( "kubernetes.io/ingress.class" ) )
+        {
+            newAnnotations.put( "kubernetes.io/ingress.class", "nginx" );
+        }
+    }
+
     private void xp7VHost( MutationRequest mt )
     {
         Xp7VHost oldR = (Xp7VHost) mt.getAdmissionReview().getRequest().getOldObject();
@@ -267,12 +315,13 @@ public class MutationApi
         }
 
         boolean linkerd = cfgBool( "operator.helm.charts.Values.extensions.linkerd.enabled" );
-        if(linkerd) {
+        if ( linkerd )
+        {
             String cfgSnippet = annotations.getAdditionalProperties().get( "nginx.ingress.kubernetes.io/configuration-snippet" );
-            StringBuilder sb = new StringBuilder( cfgSnippet != null ? cfgSnippet: "" ).
+            StringBuilder sb = new StringBuilder( cfgSnippet != null ? cfgSnippet : "" ).
                 append( "\n" ).
                 append( "proxy_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;" ).
-                append("grpc_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;");
+                append( "grpc_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;" );
             annotations.setAdditionalProperty( "nginx.ingress.kubernetes.io/configuration-snippet", sb.toString() );
             change = true;
         }

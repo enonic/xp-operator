@@ -20,10 +20,12 @@ import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
 import io.fabric8.kubernetes.client.informers.SharedInformerFactory;
 
 import com.enonic.cloud.kubernetes.client.v1alpha1.xp7app.Xp7AppList;
+import com.enonic.cloud.kubernetes.client.v1alpha2.domain.DomainList;
 import com.enonic.cloud.kubernetes.client.v1alpha2.xp7config.Xp7ConfigList;
 import com.enonic.cloud.kubernetes.client.v1alpha2.xp7deployment.Xp7DeploymentList;
 import com.enonic.cloud.kubernetes.client.v1alpha2.xp7vhost.Xp7VHostList;
 import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7App;
+import com.enonic.cloud.kubernetes.model.v1alpha2.domain.Domain;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7config.Xp7Config;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHost;
@@ -54,6 +56,7 @@ public class InformersProducer
             xp7ConfigInformer( xp7ConfigInformer( clients, sf ) ).
             xp7DeploymentInformer( xp7DeploymentInformer( clients, sf ) ).
             xp7VHostInformer( xp7VHostInformer( clients, sf ) ).
+            domainInformer( domainInformer( clients, sf ) ).
             build();
     }
 
@@ -104,5 +107,10 @@ public class InformersProducer
     {
         return sf.sharedIndexInformerForCustomResource( clients.xp7VHosts().createContext(), Xp7VHost.class, Xp7VHostList.class,
                                                         informerReSync );
+    }
+
+    private SharedIndexInformer<Domain> domainInformer( final Clients clients, final SharedInformerFactory sf )
+    {
+        return sf.sharedIndexInformerForCustomResource( clients.domain().createContext(), Domain.class, DomainList.class, informerReSync );
     }
 }

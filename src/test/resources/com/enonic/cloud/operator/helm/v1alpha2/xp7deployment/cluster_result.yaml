@@ -58,6 +58,8 @@ metadata:
     controller: true
     name: "mycloud-mysolution-myenv-myservice"
 data:
+  vhost-defaults.cfg: "enabled = true\n\nmapping.localhost.host = localhost\nmapping.localhost.source\
+    \ = /\nmapping.localhost.target = /\nmapping.localhost.idProvider.system = default"
   dns.sh: "#!/bin/bash\n\nset -e\n\nusage () {\n    echo \"Usage: $SCRIPT_NAME [OPTIONS]\"\
     \n    echo \"Wait until DNS record is present\"\n    echo \"\"\n    echo \"Options:\"\
     \n    echo \"  -d, --dns=         Record to poll\"\n    echo \"  -t, --timeout=\
@@ -1489,71 +1491,6 @@ metadata:
     service: "myservice"
     solution: "mysolution"
   name: "frontend-elasticsearch"
-  namespace: "mycloud-mysolution-myenv-myservice"
-  ownerReferences:
-  - apiVersion: "enonic.cloud/v1alpha2"
-    kind: "Xp7Deployment"
-    blockOwnerDeletion: false
-    controller: true
-    name: "mycloud-mysolution-myenv-myservice"
----
-spec:
-  host: "healthcheck"
-  options:
-    dnsRecord: false
-    cdn: false
-  mappings:
-  - nodeGroup: "all"
-    source: "/"
-    target: "/webapp/com.enonic.app.alive"
-    options:
-      ingress: false
-kind: "Xp7VHost"
-apiVersion: "enonic.cloud/v1alpha2"
-metadata:
-  annotations:
-    enonic.applyPriority: "80"
-  labels:
-    enonic.managed: "true"
-    cloud: "mycloud"
-    environment: "myenv"
-    service: "myservice"
-    solution: "mysolution"
-  name: "all-healthcheck"
-  namespace: "mycloud-mysolution-myenv-myservice"
-  ownerReferences:
-  - apiVersion: "enonic.cloud/v1alpha2"
-    kind: "Xp7Deployment"
-    blockOwnerDeletion: false
-    controller: true
-    name: "mycloud-mysolution-myenv-myservice"
----
-spec:
-  host: "localhost"
-  options:
-    dnsRecord: false
-    cdn: false
-  mappings:
-  - nodeGroup: "all"
-    source: "/"
-    target: "/"
-    idProviders:
-      default: "system"
-      enabled: []
-    options:
-      ingress: false
-kind: "Xp7VHost"
-apiVersion: "enonic.cloud/v1alpha2"
-metadata:
-  annotations:
-    enonic.applyPriority: "80"
-  labels:
-    enonic.managed: "true"
-    cloud: "mycloud"
-    environment: "myenv"
-    service: "myservice"
-    solution: "mysolution"
-  name: "all-localhost"
   namespace: "mycloud-mysolution-myenv-myservice"
   ownerReferences:
   - apiVersion: "enonic.cloud/v1alpha2"

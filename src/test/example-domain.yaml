@@ -1,0 +1,10 @@
+apiVersion: enonic.cloud/v1alpha2
+kind: Domain
+metadata:
+  name: test-domain-purplejs-io
+spec:
+  host: test-domain.purplejs.io
+  dnsRecord: true
+  cdn: false
+  certificate:
+    authority: selfSigned

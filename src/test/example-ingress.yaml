@@ -1,0 +1,21 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: test-domain-purplejs-io
+  namespace: mycloud-mysolution-myenv-myservice
+  annotations:
+    bla: a
+    enonic.cloud/ingress.cert.manage: "true"
+    enonic.cloud/xp7.vhost.mapping.1: |-
+      source = /
+      target = /admin
+      idproviders = system
+spec:
+  rules:
+    - host: test-domain.purplejs.io
+      http:
+        paths:
+          - backend:
+              serviceName: master
+              servicePort: 8080
+            path: /

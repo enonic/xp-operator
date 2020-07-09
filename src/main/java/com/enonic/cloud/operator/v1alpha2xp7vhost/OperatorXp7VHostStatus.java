@@ -24,8 +24,6 @@ import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHost;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHostSpecMapping;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHostStatus;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHostStatusFields;
-import com.enonic.cloud.operator.dns.functions.info.IngressAssignedIps;
-import com.enonic.cloud.operator.dns.functions.info.IngressEnabledHosts;
 import com.enonic.cloud.operator.helpers.HandlerStatus;
 
 import static com.enonic.cloud.common.Configuration.cfgStr;
