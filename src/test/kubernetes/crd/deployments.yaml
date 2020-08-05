@@ -1,16 +1,15 @@
-apiVersion: apiextensions.k8s.io/v1beta1
+apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: xp7deployments.enonic.cloud
 spec:
   group: enonic.cloud
-  names:
-    kind: Xp7Deployment
-    listKind: Xp7DeploymentList
-    plural: xp7deployments
-    singular: xp7deployment
   scope: Namespaced
   preserveUnknownFields: false
+  names:
+    kind: Xp7Deployment
+    singular: xp7deployment
+    plural: xp7deployments
   versions:
     - name: v1alpha2
       served: true
@@ -99,83 +98,20 @@ spec:
                             type: string
                           ready:
                             type: boolean
-    - name: v1alpha1
-      served: true
-      storage: false
-      schema:
-        openAPIV3Schema:
-          type: object
-          properties:
-            spec:
-              type: object
-              properties:
-                enabled:
-                  type: boolean
-                xpVersion:
-                  type: string
-                nodesSharedDisk:
-                  type: string
-                nodes:
-                  type: object
-                  additionalProperties:
-                    type: object
-                    properties:
-                      displayName:
-                        type: string
-                      type:
-                        type: array
-                        items:
-                          type: string
-                          enum:
-                            - MASTER
-                            - DATA
-                            - FRONTEND
-                      replicas:
-                        type: integer
-                        format: int32
-                      env:
-                        type: object
-                        additionalProperties:
-                          type: string
-                      resources:
-                        type: object
-                        properties:
-                          cpu:
-                            type: string
-                          memory:
-                            type: string
-                          disks:
-                            type: object
-                            additionalProperties:
-                              type: string
-  #  conversion:
-  #    strategy: Webhook
-  #    webhookClientConfig:
-  #      url: https://8e04e3dd.ngrok.io/apis/operator.enonic.cloud/v1alpha1/conversions
-  #  conversion:
-  #    strategy: Webhook
-  #    webhook:
-  #      conversionReviewVersions: ["v1beta1"]
-  #      clientConfig:
-  #        caBundle: "{CA_CERT}"
-  #        service:
-  #          name: kubernetes
-  #          namespace: default
-  #          path: /apis/operator.enonic.cloud/conversion
-  additionalPrinterColumns:
-    - name: Enabled
-      type: boolean
-      description: XP enabled or not
-      JSONPath: .spec.enabled
-    - name: Version
-      type: string
-      description: XP version running
-      JSONPath: .spec.xpVersion
-    - name: State
-      type: string
-      description: State
-      JSONPath: .status.state
-    - name: Msg
-      type: string
-      description: Message
-      JSONPath: .status.message
+      additionalPrinterColumns:
+        - name: Enabled
+          type: boolean
+          description: XP enabled or not
+          jsonPath: .spec.enabled
+        - name: Version
+          type: string
+          description: XP version running
+          jsonPath: .spec.xpVersion
+        - name: State
+          type: string
+          description: State
+          jsonPath: .status.state
+        - name: Msg
+          type: string
+          description: Message
+          jsonPath: .status.message

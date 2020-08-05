@@ -184,7 +184,7 @@ spec:
     port: 443
     targetPort: 443
 ---
-apiVersion: apiregistration.k8s.io/v1beta1
+apiVersion: apiregistration.k8s.io/v1
 kind: APIService
 metadata:
   name: v1alpha1.operator.enonic.cloud
@@ -198,7 +198,7 @@ spec:
     namespace: default
   version: v1alpha1
 ---
-apiVersion: admissionregistration.k8s.io/v1beta1
+apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
   name: ec-operator-validation-webhook
@@ -210,7 +210,7 @@ webhooks:
       apiVersions: ["*"]
       resources: ["xp7deployments", "xp7vhosts", "xp7apps", "xp7configs", "domains"]
       scope: "*"
-  admissionReviewVersions: ["v1", "v1beta1"]
+  admissionReviewVersions: ["v1"]
   failurePolicy: Fail
   sideEffects: None
   timeoutSeconds: 5
@@ -221,7 +221,7 @@ webhooks:
       namespace: default
       path: /apis/operator.enonic.cloud/v1alpha1/validations
 ---
-apiVersion: admissionregistration.k8s.io/v1beta1
+apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
   name: ec-operator-mutation-webhook
@@ -233,11 +233,12 @@ webhooks:
         apiVersions: ["*"]
         resources: ["xp7deployments", "xp7vhosts", "xp7apps", "xp7configs", "domains"]
         scope: "*"
-      - apiGroups: ["extensions"]
+      - apiGroups: ["networking.k8s.io"]
         operations: ["*"]
         apiVersions: ["v1beta1"]
         resources: ["ingresses"]
         scope: "*"
+    admissionReviewVersions: ["v1"]
     failurePolicy: Fail
     sideEffects: None
     timeoutSeconds: 5

@@ -3,7 +3,7 @@
 {{- if $mapping.options.ingress }}
 {{ $hash := substr 0 10 (sha256sum (list $.Values.vhost.name $mapping.source | join "" )) -}}
 ---
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
   name: {{ $.Values.vhost.name }}-{{ $hash }}

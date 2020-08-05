@@ -5,7 +5,7 @@ import java.util.Set;
 import java.util.function.Function;
 
 import io.fabric8.kubernetes.api.model.LoadBalancerIngress;
-import io.fabric8.kubernetes.api.model.extensions.Ingress;
+import io.fabric8.kubernetes.api.model.networking.v1beta1.Ingress;
 
 public class IngressAssignedIps
     implements Function<Ingress, Set<String>>

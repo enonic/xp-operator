@@ -24,9 +24,6 @@ import com.enonic.cloud.kubernetes.model.v1alpha2.domain.Domain;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7config.Xp7Config;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentSpecNodeGroup;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHost;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHostSpecCertificate;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHostSpecMapping;
 import com.enonic.cloud.operator.api.BaseAdmissionApi;
 
 import static com.enonic.cloud.common.Configuration.cfgIfBool;
@@ -44,7 +41,6 @@ public class AdmissionApi
         addFunction( Xp7App.class, this::xp7app );
         addFunction( Xp7Config.class, this::xp7config );
         addFunction( Xp7Deployment.class, this::xp7deployment );
-        addFunction( Xp7VHost.class, this::xp7VHost );
         addFunction( Domain.class, this::domain );
     }
 
@@ -196,67 +192,6 @@ public class AdmissionApi
             Optional<Xp7Deployment> xp7Deployments = getXp7Deployment( admissionReview.getRequest().getObject() );
             Preconditions.checkState( xp7Deployments.isEmpty(), "There is already an Xp7Deployment in NS '%s'",
                                       admissionReview.getRequest().getObject().getMetadata().getNamespace() );
-        }
-    }
-
-    private void xp7VHost( AdmissionReview admissionReview )
-    {
-        Xp7VHost newVHost = (Xp7VHost) admissionReview.getRequest().getObject();
-        if ( newVHost != null )
-        {
-            Preconditions.checkState( newVHost.getXp7VHostSpec() != null, "'spec' cannot be null" );
-            Preconditions.checkState( newVHost.getXp7VHostSpec().getHost() != null, "'spec.host' cannot be null" );
-            Validator.dns1123( "spec.host", newVHost.getXp7VHostSpec().getHost() );
-            Preconditions.checkState( newVHost.getXp7VHostSpec().getXp7VHostSpecOptions() != null, "'spec.options' cannot be null" );
-            Preconditions.checkState( newVHost.getXp7VHostSpec().getXp7VHostSpecOptions().getCdn() != null,
-                                      "'spec.options.cdn' cannot be null" );
-            Preconditions.checkState( newVHost.getXp7VHostSpec().getXp7VHostSpecOptions().getDnsRecord() != null,
-                                      "'spec.options.dnsRecord' cannot be null" );
-
-            if ( newVHost.getXp7VHostSpec().getXp7VHostSpecCertificate() != null )
-            {
-                Xp7VHostSpecCertificate.Authority authority = newVHost.getXp7VHostSpec().getXp7VHostSpecCertificate().getAuthority();
-                Preconditions.checkState( authority != null, "'spec.certificate.authority' cannot be null" );
-
-                if ( authority.equals( Xp7VHostSpecCertificate.Authority.CLUSTER_ISSUER ) )
-                {
-                    Preconditions.checkState( newVHost.getXp7VHostSpec().getXp7VHostSpecCertificate().getIdentifier() != null,
-                                              "'spec.certificate.identifier' cannot be null when authority is '%s'", authority );
-                }
-                else if ( authority.equals( Xp7VHostSpecCertificate.Authority.SECRET ) )
-                {
-                    Preconditions.checkState( newVHost.getXp7VHostSpec().getXp7VHostSpecCertificate().getIdentifier() != null,
-                                              "'spec.certificate.identifier' cannot be null when authority is '%s'", authority );
-                }
-            }
-
-            Preconditions.checkState( newVHost.getXp7VHostSpec().getXp7VHostSpecMappings() != null, "'spec.mappings' cannot be null" );
-            Preconditions.checkState( !newVHost.getXp7VHostSpec().getXp7VHostSpecMappings().isEmpty(), "'spec.mappings' cannot be empty" );
-
-            Set<String> nodeGroups = new HashSet<>();
-            Set<String> sources = new HashSet<>();
-            int i = 0;
-            for ( Xp7VHostSpecMapping m : newVHost.getXp7VHostSpec().getXp7VHostSpecMappings() )
-            {
-                Preconditions.checkState( m.getNodeGroup() != null, "'spec.mappings[%s].nodeGroup' cannot be null", i );
-                Preconditions.checkState( m.getSource() != null, "'spec.mappings[%s].source' cannot be null", i );
-                Preconditions.checkState( m.getTarget() != null, "'spec.mappings[%s].target' cannot be null", i );
-                Preconditions.checkState( !sources.contains( m.getSource() ), "'spec.mappings.source' has to be unique" );
-                nodeGroups.add( m.getNodeGroup() );
-                sources.add( m.getSource() );
-                i++;
-            }
-
-            assertXp7Deployment( admissionReview, nodeGroups );
-            if ( admissionReview.getRequest().getOperation().equals( "CREATE" ) )
-            {
-                Set<String> hosts = searchers.xp7VHost().query().list().stream().
-                    filter( v -> v.getXp7VHostSpec().getXp7VHostSpecMappings().stream().anyMatch(
-                        c -> c.getXp7VHostSpecMappingOptions().getIngress() ) ).
-                    map( v -> v.getXp7VHostSpec().getHost() ).collect( Collectors.toSet() );
-                Preconditions.checkState( !hosts.contains( newVHost.getXp7VHostSpec().getHost() ),
-                                          "host is being used by another Xp7VHost" );
-            }
         }
     }
 

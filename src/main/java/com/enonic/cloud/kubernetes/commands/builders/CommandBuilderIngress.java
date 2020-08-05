@@ -5,7 +5,8 @@ import java.util.Optional;
 
 import org.immutables.value.Value;
 
-import io.fabric8.kubernetes.api.model.extensions.Ingress;
+
+import io.fabric8.kubernetes.api.model.networking.v1beta1.Ingress;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
 
@@ -17,7 +18,7 @@ public abstract class CommandBuilderIngress
     protected Optional<Ingress> getOldResource( final String namespace, final String name )
     {
         return Optional.ofNullable( client().
-            extensions().
+            network().
             ingresses().
             inNamespace( namespace ).
             withName( name ).
@@ -28,7 +29,7 @@ public abstract class CommandBuilderIngress
     protected Runnable createOrReplaceCommand( final String namespace, final Ingress resource )
     {
         return () -> client().
-            extensions().
+            network().
             ingresses().
             inNamespace( namespace ).
             createOrReplace( resource );
@@ -38,7 +39,7 @@ public abstract class CommandBuilderIngress
     protected Runnable updateCommand( final String namespace, final Ingress resource )
     {
         return () -> client().
-            extensions().
+            network().
             ingresses().
             inNamespace( namespace ).
             withName( resource.getMetadata().getName() ).
@@ -49,7 +50,7 @@ public abstract class CommandBuilderIngress
     protected Runnable deleteCommand( final String namespace, final Ingress resource )
     {
         return () -> client().
-            extensions().
+            network().
             ingresses().
             inNamespace( namespace ).
             withName( resource.getMetadata().getName() ).

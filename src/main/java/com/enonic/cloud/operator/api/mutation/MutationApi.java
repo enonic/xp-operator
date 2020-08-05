@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -20,7 +21,7 @@ import com.google.common.io.BaseEncoding;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.admission.AdmissionResponseBuilder;
 import io.fabric8.kubernetes.api.model.admission.AdmissionReview;
-import io.fabric8.kubernetes.api.model.extensions.Ingress;
+import io.fabric8.kubernetes.api.model.networking.v1beta1.Ingress;
 
 import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7App;
 import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7AppStatus;
@@ -32,14 +33,6 @@ import com.enonic.cloud.kubernetes.model.v1alpha2.xp7config.Xp7Config;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentStatus;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentStatusFields;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHost;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHostSpec;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHostSpecMapping;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHostSpecMappingOptions;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHostSpecMappingOptionsIngressAnnotations;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHostSpecOptions;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHostStatus;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHostStatusFields;
 import com.enonic.cloud.operator.api.BaseAdmissionApi;
 
 import static com.enonic.cloud.common.Configuration.cfgBool;
@@ -57,9 +50,8 @@ public class MutationApi
         addFunction( Xp7App.class, this::xp7app );
         addFunction( Xp7Config.class, this::xp7config );
         addFunction( Xp7Deployment.class, this::xp7deployment );
-        addFunction( Xp7VHost.class, this::xp7VHost );
         addFunction( Domain.class, this::domain );
-        addFunction( io.fabric8.kubernetes.api.model.extensions.Ingress.class, this::ingress );
+        addFunction( Ingress.class, this::ingress );
     }
 
     @POST
@@ -84,7 +76,9 @@ public class MutationApi
     {
         if ( mutationRequest.hasPatches() )
         {
-            builder.withPatch( BaseEncoding.base64().encode( mapper.writeValueAsString( mutationRequest.getPatches() ).getBytes() ) );
+            builder.
+                withPatch( BaseEncoding.base64().encode( mapper.writeValueAsString( mutationRequest.getPatches() ).getBytes() ) ).
+                withPatchType( "JSONPatch" );
         }
     }
 
@@ -207,129 +201,36 @@ public class MutationApi
 
         Map<String, String> oldAnnotations =
             newR.getMetadata().getAnnotations() != null ? newR.getMetadata().getAnnotations() : new HashMap<>();
-        Map<String, String> newAnnotations = new HashMap<>( oldAnnotations );
+        Map<String, String> na = new HashMap<>( oldAnnotations );
 
-        if ( !newAnnotations.containsKey( "kubernetes.io/ingress.class" ) )
+        setDefault( na, "kubernetes.io/ingress.class", "nginx" );
+
+        if ( "nginx".equals( na.get( "kubernetes.io/ingress.class" ) ) )
         {
-            newAnnotations.put( "kubernetes.io/ingress.class", "nginx" );
-        }
-    }
-
-    private void xp7VHost( MutationRequest mt )
-    {
-        Xp7VHost oldR = (Xp7VHost) mt.getAdmissionReview().getRequest().getOldObject();
-        Xp7VHost newR = (Xp7VHost) mt.getAdmissionReview().getRequest().getObject();
-
-        Xp7VHostStatus defStatus = new Xp7VHostStatus().
-            withMessage( "Created" ).
-            withState( Xp7VHostStatus.State.PENDING ).
-            withXp7VHostStatusFields( new Xp7VHostStatusFields().
-                withPublicIps( new LinkedList<>() ).
-                withDnsRecordCreated( false ) );
-
-        // This is an update => set default status to old status
-        if ( oldR != null )
-        {
-            defStatus = oldR.getXp7VHostStatus();
-        }
-
-        // Ensure status
-        if ( !patchDefault( mt, defStatus, newR.getXp7VHostStatus(), "/status" ) )
-        {
-            patchDefault( mt, defStatus.getMessage(), newR.getXp7VHostStatus().getMessage(), "/status/message" );
-            patchDefault( mt, defStatus.getState(), newR.getXp7VHostStatus().getState(), "/status/state" );
-            patchDefault( mt, defStatus.getXp7VHostStatusFields(), newR.getXp7VHostStatus().getXp7VHostStatusFields(), "/status/fields" );
-        }
-
-        // Ensure spec
-        if ( newR.getXp7VHostSpec() != null )
-        {
-            Xp7VHostSpec spec = newR.getXp7VHostSpec();
-            Xp7VHostSpecOptions defaultVHostSpecOptions = new Xp7VHostSpecOptions().
-                withDnsRecord( true ).
-                withCdn( true );
-
-            if ( !patchDefault( mt, defaultVHostSpecOptions, spec.getXp7VHostSpecOptions(), "/spec/options" ) )
+            boolean linkerd = cfgBool( "operator.helm.charts.Values.extensions.linkerd.enabled" );
+            if ( linkerd )
             {
-                patchDefault( mt, defaultVHostSpecOptions.getCdn(), spec.getXp7VHostSpecOptions().getCdn(), "/spec/options/cdn" );
-                patchDefault( mt, defaultVHostSpecOptions.getDnsRecord(), spec.getXp7VHostSpecOptions().getDnsRecord(),
-                              "/spec/options/dnsRecord" );
-            }
-
-            for ( int i = 0; i < newR.getXp7VHostSpec().getXp7VHostSpecMappings().size(); i++ )
-            {
-                Xp7VHostSpecMapping m = newR.getXp7VHostSpec().getXp7VHostSpecMappings().get( i );
-
-                final int finalI = i;
-                Function<String, String> pathFunc = ( p ) -> String.format( "/spec/mappings/%d%s", finalI, p );
-
-                patchDefault( mt, cfgStr( "operator.helm.charts.Values.allNodesKey" ), m.getNodeGroup(), pathFunc, "/nodeGroup" );
-
-                if ( m.getXp7VHostSpecMappingIdProvider() != null )
-                {
-                    patchDefault( mt, "system", m.getNodeGroup(), pathFunc, "/idProviders/default" );
-                }
-
-                Xp7VHostSpecMappingOptionsIngressAnnotations defaultAnnotations = new Xp7VHostSpecMappingOptionsIngressAnnotations();
-                addDefaultIngressAnnotations( defaultAnnotations );
-
-                Xp7VHostSpecMappingOptions defSpecOpt = new Xp7VHostSpecMappingOptions().
-                    withIngress( true ).
-                    withXp7VHostSpecMappingOptionsIngressAnnotations( defaultAnnotations );
-
-                // Set default options
-                if ( !patchDefault( mt, defSpecOpt, m.getXp7VHostSpecMappingOptions(), pathFunc, "/options" ) )
-                {
-                    patchDefault( mt, defSpecOpt.getIngress(), m.getXp7VHostSpecMappingOptions().getIngress(), pathFunc,
-                                  "/options/ingress" );
-
-                    // Set default annotations
-                    if ( !patchDefault( mt, defSpecOpt.getXp7VHostSpecMappingOptionsIngressAnnotations(),
-                                        m.getXp7VHostSpecMappingOptions().getXp7VHostSpecMappingOptionsIngressAnnotations(), pathFunc,
-                                        "/options/ingressAnnotations" ) )
-                    {
-                        if ( addDefaultIngressAnnotations( m.getXp7VHostSpecMappingOptions().
-                            getXp7VHostSpecMappingOptionsIngressAnnotations() ) )
-                        {
-                            patchDefault( mt, m.getXp7VHostSpecMappingOptions().
-                                getXp7VHostSpecMappingOptionsIngressAnnotations(), null, pathFunc, "/options/ingressAnnotations" );
-                        }
-                    }
-                }
+                String cfgSnippet = na.get( "nginx.ingress.kubernetes.io/configuration-snippet" );
+                StringBuilder sb = new StringBuilder( cfgSnippet != null ? cfgSnippet : "" ).
+                    append( "\n" ).
+                    append( "proxy_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;" ).
+                    append( "grpc_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;" );
+                na.put( "nginx.ingress.kubernetes.io/configuration-snippet", sb.toString() );
             }
         }
 
-        ensureOwnerReference( mt );
+        if ( !Objects.equals( oldAnnotations, na ) )
+        {
+            mt.addPatch( newR.getMetadata().getAnnotations() == null ? "add" : "replace", "/metadata/annotations", na );
+        }
     }
 
-    private boolean addDefaultIngressAnnotations( final Xp7VHostSpecMappingOptionsIngressAnnotations annotations )
+    private void setDefault( Map<String, String> m, String key, String def )
     {
-        boolean change = false;
-        if ( annotations.getAdditionalProperties().get( "ingress.kubernetes.io/rewrite-target" ) == null )
+        if ( !m.containsKey( key ) )
         {
-            annotations.setAdditionalProperty( "ingress.kubernetes.io/rewrite-target", "/" );
-            change = true;
+            m.put( key, def );
         }
-
-        if ( annotations.getAdditionalProperties().get( "kubernetes.io/ingress.class" ) == null )
-        {
-            annotations.setAdditionalProperty( "kubernetes.io/ingress.class", "nginx" );
-            change = true;
-        }
-
-        boolean linkerd = cfgBool( "operator.helm.charts.Values.extensions.linkerd.enabled" );
-        if ( linkerd )
-        {
-            String cfgSnippet = annotations.getAdditionalProperties().get( "nginx.ingress.kubernetes.io/configuration-snippet" );
-            StringBuilder sb = new StringBuilder( cfgSnippet != null ? cfgSnippet : "" ).
-                append( "\n" ).
-                append( "proxy_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;" ).
-                append( "grpc_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;" );
-            annotations.setAdditionalProperty( "nginx.ingress.kubernetes.io/configuration-snippet", sb.toString() );
-            change = true;
-        }
-
-        return change;
     }
 
     private void ensureOwnerReference( MutationRequest mutationRequest )

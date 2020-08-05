@@ -18,7 +18,6 @@ import io.fabric8.kubernetes.api.model.admission.AdmissionReview;
 
 import com.enonic.cloud.kubernetes.SearchersImpl;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHost;
 import com.enonic.cloud.testutils.TestFileSupplier;
 
 import static com.enonic.cloud.common.Configuration.cfgStr;
@@ -28,18 +27,14 @@ class TestAdmissionApi
 {
     TestInformerSearcher<Xp7Deployment> deploymentTestInformerSearcher;
 
-    TestInformerSearcher<Xp7VHost> vHostTestInformerSearcher;
-
     @SuppressWarnings("unchecked")
     TestAdmissionApi()
     {
         mapper = new ObjectMapper( new YAMLFactory() );
         TestInformerSearcher emptyInformerSearcher = new TestInformerSearcher();
         deploymentTestInformerSearcher = new TestInformerSearcher<>();
-        vHostTestInformerSearcher = new TestInformerSearcher<>();
         searchers = SearchersImpl.of( emptyInformerSearcher, emptyInformerSearcher, emptyInformerSearcher, emptyInformerSearcher,
-                                      emptyInformerSearcher, emptyInformerSearcher, deploymentTestInformerSearcher,
-                                      vHostTestInformerSearcher, emptyInformerSearcher );
+                                      emptyInformerSearcher, emptyInformerSearcher, deploymentTestInformerSearcher, emptyInformerSearcher );
         cfgStr( "operator.helm.charts.Values.allNodesKey" );
     }
 
@@ -55,13 +50,6 @@ class TestAdmissionApi
         {
         } );
         deployments.forEach( deploymentTestInformerSearcher::add );
-
-        // Add vhosts to cache
-        cache = testFileSupplier.getFile( TestAdmissionApi.class, "xp7VHostCache.yaml" );
-        List<Xp7VHost> vHosts = this.mapper.readValue( cache, new TypeReference<>()
-        {
-        } );
-        vHosts.forEach( vHostTestInformerSearcher::add );
 
         return testFileSupplier.createTests( TestAdmissionApi.class, this::runTest, "xp7deploymentsCache.yaml", "xp7VHostCache.yaml" );
     }

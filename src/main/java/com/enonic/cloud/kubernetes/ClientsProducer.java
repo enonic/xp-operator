@@ -10,7 +10,6 @@ import com.enonic.cloud.kubernetes.client.v1alpha1.xp7app.Xp7AppClient;
 import com.enonic.cloud.kubernetes.client.v1alpha2.domain.DomainClient;
 import com.enonic.cloud.kubernetes.client.v1alpha2.xp7config.Xp7ConfigClient;
 import com.enonic.cloud.kubernetes.client.v1alpha2.xp7deployment.Xp7DeploymentClient;
-import com.enonic.cloud.kubernetes.client.v1alpha2.xp7vhost.Xp7VHostClient;
 
 public class ClientsProducer
 {
@@ -20,6 +19,6 @@ public class ClientsProducer
     {
         KubernetesClient client = new DefaultKubernetesClient().inAnyNamespace();
         return ClientsImpl.of( client, new Xp7AppClient( client ), new Xp7ConfigClient( client ), new Xp7DeploymentClient( client ),
-                               new Xp7VHostClient( client ), new DomainClient( client ) );
+                               new DomainClient( client ) );
     }
 }

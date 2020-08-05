@@ -5,8 +5,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
-import io.fabric8.kubernetes.api.model.extensions.Ingress;
-import io.fabric8.kubernetes.api.model.extensions.IngressRule;
+
+import io.fabric8.kubernetes.api.model.networking.v1beta1.Ingress;
+import io.fabric8.kubernetes.api.model.networking.v1beta1.IngressRule;
 
 import static com.enonic.cloud.common.Configuration.cfgStr;
 

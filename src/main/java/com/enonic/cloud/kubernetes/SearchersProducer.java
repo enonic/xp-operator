@@ -17,7 +17,6 @@ public class SearchersProducer
             xp7App( new InformerSearcher<>( informers.xp7AppInformer() ) ).
             xp7Config( new InformerSearcher<>( informers.xp7ConfigInformer() ) ).
             xp7Deployment( new InformerSearcher<>( informers.xp7DeploymentInformer() ) ).
-            xp7VHost( new InformerSearcher<>( informers.xp7VHostInformer() ) ).
             domain( new InformerSearcher<>( informers.domainInformer() ) ).
             build();
     }

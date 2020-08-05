@@ -31,8 +31,6 @@ import com.enonic.cloud.operator.v1alpha2xp7deployment.OperatorNamespaceDelete;
 import com.enonic.cloud.operator.v1alpha2xp7deployment.OperatorXp7DeploymentHelm;
 import com.enonic.cloud.operator.v1alpha2xp7deployment.OperatorXp7DeploymentStatus;
 import com.enonic.cloud.operator.v1alpha2xp7deployment.OperatorXpClientCacheInvalidate;
-import com.enonic.cloud.operator.v1alpha2xp7vhost.OperatorXp7VHostHelm;
-import com.enonic.cloud.operator.v1alpha2xp7vhost.OperatorXp7VHostStatus;
 
 import static com.enonic.cloud.common.Configuration.cfgIfBool;
 import static com.enonic.cloud.common.Configuration.cfgLong;
@@ -74,10 +72,6 @@ public class Operator
 
     private final OperatorXpClientCacheInvalidate operatorXpClientCacheInvalidate;
 
-    private final OperatorXp7VHostHelm operatorXp7VHostHelm;
-
-    private final OperatorXp7VHostStatus operatorXp7VHostStatus;
-
     @Inject
     public Operator( final TaskRunner taskRunner, final Informers informers, final OperatorDomainCertSync operatorDomainCertSync,
                      final OperatorDomainDns operatorDomainDns, final OperatorIngressCertSync operatorIngressCertSync,
@@ -87,8 +81,7 @@ public class Operator
                      final OperatorNamespaceDelete operatorNamespaceDelete, final OperatorXp7DeploymentHelm operatorXp7DeploymentHelm,
                      final OperatorXp7AppStartStopper operatorXp7AppStartStopper,
                      final OperatorXp7DeploymentStatus operatorXp7DeploymentStatus,
-                     final OperatorXpClientCacheInvalidate operatorXpClientCacheInvalidate, final OperatorXp7VHostHelm operatorXp7VHostHelm,
-                     final OperatorXp7VHostStatus operatorXp7VHostStatus )
+                     final OperatorXpClientCacheInvalidate operatorXpClientCacheInvalidate )
     {
         this.taskRunner = taskRunner;
         this.informers = informers;
@@ -106,8 +99,6 @@ public class Operator
         this.operatorXp7AppStartStopper = operatorXp7AppStartStopper;
         this.operatorXp7DeploymentStatus = operatorXp7DeploymentStatus;
         this.operatorXpClientCacheInvalidate = operatorXpClientCacheInvalidate;
-        this.operatorXp7VHostHelm = operatorXp7VHostHelm;
-        this.operatorXp7VHostStatus = operatorXp7VHostStatus;
     }
 
     void onStartup( @Observes StartupEvent _ev )
@@ -143,9 +134,6 @@ public class Operator
                 listen( operatorXp7DeploymentHelm, informers.xp7DeploymentInformer() );
                 schedule( operatorXp7DeploymentStatus, statusInterval );
                 listen( operatorXpClientCacheInvalidate, informers.xp7DeploymentInformer() );
-
-                listen( operatorXp7VHostHelm, informers.xp7VHostInformer() );
-                schedule( operatorXp7VHostStatus, statusInterval );
 
                 log.info( "Starting informers" );
                 informers.informerFactory().startAllRegisteredInformers();

@@ -18,7 +18,7 @@ import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceAccount;
 import io.fabric8.kubernetes.api.model.apps.DaemonSet;
 import io.fabric8.kubernetes.api.model.apps.StatefulSet;
-import io.fabric8.kubernetes.api.model.extensions.Ingress;
+import io.fabric8.kubernetes.api.model.networking.v1beta1.Ingress;
 import io.fabric8.kubernetes.api.model.rbac.Role;
 import io.fabric8.kubernetes.api.model.rbac.RoleBinding;
 
@@ -38,12 +38,10 @@ import com.enonic.cloud.kubernetes.commands.builders.ImmutableCommandBuilderV1Al
 import com.enonic.cloud.kubernetes.commands.builders.ImmutableCommandBuilderV1Alpha2Domain;
 import com.enonic.cloud.kubernetes.commands.builders.ImmutableCommandBuilderV1Alpha2Xp7Config;
 import com.enonic.cloud.kubernetes.commands.builders.ImmutableCommandBuilderV1Alpha2Xp7Deployment;
-import com.enonic.cloud.kubernetes.commands.builders.ImmutableCommandBuilderV1Alpha2Xp7VHost;
 import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7App;
 import com.enonic.cloud.kubernetes.model.v1alpha2.domain.Domain;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7config.Xp7Config;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7vhost.Xp7VHost;
 
 @SuppressWarnings("unchecked")
 @Singleton
@@ -75,7 +73,6 @@ public class K8sCommandMapper
         this.builderMap.put( Domain.class, this::v1alpha2Domain );
         this.builderMap.put( Xp7Config.class, this::v1alpha2Xp7Config );
         this.builderMap.put( Xp7Deployment.class, this::v1alpha2Xp7Deployment );
-        this.builderMap.put( Xp7VHost.class, this::v1alpha2Xp7VHost );
     }
 
     public Optional<K8sCommand> getCommand( final GenericBuilderParams params )
@@ -194,14 +191,6 @@ public class K8sCommandMapper
     {
         return ImmutableCommandBuilderV1Alpha2Xp7Deployment.builder().
             client( clients.xp7Deployments() ).
-            build().
-            apply( params );
-    }
-
-    private Optional<K8sCommand> v1alpha2Xp7VHost( final GenericBuilderParams params )
-    {
-        return ImmutableCommandBuilderV1Alpha2Xp7VHost.builder().
-            client( clients.xp7VHosts() ).
             build().
             apply( params );
     }
