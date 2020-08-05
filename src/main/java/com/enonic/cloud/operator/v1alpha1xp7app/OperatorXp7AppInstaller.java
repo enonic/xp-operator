@@ -12,7 +12,7 @@ import com.enonic.cloud.apis.xp.XpClientCache;
 import com.enonic.cloud.apis.xp.service.AppInfo;
 import com.enonic.cloud.apis.xp.service.AppInstallResponse;
 import com.enonic.cloud.apis.xp.service.ImmutableAppInstallRequest;
-import com.enonic.cloud.apis.xp.service.ImmutableAppUninstallRequest;
+import com.enonic.cloud.apis.xp.service.ImmutableAppKeyList;
 import com.enonic.cloud.kubernetes.Clients;
 import com.enonic.cloud.kubernetes.Searchers;
 import com.enonic.cloud.kubernetes.commands.K8sLogHelper;
@@ -160,7 +160,7 @@ public class OperatorXp7AppInstaller
         {
             try
             {
-                xpClientCache.uninstall( app.getMetadata().getNamespace() ).accept( ImmutableAppUninstallRequest.builder().addKey( app.
+                xpClientCache.uninstall( app.getMetadata().getNamespace() ).accept( ImmutableAppKeyList.builder().addKey( app.
                     getXp7AppStatus().
                     getXp7AppStatusFields().
                     getXp7AppStatusFieldsAppInfo().

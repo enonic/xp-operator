@@ -15,10 +15,22 @@ public interface AdminApi
     AppListResponse appList();
 
     @POST
+    @Path("/application/start")
+    @Consumes("application/json")
+    @Produces("application/json")
+    Void appStart( AppKeyList req );
+
+    @POST
+    @Path("/application/stop")
+    @Consumes("application/json")
+    @Produces("application/json")
+    Void appStop( AppKeyList req );
+
+    @POST
     @Path("/application/uninstall")
     @Consumes("application/json")
     @Produces("application/json")
-    Void appUninstall( AppUninstallRequest req );
+    Void appUninstall( AppKeyList req );
 
     @POST
     @Path("/application/installUrl")

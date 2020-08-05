@@ -23,6 +23,7 @@ import com.enonic.cloud.operator.helpers.InformerEventHandler;
 import com.enonic.cloud.operator.ingress.OperatorIngress;
 import com.enonic.cloud.operator.ingress.OperatorXp7ConfigSync;
 import com.enonic.cloud.operator.v1alpha1xp7app.OperatorXp7AppInstaller;
+import com.enonic.cloud.operator.v1alpha1xp7app.OperatorXp7AppStartStopper;
 import com.enonic.cloud.operator.v1alpha1xp7app.OperatorXp7AppStatus;
 import com.enonic.cloud.operator.v1alpha2xp7config.OperatorConfigMapSync;
 import com.enonic.cloud.operator.v1alpha2xp7config.OperatorXp7Config;
@@ -57,6 +58,8 @@ public class Operator
 
     private final OperatorXp7AppInstaller operatorXp7AppInstaller;
 
+    private final OperatorXp7AppStartStopper operatorXp7AppStartStopper;
+
     private final OperatorXp7AppStatus operatorXp7AppStatus;
 
     private final OperatorXp7Config operatorXp7Config;
@@ -82,6 +85,7 @@ public class Operator
                      final OperatorXp7AppInstaller operatorXp7AppInstaller, final OperatorXp7AppStatus operatorXp7AppStatus,
                      final OperatorXp7Config operatorXp7Config, final OperatorConfigMapSync operatorConfigMapSync,
                      final OperatorNamespaceDelete operatorNamespaceDelete, final OperatorXp7DeploymentHelm operatorXp7DeploymentHelm,
+                     final OperatorXp7AppStartStopper operatorXp7AppStartStopper,
                      final OperatorXp7DeploymentStatus operatorXp7DeploymentStatus,
                      final OperatorXpClientCacheInvalidate operatorXpClientCacheInvalidate, final OperatorXp7VHostHelm operatorXp7VHostHelm,
                      final OperatorXp7VHostStatus operatorXp7VHostStatus )
@@ -99,6 +103,7 @@ public class Operator
         this.operatorConfigMapSync = operatorConfigMapSync;
         this.operatorNamespaceDelete = operatorNamespaceDelete;
         this.operatorXp7DeploymentHelm = operatorXp7DeploymentHelm;
+        this.operatorXp7AppStartStopper = operatorXp7AppStartStopper;
         this.operatorXp7DeploymentStatus = operatorXp7DeploymentStatus;
         this.operatorXpClientCacheInvalidate = operatorXpClientCacheInvalidate;
         this.operatorXp7VHostHelm = operatorXp7VHostHelm;
@@ -127,6 +132,8 @@ public class Operator
 
                 listen( operatorXp7AppInstaller, informers.xp7AppInformer() );
                 schedule( operatorXp7AppInstaller, syncInterval );
+                listen( operatorXp7AppStartStopper, informers.xp7AppInformer() );
+                schedule( operatorXp7AppStartStopper, statusInterval );
                 schedule( operatorXp7AppStatus, statusInterval );
 
                 listen( operatorXp7Config, informers.xp7ConfigInformer() );

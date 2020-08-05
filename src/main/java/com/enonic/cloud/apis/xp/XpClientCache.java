@@ -26,8 +26,8 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import com.enonic.cloud.apis.xp.service.AdminApi;
 import com.enonic.cloud.apis.xp.service.AppInstallRequest;
 import com.enonic.cloud.apis.xp.service.AppInstallResponse;
+import com.enonic.cloud.apis.xp.service.AppKeyList;
 import com.enonic.cloud.apis.xp.service.AppListResponse;
-import com.enonic.cloud.apis.xp.service.AppUninstallRequest;
 import com.enonic.cloud.kubernetes.Clients;
 
 @Singleton
@@ -78,11 +78,27 @@ public class XpClientCache
     }
 
     @SuppressWarnings("WeakerAccess")
-    public Consumer<AppUninstallRequest> uninstall( final String namespace )
+    public Consumer<AppKeyList> uninstall( final String namespace )
     {
         return ( req ) -> {
             log( namespace, "UNINSTALL apps", req.key() );
             getAdminApi( namespace ).appUninstall( req );
+        };
+    }
+
+    public Consumer<AppKeyList> start( final String namespace )
+    {
+        return ( req ) -> {
+            log( namespace, "START apps", req.key() );
+            getAdminApi( namespace ).appStart( req );
+        };
+    }
+
+    public Consumer<AppKeyList> stop( final String namespace )
+    {
+        return ( req ) -> {
+            log( namespace, "STOP apps", req.key() );
+            getAdminApi( namespace ).appStop( req );
         };
     }
 

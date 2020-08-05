@@ -104,6 +104,9 @@ public class MutationApi
             defStatus = oldR.getXp7AppStatus();
         }
 
+        // Ensure enabled
+        patchDefault( mt, true, newR.getXp7AppSpec().getEnabled(), "/spec/enabled" );
+
         // Ensure status
         if ( !patchDefault( mt, defStatus, newR.getXp7AppStatus(), "/status" ) )
         {
