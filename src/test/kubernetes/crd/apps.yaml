@@ -36,10 +36,46 @@ spec:
             fields:
               type: object
               properties:
-                appKey:
-                  type: string
+                appInfo:
+                  type: object
                   nullable: true
+                  properties:
+                    description:
+                      type: string
+                      nullable: true
+                    displayName:
+                      type: string
+                      nullable: true
+                    key:
+                      type: string
+                      nullable: true
+                    modifiedTime:
+                      type: string
+                      nullable: true
+                    state:
+                      type: string
+                      nullable: true
+                    url:
+                      type: string
+                      nullable: true
+                    vendorName:
+                      type: string
+                      nullable: true
+                    vendorUrl:
+                      type: string
+                      nullable: true
+                    version:
+                      type: string
+                      nullable: true
   additionalPrinterColumns:
+    - name: Key
+      type: string
+      description: Key
+      JSONPath: .status.fields.appInfo.key
+    - name: Version
+      type: string
+      description: Version
+      JSONPath: .status.fields.appInfo.version
     - name: State
       type: string
       description: State
@@ -48,7 +84,3 @@ spec:
       type: string
       description: Message
       JSONPath: .status.message
-    - name: Key
-      type: string
-      description: Key
-      JSONPath: .status.fields.appKey

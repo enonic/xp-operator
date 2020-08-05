@@ -70,7 +70,8 @@ public class XpClientCache
             AppInstallResponse res = getAdminApi( namespace ).appInstall( req );
             if ( res.failure() == null )
             {
-                log( namespace, "INSTALL apps", Collections.singletonList( res.applicationInstalledJson().application().key() ) );
+                log( namespace, "INSTALL apps", Collections.
+                    singletonList( res.applicationInstalledJson().application().key() ) );
             }
             return res;
         };

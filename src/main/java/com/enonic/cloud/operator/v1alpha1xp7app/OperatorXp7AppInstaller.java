@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.enonic.cloud.apis.xp.XpClientCache;
+import com.enonic.cloud.apis.xp.service.AppInfo;
 import com.enonic.cloud.apis.xp.service.AppInstallResponse;
 import com.enonic.cloud.apis.xp.service.ImmutableAppInstallRequest;
 import com.enonic.cloud.apis.xp.service.ImmutableAppUninstallRequest;
@@ -63,7 +64,7 @@ public class OperatorXp7AppInstaller
             if ( !installApp( newResource ) )
             {
                 // If failed, remove app key and retry later
-                updateAppKey( newResource, null );
+                updateAppInfo( newResource, null );
             }
         }
 
@@ -104,7 +105,7 @@ public class OperatorXp7AppInstaller
         }
 
         String failure = null;
-        String appKey = null;
+        AppInfo appInfo = null;
         try
         {
             AppInstallResponse response =
@@ -117,7 +118,7 @@ public class OperatorXp7AppInstaller
             }
             else
             {
-                appKey = response.applicationInstalledJson().application().key();
+                appInfo = response.applicationInstalledJson().application();
             }
         }
         catch ( Exception e )
@@ -125,9 +126,9 @@ public class OperatorXp7AppInstaller
             failure = e.getMessage();
         }
 
-        if ( failure == null && appKey != null )
+        if ( failure == null && appInfo != null )
         {
-            updateAppKey( app, appKey );
+            updateAppInfo( app, appInfo );
             return true;
         }
         else
@@ -159,8 +160,12 @@ public class OperatorXp7AppInstaller
         {
             try
             {
-                xpClientCache.uninstall( app.getMetadata().getNamespace() ).accept(
-                    ImmutableAppUninstallRequest.builder().addKey( app.getXp7AppStatus().getXp7AppStatusFields().getAppKey() ).build() );
+                xpClientCache.uninstall( app.getMetadata().getNamespace() ).accept( ImmutableAppUninstallRequest.builder().addKey( app.
+                    getXp7AppStatus().
+                    getXp7AppStatusFields().
+                    getXp7AppStatusFieldsAppInfo().
+                    getKey() ).
+                    build() );
                 return removeFinalizer( app );
             }
             catch ( Exception e )
@@ -172,15 +177,15 @@ public class OperatorXp7AppInstaller
         return false;
     }
 
-    private void updateAppKey( Xp7App resource, String appKey )
+    private void updateAppInfo( Xp7App resource, AppInfo appInfo )
     {
         K8sLogHelper.logDoneable( clients.xp7Apps().crdClient().
             inNamespace( resource.getMetadata().getNamespace() ).
             withName( resource.getMetadata().getName() ).
             edit().
-            withStatus( resource.getXp7AppStatus().
-                withXp7AppStatusFields( resource.getXp7AppStatus().getXp7AppStatusFields().
-                    withAppKey( appKey ) ) ) );
+            withStatus( new AppStatusBuilder( resource.getXp7AppStatus() ).
+                withAppInfo( appInfo ).
+                build() ) );
     }
 
     private boolean removeFinalizer( Xp7App resource )
@@ -201,7 +206,8 @@ public class OperatorXp7AppInstaller
     private boolean appKeyIsNull( Xp7App app )
     {
         return app.getXp7AppStatus() == null || app.getXp7AppStatus().getXp7AppStatusFields() == null ||
-            app.getXp7AppStatus().getXp7AppStatusFields().getAppKey() == null;
+            app.getXp7AppStatus().getXp7AppStatusFields().getXp7AppStatusFieldsAppInfo() == null ||
+            app.getXp7AppStatus().getXp7AppStatusFields().getXp7AppStatusFieldsAppInfo().getKey() == null;
     }
 
     private boolean namespaceBeingTerminated( Xp7App app )

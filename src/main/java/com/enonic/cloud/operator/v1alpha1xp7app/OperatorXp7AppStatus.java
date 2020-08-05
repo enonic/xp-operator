@@ -75,11 +75,12 @@ public class OperatorXp7AppStatus
     {
         Xp7AppStatus currentStatus = resource.getXp7AppStatus();
 
-        if ( currentStatus.getXp7AppStatusFields().getAppKey() == null )
+        if ( currentStatus.getXp7AppStatusFields().getXp7AppStatusFieldsAppInfo() == null )
         {
-            return currentStatus.
+            return new AppStatusBuilder( currentStatus ).
                 withState( Xp7AppStatus.State.PENDING ).
-                withMessage( "Pending install" );
+                withMessage( "Pending install" ).
+                build();
         }
 
         return checkXp( resource, currentStatus );
@@ -89,9 +90,10 @@ public class OperatorXp7AppStatus
     {
         if ( !xp7DeploymentInfo.xpRunning( app.getMetadata().getNamespace() ) )
         {
-            return currentStatus.
+            return new AppStatusBuilder( currentStatus ).
                 withState( Xp7AppStatus.State.PENDING ).
-                withMessage( "Xp7Deployment not in RUNNING state" );
+                withMessage( "Xp7Deployment not in RUNNING state" ).
+                build();
         }
 
         String mapKey = app.getMetadata().getNamespace();
@@ -116,35 +118,46 @@ public class OperatorXp7AppStatus
 
         if ( info == null )
         {
-            return currentStatus.
+            return new AppStatusBuilder( currentStatus ).
                 withState( Xp7AppStatus.State.ERROR ).
-                withMessage( "Failed calling XP" );
+                withMessage( "Failed calling XP" ).
+                build();
         }
 
         for ( AppInfo appInfo : info )
         {
-            if ( appInfo.key().equals( currentStatus.getXp7AppStatusFields().getAppKey() ) )
+            if ( appInfo.key().equals( currentStatus.
+                getXp7AppStatusFields().
+                getXp7AppStatusFieldsAppInfo().
+                getKey() ) )
             {
                 switch ( appInfo.state() )
                 {
                     case "started":
-                        return currentStatus.
+                        return new AppStatusBuilder( currentStatus ).
                             withState( Xp7AppStatus.State.RUNNING ).
-                            withMessage( "Started" );
+                            withMessage( "Started" ).
+                            withAppInfo( appInfo ).
+                            build();
                     case "stopped":
-                        return currentStatus.
+                        return new AppStatusBuilder( currentStatus ).
                             withState( Xp7AppStatus.State.STOPPED ).
-                            withMessage( "Stopped" );
+                            withMessage( "Stopped" ).
+                            withAppInfo( appInfo ).
+                            build();
                     default:
-                        return currentStatus.
+                        return new AppStatusBuilder( currentStatus ).
                             withState( Xp7AppStatus.State.ERROR ).
-                            withMessage( "Invalid app state" );
+                            withMessage( "Invalid app state" ).
+                            withAppInfo( appInfo ).
+                            build();
                 }
             }
         }
 
-        return currentStatus.
+        return new AppStatusBuilder( currentStatus ).
             withState( Xp7AppStatus.State.ERROR ).
-            withMessage( "App not found in XP" );
+            withMessage( "App not found in XP" ).
+            build();
     }
 }
