@@ -44,7 +44,7 @@ extensions:
     enabled: false
 
 initApps:
-  - https://repo.enonic.com/public/com/enonic/app/snapshotter/3.0.0/snapshotter-3.0.0.jar
+  - https://repo.enonic.com/public/com/enonic/app/snapshotter/3.0.1/snapshotter-3.0.1.jar
 
 # Filled in by operator
 # deployment:
