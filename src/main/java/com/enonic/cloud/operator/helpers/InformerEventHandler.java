@@ -16,7 +16,6 @@ public abstract class InformerEventHandler<R extends HasMetadata>
     {
         long reSync = cfgLong( "operator.informers.reSync" );
         maxAge = ( reSync / 2L ) / 1000;
-        init();
     }
 
     @Override
@@ -27,8 +26,6 @@ public abstract class InformerEventHandler<R extends HasMetadata>
             get().
             ifPresent( this::onNewAdd );
     }
-
-    protected abstract void init();
 
     protected abstract void onNewAdd( final R newResource );
 

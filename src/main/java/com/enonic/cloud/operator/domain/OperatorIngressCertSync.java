@@ -24,6 +24,9 @@ import com.enonic.cloud.operator.helpers.InformerEventHandler;
 
 import static com.enonic.cloud.common.Configuration.cfgStr;
 
+/**
+ * This operator class updates ingress certificate configuration based on linked Domain
+ */
 @Singleton
 public class OperatorIngressCertSync
     extends InformerEventHandler<Ingress>
@@ -33,12 +36,6 @@ public class OperatorIngressCertSync
 
     @Inject
     Searchers searchers;
-
-    @Override
-    protected void init()
-    {
-        // Do nothing
-    }
 
     @Override
     protected void onNewAdd( final Ingress newResource )
@@ -60,15 +57,99 @@ public class OperatorIngressCertSync
 
     public void handle( final Ingress ingress )
     {
+        // Ignore if ingress is not relevant
         if ( !ingressRelevant( ingress ) )
         {
             return;
         }
 
+        // Collect all hosts in ingress
         Set<String> hosts = ingressHosts( ingress );
-        searchers.domain().query().
+
+        // Get domains with those hosts
+        List<Domain> domains = searchers.domain().query().
             filter( d -> hosts.contains( d.getDomainSpec().getHost() ) ).
-            forEach( d -> syncIngress( d, ingress ) );
+            list();
+
+        // Sync Ingress with domain
+        domains.forEach( domain -> syncIngress( domain, ingress ) );
+    }
+
+    public void syncIngress( final Domain domain, final Ingress ingress )
+    {
+        String host = domain.getDomainSpec().getHost();
+
+        // Collect annotations
+        Map<String, String> oldAnnotations = ingress.getMetadata().getAnnotations();
+        Map<String, String> newAnnotations = oldAnnotations != null ? new HashMap<>( oldAnnotations ) : new HashMap<>();
+
+        // Always remove cert-manager annotation by default
+        newAnnotations.remove( "cert-manager.io/cluster-issuer" );
+
+        // Collect TLS definitions
+        List<IngressTLS> oldTLS = ingress.getSpec().getTls() != null ? ingress.getSpec().getTls() : new LinkedList<>();
+        List<IngressTLS> newTLS = new LinkedList<>();
+
+        // Add all TLS definitions that do not relate to this domain
+        for ( IngressTLS tls : oldTLS )
+        {
+            if ( !tls.getHosts().contains( host ) )
+            {
+                newTLS.add( tls );
+            }
+        }
+
+        // If domain has certificate, set that up on the ingress
+        if ( domain.getDomainSpec().getDomainSpecCertificate() != null )
+        {
+            switch ( domain.getDomainSpec().getDomainSpecCertificate().getAuthority() )
+            {
+                case SELF_SIGNED:
+                case LETS_ENCRYPT_STAGING:
+                case LETS_ENCRYPT:
+                case CLUSTER_ISSUER:
+                    newAnnotations.put( "cert-manager.io/cluster-issuer", getClusterIssuer( domain ) );
+                    newTLS.add( new IngressTLS( Arrays.asList( host ), domain.getMetadata().getName() + "-cert" ) );
+                    break;
+                case CUSTOM:
+                    newTLS.add(
+                        new IngressTLS( Arrays.asList( host ), domain.getDomainSpec().getDomainSpecCertificate().getIdentifier() ) );
+                    break;
+            }
+        }
+
+        // If changes are detected, update ingress
+        if ( !Objects.equals( oldAnnotations, newAnnotations ) || !Objects.equals( oldTLS, newTLS ) )
+        {
+            K8sLogHelper.logDoneable( clients.k8s().network().ingresses().
+                inNamespace( ingress.getMetadata().getNamespace() ).
+                withName( ingress.getMetadata().getName() ).
+                edit().
+                editMetadata().
+                withAnnotations( newAnnotations ).
+                endMetadata().
+                editSpec().
+                withTls( newTLS ).
+                endSpec() );
+        }
+    }
+
+
+    private String getClusterIssuer( Domain resource )
+    {
+        switch ( resource.getDomainSpec().getDomainSpecCertificate().getAuthority() )
+        {
+            case SELF_SIGNED:
+                return cfgStr( "operator.cert.issuer.selfSigned" );
+            case LETS_ENCRYPT_STAGING:
+                return cfgStr( "operator.cert.issuer.letsEncrypt.staging" );
+            case LETS_ENCRYPT:
+                return cfgStr( "operator.cert.issuer.letsEncrypt.prod" );
+            case CLUSTER_ISSUER:
+                return resource.getDomainSpec().getDomainSpecCertificate().getIdentifier();
+            default:
+                return null;
+        }
     }
 
     public Set<String> ingressHosts( final Ingress ingress )
@@ -94,70 +175,5 @@ public class OperatorIngressCertSync
             return false;
         }
         return true;
-    }
-
-
-    public void syncIngress( final Domain domain, final Ingress ingress )
-    {
-        String host = domain.getDomainSpec().getHost();
-
-        Map<String, String> oldAnnotations =
-            ingress.getMetadata().getAnnotations() != null ? ingress.getMetadata().getAnnotations() : new HashMap<>();
-        Map<String, String> newAnnotations = new HashMap<>( oldAnnotations );
-        newAnnotations.remove( "cert-manager.io/cluster-issuer" );
-
-        List<IngressTLS> oldTLS = ingress.getSpec().getTls() != null ? ingress.getSpec().getTls() : new LinkedList<>();
-        List<IngressTLS> newTLS = new LinkedList<>();
-        for ( IngressTLS tls : oldTLS )
-        {
-            if ( !tls.getHosts().contains( host ) )
-            {
-                newTLS.add( tls );
-            }
-        }
-
-        if ( domain.getDomainSpec().getDomainSpecCertificate() != null )
-        {
-            switch ( domain.getDomainSpec().getDomainSpecCertificate().getAuthority() )
-            {
-                case SELF_SIGNED:
-                case LETS_ENCRYPT_STAGING:
-                case LETS_ENCRYPT:
-                case CLUSTER_ISSUER:
-                    newAnnotations.put( "cert-manager.io/cluster-issuer", getClusterIssuer( domain ) );
-            }
-            newTLS.add( new IngressTLS( Arrays.asList( host ), domain.getMetadata().getName() + "-cert" ) );
-        }
-
-        if ( !Objects.equals( oldAnnotations, newAnnotations ) || !Objects.equals( oldTLS, newTLS ) )
-        {
-            K8sLogHelper.logDoneable( clients.k8s().network().ingresses().
-                inNamespace( ingress.getMetadata().getNamespace() ).
-                withName( ingress.getMetadata().getName() ).
-                edit().
-                editMetadata().
-                withAnnotations( newAnnotations ).
-                endMetadata().
-                editSpec().
-                withTls( newTLS ).
-                endSpec() );
-        }
-    }
-
-    private String getClusterIssuer( Domain resource )
-    {
-        switch ( resource.getDomainSpec().getDomainSpecCertificate().getAuthority() )
-        {
-            case SELF_SIGNED:
-                return cfgStr( "operator.cert.issuer.selfSigned" );
-            case LETS_ENCRYPT_STAGING:
-                return cfgStr( "operator.cert.issuer.letsEncrypt.staging" );
-            case LETS_ENCRYPT:
-                return cfgStr( "operator.cert.issuer.letsEncrypt.prod" );
-            case CLUSTER_ISSUER:
-                return resource.getDomainSpec().getDomainSpecCertificate().getIdentifier();
-            default:
-                return null;
-        }
     }
 }

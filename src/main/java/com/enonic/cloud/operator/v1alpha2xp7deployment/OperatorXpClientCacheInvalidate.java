@@ -7,18 +7,15 @@ import com.enonic.cloud.apis.xp.XpClientCache;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
 import com.enonic.cloud.operator.helpers.InformerEventHandler;
 
+/**
+ * This operator class invalidates XP client cache if Xp7Deployment is deleted
+ */
 @Singleton
 public class OperatorXpClientCacheInvalidate
     extends InformerEventHandler<Xp7Deployment>
 {
     @Inject
     XpClientCache xpClientCache;
-
-    @Override
-    protected void init()
-    {
-        // Do nothing
-    }
 
     @Override
     public void onNewAdd( final Xp7Deployment newResource )
@@ -35,6 +32,7 @@ public class OperatorXpClientCacheInvalidate
     @Override
     public void onDelete( final Xp7Deployment oldResource, final boolean b )
     {
+        // Invalidate XP client cache for deleted deployments
         xpClientCache.invalidateCache( oldResource.getMetadata().getNamespace() );
     }
 }

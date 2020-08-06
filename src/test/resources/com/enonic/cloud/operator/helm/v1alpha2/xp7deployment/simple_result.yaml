@@ -137,7 +137,7 @@ data:
   preStop.sh: "echo \"Wait for endpoints to be deleted\"\nbash /enonic-xp/home/extra-config/endpoints.sh\
     \ -r -s all -i ${XP_NODE_IP} -t 10\nbash /enonic-xp/home/extra-config/endpoints.sh\
     \ -r -s ${XP_NODE_GROUP} -i ${XP_NODE_IP} -t 10 -a 20"
-  initApps.txt: "https://repo.enonic.com/public/com/enonic/app/snapshotter/3.0.0/snapshotter-3.0.0.jar"
+  initApps.txt: "https://repo.enonic.com/public/com/enonic/app/snapshotter/3.0.1/snapshotter-3.0.1.jar"
 ---
 apiVersion: "v1"
 kind: "ConfigMap"

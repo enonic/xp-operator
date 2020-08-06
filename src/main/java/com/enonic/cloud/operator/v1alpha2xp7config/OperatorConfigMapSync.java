@@ -20,6 +20,9 @@ import com.enonic.cloud.operator.helpers.HandlerConfig;
 
 import static com.enonic.cloud.common.Configuration.cfgStr;
 
+/**
+ * This operator class collects all Xp7Configs and merges them into the nodegroup ConfigMaps
+ */
 @Singleton
 public class OperatorConfigMapSync
     extends HandlerConfig<Xp7Config>
@@ -39,11 +42,15 @@ public class OperatorConfigMapSync
     @Override
     protected void handle( final String namespace )
     {
-        // Sync all ConfigMaps with nodeGroup label
-        searchers.configMap().query().
+        // List all ConfigMaps in namespace with nodeGroup label
+        List<ConfigMap> configMaps = searchers.configMap().query().
+            inNamespace( namespace ).
             hasNotBeenDeleted().
             hasLabel( cfgStr( "operator.helm.charts.Values.labelKeys.nodeGroup" ) ).
-            forEach( this::handle );
+            list();
+
+        // Handle those ConfigMaps
+        configMaps.forEach( this::handle );
     }
 
     private void handle( final ConfigMap configMap )
@@ -60,7 +67,7 @@ public class OperatorConfigMapSync
             stream().
             collect( Collectors.toMap( c -> c.getXp7ConfigSpec().getFile(), c -> c.getXp7ConfigSpec().getData() ) );
 
-        // If data is not the same, update
+        // If data is not the same, do the update
         if ( !Objects.equals( configMap.getData(), data ) )
         {
             K8sLogHelper.logDoneable( clients.k8s().

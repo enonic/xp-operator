@@ -36,6 +36,11 @@ import com.enonic.cloud.operator.helpers.InformerEventHandler;
 import static com.enonic.cloud.common.Configuration.cfgHasKey;
 import static com.enonic.cloud.common.Configuration.cfgStr;
 
+// TODO: REFACTOR THIS CLASS
+
+/**
+ * This operator class creates/updates/deletes DNS records in cloudflare based on Domains
+ */
 @Singleton
 public class OperatorDomainDns
     extends InformerEventHandler<Domain>
@@ -76,8 +81,9 @@ public class OperatorDomainDns
     List<DomainConfig> allowedDomains;
 
     @Override
-    protected void init()
+    public void initialize()
     {
+        super.initialize();
         allowedDomains = allowedDomainKeys.stream().
             map( k -> DomainConfigImpl.of( cfgStr( "dns.domain." + k ), cfgStr( "dns.zoneId." + k ) ) ).
             collect( Collectors.toList() );

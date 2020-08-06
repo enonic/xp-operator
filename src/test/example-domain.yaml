@@ -2,6 +2,8 @@ apiVersion: enonic.cloud/v1alpha2
 kind: Domain
 metadata:
   name: test-domain-purplejs-io
+  annotations:
+    enonic.cloud/remove.with.xp7deployment: mycloud-mysolution-myenv-myservice
 spec:
   host: test-domain.purplejs.io
   dnsRecord: true

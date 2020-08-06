@@ -2,6 +2,7 @@ package com.enonic.cloud.kubernetes;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -108,6 +109,12 @@ public class ResourceQuery<T extends HasMetadata>
     public Stream<T> stream()
     {
         return this.stream;
+    }
+
+    public ResourceQuery<T> sorted( Comparator<? super T> s )
+    {
+        this.stream = this.stream.sorted( s );
+        return this;
     }
 
     public void forEach( Consumer<T> consumer )

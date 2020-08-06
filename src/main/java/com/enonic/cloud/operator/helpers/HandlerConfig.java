@@ -17,7 +17,6 @@ public abstract class HandlerConfig<R extends HasMetadata>
             forEach( this::handle );
     }
 
-
     protected abstract Stream<R> resourceStream();
 
     protected abstract void handle( String namespace );

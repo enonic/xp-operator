@@ -3,6 +3,7 @@ package com.enonic.cloud.operator.v1alpha2xp7deployment;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -36,6 +37,9 @@ import static com.enonic.cloud.common.Utils.createOwnerReference;
 import static com.enonic.cloud.kubernetes.client.Utils.cloneResource;
 
 
+/**
+ * This operator class creates/updates/deletes resources defined in the xp7deployment helm chart
+ */
 @Singleton
 public class OperatorXp7DeploymentHelm
     extends HandlerHelm<Xp7Deployment>
@@ -65,7 +69,14 @@ public class OperatorXp7DeploymentHelm
     @Override
     protected boolean specEquals( final Xp7Deployment oldResource, final Xp7Deployment newResource )
     {
-        return oldResource.getXp7DeploymentSpec().equals( newResource.getXp7DeploymentSpec() );
+        return Objects.equals( oldResource.getXp7DeploymentSpec(), newResource.getXp7DeploymentSpec() );
+    }
+
+    @Override
+    protected void postHandle( final String namespace )
+    {
+        // Update all config in namespace after update
+        operatorXp7ConfigSync.handle( namespace );
     }
 
     private String createSuPass()
@@ -86,12 +97,6 @@ public class OperatorXp7DeploymentHelm
             inNamespace( cfgStr( "operator.deployment.adminServiceAccount.namespace" ) ).
             withName( cfgStr( "operator.deployment.adminServiceAccount.name" ) ).
             get();
-    }
-
-    @Override
-    protected Runnable postHandle( final String namespace )
-    {
-        return () -> operatorXp7ConfigSync.handle( namespace );
     }
 
     public static class Xp7DeploymentValueBuilder

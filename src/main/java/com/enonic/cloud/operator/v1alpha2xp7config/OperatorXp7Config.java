@@ -6,6 +6,9 @@ import javax.inject.Singleton;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7config.Xp7Config;
 import com.enonic.cloud.operator.helpers.InformerEventHandler;
 
+/**
+ * This operator class triggers ConfigMap sync on Xp7Config changes
+ */
 @Singleton
 public class OperatorXp7Config
     extends InformerEventHandler<Xp7Config>
@@ -14,15 +17,9 @@ public class OperatorXp7Config
     OperatorConfigMapSync operatorConfigMapSync;
 
     @Override
-    protected void init()
-    {
-
-    }
-
-    @Override
     public void onNewAdd( final Xp7Config newResource )
     {
-        operatorConfigMapSync.handle( newResource.getMetadata().getNamespace() );
+        handle( newResource );
     }
 
     @Override
@@ -30,13 +27,19 @@ public class OperatorXp7Config
     {
         if ( !oldResource.getXp7ConfigSpec().equals( newResource.getXp7ConfigSpec() ) )
         {
-            operatorConfigMapSync.handle( newResource.getMetadata().getNamespace() );
+            handle( newResource );
         }
     }
 
     @Override
     public void onDelete( final Xp7Config oldResource, final boolean b )
     {
-        operatorConfigMapSync.handle( oldResource.getMetadata().getNamespace() );
+        handle( oldResource );
+    }
+
+    private void handle( final Xp7Config newResource )
+    {
+        // Sync config in namespace
+        operatorConfigMapSync.handle( newResource.getMetadata().getNamespace() );
     }
 }

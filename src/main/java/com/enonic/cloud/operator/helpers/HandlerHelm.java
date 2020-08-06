@@ -43,8 +43,9 @@ public abstract class HandlerHelm<R extends HasMetadata>
     private HelmToK8s<R> helmToK8s;
 
     @Override
-    public void init()
+    public void initialize()
     {
+        super.initialize();
         helmToK8s = HelmToK8sImpl.of( k8sCommandMapper, getValueBuilder( baseValues ), getTemplator() );
     }
 
@@ -77,16 +78,13 @@ public abstract class HandlerHelm<R extends HasMetadata>
             andThen( commandSorter ).
             andThen( runnableListExecutor ).
             apply( HelmToK8sParamsImpl.of( Optional.ofNullable( oldResource ), Optional.ofNullable( newResource ) ) );
-        Runnable postHandle = postHandle( newResource.getMetadata().getNamespace() );
-        if ( postHandle != null )
-        {
-            postHandle.run();
-        }
+
+        postHandle( newResource.getMetadata().getNamespace() );
     }
 
-    protected Runnable postHandle( final String namespace )
+    protected void postHandle( final String namespace )
     {
-        return null;
+        // By default do nothing
     }
 
     protected abstract ValueBuilder<R> getValueBuilder( final BaseValues baseValues );

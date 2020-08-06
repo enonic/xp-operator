@@ -7,13 +7,15 @@ import java.util.Objects;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-
 import io.fabric8.kubernetes.api.model.networking.v1beta1.Ingress;
 
 import com.enonic.cloud.operator.helpers.InformerEventHandler;
 
 import static com.enonic.cloud.common.Configuration.cfgStr;
 
+/**
+ * This operator class triggers vhost sync on Ingress changes
+ */
 @Singleton
 public class OperatorIngress
     extends InformerEventHandler<Ingress>
@@ -22,29 +24,29 @@ public class OperatorIngress
     OperatorXp7ConfigSync operatorXp7ConfigSync;
 
     @Override
-    protected void init()
-    {
-
-    }
-
-    @Override
     public void onNewAdd( final Ingress newResource )
     {
-        operatorXp7ConfigSync.handle( newResource.getMetadata().getNamespace() );
+        handle( newResource );
     }
 
     @Override
     public void onUpdate( final Ingress oldResource, final Ingress newResource )
     {
-        if ( ingressMappingsEqual( oldResource, newResource ) )
+        if ( !ingressMappingsEqual( oldResource, newResource ) )
         {
-            operatorXp7ConfigSync.handle( newResource.getMetadata().getNamespace() );
+            handle( newResource );
         }
     }
 
     @Override
     public void onDelete( final Ingress oldResource, final boolean b )
     {
+        handle( oldResource );
+    }
+
+    private void handle( final Ingress oldResource )
+    {
+        // Handle relevant namespace
         operatorXp7ConfigSync.handle( oldResource.getMetadata().getNamespace() );
     }
 
@@ -56,7 +58,7 @@ public class OperatorIngress
         }
 
         Map<String, String> oldAnnotations = getXpVHostAnnotations( oldResource );
-        Map<String, String> newAnnotations = getXpVHostAnnotations( oldResource );
+        Map<String, String> newAnnotations = getXpVHostAnnotations( newResource );
 
         return Objects.equals( oldAnnotations, newAnnotations );
     }

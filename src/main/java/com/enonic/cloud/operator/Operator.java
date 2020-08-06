@@ -27,7 +27,7 @@ import com.enonic.cloud.operator.v1alpha1xp7app.OperatorXp7AppStartStopper;
 import com.enonic.cloud.operator.v1alpha1xp7app.OperatorXp7AppStatus;
 import com.enonic.cloud.operator.v1alpha2xp7config.OperatorConfigMapSync;
 import com.enonic.cloud.operator.v1alpha2xp7config.OperatorXp7Config;
-import com.enonic.cloud.operator.v1alpha2xp7deployment.OperatorNamespaceDelete;
+import com.enonic.cloud.operator.v1alpha2xp7deployment.OperatorDeleteAnnotation;
 import com.enonic.cloud.operator.v1alpha2xp7deployment.OperatorXp7DeploymentHelm;
 import com.enonic.cloud.operator.v1alpha2xp7deployment.OperatorXp7DeploymentStatus;
 import com.enonic.cloud.operator.v1alpha2xp7deployment.OperatorXpClientCacheInvalidate;
@@ -35,6 +35,9 @@ import com.enonic.cloud.operator.v1alpha2xp7deployment.OperatorXpClientCacheInva
 import static com.enonic.cloud.common.Configuration.cfgIfBool;
 import static com.enonic.cloud.common.Configuration.cfgLong;
 
+/**
+ * This is the entry point for the Operator, it sets up all the Operator classes
+ */
 @ApplicationScoped
 public class Operator
 {
@@ -64,7 +67,7 @@ public class Operator
 
     private final OperatorConfigMapSync operatorConfigMapSync;
 
-    private final OperatorNamespaceDelete operatorNamespaceDelete;
+    private final OperatorDeleteAnnotation operatorDeleteAnnotation;
 
     private final OperatorXp7DeploymentHelm operatorXp7DeploymentHelm;
 
@@ -78,7 +81,7 @@ public class Operator
                      final OperatorIngress operatorIngress, final OperatorXp7ConfigSync operatorXp7ConfigSync,
                      final OperatorXp7AppInstaller operatorXp7AppInstaller, final OperatorXp7AppStatus operatorXp7AppStatus,
                      final OperatorXp7Config operatorXp7Config, final OperatorConfigMapSync operatorConfigMapSync,
-                     final OperatorNamespaceDelete operatorNamespaceDelete, final OperatorXp7DeploymentHelm operatorXp7DeploymentHelm,
+                     final OperatorDeleteAnnotation operatorDeleteAnnotation, final OperatorXp7DeploymentHelm operatorXp7DeploymentHelm,
                      final OperatorXp7AppStartStopper operatorXp7AppStartStopper,
                      final OperatorXp7DeploymentStatus operatorXp7DeploymentStatus,
                      final OperatorXpClientCacheInvalidate operatorXpClientCacheInvalidate )
@@ -94,7 +97,7 @@ public class Operator
         this.operatorXp7AppStatus = operatorXp7AppStatus;
         this.operatorXp7Config = operatorXp7Config;
         this.operatorConfigMapSync = operatorConfigMapSync;
-        this.operatorNamespaceDelete = operatorNamespaceDelete;
+        this.operatorDeleteAnnotation = operatorDeleteAnnotation;
         this.operatorXp7DeploymentHelm = operatorXp7DeploymentHelm;
         this.operatorXp7AppStartStopper = operatorXp7AppStartStopper;
         this.operatorXp7DeploymentStatus = operatorXp7DeploymentStatus;
@@ -130,7 +133,7 @@ public class Operator
                 listen( operatorXp7Config, informers.xp7ConfigInformer() );
                 schedule( operatorConfigMapSync, syncInterval );
 
-                listen( operatorNamespaceDelete, informers.xp7DeploymentInformer() );
+                listen( operatorDeleteAnnotation, informers.xp7DeploymentInformer() );
                 listen( operatorXp7DeploymentHelm, informers.xp7DeploymentInformer() );
                 schedule( operatorXp7DeploymentStatus, statusInterval );
                 listen( operatorXpClientCacheInvalidate, informers.xp7DeploymentInformer() );

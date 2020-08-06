@@ -24,6 +24,9 @@ import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentSta
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentStatusFieldsPod;
 import com.enonic.cloud.operator.helpers.HandlerStatus;
 
+/**
+ * This operator class updates Xp7Deployment status fields
+ */
 @Singleton
 public class OperatorXp7DeploymentStatus
     extends HandlerStatus<Xp7Deployment, Xp7DeploymentStatus>
@@ -59,19 +62,24 @@ public class OperatorXp7DeploymentStatus
     @Override
     protected Xp7DeploymentStatus pollStatus( final Xp7Deployment resource )
     {
+        // Get current status
         Xp7DeploymentStatus currentStatus =
             resource.getXp7DeploymentStatus() != null ? resource.getXp7DeploymentStatus() : new Xp7DeploymentStatus().
                 withState( Xp7DeploymentStatus.State.PENDING ).
                 withMessage( "Created" );
 
+        // Get pods in deployment
         List<Pod> pods = searchers.pod().query().stream().
             filter( pod -> filterPods( resource, pod ) ).
             collect( Collectors.toList() );
 
+        // Set pod fields
         currentStatus.setXp7DeploymentStatusFields( buildFields( pods ) );
 
+        // Get expected number of pods
         int expectedNumberOfPods = expectedNumberOfPods( resource );
 
+        // If pod count does not match
         if ( pods.size() != expectedNumberOfPods )
         {
             return currentStatus.
@@ -79,6 +87,7 @@ public class OperatorXp7DeploymentStatus
                 withMessage( "Pod count mismatch" );
         }
 
+        // If deployment is disabled
         if ( !resource.getXp7DeploymentSpec().getEnabled() )
         {
             return currentStatus.
@@ -86,6 +95,7 @@ public class OperatorXp7DeploymentStatus
                 withMessage( "OK" );
         }
 
+        // Iterate over pods and check status
         for ( Xp7DeploymentStatusFieldsPod s : currentStatus.
             getXp7DeploymentStatusFields().
             getXp7DeploymentStatusFieldsPods() )
@@ -98,6 +108,7 @@ public class OperatorXp7DeploymentStatus
             }
         }
 
+        // Return OK
         return currentStatus.
             withState( Xp7DeploymentStatus.State.RUNNING ).
             withMessage( "OK" );

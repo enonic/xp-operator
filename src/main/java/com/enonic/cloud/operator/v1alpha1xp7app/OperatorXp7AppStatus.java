@@ -22,6 +22,9 @@ import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7AppStatus;
 import com.enonic.cloud.operator.helpers.HandlerStatus;
 import com.enonic.cloud.operator.helpers.Xp7DeploymentInfo;
 
+/**
+ * This operator class updates Xp7App status fields
+ */
 @Singleton
 public class OperatorXp7AppStatus
     extends HandlerStatus<Xp7App, Xp7AppStatus>
@@ -73,91 +76,98 @@ public class OperatorXp7AppStatus
     @Override
     protected Xp7AppStatus pollStatus( final Xp7App resource )
     {
-        Xp7AppStatus currentStatus = resource.getXp7AppStatus();
+        Xp7AppStatus currentStatus = resource.getXp7AppStatus() != null ? resource.getXp7AppStatus() : new Xp7AppStatus().
+            withState( Xp7AppStatus.State.PENDING ).
+            withMessage( "Pending install" );
 
+        // If there is no app info
         if ( currentStatus.getXp7AppStatusFields().getXp7AppStatusFieldsAppInfo() == null )
         {
-            return new AppStatusBuilder( currentStatus ).
-                withState( Xp7AppStatus.State.PENDING ).
-                withMessage( "Pending install" ).
-                build();
+            return currentStatus;
         }
 
-        return checkXp( resource, currentStatus );
+        // XP is not running
+        if ( !xp7DeploymentInfo.xpRunning( resource.getMetadata().getNamespace() ) )
+        {
+            return currentStatus.
+                withState( Xp7AppStatus.State.PENDING ).
+                withMessage( "Xp7Deployment not in RUNNING state" );
+        }
+
+        List<AppInfo> infoList = getAppInfoList( resource );
+
+        // Failed calling XP
+        if ( infoList == null )
+        {
+            return currentStatus.
+                withState( Xp7AppStatus.State.ERROR ).
+                withMessage( "Failed calling XP" );
+        }
+
+        AppInfo appInfo = getAppState( resource, infoList );
+
+        // App not found in XP
+        if ( appInfo == null )
+        {
+            return currentStatus.
+                withState( Xp7AppStatus.State.ERROR ).
+                withMessage( "App not found in XP" );
+        }
+
+        // Update state/message
+        switch ( appInfo.state() )
+        {
+            case "started":
+                return currentStatus.
+                    withState( Xp7AppStatus.State.RUNNING ).
+                    withMessage( "Started" );
+            case "stopped":
+                return currentStatus.
+                    withState( Xp7AppStatus.State.STOPPED ).
+                    withMessage( "Stopped" );
+            default:
+                return currentStatus.
+                    withState( Xp7AppStatus.State.ERROR ).
+                    withMessage( "Invalid app state" );
+        }
     }
 
-    private Xp7AppStatus checkXp( final Xp7App app, final Xp7AppStatus currentStatus )
+    private List<AppInfo> getAppInfoList( final Xp7App resource )
     {
-        if ( !xp7DeploymentInfo.xpRunning( app.getMetadata().getNamespace() ) )
-        {
-            return new AppStatusBuilder( currentStatus ).
-                withState( Xp7AppStatus.State.PENDING ).
-                withMessage( "Xp7Deployment not in RUNNING state" ).
-                build();
-        }
-
-        String mapKey = app.getMetadata().getNamespace();
+        String mapKey = resource.getMetadata().getNamespace();
         if ( !appInfoMap.containsKey( mapKey ) )
         {
             List<AppInfo> appInfo = null;
             try
             {
-                appInfo = xpClientCache.list( app.getMetadata().getNamespace() ).
+                appInfo = xpClientCache.list( resource.getMetadata().getNamespace() ).
                     get().
                     applications();
             }
             catch ( Exception e )
             {
-                log.warn( String.format( "Failed calling XP for app '%s' in NS '%s': %s", app.getMetadata().getName(),
-                                         app.getMetadata().getNamespace(), e.getMessage() ) );
+                log.warn( String.format( "Failed calling XP for app '%s' in NS '%s': %s", resource.getMetadata().getName(),
+                                         resource.getMetadata().getNamespace(), e.getMessage() ) );
             }
             appInfoMap.put( mapKey, appInfo );
         }
 
-        List<AppInfo> info = appInfoMap.get( mapKey );
+        return appInfoMap.get( mapKey );
+    }
 
-        if ( info == null )
+    private AppInfo getAppState( final Xp7App resource, final List<AppInfo> infoList )
+    {
+        for ( AppInfo appInfo : infoList )
         {
-            return new AppStatusBuilder( currentStatus ).
-                withState( Xp7AppStatus.State.ERROR ).
-                withMessage( "Failed calling XP" ).
-                build();
-        }
-
-        for ( AppInfo appInfo : info )
-        {
-            if ( appInfo.key().equals( currentStatus.
+            if ( appInfo.key().equals( resource.
+                getXp7AppStatus().
                 getXp7AppStatusFields().
                 getXp7AppStatusFieldsAppInfo().
                 getKey() ) )
             {
-                switch ( appInfo.state() )
-                {
-                    case "started":
-                        return new AppStatusBuilder( currentStatus ).
-                            withState( Xp7AppStatus.State.RUNNING ).
-                            withMessage( "Started" ).
-                            withAppInfo( appInfo ).
-                            build();
-                    case "stopped":
-                        return new AppStatusBuilder( currentStatus ).
-                            withState( Xp7AppStatus.State.STOPPED ).
-                            withMessage( "Stopped" ).
-                            withAppInfo( appInfo ).
-                            build();
-                    default:
-                        return new AppStatusBuilder( currentStatus ).
-                            withState( Xp7AppStatus.State.ERROR ).
-                            withMessage( "Invalid app state" ).
-                            withAppInfo( appInfo ).
-                            build();
-                }
+                return appInfo;
             }
         }
-
-        return new AppStatusBuilder( currentStatus ).
-            withState( Xp7AppStatus.State.ERROR ).
-            withMessage( "App not found in XP" ).
-            build();
+        return null;
     }
 }
