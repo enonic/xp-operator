@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 import com.enonic.cloud.apis.xp.XpClientCache;
 import com.enonic.cloud.apis.xp.service.AppInfo;
-import com.enonic.cloud.apis.xp.service.AppInstallResponse;
 import com.enonic.cloud.apis.xp.service.ImmutableAppInstallRequest;
 import com.enonic.cloud.apis.xp.service.ImmutableAppKeyList;
 import com.enonic.cloud.kubernetes.Clients;
@@ -18,6 +17,8 @@ import com.enonic.cloud.kubernetes.Searchers;
 import com.enonic.cloud.kubernetes.commands.K8sLogHelper;
 import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7App;
 import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7AppStatus;
+import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7AppStatusFields;
+import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7AppStatusFieldsAppInfo;
 import com.enonic.cloud.operator.helpers.InformerEventHandler;
 import com.enonic.cloud.operator.helpers.Xp7DeploymentInfo;
 
@@ -111,37 +112,19 @@ public class OperatorXp7AppInstaller
         }
 
         // Try to install
-        String failure = null;
-        AppInfo appInfo = null;
         try
         {
-            AppInstallResponse response =
-                xpClientCache.install( app.getMetadata().getNamespace() ).apply( ImmutableAppInstallRequest.builder().
-                    url( app.getXp7AppSpec().getUrl() ).
-                    build() );
-            if ( response.failure() != null )
-            {
-                failure = response.failure();
-            }
-            else
-            {
-                appInfo = response.applicationInstalledJson().application();
-            }
+            AppInfo appInfo = xpClientCache.install( app.getMetadata().getNamespace(), ImmutableAppInstallRequest.builder().
+                url( app.getXp7AppSpec().getUrl() ).
+                build() );
+            updateAppInfo( app, appInfo );
+            return true;
         }
         catch ( Exception e )
         {
-            failure = e.getMessage();
-        }
-
-        // On Failure
-        if ( failure != null || appInfo == null )
-        {
-            log.warn( "Failed installing app: " + failure );
+            log.warn( "Failed installing app: " + e.getMessage() );
             return false;
         }
-
-        updateAppInfo( app, appInfo );
-        return true;
     }
 
     @SuppressWarnings("UnusedReturnValue")
@@ -174,7 +157,7 @@ public class OperatorXp7AppInstaller
         // Try to uninstall
         try
         {
-            xpClientCache.uninstall( app.getMetadata().getNamespace() ).accept( ImmutableAppKeyList.builder().addKey( app.
+            xpClientCache.uninstall( app.getMetadata().getNamespace(), ImmutableAppKeyList.builder().addKey( app.
                 getXp7AppStatus().
                 getXp7AppStatusFields().
                 getXp7AppStatusFieldsAppInfo().
@@ -187,6 +170,25 @@ public class OperatorXp7AppInstaller
             log.warn( "Failed uninstalling app: " + e.getMessage() );
             return false;
         }
+    }
+
+    public static Xp7AppStatusFields fieldsFromAppInfo( AppInfo appInfo )
+    {
+        if ( appInfo == null )
+        {
+            return null;
+        }
+        return new Xp7AppStatusFields().
+            withXp7AppStatusFieldsAppInfo( new Xp7AppStatusFieldsAppInfo().
+                withDescription( appInfo.description() ).
+                withDisplayName( appInfo.displayName() ).
+                withKey( appInfo.key() ).
+                withModifiedTime( appInfo.modifiedTime() ).
+                withState( appInfo.state() ).
+                withUrl( appInfo.url() ).
+                withVendorName( appInfo.vendorName() ).
+                withVendorUrl( appInfo.vendorUrl() ).
+                withVersion( appInfo.version() ) );
     }
 
     private void updateAppInfo( Xp7App resource, AppInfo appInfo )
@@ -204,7 +206,7 @@ public class OperatorXp7AppInstaller
             status = new Xp7AppStatus().
                 withState( Xp7AppStatus.State.PENDING ).
                 withMessage( "Installed" ).
-                withXp7AppStatusFields( null );
+                withXp7AppStatusFields( fieldsFromAppInfo( appInfo ) );
         }
 
         K8sLogHelper.logDoneable( clients.xp7Apps().crdClient().

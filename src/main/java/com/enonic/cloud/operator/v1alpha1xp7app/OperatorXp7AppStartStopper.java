@@ -98,7 +98,7 @@ public class OperatorXp7AppStartStopper
         {
             try
             {
-                xpClientCache.start( namespace ).accept( ImmutableAppKeyList.builder().addKey( key ).build() );
+                xpClientCache.start( namespace, ImmutableAppKeyList.builder().addKey( key ).build() );
             }
             catch ( Exception e )
             {
@@ -111,7 +111,7 @@ public class OperatorXp7AppStartStopper
         {
             try
             {
-                xpClientCache.stop( namespace ).accept( ImmutableAppKeyList.builder().addKey( key ).build() );
+                xpClientCache.stop( namespace, ImmutableAppKeyList.builder().addKey( key ).build() );
             }
             catch ( Exception e )
             {

@@ -4,9 +4,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -24,10 +21,10 @@ import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
 import com.enonic.cloud.apis.xp.service.AdminApi;
+import com.enonic.cloud.apis.xp.service.AppInfo;
 import com.enonic.cloud.apis.xp.service.AppInstallRequest;
 import com.enonic.cloud.apis.xp.service.AppInstallResponse;
 import com.enonic.cloud.apis.xp.service.AppKeyList;
-import com.enonic.cloud.apis.xp.service.AppListResponse;
 import com.enonic.cloud.kubernetes.Clients;
 
 @Singleton
@@ -58,48 +55,44 @@ public class XpClientCache
     }
 
     @SuppressWarnings("WeakerAccess")
-    public Supplier<AppListResponse> list( final String namespace )
+    public List<AppInfo> list( final String namespace )
     {
-        return () -> getAdminApi( namespace ).appList();
+        return getAdminApi( namespace ).appList().applications();
     }
 
     @SuppressWarnings("WeakerAccess")
-    public Function<AppInstallRequest, AppInstallResponse> install( final String namespace )
+    public AppInfo install( final String namespace, final AppInstallRequest req )
     {
-        return ( req ) -> {
-            AppInstallResponse res = getAdminApi( namespace ).appInstall( req );
-            if ( res.failure() == null )
-            {
-                log( namespace, "INSTALL apps", Collections.
-                    singletonList( res.applicationInstalledJson().application().key() ) );
-            }
-            return res;
-        };
+        AppInstallResponse res = getAdminApi( namespace ).appInstall( req );
+        if ( res.failure() == null )
+        {
+            log( namespace, "INSTALL apps", Collections.
+                singletonList( res.applicationInstalledJson().application().key() ) );
+        }
+        else
+        {
+            throw new RuntimeException( res.failure() );
+        }
+        return res.applicationInstalledJson().application();
     }
 
     @SuppressWarnings("WeakerAccess")
-    public Consumer<AppKeyList> uninstall( final String namespace )
+    public void uninstall( final String namespace, final AppKeyList req )
     {
-        return ( req ) -> {
-            log( namespace, "UNINSTALL apps", req.key() );
-            getAdminApi( namespace ).appUninstall( req );
-        };
+        log( namespace, "UNINSTALL apps", req.key() );
+        getAdminApi( namespace ).appUninstall( req );
     }
 
-    public Consumer<AppKeyList> start( final String namespace )
+    public void start( final String namespace, final AppKeyList req )
     {
-        return ( req ) -> {
-            log( namespace, "START apps", req.key() );
-            getAdminApi( namespace ).appStart( req );
-        };
+        log( namespace, "START apps", req.key() );
+        getAdminApi( namespace ).appStart( req );
     }
 
-    public Consumer<AppKeyList> stop( final String namespace )
+    public void stop( final String namespace, final AppKeyList req )
     {
-        return ( req ) -> {
-            log( namespace, "STOP apps", req.key() );
-            getAdminApi( namespace ).appStop( req );
-        };
+        log( namespace, "STOP apps", req.key() );
+        getAdminApi( namespace ).appStop( req );
     }
 
     private void log( String namespace, String action, List<String> keys )

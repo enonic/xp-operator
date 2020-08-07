@@ -22,6 +22,8 @@ import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7AppStatus;
 import com.enonic.cloud.operator.helpers.HandlerStatus;
 import com.enonic.cloud.operator.helpers.Xp7DeploymentInfo;
 
+import static com.enonic.cloud.operator.v1alpha1xp7app.OperatorXp7AppInstaller.fieldsFromAppInfo;
+
 /**
  * This operator class updates Xp7App status fields
  */
@@ -111,8 +113,11 @@ public class OperatorXp7AppStatus
         {
             return currentStatus.
                 withState( Xp7AppStatus.State.ERROR ).
-                withMessage( "App not found in XP" );
+                withMessage( "App not found in XP" ).
+                withXp7AppStatusFields( null );
         }
+
+        currentStatus.withXp7AppStatusFields( fieldsFromAppInfo( appInfo ) );
 
         // Update state/message
         switch ( appInfo.state() )
@@ -137,19 +142,16 @@ public class OperatorXp7AppStatus
         String mapKey = resource.getMetadata().getNamespace();
         if ( !appInfoMap.containsKey( mapKey ) )
         {
-            List<AppInfo> appInfo = null;
             try
             {
-                appInfo = xpClientCache.list( resource.getMetadata().getNamespace() ).
-                    get().
-                    applications();
+                List<AppInfo> appInfo = xpClientCache.list( resource.getMetadata().getNamespace() );
+                appInfoMap.put( mapKey, appInfo );
             }
             catch ( Exception e )
             {
                 log.warn( String.format( "Failed calling XP for app '%s' in NS '%s': %s", resource.getMetadata().getName(),
                                          resource.getMetadata().getNamespace(), e.getMessage() ) );
             }
-            appInfoMap.put( mapKey, appInfo );
         }
 
         return appInfoMap.get( mapKey );

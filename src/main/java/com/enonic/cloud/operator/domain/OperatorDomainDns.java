@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -18,13 +17,10 @@ import org.slf4j.LoggerFactory;
 import io.fabric8.kubernetes.api.model.LoadBalancerIngress;
 import io.fabric8.kubernetes.api.model.Service;
 
-import com.enonic.cloud.apis.cloudflare.CloudflareListParams;
-import com.enonic.cloud.apis.cloudflare.CloudflareListParamsImpl;
+import com.enonic.cloud.apis.cloudflare.DnsRecordServiceWrapper;
 import com.enonic.cloud.apis.cloudflare.service.model.DnsRecord;
 import com.enonic.cloud.apis.cloudflare.service.model.ImmutableDnsRecord;
-import com.enonic.cloud.apis.doh.DohQueryParams;
-import com.enonic.cloud.apis.doh.DohQueryParamsImpl;
-import com.enonic.cloud.apis.doh.service.DohAnswer;
+import com.enonic.cloud.apis.doh.DohServiceWrapper;
 import com.enonic.cloud.common.functions.RunnableListExecutor;
 import com.enonic.cloud.kubernetes.Clients;
 import com.enonic.cloud.kubernetes.commands.K8sLogHelper;
@@ -51,22 +47,10 @@ public class OperatorDomainDns
     Clients clients;
 
     @Inject
-    Function<DohQueryParams, List<DohAnswer>> doh;
+    DohServiceWrapper doh;
 
     @Inject
-    Function<CloudflareListParams, List<DnsRecord>> cfList;
-
-    @Inject
-    @Named("create")
-    Function<DnsRecord, Runnable> cfCreate;
-
-    @Inject
-    @Named("update")
-    Function<DnsRecord, Runnable> cfUpdate;
-
-    @Inject
-    @Named("delete")
-    Function<DnsRecord, Runnable> cfDelete;
+    DnsRecordServiceWrapper dnsRecordService;
 
     @Inject
     RunnableListExecutor runnableListExecutor;
@@ -92,7 +76,7 @@ public class OperatorDomainDns
     @Override
     protected void onNewAdd( final Domain newResource )
     {
-        handle( newResource, newResource.getDomainSpec().getDnsRecord(), false );
+        handle( newResource, false, false );
     }
 
     @Override
@@ -110,13 +94,12 @@ public class OperatorDomainDns
         handle( oldResource, true, false );
     }
 
-    private void handle( final Domain domain, final boolean delete, final boolean forceDnsRecordChange )
+    private Void handle( final Domain domain, final boolean delete, final boolean forceDnsRecordChange )
     {
         // Check if domain has been assigned public IPs
         if ( domain.getDomainStatus().getDomainStatusFields().getPublicIps().size() == 0 && !delete )
         {
-            addPublicIps( domain );
-            return;
+            return addPublicIps( domain );
         }
 
         DomainConfig config = getDomainConfig( domain.getDomainSpec().getHost() );
@@ -124,26 +107,25 @@ public class OperatorDomainDns
         if ( config == null && !domain.getDomainStatus().getDomainStatusFields().getDnsRecordCreated() )
         {
             log.warn( String.format( "Domain '%s' is not in allowed domains list", domain.getDomainSpec().getHost() ) );
-            updateDnsStatus( domain );
-            return;
+            return updateDnsStatus( domain );
         }
 
         if ( domain.getDomainStatus().getState() == DomainStatus.State.READY && !delete && !forceDnsRecordChange )
         {
-            return;
+            return null;
         }
 
-        List<DnsRecord> records = cfList.apply( CloudflareListParamsImpl.of( config.zoneId(), domain.getDomainSpec().getHost(), null ) );
+        List<DnsRecord> records = dnsRecordService.list( config.zoneId(), domain.getDomainSpec().getHost(), null );
         if ( records.size() == 0 && delete )
         {
             // No records to delete, ignore
-            return;
+            return null;
         }
 
-        syncDnsRecords( config, domain, records, delete );
+        return syncDnsRecords( config, domain, records, delete );
     }
 
-    private void addPublicIps( final Domain domain )
+    private Void addPublicIps( final Domain domain )
     {
         Set<String> ips = new HashSet<>();
 
@@ -161,7 +143,7 @@ public class OperatorDomainDns
             if ( lbService == null )
             {
                 log.warn( "Loadbalancer service not found" );
-                return;
+                return null;
             }
 
             if ( lbService.getStatus() != null && lbService.getStatus().getLoadBalancer() != null &&
@@ -199,12 +181,14 @@ public class OperatorDomainDns
                 edit().
                 withStatus( status ) );
         }
+
+        return null;
     }
 
-    private void updateDnsStatus( final Domain domain )
+    private Void updateDnsStatus( final Domain domain )
     {
         // TODO: Handle CNAME
-        if ( doh.apply( DohQueryParamsImpl.of( "A", domain.getDomainSpec().getHost() ) ).size() > 0 )
+        if ( doh.query( "A", domain.getDomainSpec().getHost() ).answers().size() > 0 )
         {
             K8sLogHelper.logDoneable( clients.domain().crdClient().
                 withName( domain.getMetadata().getName() ).
@@ -216,16 +200,17 @@ public class OperatorDomainDns
                         withPublicIps( domain.getDomainStatus().getDomainStatusFields().getPublicIps() ).
                         withDnsRecordCreated( true ) ) ) );
         }
+        return null;
     }
 
-    private void syncDnsRecords( final DomainConfig config, final Domain domain, final List<DnsRecord> records, final boolean delete )
+    private Void syncDnsRecords( final DomainConfig config, final Domain domain, final List<DnsRecord> records, final boolean delete )
     {
 
         DnsRecord heritageRecord = getHeritageRecord( records );
         if ( records.size() > 0 && heritageRecord == null )
         {
             log.warn( String.format( "Present heritage record does not match this cluster id", domain.getDomainSpec().getHost() ) );
-            return;
+            return null;
         }
 
         List<String> ips = domain.getDomainStatus().getDomainStatusFields().getPublicIps();
@@ -233,7 +218,7 @@ public class OperatorDomainDns
         if ( ips.size() == 0 )
         {
             log.warn( "Domain does not have an external IP" );
-            return;
+            return null;
         }
 
         List<DnsRecord> aRecords = records.stream().filter( r -> "A".equals( r.type() ) ).collect( Collectors.toList() );
@@ -287,9 +272,9 @@ public class OperatorDomainDns
 
         List<Runnable> commands = new LinkedList<>();
 
-        toAdd.stream().forEach( r -> commands.add( cfCreate.apply( r ) ) );
-        toModify.stream().forEach( r -> commands.add( cfUpdate.apply( r ) ) );
-        toRemove.stream().forEach( r -> commands.add( cfDelete.apply( r ) ) );
+        toAdd.stream().forEach( r -> commands.add( dnsRecordService.create( r ) ) );
+        toModify.stream().forEach( r -> commands.add( dnsRecordService.update( r ) ) );
+        toRemove.stream().forEach( r -> commands.add( dnsRecordService.delete( r ) ) );
 
         if ( !delete )
         {
@@ -305,6 +290,7 @@ public class OperatorDomainDns
         }
 
         runnableListExecutor.apply( commands );
+        return null;
     }
 
     private DnsRecord getHeritageRecord( final List<DnsRecord> records )
