@@ -128,17 +128,18 @@ public class MutationApi
         ensureOwnerReference( mt );
     }
 
-    private void xp7config( MutationRequest mutationRequest )
+    private void xp7config( MutationRequest mt )
     {
-        Xp7Config newR = (Xp7Config) mutationRequest.getAdmissionReview().getRequest().getObject();
+        Xp7Config newR = (Xp7Config) mt.getAdmissionReview().getRequest().getObject();
 
         if ( newR.getXp7ConfigSpec() != null )
         {
-            patchDefault( mutationRequest, cfgStr( "operator.helm.charts.Values.allNodesKey" ), newR.getXp7ConfigSpec().getNodeGroup(),
+            patchDefault( mt, false, newR.getXp7ConfigSpec().getDataBase64(), "/spec/dataBase64" );
+            patchDefault( mt, cfgStr( "operator.helm.charts.Values.allNodesKey" ), newR.getXp7ConfigSpec().getNodeGroup(),
                           "/spec/nodeGroup" );
         }
 
-        ensureOwnerReference( mutationRequest );
+        ensureOwnerReference( mt );
     }
 
     private void xp7deployment( MutationRequest mt )

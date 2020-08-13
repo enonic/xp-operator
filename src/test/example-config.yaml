@@ -7,3 +7,13 @@ spec:
   file: test
   data: |
     metricsUrl = http://asdf:2609/
+---
+apiVersion: enonic.cloud/v1alpha2
+kind: Xp7Config
+metadata:
+  name: test2
+  namespace: mycloud-mysolution-myenv-myservice
+spec:
+  file: test2
+  dataBase64: true
+  data: YXNkZg==

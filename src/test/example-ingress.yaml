@@ -4,7 +4,6 @@ metadata:
   name: test-domain-purplejs-io
   namespace: mycloud-mysolution-myenv-myservice
   annotations:
-    bla: a
     enonic.cloud/ingress.cert.manage: "true"
     enonic.cloud/xp7.vhost.mapping.1.source: /
     enonic.cloud/xp7.vhost.mapping.1.target: /admin

@@ -27,6 +27,9 @@ spec:
                   type: string
                 data:
                   type: string
+                dataBase64:
+                  type: boolean
+                  nullable: true
       additionalPrinterColumns:
         - name: NodeGroup
           type: string

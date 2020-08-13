@@ -1,10 +1,10 @@
 package com.enonic.cloud.operator.v1alpha2xp7config;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
@@ -61,21 +61,36 @@ public class OperatorConfigMapSync
             get( cfgStr( "operator.helm.charts.Values.labelKeys.nodeGroup" ) ) );
 
         // Collect all data from Xp7Config that has nodeGroup 'all' or '<nodeGroup>'
-        Map<String, String> data = searchers.xp7Config().query().
+        List<Xp7Config> configs = searchers.xp7Config().query().
             inNamespace( configMap.getMetadata().getNamespace() ).
             filter( xp7Config -> nodeGroups.contains( xp7Config.getXp7ConfigSpec().getNodeGroup() ) ).
-            stream().
-            collect( Collectors.toMap( c -> c.getXp7ConfigSpec().getFile(), c -> c.getXp7ConfigSpec().getData() ) );
+            list();
+
+        Map<String, String> data = new HashMap<>();
+        Map<String, String> binaryData = new HashMap<>();
+
+        for ( Xp7Config c : configs )
+        {
+            if ( Objects.equals( c.getXp7ConfigSpec().getDataBase64(), true ) )
+            {
+                binaryData.put( c.getXp7ConfigSpec().getFile(), c.getXp7ConfigSpec().getData() );
+            }
+            else
+            {
+                data.put( c.getXp7ConfigSpec().getFile(), c.getXp7ConfigSpec().getData() );
+            }
+        }
 
         // If data is not the same, do the update
-        if ( !Objects.equals( configMap.getData(), data ) )
+        if ( !Objects.equals( configMap.getData(), data ) || !Objects.equals( configMap.getBinaryData(), binaryData ) )
         {
             K8sLogHelper.logDoneable( clients.k8s().
                 configMaps().
                 inNamespace( configMap.getMetadata().getNamespace() ).
                 withName( configMap.getMetadata().getName() ).
                 edit().
-                withData( data ) );
+                withData( data ).
+                withBinaryData( binaryData ) );
         }
     }
 }
