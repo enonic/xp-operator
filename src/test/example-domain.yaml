@@ -1,11 +1,11 @@
 apiVersion: enonic.cloud/v1alpha2
 kind: Domain
 metadata:
-  name: test-domain-purplejs-io
+  name: test-domain-enonic-net
   annotations:
     enonic.cloud/remove.with.xp7deployment: mycloud-mysolution-myenv-myservice
 spec:
-  host: test-domain.purplejs.io
+  host: test-domain.enonic.net
   dnsRecord: true
   cdn: false
   certificate:
