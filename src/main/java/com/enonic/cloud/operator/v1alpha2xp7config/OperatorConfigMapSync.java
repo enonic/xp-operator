@@ -19,6 +19,7 @@ import com.enonic.cloud.kubernetes.model.v1alpha2.xp7config.Xp7Config;
 import com.enonic.cloud.operator.helpers.HandlerConfig;
 
 import static com.enonic.cloud.common.Configuration.cfgStr;
+import static com.enonic.cloud.operator.helpers.VeleroBackups.backupRestoreInProgress;
 
 /**
  * This operator class collects all Xp7Configs and merges them into the nodegroup ConfigMaps
@@ -47,6 +48,7 @@ public class OperatorConfigMapSync
             inNamespace( namespace ).
             hasNotBeenDeleted().
             hasLabel( cfgStr( "operator.helm.charts.Values.labelKeys.nodeGroup" ) ).
+            filter( c -> !backupRestoreInProgress( c ) ).
             list();
 
         // Handle those ConfigMaps

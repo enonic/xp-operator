@@ -19,6 +19,8 @@ import com.enonic.cloud.helm.values.ValueBuilder;
 import com.enonic.cloud.kubernetes.commands.K8sCommand;
 import com.enonic.cloud.kubernetes.commands.K8sCommandMapper;
 
+import static com.enonic.cloud.operator.helpers.VeleroBackups.backupRestoreInProgress;
+
 public abstract class HandlerHelm<R extends HasMetadata>
     extends InformerEventHandler<R>
 {
@@ -52,7 +54,10 @@ public abstract class HandlerHelm<R extends HasMetadata>
     @Override
     public void onNewAdd( final R newResource )
     {
-        handle( null, newResource );
+        if ( !backupRestoreInProgress( newResource ) )
+        {
+            handle( null, newResource );
+        }
     }
 
     @Override

@@ -29,6 +29,7 @@ import com.enonic.cloud.operator.api.BaseAdmissionApi;
 import static com.enonic.cloud.common.Configuration.cfgIfBool;
 import static com.enonic.cloud.common.Configuration.cfgStr;
 import static com.enonic.cloud.common.Validator.dns1123;
+import static com.enonic.cloud.operator.helpers.VeleroBackups.backupRestoreInProgress;
 
 @ApplicationScoped
 @Path("/apis/operator.enonic.cloud/v1alpha1")
@@ -69,7 +70,10 @@ public class AdmissionApi
             Preconditions.checkState( newApp.getXp7AppSpec() != null, "'spec' cannot be null" );
             Preconditions.checkState( newApp.getXp7AppSpec().getUrl() != null, "'spec.url' cannot be null" );
 
-            assertXp7Deployment( admissionReview, null );
+            if ( !backupRestoreInProgress( newApp ) )
+            {
+                assertXp7Deployment( admissionReview, null );
+            }
         }
     }
 
@@ -101,7 +105,10 @@ public class AdmissionApi
             }
 
             // Check for present deployment
-            assertXp7Deployment( admissionReview, Collections.singleton( newConfig.getXp7ConfigSpec().getNodeGroup() ) );
+            if ( !backupRestoreInProgress( newConfig ) )
+            {
+                assertXp7Deployment( admissionReview, Collections.singleton( newConfig.getXp7ConfigSpec().getNodeGroup() ) );
+            }
         }
     }
 
