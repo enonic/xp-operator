@@ -105,6 +105,11 @@ public class OperatorXp7AppInstaller
 
     private synchronized boolean installApp( final Xp7App app )
     {
+        // This is never going to work, do not even try
+        if ( app.getXp7AppSpec().getUrl().startsWith( "http://localhost" )) {
+            return false;
+        }
+
         // Check if XP is running
         if ( !xp7DeploymentInfo.xpRunning( app.getMetadata().getNamespace() ) )
         {
