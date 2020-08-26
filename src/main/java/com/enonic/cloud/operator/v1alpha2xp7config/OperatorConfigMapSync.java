@@ -1,6 +1,7 @@
 package com.enonic.cloud.operator.v1alpha2xp7config;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -83,8 +84,11 @@ public class OperatorConfigMapSync
             }
         }
 
+        Map<String, String> oldData = configMap.getData() != null ? configMap.getData() : Collections.emptyMap();
+        Map<String, String> oldBinaryData = configMap.getBinaryData() != null ? configMap.getBinaryData() : Collections.emptyMap();
+
         // If data is not the same, do the update
-        if ( !Objects.equals( configMap.getData(), data ) || !Objects.equals( configMap.getBinaryData(), binaryData ) )
+        if ( !Objects.equals( oldData, data ) || !Objects.equals( oldBinaryData, binaryData ) )
         {
             K8sLogHelper.logDoneable( clients.k8s().
                 configMaps().
