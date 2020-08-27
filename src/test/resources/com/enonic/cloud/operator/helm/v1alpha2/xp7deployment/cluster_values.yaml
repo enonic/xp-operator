@@ -1,10 +1,6 @@
 ---
 settings:
   nodeGroupAntiAffinity: false
-extensions:
-  linkerd:
-    enabled: false
-allNodesKey: "all"
 defaultLabels:
   cloud: "mycloud"
   solution: "mysolution"
@@ -13,7 +9,21 @@ defaultLabels:
 labelKeys:
   managed: "enonic.managed"
   nodeGroup: "enonic.nodeGroup"
+extraConfigLocation: "/enonic-xp/home/extra-config"
 clusterId: "44ddc40b-266c-4c99-b094-e758328fc6ba"
+configLocation: "/enonic-xp/home/config"
+ownerReferences:
+- apiVersion: "enonic.cloud/v1alpha2"
+  kind: "Xp7Deployment"
+  blockOwnerDeletion: false
+  controller: true
+  name: "mycloud-mysolution-myenv-myservice"
+heapDumpLocation: "/enonic-xp/home/data"
+extensions:
+  linkerd:
+    enabled: false
+allNodesKey: "all"
+setEnvLocation: "/enonic-xp/home/setenv.sh"
 imageTemplate: "enonic/xp:%s-ubuntu"
 annotationKeys:
   applyPriority: "enonic.applyPriority"
@@ -82,9 +92,3 @@ deployment:
           value: "6Gi"
         - name: "work"
           value: "7Gi"
-ownerReferences:
-- apiVersion: "enonic.cloud/v1alpha2"
-  kind: "Xp7Deployment"
-  blockOwnerDeletion: false
-  controller: true
-  name: "mycloud-mysolution-myenv-myservice"
