@@ -30,6 +30,15 @@ spec:
                 dataBase64:
                   type: boolean
                   nullable: true
+            status:
+              type: object
+              nullable: true
+              properties:
+                state:
+                  type: string
+                  enum: ["ERROR", "PENDING", "READY"]
+                message:
+                  type: string
       additionalPrinterColumns:
         - name: NodeGroup
           type: string
@@ -39,3 +48,11 @@ spec:
           type: string
           description: Config file name
           jsonPath: .spec.file
+        - name: State
+          type: string
+          description: State
+          jsonPath: .status.state
+        - name: Msg
+          type: string
+          description: Message
+          jsonPath: .status.message

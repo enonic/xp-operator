@@ -30,6 +30,7 @@ import com.enonic.cloud.kubernetes.model.v1alpha2.domain.Domain;
 import com.enonic.cloud.kubernetes.model.v1alpha2.domain.DomainStatus;
 import com.enonic.cloud.kubernetes.model.v1alpha2.domain.DomainStatusFields;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7config.Xp7Config;
+import com.enonic.cloud.kubernetes.model.v1alpha2.xp7config.Xp7ConfigStatus;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentStatus;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentStatusFields;
@@ -131,6 +132,23 @@ public class MutationApi
     private void xp7config( MutationRequest mt )
     {
         Xp7Config newR = (Xp7Config) mt.getAdmissionReview().getRequest().getObject();
+
+        Xp7ConfigStatus defStatus = new Xp7ConfigStatus().
+            withMessage( "Not loaded" ).
+            withState( Xp7ConfigStatus.State.PENDING );
+
+        if ( !patchDefault( mt, defStatus, newR.getXp7ConfigStatus(), "/status" ) )
+        {
+            // There is an old status here
+            Xp7Config oldR = (Xp7Config) mt.getAdmissionReview().getRequest().getOldObject();
+            boolean newBase64 = newR.getXp7ConfigSpec().getDataBase64() != null ? newR.getXp7ConfigSpec().getDataBase64() : true;
+            if ( !Objects.equals( oldR.getXp7ConfigSpec().getData(), newR.getXp7ConfigSpec().getData() ) ||
+                !Objects.equals( oldR.getXp7ConfigSpec().getDataBase64(), newBase64 ) )
+            {
+                // There is a change in the data, set default status
+                mt.addPatch( "replace", "/status", defStatus );
+            }
+        }
 
         if ( newR.getXp7ConfigSpec() != null )
         {

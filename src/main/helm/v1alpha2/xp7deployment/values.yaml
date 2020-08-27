@@ -10,11 +10,6 @@ volumeMounts:
 
 volumeBackups: ["blobstore", "snapshots"]
 
-heapDumpLocation: /enonic-xp/home/data
-configLocation: /enonic-xp/home/config
-extraConfigLocation: /enonic-xp/home/extra-config
-setEnvLocation: /enonic-xp/home/setenv.sh
-
 discoveryService: cluster-discovery
 
 securityContext:
