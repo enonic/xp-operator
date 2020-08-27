@@ -51,7 +51,9 @@ public class OperatorXp7ConfigStatus
     @Override
     protected Xp7ConfigStatus getStatus( final Xp7Config resource )
     {
-        return resource.getXp7ConfigStatus();
+        return resource.getXp7ConfigStatus() != null ? resource.getXp7ConfigStatus() : new Xp7ConfigStatus().
+            withState( Xp7ConfigStatus.State.PENDING ).
+            withMessage( "Created" );
     }
 
     @Override
@@ -68,7 +70,7 @@ public class OperatorXp7ConfigStatus
     protected Xp7ConfigStatus pollStatus( final Xp7Config config )
     {
         // If config has been flagged ready, do not try to set the state again
-        if ( config.getXp7ConfigStatus().getState() == Xp7ConfigStatus.State.READY )
+        if ( config.getXp7ConfigStatus() != null && config.getXp7ConfigStatus().getState() == Xp7ConfigStatus.State.READY )
         {
             return config.getXp7ConfigStatus();
         }
