@@ -20,6 +20,8 @@ import static com.enonic.cloud.common.Configuration.cfgStr;
 @Value.Immutable
 public abstract class XpClientCreator
 {
+    private static final ApacheHttpClient43Engine engine = new ApacheHttpClient43Engine();
+
     @Value.Default
     public String serviceName()
     {
@@ -39,14 +41,12 @@ public abstract class XpClientCreator
     @Value.Derived
     protected String deploymentHost()
     {
-//        return "localhost";
         return String.format( "%s.%s.svc.cluster.local", serviceName(), namespace() );
     }
 
     @Value.Default
     protected String adminPort()
     {
-//        return "8081";
         return "8080";
     }
 
@@ -59,7 +59,7 @@ public abstract class XpClientCreator
     @Value.Derived
     protected ResteasyClient client()
     {
-        return new ResteasyClientBuilderImpl().httpEngine( new ApacheHttpClient43Engine() ).build();
+        return new ResteasyClientBuilderImpl().httpEngine( engine ).build();
     }
 
     private ResteasyWebTarget createTarget( UriBuilder uriBuilder )
