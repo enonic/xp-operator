@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.io.BaseEncoding;
 
+import io.fabric8.kubernetes.api.model.ContainerStatus;
 import io.fabric8.kubernetes.api.model.Doneable;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.dsl.ExecListener;
@@ -39,8 +40,6 @@ public class OperatorXp7ConfigStatus
 
     @Inject
     Searchers searchers;
-
-    String code = "";
 
     @Override
     protected InformerSearcher<Xp7Config> informerSearcher()
@@ -75,15 +74,18 @@ public class OperatorXp7ConfigStatus
             return config.getXp7ConfigStatus();
         }
 
+        // Get all pods stream
         ResourceQuery<Pod> stream = searchers.pod().query().
             inNamespace( config.getMetadata().getNamespace() );
 
+        // Filter by nodegroup if needed
         if ( !Objects.equals( config.getXp7ConfigSpec().getNodeGroup(), cfgStr( "operator.helm.charts.Values.allNodesKey" ) ) )
         {
             stream =
                 stream.hasLabel( cfgStr( "operator.helm.charts.Values.labelKeys.nodeGroup" ), config.getXp7ConfigSpec().getNodeGroup() );
         }
 
+        // Find expected contents
         String fileName = config.getXp7ConfigSpec().getFile();
         String expectedContents = config.getXp7ConfigSpec().getData();
         if ( !config.getXp7ConfigSpec().getDataBase64() )
@@ -93,6 +95,7 @@ public class OperatorXp7ConfigStatus
                 encode( expectedContents.getBytes() );
         }
 
+        // Iterate over pods
         for ( Pod p : stream.list() )
         {
             if ( !configLoaded( p, fileName, expectedContents ) )
@@ -103,6 +106,7 @@ public class OperatorXp7ConfigStatus
             }
         }
 
+        // If all pods are ready, return OK
         return new Xp7ConfigStatus().
             withState( Xp7ConfigStatus.State.READY ).
             withMessage( "OK" );
@@ -110,11 +114,28 @@ public class OperatorXp7ConfigStatus
 
     private boolean configLoaded( final Pod pod, final String fileName, final String expectedContents )
     {
+        // Check pod
         if ( !Objects.equals( pod.getStatus().getPhase(), "Running" ) )
         {
             return false;
         }
 
+        // Check exp container
+        boolean expRunning = false;
+        for ( ContainerStatus cStatus : pod.getStatus().getContainerStatuses() )
+        {
+            if ( cStatus.getName().equals( "exp" ) && cStatus.getState().getRunning() != null )
+            {
+                expRunning = true;
+                break;
+            }
+        }
+        if ( !expRunning )
+        {
+            return false;
+        }
+
+        // Extract config file from pod in base64 format
         String base64Contents = null;
         try
         {
@@ -157,6 +178,7 @@ public class OperatorXp7ConfigStatus
             log.debug( "Failed getting config from pod", e );
         }
 
+        // Compare extracted value with expected value
         return Objects.equals( expectedContents, base64Contents );
     }
 }
