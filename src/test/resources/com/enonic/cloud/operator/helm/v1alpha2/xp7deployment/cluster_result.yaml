@@ -382,7 +382,6 @@ spec:
     port: 9200
     protocol: "TCP"
     targetPort: 9200
-  publishNotReadyAddresses: false
   selector:
     cloud: "mycloud"
     environment: "myenv"
@@ -430,7 +429,6 @@ spec:
     port: 9200
     protocol: "TCP"
     targetPort: 9200
-  publishNotReadyAddresses: false
   selector:
     enonic.nodeGroup: "master"
     cloud: "mycloud"
@@ -479,7 +477,6 @@ spec:
     port: 9200
     protocol: "TCP"
     targetPort: 9200
-  publishNotReadyAddresses: false
   selector:
     enonic.nodeGroup: "data"
     cloud: "mycloud"
@@ -528,7 +525,6 @@ spec:
     port: 9200
     protocol: "TCP"
     targetPort: 9200
-  publishNotReadyAddresses: false
   selector:
     enonic.nodeGroup: "frontend"
     cloud: "mycloud"
@@ -690,6 +686,7 @@ spec:
       schedulerName: "default-scheduler"
       securityContext:
         fsGroup: 0
+      serviceAccount: "xp-node-sa"
       serviceAccountName: "xp-node-sa"
       terminationGracePeriodSeconds: 600
       volumes:
@@ -885,6 +882,7 @@ spec:
       schedulerName: "default-scheduler"
       securityContext:
         fsGroup: 0
+      serviceAccount: "xp-node-sa"
       serviceAccountName: "xp-node-sa"
       terminationGracePeriodSeconds: 600
       volumes:
@@ -1102,6 +1100,7 @@ spec:
       schedulerName: "default-scheduler"
       securityContext:
         fsGroup: 0
+      serviceAccount: "xp-node-sa"
       serviceAccountName: "xp-node-sa"
       terminationGracePeriodSeconds: 600
       volumes:
@@ -1168,6 +1167,7 @@ spec:
   file: "system.properties"
   data: "xp.name = mycloud-mysolution-myenv-myservice\nxp.suPassword = {sha512}${env.SU_PASS_HASH}\n\
     xp.init.adminUserCreation = false"
+  dataBase64: false
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
@@ -1193,6 +1193,7 @@ spec:
   nodeGroup: "all"
   file: "com.enonic.xp.app.main.cfg"
   data: "tourDisabled = true"
+  dataBase64: false
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
@@ -1218,6 +1219,7 @@ spec:
   nodeGroup: "all"
   file: "com.enonic.xp.web.sessionstore.cfg"
   data: "storeMode=replicated"
+  dataBase64: false
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
@@ -1242,6 +1244,7 @@ spec:
   nodeGroup: "all"
   file: "com.enonic.app.status.cfg"
   data: "metricsUrl = http://localhost:2609/"
+  dataBase64: false
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
@@ -1267,6 +1270,7 @@ spec:
   file: "com.enonic.xp.cluster.cfg"
   data: "network.host=${env.XP_NODE_IP},127.0.0.1\nnetwork.publish.host=${env.XP_NODE_IP}\n\
     node.name=${env.XP_NODE_NAME}\ncluster.enabled=true"
+  dataBase64: false
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
@@ -1306,6 +1310,7 @@ spec:
     \   <appender-ref ref=\"FILE\"/>\n  </logger>\n\n  <logger name=\"Events.Bundle\"\
     \ level=\"WARN\" additivity=\"false\">\n    <appender-ref ref=\"STDOUT\"/>\n \
     \   <appender-ref ref=\"FILE\"/>\n  </logger>\n\n</configuration>"
+  dataBase64: false
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
@@ -1333,6 +1338,7 @@ spec:
   data: "clusterConfigDefaults=false\nsystem.hazelcast.initial.min.cluster.size=5\n\
     network.join.kubernetes.serviceDns=cluster-discovery.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
     network.join.kubernetes.enabled=true\nnetwork.join.tcpIp.enabled=false"
+  dataBase64: false
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
@@ -1358,6 +1364,7 @@ spec:
   nodeGroup: "master"
   file: "com.enonic.xp.web.vhost.cfg"
   data: "enabled = true"
+  dataBase64: false
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
@@ -1386,6 +1393,7 @@ spec:
     node.data=false\ngateway.expected_master_nodes=2\ngateway.expected_data_nodes=2\n\
     gateway.recover_after_time=5m\ndiscovery.zen.minimum_master_nodes=2\ndiscovery.unicast.sockets=cluster-discovery.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
     network.tcp.keep_alive=true"
+  dataBase64: false
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
@@ -1411,6 +1419,7 @@ spec:
   nodeGroup: "data"
   file: "com.enonic.xp.web.vhost.cfg"
   data: "enabled = true"
+  dataBase64: false
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
@@ -1439,6 +1448,7 @@ spec:
     node.data=true\ngateway.expected_master_nodes=2\ngateway.expected_data_nodes=2\n\
     gateway.recover_after_time=5m\ndiscovery.zen.minimum_master_nodes=2\ndiscovery.unicast.sockets=cluster-discovery.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
     network.tcp.keep_alive=true"
+  dataBase64: false
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
@@ -1464,6 +1474,7 @@ spec:
   nodeGroup: "frontend"
   file: "com.enonic.xp.web.vhost.cfg"
   data: "enabled = true"
+  dataBase64: false
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
@@ -1492,6 +1503,7 @@ spec:
     node.data=false\ngateway.expected_master_nodes=2\ngateway.expected_data_nodes=2\n\
     gateway.recover_after_time=5m\ndiscovery.zen.minimum_master_nodes=2\ndiscovery.unicast.sockets=cluster-discovery.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
     network.tcp.keep_alive=true"
+  dataBase64: false
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:

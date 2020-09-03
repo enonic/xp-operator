@@ -53,6 +53,7 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
+      serviceAccount: xp-node-sa
       serviceAccountName: xp-node-sa
       {{- if $.Values.settings.nodeGroupAntiAffinity }}
       affinity:
@@ -87,7 +88,7 @@ spec:
                 - ALL
             runAsNonRoot: true
             runAsUser: {{ $.Values.securityContext.user }}
-            sysctls:
+            sysctls: # TODO: Is this creating unnecessary updates?
               - name: vm.max_map_count
                 value: "262144"
 

@@ -95,15 +95,33 @@ public abstract class GenericBuilder<C, R extends HasMetadata>
     {
         Preconditions.checkState( Objects.equals( o.getMetadata().getName(), n.getMetadata().getName() ) );
         Preconditions.checkState( Objects.equals( o.getMetadata().getNamespace(), n.getMetadata().getNamespace() ) );
+
         if ( !equalLabels( getOrDefault( o.getMetadata().getLabels() ), getOrDefault( n.getMetadata().getLabels() ) ) )
         {
             return false;
         }
+
         if ( !equalAnnotations( getOrDefault( o.getMetadata().getAnnotations() ), getOrDefault( n.getMetadata().getAnnotations() ) ) )
         {
             return false;
         }
-        return equalsSpec( o, n );
+
+        boolean equalSpec = equalsSpec( o, n );
+//        if ( !equalSpec )
+//        {
+//            ObjectMapper mapper = new ObjectMapper();
+//            try
+//            {
+//                System.out.println( mapper.writeValueAsString( o ) );
+//                System.out.println( mapper.writeValueAsString( n ) );
+//            }
+//            catch ( JsonProcessingException e )
+//            {
+//                e.printStackTrace();
+//            }
+//        }
+
+        return equalSpec;
     }
 
     protected boolean equalLabels( Map<String, String> o, Map<String, String> n )

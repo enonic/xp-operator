@@ -55,7 +55,6 @@ metadata:
 spec:
   type: ClusterIP
   clusterIP: None
-  publishNotReadyAddresses: false
   sessionAffinity: None
   selector:
     {{- with .Values.defaultLabels }}

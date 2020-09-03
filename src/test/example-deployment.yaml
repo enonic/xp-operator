@@ -23,9 +23,9 @@ spec:
       data: true
       master: true
       replicas: 1
-#      env:
-#        - name: ASD
-#          value: asdasdadsa2
+      env:
+        - name: ASD
+          value: asdasdadsa2aaa1aa
       resources:
         cpu: "1"
         memory: 512Mi

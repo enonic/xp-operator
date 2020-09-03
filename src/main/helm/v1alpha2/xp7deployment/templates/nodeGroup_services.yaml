@@ -20,7 +20,6 @@ metadata:
 spec:
   type: ClusterIP
   clusterIP: None
-  publishNotReadyAddresses: false
   sessionAffinity: None
   selector:
     {{ $.Values.labelKeys.nodeGroup }}: {{ $nodeGroup.name }}

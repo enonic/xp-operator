@@ -336,7 +336,6 @@ spec:
     port: 9200
     protocol: "TCP"
     targetPort: 9200
-  publishNotReadyAddresses: false
   selector:
     cloud: "mycloud"
     environment: "myenv"
@@ -384,7 +383,6 @@ spec:
     port: 9200
     protocol: "TCP"
     targetPort: 9200
-  publishNotReadyAddresses: false
   selector:
     enonic.nodeGroup: "fisk"
     cloud: "mycloud"
@@ -544,6 +542,7 @@ spec:
       schedulerName: "default-scheduler"
       securityContext:
         fsGroup: 0
+      serviceAccount: "xp-node-sa"
       serviceAccountName: "xp-node-sa"
       terminationGracePeriodSeconds: 600
       volumes:
@@ -630,6 +629,7 @@ spec:
   file: "system.properties"
   data: "xp.name = mycloud-mysolution-myenv-myservice\nxp.suPassword = {sha512}${env.SU_PASS_HASH}\n\
     xp.init.adminUserCreation = false"
+  dataBase64: false
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
@@ -655,6 +655,7 @@ spec:
   nodeGroup: "all"
   file: "com.enonic.xp.app.main.cfg"
   data: "tourDisabled = true"
+  dataBase64: false
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
@@ -680,6 +681,7 @@ spec:
   nodeGroup: "all"
   file: "com.enonic.xp.web.sessionstore.cfg"
   data: "storeMode=non-persistent"
+  dataBase64: false
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
@@ -704,6 +706,7 @@ spec:
   nodeGroup: "all"
   file: "com.enonic.app.status.cfg"
   data: "metricsUrl = http://localhost:2609/"
+  dataBase64: false
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
@@ -729,6 +732,7 @@ spec:
   file: "com.enonic.xp.cluster.cfg"
   data: "network.host=${env.XP_NODE_IP},127.0.0.1\nnetwork.publish.host=${env.XP_NODE_IP}\n\
     node.name=${env.XP_NODE_NAME}\ncluster.enabled=false"
+  dataBase64: false
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
@@ -768,6 +772,7 @@ spec:
     \   <appender-ref ref=\"FILE\"/>\n  </logger>\n\n  <logger name=\"Events.Bundle\"\
     \ level=\"WARN\" additivity=\"false\">\n    <appender-ref ref=\"STDOUT\"/>\n \
     \   <appender-ref ref=\"FILE\"/>\n  </logger>\n\n</configuration>"
+  dataBase64: false
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
@@ -793,6 +798,7 @@ spec:
   nodeGroup: "fisk"
   file: "com.enonic.xp.web.vhost.cfg"
   data: "enabled = true"
+  dataBase64: false
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
@@ -818,6 +824,7 @@ spec:
   nodeGroup: "fisk"
   file: "com.enonic.xp.elasticsearch.cfg"
   data: "http.enabled=true\ncluster.name=mycloud-mysolution-myenv-myservice"
+  dataBase64: false
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:

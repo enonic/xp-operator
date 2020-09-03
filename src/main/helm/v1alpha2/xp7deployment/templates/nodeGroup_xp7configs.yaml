@@ -21,6 +21,7 @@ metadata:
 spec:
   nodeGroup: {{ $nodeGroup.name }}
   file: com.enonic.xp.web.vhost.cfg
+  dataBase64: false
   data: |-
     enabled = true
 ---
@@ -45,6 +46,7 @@ metadata:
 spec:
   nodeGroup: {{ $nodeGroup.name }}
   file: com.enonic.xp.elasticsearch.cfg
+  dataBase64: false
   data: |-
     http.enabled=true
     cluster.name={{ $.Values.deployment.name }}
@@ -71,6 +73,7 @@ metadata:
 spec:
   nodeGroup: {{ $nodeGroup.name }}
   file: com.enonic.xp.elasticsearch.cfg
+  dataBase64: false
   data: |-
     http.enabled=true
     cluster.name={{ $.Values.deployment.name }}
