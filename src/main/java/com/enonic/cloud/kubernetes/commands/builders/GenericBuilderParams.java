@@ -13,16 +13,4 @@ public interface GenericBuilderParams<R extends HasMetadata>
     R resource();
 
     GenericBuilderAction action();
-
-    @Value.Default
-    default boolean neverModify()
-    {
-        return false;
-    }
-
-    @Value.Default
-    default boolean alwaysOverwrite()
-    {
-        return false;
-    }
 }

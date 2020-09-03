@@ -15,6 +15,8 @@ import com.enonic.cloud.kubernetes.commands.ImmutableK8sCommand;
 import com.enonic.cloud.kubernetes.commands.K8sCommand;
 import com.enonic.cloud.kubernetes.commands.K8sCommandAction;
 
+import static com.enonic.cloud.common.Configuration.cfgStr;
+
 @SuppressWarnings("WeakerAccess")
 public abstract class GenericBuilder<C, R extends HasMetadata>
     implements Function<GenericBuilderParams<R>, Optional<K8sCommand>>
@@ -25,14 +27,14 @@ public abstract class GenericBuilder<C, R extends HasMetadata>
     public Optional<K8sCommand> apply( final GenericBuilderParams<R> params )
     {
         // If always override, do not bother to check old resource
-        if ( params.action() == GenericBuilderAction.APPLY && params.alwaysOverwrite() )
-        {
-            return Optional.of( ImmutableK8sCommand.builder().
-                action( K8sCommandAction.OVERWRITE ).
-                resource( params.resource() ).
-                wrappedRunnable( createOrReplaceCommand( params.resource().getMetadata().getNamespace(), params.resource() ) ).
-                build() );
-        }
+//        if ( params.action() == GenericBuilderAction.APPLY && params.alwaysOverwrite() )
+//        {
+//            return Optional.of( ImmutableK8sCommand.builder().
+//                action( K8sCommandAction.OVERWRITE ).
+//                resource( params.resource() ).
+//                wrappedRunnable( createOrReplaceCommand( params.resource().getMetadata().getNamespace(), params.resource() ) ).
+//                build() );
+//        }
 
         Optional<R> oldResource =
             getOldResource( params.resource().getMetadata().getNamespace(), params.resource().getMetadata().getName() );
@@ -62,7 +64,8 @@ public abstract class GenericBuilder<C, R extends HasMetadata>
                 build() );
         }
 
-        if ( params.neverModify() )
+        // If both old and new have never overwrite
+        if ( neverOverwrite( oldResource.get() ) && neverOverwrite( params.resource() ) )
         {
             return Optional.empty();
         }
@@ -78,6 +81,14 @@ public abstract class GenericBuilder<C, R extends HasMetadata>
         }
 
         return Optional.empty();
+    }
+
+    private boolean neverOverwrite( final R r )
+    {
+        return r.getMetadata().getAnnotations() != null && Objects.equals( r.
+            getMetadata().
+            getAnnotations().
+            get( cfgStr( "operator.helm.charts.Values.annotationKeys.neverOverwrite" ) ), "true" );
     }
 
     protected boolean equals( final R o, final R n )

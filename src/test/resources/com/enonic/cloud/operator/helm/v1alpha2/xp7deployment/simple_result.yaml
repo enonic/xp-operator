@@ -422,6 +422,8 @@ spec:
     matchLabels:
       enonic.managed: "true"
       enonic.nodeGroup: "fisk"
+      enonic.master: "true"
+      enonic.data: "true"
       cloud: "mycloud"
       environment: "myenv"
       service: "myservice"
@@ -439,6 +441,8 @@ spec:
       labels:
         enonic.managed: "true"
         enonic.nodeGroup: "fisk"
+        enonic.master: "true"
+        enonic.data: "true"
         cloud: "mycloud"
         environment: "myenv"
         service: "myservice"
@@ -680,7 +684,6 @@ kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   annotations:
-    enonic.neverOverwrite: "true"
     enonic.applyPriority: "70"
   labels:
     enonic.managed: "true"

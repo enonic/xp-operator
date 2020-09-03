@@ -566,6 +566,8 @@ spec:
     matchLabels:
       enonic.managed: "true"
       enonic.nodeGroup: "master"
+      enonic.master: "true"
+      enonic.data: "false"
       cloud: "mycloud"
       environment: "myenv"
       service: "myservice"
@@ -583,6 +585,8 @@ spec:
       labels:
         enonic.managed: "true"
         enonic.nodeGroup: "master"
+        enonic.master: "true"
+        enonic.data: "false"
         cloud: "mycloud"
         environment: "myenv"
         service: "myservice"
@@ -755,6 +759,8 @@ spec:
     matchLabels:
       enonic.managed: "true"
       enonic.nodeGroup: "data"
+      enonic.master: "false"
+      enonic.data: "true"
       cloud: "mycloud"
       environment: "myenv"
       service: "myservice"
@@ -772,6 +778,8 @@ spec:
       labels:
         enonic.managed: "true"
         enonic.nodeGroup: "data"
+        enonic.master: "false"
+        enonic.data: "true"
         cloud: "mycloud"
         environment: "myenv"
         service: "myservice"
@@ -966,6 +974,8 @@ spec:
     matchLabels:
       enonic.managed: "true"
       enonic.nodeGroup: "frontend"
+      enonic.master: "false"
+      enonic.data: "false"
       cloud: "mycloud"
       environment: "myenv"
       service: "myservice"
@@ -983,6 +993,8 @@ spec:
       labels:
         enonic.managed: "true"
         enonic.nodeGroup: "frontend"
+        enonic.master: "false"
+        enonic.data: "false"
         cloud: "mycloud"
         environment: "myenv"
         service: "myservice"
@@ -1210,7 +1222,6 @@ kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   annotations:
-    enonic.neverOverwrite: "true"
     enonic.applyPriority: "70"
   labels:
     enonic.managed: "true"
@@ -1319,7 +1330,7 @@ metadata:
 spec:
   nodeGroup: "all"
   file: "com.enonic.xp.hazelcast.cfg"
-  data: "clusterConfigDefaults=false\nsystem.hazelcast.initial.min.cluster.size=2\n\
+  data: "clusterConfigDefaults=false\nsystem.hazelcast.initial.min.cluster.size=5\n\
     network.join.kubernetes.serviceDns=cluster-discovery.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
     network.join.kubernetes.enabled=true\nnetwork.join.tcpIp.enabled=false"
 kind: "Xp7Config"
@@ -1379,6 +1390,7 @@ kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   annotations:
+    enonic.neverOverwrite: "true"
     enonic.applyPriority: "71"
   labels:
     enonic.managed: "true"
@@ -1431,6 +1443,7 @@ kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   annotations:
+    enonic.neverOverwrite: "true"
     enonic.applyPriority: "71"
   labels:
     enonic.managed: "true"
@@ -1483,6 +1496,7 @@ kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   annotations:
+    enonic.neverOverwrite: "true"
     enonic.applyPriority: "71"
   labels:
     enonic.managed: "true"

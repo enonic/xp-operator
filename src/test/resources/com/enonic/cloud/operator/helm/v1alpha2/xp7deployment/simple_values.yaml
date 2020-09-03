@@ -7,8 +7,10 @@ defaultLabels:
   environment: "myenv"
   service: "myservice"
 labelKeys:
+  data: "enonic.data"
   managed: "enonic.managed"
   nodeGroup: "enonic.nodeGroup"
+  master: "enonic.master"
 extraConfigLocation: "/enonic-xp/home/extra-config"
 clusterId: "44ddc40b-266c-4c99-b094-e758328fc6ba"
 configLocation: "/enonic-xp/home/config"
@@ -27,8 +29,6 @@ setEnvLocation: "/enonic-xp/home/setenv.sh"
 imageTemplate: "enonic/xp:%s-ubuntu"
 annotationKeys:
   applyPriority: "enonic.applyPriority"
-  vHostName: "enonic.vhost"
-  alwaysOverwrite: "enonic.alwaysOverwrite"
   neverOverwrite: "enonic.neverOverwrite"
 deployment:
   suPass: "password"

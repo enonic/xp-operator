@@ -28,6 +28,8 @@ spec:
     matchLabels:
       {{ $.Values.labelKeys.managed }}: true
       {{ $.Values.labelKeys.nodeGroup }}: {{ $nodeGroup.name }}
+      {{ $.Values.labelKeys.master }}: {{ $nodeGroup.master }}
+      {{ $.Values.labelKeys.data }}: {{ $nodeGroup.data }}
       {{- with $.Values.defaultLabels }}
       {{- toYaml . | nindent 6 }}
       {{- end }}
@@ -45,6 +47,8 @@ spec:
       labels:
         {{ $.Values.labelKeys.managed }}: true
         {{ $.Values.labelKeys.nodeGroup }}: {{ $nodeGroup.name }}
+        {{ $.Values.labelKeys.master }}: {{ $nodeGroup.master }}
+        {{ $.Values.labelKeys.data }}: {{ $nodeGroup.data }}
         {{- with $.Values.defaultLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -122,7 +126,7 @@ spec:
                   fieldPath: metadata.name
             - name: XP_NODE_GROUP
               value: {{ $nodeGroup.name }}
-            - name: XP_CLUSTERED
+            - name: XP_CLUSTERED # This is to ensure that XP is restarted when deployment is changed from clustered to non clustered
               value: {{ if $.Values.deployment.clustered }}true{{ else }}false{{ end }}
             - name: XP_NODE_IP
               valueFrom:

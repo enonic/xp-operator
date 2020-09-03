@@ -2,6 +2,7 @@ package com.enonic.cloud.operator.v1alpha2xp7deployment;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -166,8 +167,11 @@ public class OperatorXp7DeploymentHelm
             deployment.put( "suPassHash", sha512( pass ) );
             if ( isClustered )
             {
-                deployment.put( "minimumMasterNodes", 2 );
-                deployment.put( "minimumDataNodes", 2 );
+                deployment.put( "clusterMajority", getClusterMajority( resource.getXp7DeploymentSpec().getXp7DeploymentSpecNodeGroups() ) );
+                deployment.put( "minimumMasterNodes",
+                                getMinimumMasterNodes( resource.getXp7DeploymentSpec().getXp7DeploymentSpecNodeGroups() ) );
+                deployment.put( "minimumDataNodes",
+                                getMinimumDataNodes( resource.getXp7DeploymentSpec().getXp7DeploymentSpecNodeGroups() ) );
             }
 
             deployment.put( "spec", resource.getXp7DeploymentSpec() );
@@ -187,6 +191,29 @@ public class OperatorXp7DeploymentHelm
             values.put( "ownerReferences", Collections.singletonList( createOwnerReference( resource ) ) );
 
             return values;
+        }
+
+        private int getClusterMajority( final List<Xp7DeploymentSpecNodeGroup> xp7DeploymentSpecNodeGroups )
+        {
+            return ( xp7DeploymentSpecNodeGroups.stream().
+                map( Xp7DeploymentSpecNodeGroup::getReplicas ).
+                reduce( 0, Integer::sum ) / 2 ) + 1;
+        }
+
+        private int getMinimumMasterNodes( final List<Xp7DeploymentSpecNodeGroup> xp7DeploymentSpecNodeGroups )
+        {
+            return ( xp7DeploymentSpecNodeGroups.stream().
+                filter( Xp7DeploymentSpecNodeGroup::getMaster ).
+                map( Xp7DeploymentSpecNodeGroup::getReplicas ).
+                reduce( 0, Integer::sum ) / 2 ) + 1;
+        }
+
+        private Object getMinimumDataNodes( final List<Xp7DeploymentSpecNodeGroup> xp7DeploymentSpecNodeGroups )
+        {
+            return ( xp7DeploymentSpecNodeGroups.stream().
+                filter( Xp7DeploymentSpecNodeGroup::getData ).
+                map( Xp7DeploymentSpecNodeGroup::getReplicas ).
+                reduce( 0, Integer::sum ) / 2 ) + 1;
         }
 
         private String getMemoryOpts( final Xp7DeploymentSpecNodeGroup ng )

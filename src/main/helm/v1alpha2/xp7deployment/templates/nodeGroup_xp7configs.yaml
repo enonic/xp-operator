@@ -24,7 +24,8 @@ spec:
   data: |-
     enabled = true
 ---
-# Elastic Search configuration
+{{- if not $.Values.deployment.clustered }}
+# Elastic Search non clustered configuration
 apiVersion: enonic.cloud/v1alpha2
 kind: Xp7Config
 metadata:
@@ -47,7 +48,32 @@ spec:
   data: |-
     http.enabled=true
     cluster.name={{ $.Values.deployment.name }}
-  {{- if $.Values.deployment.clustered }}
+---
+{{- else }}
+# Elastic Search clustered configuration
+apiVersion: enonic.cloud/v1alpha2
+kind: Xp7Config
+metadata:
+  name: {{ $nodeGroup.name }}-elasticsearch
+  namespace: {{ $.Values.deployment.namespace }}
+  annotations:
+    {{ $.Values.annotationKeys.neverOverwrite }}: true
+    {{ $.Values.annotationKeys.applyPriority }}: "71"
+  labels:
+    {{ $.Values.labelKeys.managed }}: true
+    {{- with $.Values.defaultLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  ownerReferences:
+    {{- with $.Values.ownerReferences }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  nodeGroup: {{ $nodeGroup.name }}
+  file: com.enonic.xp.elasticsearch.cfg
+  data: |-
+    http.enabled=true
+    cluster.name={{ $.Values.deployment.name }}
     node.master={{ if $nodeGroup.master }}true{{ else }}false{{ end }}
     node.data={{ if $nodeGroup.data }}true{{ else }}false{{ end }}
     gateway.expected_master_nodes={{ $.Values.deployment.minimumMasterNodes }}
@@ -56,6 +82,6 @@ spec:
     discovery.zen.minimum_master_nodes={{ $.Values.deployment.minimumMasterNodes }}
     discovery.unicast.sockets={{ $.Values.discoveryService }}.{{ $.Values.deployment.namespace }}.svc.cluster.local
     network.tcp.keep_alive=true
-  {{- end }}
+{{- end }}
 ---
 {{- end }}

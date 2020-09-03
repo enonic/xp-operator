@@ -10,7 +10,7 @@ metadata:
     service: myservice
 spec:
   enabled: true
-  xpVersion: 7.3.0
+  xpVersion: 7.4.0
 
   nodesSharedDisks:
     - name: blobstore
@@ -23,9 +23,9 @@ spec:
       data: true
       master: true
       replicas: 1
-      env:
-        - name: ASD
-          value: asdasdadsa2
+#      env:
+#        - name: ASD
+#          value: asdasdadsa2
       resources:
         cpu: "1"
         memory: 512Mi

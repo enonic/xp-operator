@@ -3,7 +3,6 @@ package com.enonic.cloud.helm.functions;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -15,8 +14,6 @@ import io.fabric8.kubernetes.api.model.HasMetadata;
 import com.enonic.cloud.kubernetes.commands.K8sCommand;
 import com.enonic.cloud.kubernetes.commands.builders.GenericBuilderAction;
 import com.enonic.cloud.kubernetes.commands.builders.GenericBuilderParamsImpl;
-
-import static com.enonic.cloud.common.Configuration.cfgStr;
 
 
 @Singleton
@@ -53,27 +50,9 @@ public class K8sCommandBuilder
                 resource( r.getValue() ).
                 action( GenericBuilderAction.APPLY );
 
-            applyOptions( r.getValue().getMetadata().getAnnotations(), paramBuilder );
-
             res.add( params.k8sCommandMapper().getCommand( paramBuilder.build() ) );
         }
 
         return res;
     }
-
-    private void applyOptions( final Map<String, String> annotations, final GenericBuilderParamsImpl.Builder paramBuilder )
-    {
-        boolean alwaysOverwrite = false;
-        boolean neverModify = false;
-        if ( annotations != null )
-        {
-            alwaysOverwrite =
-                Objects.equals( annotations.get( cfgStr( "operator.helm.charts.Values.annotationKeys.alwaysOverwrite" ) ), "true" );
-            neverModify =
-                Objects.equals( annotations.get( cfgStr( "operator.helm.charts.Values.annotationKeys.neverOverwrite" ) ), "true" );
-        }
-        paramBuilder.alwaysOverwrite( alwaysOverwrite );
-        paramBuilder.neverModify( neverModify );
-    }
-
 }
