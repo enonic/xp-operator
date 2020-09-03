@@ -21,4 +21,4 @@ COPY src/main/helm /deployments/helm
 WORKDIR /deployments
 COPY target/*-runner /deployments/application
 RUN chmod 775 /deployments
-CMD ["./application", "-Dquarkus.http.host=0.0.0.0", "-Djava.library.path=/work/library", "-Doperator.helm.charts.path=helm"]
+CMD ["./application", "-Dquarkus.http.host=0.0.0.0", "-Djava.library.path=/work/library", "-Doperator.charts.path=helm"]

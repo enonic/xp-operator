@@ -94,7 +94,7 @@ public class AdmissionApi
                 filter( c -> !c.getMetadata().getName().equals( newConfig.getMetadata().getName() ) ).
                 filter( c -> c.getXp7ConfigSpec().getFile().equals( newConfig.getXp7ConfigSpec().getFile() ) ).
                 filter( c -> c.getXp7ConfigSpec().getNodeGroup().equals( newConfig.getXp7ConfigSpec().getFile() ) ||
-                    c.getXp7ConfigSpec().getNodeGroup().equals( cfgStr( "operator.helm.charts.Values.allNodesKey" ) ) ).
+                    c.getXp7ConfigSpec().getNodeGroup().equals( cfgStr( "operator.charts.values.allNodesKey" ) ) ).
                 list();
 
             if ( !presentConfigs.isEmpty() )
@@ -131,9 +131,9 @@ public class AdmissionApi
             for ( Xp7DeploymentSpecNodeGroup ng : newDeployment.getXp7DeploymentSpec().getXp7DeploymentSpecNodeGroups() )
             {
                 Preconditions.checkState( ng.getName() != null, "'spec.nodeGroups[" + i + "].name' cannot be null" );
-                Preconditions.checkState( !ng.getName().equals( cfgStr( "operator.helm.charts.Values.allNodesKey" ) ),
+                Preconditions.checkState( !ng.getName().equals( cfgStr( "operator.charts.values.allNodesKey" ) ),
                                           "'spec.nodeGroups[" + i + "].name' cannot be " +
-                                              cfgStr( "operator.helm.charts.Values.allNodesKey" ) );
+                                              cfgStr( "operator.charts.values.allNodesKey" ) );
                 dns1123( "spec.nodeGroups[" + i + "].name", ng.getName() );
                 Preconditions.checkState( ng.getData() != null, "'spec.nodeGroups[" + i + "].data' cannot be null" );
                 Preconditions.checkState( ng.getMaster() != null, "'spec.nodeGroups[" + i + "].master' cannot be null" );
@@ -219,7 +219,7 @@ public class AdmissionApi
                     collect( Collectors.toSet() );
                 Set<String> tmp = new HashSet<>( nodeGroups );
                 tmp.removeAll( xpDeploymentNodeGroups );
-                tmp.remove( cfgStr( "operator.helm.charts.Values.allNodesKey" ) );
+                tmp.remove( cfgStr( "operator.charts.values.allNodesKey" ) );
 
                 Preconditions.checkState( tmp.isEmpty(), String.format( "Xp7Deployment '%s' does not contain nodeGroups %s",
                                                                         xp7Deployments.get().getMetadata().getName(), nodeGroups ) );

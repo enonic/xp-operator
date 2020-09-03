@@ -10,7 +10,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 public class RepositoriesProducer
 {
-    @ConfigProperty(name = "operator.helm.charts.path")
+    @ConfigProperty(name = "operator.charts.path")
     String helmChartsPath;
 
     @Produces

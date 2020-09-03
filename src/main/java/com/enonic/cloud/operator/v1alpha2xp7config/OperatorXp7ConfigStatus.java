@@ -79,10 +79,10 @@ public class OperatorXp7ConfigStatus
             inNamespace( config.getMetadata().getNamespace() );
 
         // Filter by nodegroup if needed
-        if ( !Objects.equals( config.getXp7ConfigSpec().getNodeGroup(), cfgStr( "operator.helm.charts.Values.allNodesKey" ) ) )
+        if ( !Objects.equals( config.getXp7ConfigSpec().getNodeGroup(), cfgStr( "operator.charts.values.allNodesKey" ) ) )
         {
             stream =
-                stream.hasLabel( cfgStr( "operator.helm.charts.Values.labelKeys.nodeGroup" ), config.getXp7ConfigSpec().getNodeGroup() );
+                stream.hasLabel( cfgStr( "operator.charts.values.labelKeys.nodeGroup" ), config.getXp7ConfigSpec().getNodeGroup() );
         }
 
         // Find expected contents
@@ -165,7 +165,7 @@ public class OperatorXp7ConfigStatus
                         done[0] = true;
                     }
                 } ).
-                exec( "base64", "-w", "0", String.format( "%s/%s", cfgStr( "operator.helm.charts.Values.configLocation" ), fileName ) );
+                exec( "base64", "-w", "0", String.format( "%s/%s", cfgStr( "operator.charts.values.dirs.config" ), fileName ) );
             while ( !done[0] )
             {
                 Thread.sleep( 200L );

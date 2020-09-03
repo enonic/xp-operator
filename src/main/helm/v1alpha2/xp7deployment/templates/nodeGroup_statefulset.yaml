@@ -23,7 +23,7 @@ spec:
   revisionHistoryLimit: 10
   podManagementPolicy: Parallel
   updateStrategy:
-    type: {{ $.Values.updateStrategy }}
+    type: {{ $.Values.pods.updateStrategy }}
   selector:
     matchLabels:
       {{ $.Values.labelKeys.managed }}: true
@@ -38,10 +38,10 @@ spec:
       annotations:
         enonic.cloud/metrics.xp7: "true"
         enonic.cloud/logs.xp7: "true"
-        backup.velero.io/backup-volumes: "{{- join "," $.Values.volumeBackups }}"
+        backup.velero.io/backup-volumes: "{{- join "," $.Values.volumes.backups }}"
         pre.hook.backup.velero.io/container: "exp"
         pre.hook.backup.velero.io/command: '["bash", "-c", "/usr/local/bin/backup.sh"]'
-        {{- if index $.Values "extensions.linkerd" }}
+        {{- if index $.Values "settings.linkerd" }}
         linkerd.io/inject: enabled
         {{- end }}
       labels:
@@ -55,7 +55,7 @@ spec:
     spec:
       serviceAccount: xp-node-sa
       serviceAccountName: xp-node-sa
-      {{- if $.Values.settings.nodeGroupAntiAffinity }}
+      {{- if $.Values.pods.nodeGroupAntiAffinity }}
       affinity:
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -70,15 +70,15 @@ spec:
       restartPolicy: Always
       dnsPolicy: ClusterFirst
       schedulerName: default-scheduler
-      terminationGracePeriodSeconds: {{ $.Values.terminationGracePeriodSeconds }}
+      terminationGracePeriodSeconds: {{ $.Values.pods.terminationGracePeriodSeconds }}
 
       securityContext:
-        fsGroup: {{ $.Values.securityContext.fsGroup }}
+        fsGroup: {{ $.Values.pods.securityContext.fsGroup }}
 
       containers:
         - name: exp
-          image: {{ $.Values.imageTemplate | replace "%s" $.Values.deployment.spec.xpVersion }}
-          imagePullPolicy: {{ $.Values.imagePullPolicy }}
+          image: {{ $.Values.image.nameTemplate | replace "%s" $.Values.deployment.spec.xpVersion }}
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
 
@@ -87,7 +87,7 @@ spec:
               drop:
                 - ALL
             runAsNonRoot: true
-            runAsUser: {{ $.Values.securityContext.user }}
+            runAsUser: {{ $.Values.pods.securityContext.user }}
             sysctls: # TODO: Is this creating unnecessary updates?
               - name: vm.max_map_count
                 value: "262144"
@@ -164,24 +164,24 @@ spec:
           lifecycle:
             preStop:
               exec:
-                command: ["/bin/bash","{{ $.Values.extraConfigLocation }}/preStop.sh"]
+                command: ["/bin/bash","{{ $.Values.dirs.extraConfig }}/preStop.sh"]
           {{- end }}
 
           volumeMounts:
             - name: config
-              mountPath: {{ $.Values.configLocation }}
+              mountPath: {{ $.Values.dirs.config }}
             - name: extra-config
-              mountPath: {{ $.Values.extraConfigLocation }}
+              mountPath: {{ $.Values.dirs.extraConfig }}
             - name: extra-config
-              mountPath: {{ $.Values.setEnvLocation }}
+              mountPath: {{ $.Values.files.setEnv }}
               subPath: preStart.sh
             {{- range $volume := $nodeGroup.resources.disks }}
             - name: {{ $volume.name }}
-              mountPath: {{ index $.Values.volumeMounts $volume.name }}
+              mountPath: {{ index $.Values.volumes.mounts $volume.name }}
             {{- end }}
             {{- range $volume := $.Values.deployment.spec.nodesSharedDisks }}
             - name: {{ $volume.name }}
-              mountPath: {{ index $.Values.volumeMounts $volume.name }}
+              mountPath: {{ index $.Values.volumes.mounts $volume.name }}
             {{- end }}
       volumes:
         - name: config
@@ -207,7 +207,7 @@ spec:
           {{- toYaml . | nindent 10 }}
           {{- end }}
         labels:
-          {{- if not (has $volume.name $.Values.volumeBackups) }}
+          {{- if not (has $volume.name $.Values.volumes.backups) }}
           velero.io/exclude-from-backup: true
           {{- end }}
           {{ $.Values.labelKeys.managed }}: true

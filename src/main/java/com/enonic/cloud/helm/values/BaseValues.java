@@ -18,7 +18,7 @@ import static com.enonic.cloud.common.Configuration.globalConfig;
 public class BaseValues
     extends HashMap<String, Object>
 {
-    private static final String keyPrefix = "operator.helm.charts.Values.";
+    private static final String keyPrefix = "operator.charts.values.";
 
     @Inject
     public BaseValues( @Named("clusterId") String clusterId )
@@ -40,7 +40,11 @@ public class BaseValues
         if ( split.size() == 1 )
         {
             String key = split.get( 0 );
-            if ( value.equals( "false" ) )
+            if ( value.equals( "null" ) )
+            {
+                values.put( key, null );
+            }
+            else if ( value.equals( "false" ) )
             {
                 values.put( key, false );
             }

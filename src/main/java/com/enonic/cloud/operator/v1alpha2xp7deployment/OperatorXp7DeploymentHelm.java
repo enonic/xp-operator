@@ -58,7 +58,7 @@ public class OperatorXp7DeploymentHelm
     @Override
     protected ValueBuilder<Xp7Deployment> getValueBuilder( final BaseValues baseValues )
     {
-        return new Xp7DeploymentValueBuilder( baseValues, this::createSuPass, this::cloudApiSa );
+        return new Xp7DeploymentValueBuilder( baseValues, this::createSuPass );
     }
 
     @Override
@@ -92,14 +92,6 @@ public class OperatorXp7DeploymentHelm
         }
     }
 
-    private ServiceAccount cloudApiSa()
-    {
-        return clients.k8s().serviceAccounts().
-            inNamespace( cfgStr( "operator.deployment.adminServiceAccount.namespace" ) ).
-            withName( cfgStr( "operator.deployment.adminServiceAccount.name" ) ).
-            get();
-    }
-
     public static class Xp7DeploymentValueBuilder
         implements ValueBuilder<Xp7Deployment>
     {
@@ -107,14 +99,10 @@ public class OperatorXp7DeploymentHelm
 
         private final Supplier<String> suPassProvider;
 
-        private final Supplier<ServiceAccount> cloudApiServiceAccountProvider;
-
-        public Xp7DeploymentValueBuilder( final BaseValues baseValues, final Supplier<String> suPassProvider,
-                                          final Supplier<ServiceAccount> cloudApiServiceAccountProvider )
+        public Xp7DeploymentValueBuilder( final BaseValues baseValues, final Supplier<String> suPassProvider )
         {
             this.baseValues = baseValues;
             this.suPassProvider = suPassProvider;
-            this.cloudApiServiceAccountProvider = cloudApiServiceAccountProvider;
         }
 
         @Override
@@ -178,15 +166,6 @@ public class OperatorXp7DeploymentHelm
 
             values.put( "defaultLabels", defaultLabels( resource ) );
             values.put( "deployment", deployment );
-
-            ServiceAccount sa = cloudApiServiceAccountProvider.get();
-            if ( sa != null )
-            {
-                Map<String, Object> cloudApiSa = new HashMap<>();
-                cloudApiSa.put( "namespace", sa.getMetadata().getNamespace() );
-                cloudApiSa.put( "name", sa.getMetadata().getName() );
-                values.put( "cloudApiSa", cloudApiSa );
-            }
 
             values.put( "ownerReferences", Collections.singletonList( createOwnerReference( resource ) ) );
 

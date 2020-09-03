@@ -236,14 +236,14 @@ data:
   preStart.sh: |-
     echo "Running prescript for node ${XP_NODE_NAME} (${XP_NODE_IP})"
     echo "Bootstrap deploy folder apps"
-    cat {{ $.Values.extraConfigLocation }}/initApps.txt | xargs -I {} app.sh add {}
-    bash {{ $.Values.extraConfigLocation }}/dns.sh -d cluster-discovery.${NAMESPACE}.svc.cluster.local
-    bash {{ $.Values.extraConfigLocation }}/dns.sh -d ${XP_NODE_NAME}.cluster-discovery.${NAMESPACE}.svc.cluster.local
+    cat {{ $.Values.dirs.extraConfig }}/initApps.txt | xargs -I {} app.sh add {}
+    bash {{ $.Values.dirs.extraConfig }}/dns.sh -d cluster-discovery.${NAMESPACE}.svc.cluster.local
+    bash {{ $.Values.dirs.extraConfig }}/dns.sh -d ${XP_NODE_NAME}.cluster-discovery.${NAMESPACE}.svc.cluster.local
   preStop.sh: |-
     echo "Wait for endpoints to be deleted"
-    bash {{ $.Values.extraConfigLocation }}/endpoints.sh -r -s {{ $.Values.allNodesKey }} -i ${XP_NODE_IP} -t 10
-    bash {{ $.Values.extraConfigLocation }}/endpoints.sh -r -s ${XP_NODE_GROUP} -i ${XP_NODE_IP} -t 10 -a 20
+    bash {{ $.Values.dirs.extraConfig }}/endpoints.sh -r -s {{ $.Values.allNodesKey }} -i ${XP_NODE_IP} -t 10
+    bash {{ $.Values.dirs.extraConfig }}/endpoints.sh -r -s ${XP_NODE_GROUP} -i ${XP_NODE_IP} -t 10 -a 20
   initApps.txt: |-
-    {{- range $app := .Values.initApps }}
+    {{- range $k, $app := .Values.preInstalledApps }}
     {{ $app }}
     {{- end }}

@@ -114,7 +114,7 @@ public class MutationApi
         if ( mt.getAdmissionReview().getRequest().getOperation().equals( "CREATE" ) )
         {
             List<String> finalizers = mt.getAdmissionReview().getRequest().getObject().getMetadata().getFinalizers();
-            String uninstallFinalizer = cfgStr( "operator.finalizer.app.uninstall" );
+            String uninstallFinalizer = cfgStr( "operator.charts.values.finalizers.app.uninstall" );
             if ( finalizers == null )
             {
                 mt.addPatch( "add", "/metadata/finalizers", Collections.singletonList( uninstallFinalizer ) );
@@ -153,7 +153,7 @@ public class MutationApi
         if ( newR.getXp7ConfigSpec() != null )
         {
             patchDefault( mt, false, newR.getXp7ConfigSpec().getDataBase64(), "/spec/dataBase64" );
-            patchDefault( mt, cfgStr( "operator.helm.charts.Values.allNodesKey" ), newR.getXp7ConfigSpec().getNodeGroup(),
+            patchDefault( mt, cfgStr( "operator.charts.values.allNodesKey" ), newR.getXp7ConfigSpec().getNodeGroup(),
                           "/spec/nodeGroup" );
         }
 
@@ -226,7 +226,7 @@ public class MutationApi
 
         if ( "nginx".equals( na.get( "kubernetes.io/ingress.class" ) ) )
         {
-            boolean linkerd = cfgBool( "operator.helm.charts.Values.extensions.linkerd.enabled" );
+            boolean linkerd = cfgBool( "operator.charts.values.extensions.linkerd.enabled" );
             if ( linkerd )
             {
                 String cfgSnippet = na.get( "nginx.ingress.kubernetes.io/configuration-snippet" );

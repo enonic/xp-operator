@@ -70,7 +70,7 @@ public class OperatorXp7AppInstaller
         // If app marked for deletion and has finalizers
         List<String> finalizers = newResource.getMetadata().getFinalizers();
         if ( newResource.getMetadata().getDeletionTimestamp() != null &&
-            finalizers.contains( cfgStr( "operator.finalizer.app.uninstall" ) ) )
+            finalizers.contains( cfgStr( "operator.charts.values.finalizers.app.uninstall" ) ) )
         {
             uninstallApp( newResource );
         }
@@ -88,13 +88,13 @@ public class OperatorXp7AppInstaller
         // Collect lists
         List<Xp7App> appsToInstall = searchers.xp7App().query().
             hasNotBeenDeleted().
-            hasFinalizer( cfgStr( "operator.finalizer.app.uninstall" ) ).
+            hasFinalizer( cfgStr( "operator.charts.values.finalizers.app.uninstall" ) ).
             filter( this::appInfoIsNull ).
             sorted( hasMetadataComparator() ).
             list();
         List<Xp7App> appsToUninstall = searchers.xp7App().query().
             hasBeenDeleted().
-            hasFinalizer( cfgStr( "operator.finalizer.app.uninstall" ) ).
+            hasFinalizer( cfgStr( "operator.charts.values.finalizers.app.uninstall" ) ).
             sorted( hasMetadataComparator() ).
             list();
 
@@ -225,7 +225,7 @@ public class OperatorXp7AppInstaller
     {
         List<String> finalizers = resource.getMetadata().getFinalizers();
 
-        if ( finalizers.remove( cfgStr( "operator.finalizer.app.uninstall" ) ) )
+        if ( finalizers.remove( cfgStr( "operator.charts.values.finalizers.app.uninstall" ) ) )
         {
             K8sLogHelper.logDoneable( clients.xp7Apps().crdClient().
                 inNamespace( resource.getMetadata().getNamespace() ).

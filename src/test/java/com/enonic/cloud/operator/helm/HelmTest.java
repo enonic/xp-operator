@@ -35,7 +35,7 @@ public abstract class HelmTest
     {
         mapper = new ObjectMapper( new YAMLFactory() );
         helm = new Helm();
-        chartRepository = new LocalRepository( new File( cfgStr( "operator.helm.charts.path" ) ) );
+        chartRepository = new LocalRepository( new File( cfgStr( "operator.charts.path" ) ) );
     }
 
     void test( String chartName, Object values, String expectedValuesFile, String expectedResultFile )

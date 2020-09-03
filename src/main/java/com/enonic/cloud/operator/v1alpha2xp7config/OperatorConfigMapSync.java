@@ -48,7 +48,7 @@ public class OperatorConfigMapSync
         List<ConfigMap> configMaps = searchers.configMap().query().
             inNamespace( namespace ).
             hasNotBeenDeleted().
-            hasLabel( cfgStr( "operator.helm.charts.Values.labelKeys.nodeGroup" ) ).
+            hasLabel( cfgStr( "operator.charts.values.labelKeys.nodeGroup" ) ).
             filter( c -> !backupRestoreInProgress( c ) ).
             list();
 
@@ -59,9 +59,9 @@ public class OperatorConfigMapSync
     private void handle( final ConfigMap configMap )
     {
         // Create a list ['all', '<nodeGroup>']
-        List<String> nodeGroups = Arrays.asList( cfgStr( "operator.helm.charts.Values.allNodesKey" ), configMap.getMetadata().
+        List<String> nodeGroups = Arrays.asList( cfgStr( "operator.charts.values.allNodesKey" ), configMap.getMetadata().
             getLabels().
-            get( cfgStr( "operator.helm.charts.Values.labelKeys.nodeGroup" ) ) );
+            get( cfgStr( "operator.charts.values.labelKeys.nodeGroup" ) ) );
 
         // Collect all data from Xp7Config that has nodeGroup 'all' or '<nodeGroup>'
         List<Xp7Config> configs = searchers.xp7Config().query().

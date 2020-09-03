@@ -38,16 +38,16 @@ public class LbServiceIpProducer
     private List<String> getLbIp( final Clients clients )
     {
         List<String> res = new LinkedList<>();
-        if ( cfgHasKey( "operator.dns.lb.staticIp" ) )
+        if ( cfgHasKey( "dns.lb.staticIp" ) )
         {
-            res.add( cfgStr( "operator.dns.lb.staticIp" ) );
+            res.add( cfgStr( "dns.lb.staticIp" ) );
         }
 
         if ( res.isEmpty() )
         {
             Service lbService = clients.k8s().services().
-                inNamespace( cfgStr( "operator.dns.lb.service.namespace" ) ).
-                withName( cfgStr( "operator.dns.lb.service.name" ) ).
+                inNamespace( cfgStr( "dns.lb.service.namespace" ) ).
+                withName( cfgStr( "dns.lb.service.name" ) ).
                 get();
 
             if ( lbService == null )

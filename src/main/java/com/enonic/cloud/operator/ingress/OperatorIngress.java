@@ -68,7 +68,7 @@ public class OperatorIngress
         Map<String, String> res = new HashMap<>();
         for ( Map.Entry<String, String> e : r.getMetadata().getAnnotations().entrySet() )
         {
-            if ( e.getKey().startsWith( cfgStr( "operator.annotations.xp7.vhosts" ) ) )
+            if ( e.getKey().startsWith( cfgStr( "operator.charts.values.annotationKeys.vhostMapping" ) ) )
             {
                 res.put( e.getKey(), e.getValue() );
             }

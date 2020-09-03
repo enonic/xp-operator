@@ -19,8 +19,8 @@ public class VeleroBackups
             return false;
         }
 
-        if ( !labels.containsKey( cfgStr( "operator.labels.velero.backupName" ) ) ||
-            !labels.containsKey( cfgStr( "operator.labels.velero.backupRestore" ) ) )
+        if ( !labels.containsKey( cfgStr( "operator.charts.values.labelKeys.veleroBackupName" ) ) ||
+            !labels.containsKey( cfgStr( "operator.charts.values.labelKeys.veleroBackupRestore" ) ) )
         {
             return false;
         }

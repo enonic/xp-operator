@@ -55,7 +55,7 @@ public class OperatorXp7ConfigSync
     public void handle( final String namespace )
     {
         // Trigger update on each vHost config in the namespace
-        final String file = cfgStr( "operator.deployment.xp.config.vhosts.file" );
+        final String file = cfgStr( "operator.charts.values.files.vhosts" );
         searchers.xp7Config().query().
             inNamespace( namespace ).
             hasNotBeenDeleted().
@@ -67,7 +67,7 @@ public class OperatorXp7ConfigSync
     {
         // Create a list ['all', '<nodeGroup>']
         List<String> nodeGroups =
-            Arrays.asList( cfgStr( "operator.helm.charts.Values.allNodesKey" ), xp7Config.getXp7ConfigSpec().getNodeGroup() );
+            Arrays.asList( cfgStr( "operator.charts.values.allNodesKey" ), xp7Config.getXp7ConfigSpec().getNodeGroup() );
 
         // Collect all relevant ingresses
         List<Ingress> ingresses = searchers.ingress().query().
@@ -223,7 +223,7 @@ public class OperatorXp7ConfigSync
     private Set<Mapping> getAnnotationMappings( final Ingress ingress )
     {
         Set<Mapping> result = new HashSet<>();
-        String prefix = cfgStr( "operator.annotations.xp7.vhosts" );
+        String prefix = cfgStr( "operator.charts.values.annotationKeys.vhostMapping" );
         Map<String, String> annotations = ingress.getMetadata().getAnnotations();
 
         // Collect all mapping prefixes

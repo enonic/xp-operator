@@ -88,7 +88,7 @@ public abstract class GenericBuilder<C, R extends HasMetadata>
         return r.getMetadata().getAnnotations() != null && Objects.equals( r.
             getMetadata().
             getAnnotations().
-            get( cfgStr( "operator.helm.charts.Values.annotationKeys.neverOverwrite" ) ), "true" );
+            get( cfgStr( "operator.charts.values.annotationKeys.neverOverwrite" ) ), "true" );
     }
 
     protected boolean equals( final R o, final R n )

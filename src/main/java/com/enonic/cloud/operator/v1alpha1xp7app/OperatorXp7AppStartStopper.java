@@ -58,7 +58,7 @@ public class OperatorXp7AppStartStopper
         // List all apps
         List<Xp7App> apps = searchers.xp7App().query().
             hasNotBeenDeleted().
-            hasFinalizer( cfgStr( "operator.finalizer.app.uninstall" ) ).
+            hasFinalizer( cfgStr( "operator.charts.values.finalizers.app.uninstall" ) ).
             sorted( hasMetadataComparator() ).
             list();
 

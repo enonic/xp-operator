@@ -25,7 +25,7 @@ public abstract class XpClientCreator
     @Value.Default
     public String serviceName()
     {
-        return cfgStr( "operator.helm.charts.Values.allNodesKey" );
+        return cfgStr( "operator.charts.values.allNodesKey" );
     }
 
     public abstract String namespace();

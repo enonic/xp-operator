@@ -30,7 +30,7 @@ public class OperatorDeleteAnnotation
     @Inject
     Searchers searchers;
 
-    @ConfigProperty(name = "operator.annotations.delete")
+    @ConfigProperty(name = "operator.charts.values.annotationKeys.removeWithDeployment")
     String deleteAnnotation;
 
     @Override

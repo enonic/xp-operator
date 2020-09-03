@@ -12,7 +12,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
   labels:
-    {{- if not (has $volume.name $.Values.volumeBackups) }}
+    {{- if not (has $volume.name $.Values.volumes.backups) }}
     velero.io/exclude-from-backup: true
     {{- end }}
     {{ $.Values.labelKeys.managed }}: true

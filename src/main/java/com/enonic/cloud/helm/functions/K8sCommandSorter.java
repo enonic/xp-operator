@@ -31,7 +31,7 @@ public class K8sCommandSorter
             return sortActions( a.action(), b.action() );
         }
 
-        String priorityAnnotation = cfgStr( "operator.helm.charts.Values.annotationKeys.applyPriority" );
+        String priorityAnnotation = cfgStr( "operator.charts.values.annotationKeys.applyPriority" );
 
         Preconditions.checkState( a.resource().getMetadata().getAnnotations() != null,
                                   String.format( "Annotations cannot be null on '%s'", a.resource().getMetadata().getName() ) );

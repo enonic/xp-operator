@@ -140,11 +140,11 @@ public class OperatorIngressCertSync
         switch ( resource.getDomainSpec().getDomainSpecCertificate().getAuthority() )
         {
             case SELF_SIGNED:
-                return cfgStr( "operator.cert.issuer.selfSigned" );
+                return cfgStr( "operator.certIssuer.selfSigned" );
             case LETS_ENCRYPT_STAGING:
-                return cfgStr( "operator.cert.issuer.letsEncrypt.staging" );
+                return cfgStr( "operator.certIssuer.letsEncrypt.staging" );
             case LETS_ENCRYPT:
-                return cfgStr( "operator.cert.issuer.letsEncrypt.prod" );
+                return cfgStr( "operator.certIssuer.letsEncrypt.prod" );
             case CLUSTER_ISSUER:
                 return resource.getDomainSpec().getDomainSpecCertificate().getIdentifier();
             default:
@@ -170,7 +170,7 @@ public class OperatorIngressCertSync
         }
 
         if ( !ingress.getMetadata().getAnnotations().
-            getOrDefault( cfgStr( "operator.annotations.ingress.cert.manage" ), "false" ).equals( "true" ) )
+            getOrDefault( cfgStr( "operator.charts.values.annotationKeys.ingressCertManage" ), "false" ).equals( "true" ) )
         {
             return false;
         }

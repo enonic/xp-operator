@@ -35,7 +35,7 @@ class TestAdmissionApi
         deploymentTestInformerSearcher = new TestInformerSearcher<>();
         searchers = SearchersImpl.of( emptyInformerSearcher, emptyInformerSearcher, emptyInformerSearcher, emptyInformerSearcher,
                                       emptyInformerSearcher, emptyInformerSearcher, deploymentTestInformerSearcher, emptyInformerSearcher );
-        cfgStr( "operator.helm.charts.Values.allNodesKey" );
+        cfgStr( "operator.charts.values.allNodesKey" );
     }
 
     @TestFactory
