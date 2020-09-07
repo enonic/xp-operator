@@ -124,7 +124,7 @@ spec:
   file: com.enonic.xp.cluster.cfg
   dataBase64: false
   data: |-
-    network.host=${env.XP_NODE_IP},127.0.0.1
+    network.host=0.0.0.0
     network.publish.host=${env.XP_NODE_IP}
     node.name=${env.XP_NODE_NAME}
     cluster.enabled={{ if $.Values.deployment.clustered }}true{{ else }}false{{ end }}
