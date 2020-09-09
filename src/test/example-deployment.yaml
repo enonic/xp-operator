@@ -44,7 +44,7 @@ spec:
       replicas: 1
       env:
         - name: ASD
-          value: asdasdadsa2aaa1aaasd
+          value: asdasdadsa2aaa1aaasdasd
       resources:
         cpu: "0.5"
         memory: 1024Mi

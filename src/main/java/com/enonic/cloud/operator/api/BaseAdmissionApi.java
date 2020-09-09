@@ -15,6 +15,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.KubernetesResource;
 import io.fabric8.kubernetes.api.model.StatusBuilder;
 import io.fabric8.kubernetes.api.model.admission.AdmissionResponseBuilder;
 import io.fabric8.kubernetes.api.model.admission.AdmissionReview;
@@ -137,17 +138,17 @@ public abstract class BaseAdmissionApi<R>
     {
         if ( admissionReview.getRequest().getObject() != null )
         {
-            return admissionReview.getRequest().getObject();
+            return (HasMetadata) admissionReview.getRequest().getObject();
         }
-        return admissionReview.getRequest().getOldObject();
+        return (HasMetadata) admissionReview.getRequest().getOldObject();
     }
 
     protected abstract R createApiObject( final AdmissionReview admissionReview );
 
-    protected Optional<Xp7Deployment> getXp7Deployment( HasMetadata hasMetadata )
+    protected Optional<Xp7Deployment> getXp7Deployment( KubernetesResource resource )
     {
         return searchers.xp7Deployment().query().
-            inNamespace( hasMetadata.getMetadata().getNamespace() ).
+            inNamespace( ( (HasMetadata) resource ).getMetadata().getNamespace() ).
             get();
     }
 }

@@ -113,7 +113,7 @@ public class MutationApi
         // Ensure finalizers
         if ( mt.getAdmissionReview().getRequest().getOperation().equals( "CREATE" ) )
         {
-            List<String> finalizers = mt.getAdmissionReview().getRequest().getObject().getMetadata().getFinalizers();
+            List<String> finalizers = ( (HasMetadata) mt.getAdmissionReview().getRequest().getObject() ).getMetadata().getFinalizers();
             String uninstallFinalizer = cfgStr( "operator.charts.values.finalizers.app.uninstall" );
             if ( finalizers == null )
             {
@@ -153,8 +153,7 @@ public class MutationApi
         if ( newR.getXp7ConfigSpec() != null )
         {
             patchDefault( mt, false, newR.getXp7ConfigSpec().getDataBase64(), "/spec/dataBase64" );
-            patchDefault( mt, cfgStr( "operator.charts.values.allNodesKey" ), newR.getXp7ConfigSpec().getNodeGroup(),
-                          "/spec/nodeGroup" );
+            patchDefault( mt, cfgStr( "operator.charts.values.allNodesKey" ), newR.getXp7ConfigSpec().getNodeGroup(), "/spec/nodeGroup" );
         }
 
         ensureOwnerReference( mt );
@@ -259,7 +258,7 @@ public class MutationApi
             return;
         }
 
-        HasMetadata obj = mutationRequest.getAdmissionReview().getRequest().getObject();
+        HasMetadata obj = (HasMetadata) mutationRequest.getAdmissionReview().getRequest().getObject();
 
         if ( obj == null )
         {
