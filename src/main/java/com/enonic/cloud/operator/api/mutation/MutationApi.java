@@ -226,7 +226,7 @@ public class MutationApi
 
         if ( "nginx".equals( na.get( "kubernetes.io/ingress.class" ) ) )
         {
-            boolean linkerd = cfgBool( "operator.charts.values.extensions.linkerd.enabled" );
+            boolean linkerd = cfgBool( "operator.charts.values.settings.linkerd" );
             if ( linkerd )
             {
                 String cfgSnippet = na.get( "nginx.ingress.kubernetes.io/configuration-snippet" );
