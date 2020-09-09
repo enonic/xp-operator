@@ -1,84 +1,24 @@
 ---
-image:
-  nameTemplate: "enonic/xp:%s-ubuntu"
-  pullPolicy: "IfNotPresent"
-settings:
-  linkerd: false
-finalizers:
-  app:
-    uninstall: "uninstall.app.enonic.cloud"
-defaultLabels:
-  cloud: "mycloud"
-  solution: "mysolution"
-  environment: "myenv"
-  service: "myservice"
-volumes:
-  mounts:
-    snapshots: "/enonic-xp/home/snapshots"
-    work: "/enonic-xp/home/work"
-    index: "/enonic-xp/home/repo/index"
-    export: "/enonic-xp/home/data"
-    deploy: "/enonic-xp/home/deploy"
-    blobstore: "/enonic-xp/home/repo/blob"
-  backups:
-  - "blobstore"
-  - "snapshots"
-resources:
-  memory:
-    defaultRequests: null
-  cpu:
-    defaultRequests: null
-dirs:
-  extraConfig: "/enonic-xp/home/extra-config"
-  config: "/enonic-xp/home/config"
-labelKeys:
-  veleroBackupRestore: "velero.io/restore-name"
-  data: "enonic.data"
-  veleroBackupName: "velero.io/backup-name"
-  managed: "enonic.managed"
-  nodeGroup: "enonic.nodeGroup"
-  master: "enonic.master"
-clusterId: "44ddc40b-266c-4c99-b094-e758328fc6ba"
-storage:
-  shared:
-    storageClassName: "standard"
-  default:
-    storageClassName: "standard"
-preInstalledApps:
-  snapshotter: "https://repo.enonic.com/public/com/enonic/app/snapshotter/3.0.1/snapshotter-3.0.1.jar"
-ownerReferences:
-- apiVersion: "enonic.cloud/v1alpha2"
-  kind: "Xp7Deployment"
-  blockOwnerDeletion: false
-  controller: true
-  name: "mycloud-mysolution-myenv-myservice"
-discoveryService: "cluster-discovery"
 allNodesKey: "all"
-files:
-  setEnv: "/enonic-xp/home/setenv.sh"
-  vhosts: "com.enonic.xp.web.vhost.cfg"
-pods:
-  terminationGracePeriodSeconds: "600"
-  updateStrategy: "RollingUpdate"
-  nodeGroupAntiAffinity: false
-  securityContext:
-    fsGroup: "0"
-    user: "1337"
 annotationKeys:
   applyPriority: "enonic.applyPriority"
-  removeWithDeployment: "enonic.cloud/remove.with.xp7deployment"
-  neverOverwrite: "enonic.neverOverwrite"
-  vhostMapping: "enonic.cloud/xp7.vhost.mapping."
   ingressCertManage: "enonic.cloud/ingress.cert.manage"
+  neverOverwrite: "enonic.neverOverwrite"
+  removeWithDeployment: "enonic.cloud/remove.with.xp7deployment"
+  vhostMapping: "enonic.cloud/xp7.vhost.mapping."
+clusterId: "44ddc40b-266c-4c99-b094-e758328fc6ba"
+defaultLabels:
+  cloud: "mycloud"
+  environment: "myenv"
+  service: "myservice"
+  solution: "mysolution"
 deployment:
-  suPass: "password"
-  suPassHash: "b109f3bbbc244eb82441917ed06d618b9008dd09b3befd1b5e07394c706a8bb980b1d7785e5976ec049b46df5f1326af5a2ea6d103fd07c95385ffab0cacbc86"
-  minimumDataNodes: 2
-  clustered: true
   clusterMajority: 5
+  clustered: true
+  minimumDataNodes: 2
+  minimumMasterNodes: 2
   name: "mycloud-mysolution-myenv-myservice"
   namespace: "mycloud-mysolution-myenv-myservice"
-  minimumMasterNodes: 2
   spec:
     enabled: true
     xpVersion: "7.1.2"
@@ -133,3 +73,67 @@ deployment:
           value: "6Gi"
         - name: "work"
           value: "7Gi"
+  suPass: "password"
+  suPassHash: "b109f3bbbc244eb82441917ed06d618b9008dd09b3befd1b5e07394c706a8bb980b1d7785e5976ec049b46df5f1326af5a2ea6d103fd07c95385ffab0cacbc86"
+dirs:
+  config: "/enonic-xp/home/config"
+  extraConfig: "/enonic-xp/home/extra-config"
+discoveryService: "cluster-discovery"
+files:
+  setEnv: "/enonic-xp/home/setenv.sh"
+  vhosts: "com.enonic.xp.web.vhost.cfg"
+finalizers:
+  app:
+    uninstall: "uninstall.app.enonic.cloud"
+image:
+  nameTemplate: "enonic/xp:%s-ubuntu"
+  pullPolicy: "IfNotPresent"
+labelKeys:
+  data: "enonic.data"
+  managed: "enonic.managed"
+  master: "enonic.master"
+  nodeGroup: "enonic.nodeGroup"
+  veleroBackupName: "velero.io/backup-name"
+  veleroBackupRestore: "velero.io/restore-name"
+ownerReferences:
+- apiVersion: "enonic.cloud/v1alpha2"
+  kind: "Xp7Deployment"
+  blockOwnerDeletion: false
+  controller: true
+  name: "mycloud-mysolution-myenv-myservice"
+pods:
+  nodeGroupAntiAffinity: false
+  securityContext:
+    fsGroup: "0"
+    user: "1337"
+  sysctlInitContainer: true
+  terminationGracePeriodSeconds: "600"
+  updateStrategy: "RollingUpdate"
+preInstalledApps:
+  snapshotter: "https://repo.enonic.com/public/com/enonic/app/snapshotter/3.0.1/snapshotter-3.0.1.jar"
+resources:
+  cpu:
+    defaultRequests: null
+  memory:
+    defaultRequests: null
+settings:
+  cloudApiServiceAccount:
+    name: "cloudApi"
+    namespace: "ec-system"
+  linkerd: false
+storage:
+  default:
+    storageClassName: "standard"
+  shared:
+    storageClassName: "standard"
+volumes:
+  backups:
+  - "blobstore"
+  - "snapshots"
+  mounts:
+    blobstore: "/enonic-xp/home/repo/blob"
+    deploy: "/enonic-xp/home/deploy"
+    export: "/enonic-xp/home/data"
+    index: "/enonic-xp/home/repo/index"
+    snapshots: "/enonic-xp/home/snapshots"
+    work: "/enonic-xp/home/work"

@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.function.Supplier;
 
 import javax.inject.Inject;
@@ -31,9 +30,7 @@ import com.enonic.cloud.operator.helpers.HandlerHelm;
 import com.enonic.cloud.operator.ingress.OperatorXp7ConfigSync;
 
 import static com.enonic.cloud.common.Configuration.cfgFloat;
-import static com.enonic.cloud.common.Configuration.cfgHasKey;
 import static com.enonic.cloud.common.Configuration.cfgInt;
-import static com.enonic.cloud.common.Configuration.cfgStr;
 import static com.enonic.cloud.common.Utils.createOwnerReference;
 import static com.enonic.cloud.kubernetes.client.Utils.cloneResource;
 
@@ -55,10 +52,18 @@ public class OperatorXp7DeploymentHelm
     @Inject
     OperatorXp7ConfigSync operatorXp7ConfigSync;
 
+    @Inject
+    @Named("suPass")
+    Supplier<String> suPassSupplier;
+
+    @Inject
+    @Named("cloudApi")
+    Supplier<ServiceAccount> cloudApi;
+
     @Override
     protected ValueBuilder<Xp7Deployment> getValueBuilder( final BaseValues baseValues )
     {
-        return new Xp7DeploymentValueBuilder( baseValues, this::createSuPass );
+        return new Xp7DeploymentValueBuilder( baseValues, suPassSupplier, cloudApi );
     }
 
     @Override
@@ -80,18 +85,6 @@ public class OperatorXp7DeploymentHelm
         operatorXp7ConfigSync.handle( namespace );
     }
 
-    private String createSuPass()
-    {
-        if ( cfgHasKey( "operator.deployment.fixedSuPass" ) )
-        {
-            return cfgStr( "operator.deployment.fixedSuPass" );
-        }
-        else
-        {
-            return UUID.randomUUID().toString().replace( "-", "" ).toLowerCase();
-        }
-    }
-
     public static class Xp7DeploymentValueBuilder
         implements ValueBuilder<Xp7Deployment>
     {
@@ -99,10 +92,14 @@ public class OperatorXp7DeploymentHelm
 
         private final Supplier<String> suPassProvider;
 
-        public Xp7DeploymentValueBuilder( final BaseValues baseValues, final Supplier<String> suPassProvider )
+        private final Supplier<ServiceAccount> cloudApiSa;
+
+        public Xp7DeploymentValueBuilder( final BaseValues baseValues, final Supplier<String> suPassProvider,
+                                          final Supplier<ServiceAccount> cloudApiSa )
         {
             this.baseValues = baseValues;
             this.suPassProvider = suPassProvider;
+            this.cloudApiSa = cloudApiSa;
         }
 
         @Override
@@ -110,6 +107,19 @@ public class OperatorXp7DeploymentHelm
         {
             Xp7Deployment resource = cloneResource( in );
             MapValues values = new MapValues( baseValues );
+
+            if ( !values.containsKey( "settings" ) )
+            {
+                values.put( "settings", new HashMap<>() );
+            }
+
+            ServiceAccount sa = cloudApiSa.get();
+            if ( sa != null )
+            {
+                ( (Map<String, Object>) values.get( "settings" ) ).
+                    put( "cloudApiServiceAccount",
+                         Map.of( "name", sa.getMetadata().getName(), "namespace", sa.getMetadata().getNamespace() ) );
+            }
 
             for ( Xp7DeploymentSpecNodeGroup ng : resource.getXp7DeploymentSpec().getXp7DeploymentSpecNodeGroups() )
             {

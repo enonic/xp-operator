@@ -25,9 +25,9 @@ spec:
       replicas: 1
       env:
         - name: ASD
-          value: asdasdadsa2aaa1aa
+          value: asdasdadsa2aaa1aaasd
       resources:
-        cpu: "1"
+        cpu: "1.5"
         memory: 512Mi
         disks:
           - name: deploy
@@ -38,22 +38,25 @@ spec:
             size: 100Mi
           - name: work
             size: 100Mi
-#    - name: front
-#      data: false
-#      master: false
-#      replicas: 1
-#      resources:
-#        cpu: "1"
-#        memory: 512Mi
-#        disks:
-#          - name: deploy
-#            size: 100Mi
-#          - name: export
-#            size: 100Mi
-#          - name: index
-#            size: 100Mi
-#          - name: work
-#            size: 100Mi
+    - name: front
+      data: false
+      master: false
+      replicas: 1
+      env:
+        - name: ASD
+          value: asdasdadsa2aaa1aaasd
+      resources:
+        cpu: "0.5"
+        memory: 1024Mi
+        disks:
+          - name: deploy
+            size: 100Mi
+          - name: export
+            size: 100Mi
+          - name: index
+            size: 100Mi
+          - name: work
+            size: 100Mi
 #    - name: data
 #      data: true
 #      master: false

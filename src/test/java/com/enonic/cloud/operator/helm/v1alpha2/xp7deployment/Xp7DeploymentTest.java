@@ -5,6 +5,9 @@ import java.io.IOException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.fabric8.kubernetes.api.model.ObjectMeta;
+import io.fabric8.kubernetes.api.model.ServiceAccount;
+
 import com.enonic.cloud.helm.values.BaseValues;
 import com.enonic.cloud.helm.values.ValueBuilder;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
@@ -21,7 +24,17 @@ public class Xp7DeploymentTest
     {
         super();
         valueBuilder = new OperatorXp7DeploymentHelm.Xp7DeploymentValueBuilder( new BaseValues( "44ddc40b-266c-4c99-b094-e758328fc6ba" ),
-                                                                                () -> "password" );
+                                                                                () -> "password", this::createTestSa );
+    }
+
+    private ServiceAccount createTestSa()
+    {
+        ServiceAccount sa = new ServiceAccount();
+        ObjectMeta meta = new ObjectMeta();
+        meta.setName( "cloudApi" );
+        meta.setNamespace( "ec-system" );
+        sa.setMetadata( meta );
+        return sa;
     }
 
     @Override

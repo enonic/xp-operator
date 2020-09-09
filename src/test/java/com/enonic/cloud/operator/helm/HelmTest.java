@@ -10,6 +10,7 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
@@ -34,6 +35,7 @@ public abstract class HelmTest
     protected HelmTest()
     {
         mapper = new ObjectMapper( new YAMLFactory() );
+        mapper.configure( SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
         helm = new Helm();
         chartRepository = new LocalRepository( new File( cfgStr( "operator.charts.path" ) ) );
     }

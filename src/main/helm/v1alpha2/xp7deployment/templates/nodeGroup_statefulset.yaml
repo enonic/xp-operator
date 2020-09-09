@@ -75,6 +75,20 @@ spec:
       securityContext:
         fsGroup: {{ $.Values.pods.securityContext.fsGroup }}
 
+      {{- if $.Values.pods.sysctlInitContainer }}
+      initContainers:
+        - name: configure-sysctl
+          securityContext:
+            runAsUser: 0
+            privileged: true
+          image: {{ $.Values.image.nameTemplate | replace "%s" $.Values.deployment.spec.xpVersion }}
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
+          command: ["sysctl", "-w", "vm.max_map_count=262144"]
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      {{- end }}
+
       containers:
         - name: exp
           image: {{ $.Values.image.nameTemplate | replace "%s" $.Values.deployment.spec.xpVersion }}
@@ -88,9 +102,6 @@ spec:
                 - ALL
             runAsNonRoot: true
             runAsUser: {{ $.Values.pods.securityContext.user }}
-            sysctls: # TODO: Is this creating unnecessary updates?
-              - name: vm.max_map_count
-                value: "262144"
 
           resources:
             requests:

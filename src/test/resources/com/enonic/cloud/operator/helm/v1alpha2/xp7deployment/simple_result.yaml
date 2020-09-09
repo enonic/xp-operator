@@ -17,11 +17,11 @@ apiVersion: "v1"
 kind: "Secret"
 metadata:
   annotations:
-    enonic.neverOverwrite: "true"
     enonic.applyPriority: "60"
+    enonic.neverOverwrite: "true"
   labels:
-    enonic.managed: "true"
     cloud: "mycloud"
+    enonic.managed: "true"
     environment: "myenv"
     service: "myservice"
     solution: "mysolution"
@@ -41,11 +41,11 @@ apiVersion: "v1"
 kind: "ConfigMap"
 metadata:
   annotations:
-    enonic.neverOverwrite: "true"
     enonic.applyPriority: "60"
+    enonic.neverOverwrite: "true"
   labels:
-    enonic.managed: "true"
     cloud: "mycloud"
+    enonic.managed: "true"
     environment: "myenv"
     service: "myservice"
     solution: "mysolution"
@@ -58,8 +58,6 @@ metadata:
     controller: true
     name: "mycloud-mysolution-myenv-myservice"
 data:
-  vhost-defaults.cfg: "enabled = true\n\nmapping.localhost.host = localhost\nmapping.localhost.source\
-    \ = /\nmapping.localhost.target = /\nmapping.localhost.idProvider.system = default"
   dns.sh: "#!/bin/bash\n\nset -e\n\nusage () {\n    echo \"Usage: $SCRIPT_NAME [OPTIONS]\"\
     \n    echo \"Wait until DNS record is present\"\n    echo \"\"\n    echo \"Options:\"\
     \n    echo \"  -d, --dns=         Record to poll\"\n    echo \"  -t, --timeout=\
@@ -130,6 +128,7 @@ data:
     \ != \"0\" ]; then\n    echo \"Waiting for additional ${ADDITIONAL_WAIT_SECONDS}\
     \ seconds\"\n    sleep ${ADDITIONAL_WAIT_SECONDS}\nfi\n\nif [ \"${OK}\" != \"\
     1\" ]; then\n    exit 1\nfi"
+  initApps.txt: "https://repo.enonic.com/public/com/enonic/app/snapshotter/3.0.1/snapshotter-3.0.1.jar"
   preStart.sh: "echo \"Running prescript for node ${XP_NODE_NAME} (${XP_NODE_IP})\"\
     \necho \"Bootstrap deploy folder apps\"\ncat /enonic-xp/home/extra-config/initApps.txt\
     \ | xargs -I {} app.sh add {}\nbash /enonic-xp/home/extra-config/dns.sh -d cluster-discovery.${NAMESPACE}.svc.cluster.local\n\
@@ -137,18 +136,19 @@ data:
   preStop.sh: "echo \"Wait for endpoints to be deleted\"\nbash /enonic-xp/home/extra-config/endpoints.sh\
     \ -r -s all -i ${XP_NODE_IP} -t 10\nbash /enonic-xp/home/extra-config/endpoints.sh\
     \ -r -s ${XP_NODE_GROUP} -i ${XP_NODE_IP} -t 10 -a 20"
-  initApps.txt: "https://repo.enonic.com/public/com/enonic/app/snapshotter/3.0.1/snapshotter-3.0.1.jar"
+  vhost-defaults.cfg: "enabled = true\n\nmapping.localhost.host = localhost\nmapping.localhost.source\
+    \ = /\nmapping.localhost.target = /\nmapping.localhost.idProvider.system = default"
 ---
 apiVersion: "v1"
 kind: "ConfigMap"
 metadata:
   annotations:
-    enonic.neverOverwrite: "true"
     enonic.applyPriority: "50"
+    enonic.neverOverwrite: "true"
   labels:
+    cloud: "mycloud"
     enonic.managed: "true"
     enonic.nodeGroup: "fisk"
-    cloud: "mycloud"
     environment: "myenv"
     service: "myservice"
     solution: "mysolution"
@@ -168,8 +168,8 @@ metadata:
   annotations:
     enonic.applyPriority: "10"
   labels:
-    enonic.managed: "true"
     cloud: "mycloud"
+    enonic.managed: "true"
     environment: "myenv"
     service: "myservice"
     solution: "mysolution"
@@ -195,8 +195,8 @@ metadata:
   annotations:
     enonic.applyPriority: "10"
   labels:
-    enonic.managed: "true"
     cloud: "mycloud"
+    enonic.managed: "true"
     environment: "myenv"
     service: "myservice"
     solution: "mysolution"
@@ -238,6 +238,27 @@ rules:
   - "get"
 ---
 apiVersion: "rbac.authorization.k8s.io/v1"
+kind: "Role"
+metadata:
+  annotations:
+    enonic.applyPriority: "30"
+  name: "read-secrets"
+  namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
+rules:
+- apiGroups:
+  - "*"
+  resources:
+  - "secrets"
+  verbs:
+  - "get"
+---
+apiVersion: "rbac.authorization.k8s.io/v1"
 kind: "RoleBinding"
 metadata:
   annotations:
@@ -259,14 +280,36 @@ subjects:
   name: "xp-node-sa"
   namespace: "mycloud-mysolution-myenv-myservice"
 ---
+apiVersion: "rbac.authorization.k8s.io/v1"
+kind: "RoleBinding"
+metadata:
+  annotations:
+    enonic.applyPriority: "40"
+  name: "cloud-api-read-secrets"
+  namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
+roleRef:
+  kind: "Role"
+  apiGroup: "rbac.authorization.k8s.io"
+  name: "read-secrets"
+subjects:
+- kind: "ServiceAccount"
+  name: "cloudApi"
+  namespace: "ec-system"
+---
 apiVersion: "v1"
 kind: "Service"
 metadata:
   annotations:
     enonic.applyPriority: "100"
   labels:
-    enonic.managed: "true"
     cloud: "mycloud"
+    enonic.managed: "true"
     environment: "myenv"
     service: "myservice"
     solution: "mysolution"
@@ -304,8 +347,8 @@ metadata:
   annotations:
     enonic.applyPriority: "100"
   labels:
-    enonic.managed: "true"
     cloud: "mycloud"
+    enonic.managed: "true"
     environment: "myenv"
     service: "myservice"
     solution: "mysolution"
@@ -350,9 +393,9 @@ metadata:
   annotations:
     enonic.applyPriority: "100"
   labels:
+    cloud: "mycloud"
     enonic.managed: "true"
     enonic.nodeGroup: "fisk"
-    cloud: "mycloud"
     environment: "myenv"
     service: "myservice"
     solution: "mysolution"
@@ -384,8 +427,8 @@ spec:
     protocol: "TCP"
     targetPort: 9200
   selector:
-    enonic.nodeGroup: "fisk"
     cloud: "mycloud"
+    enonic.nodeGroup: "fisk"
     environment: "myenv"
     service: "myservice"
     solution: "mysolution"
@@ -398,9 +441,9 @@ metadata:
   annotations:
     enonic.applyPriority: "90"
   labels:
+    cloud: "mycloud"
     enonic.managed: "true"
     enonic.nodeGroup: "fisk"
-    cloud: "mycloud"
     environment: "myenv"
     service: "myservice"
     solution: "mysolution"
@@ -418,11 +461,11 @@ spec:
   revisionHistoryLimit: 10
   selector:
     matchLabels:
-      enonic.managed: "true"
-      enonic.nodeGroup: "fisk"
-      enonic.master: "true"
-      enonic.data: "true"
       cloud: "mycloud"
+      enonic.data: "true"
+      enonic.managed: "true"
+      enonic.master: "true"
+      enonic.nodeGroup: "fisk"
       environment: "myenv"
       service: "myservice"
       solution: "mysolution"
@@ -430,18 +473,18 @@ spec:
   template:
     metadata:
       annotations:
-        enonic.cloud/metrics.xp7: "true"
-        enonic.cloud/logs.xp7: "true"
         backup.velero.io/backup-volumes: "blobstore,snapshots"
-        pre.hook.backup.velero.io/container: "exp"
+        enonic.cloud/logs.xp7: "true"
+        enonic.cloud/metrics.xp7: "true"
         pre.hook.backup.velero.io/command: "[\"bash\", \"-c\", \"/usr/local/bin/backup.sh\"\
           ]"
+        pre.hook.backup.velero.io/container: "exp"
       labels:
-        enonic.managed: "true"
-        enonic.nodeGroup: "fisk"
-        enonic.master: "true"
-        enonic.data: "true"
         cloud: "mycloud"
+        enonic.data: "true"
+        enonic.managed: "true"
+        enonic.master: "true"
+        enonic.nodeGroup: "fisk"
         environment: "myenv"
         service: "myservice"
         solution: "mysolution"
@@ -514,9 +557,6 @@ spec:
             - "ALL"
           runAsNonRoot: true
           runAsUser: 1337
-          sysctls:
-          - name: "vm.max_map_count"
-            value: "262144"
         terminationMessagePath: "/dev/termination-log"
         terminationMessagePolicy: "File"
         volumeMounts:
@@ -538,6 +578,20 @@ spec:
         - mountPath: "/enonic-xp/home/snapshots"
           name: "snapshots"
       dnsPolicy: "ClusterFirst"
+      initContainers:
+      - command:
+        - "sysctl"
+        - "-w"
+        - "vm.max_map_count=262144"
+        image: "enonic/xp:7.1.2-ubuntu"
+        imagePullPolicy: "IfNotPresent"
+        name: "configure-sysctl"
+        resources: {}
+        securityContext:
+          privileged: true
+          runAsUser: 0
+        terminationMessagePath: "/dev/termination-log"
+        terminationMessagePolicy: "File"
       restartPolicy: "Always"
       schedulerName: "default-scheduler"
       securityContext:
@@ -567,13 +621,13 @@ spec:
     kind: "PersistentVolumeClaim"
     metadata:
       labels:
-        velero.io/exclude-from-backup: "true"
+        cloud: "mycloud"
         enonic.managed: "true"
         enonic.nodeGroup: "fisk"
-        cloud: "mycloud"
         environment: "myenv"
         service: "myservice"
         solution: "mysolution"
+        velero.io/exclude-from-backup: "true"
       name: "export"
     spec:
       accessModes:
@@ -587,13 +641,13 @@ spec:
     kind: "PersistentVolumeClaim"
     metadata:
       labels:
-        velero.io/exclude-from-backup: "true"
+        cloud: "mycloud"
         enonic.managed: "true"
         enonic.nodeGroup: "fisk"
-        cloud: "mycloud"
         environment: "myenv"
         service: "myservice"
         solution: "mysolution"
+        velero.io/exclude-from-backup: "true"
       name: "index"
     spec:
       accessModes:
@@ -607,13 +661,13 @@ spec:
     kind: "PersistentVolumeClaim"
     metadata:
       labels:
-        velero.io/exclude-from-backup: "true"
+        cloud: "mycloud"
         enonic.managed: "true"
         enonic.nodeGroup: "fisk"
-        cloud: "mycloud"
         environment: "myenv"
         service: "myservice"
         solution: "mysolution"
+        velero.io/exclude-from-backup: "true"
       name: "work"
     spec:
       accessModes:
@@ -634,11 +688,11 @@ kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   annotations:
-    enonic.neverOverwrite: "true"
     enonic.applyPriority: "70"
+    enonic.neverOverwrite: "true"
   labels:
-    enonic.managed: "true"
     cloud: "mycloud"
+    enonic.managed: "true"
     environment: "myenv"
     service: "myservice"
     solution: "mysolution"
@@ -660,11 +714,11 @@ kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   annotations:
-    enonic.neverOverwrite: "true"
     enonic.applyPriority: "70"
+    enonic.neverOverwrite: "true"
   labels:
-    enonic.managed: "true"
     cloud: "mycloud"
+    enonic.managed: "true"
     environment: "myenv"
     service: "myservice"
     solution: "mysolution"
@@ -688,8 +742,8 @@ metadata:
   annotations:
     enonic.applyPriority: "70"
   labels:
-    enonic.managed: "true"
     cloud: "mycloud"
+    enonic.managed: "true"
     environment: "myenv"
     service: "myservice"
     solution: "mysolution"
@@ -713,8 +767,8 @@ metadata:
   annotations:
     enonic.applyPriority: "70"
   labels:
-    enonic.managed: "true"
     cloud: "mycloud"
+    enonic.managed: "true"
     environment: "myenv"
     service: "myservice"
     solution: "mysolution"
@@ -739,8 +793,8 @@ metadata:
   annotations:
     enonic.applyPriority: "70"
   labels:
-    enonic.managed: "true"
     cloud: "mycloud"
+    enonic.managed: "true"
     environment: "myenv"
     service: "myservice"
     solution: "mysolution"
@@ -777,11 +831,11 @@ kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   annotations:
-    enonic.neverOverwrite: "true"
     enonic.applyPriority: "70"
+    enonic.neverOverwrite: "true"
   labels:
-    enonic.managed: "true"
     cloud: "mycloud"
+    enonic.managed: "true"
     environment: "myenv"
     service: "myservice"
     solution: "mysolution"
@@ -803,11 +857,11 @@ kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   annotations:
-    enonic.neverOverwrite: "true"
     enonic.applyPriority: "71"
+    enonic.neverOverwrite: "true"
   labels:
-    enonic.managed: "true"
     cloud: "mycloud"
+    enonic.managed: "true"
     environment: "myenv"
     service: "myservice"
     solution: "mysolution"
@@ -831,8 +885,8 @@ metadata:
   annotations:
     enonic.applyPriority: "71"
   labels:
-    enonic.managed: "true"
     cloud: "mycloud"
+    enonic.managed: "true"
     environment: "myenv"
     service: "myservice"
     solution: "mysolution"
