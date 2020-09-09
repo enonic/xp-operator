@@ -102,6 +102,7 @@ public class OperatorXp7DeploymentHelm
             this.cloudApiSa = cloudApiSa;
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public Values apply( final Xp7Deployment in )
         {
