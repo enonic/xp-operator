@@ -16,6 +16,7 @@ import javax.ws.rs.Produces;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Preconditions;
 
+import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.admission.AdmissionReview;
 
 import com.enonic.cloud.common.Validator;
@@ -132,8 +133,7 @@ public class AdmissionApi
             {
                 Preconditions.checkState( ng.getName() != null, "'spec.nodeGroups[" + i + "].name' cannot be null" );
                 Preconditions.checkState( !ng.getName().equals( cfgStr( "operator.charts.values.allNodesKey" ) ),
-                                          "'spec.nodeGroups[" + i + "].name' cannot be " +
-                                              cfgStr( "operator.charts.values.allNodesKey" ) );
+                                          "'spec.nodeGroups[" + i + "].name' cannot be " + cfgStr( "operator.charts.values.allNodesKey" ) );
                 dns1123( "spec.nodeGroups[" + i + "].name", ng.getName() );
                 Preconditions.checkState( ng.getData() != null, "'spec.nodeGroups[" + i + "].data' cannot be null" );
                 Preconditions.checkState( ng.getMaster() != null, "'spec.nodeGroups[" + i + "].master' cannot be null" );
@@ -198,7 +198,7 @@ public class AdmissionApi
 
             Optional<Xp7Deployment> xp7Deployments = getXp7Deployment( admissionReview.getRequest().getObject() );
             Preconditions.checkState( xp7Deployments.isEmpty(), "There is already an Xp7Deployment in NS '%s'",
-                                      admissionReview.getRequest().getObject().getMetadata().getNamespace() );
+                                      newDeployment.getMetadata().getNamespace() );
         }
     }
 
@@ -208,7 +208,7 @@ public class AdmissionApi
         {
             Optional<Xp7Deployment> xp7Deployments = getXp7Deployment( admissionReview.getRequest().getObject() );
             Preconditions.checkState( xp7Deployments.isPresent(), "No Xp7Deployment found in NS '%s'",
-                                      admissionReview.getRequest().getObject().getMetadata().getNamespace() );
+                                      ( (HasMetadata) admissionReview.getRequest().getObject() ).getMetadata().getNamespace() );
             if ( nodeGroups != null )
             {
                 Set<String> xpDeploymentNodeGroups = xp7Deployments.get().
