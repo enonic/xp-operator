@@ -157,6 +157,9 @@ public class OperatorDomainDns
         if ( ips.size() == 0 )
         {
             log.warn( "Domain does not have an external IP, not altering records" );
+            domain.getDomainStatus().
+                withState( DomainStatus.State.ERROR ).
+                withMessage( "Domain has no external IP" );
             return;
         }
 
@@ -169,6 +172,9 @@ public class OperatorDomainDns
         {
             log.warn( String.format( "Present heritage record does not match this cluster id for domain '%s'",
                                      domain.getDomainSpec().getHost() ) );
+            domain.getDomainStatus().
+                withState( DomainStatus.State.ERROR ).
+                withMessage( "Heritage record mismatch" );
             return;
         }
 
