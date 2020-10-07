@@ -79,7 +79,7 @@ pods:
   terminationGracePeriodSeconds: "600"
   updateStrategy: "RollingUpdate"
 preInstalledApps:
-  snapshotter: "https://repo.enonic.com/public/com/enonic/app/snapshotter/3.0.1/snapshotter-3.0.1.jar"
+  snapshotter: "https://repo.enonic.com/public/com/enonic/app/snapshotter/3.0.2/snapshotter-3.0.2.jar"
 resources:
   cpu:
     defaultRequests: null
