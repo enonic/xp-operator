@@ -1,0 +1,14 @@
+admissionRequest:
+  request:
+    operation: DELETE
+    oldObject:
+      apiVersion: enonic.cloud/v1alpha2
+      kind: Xp7Config
+      metadata:
+        name: test
+        namespace: mycloud-mysolution-myenv-myservice
+      spec:
+        file: mytest.cfg
+        nodeGroup: main
+        data: |
+          hello

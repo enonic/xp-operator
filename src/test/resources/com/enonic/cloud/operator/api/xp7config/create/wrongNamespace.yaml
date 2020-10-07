@@ -1,0 +1,26 @@
+admissionRequest:
+  request:
+    operation: CREATE
+    object:
+      apiVersion: enonic.cloud/v1alpha2
+      kind: Xp7Config
+      metadata:
+        name: test
+        namespace: wrongnamespace
+      spec:
+        file: mytest.cfg
+        nodeGroup: main
+        data: |
+          hello
+
+assertPatch:
+  - op: add
+    path: /status
+    value:
+      state: PENDING
+      message: Not loaded
+  - op: add
+    path: /spec/dataBase64
+    value: false
+
+assertException: "No Xp7Deployment found in NS 'wrongnamespace'"

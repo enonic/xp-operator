@@ -1,0 +1,11 @@
+admissionRequest:
+  request:
+    operation: DELETE
+    oldObject:
+      apiVersion: enonic.cloud/v1alpha1
+      kind: Xp7App
+      metadata:
+        name: contentstudio
+        namespace: mycloud-mysolution-myenv-myservice
+      spec:
+        url: https://repo.enonic.com/public/com/enonic/app/contentstudio/2.2.3/contentstudio-2.2.3.jar

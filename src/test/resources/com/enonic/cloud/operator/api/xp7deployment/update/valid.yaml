@@ -1,0 +1,68 @@
+admissionRequest:
+  request:
+    operation: UPDATE
+    oldObject:
+      apiVersion: enonic.cloud/v1alpha2
+      kind: Xp7Deployment
+      metadata:
+        name: mycloud-mysolution-myenv-myservice
+        namespace: mycloud-mysolution-myenv-myservice
+        labels:
+          cloud: mycloud
+          solution: mysolution
+          environment: myenv
+          service: myservice
+      spec:
+        enabled: true
+        xpVersion: 7.1.2
+        nodesSharedDisks:
+          - name: blobstore
+            size: 1Gi
+          - name: snapshots
+            size: 1Gi
+        nodeGroups:
+          - name: main
+            master: true
+            data: true
+            replicas: 1
+            resources:
+              cpu: "1"
+              memory: 512Mi
+              disks:
+                - name: index
+                  size: 200Mi
+    object:
+      apiVersion: enonic.cloud/v1alpha2
+      kind: Xp7Deployment
+      metadata:
+        name: mycloud-mysolution-myenv-myservice
+        namespace: mycloud-mysolution-myenv-myservice
+        labels:
+          cloud: mycloud
+          solution: mysolution
+          environment: myenv
+          service: myservice
+      spec:
+        enabled: true
+        xpVersion: 7.1.3
+        nodesSharedDisks:
+          - name: blobstore
+            size: 1Gi
+          - name: snapshots
+            size: 1Gi
+        nodeGroups:
+          - name: main
+            master: true
+            data: true
+            replicas: 1
+            resources:
+              cpu: "1"
+              memory: 512Mi
+              disks:
+                - name: index
+                  size: 200Mi
+
+assertPatch:
+  - op: add
+    path: /status
+    value: null

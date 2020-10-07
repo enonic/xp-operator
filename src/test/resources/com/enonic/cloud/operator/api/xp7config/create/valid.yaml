@@ -1,0 +1,33 @@
+admissionRequest:
+  request:
+    operation: CREATE
+    object:
+      apiVersion: enonic.cloud/v1alpha2
+      kind: Xp7Config
+      metadata:
+        name: test
+        namespace: mycloud-mysolution-myenv-myservice
+      spec:
+        file: mytest.cfg
+        nodeGroup: main
+        data: |
+          hello
+
+assertPatch:
+  - op: add
+    path: /status
+    value:
+      state: PENDING
+      message: Not loaded
+  - op: add
+    path: /spec/dataBase64
+    value: false
+  - op: add
+    path: /metadata/ownerReferences
+    value:
+      - apiVersion: enonic.cloud/v1alpha2
+        kind: Xp7Deployment
+        blockOwnerDeletion: false
+        controller: true
+        name: mycloud-mysolution-myenv-myservice
+        uid: 9265a02a-000f-421a-b4aa-4768e8eab21e

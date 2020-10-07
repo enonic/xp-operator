@@ -3,11 +3,12 @@ package com.enonic.cloud.operator.api.admission;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.enonic.cloud.kubernetes.Searchers;
+import com.enonic.cloud.operator.api.mutation.MutationApi;
 
-public class TestAdmissionApi
-    extends AdmissionApi
+public class TestMutationApi
+    extends MutationApi
 {
-    public TestAdmissionApi( ObjectMapper mapper, Searchers searchers )
+    public TestMutationApi( ObjectMapper mapper, Searchers searchers )
     {
         super();
         this.mapper = mapper;

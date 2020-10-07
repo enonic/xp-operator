@@ -1,0 +1,43 @@
+admissionRequest:
+  request:
+    operation: CREATE
+    object:
+      apiVersion: enonic.cloud/v1alpha2
+      kind: Xp7Deployment
+      metadata:
+        name: mycloud-mysolution-myenv-myservice2
+        namespace: mycloud-mysolution-myenv-myservice2
+        labels:
+          cloud: mycloud
+          project: myproject
+          name: qaxp
+      spec:
+        enabled: true
+        xpVersion: 7.1.2
+        nodesSharedDisks:
+          - name: blobstore
+            size: 1Gi
+          - name: snapshots
+            size: 1Gi
+        nodeGroups:
+          - name: main
+            master: true
+            data: true
+            replicas: -4
+            resources:
+              cpu: "1"
+              memory: 512Mi
+              disks:
+                - name: index
+                  size: 200Mi
+
+assertPatch:
+  - op: add
+    path: /status
+    value:
+      state: PENDING
+      message: Created
+      fields:
+        pods: []
+
+assertException: "'spec.nodeGroups[0].replicas' has to be >= 0"
