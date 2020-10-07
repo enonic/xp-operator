@@ -11,14 +11,6 @@ public class TemplatorProducer
 {
     @Produces
     @Singleton
-    @Named("v1alpha2/xp7vhost")
-    public Templator producerTemplatorV1Alpha2Xp7VHost( Helm helm, @Named("local") ChartRepository chartRepository )
-    {
-        return ( values -> helm.templateObjects( chartRepository.get( "v1alpha2/xp7vhost" ), values ) );
-    }
-
-    @Produces
-    @Singleton
     @Named("v1alpha2/xp7deployment")
     public Templator producerTemplatorV1Alpha2Xp7Deployment( Helm helm, @Named("local") ChartRepository chartRepository )
     {
