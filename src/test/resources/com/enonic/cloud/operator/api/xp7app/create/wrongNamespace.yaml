@@ -10,19 +10,4 @@ admissionRequest:
       spec:
         url: https://repo.enonic.com/public/com/enonic/app/contentstudio/2.2.3/contentstudio-2.2.3.jar
 
-assertPatch:
-  - op: add
-    path: /spec/enabled
-    value: true
-  - op: add
-    path: /status
-    value:
-      state: PENDING
-      message: Created
-      fields: {}
-  - op: replace
-    path: /metadata/finalizers
-    value:
-      - uninstall.app.enonic.cloud
-
 assertException: "No Xp7Deployment found in NS 'wrongnamespace'"

@@ -31,13 +31,4 @@ admissionRequest:
                 - name: index
                   size: 200Mi
 
-assertPatch:
-  - op: add
-    path: /status
-    value:
-      state: PENDING
-      message: Created
-      fields:
-        pods: []
-
 assertException: "'spec.nodeGroups[0].replicas' has to be >= 0"

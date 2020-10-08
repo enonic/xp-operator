@@ -31,13 +31,4 @@ admissionRequest:
                 - name: index
                   size: 200Mi
 
-assertPatch:
-  - op: add
-    path: /status
-    value:
-      state: PENDING
-      message: Created
-      fields:
-        pods: []
-
 assertException: "'spec.xpVersion' cannot be null"

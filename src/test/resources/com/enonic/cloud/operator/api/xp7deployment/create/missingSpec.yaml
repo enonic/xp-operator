@@ -28,13 +28,4 @@ admissionRequest:
       #        disks:
       #          index: 200Mi
 
-assertPatch:
-  - op: add
-    path: /status
-    value:
-      state: PENDING
-      message: Created
-      fields:
-        pods: []
-
 assertException: "'spec' cannot be null"

@@ -32,13 +32,4 @@ admissionRequest:
                 - name: index
                   size: 200Mi
 
-assertPatch:
-  - op: add
-    path: /status
-    value:
-      state: PENDING
-      message: Created
-      fields:
-        pods: []
-
 assertException: "Field 'spec.nodeGroups[0].name' with value '1$234' is not valid, it must consist of lower case alphanumeric characters, '-' or '.', and must start and end with an alphanumeric character (e.g. 'my-name', regex used for validation is '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*')"

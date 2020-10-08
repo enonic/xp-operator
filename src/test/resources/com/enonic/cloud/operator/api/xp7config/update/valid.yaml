@@ -10,8 +10,11 @@ admissionRequest:
       spec:
         file: mytest.cfg
         nodeGroup: main
-        data: |
+        data: |-
           hello
+      status:
+        state: READY
+        message: Loaded
     object:
       apiVersion: enonic.cloud/v1alpha2
       kind: Xp7Config
@@ -24,12 +27,17 @@ admissionRequest:
         data: |
           world
 
-assertPatch:
-  - op: add
-    path: /status
-    value:
-      state: PENDING
-      message: Not loaded
-  - op: add
-    path: /spec/dataBase64
-    value: false
+assertResult:
+  apiVersion: "enonic.cloud/v1alpha2"
+  kind: "Xp7Config"
+  metadata:
+    name: "test"
+    namespace: "mycloud-mysolution-myenv-myservice"
+  spec:
+    nodeGroup: "main"
+    file: "mytest.cfg"
+    data: "world\n"
+    dataBase64: false
+  status:
+    state: "PENDING"
+    message: "Not loaded"

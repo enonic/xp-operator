@@ -2,12 +2,13 @@ package com.enonic.cloud.operator.api.mutation;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
+import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.Consumes;
@@ -34,6 +35,7 @@ import com.enonic.cloud.kubernetes.model.v1alpha2.xp7config.Xp7ConfigStatus;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentStatus;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentStatusFields;
+import com.enonic.cloud.operator.api.AdmissionOperation;
 import com.enonic.cloud.operator.api.BaseAdmissionApi;
 
 import static com.enonic.cloud.common.Configuration.cfgBool;
@@ -85,148 +87,221 @@ public class MutationApi
 
     private void xp7app( MutationRequest mt )
     {
+        // Collect old and new object
         Xp7App oldR = (Xp7App) mt.getAdmissionReview().getRequest().getOldObject();
         Xp7App newR = (Xp7App) mt.getAdmissionReview().getRequest().getObject();
 
+        // Create default status
         Xp7AppStatus defStatus = new Xp7AppStatus().
             withMessage( "Created" ).
             withState( Xp7AppStatus.State.PENDING ).
             withXp7AppStatusFields( new Xp7AppStatusFields() );
 
-        // This is an update => set default status to old status
-        if ( oldR != null )
+        // Get OP
+        AdmissionOperation op = getOperation( mt.getAdmissionReview() );
+
+        // Ensure status
+        switch ( op )
         {
-            defStatus = oldR.getXp7AppStatus();
+            case CREATE: // Always set the default status on new objects
+                patch( mt, true, "/status", newR.getXp7AppStatus(), defStatus );
+                break;
+            case UPDATE:
+                if ( newR.getXp7AppSpec() != null && !newR.getXp7AppSpec().getUrl().equals( oldR.getXp7AppSpec().getUrl() ) )
+                {
+                    // On url change, set default status
+                    patch( mt, true, "/status", newR.getXp7AppStatus(), defStatus );
+                }
+                else
+                {
+                    // Else make sure the old status is not removed
+                    patch( mt, false, "/status", newR.getXp7AppStatus(), oldR.getXp7AppStatus() );
+                }
+                break;
+            case DELETE:
+                // Set pending deletion status
+                oldR.getXp7AppStatus().setState( Xp7AppStatus.State.PENDING );
+                oldR.getXp7AppStatus().setMessage( "Pending deletion" );
+                patch( mt, true, "/status", newR.getXp7AppStatus(), oldR.getXp7AppStatus() );
+                break;
         }
 
         // Ensure enabled
-        patchDefault( mt, true, newR.getXp7AppSpec().getEnabled(), "/spec/enabled" );
+        patch( mt, false, "/spec/enabled", newR.getXp7AppSpec().getEnabled(), true );
 
-        // Ensure status
-        if ( !patchDefault( mt, defStatus, newR.getXp7AppStatus(), "/status" ) )
+        if ( op == AdmissionOperation.CREATE )
         {
-            patchDefault( mt, defStatus.getMessage(), newR.getXp7AppStatus().getMessage(), "/status/message" );
-            patchDefault( mt, defStatus.getState(), newR.getXp7AppStatus().getState(), "/status/state" );
-            patchDefault( mt, defStatus.getXp7AppStatusFields(), newR.getXp7AppStatus().getXp7AppStatusFields(), "/status/fields" );
-        }
-
-        // Ensure finalizers
-        if ( mt.getAdmissionReview().getRequest().getOperation().equals( "CREATE" ) )
-        {
-            List<String> finalizers = ( (HasMetadata) mt.getAdmissionReview().getRequest().getObject() ).getMetadata().getFinalizers();
+            // Ensure finalizers
+            List<String> oldFinalizers = ( (HasMetadata) mt.getAdmissionReview().getRequest().getObject() ).getMetadata().getFinalizers();
+            Set<String> newFinalizers = oldFinalizers != null ? new HashSet<>( oldFinalizers ) : new HashSet<>();
             String uninstallFinalizer = cfgStr( "operator.charts.values.finalizers.app.uninstall" );
-            if ( finalizers == null )
+            if ( !newFinalizers.contains( uninstallFinalizer ) )
             {
-                mt.addPatch( "add", "/metadata/finalizers", Collections.singletonList( uninstallFinalizer ) );
+                newFinalizers.add( uninstallFinalizer );
+                patch( mt, true, "/metadata/finalizers", null, newFinalizers );
             }
-            else if ( !finalizers.contains( uninstallFinalizer ) )
-            {
-                finalizers.add( uninstallFinalizer );
-                mt.addPatch( "replace", "/metadata/finalizers", finalizers );
-            }
-        }
 
-        ensureOwnerReference( mt );
+            // Ensure owner reference
+            ensureOwnerReference( mt );
+        }
     }
 
     private void xp7config( MutationRequest mt )
     {
+        // Collect old and new object
+        Xp7Config oldR = (Xp7Config) mt.getAdmissionReview().getRequest().getOldObject();
         Xp7Config newR = (Xp7Config) mt.getAdmissionReview().getRequest().getObject();
 
+        // Create default status
         Xp7ConfigStatus defStatus = new Xp7ConfigStatus().
             withMessage( "Not loaded" ).
             withState( Xp7ConfigStatus.State.PENDING );
 
-        if ( !patchDefault( mt, defStatus, newR.getXp7ConfigStatus(), "/status" ) )
+        // Get OP
+        AdmissionOperation op = getOperation( mt.getAdmissionReview() );
+
+        // Ensure status
+        switch ( op )
         {
-            // There is an old status here
-            Xp7Config oldR = (Xp7Config) mt.getAdmissionReview().getRequest().getOldObject();
-            boolean newBase64 = newR.getXp7ConfigSpec().getDataBase64() != null ? newR.getXp7ConfigSpec().getDataBase64() : true;
-            if ( !Objects.equals( oldR.getXp7ConfigSpec().getData(), newR.getXp7ConfigSpec().getData() ) ||
-                !Objects.equals( oldR.getXp7ConfigSpec().getDataBase64(), newBase64 ) )
-            {
-                // There is a change in the data, set default status
-                mt.addPatch( "replace", "/status", defStatus );
-            }
+            case CREATE: // Always set the default status on new objects
+                patch( mt, true, "/status", newR.getXp7ConfigStatus(), defStatus );
+                break;
+            case UPDATE:
+                if ( newR.getXp7ConfigSpec() != null && !newR.getXp7ConfigSpec().equals( oldR.getXp7ConfigSpec() ) )
+                {
+                    // On any change change, set default status
+                    patch( mt, true, "/status", newR.getXp7ConfigStatus(), defStatus );
+                }
+                else
+                {
+                    // Else make sure the old status is not removed
+                    patch( mt, false, "/status", newR.getXp7ConfigStatus(), oldR.getXp7ConfigStatus() );
+                }
+                break;
+            case DELETE:
+                // Do nothing
+                break;
         }
 
+        // Ensure defaults
         if ( newR.getXp7ConfigSpec() != null )
         {
-            patchDefault( mt, false, newR.getXp7ConfigSpec().getDataBase64(), "/spec/dataBase64" );
-            patchDefault( mt, cfgStr( "operator.charts.values.allNodesKey" ), newR.getXp7ConfigSpec().getNodeGroup(), "/spec/nodeGroup" );
+            patch( mt, false, "/spec/dataBase64", newR.getXp7ConfigSpec().getDataBase64(), false );
+            patch( mt, false, "/spec/nodeGroup", newR.getXp7ConfigSpec().getNodeGroup(), cfgStr( "operator.charts.values.allNodesKey" ) );
         }
 
-        ensureOwnerReference( mt );
+        if ( op == AdmissionOperation.CREATE )
+        {
+            // Ensure owner reference
+            ensureOwnerReference( mt );
+        }
     }
 
     private void xp7deployment( MutationRequest mt )
     {
+        // Collect old and new object
         Xp7Deployment oldR = (Xp7Deployment) mt.getAdmissionReview().getRequest().getOldObject();
         Xp7Deployment newR = (Xp7Deployment) mt.getAdmissionReview().getRequest().getObject();
 
+        // Create default status
         Xp7DeploymentStatus defStatus = new Xp7DeploymentStatus().
             withMessage( "Created" ).
             withState( Xp7DeploymentStatus.State.PENDING ).
             withXp7DeploymentStatusFields( new Xp7DeploymentStatusFields().
                 withXp7DeploymentStatusFieldsPods( new LinkedList<>() ) );
 
-        // This is an update => set default status to old status
-        if ( oldR != null )
-        {
-            defStatus = oldR.getXp7DeploymentStatus();
-        }
+        // Get OP
+        AdmissionOperation op = getOperation( mt.getAdmissionReview() );
 
         // Ensure status
-        if ( !patchDefault( mt, defStatus, newR.getXp7DeploymentStatus(), "/status" ) )
+        switch ( op )
         {
-            patchDefault( mt, defStatus.getMessage(), newR.getXp7DeploymentStatus().getMessage(), "/status/message" );
-            patchDefault( mt, defStatus.getState(), newR.getXp7DeploymentStatus().getState(), "/status/state" );
-            patchDefault( mt, defStatus.getXp7DeploymentStatusFields(), newR.getXp7DeploymentStatus().getXp7DeploymentStatusFields(),
-                          "/status/fields" );
+            case CREATE: // Always set the default status on new objects
+                patch( mt, true, "/status", newR.getXp7DeploymentStatus(), defStatus );
+                break;
+            case UPDATE:
+                if ( newR.getXp7DeploymentSpec() != null && !newR.getXp7DeploymentSpec().equals( oldR.getXp7DeploymentSpec() ) )
+                {
+                    // On any change change, set default status
+                    patch( mt, true, "/status", newR.getXp7DeploymentStatus(), defStatus );
+                }
+                else
+                {
+                    // Else make sure the old status is not removed
+                    patch( mt, false, "/status", newR.getXp7DeploymentStatus(), oldR.getXp7DeploymentStatus() );
+                }
+                break;
+            case DELETE:
+                // Do nothing
+                break;
         }
     }
 
     private void domain( final MutationRequest mt )
     {
+        // Collect old and new object
+        Domain oldR = (Domain) mt.getAdmissionReview().getRequest().getOldObject();
         Domain newR = (Domain) mt.getAdmissionReview().getRequest().getObject();
-        if ( newR == null )
-        {
-            return;
-        }
 
+        // Create default status
         DomainStatus defStatus = new DomainStatus().
             withState( DomainStatus.State.PENDING ).
             withMessage( "Created" ).
             withDomainStatusFields( new DomainStatusFields( new LinkedList<>(), false ) );
 
-        if ( !patchDefault( mt, defStatus, newR.getDomainStatus(), "/status" ) )
+        // Get OP
+        AdmissionOperation op = getOperation( mt.getAdmissionReview() );
+
+        // Ensure status
+        switch ( op )
         {
-            patchDefault( mt, defStatus.getMessage(), newR.getDomainStatus().getMessage(), "/status/message" );
-            patchDefault( mt, defStatus.getState(), newR.getDomainStatus().getState(), "/status/state" );
-            patchDefault( mt, defStatus.getDomainStatusFields(), newR.getDomainStatus().getDomainStatusFields(), "/status/fields" );
+            case CREATE: // Always set the default status on new objects
+                patch( mt, true, "/status", newR.getDomainStatus(), defStatus );
+                break;
+            case UPDATE:
+                if ( newR.getDomainSpec() != null && !newR.getDomainSpec().equals( oldR.getDomainSpec() ) )
+                {
+                    // On any change change, set default status
+                    patch( mt, true, "/status", newR.getDomainStatus(), defStatus );
+                }
+                else
+                {
+                    // Else make sure the old status is not removed
+                    patch( mt, false, "/status", newR.getDomainStatus(), oldR.getDomainStatus() );
+                }
+                break;
+            case DELETE:
+                // Do nothing
+                break;
         }
 
-        patchDefault( mt, 3600, newR.getDomainSpec().getDnsTTL(), "/spec/dnsTTL" );
+        if ( newR.getDomainSpec() != null )
+        {
+            // Set default TTL
+            patch( mt, false, "/spec/dnsTTL", newR.getDomainSpec().getDnsTTL(), 3600 );
+        }
     }
 
     private void ingress( final MutationRequest mt )
     {
+        // Collect old and new object
+        Ingress oldR = (Ingress) mt.getAdmissionReview().getRequest().getOldObject();
         Ingress newR = (Ingress) mt.getAdmissionReview().getRequest().getObject();
+
         if ( newR == null )
         {
             return;
         }
 
-        Map<String, String> oldAnnotations =
-            newR.getMetadata().getAnnotations() != null ? newR.getMetadata().getAnnotations() : new HashMap<>();
-        Map<String, String> na = new HashMap<>( oldAnnotations );
+        Map<String, String> oa = newR.getMetadata().getAnnotations() != null ? newR.getMetadata().getAnnotations() : new HashMap<>();
+        Map<String, String> na = new HashMap<>( oa );
 
-        setDefault( na, "kubernetes.io/ingress.class", "nginx" );
+        setDefaultValueInMap( na, "kubernetes.io/ingress.class", "nginx" );
 
         if ( "nginx".equals( na.get( "kubernetes.io/ingress.class" ) ) )
         {
-            boolean linkerd = cfgBool( "operator.charts.values.settings.linkerd" );
-            if ( linkerd )
+            // If linkerd is enabled
+            if ( cfgBool( "operator.charts.values.settings.linkerd" ) )
             {
                 String cfgSnippet = na.get( "nginx.ingress.kubernetes.io/configuration-snippet" );
                 StringBuilder sb = new StringBuilder( cfgSnippet != null ? cfgSnippet : "" ).
@@ -237,13 +312,10 @@ public class MutationApi
             }
         }
 
-        if ( !Objects.equals( oldAnnotations, na ) )
-        {
-            mt.addPatch( newR.getMetadata().getAnnotations() == null ? "add" : "replace", "/metadata/annotations", na );
-        }
+        patch( mt, true, "/metadata/annotations", newR.getMetadata().getAnnotations(), na );
     }
 
-    private void setDefault( Map<String, String> m, String key, String def )
+    private void setDefaultValueInMap( Map<String, String> m, String key, String def )
     {
         if ( !m.containsKey( key ) )
         {
@@ -251,21 +323,11 @@ public class MutationApi
         }
     }
 
-    private void ensureOwnerReference( MutationRequest mutationRequest )
+    private void ensureOwnerReference( MutationRequest mt )
     {
-        if ( !mutationRequest.getAdmissionReview().getRequest().getOperation().equals( "CREATE" ) )
-        {
-            return;
-        }
+        HasMetadata obj = (HasMetadata) mt.getAdmissionReview().getRequest().getObject();
 
-        HasMetadata obj = (HasMetadata) mutationRequest.getAdmissionReview().getRequest().getObject();
-
-        if ( obj == null )
-        {
-            return;
-        }
-
-        if ( !obj.getMetadata().getOwnerReferences().isEmpty() )
+        if ( obj.getMetadata().getOwnerReferences() != null && !obj.getMetadata().getOwnerReferences().isEmpty() )
         {
             return;
         }
@@ -276,22 +338,21 @@ public class MutationApi
             return;
         }
 
-        mutationRequest.addPatch( "add", "/metadata/ownerReferences",
-                                  Collections.singletonList( createOwnerReference( xp7Deployments.get() ) ) );
+        patch( mt, false, "/metadata/ownerReferences", null, Collections.singletonList( createOwnerReference( xp7Deployments.get() ) ) );
     }
 
-    private <T> boolean patchDefault( MutationRequest mt, T defaultValue, T currentValue, String path )
+    private <T> boolean patch( MutationRequest mt, boolean force, String path, T currentValue, T value )
     {
         if ( currentValue == null )
         {
-            mt.addPatch( "add", path, defaultValue );
+            mt.addPatch( "add", path, value );
+            return true;
+        }
+        else if ( force && !Objects.equals( currentValue, value ) )
+        {
+            mt.addPatch( "replace", path, value );
             return true;
         }
         return false;
-    }
-
-    private <T> boolean patchDefault( MutationRequest mt, T defaultValue, T currentValue, Function<String, String> pathFunc, String path )
-    {
-        return patchDefault( mt, defaultValue, currentValue, pathFunc.apply( path ) );
     }
 }

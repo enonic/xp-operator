@@ -48,13 +48,4 @@ admissionRequest:
               cpu: "1"
               memory: 512Mi
 
-assertPatch:
-  - op: add
-    path: /status
-    value:
-      state: PENDING
-      message: Created
-      fields:
-        pods: []
-
 assertException: "number of master nodes has to be an odd number"

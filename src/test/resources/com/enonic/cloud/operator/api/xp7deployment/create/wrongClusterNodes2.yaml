@@ -45,13 +45,4 @@ admissionRequest:
               cpu: "1"
               memory: 512Mi
 
-assertPatch:
-  - op: add
-    path: /status
-    value:
-      state: PENDING
-      message: Created
-      fields:
-        pods: []
-
 assertException: "some nodeGroups must have master=true"

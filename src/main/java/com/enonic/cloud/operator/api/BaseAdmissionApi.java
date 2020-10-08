@@ -88,7 +88,6 @@ public abstract class BaseAdmissionApi<R>
             catch ( Throwable e )
             {
                 error = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
-                log.error( error, e );
             }
         }
 
@@ -100,7 +99,8 @@ public abstract class BaseAdmissionApi<R>
         if ( error != null )
         {
             statusBuilder.withMessage( error );
-            log.error( String.format( "%s failed with error: %s", apiName, error ) );
+            log.warn( String.format( "%s failed for %s %s in NS %s: %s", apiName, obj.getKind(), obj.getMetadata().getName(),
+                                     obj.getMetadata().getNamespace(), error ) );
         }
         else if ( apiObject != null )
         {
@@ -150,5 +150,10 @@ public abstract class BaseAdmissionApi<R>
         return searchers.xp7Deployment().query().
             inNamespace( ( (HasMetadata) resource ).getMetadata().getNamespace() ).
             get();
+    }
+
+    protected AdmissionOperation getOperation( AdmissionReview r )
+    {
+        return AdmissionOperation.valueOf( r.getRequest().getOperation() );
     }
 }

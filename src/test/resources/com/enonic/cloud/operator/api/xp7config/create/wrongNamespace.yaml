@@ -13,14 +13,4 @@ admissionRequest:
         data: |
           hello
 
-assertPatch:
-  - op: add
-    path: /status
-    value:
-      state: PENDING
-      message: Not loaded
-  - op: add
-    path: /spec/dataBase64
-    value: false
-
 assertException: "No Xp7Deployment found in NS 'wrongnamespace'"

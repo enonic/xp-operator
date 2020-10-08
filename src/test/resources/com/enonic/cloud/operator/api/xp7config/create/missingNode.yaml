@@ -13,24 +13,24 @@ admissionRequest:
         data: |
           hello
 
-assertPatch:
-  - op: add
-    path: /status
-    value:
-      state: PENDING
-      message: Not loaded
-  - op: add
-    path: /spec/dataBase64
-    value: false
-  - op: add
-    path: /spec/nodeGroup
-    value: all
-  - op: add
-    path: /metadata/ownerReferences
-    value:
-      - apiVersion: enonic.cloud/v1alpha2
-        kind: Xp7Deployment
+assertResult:
+  apiVersion: "enonic.cloud/v1alpha2"
+  kind: "Xp7Config"
+  metadata:
+    name: "test"
+    namespace: "mycloud-mysolution-myenv-myservice"
+    ownerReferences:
+      - apiVersion: "enonic.cloud/v1alpha2"
+        kind: "Xp7Deployment"
         blockOwnerDeletion: false
         controller: true
-        name: mycloud-mysolution-myenv-myservice
-        uid: 9265a02a-000f-421a-b4aa-4768e8eab21e
+        name: "mycloud-mysolution-myenv-myservice"
+        uid: "9265a02a-000f-421a-b4aa-4768e8eab21e"
+  spec:
+    nodeGroup: "all"
+    file: "mytest.cfg"
+    data: "hello\n"
+    dataBase64: false
+  status:
+    state: "PENDING"
+    message: "Not loaded"

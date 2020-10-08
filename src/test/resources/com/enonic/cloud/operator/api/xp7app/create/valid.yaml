@@ -10,26 +10,25 @@ admissionRequest:
       spec:
         url: https://repo.enonic.com/public/com/enonic/app/contentstudio/2.2.3/contentstudio-2.2.3.jar
 
-assertPatch:
-  - op: add
-    path: /spec/enabled
-    value: true
-  - op: add
-    path: /status
-    value:
-      state: PENDING
-      message: Created
-      fields: { }
-  - op: replace
-    path: /metadata/finalizers
-    value:
+assertResult:
+  apiVersion: enonic.cloud/v1alpha1
+  kind: Xp7App
+  metadata:
+    name: contentstudio
+    namespace: mycloud-mysolution-myenv-myservice
+    finalizers:
       - uninstall.app.enonic.cloud
-  - op: add
-    path: /metadata/ownerReferences
-    value:
+    ownerReferences:
       - apiVersion: enonic.cloud/v1alpha2
         kind: Xp7Deployment
         blockOwnerDeletion: false
         controller: true
         name: mycloud-mysolution-myenv-myservice
         uid: 9265a02a-000f-421a-b4aa-4768e8eab21e
+  spec:
+    enabled: true
+    url: https://repo.enonic.com/public/com/enonic/app/contentstudio/2.2.3/contentstudio-2.2.3.jar
+  status:
+    state: PENDING
+    message: Created
+    fields: { }

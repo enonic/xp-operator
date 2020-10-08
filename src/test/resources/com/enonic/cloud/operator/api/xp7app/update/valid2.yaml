@@ -10,8 +10,8 @@ admissionRequest:
       spec:
         url: https://repo.enonic.com/public/com/enonic/app/contentstudio/2.2.3/contentstudio-2.2.3.jar
       status:
-        state: PENDING
-        message: Created
+        state: RUNNING
+        message: OK
         fields: { }
     object:
       apiVersion: enonic.cloud/v1alpha1
@@ -19,10 +19,8 @@ admissionRequest:
       metadata:
         name: contentstudio
         namespace: mycloud-mysolution-myenv-myservice
-        labels:
-          test: test
       spec:
-        url: https://repo.enonic.com/public/com/enonic/app/contentstudio/2.2.3/contentstudio-2.2.3.jar
+        url: https://repo.enonic.com/public/com/enonic/app/contentstudio/2.2.4/contentstudio-2.2.4.jar
 
 assertResult:
   apiVersion: enonic.cloud/v1alpha1
@@ -30,11 +28,9 @@ assertResult:
   metadata:
     name: contentstudio
     namespace: mycloud-mysolution-myenv-myservice
-    labels:
-      test: "test"
   spec:
     enabled: true
-    url: https://repo.enonic.com/public/com/enonic/app/contentstudio/2.2.3/contentstudio-2.2.3.jar
+    url: https://repo.enonic.com/public/com/enonic/app/contentstudio/2.2.4/contentstudio-2.2.4.jar
   status:
     state: PENDING
     message: Created

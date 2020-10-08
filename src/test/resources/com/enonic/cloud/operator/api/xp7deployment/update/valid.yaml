@@ -62,7 +62,39 @@ admissionRequest:
                 - name: index
                   size: 200Mi
 
-assertPatch:
-  - op: add
-    path: /status
-    value: null
+assertResult:
+  apiVersion: "enonic.cloud/v1alpha2"
+  kind: "Xp7Deployment"
+  metadata:
+    labels:
+      cloud: "mycloud"
+      solution: "mysolution"
+      environment: "myenv"
+      service: "myservice"
+    name: "mycloud-mysolution-myenv-myservice"
+    namespace: "mycloud-mysolution-myenv-myservice"
+  spec:
+    enabled: true
+    xpVersion: "7.1.3"
+    nodesSharedDisks:
+      - name: "blobstore"
+        size: "1Gi"
+      - name: "snapshots"
+        size: "1Gi"
+    nodeGroups:
+      - name: "main"
+        data: true
+        master: true
+        replicas: 1
+        env: [ ]
+        resources:
+          cpu: "1"
+          memory: "512Mi"
+          disks:
+            - name: "index"
+              size: "200Mi"
+  status:
+    state: "PENDING"
+    message: "Created"
+    fields:
+      pods: [ ]

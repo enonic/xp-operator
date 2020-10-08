@@ -30,13 +30,4 @@ admissionRequest:
   #            disks:
   #              index: 200Mi
 
-assertPatch:
-  - op: add
-    path: /status
-    value:
-      state: PENDING
-      message: Created
-      fields:
-        pods: []
-
 assertException: "'spec.nodeGroups[0].resources' cannot be null"

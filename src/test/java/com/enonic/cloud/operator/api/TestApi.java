@@ -97,10 +97,14 @@ class TestApi
                 } );
                 review = applyPatch( patch, review );
             }
-            Assertions.assertEquals( test.assertPatch(), patch, "Patch does not match" );
 
             review = admissionApi.validate( review );
             Assertions.assertEquals( test.assertException(), review.getResponse().getStatus().getMessage(), "Exception does not match" );
+            if ( review.getResponse().getStatus().getMessage() == null )
+            {
+                Assertions.assertEquals( mapper.writeValueAsString( test.assertResult() ),
+                                         mapper.writeValueAsString( review.getRequest().getObject() ), "Result does not match" );
+            }
         }
         catch ( IOException e )
         {
