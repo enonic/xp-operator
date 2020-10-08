@@ -298,18 +298,15 @@ public class MutationApi
 
         setDefaultValueInMap( na, "kubernetes.io/ingress.class", "nginx" );
 
-        if ( "nginx".equals( na.get( "kubernetes.io/ingress.class" ) ) )
+        if ( "nginx".equals( na.get( "kubernetes.io/ingress.class" ) ) && cfgBool( "operator.charts.values.settings.linkerd" ) )
         {
             // If linkerd is enabled
-            if ( cfgBool( "operator.charts.values.settings.linkerd" ) )
-            {
-                String cfgSnippet = na.get( "nginx.ingress.kubernetes.io/configuration-snippet" );
-                StringBuilder sb = new StringBuilder( cfgSnippet != null ? cfgSnippet : "" ).
-                    append( "\n" ).
-                    append( "proxy_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;" ).
-                    append( "grpc_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;" );
-                na.put( "nginx.ingress.kubernetes.io/configuration-snippet", sb.toString() );
-            }
+            String cfgSnippet = na.get( "nginx.ingress.kubernetes.io/configuration-snippet" );
+            StringBuilder sb = new StringBuilder( cfgSnippet != null ? cfgSnippet : "" ).
+                append( "\n" ).
+                append( "proxy_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;" ).
+                append( "grpc_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;" );
+            na.put( "nginx.ingress.kubernetes.io/configuration-snippet", sb.toString() );
         }
 
         patch( mt, true, "/metadata/annotations", newR.getMetadata().getAnnotations(), na );

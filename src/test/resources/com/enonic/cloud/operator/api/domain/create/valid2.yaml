@@ -1,0 +1,27 @@
+admissionRequest:
+  request:
+    operation: CREATE
+    object:
+      apiVersion: enonic.cloud/v1alpha2
+      kind: Domain
+      metadata:
+        name: my-test-domain
+      spec:
+        host: test-domain.enonic.net
+        dnsRecord: false
+
+assertResult:
+  apiVersion: enonic.cloud/v1alpha2
+  kind: Domain
+  metadata:
+    name: my-test-domain
+  spec:
+    host: test-domain.enonic.net
+    dnsRecord: false
+    dnsTTL: 3600
+  status:
+    state: "PENDING"
+    message: "Created"
+    fields:
+      publicIps: []
+      dnsRecordCreated: false

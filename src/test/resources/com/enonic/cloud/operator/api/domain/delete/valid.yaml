@@ -1,0 +1,26 @@
+admissionRequest:
+  request:
+    operation: DELETE
+    object:
+      apiVersion: enonic.cloud/v1alpha2
+      kind: Domain
+      metadata:
+        name: my-test-domain
+      spec:
+        host: test-domain.enonic.net
+        dnsRecord: true
+        cdn: false
+        certificate:
+          authority: selfSigned
+
+assertResult:
+  apiVersion: enonic.cloud/v1alpha2
+  kind: Domain
+  metadata:
+    name: my-test-domain
+  spec:
+    host: test-domain.enonic.net
+    dnsRecord: true
+    cdn: false
+    certificate:
+      authority: selfSigned
