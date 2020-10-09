@@ -2,6 +2,7 @@ package com.enonic.cloud.operator.domain;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -19,20 +20,21 @@ import static com.enonic.cloud.common.Configuration.cfgStr;
 
 @Singleton
 public class LbServiceIpProducer
+    implements Supplier<List<String>>
 {
     private final Logger log = LoggerFactory.getLogger( LbServiceIpProducer.class );
 
     private List<String> ips;
 
+    protected LbServiceIpProducer()
+    {
+        // For testing
+    }
+
     @Inject
     public LbServiceIpProducer( final Clients clients )
     {
         ips = getLbIp( clients );
-    }
-
-    public List<String> getIps()
-    {
-        return ips;
     }
 
     private List<String> getLbIp( final Clients clients )
@@ -76,5 +78,11 @@ public class LbServiceIpProducer
         }
 
         return res;
+    }
+
+    @Override
+    public List<String> get()
+    {
+        return ips;
     }
 }

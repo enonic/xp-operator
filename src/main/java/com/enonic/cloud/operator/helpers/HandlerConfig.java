@@ -12,6 +12,7 @@ public abstract class HandlerConfig<R extends HasMetadata>
     @Override
     public void run()
     {
+        // Collect affected namespaces and run update on each
         this.resourceStream().collect( groupingBy( r -> r.getMetadata().getNamespace() ) ).
             keySet().
             forEach( this::handle );

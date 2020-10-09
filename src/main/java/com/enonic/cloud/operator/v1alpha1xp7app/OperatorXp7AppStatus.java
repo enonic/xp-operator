@@ -19,6 +19,7 @@ import com.enonic.cloud.kubernetes.InformerSearcher;
 import com.enonic.cloud.kubernetes.Searchers;
 import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7App;
 import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7AppStatus;
+import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7AppStatusFields;
 import com.enonic.cloud.operator.helpers.HandlerStatus;
 import com.enonic.cloud.operator.helpers.Xp7DeploymentInfo;
 
@@ -78,9 +79,7 @@ public class OperatorXp7AppStatus
     @Override
     protected Xp7AppStatus pollStatus( final Xp7App resource )
     {
-        Xp7AppStatus currentStatus = resource.getXp7AppStatus() != null ? resource.getXp7AppStatus() : new Xp7AppStatus().
-            withState( Xp7AppStatus.State.PENDING ).
-            withMessage( "Pending install" );
+        Xp7AppStatus currentStatus = resource.getXp7AppStatus();
 
         // If there is no app info
         if ( currentStatus.getXp7AppStatusFields().getXp7AppStatusFieldsAppInfo() == null )
@@ -88,12 +87,12 @@ public class OperatorXp7AppStatus
             return currentStatus;
         }
 
-        // XP is not running
+        // If XP is not running
         if ( !xp7DeploymentInfo.xpRunning( resource.getMetadata().getNamespace() ) )
         {
             return currentStatus.
                 withState( Xp7AppStatus.State.PENDING ).
-                withMessage( "Xp7Deployment not in RUNNING state" );
+                withMessage( "Cannot update status, XP not in RUNNING state" );
         }
 
         List<AppInfo> infoList = getAppInfoList( resource );
@@ -103,7 +102,7 @@ public class OperatorXp7AppStatus
         {
             return currentStatus.
                 withState( Xp7AppStatus.State.ERROR ).
-                withMessage( "Failed calling XP" );
+                withMessage( "Cannot update status, see operator logs" );
         }
 
         AppInfo appInfo = getAppState( resource, infoList );
@@ -114,9 +113,10 @@ public class OperatorXp7AppStatus
             return currentStatus.
                 withState( Xp7AppStatus.State.ERROR ).
                 withMessage( "App not found in XP" ).
-                withXp7AppStatusFields( null );
+                withXp7AppStatusFields( new Xp7AppStatusFields() );
         }
 
+        // Add app info to status
         currentStatus.withXp7AppStatusFields( fieldsFromAppInfo( appInfo ) );
 
         // Update state/message
@@ -149,8 +149,8 @@ public class OperatorXp7AppStatus
             }
             catch ( Exception e )
             {
-                log.warn( String.format( "Failed calling XP for app '%s' in NS '%s': %s", resource.getMetadata().getName(),
-                                         resource.getMetadata().getNamespace(), e.getMessage() ) );
+                log.warn(
+                    String.format( "Failed calling XP for apps NS '%s': %s", resource.getMetadata().getNamespace(), e.getMessage() ) );
             }
         }
 

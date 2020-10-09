@@ -27,6 +27,7 @@ public class OperatorXp7Config
     {
         if ( !oldResource.getXp7ConfigSpec().equals( newResource.getXp7ConfigSpec() ) )
         {
+            // If the spec changed, roll out the update
             handle( newResource );
         }
     }

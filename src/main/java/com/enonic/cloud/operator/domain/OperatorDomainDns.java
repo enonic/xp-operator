@@ -18,17 +18,16 @@ import com.enonic.cloud.apis.cloudflare.DnsRecordServiceWrapper;
 import com.enonic.cloud.apis.cloudflare.service.model.DnsRecord;
 import com.enonic.cloud.apis.cloudflare.service.model.ImmutableDnsRecord;
 import com.enonic.cloud.apis.doh.DohServiceWrapper;
+import com.enonic.cloud.apis.doh.service.DohAnswer;
 import com.enonic.cloud.common.functions.RunnableListExecutor;
 import com.enonic.cloud.kubernetes.Clients;
+import com.enonic.cloud.kubernetes.Searchers;
 import com.enonic.cloud.kubernetes.commands.K8sLogHelper;
 import com.enonic.cloud.kubernetes.model.v1alpha2.domain.Domain;
 import com.enonic.cloud.kubernetes.model.v1alpha2.domain.DomainStatus;
-import com.enonic.cloud.kubernetes.model.v1alpha2.domain.DomainStatusFields;
 import com.enonic.cloud.operator.helpers.InformerEventHandler;
 
 import static com.enonic.cloud.common.Configuration.cfgStr;
-
-// TODO: REFACTOR THIS CLASS
 
 /**
  * This operator class creates/updates/deletes DNS records in cloudflare based on Domains
@@ -52,11 +51,14 @@ public class OperatorDomainDns
     RunnableListExecutor runnableListExecutor;
 
     @Inject
-    @Named("clusterId")
-    String clusterId;
+    LbServiceIpProducer ips;
 
     @Inject
-    LbServiceIpProducer lbServiceIpProducer;
+    Searchers searchers;
+
+    @Inject
+    @Named("clusterId")
+    String clusterId;
 
     @ConfigProperty(name = "dns.allowedDomains.keys")
     List<String> allowedDomainKeys;
@@ -75,22 +77,35 @@ public class OperatorDomainDns
     @Override
     protected void onNewAdd( final Domain newResource )
     {
-        editDomain( newResource, domain -> {
-            initDomainStatus( domain );
-        } );
+        handle( newResource );
     }
 
     @Override
     public void onUpdate( final Domain oldResource, final Domain newResource )
     {
-        editDomain( newResource, domain -> {
-            initDomainStatus( domain );
+        // If domain is ready and spec has not changed, just return
+        if ( newResource.getDomainStatus().getState() == DomainStatus.State.READY &&
+            Objects.equals( oldResource.getDomainSpec(), newResource.getDomainSpec() ) )
+        {
+            return;
+        }
 
-            if ( domain.getDomainStatus().getState() == DomainStatus.State.READY && Objects.equals( oldResource, newResource ) )
-            {
-                return;
-            }
+        handle( newResource );
+    }
 
+    @Override
+    public void onDelete( final Domain oldResource, final boolean b )
+    {
+        DomainConfig config = getDomainConfig( oldResource.getDomainSpec().getHost() );
+        if ( config != null )
+        {
+            syncDnsRecords( config, oldResource, true );
+        }
+    }
+
+    private void handle( Domain domainToChange )
+    {
+        editDomain( domainToChange, domain -> {
             DomainConfig config = getDomainConfig( domain.getDomainSpec().getHost() );
             if ( config != null )
             {
@@ -105,49 +120,64 @@ public class OperatorDomainDns
         } );
     }
 
-    @Override
-    public void onDelete( final Domain oldResource, final boolean b )
-    {
-        DomainConfig config = getDomainConfig( oldResource.getDomainSpec().getHost() );
-        if ( config != null )
-        {
-            syncDnsRecords( config, oldResource, true );
-        }
-    }
-
-    private void initDomainStatus( final Domain domain )
-    {
-        DomainStatus status = new DomainStatus().
-            withMessage( domain.getDomainStatus().getMessage() ).
-            withState( domain.getDomainStatus().getState() ).
-            withDomainStatusFields( new DomainStatusFields().
-                withPublicIps( new LinkedList<>( lbServiceIpProducer.getIps() ) ).
-                withDnsRecordCreated( false ) );
-
-        if ( !domain.getDomainSpec().getDnsRecord() )
-        {
-            status = status.
-                withState( DomainStatus.State.READY ).
-                withMessage( "OK" );
-        }
-
-        if ( domain.getDomainSpec().getDnsRecord() && status.getState() == DomainStatus.State.PENDING )
-        {
-            status = status.withMessage( "Waiting for DNS records" );
-        }
-
-        domain.withDomainStatus( status );
-    }
-
     private void lookupDomain( final Domain domain )
     {
-        // TODO: Handle CNAME
-        if ( doh.query( "A", domain.getDomainSpec().getHost() ).answers().size() > 0 )
+        List<String> ourIps = ips.get();
+
+        // Try to find a records
+        List<DohAnswer> aRecords = doh.query( "A", domain.getDomainSpec().getHost() ).answers();
+        if ( aRecords.size() > 0 )
         {
-            domain.getDomainStatus().
-                withState( DomainStatus.State.READY ).
-                withMessage( "OK" );
+            List<String> matches = new LinkedList<>();
+            for ( DohAnswer r : aRecords )
+            {
+                for ( String ip : ourIps )
+                {
+                    if ( ip.equals( r.data() ) )
+                    {
+                        matches.add( r.data() );
+                    }
+                }
+            }
+            if ( matches.size() == ips.get().size() )
+            {
+                updateStatus( domain, DomainStatus.State.READY, "External A records match", true );
+            }
+            else
+            {
+                updateStatus( domain, DomainStatus.State.ERROR, "External A records do not match", false );
+            }
+            return;
         }
+
+        List<DohAnswer> cnameRecords = doh.query( "CNAME", domain.getDomainSpec().getHost() ).answers();
+        if ( cnameRecords.size() == 1 )
+        {
+            String cnameDomain = cnameRecords.get( 0 ).data();
+            boolean realDomainExists = searchers.domain().
+                query().
+                filter( d -> d.getDomainSpec().getHost().equals( cnameDomain ) ).list().size() == 1;
+            if ( realDomainExists )
+            {
+                updateStatus( domain, DomainStatus.State.READY, "External CNAME record matches", true );
+            }
+            else
+            {
+                updateStatus( domain, DomainStatus.State.ERROR, "External CNAME record does not match", true );
+            }
+        }
+
+        // Some records were found
+        updateStatus( domain, DomainStatus.State.ERROR, "No External record found", false );
+    }
+
+    private void updateStatus( Domain domain, DomainStatus.State state, String message, boolean dnsRecordCreated )
+    {
+        domain.getDomainStatus().
+            withState( state ).
+            withMessage( message ).
+            withDomainStatusFields( domain.getDomainStatus().getDomainStatusFields().
+                withDnsRecordCreated( dnsRecordCreated ) );
     }
 
     private void syncDnsRecords( final DomainConfig config, final Domain domain, final boolean delete )
@@ -157,9 +187,7 @@ public class OperatorDomainDns
         if ( ips.size() == 0 )
         {
             log.warn( "Domain does not have an external IP, not altering records" );
-            domain.getDomainStatus().
-                withState( DomainStatus.State.ERROR ).
-                withMessage( "Domain has no external IP" );
+            updateStatus( domain, DomainStatus.State.ERROR, "No external IP found", false );
             return;
         }
 
@@ -172,9 +200,7 @@ public class OperatorDomainDns
         {
             log.warn( String.format( "Present heritage record does not match this cluster id for domain '%s'",
                                      domain.getDomainSpec().getHost() ) );
-            domain.getDomainStatus().
-                withState( DomainStatus.State.ERROR ).
-                withMessage( "Heritage record mismatch" );
+            updateStatus( domain, DomainStatus.State.ERROR, "Heritage record mismatch", false );
             return;
         }
 
@@ -236,10 +262,7 @@ public class OperatorDomainDns
 
         if ( !delete )
         {
-            // Update status
-            domain.getDomainStatus().
-                withState( DomainStatus.State.READY ).
-                withMessage( "OK" );
+            updateStatus( domain, DomainStatus.State.READY, "OK", true );
         }
 
         runnableListExecutor.apply( commands );

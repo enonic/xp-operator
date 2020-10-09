@@ -60,11 +60,7 @@ public class OperatorXp7AppInstaller
         if ( !oldResource.getXp7AppSpec().getUrl().equals( newResource.getXp7AppSpec().getUrl() ) )
         {
             // Try to reinstall app
-            if ( !installApp( newResource ) )
-            {
-                // If failed, remove app info and retry later
-                updateAppInfo( newResource, null );
-            }
+            installApp( newResource );
         }
 
         // If app marked for deletion and has finalizers
@@ -89,7 +85,7 @@ public class OperatorXp7AppInstaller
         List<Xp7App> appsToInstall = searchers.xp7App().query().
             hasNotBeenDeleted().
             hasFinalizer( cfgStr( "operator.charts.values.finalizers.app.uninstall" ) ).
-            filter( this::appInfoIsNull ).
+            filter( app -> app.getXp7AppStatus().getXp7AppStatusFields().getXp7AppStatusFieldsAppInfo() == null ).
             sorted( hasMetadataComparator() ).
             list();
         List<Xp7App> appsToUninstall = searchers.xp7App().query().
@@ -103,17 +99,25 @@ public class OperatorXp7AppInstaller
         appsToUninstall.forEach( this::uninstallApp );
     }
 
-    private synchronized boolean installApp( final Xp7App app )
+    private synchronized void installApp( final Xp7App app )
     {
+        // Create fail status
+        Xp7AppStatus f = new Xp7AppStatus().
+            withState( Xp7AppStatus.State.ERROR ).
+            withXp7AppStatusFields( new Xp7AppStatusFields() );
+
         // This is never going to work, do not even try
-        if ( app.getXp7AppSpec().getUrl().startsWith( "http://localhost" )) {
-            return false;
+        if ( app.getXp7AppSpec().getUrl().startsWith( "http://localhost" ) )
+        {
+            updateAppStatus( app, f.withMessage( "Cannot install, app URL invalid" ) );
+            return;
         }
 
         // Check if XP is running
         if ( !xp7DeploymentInfo.xpRunning( app.getMetadata().getNamespace() ) )
         {
-            return false;
+            updateAppStatus( app, f.withMessage( "Cannot install, XP not in RUNNING state" ) );
+            return;
         }
 
         // Try to install
@@ -122,18 +126,23 @@ public class OperatorXp7AppInstaller
             AppInfo appInfo = xpClientCache.install( app.getMetadata().getNamespace(), ImmutableAppInstallRequest.builder().
                 url( app.getXp7AppSpec().getUrl() ).
                 build() );
-            updateAppInfo( app, appInfo );
-            return true;
+
+            updateAppStatus( app, new Xp7AppStatus().
+                withState( Xp7AppStatus.State.PENDING ).
+                withMessage( "Installed" ).
+                withXp7AppStatusFields( fieldsFromAppInfo( appInfo ) ) );
         }
         catch ( Exception e )
         {
-            log.warn( "Failed installing app: " + e.getMessage() );
-            return false;
+            log.warn( String.format( "Failed installing app %s in NS %s: %s", app.getMetadata().getName(), app.getMetadata().getNamespace(),
+                                     e.getMessage() ) );
+
+            updateAppStatus( app, f.withMessage( "Cannot install, see operator logs" ) );
         }
     }
 
     @SuppressWarnings("UnusedReturnValue")
-    private boolean uninstallApp( final Xp7App app )
+    private synchronized boolean uninstallApp( final Xp7App app )
     {
         // If whole namespace is being deleted just remove the app finalizer
         if ( namespaceBeingTerminated( app ) )
@@ -142,7 +151,7 @@ public class OperatorXp7AppInstaller
         }
 
         // If there is no app info, the app is not installed, hence just remove the app finalizer
-        if ( appInfoIsNull( app ) )
+        if ( app.getXp7AppStatus().getXp7AppStatusFields().getXp7AppStatusFieldsAppInfo() == null )
         {
             return removeFinalizer( app );
         }
@@ -153,9 +162,15 @@ public class OperatorXp7AppInstaller
             return removeFinalizer( app );
         }
 
-        // XP is not running, nothing we can dos
+        // Create fail status
+        Xp7AppStatus f = new Xp7AppStatus().
+            withState( Xp7AppStatus.State.ERROR ).
+            withXp7AppStatusFields( app.getXp7AppStatus().getXp7AppStatusFields() );
+
+        // XP is not running, nothing we can do
         if ( !xp7DeploymentInfo.xpRunning( app.getMetadata().getNamespace() ) )
         {
+            updateAppStatus( app, f.withMessage( "Cannot uninstall, XP not in RUNNING state" ) );
             return false;
         }
 
@@ -172,7 +187,10 @@ public class OperatorXp7AppInstaller
         }
         catch ( Exception e )
         {
-            log.warn( "Failed uninstalling app: " + e.getMessage() );
+            log.warn(
+                String.format( "Failed uninstalling app %s in NS %s: %s", app.getMetadata().getName(), app.getMetadata().getNamespace(),
+                               e.getMessage() ) );
+            updateAppStatus( app, f.withMessage( "Cannot uninstall, see operator logs" ) );
             return false;
         }
     }
@@ -196,29 +214,16 @@ public class OperatorXp7AppInstaller
                 withVersion( appInfo.version() ) );
     }
 
-    private void updateAppInfo( Xp7App resource, AppInfo appInfo )
+    private void updateAppStatus( Xp7App resource, Xp7AppStatus status )
     {
-        Xp7AppStatus status;
-        if ( appInfo == null )
+        if ( resource.getXp7AppStatus().hashCode() != status.hashCode() )
         {
-            status = new Xp7AppStatus().
-                withState( Xp7AppStatus.State.PENDING ).
-                withMessage( "Pending install" ).
-                withXp7AppStatusFields( null );
+            K8sLogHelper.logDoneable( clients.xp7Apps().crdClient().
+                inNamespace( resource.getMetadata().getNamespace() ).
+                withName( resource.getMetadata().getName() ).
+                edit().
+                withStatus( status ) );
         }
-        else
-        {
-            status = new Xp7AppStatus().
-                withState( Xp7AppStatus.State.PENDING ).
-                withMessage( "Installed" ).
-                withXp7AppStatusFields( fieldsFromAppInfo( appInfo ) );
-        }
-
-        K8sLogHelper.logDoneable( clients.xp7Apps().crdClient().
-            inNamespace( resource.getMetadata().getNamespace() ).
-            withName( resource.getMetadata().getName() ).
-            edit().
-            withStatus( status ) );
     }
 
     private boolean removeFinalizer( Xp7App resource )
@@ -234,12 +239,6 @@ public class OperatorXp7AppInstaller
             return true;
         }
         return false;
-    }
-
-    private boolean appInfoIsNull( Xp7App app )
-    {
-        return app.getXp7AppStatus() == null || app.getXp7AppStatus().getXp7AppStatusFields() == null ||
-            app.getXp7AppStatus().getXp7AppStatusFields().getXp7AppStatusFieldsAppInfo() == null;
     }
 
     private boolean namespaceBeingTerminated( Xp7App app )

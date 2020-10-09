@@ -16,6 +16,7 @@ import io.quarkus.runtime.StartupEvent;
 
 import com.enonic.cloud.common.TaskRunner;
 import com.enonic.cloud.kubernetes.Informers;
+import com.enonic.cloud.operator.domain.LbServiceIpProducer;
 import com.enonic.cloud.operator.domain.OperatorDomainCertSync;
 import com.enonic.cloud.operator.domain.OperatorDomainDns;
 import com.enonic.cloud.operator.domain.OperatorIngressCertSync;
@@ -79,13 +80,14 @@ public class Operator
     private final OperatorXpClientCacheInvalidate operatorXpClientCacheInvalidate;
 
     @Inject
-    public Operator( final TaskRunner taskRunner, final Informers informers, final OperatorDomainCertSync operatorDomainCertSync,
-                     final OperatorDomainDns operatorDomainDns, final OperatorIngressCertSync operatorIngressCertSync,
-                     final OperatorIngress operatorIngress, final OperatorXp7ConfigSync operatorXp7ConfigSync,
-                     final OperatorXp7AppInstaller operatorXp7AppInstaller, final OperatorXp7AppStatus operatorXp7AppStatus,
-                     final OperatorXp7Config operatorXp7Config, final OperatorXp7ConfigStatus operatorXp7ConfigStatus,
-                     final OperatorConfigMapSync operatorConfigMapSync, final OperatorDeleteAnnotation operatorDeleteAnnotation,
-                     final OperatorXp7DeploymentHelm operatorXp7DeploymentHelm, final OperatorXp7AppStartStopper operatorXp7AppStartStopper,
+    public Operator( final TaskRunner taskRunner, final LbServiceIpProducer lbIp, final Informers informers,
+                     final OperatorDomainCertSync operatorDomainCertSync, final OperatorDomainDns operatorDomainDns,
+                     final OperatorIngressCertSync operatorIngressCertSync, final OperatorIngress operatorIngress,
+                     final OperatorXp7ConfigSync operatorXp7ConfigSync, final OperatorXp7AppInstaller operatorXp7AppInstaller,
+                     final OperatorXp7AppStatus operatorXp7AppStatus, final OperatorXp7Config operatorXp7Config,
+                     final OperatorXp7ConfigStatus operatorXp7ConfigStatus, final OperatorConfigMapSync operatorConfigMapSync,
+                     final OperatorDeleteAnnotation operatorDeleteAnnotation, final OperatorXp7DeploymentHelm operatorXp7DeploymentHelm,
+                     final OperatorXp7AppStartStopper operatorXp7AppStartStopper,
                      final OperatorXp7DeploymentStatus operatorXp7DeploymentStatus,
                      final OperatorXpClientCacheInvalidate operatorXpClientCacheInvalidate )
     {

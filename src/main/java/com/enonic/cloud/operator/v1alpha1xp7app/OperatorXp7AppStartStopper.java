@@ -34,6 +34,9 @@ public class OperatorXp7AppStartStopper
     @Inject
     XpClientCache xpClientCache;
 
+    @Inject
+    OperatorXp7AppStatus operatorXp7AppStatus;
+
     @Override
     public void onNewAdd( final Xp7App newResource )
     {
@@ -59,7 +62,7 @@ public class OperatorXp7AppStartStopper
         List<Xp7App> apps = searchers.xp7App().query().
             hasNotBeenDeleted().
             hasFinalizer( cfgStr( "operator.charts.values.finalizers.app.uninstall" ) ).
-            sorted( hasMetadataComparator() ).
+            sorted( hasMetadataComparator() ). // Sort by metadata
             list();
 
         // Handle apps
@@ -69,14 +72,7 @@ public class OperatorXp7AppStartStopper
     private void handle( final Xp7App xp7App )
     {
         // If app info is missing
-        if ( xp7App.getXp7AppStatus() == null || xp7App.getXp7AppStatus().getXp7AppStatusFields() == null ||
-            xp7App.getXp7AppStatus().getXp7AppStatusFields().getXp7AppStatusFieldsAppInfo() == null )
-        {
-            return;
-        }
-
-        // If enabled flag is missing
-        if ( xp7App.getXp7AppSpec().getEnabled() == null )
+        if ( xp7App.getXp7AppStatus().getXp7AppStatusFields().getXp7AppStatusFieldsAppInfo() == null )
         {
             return;
         }
@@ -99,10 +95,12 @@ public class OperatorXp7AppStartStopper
             try
             {
                 xpClientCache.start( namespace, ImmutableAppKeyList.builder().addKey( key ).build() );
+                operatorXp7AppStatus.handle( xp7App ); // Update status
             }
             catch ( Exception e )
             {
-                log.warn( "Failed starting app: " + e.getMessage() );
+                log.warn( String.format( "XP: Failed starting app %s in NS %s: %s", xp7App.getMetadata().getName(),
+                                         xp7App.getMetadata().getNamespace(), e.getMessage() ) );
             }
         }
 
@@ -112,10 +110,12 @@ public class OperatorXp7AppStartStopper
             try
             {
                 xpClientCache.stop( namespace, ImmutableAppKeyList.builder().addKey( key ).build() );
+                operatorXp7AppStatus.handle( xp7App ); // Update status
             }
             catch ( Exception e )
             {
-                log.warn( "Failed stopping app: " + e.getMessage() );
+                log.warn( String.format( "XP: Failed starting app %s in NS %s: %s", xp7App.getMetadata().getName(),
+                                         xp7App.getMetadata().getNamespace(), e.getMessage() ) );
             }
         }
     }

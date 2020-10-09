@@ -1,9 +1,8 @@
-package com.enonic.cloud.operator.api.admission;
+package com.enonic.cloud.operator.api.mutation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.enonic.cloud.kubernetes.Searchers;
-import com.enonic.cloud.operator.api.mutation.MutationApi;
 
 public class TestMutationApi
     extends MutationApi
@@ -13,5 +12,6 @@ public class TestMutationApi
         super();
         this.mapper = mapper;
         this.searchers = searchers;
+        this.lbServiceIpProducer = new TestLbServiceIpProducer();
     }
 }

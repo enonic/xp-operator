@@ -45,7 +45,8 @@ assertResult:
       authority: letsEncrypt
   status:
     state: "PENDING"
-    message: "Created"
+    message: "Waiting for DNS records"
     fields:
-      publicIps: [ ]
+      publicIps:
+        - 1.2.3.4
       dnsRecordCreated: false

@@ -31,9 +31,9 @@ import com.enonic.cloud.kubernetes.SearchersImpl;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
 import com.enonic.cloud.operator.api.admission.AdmissionApi;
 import com.enonic.cloud.operator.api.admission.TestAdmissionApi;
-import com.enonic.cloud.operator.api.admission.TestMutationApi;
 import com.enonic.cloud.operator.api.mutation.MutationApi;
 import com.enonic.cloud.operator.api.mutation.Patch;
+import com.enonic.cloud.operator.api.mutation.TestMutationApi;
 import com.enonic.cloud.testutils.TestFileSupplier;
 
 class TestApi

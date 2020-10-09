@@ -63,10 +63,7 @@ public class OperatorXp7DeploymentStatus
     protected Xp7DeploymentStatus pollStatus( final Xp7Deployment resource )
     {
         // Get current status
-        Xp7DeploymentStatus currentStatus =
-            resource.getXp7DeploymentStatus() != null ? resource.getXp7DeploymentStatus() : new Xp7DeploymentStatus().
-                withState( Xp7DeploymentStatus.State.PENDING ).
-                withMessage( "Created" );
+        Xp7DeploymentStatus currentStatus = resource.getXp7DeploymentStatus();
 
         // Get pods in deployment
         List<Pod> pods = searchers.pod().query().stream().
@@ -96,16 +93,24 @@ public class OperatorXp7DeploymentStatus
         }
 
         // Iterate over pods and check status
-        for ( Xp7DeploymentStatusFieldsPod s : currentStatus.
+        List<String> waitingForPods = new LinkedList<>();
+        for ( Xp7DeploymentStatusFieldsPod pod : currentStatus.
             getXp7DeploymentStatusFields().
             getXp7DeploymentStatusFieldsPods() )
         {
-            if ( !s.getPhase().equals( "Running" ) || !s.getReady() )
+            if ( !pod.getPhase().equals( "Running" ) || !pod.getReady() )
             {
-                return currentStatus.
-                    withState( Xp7DeploymentStatus.State.PENDING ).
-                    withMessage( "Waiting for pods" );
+                waitingForPods.add( pod.getName() );
             }
+        }
+
+        // If we are still waiting
+        if ( !waitingForPods.isEmpty() )
+        {
+            waitingForPods.sort( String::compareTo );
+            return currentStatus.
+                withState( Xp7DeploymentStatus.State.PENDING ).
+                withMessage( String.format( "Waiting for pods: %s", waitingForPods ) );
         }
 
         // Return OK

@@ -1,6 +1,8 @@
 package com.enonic.cloud.operator.v1alpha2xp7config;
 
 import java.io.ByteArrayOutputStream;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
 
 import javax.inject.Inject;
@@ -50,9 +52,7 @@ public class OperatorXp7ConfigStatus
     @Override
     protected Xp7ConfigStatus getStatus( final Xp7Config resource )
     {
-        return resource.getXp7ConfigStatus() != null ? resource.getXp7ConfigStatus() : new Xp7ConfigStatus().
-            withState( Xp7ConfigStatus.State.PENDING ).
-            withMessage( "Created" );
+        return resource.getXp7ConfigStatus();
     }
 
     @Override
@@ -69,20 +69,19 @@ public class OperatorXp7ConfigStatus
     protected Xp7ConfigStatus pollStatus( final Xp7Config config )
     {
         // If config has been flagged ready, do not try to set the state again
-        if ( config.getXp7ConfigStatus() != null && config.getXp7ConfigStatus().getState() == Xp7ConfigStatus.State.READY )
+        if ( config.getXp7ConfigStatus().getState() == Xp7ConfigStatus.State.READY )
         {
             return config.getXp7ConfigStatus();
         }
 
-        // Get all pods stream
+        // Get all pods
         ResourceQuery<Pod> stream = searchers.pod().query().
             inNamespace( config.getMetadata().getNamespace() );
 
         // Filter by nodegroup if needed
         if ( !Objects.equals( config.getXp7ConfigSpec().getNodeGroup(), cfgStr( "operator.charts.values.allNodesKey" ) ) )
         {
-            stream =
-                stream.hasLabel( cfgStr( "operator.charts.values.labelKeys.nodeGroup" ), config.getXp7ConfigSpec().getNodeGroup() );
+            stream = stream.hasLabel( cfgStr( "operator.charts.values.labelKeys.nodeGroup" ), config.getXp7ConfigSpec().getNodeGroup() );
         }
 
         // Find expected contents
@@ -96,14 +95,22 @@ public class OperatorXp7ConfigStatus
         }
 
         // Iterate over pods
+        List<String> waitingForPods = new LinkedList<>();
         for ( Pod p : stream.list() )
         {
             if ( !configLoaded( p, fileName, expectedContents ) )
             {
-                return new Xp7ConfigStatus().
-                    withState( Xp7ConfigStatus.State.PENDING ).
-                    withMessage( "Not loaded: " + p.getMetadata().getName() );
+                waitingForPods.add( p.getMetadata().getName() );
             }
+        }
+
+        // If we are still waiting
+        if ( !waitingForPods.isEmpty() )
+        {
+            waitingForPods.sort( String::compareTo );
+            return new Xp7ConfigStatus().
+                withState( Xp7ConfigStatus.State.PENDING ).
+                withMessage( String.format( "Waiting for pods: %s", waitingForPods ) );
         }
 
         // If all pods are ready, return OK

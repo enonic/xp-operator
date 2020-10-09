@@ -5,8 +5,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.enterprise.event.Observes;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-
-import com.google.common.base.Preconditions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.quarkus.runtime.StartupEvent;
 
@@ -15,6 +15,8 @@ import com.enonic.cloud.common.Configuration;
 
 public class Auth
 {
+    private static final Logger log = LoggerFactory.getLogger( Auth.class );
+
     private static final AtomicBoolean tokenSet = new AtomicBoolean( false );
 
     private static String apiToken;
@@ -47,10 +49,16 @@ public class Auth
     void onStart( @Observes StartupEvent ev )
     {
         Configuration.cfgIfBool( "dns.enabled", () -> {
-            Preconditions.checkState( !token.equals( "not_set" ),
-                                      "You have to set the DNS token with properties 'dns.cloudflare.apiToken'" );
-            Auth.setApiToken( token );
-            tokenSet.set( true );
+            if ( token.equals( "not_set" ) )
+            {
+                log.warn(
+                    "Cloudflare token not set. Api calls will fail. Set with property 'dns.cloudflare.apiToken' or environmental variable 'DNS_CLOUDFLARE_APITOKEN'" );
+            }
+            else
+            {
+                Auth.setApiToken( token );
+                tokenSet.set( true );
+            }
         } );
     }
 }

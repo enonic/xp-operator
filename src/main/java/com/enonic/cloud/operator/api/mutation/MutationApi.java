@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -37,6 +38,7 @@ import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentSta
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentStatusFields;
 import com.enonic.cloud.operator.api.AdmissionOperation;
 import com.enonic.cloud.operator.api.BaseAdmissionApi;
+import com.enonic.cloud.operator.domain.LbServiceIpProducer;
 
 import static com.enonic.cloud.common.Configuration.cfgBool;
 import static com.enonic.cloud.common.Configuration.cfgStr;
@@ -47,6 +49,9 @@ import static com.enonic.cloud.common.Utils.createOwnerReference;
 public class MutationApi
     extends BaseAdmissionApi<MutationRequest>
 {
+    @Inject
+    LbServiceIpProducer lbServiceIpProducer;
+
     public MutationApi()
     {
         super();
@@ -246,8 +251,8 @@ public class MutationApi
         // Create default status
         DomainStatus defStatus = new DomainStatus().
             withState( DomainStatus.State.PENDING ).
-            withMessage( "Created" ).
-            withDomainStatusFields( new DomainStatusFields( new LinkedList<>(), false ) );
+            withMessage( "Waiting for DNS records" ).
+            withDomainStatusFields( new DomainStatusFields( lbServiceIpProducer.get(), false ) );
 
         // Get OP
         AdmissionOperation op = getOperation( mt.getAdmissionReview() );

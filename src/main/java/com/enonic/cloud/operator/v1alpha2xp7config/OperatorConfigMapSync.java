@@ -69,9 +69,11 @@ public class OperatorConfigMapSync
             filter( xp7Config -> nodeGroups.contains( xp7Config.getXp7ConfigSpec().getNodeGroup() ) ).
             list();
 
+        // Create variables for data
         Map<String, String> data = new HashMap<>();
         Map<String, String> binaryData = new HashMap<>();
 
+        // Populate data
         for ( Xp7Config c : configs )
         {
             if ( Objects.equals( c.getXp7ConfigSpec().getDataBase64(), true ) )
@@ -84,6 +86,7 @@ public class OperatorConfigMapSync
             }
         }
 
+        // Get old data
         Map<String, String> oldData = configMap.getData() != null ? configMap.getData() : Collections.emptyMap();
         Map<String, String> oldBinaryData = configMap.getBinaryData() != null ? configMap.getBinaryData() : Collections.emptyMap();
 

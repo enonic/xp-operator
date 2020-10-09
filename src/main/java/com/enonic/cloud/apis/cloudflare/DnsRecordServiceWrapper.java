@@ -32,7 +32,7 @@ public class DnsRecordServiceWrapper
     {
         try
         {
-            log.info( String.format( "CF: LIST (%s) %s", type, name ) );
+            log.info( String.format( "CF: LIST (%s) %s", type == null ? "ALL" : type, name ) );
             return service.list( zone_identifier, name, type ).result();
         }
         catch ( WebApplicationException e )

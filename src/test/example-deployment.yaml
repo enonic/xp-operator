@@ -10,7 +10,7 @@ metadata:
     service: myservice
 spec:
   enabled: true
-  xpVersion: 7.4.0
+  xpVersion: 7.4.1
 
   nodesSharedDisks:
     - name: blobstore
@@ -38,25 +38,25 @@ spec:
             size: 100Mi
           - name: work
             size: 100Mi
-    - name: front
-      data: false
-      master: false
-      replicas: 1
-      env:
-        - name: ASD
-          value: asdasdadsa2aaa1aaasdasd
-      resources:
-        cpu: "0.5"
-        memory: 1024Mi
-        disks:
-          - name: deploy
-            size: 100Mi
-          - name: export
-            size: 100Mi
-          - name: index
-            size: 100Mi
-          - name: work
-            size: 100Mi
+#    - name: front
+#      data: false
+#      master: false
+#      replicas: 2
+#      env:
+#        - name: ASD
+#          value: asdasdadsa2aaa1aaasdasd
+#      resources:
+#        cpu: "0.5"
+#        memory: 1024Mi
+#        disks:
+#          - name: deploy
+#            size: 100Mi
+#          - name: export
+#            size: 100Mi
+#          - name: index
+#            size: 100Mi
+#          - name: work
+#            size: 100Mi
 #    - name: data
 #      data: true
 #      master: false

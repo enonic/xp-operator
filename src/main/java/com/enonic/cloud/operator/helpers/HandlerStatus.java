@@ -34,7 +34,7 @@ public abstract class HandlerStatus<R extends HasMetadata, S>
             forEach( this::handle );
     }
 
-    private void handle( final R resource )
+    public void handle( final R resource )
     {
         // Get old status info
         S oldStatus = getStatus( resource );
