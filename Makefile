@@ -3,7 +3,10 @@ IMAGE:=gbbirkisson/ec-operator
 
 docker-build:
 	./mvnw clean package
-	docker build -f src/main/docker/Dockerfile.jvm -t operatortmp .
+	docker build -f src/main/docker/Dockerfile -t operatortmp .
+
+docker-run: docker-build
+	docker run -it -v ${HOME}/.kube:/opt/jboss/.kube -v ${HOME}/.minikube:${HOME}/.minikube -p 8081:8080 operatortmp:latest
 
 docker-push: docker-build
 	docker tag operatortmp ${IMAGE}:$(shell ./get-version.sh)
