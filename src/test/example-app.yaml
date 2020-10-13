@@ -1,7 +1,7 @@
 apiVersion: enonic.cloud/v1alpha1
 kind: Xp7App
 metadata:
-  name: contentstudio
+  name: datatoolbox
   namespace: mycloud-mysolution-myenv-myservice
 spec:
-  url: https://repo.enonic.com/public/com/enonic/app/contentstudio/2.2.3/contentstudio-2.2.3.jar
+  url: https://dl.bintray.com/rcd-systems/rcd-repo/systems/rcd/enonic/datatoolbox/5.0.3/datatoolbox-5.0.3.jar
