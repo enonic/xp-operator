@@ -156,7 +156,7 @@ public class OperatorXp7ConfigSync
         }
         else
         {
-            log.warn( "Could not find default vhost configuration" );
+            log.warn( String.format( "Could not find default vhost configuration in NS '%s'", namespace) );
             sb = new StringBuilder( "enabled = true" );
         }
 
