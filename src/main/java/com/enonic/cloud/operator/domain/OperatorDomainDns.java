@@ -110,7 +110,7 @@ public class OperatorDomainDns
             if ( config != null )
             {
                 // Domain managed by the operator
-                syncDnsRecords( config, domain, false );
+                syncDnsRecords( config, domain, !domain.getDomainSpec().getDnsRecord() );
             }
             else
             {
@@ -122,6 +122,13 @@ public class OperatorDomainDns
 
     private void lookupDomain( final Domain domain )
     {
+        // We do not expect dns records
+        if ( !domain.getDomainSpec().getDnsRecord() )
+        {
+            updateStatus( domain, DomainStatus.State.READY, "OK", false );
+            return;
+        }
+
         List<String> ourIps = ips.get();
 
         // Try to find a records
@@ -167,17 +174,8 @@ public class OperatorDomainDns
             }
         }
 
-        // Some records were found
+        // No records were found
         updateStatus( domain, DomainStatus.State.ERROR, "No External record found", false );
-    }
-
-    private void updateStatus( Domain domain, DomainStatus.State state, String message, boolean dnsRecordCreated )
-    {
-        domain.getDomainStatus().
-            withState( state ).
-            withMessage( message ).
-            withDomainStatusFields( domain.getDomainStatus().getDomainStatusFields().
-                withDnsRecordCreated( dnsRecordCreated ) );
     }
 
     private void syncDnsRecords( final DomainConfig config, final Domain domain, final boolean delete )
@@ -194,6 +192,13 @@ public class OperatorDomainDns
         // Get current records
         List<DnsRecord> records = dnsRecordService.list( config.zoneId(), domain.getDomainSpec().getHost(), null );
 
+        // If we are not suppose to create records
+        if ( records.size() == 0 && !domain.getDomainSpec().getDnsRecord() )
+        {
+            updateStatus( domain, DomainStatus.State.READY, "OK", false );
+            return;
+        }
+
         // Get heritage record
         DnsRecord heritageRecord = getHeritageRecord( records );
         if ( records.size() > 0 && heritageRecord == null )
@@ -204,6 +209,7 @@ public class OperatorDomainDns
             return;
         }
 
+        // Collect A records
         List<DnsRecord> aRecords = records.stream().filter( r -> "A".equals( r.type() ) ).collect( Collectors.toList() );
 
         List<DnsRecord> toAdd = new LinkedList<>();
@@ -254,8 +260,8 @@ public class OperatorDomainDns
             } );
         }
 
+        // Collect commands
         List<Runnable> commands = new LinkedList<>();
-
         toAdd.stream().forEach( r -> commands.add( dnsRecordService.create( r ) ) );
         toModify.stream().forEach( r -> commands.add( dnsRecordService.update( r ) ) );
         toRemove.stream().forEach( r -> commands.add( dnsRecordService.delete( r ) ) );
@@ -265,7 +271,15 @@ public class OperatorDomainDns
             updateStatus( domain, DomainStatus.State.READY, "OK", true );
         }
 
-        runnableListExecutor.apply( commands );
+        try
+        {
+            runnableListExecutor.apply( commands );
+        }
+        catch ( Exception e )
+        {
+            updateStatus( domain, DomainStatus.State.ERROR, "Faild updating records, see operator logs", false );
+            log.error( "Failed calling CF: " + e.getMessage() );
+        }
     }
 
     private DnsRecord getHeritageRecord( final List<DnsRecord> records )
@@ -312,5 +326,14 @@ public class OperatorDomainDns
                 withSpec( domain.getDomainSpec() ).
                 withStatus( domain.getDomainStatus() ) );
         }
+    }
+
+    private void updateStatus( Domain domain, DomainStatus.State state, String message, boolean dnsRecordCreated )
+    {
+        domain.getDomainStatus().
+            withState( state ).
+            withMessage( message ).
+            withDomainStatusFields( domain.getDomainStatus().getDomainStatusFields().
+                withDnsRecordCreated( dnsRecordCreated ) );
     }
 }
