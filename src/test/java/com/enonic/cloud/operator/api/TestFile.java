@@ -1,6 +1,7 @@
 package com.enonic.cloud.operator.api;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.immutables.value.Value;
 import org.wildfly.common.annotation.Nullable;
@@ -18,6 +19,12 @@ import com.enonic.cloud.operator.api.mutation.Patch;
 @Params
 public abstract class TestFile
 {
+    @Nullable
+    @Value.Default
+    public Boolean disabled() {
+        return false;
+    }
+
     public abstract AdmissionReview admissionRequest();
 
     @Nullable

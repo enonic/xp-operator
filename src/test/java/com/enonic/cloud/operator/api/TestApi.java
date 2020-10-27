@@ -86,6 +86,10 @@ class TestApi
         try
         {
             TestFile test = mapper.readValue( file, TestFile.class );
+            if( test.disabled() ) {
+                return;
+            }
+
             AdmissionReview review = mutationApi.validate( test.admissionRequest() );
 
             List<Patch> patch = null;

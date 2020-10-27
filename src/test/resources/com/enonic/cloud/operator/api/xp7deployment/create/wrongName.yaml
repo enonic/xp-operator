@@ -1,3 +1,5 @@
+disabled: true
+
 admissionRequest:
   request:
     operation: CREATE
