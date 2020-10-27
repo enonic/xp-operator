@@ -42,7 +42,6 @@ kind: "ConfigMap"
 metadata:
   annotations:
     enonic.applyPriority: "60"
-    enonic.neverOverwrite: "true"
   labels:
     cloud: "mycloud"
     enonic.managed: "true"
