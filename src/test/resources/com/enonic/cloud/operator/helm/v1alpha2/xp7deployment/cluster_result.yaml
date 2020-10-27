@@ -605,6 +605,7 @@ spec:
     matchLabels:
       cloud: "mycloud"
       enonic.data: "false"
+      enonic.deployment: "mycloud-mysolution-myenv-myservice"
       enonic.managed: "true"
       enonic.master: "true"
       enonic.nodeGroup: "master"
@@ -624,6 +625,7 @@ spec:
       labels:
         cloud: "mycloud"
         enonic.data: "false"
+        enonic.deployment: "mycloud-mysolution-myenv-myservice"
         enonic.managed: "true"
         enonic.master: "true"
         enonic.nodeGroup: "master"
@@ -810,6 +812,7 @@ spec:
     matchLabels:
       cloud: "mycloud"
       enonic.data: "true"
+      enonic.deployment: "mycloud-mysolution-myenv-myservice"
       enonic.managed: "true"
       enonic.master: "false"
       enonic.nodeGroup: "data"
@@ -829,6 +832,7 @@ spec:
       labels:
         cloud: "mycloud"
         enonic.data: "true"
+        enonic.deployment: "mycloud-mysolution-myenv-myservice"
         enonic.managed: "true"
         enonic.master: "false"
         enonic.nodeGroup: "data"
@@ -1037,6 +1041,7 @@ spec:
     matchLabels:
       cloud: "mycloud"
       enonic.data: "false"
+      enonic.deployment: "mycloud-mysolution-myenv-myservice"
       enonic.managed: "true"
       enonic.master: "false"
       enonic.nodeGroup: "frontend"
@@ -1056,6 +1061,7 @@ spec:
       labels:
         cloud: "mycloud"
         enonic.data: "false"
+        enonic.deployment: "mycloud-mysolution-myenv-myservice"
         enonic.managed: "true"
         enonic.master: "false"
         enonic.nodeGroup: "frontend"

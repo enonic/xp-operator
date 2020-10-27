@@ -30,6 +30,7 @@ spec:
       {{ $.Values.labelKeys.nodeGroup }}: {{ $nodeGroup.name }}
       {{ $.Values.labelKeys.master }}: {{ $nodeGroup.master }}
       {{ $.Values.labelKeys.data }}: {{ $nodeGroup.data }}
+      {{ $.Values.labelKeys.deployment }}: {{ $.Values.deployment.name }}
       {{- with $.Values.defaultLabels }}
       {{- toYaml . | nindent 6 }}
       {{- end }}
@@ -49,6 +50,7 @@ spec:
         {{ $.Values.labelKeys.nodeGroup }}: {{ $nodeGroup.name }}
         {{ $.Values.labelKeys.master }}: {{ $nodeGroup.master }}
         {{ $.Values.labelKeys.data }}: {{ $nodeGroup.data }}
+        {{ $.Values.labelKeys.deployment }}: {{ $.Values.deployment.name }}
         {{- with $.Values.defaultLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}

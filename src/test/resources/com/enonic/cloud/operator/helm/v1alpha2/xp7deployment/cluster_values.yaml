@@ -90,6 +90,7 @@ image:
   pullPolicy: "IfNotPresent"
 labelKeys:
   data: "enonic.data"
+  deployment: "enonic.deployment"
   managed: "enonic.managed"
   master: "enonic.master"
   nodeGroup: "enonic.nodeGroup"

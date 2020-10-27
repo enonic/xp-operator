@@ -463,6 +463,7 @@ spec:
     matchLabels:
       cloud: "mycloud"
       enonic.data: "true"
+      enonic.deployment: "mycloud-mysolution-myenv-myservice"
       enonic.managed: "true"
       enonic.master: "true"
       enonic.nodeGroup: "fisk"
@@ -482,6 +483,7 @@ spec:
       labels:
         cloud: "mycloud"
         enonic.data: "true"
+        enonic.deployment: "mycloud-mysolution-myenv-myservice"
         enonic.managed: "true"
         enonic.master: "true"
         enonic.nodeGroup: "fisk"

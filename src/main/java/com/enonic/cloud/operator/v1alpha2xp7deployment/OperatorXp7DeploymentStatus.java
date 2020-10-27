@@ -2,7 +2,6 @@ package com.enonic.cloud.operator.v1alpha2xp7deployment;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -23,6 +22,8 @@ import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentSta
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentStatusFields;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentStatusFieldsPod;
 import com.enonic.cloud.operator.helpers.HandlerStatus;
+
+import static com.enonic.cloud.common.Configuration.cfgStr;
 
 /**
  * This operator class updates Xp7Deployment status fields
@@ -121,14 +122,8 @@ public class OperatorXp7DeploymentStatus
 
     private boolean filterPods( final Xp7Deployment deployment, final Pod pod )
     {
-        for ( Map.Entry<String, String> l : deployment.getMetadata().getLabels().entrySet() )
-        {
-            if ( !Objects.equals( l.getValue(), pod.getMetadata().getLabels().get( l.getKey() ) ) )
-            {
-                return false;
-            }
-        }
-        return true;
+        return Objects.equals( pod.getMetadata().getLabels().get( cfgStr( "operator.charts.values.labelKeys.deployment" ) ),
+                               deployment.getMetadata().getName() );
     }
 
     private Xp7DeploymentStatusFields buildFields( final List<Pod> pods )
