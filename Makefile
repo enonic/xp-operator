@@ -1,5 +1,5 @@
 LOCAL_OPERATOR_PORT:=8080
-IMAGE:=gbbirkisson/ec-operator
+IMAGE:=enonic/ec-operator
 
 docker-build:
 	./mvnw clean package
