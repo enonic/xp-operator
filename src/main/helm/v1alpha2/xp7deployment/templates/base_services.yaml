@@ -21,9 +21,7 @@ spec:
   publishNotReadyAddresses: true
   sessionAffinity: None
   selector:
-    {{- with .Values.defaultLabels }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
+    {{ $.Values.labelKeys.deployment }}: {{ $.Values.deployment.name }}
   ports:
     - name: hazelcast
       port: 5701
@@ -57,9 +55,7 @@ spec:
   clusterIP: None
   sessionAffinity: None
   selector:
-    {{- with .Values.defaultLabels }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
+    {{ $.Values.labelKeys.deployment }}: {{ $.Values.deployment.name }}
   ports:
     - name: xp-metrics
       port: 2609

@@ -23,9 +23,7 @@ spec:
   sessionAffinity: None
   selector:
     {{ $.Values.labelKeys.nodeGroup }}: {{ $nodeGroup.name }}
-    {{- with $.Values.defaultLabels }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
+    {{ $.Values.labelKeys.deployment }}: {{ $.Values.deployment.name }}
   ports:
     - name: xp-metrics
       port: 2609

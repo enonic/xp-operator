@@ -379,10 +379,7 @@ spec:
     targetPort: 9300
   publishNotReadyAddresses: true
   selector:
-    cloud: "mycloud"
-    environment: "myenv"
-    service: "myservice"
-    solution: "mysolution"
+    enonic.deployment: "mycloud-mysolution-myenv-myservice"
   sessionAffinity: "None"
   type: "ClusterIP"
 ---
@@ -425,10 +422,7 @@ spec:
     protocol: "TCP"
     targetPort: 9200
   selector:
-    cloud: "mycloud"
-    environment: "myenv"
-    service: "myservice"
-    solution: "mysolution"
+    enonic.deployment: "mycloud-mysolution-myenv-myservice"
   sessionAffinity: "None"
   type: "ClusterIP"
 ---
@@ -472,11 +466,8 @@ spec:
     protocol: "TCP"
     targetPort: 9200
   selector:
-    cloud: "mycloud"
+    enonic.deployment: "mycloud-mysolution-myenv-myservice"
     enonic.nodeGroup: "master"
-    environment: "myenv"
-    service: "myservice"
-    solution: "mysolution"
   sessionAffinity: "None"
   type: "ClusterIP"
 ---
@@ -520,11 +511,8 @@ spec:
     protocol: "TCP"
     targetPort: 9200
   selector:
-    cloud: "mycloud"
+    enonic.deployment: "mycloud-mysolution-myenv-myservice"
     enonic.nodeGroup: "data"
-    environment: "myenv"
-    service: "myservice"
-    solution: "mysolution"
   sessionAffinity: "None"
   type: "ClusterIP"
 ---
@@ -568,11 +556,8 @@ spec:
     protocol: "TCP"
     targetPort: 9200
   selector:
-    cloud: "mycloud"
+    enonic.deployment: "mycloud-mysolution-myenv-myservice"
     enonic.nodeGroup: "frontend"
-    environment: "myenv"
-    service: "myservice"
-    solution: "mysolution"
   sessionAffinity: "None"
   type: "ClusterIP"
 ---
