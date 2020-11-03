@@ -16,7 +16,6 @@ public class PasswordGenerator
         "!\"#$%&()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_abcdefghijklmnopqrstuvwxyz{|}~".
             chars().
             forEach( c -> letters.add( (char) c ) );
-        Collections.rotate( letters, 5 );
     }
 
     private static char getRandomChar()

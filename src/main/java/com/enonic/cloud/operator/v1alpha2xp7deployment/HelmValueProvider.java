@@ -33,7 +33,7 @@ public class HelmValueProvider
         }
         else
         {
-            return () -> PasswordGenerator.getPassword( 30 );
+            return () -> PasswordGenerator.getPassword( 32 );
         }
     }
 
