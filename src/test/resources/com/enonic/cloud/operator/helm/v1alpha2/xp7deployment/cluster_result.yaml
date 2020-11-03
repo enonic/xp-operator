@@ -127,11 +127,12 @@ data:
     \ != \"0\" ]; then\n    echo \"Waiting for additional ${ADDITIONAL_WAIT_SECONDS}\
     \ seconds\"\n    sleep ${ADDITIONAL_WAIT_SECONDS}\nfi\n\nif [ \"${OK}\" != \"\
     1\" ]; then\n    exit 1\nfi"
-  initApps.txt: "https://repo.enonic.com/public/com/enonic/app/snapshotter/3.0.2/snapshotter-3.0.2.jar"
   preStart.sh: "echo \"Running prescript for node ${XP_NODE_NAME} (${XP_NODE_IP})\"\
-    \necho \"Bootstrap deploy folder apps\"\ncat /enonic-xp/home/extra-config/initApps.txt\
-    \ | xargs -I {} app.sh add {}\nbash /enonic-xp/home/extra-config/dns.sh -d cluster-discovery.${NAMESPACE}.svc.cluster.local\n\
-    bash /enonic-xp/home/extra-config/dns.sh -d ${XP_NODE_NAME}.cluster-discovery.${NAMESPACE}.svc.cluster.local"
+    \n\necho \"Bootstrap deploy folder apps\"\n\n# Delete apps\nfor f in $(find $XP_HOME/deploy\
+    \ -name '*.jar'); do\n  name=$(basename $f)\n  if [ \"$(echo '' | grep $name)\"\
+    \ == \"\" ]; then\n    app.sh remove $name\n  fi\ndone\n\n# Add apps\nbash /enonic-xp/home/extra-config/dns.sh\
+    \ -d cluster-discovery.${NAMESPACE}.svc.cluster.local\nbash /enonic-xp/home/extra-config/dns.sh\
+    \ -d ${XP_NODE_NAME}.cluster-discovery.${NAMESPACE}.svc.cluster.local"
   preStop.sh: "echo \"Wait for endpoints to be deleted\"\nbash /enonic-xp/home/extra-config/endpoints.sh\
     \ -r -s all -i ${XP_NODE_IP} -t 10\nbash /enonic-xp/home/extra-config/endpoints.sh\
     \ -r -s ${XP_NODE_GROUP} -i ${XP_NODE_IP} -t 10 -a 20"
