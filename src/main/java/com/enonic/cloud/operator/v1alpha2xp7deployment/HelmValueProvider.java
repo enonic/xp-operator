@@ -1,6 +1,5 @@
 package com.enonic.cloud.operator.v1alpha2xp7deployment;
 
-import java.util.UUID;
 import java.util.function.Supplier;
 
 import javax.inject.Named;
@@ -13,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import io.fabric8.kubernetes.api.model.ServiceAccount;
 
 import com.enonic.cloud.kubernetes.Clients;
+import com.enonic.cloud.operator.helpers.PasswordGenerator;
 
 import static com.enonic.cloud.common.Configuration.cfgHasKey;
 import static com.enonic.cloud.common.Configuration.cfgStr;
@@ -33,7 +33,7 @@ public class HelmValueProvider
         }
         else
         {
-            return () -> UUID.randomUUID().toString().replace( "-", "" ).toLowerCase();
+            return () -> PasswordGenerator.getPassword( 30 );
         }
     }
 
