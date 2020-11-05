@@ -13,9 +13,10 @@ public class PasswordGenerator
 
     static
     {
-        "!\"#$%&()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_abcdefghijklmnopqrstuvwxyz{|}~".
-            chars().
-            forEach( c -> letters.add( (char) c ) );
+        // Adding ASCII Decimal value from 33 to 126
+        for (int i = 33; i < 127; i++) {
+            letters.add((char) i);
+        }
     }
 
     private static char getRandomChar()
