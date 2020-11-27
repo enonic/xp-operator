@@ -2,7 +2,6 @@ package com.enonic.cloud.operator.helpers;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class PasswordGenerator
@@ -13,10 +12,10 @@ public class PasswordGenerator
 
     static
     {
-        // Adding ASCII Decimal value from 33 to 126
-        for (int i = 33; i < 127; i++) {
-            letters.add((char) i);
-        }
+        // Set taken from LastPass password generation
+        "@!#$%&*^0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".
+            chars().
+            forEach( c -> letters.add( (char) c ) );
     }
 
     private static char getRandomChar()
