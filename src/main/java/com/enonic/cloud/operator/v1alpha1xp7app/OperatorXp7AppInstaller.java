@@ -10,8 +10,6 @@ import org.slf4j.LoggerFactory;
 
 import com.enonic.cloud.apis.xp.XpClientCache;
 import com.enonic.cloud.apis.xp.service.AppInfo;
-import com.enonic.cloud.apis.xp.service.ImmutableAppInstallRequest;
-import com.enonic.cloud.apis.xp.service.ImmutableAppKeyList;
 import com.enonic.cloud.kubernetes.Clients;
 import com.enonic.cloud.kubernetes.Searchers;
 import com.enonic.cloud.kubernetes.commands.K8sLogHelper;
@@ -123,9 +121,7 @@ public class OperatorXp7AppInstaller
         // Try to install
         try
         {
-            AppInfo appInfo = xpClientCache.install( app.getMetadata().getNamespace(), ImmutableAppInstallRequest.builder().
-                url( app.getXp7AppSpec().getUrl() ).
-                build() );
+            AppInfo appInfo = xpClientCache.install( app.getMetadata().getNamespace(), app.getXp7AppSpec().getUrl() );
 
             updateAppStatus( app, new Xp7AppStatus().
                 withState( Xp7AppStatus.State.PENDING ).
@@ -177,12 +173,11 @@ public class OperatorXp7AppInstaller
         // Try to uninstall
         try
         {
-            xpClientCache.uninstall( app.getMetadata().getNamespace(), ImmutableAppKeyList.builder().addKey( app.
+            xpClientCache.uninstall( app.getMetadata().getNamespace(), app.
                 getXp7AppStatus().
                 getXp7AppStatusFields().
                 getXp7AppStatusFieldsAppInfo().
-                getKey() ).
-                build() );
+                getKey() );
             return removeFinalizer( app );
         }
         catch ( Exception e )

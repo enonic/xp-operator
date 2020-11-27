@@ -14,7 +14,7 @@ admissionRequest:
           service: myservice2
       spec:
         enabled: true
-        xpVersion: 7.6.0
+        xpVersion: 7.1.2
         nodesSharedDisks:
           - name: blobstore
             size: 1Gi
@@ -45,7 +45,7 @@ assertResult:
     namespace: "mycloud-mysolution-myenv-myservice2"
   spec:
     enabled: true
-    xpVersion: "7.6.0"
+    xpVersion: "7.1.2"
     nodesSharedDisks:
       - name: "blobstore"
         size: "1Gi"
@@ -61,10 +61,12 @@ assertResult:
           cpu: "1"
           memory: "512Mi"
           disks:
-            - name: "index"
-              size: "200Mi"
+          - name: "index"
+            size: "200Mi"
   status:
     state: "PENDING"
     message: "Created"
     fields:
       pods: [ ]
+
+assertException: "Operator only supports XP version 7.6 and higher"

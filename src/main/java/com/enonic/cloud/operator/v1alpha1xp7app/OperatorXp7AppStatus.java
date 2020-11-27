@@ -1,6 +1,5 @@
 package com.enonic.cloud.operator.v1alpha1xp7app;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -10,27 +9,17 @@ import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.fabric8.kubernetes.api.model.Doneable;
-
 import com.enonic.cloud.apis.xp.XpClientCache;
 import com.enonic.cloud.apis.xp.service.AppInfo;
 import com.enonic.cloud.kubernetes.Clients;
-import com.enonic.cloud.kubernetes.InformerSearcher;
 import com.enonic.cloud.kubernetes.Searchers;
-import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7App;
-import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7AppStatus;
-import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7AppStatusFields;
-import com.enonic.cloud.operator.helpers.HandlerStatus;
 import com.enonic.cloud.operator.helpers.Xp7DeploymentInfo;
-
-import static com.enonic.cloud.operator.v1alpha1xp7app.OperatorXp7AppInstaller.fieldsFromAppInfo;
 
 /**
  * This operator class updates Xp7App status fields
  */
 @Singleton
 public class OperatorXp7AppStatus
-    extends HandlerStatus<Xp7App, Xp7AppStatus>
 {
     private static final Logger log = LoggerFactory.getLogger( OperatorXp7AppStatus.class );
 
@@ -48,128 +37,128 @@ public class OperatorXp7AppStatus
 
     private Map<String, List<AppInfo>> appInfoMap;
 
-    @Override
-    protected void preRun()
-    {
-        appInfoMap = new HashMap<>();
-    }
-
-    @Override
-    protected InformerSearcher<Xp7App> informerSearcher()
-    {
-        return searchers.xp7App();
-    }
-
-    @Override
-    protected Xp7AppStatus getStatus( final Xp7App resource )
-    {
-        return resource.getXp7AppStatus();
-    }
-
-    @Override
-    protected Doneable<Xp7App> updateStatus( final Xp7App resource, final Xp7AppStatus newStatus )
-    {
-        return clients.xp7Apps().crdClient().
-            inNamespace( resource.getMetadata().getNamespace() ).
-            withName( resource.getMetadata().getName() ).
-            edit().
-            withStatus( newStatus );
-    }
-
-    @Override
-    protected Xp7AppStatus pollStatus( final Xp7App resource )
-    {
-        Xp7AppStatus currentStatus = resource.getXp7AppStatus();
-
-        // If there is no app info
-        if ( currentStatus.getXp7AppStatusFields().getXp7AppStatusFieldsAppInfo() == null )
-        {
-            return currentStatus;
-        }
-
-        // If XP is not running
-        if ( !xp7DeploymentInfo.xpRunning( resource.getMetadata().getNamespace() ) )
-        {
-            return currentStatus.
-                withState( Xp7AppStatus.State.PENDING ).
-                withMessage( "Cannot update status, XP not in RUNNING state" );
-        }
-
-        List<AppInfo> infoList = getAppInfoList( resource );
-
-        // Failed calling XP
-        if ( infoList == null )
-        {
-            return currentStatus.
-                withState( Xp7AppStatus.State.ERROR ).
-                withMessage( "Cannot update status, see operator logs" );
-        }
-
-        AppInfo appInfo = getAppState( resource, infoList );
-
-        // App not found in XP
-        if ( appInfo == null )
-        {
-            return currentStatus.
-                withState( Xp7AppStatus.State.ERROR ).
-                withMessage( "App not found in XP" ).
-                withXp7AppStatusFields( new Xp7AppStatusFields() );
-        }
-
-        // Add app info to status
-        currentStatus.withXp7AppStatusFields( fieldsFromAppInfo( appInfo ) );
-
-        // Update state/message
-        switch ( appInfo.state() )
-        {
-            case "started":
-                return currentStatus.
-                    withState( Xp7AppStatus.State.RUNNING ).
-                    withMessage( "Started" );
-            case "stopped":
-                return currentStatus.
-                    withState( Xp7AppStatus.State.STOPPED ).
-                    withMessage( "Stopped" );
-            default:
-                return currentStatus.
-                    withState( Xp7AppStatus.State.ERROR ).
-                    withMessage( "Invalid app state" );
-        }
-    }
-
-    private List<AppInfo> getAppInfoList( final Xp7App resource )
-    {
-        String mapKey = resource.getMetadata().getNamespace();
-        if ( !appInfoMap.containsKey( mapKey ) )
-        {
-            try
-            {
-                List<AppInfo> appInfo = xpClientCache.list( resource.getMetadata().getNamespace() );
-                appInfoMap.put( mapKey, appInfo );
-            }
-            catch ( Exception e )
-            {
-                log.warn(
-                    String.format( "Failed calling XP for apps NS '%s': %s", resource.getMetadata().getNamespace(), e.getMessage() ) );
-            }
-        }
-
-        return appInfoMap.get( mapKey );
-    }
-
-    private AppInfo getAppState( final Xp7App resource, final List<AppInfo> infoList )
-    {
-        for ( AppInfo appInfo : infoList )
-        {
-            if ( appInfo.key().equals( resource.
-                getXp7AppStatus().
-                getXp7AppStatusFields().
-                getXp7AppStatusFieldsAppInfo().
-                getKey() ) )
-            {
-                return appInfo;
-            }
-        }
-        return null;
-    }
+//    @Override
+//    protected void preRun()
+//    {
+//        appInfoMap = new HashMap<>();
+//    }
+//
+//    @Override
+//    protected InformerSearcher<Xp7App> informerSearcher()
+//    {
+//        return searchers.xp7App();
+//    }
+//
+//    @Override
+//    protected Xp7AppStatus getStatus( final Xp7App resource )
+//    {
+//        return resource.getXp7AppStatus();
+//    }
+//
+//    @Override
+//    protected Doneable<Xp7App> updateStatus( final Xp7App resource, final Xp7AppStatus newStatus )
+//    {
+//        return clients.xp7Apps().crdClient().
+//            inNamespace( resource.getMetadata().getNamespace() ).
+//            withName( resource.getMetadata().getName() ).
+//            edit().
+//            withStatus( newStatus );
+//    }
+//
+//    @Override
+//    protected Xp7AppStatus pollStatus( final Xp7App resource )
+//    {
+//        Xp7AppStatus currentStatus = resource.getXp7AppStatus();
+//
+//        // If there is no app info
+//        if ( currentStatus.getXp7AppStatusFields().getXp7AppStatusFieldsAppInfo() == null )
+//        {
+//            return currentStatus;
+//        }
+//
+//        // If XP is not running
+//        if ( !xp7DeploymentInfo.xpRunning( resource.getMetadata().getNamespace() ) )
+//        {
+//            return currentStatus.
+//                withState( Xp7AppStatus.State.PENDING ).
+//                withMessage( "Cannot update status, XP not in RUNNING state" );
+//        }
+//
+//        List<AppInfo> infoList = getAppInfoList( resource );
+//
+//        // Failed calling XP
+//        if ( infoList == null )
+//        {
+//            return currentStatus.
+//                withState( Xp7AppStatus.State.ERROR ).
+//                withMessage( "Cannot update status, see operator logs" );
+//        }
+//
+//        AppInfo appInfo = getAppState( resource, infoList );
+//
+//        // App not found in XP
+//        if ( appInfo == null )
+//        {
+//            return currentStatus.
+//                withState( Xp7AppStatus.State.ERROR ).
+//                withMessage( "App not found in XP" ).
+//                withXp7AppStatusFields( new Xp7AppStatusFields() );
+//        }
+//
+//        // Add app info to status
+//        currentStatus.withXp7AppStatusFields( fieldsFromAppInfo( appInfo ) );
+//
+//        // Update state/message
+//        switch ( appInfo.state() )
+//        {
+//            case "started":
+//                return currentStatus.
+//                    withState( Xp7AppStatus.State.RUNNING ).
+//                    withMessage( "Started" );
+//            case "stopped":
+//                return currentStatus.
+//                    withState( Xp7AppStatus.State.STOPPED ).
+//                    withMessage( "Stopped" );
+//            default:
+//                return currentStatus.
+//                    withState( Xp7AppStatus.State.ERROR ).
+//                    withMessage( "Invalid app state" );
+//        }
+//    }
+//
+//    private List<AppInfo> getAppInfoList( final Xp7App resource )
+//    {
+//        String mapKey = resource.getMetadata().getNamespace();
+//        if ( !appInfoMap.containsKey( mapKey ) )
+//        {
+//            try
+//            {
+//                List<AppInfo> appInfo = xpClientCache.list( resource.getMetadata().getNamespace() );
+//                appInfoMap.put( mapKey, appInfo );
+//            }
+//            catch ( Exception e )
+//            {
+//                log.warn(
+//                    String.format( "Failed calling XP for apps NS '%s': %s", resource.getMetadata().getNamespace(), e.getMessage() ) );
+//            }
+//        }
+//
+//        return appInfoMap.get( mapKey );
+//    }
+//
+//    private AppInfo getAppState( final Xp7App resource, final List<AppInfo> infoList )
+//    {
+//        for ( AppInfo appInfo : infoList )
+//        {
+//            if ( appInfo.key().equals( resource.
+//                getXp7AppStatus().
+//                getXp7AppStatusFields().
+//                getXp7AppStatusFieldsAppInfo().
+//                getKey() ) )
+//            {
+//                return appInfo;
+//            }
+//        }
+//        return null;
+//    }
 }

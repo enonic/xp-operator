@@ -12,8 +12,8 @@ import org.jboss.resteasy.plugins.interceptors.AcceptEncodingGZIPFilter;
 import org.jboss.resteasy.plugins.interceptors.GZIPDecodingInterceptor;
 import org.jboss.resteasy.plugins.interceptors.GZIPEncodingInterceptor;
 
-import com.enonic.cloud.apis.xp.service.AdminApi;
 import com.enonic.cloud.apis.xp.service.CustomRestHeaderFilter;
+import com.enonic.cloud.apis.xp.service.ManagementApi;
 
 import static com.enonic.cloud.common.Configuration.cfgStr;
 
@@ -45,9 +45,9 @@ public abstract class XpClientCreator
     }
 
     @Value.Default
-    protected String adminPort()
+    protected String port()
     {
-        return "8080";
+        return "4848";
     }
 
     @Value.Derived
@@ -74,8 +74,14 @@ public abstract class XpClientCreator
     }
 
     @Value.Derived
-    public AdminApi adminApi()
+    public ResteasyWebTarget sseTarget()
     {
-        return createTarget( UriBuilder.fromPath( "http://" + deploymentHost() + ":" + adminPort() ) ).proxy( AdminApi.class );
+        return createTarget( UriBuilder.fromPath( "http://" + deploymentHost() + ":" + port() + "/app/events" ) );
+    }
+
+    @Value.Derived
+    public ManagementApi managementApi()
+    {
+        return createTarget( UriBuilder.fromPath( "http://" + deploymentHost() + ":" + port() ) ).proxy( ManagementApi.class );
     }
 }

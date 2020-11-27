@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.enonic.cloud.apis.xp.XpClientCache;
-import com.enonic.cloud.apis.xp.service.ImmutableAppKeyList;
 import com.enonic.cloud.kubernetes.Searchers;
 import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7App;
 import com.enonic.cloud.operator.helpers.InformerEventHandler;
@@ -94,8 +93,7 @@ public class OperatorXp7AppStartStopper
         {
             try
             {
-                xpClientCache.start( namespace, ImmutableAppKeyList.builder().addKey( key ).build() );
-                operatorXp7AppStatus.handle( xp7App ); // Update status
+                xpClientCache.start( namespace, key );
             }
             catch ( Exception e )
             {
@@ -109,8 +107,7 @@ public class OperatorXp7AppStartStopper
         {
             try
             {
-                xpClientCache.stop( namespace, ImmutableAppKeyList.builder().addKey( key ).build() );
-                operatorXp7AppStatus.handle( xp7App ); // Update status
+                xpClientCache.stop( namespace, key );
             }
             catch ( Exception e )
             {

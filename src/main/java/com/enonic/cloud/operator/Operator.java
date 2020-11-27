@@ -134,7 +134,6 @@ public class Operator
                 schedule( operatorXp7AppInstaller, syncInterval );
                 listen( operatorXp7AppStartStopper, informers.xp7AppInformer() );
                 schedule( operatorXp7AppStartStopper, statusInterval );
-                schedule( operatorXp7AppStatus, statusInterval );
 
                 listen( operatorXp7Config, informers.xp7ConfigInformer() );
                 schedule( operatorConfigMapSync, syncInterval );

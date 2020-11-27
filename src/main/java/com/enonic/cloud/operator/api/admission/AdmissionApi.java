@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -12,6 +14,8 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+
+import org.apache.maven.artifact.versioning.ComparableVersion;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Preconditions;
@@ -245,6 +249,32 @@ public class AdmissionApi
             Optional<Xp7Deployment> xp7Deployments = getXp7Deployment( admissionReview.getRequest().getObject() );
             Preconditions.checkState( xp7Deployments.isEmpty(), "There is already an Xp7Deployment in NS '%s'",
                                       newDeployment.getMetadata().getNamespace() );
+
+            // Assert version is >=7.6, if we cant parse version, just let it go
+            ComparableVersion currentVersion = new ComparableVersion( "7.6.0" );
+            try
+            {
+                if ( newDeployment.getXp7DeploymentSpec().getXpVersion().startsWith( "7." ) )
+                {
+                    currentVersion = new ComparableVersion( newDeployment.getXp7DeploymentSpec().getXpVersion() );
+                }
+                else if ( newDeployment.getXp7DeploymentSpec().getXpVersion().startsWith( "enonic/xp:7." ) )
+                {
+                    String pattern = "^enonic\\/xp:([0-9]+\\.[0-9]+\\.[0-9]+)";
+                    Matcher m = Pattern.compile( pattern ).matcher( newDeployment.getXp7DeploymentSpec().getXpVersion() );
+                    if ( m.find() )
+                    {
+                        currentVersion = new ComparableVersion( m.group( 1 ) );
+                    }
+                }
+            }
+            catch ( Exception e )
+            {
+                // Just ignore
+            }
+
+            Preconditions.checkState( currentVersion.compareTo( new ComparableVersion( "7.6.0" ) ) >= 0,
+                                      "Operator only supports XP version 7.6 and higher" );
         }
     }
 

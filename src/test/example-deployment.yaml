@@ -10,7 +10,7 @@ metadata:
     service: myservice
 spec:
   enabled: true
-  xpVersion: 7.4.1
+  xpVersion: gcr.io/playground-186616/enonic-xp:nightly
 
   nodesSharedDisks:
     - name: blobstore

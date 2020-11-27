@@ -1,16 +1,17 @@
 package com.enonic.cloud.apis.xp;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.ws.rs.sse.SseEventSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -20,11 +21,14 @@ import com.google.common.io.BaseEncoding;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
-import com.enonic.cloud.apis.xp.service.AdminApi;
+import com.enonic.cloud.apis.xp.service.AppEvent;
+import com.enonic.cloud.apis.xp.service.AppEventList;
 import com.enonic.cloud.apis.xp.service.AppInfo;
-import com.enonic.cloud.apis.xp.service.AppInstallRequest;
 import com.enonic.cloud.apis.xp.service.AppInstallResponse;
-import com.enonic.cloud.apis.xp.service.AppKeyList;
+import com.enonic.cloud.apis.xp.service.AppKey;
+import com.enonic.cloud.apis.xp.service.ImmutableAppEvent;
+import com.enonic.cloud.apis.xp.service.ImmutableAppInstallRequest;
+import com.enonic.cloud.apis.xp.service.ImmutableAppKey;
 import com.enonic.cloud.kubernetes.Clients;
 
 @Singleton
@@ -32,6 +36,8 @@ public class XpClientCache
     extends CacheLoader<String, XpClientCreator>
 {
     private static final Logger log = LoggerFactory.getLogger( XpClientCache.class );
+
+    private static final ObjectMapper mapper = new ObjectMapper();
 
     private static final BaseEncoding baseEncoding = BaseEncoding.base64();
 
@@ -55,19 +61,42 @@ public class XpClientCache
     }
 
     @SuppressWarnings("WeakerAccess")
-    public List<AppInfo> list( final String namespace )
+    public void addEventListener( final String namespace, final Consumer<AppEvent> eventConsumer )
     {
-        return getAdminApi( namespace ).appList().applications();
+        SseEventSource msgEventSource = SseEventSource.target( getCreator( namespace ).sseTarget() ).build();
+        try (SseEventSource eventSource = msgEventSource)
+        {
+            eventSource.register( event -> {
+                switch ( event.getName() )
+                {
+                    case "list":
+                        event.
+                            readData( AppEventList.class ).
+                            applications().
+                            forEach( e -> eventConsumer.accept( ImmutableAppEvent.builder().info( e ).build() ) );
+                    case "installed":
+                    case "state":
+                        eventConsumer.accept( ImmutableAppEvent.builder().info( event.readData( AppInfo.class ) ).build() );
+                    case "uninstalled":
+                        eventConsumer.accept( ImmutableAppEvent.builder().uninstall( event.readData( AppKey.class ) ).build() );
+                }
+            }, e -> log.error( "Error recieving SSE event", e ) );
+            eventSource.open();
+        }
+        catch ( Exception e )
+        {
+            log.error( String.format( "SSE connection with XP failed in NS '%s'", namespace ), e );
+        }
     }
 
     @SuppressWarnings("WeakerAccess")
-    public AppInfo install( final String namespace, final AppInstallRequest req )
+    public AppInfo install( final String namespace, final String url )
     {
-        AppInstallResponse res = getAdminApi( namespace ).appInstall( req );
+        AppInstallResponse res =
+            getCreator( namespace ).managementApi().appInstall( ImmutableAppInstallRequest.builder().url( url ).build() );
         if ( res.failure() == null )
         {
-            log( namespace, "INSTALL apps", Collections.
-                singletonList( res.applicationInstalledJson().application().key() ) );
+            log( namespace, "INSTALL app", res.applicationInstalledJson().application().key() );
         }
         else
         {
@@ -77,34 +106,34 @@ public class XpClientCache
     }
 
     @SuppressWarnings("WeakerAccess")
-    public void uninstall( final String namespace, final AppKeyList req )
+    public void uninstall( final String namespace, final String key )
     {
-        log( namespace, "UNINSTALL apps", req.key() );
-        getAdminApi( namespace ).appUninstall( req );
+        log( namespace, "UNINSTALL app", key );
+        getCreator( namespace ).managementApi().appUninstall( ImmutableAppKey.builder().key( key ).build() );
     }
 
-    public void start( final String namespace, final AppKeyList req )
+    public void start( final String namespace, final String key )
     {
-        log( namespace, "START apps", req.key() );
-        getAdminApi( namespace ).appStart( req );
+        log( namespace, "START app", key );
+        getCreator( namespace ).managementApi().appStart( ImmutableAppKey.builder().key( key ).build() );
     }
 
-    public void stop( final String namespace, final AppKeyList req )
+    public void stop( final String namespace, final String key )
     {
-        log( namespace, "STOP apps", req.key() );
-        getAdminApi( namespace ).appStop( req );
+        log( namespace, "STOP app", key );
+        getCreator( namespace ).managementApi().appStop( ImmutableAppKey.builder().key( key ).build() );
     }
 
-    private void log( String namespace, String action, List<String> keys )
+    private void log( String namespace, String action, String key )
     {
-        log.info( String.format( "XP: %s %s in NS '%s'", action, keys, namespace ) );
+        log.info( String.format( "XP: %s %s in NS '%s'", action, key, namespace ) );
     }
 
-    private AdminApi getAdminApi( String namespace )
+    private XpClientCreator getCreator( String namespace )
     {
         try
         {
-            return clientCreatorCache.get( namespace ).adminApi();
+            return clientCreatorCache.get( namespace );
         }
         catch ( ExecutionException e )
         {
