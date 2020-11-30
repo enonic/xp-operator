@@ -7,7 +7,7 @@ import org.immutables.value.Value;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 
-@JsonDeserialize(builder = ImmutableAppInfo.Builder.class)
+@JsonDeserialize(builder = ImmutableAppEventList.Builder.class)
 @Value.Immutable
 public abstract class AppEventList
 {

@@ -19,6 +19,10 @@ public class CustomRestHeaderFilter
     @Override
     public void filter( ClientRequestContext requestContext )
     {
-        requestContext.getHeaders().add( name, value );
+        requestContext.getHeaders().remove( name );
+        if ( value != null )
+        {
+            requestContext.getHeaders().add( name, value );
+        }
     }
 }

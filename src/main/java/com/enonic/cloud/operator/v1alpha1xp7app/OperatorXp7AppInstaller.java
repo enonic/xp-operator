@@ -124,8 +124,8 @@ public class OperatorXp7AppInstaller
             AppInfo appInfo = xpClientCache.install( app.getMetadata().getNamespace(), app.getXp7AppSpec().getUrl() );
 
             updateAppStatus( app, new Xp7AppStatus().
-                withState( Xp7AppStatus.State.PENDING ).
-                withMessage( "Installed" ).
+                withState( Xp7AppStatus.State.RUNNING ).
+                withMessage( "OK" ).
                 withXp7AppStatusFields( fieldsFromAppInfo( appInfo ) ) );
         }
         catch ( Exception e )

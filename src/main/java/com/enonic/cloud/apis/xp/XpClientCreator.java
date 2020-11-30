@@ -1,6 +1,10 @@
 package com.enonic.cloud.apis.xp;
 
+import java.util.concurrent.TimeUnit;
+
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.sse.SseEventSource;
 
 import org.immutables.value.Value;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
@@ -41,6 +45,7 @@ public abstract class XpClientCreator
     @Value.Derived
     protected String deploymentHost()
     {
+        //return String.format( "http://localhost:8001/api/v1/namespaces/%s/services/%s:4848/proxy", namespace(), serviceName() );
         return String.format( "%s.%s.svc.cluster.local", serviceName(), namespace() );
     }
 
@@ -74,14 +79,26 @@ public abstract class XpClientCreator
     }
 
     @Value.Derived
-    public ResteasyWebTarget sseTarget()
+    public SseEventSource appsSSE()
     {
-        return createTarget( UriBuilder.fromPath( "http://" + deploymentHost() + ":" + port() + "/app/events" ) );
+        WebTarget target = client().target( UriBuilder.fromPath( "http://" + deploymentHost() + ":" + port() + "/app/events" ) );
+        target.register( new CustomRestHeaderFilter( "Accept-Encoding", null ) );
+        target.register( basicAuthentication() );
+        SseEventSource eventSource = SseEventSource.
+            target( target ).
+            reconnectingEvery( 60, TimeUnit.SECONDS ).
+            build();
+        return eventSource;
     }
 
     @Value.Derived
-    public ManagementApi managementApi()
+    public ManagementApi appsApi()
     {
-        return createTarget( UriBuilder.fromPath( "http://" + deploymentHost() + ":" + port() ) ).proxy( ManagementApi.class );
+        ResteasyWebTarget target = client().target( UriBuilder.fromPath( "http://" + deploymentHost() + ":" + port() ) );
+        target.register( basicAuthentication() );
+        target.register( AcceptEncodingGZIPFilter.class );
+        target.register( GZIPDecodingInterceptor.class );
+        target.register( GZIPEncodingInterceptor.class );
+        return target.proxy( ManagementApi.class );
     }
 }

@@ -1,5 +1,7 @@
 package com.enonic.cloud.apis.xp;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -45,10 +47,13 @@ public class XpClientCache
 
     private final LoadingCache<String, XpClientCreator> clientCreatorCache;
 
+    private final Map<Integer, Consumer<AppEvent>> appEventListeners;
+
     @Inject
     public XpClientCache( final Clients clients )
     {
         this.client = clients.k8s();
+        appEventListeners = new HashMap<>();
         clientCreatorCache = CacheBuilder.newBuilder().
             maximumSize( 1000 ).
             expireAfterWrite( 10, TimeUnit.MINUTES ).
@@ -61,39 +66,57 @@ public class XpClientCache
     }
 
     @SuppressWarnings("WeakerAccess")
-    public void addEventListener( final String namespace, final Consumer<AppEvent> eventConsumer )
+    public synchronized void addEventListener( final String namespace, final Consumer<AppEvent> eventConsumer )
     {
-        SseEventSource msgEventSource = SseEventSource.target( getCreator( namespace ).sseTarget() ).build();
-        try (SseEventSource eventSource = msgEventSource)
+        SseEventSource eventSource = getCreator( namespace ).appsSSE();
+        if ( appEventListeners.get( eventConsumer.hashCode() ) == null )
         {
             eventSource.register( event -> {
-                switch ( event.getName() )
+                try
                 {
-                    case "list":
-                        event.
-                            readData( AppEventList.class ).
-                            applications().
-                            forEach( e -> eventConsumer.accept( ImmutableAppEvent.builder().info( e ).build() ) );
-                    case "installed":
-                    case "state":
-                        eventConsumer.accept( ImmutableAppEvent.builder().info( event.readData( AppInfo.class ) ).build() );
-                    case "uninstalled":
-                        eventConsumer.accept( ImmutableAppEvent.builder().uninstall( event.readData( AppKey.class ) ).build() );
+                    switch ( event.getName() )
+                    {
+                        case "list":
+                            mapper.readValue( event.readData(), AppEventList.class ).
+                                applications().
+                                forEach( e -> eventConsumer.accept( ImmutableAppEvent.builder().
+                                    namespace( namespace ).
+                                    info( e ).
+                                    build() ) );
+                            break;
+                        case "installed":
+                        case "state":
+                            eventConsumer.accept( ImmutableAppEvent.builder().
+                                info( mapper.readValue( event.readData(), AppInfo.class ) ).
+                                namespace( namespace ).
+                                build() );
+                            break;
+                        case "uninstalled":
+                            eventConsumer.accept( ImmutableAppEvent.builder().
+                                uninstall( mapper.readValue( event.readData(), AppKey.class ) ).
+                                namespace( namespace ).
+                                build() );
+                            break;
+                        default:
+                            throw new RuntimeException( String.format( "Unknown SSE event '%s'", event.getName() ) );
+                    }
                 }
-            }, e -> log.error( "Error recieving SSE event", e ) );
-            eventSource.open();
+                catch ( Exception e )
+                {
+                    log.error( "Failed to parse SSE event", e );
+                }
+            }, e -> log.error( "Error receiving SSE event", e ) );
         }
-        catch ( Exception e )
+        if ( !eventSource.isOpen() )
         {
-            log.error( String.format( "SSE connection with XP failed in NS '%s'", namespace ), e );
+            eventSource.open();
         }
     }
 
     @SuppressWarnings("WeakerAccess")
     public AppInfo install( final String namespace, final String url )
     {
-        AppInstallResponse res =
-            getCreator( namespace ).managementApi().appInstall( ImmutableAppInstallRequest.builder().url( url ).build() );
+        AppInstallResponse res = getCreator( namespace ).appsApi().appInstall( ImmutableAppInstallRequest.builder().url( url ).build() );
         if ( res.failure() == null )
         {
             log( namespace, "INSTALL app", res.applicationInstalledJson().application().key() );
@@ -109,19 +132,19 @@ public class XpClientCache
     public void uninstall( final String namespace, final String key )
     {
         log( namespace, "UNINSTALL app", key );
-        getCreator( namespace ).managementApi().appUninstall( ImmutableAppKey.builder().key( key ).build() );
+        getCreator( namespace ).appsApi().appUninstall( ImmutableAppKey.builder().key( key ).build() );
     }
 
     public void start( final String namespace, final String key )
     {
         log( namespace, "START app", key );
-        getCreator( namespace ).managementApi().appStart( ImmutableAppKey.builder().key( key ).build() );
+        getCreator( namespace ).appsApi().appStart( ImmutableAppKey.builder().key( key ).build() );
     }
 
     public void stop( final String namespace, final String key )
     {
         log( namespace, "STOP app", key );
-        getCreator( namespace ).managementApi().appStop( ImmutableAppKey.builder().key( key ).build() );
+        getCreator( namespace ).appsApi().appStop( ImmutableAppKey.builder().key( key ).build() );
     }
 
     private void log( String namespace, String action, String key )

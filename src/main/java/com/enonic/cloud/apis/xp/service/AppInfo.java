@@ -27,12 +27,14 @@ public abstract class AppInfo
     @Nullable
     public abstract List<Object> metaSteps();
 
-    public abstract boolean deletable();
+    @Nullable
+    public abstract Boolean deletable();
 
     @Nullable
     public abstract String displayName();
 
-    public abstract boolean editable();
+    @Nullable
+    public abstract Boolean editable();
 
     public abstract String key();
 
