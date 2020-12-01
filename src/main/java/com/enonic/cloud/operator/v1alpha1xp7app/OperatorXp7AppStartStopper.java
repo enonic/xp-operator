@@ -33,9 +33,6 @@ public class OperatorXp7AppStartStopper
     @Inject
     XpClientCache xpClientCache;
 
-    @Inject
-    OperatorXp7AppStatus operatorXp7AppStatus;
-
     @Override
     public void onNewAdd( final Xp7App newResource )
     {

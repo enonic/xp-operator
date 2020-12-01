@@ -1,10 +1,7 @@
 package com.enonic.cloud.apis.xp;
 
-import java.util.concurrent.TimeUnit;
-
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.sse.SseEventSource;
 
 import org.immutables.value.Value;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
@@ -19,18 +16,12 @@ import org.jboss.resteasy.plugins.interceptors.GZIPEncodingInterceptor;
 import com.enonic.cloud.apis.xp.service.CustomRestHeaderFilter;
 import com.enonic.cloud.apis.xp.service.ManagementApi;
 
-import static com.enonic.cloud.common.Configuration.cfgStr;
-
 @Value.Immutable
-public abstract class XpClientCreator
+public abstract class XpClient
 {
     private static final ApacheHttpClient43Engine engine = new ApacheHttpClient43Engine();
 
-    @Value.Default
-    public String serviceName()
-    {
-        return cfgStr( "operator.charts.values.allNodesKey" );
-    }
+    protected abstract String nodeGroup();
 
     public abstract String namespace();
 
@@ -42,11 +33,14 @@ public abstract class XpClientCreator
 
     public abstract String password();
 
-    @Value.Derived
-    protected String deploymentHost()
+    protected UriBuilder uri()
     {
-        //return String.format( "http://localhost:8001/api/v1/namespaces/%s/services/%s:4848/proxy", namespace(), serviceName() );
-        return String.format( "%s.%s.svc.cluster.local", serviceName(), namespace() );
+        return uri( "" );
+    }
+
+    protected UriBuilder uri( final String path )
+    {
+        return UriBuilder.fromPath( String.format( "http://%s.%s.svc.cluster.local:4848%s", nodeGroup(), namespace(), path ) );
     }
 
     @Value.Default
@@ -67,34 +61,18 @@ public abstract class XpClientCreator
         return new ResteasyClientBuilderImpl().httpEngine( engine ).build();
     }
 
-    private ResteasyWebTarget createTarget( UriBuilder uriBuilder )
+    protected XpClientAppListener appsSSE()
     {
-        ResteasyWebTarget target = client().target( uriBuilder );
-        target.register( basicAuthentication() );
-        target.register( new CustomRestHeaderFilter( "Host", "localhost" ) );
-        target.register( AcceptEncodingGZIPFilter.class );
-        target.register( GZIPDecodingInterceptor.class );
-        target.register( GZIPEncodingInterceptor.class );
-        return target;
-    }
-
-    @Value.Derived
-    public SseEventSource appsSSE()
-    {
-        WebTarget target = client().target( UriBuilder.fromPath( "http://" + deploymentHost() + ":" + port() + "/app/events" ) );
+        WebTarget target = client().target( uri( "/app/events" ) );
         target.register( new CustomRestHeaderFilter( "Accept-Encoding", null ) );
         target.register( basicAuthentication() );
-        SseEventSource eventSource = SseEventSource.
-            target( target ).
-            reconnectingEvery( 60, TimeUnit.SECONDS ).
-            build();
-        return eventSource;
+        return new XpClientAppListener( target, nodeGroup(), namespace() );
     }
 
     @Value.Derived
     public ManagementApi appsApi()
     {
-        ResteasyWebTarget target = client().target( UriBuilder.fromPath( "http://" + deploymentHost() + ":" + port() ) );
+        ResteasyWebTarget target = client().target( uri() );
         target.register( basicAuthentication() );
         target.register( AcceptEncodingGZIPFilter.class );
         target.register( GZIPDecodingInterceptor.class );

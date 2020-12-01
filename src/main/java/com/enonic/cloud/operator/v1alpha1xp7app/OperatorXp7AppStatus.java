@@ -8,6 +8,7 @@ import javax.inject.Singleton;
 
 import com.enonic.cloud.apis.xp.XpClientCache;
 import com.enonic.cloud.apis.xp.service.AppEvent;
+import com.enonic.cloud.apis.xp.service.AppEventType;
 import com.enonic.cloud.apis.xp.service.AppInfo;
 import com.enonic.cloud.kubernetes.Clients;
 import com.enonic.cloud.kubernetes.Searchers;
@@ -42,9 +43,10 @@ public class OperatorXp7AppStatus
     @Override
     public void run()
     {
+        // Ensure app listener in every namespace
         searchers.xp7Deployment().query().
             stream().
-            sorted( hasMetadataComparator() ).
+            sorted( hasMetadataComparator() ). // Sort by metadata
             map( d -> d.getMetadata().getNamespace() ).
             forEach( n -> {
                 if ( xp7DeploymentInfo.xpRunning( n ) )
@@ -57,74 +59,61 @@ public class OperatorXp7AppStatus
     @Override
     public void accept( final AppEvent appEvent )
     {
-        String key = appEvent.info() != null ? appEvent.info().key() : appEvent.uninstall().key();
-        Optional<Xp7App> optionalXp7App = searchers.xp7App().query().
-            inNamespace( appEvent.namespace() ).
-            filter( a -> filterAppByKey( a, key ) ).
-            get();
+        // Find app key and match with k8s resource
+        Optional<Xp7App> optionalXp7App = matchEvent( appEvent );
 
+        // If no match is found, exit
         if ( optionalXp7App.isEmpty() )
         {
             return;
         }
-
         Xp7App app = optionalXp7App.get();
 
         // If app has been uninstalled but not deleted in K8s
-        if ( appEvent.uninstall() != null )
+        if ( appEvent.type() == AppEventType.UNINSTALLED )
         {
             if ( app.getMetadata().getDeletionTimestamp() == null )
             {
                 // Trigger reinstall
-                K8sLogHelper.logDoneable( clients.xp7Apps().crdClient().
-                    inNamespace( app.getMetadata().getNamespace() ).
-                    withName( app.getMetadata().getName() ).
-                    edit().
-                    withStatus( null ) );
+                reinstall( app );
             }
             return;
         }
 
-        AppInfo newState = appEvent.info();
+        // Collect info
+        AppInfo info = appEvent.info();
         Xp7AppStatusFieldsAppInfo oldState = app.getXp7AppStatus().getXp7AppStatusFields().getXp7AppStatusFieldsAppInfo();
         int oldStatusHash = app.getXp7AppStatus().hashCode();
 
         // If version in XP does not match version in K8s
-        if ( !newState.version().equals( oldState.getVersion() ) )
+        if ( !info.version().equals( oldState.getVersion() ) )
         {
             // Trigger reinstall
-            K8sLogHelper.logDoneable( clients.xp7Apps().crdClient().
-                inNamespace( app.getMetadata().getNamespace() ).
-                withName( app.getMetadata().getName() ).
-                edit().
-                withStatus( null ) );
+            reinstall( app );
             return;
         }
 
-        Xp7AppStatus.State xp7AppState = "started".equals( newState.state() ) ? Xp7AppStatus.State.RUNNING : Xp7AppStatus.State.STOPPED;
-        Xp7AppStatus newStatus = new Xp7AppStatus().
-            withState( xp7AppState ).
-            withMessage( "OK" ).
-            withXp7AppStatusFields( new Xp7AppStatusFields().
-                withXp7AppStatusFieldsAppInfo( new Xp7AppStatusFieldsAppInfo().
-                    withDescription( newState.description() ).
-                    withDisplayName( newState.displayName() ).
-                    withKey( newState.key() ).
-                    withModifiedTime( newState.modifiedTime() ).
-                    withState( newState.state() ).
-                    withUrl( newState.url() ).
-                    withVendorName( newState.vendorName() ).
-                    withVendorUrl( newState.vendorUrl() ).
-                    withVersion( newState.version() ) ) );
+        // Update status
+        Xp7AppStatus newStatus = createNewStatus( info );
 
+        // If status has changed
         if ( newStatus.hashCode() != oldStatusHash )
         {
+            // Update status
             K8sLogHelper.logDoneable( clients.xp7Apps().crdClient().
                 inNamespace( app.getMetadata().getNamespace() ).
                 withName( app.getMetadata().getName() ).
                 edit().
                 withStatus( newStatus ) );
         }
+    }
+
+    private Optional<Xp7App> matchEvent( AppEvent appEvent )
+    {
+        return searchers.xp7App().query().
+            inNamespace( appEvent.namespace() ).
+            filter( a -> filterAppByKey( a, appEvent.key() ) ).
+            get();
     }
 
     private boolean filterAppByKey( final Xp7App app, final String key )
@@ -134,5 +123,47 @@ public class OperatorXp7AppStatus
             return false;
         }
         return app.getXp7AppStatus().getXp7AppStatusFields().getXp7AppStatusFieldsAppInfo().getKey().equals( key );
+    }
+
+    private Xp7AppStatus createNewStatus( final AppInfo info )
+    {
+        Xp7AppStatus.State state = null;
+        String message = "OK";
+        switch ( info.state() )
+        {
+            case "started":
+                state = Xp7AppStatus.State.RUNNING;
+                break;
+            case "stopped":
+                state = Xp7AppStatus.State.STOPPED;
+                break;
+            default:
+                state = Xp7AppStatus.State.ERROR;
+                message = String.format( "Invalid app state '%'", info.state() );
+        }
+
+        return new Xp7AppStatus().
+            withState( state ).
+            withMessage( message ).
+            withXp7AppStatusFields( new Xp7AppStatusFields().
+                withXp7AppStatusFieldsAppInfo( new Xp7AppStatusFieldsAppInfo().
+                    withDescription( info.description() ).
+                    withDisplayName( info.displayName() ).
+                    withKey( info.key() ).
+                    withModifiedTime( info.modifiedTime() ).
+                    withState( info.state() ).
+                    withUrl( info.url() ).
+                    withVendorName( info.vendorName() ).
+                    withVendorUrl( info.vendorUrl() ).
+                    withVersion( info.version() ) ) );
+    }
+
+    private void reinstall( Xp7App app )
+    {
+        K8sLogHelper.logDoneable( clients.xp7Apps().crdClient().
+            inNamespace( app.getMetadata().getNamespace() ).
+            withName( app.getMetadata().getName() ).
+            edit().
+            withStatus( null ) );
     }
 }
