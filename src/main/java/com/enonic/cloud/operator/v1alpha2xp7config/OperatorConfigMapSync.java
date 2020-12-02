@@ -56,8 +56,21 @@ public class OperatorConfigMapSync
         configMaps.forEach( this::handle );
     }
 
-    private void handle( final ConfigMap configMap )
+    private synchronized void handle( final ConfigMap configMap )
     {
+        // First lets check if namespace is being deleted
+        boolean namespaceBeingDeleted = searchers.namespace().
+            query().
+            filter( n -> n.getMetadata().getName().equals( configMap.getMetadata().getNamespace() ) ).
+            filter( n -> n.getMetadata().getDeletionTimestamp() != null ).
+            get().isPresent();
+
+        // If so, just exit
+        if ( namespaceBeingDeleted )
+        {
+            return;
+        }
+
         // Create a list ['all', '<nodeGroup>']
         List<String> nodeGroups = Arrays.asList( cfgStr( "operator.charts.values.allNodesKey" ), configMap.getMetadata().
             getLabels().
@@ -74,6 +87,7 @@ public class OperatorConfigMapSync
         Map<String, String> binaryData = new HashMap<>();
 
         // Populate data
+        StringBuilder index = new StringBuilder();
         for ( Xp7Config c : configs )
         {
             if ( Objects.equals( c.getXp7ConfigSpec().getDataBase64(), true ) )
@@ -84,7 +98,12 @@ public class OperatorConfigMapSync
             {
                 data.put( c.getXp7ConfigSpec().getFile(), c.getXp7ConfigSpec().getData() );
             }
+            index.
+                append( c.getMetadata().getName() ).append( "\t" ).
+                append( c.getXp7ConfigSpec().getNodeGroup() ).append( "\t" ).
+                append( c.getXp7ConfigSpec().getFile() ).append( "\n" );
         }
+        data.put( "operator-index", index.toString() );
 
         // Get old data
         Map<String, String> oldData = configMap.getData() != null ? configMap.getData() : Collections.emptyMap();

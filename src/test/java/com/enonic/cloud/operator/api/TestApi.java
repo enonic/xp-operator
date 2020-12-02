@@ -59,7 +59,8 @@ class TestApi
         TestInformerSearcher emptyInformerSearcher = new TestInformerSearcher();
         deploymentTestInformerSearcher = new TestInformerSearcher<>();
         searchers = SearchersImpl.of( emptyInformerSearcher, emptyInformerSearcher, emptyInformerSearcher, emptyInformerSearcher,
-                                      emptyInformerSearcher, emptyInformerSearcher, deploymentTestInformerSearcher, emptyInformerSearcher );
+                                      emptyInformerSearcher, emptyInformerSearcher, deploymentTestInformerSearcher, emptyInformerSearcher,
+                                      emptyInformerSearcher );
         mutationApi = new TestMutationApi( mapper, searchers );
         admissionApi = new TestAdmissionApi( mapper, searchers );
     }
@@ -86,7 +87,8 @@ class TestApi
         try
         {
             TestFile test = mapper.readValue( file, TestFile.class );
-            if( test.disabled() ) {
+            if ( test.disabled() )
+            {
                 return;
             }
 

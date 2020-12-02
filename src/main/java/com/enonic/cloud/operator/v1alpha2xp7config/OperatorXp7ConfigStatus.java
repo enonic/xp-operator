@@ -1,42 +1,35 @@
 package com.enonic.cloud.operator.v1alpha2xp7config;
 
-import java.io.ByteArrayOutputStream;
-import java.util.LinkedList;
+import java.time.Instant;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.io.BaseEncoding;
-
-import io.fabric8.kubernetes.api.model.ContainerStatus;
-import io.fabric8.kubernetes.api.model.Doneable;
+import io.fabric8.kubernetes.api.model.Event;
+import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.client.dsl.ExecListener;
-import io.fabric8.kubernetes.client.dsl.ExecWatch;
-import okhttp3.Response;
 
 import com.enonic.cloud.kubernetes.Clients;
-import com.enonic.cloud.kubernetes.InformerSearcher;
-import com.enonic.cloud.kubernetes.ResourceQuery;
 import com.enonic.cloud.kubernetes.Searchers;
+import com.enonic.cloud.kubernetes.commands.K8sLogHelper;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7config.Xp7Config;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7config.Xp7ConfigStatus;
-import com.enonic.cloud.operator.helpers.HandlerStatus;
+import com.enonic.cloud.operator.helpers.InformerEventHandler;
 
 import static com.enonic.cloud.common.Configuration.cfgStr;
 
+/**
+ * This operator class triggers maintains the Xp7Config status field
+ */
 @Singleton
 public class OperatorXp7ConfigStatus
-    extends HandlerStatus<Xp7Config, Xp7ConfigStatus>
+    extends InformerEventHandler<Event>
 {
-    private static final Logger log = LoggerFactory.getLogger( OperatorXp7ConfigStatus.class );
-
     @Inject
     Clients clients;
 
@@ -44,149 +37,128 @@ public class OperatorXp7ConfigStatus
     Searchers searchers;
 
     @Override
-    protected InformerSearcher<Xp7Config> informerSearcher()
+    public void onNewAdd( final Event newEvent )
     {
-        return searchers.xp7Config();
+        handle( newEvent );
     }
 
     @Override
-    protected Xp7ConfigStatus getStatus( final Xp7Config resource )
+    public void onUpdate( final Event oldEvent, final Event newEvent )
     {
-        return resource.getXp7ConfigStatus();
+        // Do nothing
     }
 
     @Override
-    protected Doneable<Xp7Config> updateStatus( final Xp7Config resource, final Xp7ConfigStatus newStatus )
+    public void onDelete( final Event newEvent, final boolean b )
     {
-        return clients.xp7Configs().crdClient().
-            inNamespace( resource.getMetadata().getNamespace() ).
-            withName( resource.getMetadata().getName() ).
+        // Do nothing
+    }
+
+    private synchronized void handle( final Event newEvent )
+    {
+        if ( !"ConfigReload".equals( newEvent.getReason() ) )
+        {
+            return;
+        }
+
+        // Find out when the configmap was last updated
+        Optional<Instant> configMapLastModifiedAt = searchers.event().query().
+            inNamespace( newEvent.getMetadata().getNamespace() ).
+            stream().
+            filter( e -> "ConfigModified".equals( e.getReason() ) ).
+            filter( e -> e.getInvolvedObject().getName().equals( newEvent.getRelated().getName() ) ).
+            sorted( Comparator.comparing( ( HasMetadata a ) -> a.getMetadata().getCreationTimestamp() ).reversed() ).
+            map( e -> Instant.parse( e.getMetadata().getCreationTimestamp() ) ).
+            findFirst();
+
+        // We cant make any assumptions if last modified is nonexistent
+        if ( configMapLastModifiedAt.isEmpty() )
+        {
+            return;
+        }
+
+        // Find pods that have been updated since then
+        List<String> updatedPods = searchers.event().
+            query().
+            inNamespace( newEvent.getMetadata().getNamespace() ).
+            filter( e -> "ConfigReload".equals( e.getReason() ) ).
+            youngerThen( configMapLastModifiedAt.get() ).
+            stream().
+            map( e -> e.getInvolvedObject().getName() ).
+            collect( Collectors.toList() );
+
+        // Pods that have not been updated
+        List<Pod> notUpdatedPods = searchers.pod().query().
+            inNamespace( newEvent.getMetadata().getNamespace() ).
+            isEnonicManaged().
+            filter( p -> !updatedPods.contains( p.getMetadata().getName() ) ).
+            list();
+
+        // Collect relevant XP7 configs and handle them
+        searchers.xp7Config().
+            query().
+            inNamespace( newEvent.getMetadata().getNamespace() ).
+            filter( c -> c.getXp7ConfigStatus().getState() != Xp7ConfigStatus.State.READY ).
+            forEach( c -> handle( c, notUpdatedPods ) );
+    }
+
+    private boolean handle( final Xp7Config xp7Config, final List<Pod> notUpdatedPods )
+    {
+        // All pods are updated, mark as ready
+        if ( notUpdatedPods.isEmpty() )
+        {
+            return markReady( xp7Config );
+        }
+
+        // This should apply to all pods, and some are not ready
+        if ( xp7Config.getXp7ConfigSpec().getNodeGroup().equals( cfgStr( "operator.charts.values.allNodesKey" ) ) )
+        {
+            return markPending( xp7Config, notUpdatedPods );
+        }
+
+        // This should apply to a particular node group
+        List<Pod> relevantNonUpdated = notUpdatedPods.stream().
+            filter( p -> Objects.equals( p.getMetadata().
+                getLabels().
+                get( cfgStr( "operator.charts.values.labelKeys.nodeGroup" ) ), xp7Config.getXp7ConfigSpec().
+                getNodeGroup() ) ).
+            collect( Collectors.toList() );
+
+        if ( relevantNonUpdated.isEmpty() )
+        {
+            return markReady( xp7Config );
+        }
+        else
+        {
+            return markPending( xp7Config, relevantNonUpdated );
+        }
+    }
+
+    private boolean markPending( final Xp7Config xp7Config, final List<Pod> notUpdatedPods )
+    {
+        String podNames = notUpdatedPods.stream().
+            map( p -> p.getMetadata().getName() ).
+            collect( Collectors.joining( ", " ) );
+
+        K8sLogHelper.logDoneable( clients.xp7Configs().crdClient().
+            inNamespace( xp7Config.getMetadata().getNamespace() ).
+            withName( xp7Config.getMetadata().getName() ).
             edit().
-            withStatus( newStatus );
-    }
-
-    @Override
-    protected Xp7ConfigStatus pollStatus( final Xp7Config config )
-    {
-        // If config has been flagged ready, do not try to set the state again
-        if ( config.getXp7ConfigStatus().getState() == Xp7ConfigStatus.State.READY )
-        {
-            return config.getXp7ConfigStatus();
-        }
-
-        // Get all pods
-        ResourceQuery<Pod> stream = searchers.pod().query().
-            inNamespace( config.getMetadata().getNamespace() );
-
-        // Filter by nodegroup if needed
-        if ( !Objects.equals( config.getXp7ConfigSpec().getNodeGroup(), cfgStr( "operator.charts.values.allNodesKey" ) ) )
-        {
-            stream = stream.hasLabel( cfgStr( "operator.charts.values.labelKeys.nodeGroup" ), config.getXp7ConfigSpec().getNodeGroup() );
-        }
-
-        // Find expected contents
-        String fileName = config.getXp7ConfigSpec().getFile();
-        String expectedContents = config.getXp7ConfigSpec().getData();
-        if ( !config.getXp7ConfigSpec().getDataBase64() )
-        {
-            expectedContents = BaseEncoding.
-                base64().
-                encode( expectedContents.getBytes() );
-        }
-
-        // Iterate over pods
-        List<String> waitingForPods = new LinkedList<>();
-        for ( Pod p : stream.list() )
-        {
-            if ( !configLoaded( p, fileName, expectedContents ) )
-            {
-                waitingForPods.add( p.getMetadata().getName() );
-            }
-        }
-
-        // If we are still waiting
-        if ( !waitingForPods.isEmpty() )
-        {
-            waitingForPods.sort( String::compareTo );
-            return new Xp7ConfigStatus().
+            withStatus( new Xp7ConfigStatus().
                 withState( Xp7ConfigStatus.State.PENDING ).
-                withMessage( String.format( "Waiting for pods: %s", waitingForPods ) );
-        }
-
-        // If all pods are ready, return OK
-        return new Xp7ConfigStatus().
-            withState( Xp7ConfigStatus.State.READY ).
-            withMessage( "OK" );
+                withMessage( "Not loaded: " + podNames ) ) );
+        return false;
     }
 
-    private boolean configLoaded( final Pod pod, final String fileName, final String expectedContents )
+    private boolean markReady( final Xp7Config xp7Config )
     {
-        // Check pod
-        if ( !Objects.equals( pod.getStatus().getPhase(), "Running" ) )
-        {
-            return false;
-        }
-
-        // Check exp container
-        boolean expRunning = false;
-        for ( ContainerStatus cStatus : pod.getStatus().getContainerStatuses() )
-        {
-            if ( cStatus.getName().equals( "exp" ) && cStatus.getState().getRunning() != null )
-            {
-                expRunning = true;
-                break;
-            }
-        }
-        if ( !expRunning )
-        {
-            return false;
-        }
-
-        // Extract config file from pod in base64 format
-        String base64Contents = null;
-        try
-        {
-            final boolean[] done = {false};
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            ExecWatch exec = clients.k8s().pods().
-                inNamespace( pod.getMetadata().getNamespace() ).
-                withName( pod.getMetadata().getName() ).
-                inContainer( "exp" ).
-                writingOutput( os ).
-                usingListener( new ExecListener()
-                {
-                    @Override
-                    public void onOpen( final Response response )
-                    {
-                        // Do Nothing
-                    }
-
-                    @Override
-                    public void onFailure( final Throwable throwable, final Response response )
-                    {
-                        // Do Nothing
-                    }
-
-                    @Override
-                    public void onClose( final int i, final String s )
-                    {
-                        done[0] = true;
-                    }
-                } ).
-                exec( "base64", "-w", "0", String.format( "%s/%s", cfgStr( "operator.charts.values.dirs.config" ), fileName ) );
-            while ( !done[0] )
-            {
-                Thread.sleep( 200L );
-            }
-            exec.close();
-            base64Contents = IOUtils.toString( os.toByteArray(), "UTF-8" );
-        }
-        catch ( Exception e )
-        {
-            log.debug( "Failed getting config from pod", e );
-        }
-
-        // Compare extracted value with expected value
-        return Objects.equals( expectedContents, base64Contents );
+        K8sLogHelper.logDoneable( clients.xp7Configs().crdClient().
+            inNamespace( xp7Config.getMetadata().getNamespace() ).
+            withName( xp7Config.getMetadata().getName() ).
+            edit().
+            withStatus( new Xp7ConfigStatus().
+                withState( Xp7ConfigStatus.State.READY ).
+                withMessage( "OK" ) ) );
+        return true;
     }
 }

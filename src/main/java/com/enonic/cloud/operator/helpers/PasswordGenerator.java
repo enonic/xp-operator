@@ -1,36 +1,32 @@
 package com.enonic.cloud.operator.helpers;
 
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.List;
 
 public class PasswordGenerator
 {
     private static final SecureRandom random = new SecureRandom();
 
-    private static final List<Character> letters = new ArrayList<>();
+    // Set taken from LastPass password generation
+    private static final String letters = "@!#$%&*^0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-    static
-    {
-        // Set taken from LastPass password generation
-        "@!#$%&*^0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".
-            chars().
-            forEach( c -> letters.add( (char) c ) );
-    }
-
-    private static char getRandomChar()
-    {
-        return letters.get( random.nextInt( letters.size() ) );
-    }
-
-    public static String getPassword( int length )
+    public static String getRandomScramble( String pool, int length )
     {
         StringBuilder sb = new StringBuilder();
         for ( int i = 0; i < length; i++ )
         {
-            sb.append( getRandomChar() );
+            sb.append( getRandomChar( pool ) );
         }
         return sb.toString();
+    }
+
+    private static char getRandomChar( String pool )
+    {
+        return pool.charAt( random.nextInt( pool.length() ) );
+    }
+
+    public static String getPassword( int length )
+    {
+        return getRandomScramble( letters, length );
     }
 
     public static void main( String[] args )
