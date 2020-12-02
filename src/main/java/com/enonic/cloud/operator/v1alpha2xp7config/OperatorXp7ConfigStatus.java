@@ -151,6 +151,7 @@ public class OperatorXp7ConfigStatus
             ExecWatch exec = clients.k8s().pods().
                 inNamespace( pod.getMetadata().getNamespace() ).
                 withName( pod.getMetadata().getName() ).
+                inContainer( "exp" ).
                 writingOutput( os ).
                 usingListener( new ExecListener()
                 {

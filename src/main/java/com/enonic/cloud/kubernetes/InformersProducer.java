@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapList;
+import io.fabric8.kubernetes.api.model.Event;
+import io.fabric8.kubernetes.api.model.EventList;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.NamespaceList;
 import io.fabric8.kubernetes.api.model.Pod;
@@ -49,6 +51,7 @@ public class InformersProducer
             ingressInformer( ingressInformer( sf ) ).
             namespaceInformer( namespaceInformer( sf ) ).
             podInformer( podInformer( sf ) ).
+            eventInformer( eventInformer( sf ) ).
             xp7AppInformer( xp7AppInformer( clients, sf ) ).
             xp7ConfigInformer( xp7ConfigInformer( clients, sf ) ).
             xp7DeploymentInformer( xp7DeploymentInformer( clients, sf ) ).
@@ -74,6 +77,11 @@ public class InformersProducer
     private SharedIndexInformer<Pod> podInformer( final SharedInformerFactory sf )
     {
         return sf.sharedIndexInformerFor( Pod.class, PodList.class, informerReSync );
+    }
+
+    private SharedIndexInformer<Event> eventInformer( final SharedInformerFactory sf )
+    {
+        return sf.sharedIndexInformerFor( Event.class, EventList.class, informerReSync );
     }
 
     private SharedIndexInformer<Xp7App> xp7AppInformer( final Clients clients, final SharedInformerFactory sf )
