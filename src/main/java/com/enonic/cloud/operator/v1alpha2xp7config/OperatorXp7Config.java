@@ -6,6 +6,9 @@ import javax.inject.Singleton;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7config.Xp7Config;
 import com.enonic.cloud.operator.helpers.InformerEventHandler;
 
+import static com.enonic.cloud.kubernetes.Predicates.fieldEquals;
+import static com.enonic.cloud.kubernetes.Predicates.onCondition;
+
 /**
  * This operator class triggers ConfigMap sync on Xp7Config changes
  */
@@ -25,11 +28,7 @@ public class OperatorXp7Config
     @Override
     public void onUpdate( final Xp7Config oldResource, final Xp7Config newResource )
     {
-        if ( !oldResource.getXp7ConfigSpec().equals( newResource.getXp7ConfigSpec() ) )
-        {
-            // If the spec changed, roll out the update
-            handle( newResource );
-        }
+        onCondition( newResource, this::handle, fieldEquals( oldResource, Xp7Config::getXp7ConfigSpec ).negate() );
     }
 
     @Override

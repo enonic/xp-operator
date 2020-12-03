@@ -1,9 +1,7 @@
 package com.enonic.cloud.operator.v1alpha2xp7config;
 
 import java.time.Instant;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -11,7 +9,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.fabric8.kubernetes.api.model.Event;
-import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.Pod;
 
 import com.enonic.cloud.kubernetes.Clients;
@@ -22,6 +19,11 @@ import com.enonic.cloud.kubernetes.model.v1alpha2.xp7config.Xp7ConfigStatus;
 import com.enonic.cloud.operator.helpers.InformerEventHandler;
 
 import static com.enonic.cloud.common.Configuration.cfgStr;
+import static com.enonic.cloud.kubernetes.Comparators.creationTime;
+import static com.enonic.cloud.kubernetes.Predicates.createdAfter;
+import static com.enonic.cloud.kubernetes.Predicates.inSameNamespace;
+import static com.enonic.cloud.kubernetes.Predicates.isEnonicManaged;
+import static com.enonic.cloud.kubernetes.Predicates.matchLabel;
 
 /**
  * This operator class triggers maintains the Xp7Config status field
@@ -39,7 +41,10 @@ public class OperatorXp7ConfigStatus
     @Override
     public void onNewAdd( final Event newEvent )
     {
-        handle( newEvent );
+        if ( "ConfigReload".equals( newEvent.getReason() ) )
+        {
+            handle( newEvent );
+        }
     }
 
     @Override
@@ -56,18 +61,12 @@ public class OperatorXp7ConfigStatus
 
     private synchronized void handle( final Event newEvent )
     {
-        if ( !"ConfigReload".equals( newEvent.getReason() ) )
-        {
-            return;
-        }
-
         // Find out when the configmap was last updated
-        Optional<Instant> configMapLastModifiedAt = searchers.event().query().
-            inNamespace( newEvent.getMetadata().getNamespace() ).
-            stream().
+        Optional<Instant> configMapLastModifiedAt = searchers.event().stream().
+            filter( inSameNamespace( newEvent ) ).
             filter( e -> "ConfigModified".equals( e.getReason() ) ).
             filter( e -> e.getInvolvedObject().getName().equals( newEvent.getRelated().getName() ) ).
-            sorted( Comparator.comparing( ( HasMetadata a ) -> a.getMetadata().getCreationTimestamp() ).reversed() ).
+            sorted( creationTime().reversed() ).
             map( e -> Instant.parse( e.getMetadata().getCreationTimestamp() ) ).
             findFirst();
 
@@ -78,26 +77,23 @@ public class OperatorXp7ConfigStatus
         }
 
         // Find pods that have been updated since then
-        List<String> updatedPods = searchers.event().
-            query().
-            inNamespace( newEvent.getMetadata().getNamespace() ).
+        List<String> updatedPods = searchers.event().stream().
+            filter( inSameNamespace( newEvent ) ).
             filter( e -> "ConfigReload".equals( e.getReason() ) ).
-            youngerThen( configMapLastModifiedAt.get() ).
-            stream().
+            filter( createdAfter( configMapLastModifiedAt.get() ) ).
             map( e -> e.getInvolvedObject().getName() ).
             collect( Collectors.toList() );
 
         // Pods that have not been updated
-        List<Pod> notUpdatedPods = searchers.pod().query().
-            inNamespace( newEvent.getMetadata().getNamespace() ).
-            isEnonicManaged().
+        List<Pod> notUpdatedPods = searchers.pod().stream().
+            filter( inSameNamespace( newEvent ) ).
+            filter( isEnonicManaged() ).
             filter( p -> !updatedPods.contains( p.getMetadata().getName() ) ).
-            list();
+            collect( Collectors.toList() );
 
         // Collect relevant XP7 configs and handle them
-        searchers.xp7Config().
-            query().
-            inNamespace( newEvent.getMetadata().getNamespace() ).
+        searchers.xp7Config().stream().
+            filter( inSameNamespace( newEvent ) ).
             filter( c -> c.getXp7ConfigStatus().getState() != Xp7ConfigStatus.State.READY ).
             forEach( c -> handle( c, notUpdatedPods ) );
     }
@@ -118,10 +114,7 @@ public class OperatorXp7ConfigStatus
 
         // This should apply to a particular node group
         List<Pod> relevantNonUpdated = notUpdatedPods.stream().
-            filter( p -> Objects.equals( p.getMetadata().
-                getLabels().
-                get( cfgStr( "operator.charts.values.labelKeys.nodeGroup" ) ), xp7Config.getXp7ConfigSpec().
-                getNodeGroup() ) ).
+            filter( matchLabel( cfgStr( "operator.charts.values.labelKeys.nodeGroup" ), xp7Config.getXp7ConfigSpec().getNodeGroup() ) ).
             collect( Collectors.toList() );
 
         if ( relevantNonUpdated.isEmpty() )

@@ -1,7 +1,6 @@
 package com.enonic.cloud.operator.v1alpha2xp7config;
 
 import java.time.Instant;
-import java.util.Objects;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -15,7 +14,9 @@ import com.enonic.cloud.kubernetes.commands.ImmutableK8sCommand;
 import com.enonic.cloud.kubernetes.commands.K8sCommandAction;
 import com.enonic.cloud.operator.helpers.InformerEventHandler;
 
-import static com.enonic.cloud.common.Configuration.cfgStr;
+import static com.enonic.cloud.kubernetes.Predicates.dataEquals;
+import static com.enonic.cloud.kubernetes.Predicates.isEnonicManaged;
+import static com.enonic.cloud.kubernetes.Predicates.onCondition;
 import static com.enonic.cloud.operator.helpers.PasswordGenerator.getRandomScramble;
 
 /**
@@ -31,22 +32,13 @@ public class OperatorConfigMapEvent
     @Override
     protected void onNewAdd( final ConfigMap newCm )
     {
-        if ( managed( newCm ) )
-        {
-            handle( newCm );
-        }
+        onCondition( newCm, this::handle, isEnonicManaged() );
     }
 
     @Override
     public void onUpdate( final ConfigMap oldCm, final ConfigMap newCm )
     {
-        if ( managed( newCm ) )
-        {
-            if ( !Objects.equals( oldCm.getData(), newCm.getData() ) || !Objects.equals( oldCm.getBinaryData(), newCm.getBinaryData() ) )
-            {
-                handle( newCm );
-            }
-        }
+        onCondition( newCm, this::handle, isEnonicManaged(), dataEquals( oldCm ).negate() );
     }
 
     @Override
@@ -57,6 +49,7 @@ public class OperatorConfigMapEvent
 
     private void handle( final ConfigMap newCm )
     {
+        // Build new Event
         Event event = new EventBuilder().editOrNewMetadata().
             withNamespace( newCm.getMetadata().getNamespace() ).
             withName( newCm.getMetadata().getName() + "." + getRandomScramble( "0123456789abcdefghijklmnopqrstuvwxyz", 16 ) ).
@@ -73,17 +66,12 @@ public class OperatorConfigMapEvent
             withType( "Normal" ).
             build();
 
+        // Send event
         ImmutableK8sCommand.builder().
             action( K8sCommandAction.CREATE ).
             resource( event ).
             wrappedRunnable( () -> clients.k8s().events().create( event ) ).
             build().
             run();
-    }
-
-    private boolean managed( final ConfigMap newCm )
-    {
-        return newCm.getMetadata().getLabels() != null &&
-            Objects.equals( newCm.getMetadata().getLabels().get( cfgStr( "operator.charts.values.labelKeys.managed" ) ), "true" );
     }
 }
