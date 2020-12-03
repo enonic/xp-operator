@@ -68,6 +68,7 @@ public class OperatorXp7DeploymentHelm
         return templator;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected Xp7DeploymentSpec getSpec( final Xp7Deployment t )
     {

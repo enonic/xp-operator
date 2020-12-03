@@ -2,11 +2,11 @@ package com.enonic.cloud.operator.api;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 
 import com.enonic.cloud.kubernetes.InformerSearcher;
-import com.enonic.cloud.kubernetes.ResourceQuery;
 
 public class TestInformerSearcher<T extends HasMetadata>
     extends InformerSearcher<T>
@@ -19,9 +19,9 @@ public class TestInformerSearcher<T extends HasMetadata>
     }
 
     @Override
-    public ResourceQuery<T> query()
+    public Stream<T> stream()
     {
-        return new ResourceQuery<>( list.stream() );
+        return list.stream();
     }
 
     public void add( T r )

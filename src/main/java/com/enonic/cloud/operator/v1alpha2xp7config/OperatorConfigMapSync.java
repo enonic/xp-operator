@@ -46,7 +46,7 @@ public class OperatorConfigMapSync
     @Override
     protected Stream<Xp7Config> resourceStream()
     {
-        return searchers.xp7Config().query().stream();
+        return searchers.xp7Config().stream();
     }
 
     @Override

@@ -1,0 +1,25 @@
+admissionRequest:
+  request:
+    operation: CREATE
+    object:
+      apiVersion: networking.k8s.io/v1beta1
+      kind: Ingress
+      metadata:
+        name: test-domain-purplejs-io
+        namespace: mycloud-mysolution-myenv-myservice
+        annotations:
+          enonic.cloud/xp7.vhost.mapping.1.host: test-domain.purplejs.io
+          enonic.cloud/xp7.vhost.mapping.1.source: /
+          enonic.cloud/xp7.vhost.mapping.1.target: /admin
+          enonic.cloud/xp7.vhost.mapping.1.idproviders: system
+      spec:
+        rules:
+          - host: test-domain.purplejs.io
+            http:
+              paths:
+                - backend:
+                    serviceName: master
+                    servicePort: 4848
+                  path: /
+
+assertException: "source '/' in 'enonic.cloud/xp7.vhost.mapping' annotation not defined in ingress rules on host test-domain.purplejs.io, port 8080"

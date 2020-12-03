@@ -70,6 +70,24 @@ public class Predicates
         return ( r ) -> r.getMetadata().getAnnotations() != null && Objects.equals( r.getMetadata().getAnnotations().get( key ), value );
     }
 
+    public static Predicate<HasMetadata> matchAnnotationPrefix( String key )
+    {
+        return ( r ) -> {
+            if ( r.getMetadata().getAnnotations() == null )
+            {
+                return false;
+            }
+            for ( String k : r.getMetadata().getAnnotations().keySet() )
+            {
+                if ( k.startsWith( key ) )
+                {
+                    return true;
+                }
+            }
+            return false;
+        };
+    }
+
     public static Predicate<HasMetadata> hasFinalizer( String key )
     {
         return ( r ) -> r.getMetadata().getFinalizers() != null && r.getMetadata().getFinalizers().contains( key );

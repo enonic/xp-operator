@@ -9,6 +9,7 @@ admissionRequest:
         namespace: mycloud-mysolution-myenv-myservice
         annotations:
           enonic.cloud/ingress.cert.manage: "true"
+          enonic.cloud/xp7.vhost.mapping.1.host: test-domain.purplejs.io
           enonic.cloud/xp7.vhost.mapping.1.source: /
           enonic.cloud/xp7.vhost.mapping.1.target: /admin
           enonic.cloud/xp7.vhost.mapping.1.idproviders: system
@@ -29,6 +30,7 @@ admissionRequest:
         namespace: mycloud-mysolution-myenv-myservice
         annotations:
           kubernetes.io/ingress.class: "myingress"
+          enonic.cloud/xp7.vhost.mapping.1.host: test-domain.purplejs.io
           enonic.cloud/xp7.vhost.mapping.1.source: /
           enonic.cloud/xp7.vhost.mapping.1.target: /admin
           enonic.cloud/xp7.vhost.mapping.1.idproviders: system
@@ -50,6 +52,7 @@ assertResult:
     namespace: mycloud-mysolution-myenv-myservice
     annotations:
       kubernetes.io/ingress.class: "myingress"
+      enonic.cloud/xp7.vhost.mapping.1.host: test-domain.purplejs.io
       enonic.cloud/xp7.vhost.mapping.1.source: "/"
       enonic.cloud/xp7.vhost.mapping.1.target: "/admin"
       enonic.cloud/xp7.vhost.mapping.1.idproviders: "system"

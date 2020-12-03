@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
@@ -29,6 +30,10 @@ import com.enonic.cloud.kubernetes.model.v1alpha2.xp7config.Xp7Config;
 import com.enonic.cloud.operator.helpers.HandlerConfig;
 
 import static com.enonic.cloud.common.Configuration.cfgStr;
+import static com.enonic.cloud.kubernetes.Predicates.inNamespace;
+import static com.enonic.cloud.kubernetes.Predicates.inSameNamespace;
+import static com.enonic.cloud.kubernetes.Predicates.isDeleted;
+import static com.enonic.cloud.kubernetes.Predicates.withName;
 
 /**
  * This operator class collects all annotated ingresses and creates the VHost configuration for XP
@@ -37,7 +42,7 @@ import static com.enonic.cloud.common.Configuration.cfgStr;
 public class OperatorXp7ConfigSync
     extends HandlerConfig<Xp7Config>
 {
-    private final Logger log = LoggerFactory.getLogger( OperatorXp7ConfigSync.class );
+    private static final Logger log = LoggerFactory.getLogger( OperatorXp7ConfigSync.class );
 
     @Inject
     Clients clients;
@@ -48,7 +53,7 @@ public class OperatorXp7ConfigSync
     @Override
     protected Stream<Xp7Config> resourceStream()
     {
-        return searchers.xp7Config().query().stream();
+        return searchers.xp7Config().stream();
     }
 
     @Override
@@ -56,9 +61,9 @@ public class OperatorXp7ConfigSync
     {
         // Trigger update on each vHost config in the namespace
         final String file = cfgStr( "operator.charts.values.files.vhosts" );
-        searchers.xp7Config().query().
-            inNamespace( namespace ).
-            hasNotBeenDeleted().
+        searchers.xp7Config().stream().
+            filter( inNamespace( namespace ) ).
+            filter( isDeleted().negate() ).
             filter( xp7config -> Objects.equals( xp7config.getXp7ConfigSpec().getFile(), file ) ).
             forEach( xp7Config -> handle( namespace, xp7Config ) );
     }
@@ -70,11 +75,11 @@ public class OperatorXp7ConfigSync
             Arrays.asList( cfgStr( "operator.charts.values.allNodesKey" ), xp7Config.getXp7ConfigSpec().getNodeGroup() );
 
         // Collect all relevant ingresses
-        List<Ingress> ingresses = searchers.ingress().query().
-            inNamespace( xp7Config.getMetadata().getNamespace() ).
-            hasNotBeenDeleted().
+        List<Ingress> ingresses = searchers.ingress().stream().
+            filter( inSameNamespace( xp7Config ) ).
+            filter( isDeleted().negate() ).
             filter( ingress -> hasMappingsWithNodeGroups( ingress, nodeGroups ) ).
-            list();
+            collect( Collectors.toList() );
 
         // Create new data
         String data = createVHostData( namespace, ingresses, nodeGroups );
@@ -145,9 +150,10 @@ public class OperatorXp7ConfigSync
     {
         // Create config string builder
         StringBuilder sb;
-        Optional<ConfigMap> cm = searchers.configMap().query().
-            inNamespace( namespace ).withName( "extra-config" ).
-            get();
+        Optional<ConfigMap> cm = searchers.configMap().stream().
+            filter( inNamespace( namespace ) ).
+            filter( withName( "extra-config" ) ).
+            findFirst();
 
         // Try to use vhost defaults
         if ( cm.isPresent() && cm.get().getData().containsKey( "vhost-defaults.cfg" ) )
@@ -156,7 +162,7 @@ public class OperatorXp7ConfigSync
         }
         else
         {
-            log.warn( String.format( "Could not find default vhost configuration in NS '%s'", namespace) );
+            log.warn( String.format( "Could not find default vhost configuration in NS '%s'", namespace ) );
             sb = new StringBuilder( "enabled = true" );
         }
 
@@ -220,7 +226,7 @@ public class OperatorXp7ConfigSync
         }
     }
 
-    private Set<Mapping> getAnnotationMappings( final Ingress ingress )
+    public static Set<Mapping> getAnnotationMappings( final Ingress ingress )
     {
         Set<Mapping> result = new HashSet<>();
         String prefix = cfgStr( "operator.charts.values.annotationKeys.vhostMapping" );

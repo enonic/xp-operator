@@ -24,6 +24,7 @@ import com.enonic.cloud.kubernetes.Searchers;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
 
 import static com.enonic.cloud.common.Configuration.cfgIfBool;
+import static com.enonic.cloud.kubernetes.Predicates.inSameNamespace;
 
 
 public abstract class BaseAdmissionApi<R>
@@ -147,9 +148,9 @@ public abstract class BaseAdmissionApi<R>
 
     protected Optional<Xp7Deployment> getXp7Deployment( KubernetesResource resource )
     {
-        return searchers.xp7Deployment().query().
-            inNamespace( ( (HasMetadata) resource ).getMetadata().getNamespace() ).
-            get();
+        return searchers.xp7Deployment().stream().
+            filter( inSameNamespace( (HasMetadata) resource ) ).
+            findFirst();
     }
 
     protected AdmissionOperation getOperation( AdmissionReview r )
