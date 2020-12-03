@@ -22,6 +22,7 @@ import com.enonic.cloud.operator.domain.OperatorDomainDns;
 import com.enonic.cloud.operator.domain.OperatorIngressCertSync;
 import com.enonic.cloud.operator.helpers.InformerEventHandler;
 import com.enonic.cloud.operator.ingress.OperatorIngress;
+import com.enonic.cloud.operator.ingress.OperatorIngressLabel;
 import com.enonic.cloud.operator.ingress.OperatorXp7ConfigSync;
 import com.enonic.cloud.operator.v1alpha1xp7app.OperatorXp7AppInstaller;
 import com.enonic.cloud.operator.v1alpha1xp7app.OperatorXp7AppStartStopper;
@@ -58,6 +59,8 @@ public class Operator
 
     private final OperatorIngress operatorIngress;
 
+    private final OperatorIngressLabel operatorIngressLabel;
+
     private final OperatorXp7ConfigSync operatorXp7ConfigSync;
 
     private final OperatorXp7AppInstaller operatorXp7AppInstaller;
@@ -85,7 +88,7 @@ public class Operator
     @Inject
     public Operator( final TaskRunner taskRunner, final LbServiceIpProducer lbIp, final Informers informers,
                      final OperatorDomainCertSync operatorDomainCertSync, final OperatorDomainDns operatorDomainDns,
-                     final OperatorIngressCertSync operatorIngressCertSync, final OperatorIngress operatorIngress,
+                     final OperatorIngressCertSync operatorIngressCertSync, final OperatorIngress operatorIngress, final OperatorIngressLabel operatorIngressLabel,
                      final OperatorXp7ConfigSync operatorXp7ConfigSync, final OperatorXp7AppInstaller operatorXp7AppInstaller,
                      final OperatorXp7AppStatus operatorXp7AppStatus, final OperatorXp7Config operatorXp7Config,
                      final OperatorXp7ConfigStatus operatorXp7ConfigStatus, final OperatorConfigMapEvent operatorConfigMapEvent,
@@ -100,6 +103,7 @@ public class Operator
         this.operatorDomainDns = operatorDomainDns;
         this.operatorIngressCertSync = operatorIngressCertSync;
         this.operatorIngress = operatorIngress;
+        this.operatorIngressLabel = operatorIngressLabel;
         this.operatorXp7ConfigSync = operatorXp7ConfigSync;
         this.operatorXp7AppInstaller = operatorXp7AppInstaller;
         this.operatorXp7AppStatus = operatorXp7AppStatus;
@@ -129,6 +133,8 @@ public class Operator
                 cfgIfBool( "dns.enabled", () -> {
                     listen( operatorDomainDns, informers.domainInformer() );
                 } );
+                listen( operatorIngressLabel, informers.xp7ConfigInformer() );
+                schedule( operatorIngressLabel, syncInterval );
                 listen( operatorIngressCertSync, informers.ingressInformer() );
 
                 listen( operatorIngress, informers.ingressInformer() );
