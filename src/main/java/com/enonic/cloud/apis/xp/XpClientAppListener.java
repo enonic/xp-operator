@@ -1,7 +1,9 @@
 package com.enonic.cloud.apis.xp;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
@@ -48,6 +50,8 @@ public class XpClientAppListener
 
     private Map<String, AppInfo> appMap;
 
+    private boolean manuallyClosed;
+
     public XpClientAppListener( WebTarget target, String nodeGroup, String namespace )
     {
         this.onEventConsumers = new HashSet<>();
@@ -58,6 +62,7 @@ public class XpClientAppListener
         this.reconnectDelaySeconds = 60;
         this.appMap = new HashMap<>();
         this.eventSource = null;
+        this.manuallyClosed = false;
 
         // Try to connect
         run();
@@ -80,10 +85,13 @@ public class XpClientAppListener
             log.error( String.format( "XP: SSE event source error from '%s' in NS '%s': %s", nodeGroup, namespace, error.getMessage() ) );
             log.debug( error.getMessage(), error );
         }, () -> {
-            log.warn( String.format( "XP: SSE event source closed from '%s' in NS '%s'", nodeGroup, namespace ) );
+            if ( !manuallyClosed )
+            {
+                log.warn( String.format( "XP: SSE event source closed from '%s' in NS '%s'", nodeGroup, namespace ) );
 
-            // Schedule reconnect
-            scheduledExecutor.schedule( this, reconnectDelaySeconds, TimeUnit.SECONDS );
+                // Schedule reconnect
+                scheduledExecutor.schedule( this, reconnectDelaySeconds, TimeUnit.SECONDS );
+            }
         } );
 
         eventSource.open();
@@ -153,5 +161,23 @@ public class XpClientAppListener
             type( type ).
             key( key.key() ).
             build() ) );
+    }
+
+    public void close()
+    {
+        manuallyClosed = true;
+        try
+        {
+            eventSource.close();
+        }
+        catch ( Exception e )
+        {
+            // Ignore
+        }
+    }
+
+    public List<AppInfo> list()
+    {
+        return new ArrayList<>( appMap.values() );
     }
 }

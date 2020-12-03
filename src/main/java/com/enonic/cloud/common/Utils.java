@@ -1,7 +1,5 @@
 package com.enonic.cloud.common;
 
-import java.util.Comparator;
-
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.OwnerReferenceBuilder;
@@ -18,10 +16,5 @@ public class Utils
             withBlockOwnerDeletion( false ).
             withName( hasMetadata.getMetadata().getName() ).
             build();
-    }
-
-    public static Comparator<HasMetadata> hasMetadataComparator()
-    {
-        return Comparator.comparing( ( HasMetadata a ) -> a.getMetadata().getNamespace() ).thenComparing( a -> a.getMetadata().getName() );
     }
 }

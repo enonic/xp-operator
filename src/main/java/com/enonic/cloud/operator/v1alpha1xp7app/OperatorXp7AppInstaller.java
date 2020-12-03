@@ -21,7 +21,10 @@ import com.enonic.cloud.operator.helpers.InformerEventHandler;
 import com.enonic.cloud.operator.helpers.Xp7DeploymentInfo;
 
 import static com.enonic.cloud.common.Configuration.cfgStr;
-import static com.enonic.cloud.common.Utils.hasMetadataComparator;
+import static com.enonic.cloud.kubernetes.Comparators.namespaceAndName;
+import static com.enonic.cloud.kubernetes.Predicates.fieldEquals;
+import static com.enonic.cloud.kubernetes.Predicates.hasFinalizer;
+import static com.enonic.cloud.kubernetes.Predicates.isDeleted;
 
 /**
  * This operator class installs/uninstalls apps in XP
@@ -55,16 +58,14 @@ public class OperatorXp7AppInstaller
     public void onUpdate( final Xp7App oldResource, final Xp7App newResource )
     {
         // If url has changed
-        if ( !oldResource.getXp7AppSpec().getUrl().equals( newResource.getXp7AppSpec().getUrl() ) )
+        if ( fieldEquals( oldResource, r -> r.getXp7AppSpec().getUrl() ).negate().test( newResource ) )
         {
             // Try to reinstall app
             installApp( newResource );
         }
 
         // If app marked for deletion and has finalizers
-        List<String> finalizers = newResource.getMetadata().getFinalizers();
-        if ( newResource.getMetadata().getDeletionTimestamp() != null &&
-            finalizers.contains( cfgStr( "operator.charts.values.finalizers.app.uninstall" ) ) )
+        if ( isDeleted().and( hasFinalizer( cfgStr( "operator.charts.values.finalizers.app.uninstall" ) ) ).test( newResource ) )
         {
             uninstallApp( newResource );
         }
@@ -79,22 +80,18 @@ public class OperatorXp7AppInstaller
     @Override
     public void run()
     {
-        // Collect lists
-        List<Xp7App> appsToInstall = searchers.xp7App().query().
-            hasNotBeenDeleted().
-            hasFinalizer( cfgStr( "operator.charts.values.finalizers.app.uninstall" ) ).
+        searchers.xp7App().stream().
+            filter( isDeleted().negate() ).
+            filter( hasFinalizer( cfgStr( "operator.charts.values.finalizers.app.uninstall" ) ) ).
             filter( app -> app.getXp7AppStatus().getXp7AppStatusFields().getXp7AppStatusFieldsAppInfo() == null ).
-            sorted( hasMetadataComparator() ).
-            list();
-        List<Xp7App> appsToUninstall = searchers.xp7App().query().
-            hasBeenDeleted().
-            hasFinalizer( cfgStr( "operator.charts.values.finalizers.app.uninstall" ) ).
-            sorted( hasMetadataComparator() ).
-            list();
+            sorted( namespaceAndName() ).
+            forEach( this::installApp );
 
-        // Handle lists
-        appsToInstall.forEach( this::installApp );
-        appsToUninstall.forEach( this::uninstallApp );
+        searchers.xp7App().stream().
+            filter( isDeleted() ).
+            filter( hasFinalizer( cfgStr( "operator.charts.values.finalizers.app.uninstall" ) ) ).
+            sorted( namespaceAndName() ).
+            forEach( this::uninstallApp );
     }
 
     private synchronized void installApp( final Xp7App app )

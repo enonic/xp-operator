@@ -1,7 +1,5 @@
 package com.enonic.cloud.operator.v1alpha1xp7app;
 
-import java.util.List;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -14,7 +12,9 @@ import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7App;
 import com.enonic.cloud.operator.helpers.InformerEventHandler;
 
 import static com.enonic.cloud.common.Configuration.cfgStr;
-import static com.enonic.cloud.common.Utils.hasMetadataComparator;
+import static com.enonic.cloud.kubernetes.Comparators.namespaceAndName;
+import static com.enonic.cloud.kubernetes.Predicates.hasFinalizer;
+import static com.enonic.cloud.kubernetes.Predicates.isDeleted;
 
 
 /**
@@ -54,18 +54,14 @@ public class OperatorXp7AppStartStopper
     @Override
     public void run()
     {
-        // List all apps
-        List<Xp7App> apps = searchers.xp7App().query().
-            hasNotBeenDeleted().
-            hasFinalizer( cfgStr( "operator.charts.values.finalizers.app.uninstall" ) ).
-            sorted( hasMetadataComparator() ). // Sort by metadata
-            list();
-
-        // Handle apps
-        apps.forEach( this::handle );
+        searchers.xp7App().stream().
+            filter( isDeleted().negate() ).
+            filter( hasFinalizer( cfgStr( "operator.charts.values.finalizers.app.uninstall" ) ) ).
+            sorted( namespaceAndName() ).
+            forEach( this::handle );
     }
 
-    private void handle( final Xp7App xp7App )
+    private synchronized void handle( final Xp7App xp7App )
     {
         // If app info is missing
         if ( xp7App.getXp7AppStatus().getXp7AppStatusFields().getXp7AppStatusFieldsAppInfo() == null )

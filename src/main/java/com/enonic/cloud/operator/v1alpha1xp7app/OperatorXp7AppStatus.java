@@ -19,7 +19,8 @@ import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7AppStatusFields;
 import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7AppStatusFieldsAppInfo;
 import com.enonic.cloud.operator.helpers.Xp7DeploymentInfo;
 
-import static com.enonic.cloud.common.Utils.hasMetadataComparator;
+import static com.enonic.cloud.kubernetes.Predicates.inNamespace;
+import static com.enonic.cloud.kubernetes.Predicates.isDeleted;
 
 /**
  * This operator class updates Xp7App status fields
@@ -44,9 +45,8 @@ public class OperatorXp7AppStatus
     public void run()
     {
         // Ensure app listener in every namespace
-        searchers.xp7Deployment().query().
-            stream().
-            sorted( hasMetadataComparator() ). // Sort by metadata
+        searchers.xp7Deployment().stream().
+            filter( isDeleted().negate() ).
             map( d -> d.getMetadata().getNamespace() ).
             forEach( n -> {
                 if ( xp7DeploymentInfo.xpRunning( n ) )
@@ -110,10 +110,10 @@ public class OperatorXp7AppStatus
 
     private Optional<Xp7App> matchEvent( AppEvent appEvent )
     {
-        return searchers.xp7App().query().
-            inNamespace( appEvent.namespace() ).
+        return searchers.xp7App().stream().
+            filter( inNamespace( appEvent.namespace() ) ).
             filter( a -> filterAppByKey( a, appEvent.key() ) ).
-            get();
+            findFirst();
     }
 
     private boolean filterAppByKey( final Xp7App app, final String key )

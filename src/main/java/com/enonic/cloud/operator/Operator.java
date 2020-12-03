@@ -88,12 +88,13 @@ public class Operator
     @Inject
     public Operator( final TaskRunner taskRunner, final LbServiceIpProducer lbIp, final Informers informers,
                      final OperatorDomainCertSync operatorDomainCertSync, final OperatorDomainDns operatorDomainDns,
-                     final OperatorIngressCertSync operatorIngressCertSync, final OperatorIngress operatorIngress, final OperatorIngressLabel operatorIngressLabel,
-                     final OperatorXp7ConfigSync operatorXp7ConfigSync, final OperatorXp7AppInstaller operatorXp7AppInstaller,
-                     final OperatorXp7AppStatus operatorXp7AppStatus, final OperatorXp7Config operatorXp7Config,
-                     final OperatorXp7ConfigStatus operatorXp7ConfigStatus, final OperatorConfigMapEvent operatorConfigMapEvent,
-                     final OperatorConfigMapSync operatorConfigMapSync, final OperatorDeleteAnnotation operatorDeleteAnnotation,
-                     final OperatorXp7DeploymentHelm operatorXp7DeploymentHelm, final OperatorXp7AppStartStopper operatorXp7AppStartStopper,
+                     final OperatorIngressCertSync operatorIngressCertSync, final OperatorIngress operatorIngress,
+                     final OperatorIngressLabel operatorIngressLabel, final OperatorXp7ConfigSync operatorXp7ConfigSync,
+                     final OperatorXp7AppInstaller operatorXp7AppInstaller, final OperatorXp7AppStatus operatorXp7AppStatus,
+                     final OperatorXp7Config operatorXp7Config, final OperatorXp7ConfigStatus operatorXp7ConfigStatus,
+                     final OperatorConfigMapEvent operatorConfigMapEvent, final OperatorConfigMapSync operatorConfigMapSync,
+                     final OperatorDeleteAnnotation operatorDeleteAnnotation, final OperatorXp7DeploymentHelm operatorXp7DeploymentHelm,
+                     final OperatorXp7AppStartStopper operatorXp7AppStartStopper,
                      final OperatorXp7DeploymentStatus operatorXp7DeploymentStatus,
                      final OperatorXpClientCacheInvalidate operatorXpClientCacheInvalidate )
     {
@@ -120,13 +121,16 @@ public class Operator
 
     void onStartup( @Observes StartupEvent _ev )
     {
+        log.info( "Starting api and other components" );
+
         // The timer is here to give the operator api time to start up
         new Timer().schedule( new java.util.TimerTask()
         {
             @Override
             public void run()
             {
-                long statusInterval = cfgLong( "operator.tasks.status.interval" );
+                log.info( "Starting schedules and other components" );
+
                 long syncInterval = cfgLong( "operator.tasks.sync.interval" );
 
                 listen( operatorDomainCertSync, informers.domainInformer() );
@@ -161,7 +165,7 @@ public class Operator
                 log.info( "Starting informers" );
                 informers.informerFactory().startAllRegisteredInformers();
             }
-        }, 5000 );
+        }, 10000 );
     }
 
     private <T> void listen( ResourceEventHandler<T> handler, SharedIndexInformer<T> informer )
@@ -181,6 +185,7 @@ public class Operator
         long initialDelayMs = leftLimit + (long) ( Math.random() * ( rightLimit - leftLimit ) );
         log.info( String.format( "Adding schedule '%s' [delay: %d, period: %d]", runnable.getClass().getSimpleName(), initialDelayMs,
                                  periodMs ) );
+        runnable.run();
         taskRunner.scheduleAtFixedRate( runnable, initialDelayMs, periodMs, TimeUnit.MILLISECONDS );
     }
 }

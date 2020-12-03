@@ -1,8 +1,11 @@
 package com.enonic.cloud.apis.xp;
 
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -52,7 +55,12 @@ public class XpClientCache
 
     public void invalidateCache( String namespace )
     {
-        clientCreatorCache.invalidate( namespace );
+        List<Map.Entry<XpClientCacheKey, XpClient>> clients = clientCreatorCache.asMap().entrySet().stream().
+            filter( e -> e.getKey().namespace().equals( namespace ) ).
+            collect( Collectors.toList() );
+
+        clients.forEach( e -> e.getValue().appsSSE().close() );
+        clients.forEach( e -> clientCreatorCache.invalidate( e.getKey() ) );
     }
 
     private String defaultNodeGroup()
@@ -102,6 +110,11 @@ public class XpClientCache
         log( namespace, "STOP app", key );
         getClient( XpClientCacheKeyImpl.of( namespace, defaultNodeGroup() ) ).appsApi().appStop(
             ImmutableAppKey.builder().key( key ).build() );
+    }
+
+    public void list( final String namespace )
+    {
+        getClient( XpClientCacheKeyImpl.of( namespace, defaultNodeGroup() ) ).appsSSE().list();
     }
 
     private void log( String namespace, String action, String key )
