@@ -1,5 +1,6 @@
 package com.enonic.cloud.operator.api.admission;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -21,7 +22,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Preconditions;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.admission.AdmissionReview;
+import io.fabric8.kubernetes.api.model.networking.v1beta1.HTTPIngressPath;
 import io.fabric8.kubernetes.api.model.networking.v1beta1.Ingress;
 
 import com.enonic.cloud.common.Validator;
@@ -32,11 +35,18 @@ import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentSpecNodeGroup;
 import com.enonic.cloud.operator.api.AdmissionOperation;
 import com.enonic.cloud.operator.api.BaseAdmissionApi;
+import com.enonic.cloud.operator.ingress.Mapping;
 
 import static com.enonic.cloud.common.Configuration.cfgIfBool;
 import static com.enonic.cloud.common.Configuration.cfgStr;
 import static com.enonic.cloud.common.Validator.dns1123;
+import static com.enonic.cloud.kubernetes.Predicates.fieldEquals;
+import static com.enonic.cloud.kubernetes.Predicates.inNodeGroupAllOr;
+import static com.enonic.cloud.kubernetes.Predicates.inSameNamespace;
+import static com.enonic.cloud.kubernetes.Predicates.matchAnnotationPrefix;
+import static com.enonic.cloud.kubernetes.Predicates.withName;
 import static com.enonic.cloud.operator.helpers.VeleroBackups.backupRestoreInProgress;
+import static com.enonic.cloud.operator.ingress.OperatorXp7ConfigSync.getAnnotationMappings;
 
 @ApplicationScoped
 @Path("/apis/operator.enonic.cloud/v1alpha1")
@@ -71,7 +81,38 @@ public class AdmissionApi
 
     private void ingress( AdmissionReview admissionReview )
     {
-        // Do nothing
+        AdmissionOperation op = getOperation( admissionReview );
+
+        if ( op == AdmissionOperation.DELETE )
+        {
+            return;
+        }
+
+        Ingress newIngress = (Ingress) admissionReview.getRequest().getObject();
+
+        if ( matchAnnotationPrefix( cfgStr( "operator.charts.values.annotationKeys.vhostMapping" ) ).negate().test( newIngress ) )
+        {
+            return;
+        }
+
+        Set<Mapping> mappings = getAnnotationMappings( newIngress );
+        Preconditions.checkArgument( !mappings.isEmpty(), "malformed 'enonic.cloud/xp7.vhost.mapping' annotations" );
+
+        for ( Mapping m : mappings )
+        {
+            Preconditions.checkArgument( m.host() != null, "missing host in 'enonic.cloud/xp7.vhost.mapping'" );
+            List<String> paths = newIngress.getSpec().getRules().stream().
+                filter( r -> m.host().equals( r.getHost() ) ).
+                map( r -> r.getHttp().getPaths().stream().
+                    // TODO: Filter nodegroups
+                        filter( p -> p.getBackend().getServicePort().equals( new IntOrString( 8080 ) ) ).
+                        map( HTTPIngressPath::getPath ).collect( Collectors.toList() ) ).
+                flatMap( Collection::stream ).
+                collect( Collectors.toList() );
+            Preconditions.checkArgument( paths.contains( m.source() ), String.format(
+                "source '%s' in 'enonic.cloud/xp7.vhost.mapping' annotation not defined in ingress rules on host %s, port 8080", m.source(),
+                m.host() ) );
+        }
     }
 
     private void xp7app( AdmissionReview admissionReview )
@@ -126,13 +167,13 @@ public class AdmissionApi
         Preconditions.checkState( newConfig.getXp7ConfigStatus().getState() != null, "'status.state' cannot be null" );
 
         // Check for file clash
-        List<Xp7Config> presentConfigs = searchers.xp7Config().query().
-            inNamespace( newConfig.getMetadata().getNamespace() ).
-            filter( c -> !c.getMetadata().getName().equals( newConfig.getMetadata().getName() ) ).
-            filter( c -> c.getXp7ConfigSpec().getFile().equals( newConfig.getXp7ConfigSpec().getFile() ) ).
-            filter( c -> c.getXp7ConfigSpec().getNodeGroup().equals( newConfig.getXp7ConfigSpec().getFile() ) ||
-                c.getXp7ConfigSpec().getNodeGroup().equals( cfgStr( "operator.charts.values.allNodesKey" ) ) ).
-            list();
+        List<Xp7Config> presentConfigs = searchers.xp7Config().stream().
+            filter( inSameNamespace( newConfig ) ).
+            filter( withName( newConfig.getMetadata().getName() ).negate() ).
+            filter( fieldEquals( newConfig, c -> c.getXp7ConfigSpec().getFile() ) ).
+            filter( inNodeGroupAllOr( newConfig.getXp7ConfigSpec().getNodeGroup() ) ).
+            collect( Collectors.toList() );
+
         if ( !presentConfigs.isEmpty() )
         {
             Preconditions.checkState( false, "XpConfig '%s' already defines file '%s'", presentConfigs.get( 0 ).getMetadata().getName(),

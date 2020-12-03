@@ -196,6 +196,42 @@ spec:
             - name: {{ $volume.name }}
               mountPath: {{ index $.Values.volumes.mounts $volume.name }}
             {{- end }}
+        - name: events
+          image: {{ $.Values.image.nameTemplate | replace "%s" $.Values.deployment.spec.xpVersion }}
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+
+          securityContext:
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
+            runAsUser: {{ $.Values.pods.securityContext.user }}
+
+          env:
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
+            - name: XP_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+            - name: XP_NODE_GROUP
+              value: {{ $nodeGroup.name }}
+
+          volumeMounts:
+            - name: config
+              mountPath: {{ $.Values.dirs.config }}
+            - name: extra-config
+              mountPath: {{ $.Values.dirs.extraConfig }}
+
+          command: ["bash"]
+          args: ["extra-config/events.sh"]
+
       volumes:
         - name: config
           configMap:

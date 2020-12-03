@@ -3,6 +3,7 @@ package com.enonic.cloud.kubernetes;
 import org.immutables.value.Value;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.Event;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.networking.v1beta1.Ingress;
@@ -32,4 +33,6 @@ public abstract class Searchers
     public abstract InformerSearcher<Xp7Deployment> xp7Deployment();
 
     public abstract InformerSearcher<Domain> domain();
+
+    public abstract InformerSearcher<Event> event();
 }

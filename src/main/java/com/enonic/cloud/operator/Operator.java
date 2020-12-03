@@ -22,10 +22,12 @@ import com.enonic.cloud.operator.domain.OperatorDomainDns;
 import com.enonic.cloud.operator.domain.OperatorIngressCertSync;
 import com.enonic.cloud.operator.helpers.InformerEventHandler;
 import com.enonic.cloud.operator.ingress.OperatorIngress;
+import com.enonic.cloud.operator.ingress.OperatorIngressLabel;
 import com.enonic.cloud.operator.ingress.OperatorXp7ConfigSync;
 import com.enonic.cloud.operator.v1alpha1xp7app.OperatorXp7AppInstaller;
 import com.enonic.cloud.operator.v1alpha1xp7app.OperatorXp7AppStartStopper;
 import com.enonic.cloud.operator.v1alpha1xp7app.OperatorXp7AppStatus;
+import com.enonic.cloud.operator.v1alpha2xp7config.OperatorConfigMapEvent;
 import com.enonic.cloud.operator.v1alpha2xp7config.OperatorConfigMapSync;
 import com.enonic.cloud.operator.v1alpha2xp7config.OperatorXp7Config;
 import com.enonic.cloud.operator.v1alpha2xp7config.OperatorXp7ConfigStatus;
@@ -57,6 +59,8 @@ public class Operator
 
     private final OperatorIngress operatorIngress;
 
+    private final OperatorIngressLabel operatorIngressLabel;
+
     private final OperatorXp7ConfigSync operatorXp7ConfigSync;
 
     private final OperatorXp7AppInstaller operatorXp7AppInstaller;
@@ -68,6 +72,8 @@ public class Operator
     private final OperatorXp7Config operatorXp7Config;
 
     private final OperatorXp7ConfigStatus operatorXp7ConfigStatus;
+
+    private final OperatorConfigMapEvent operatorConfigMapEvent;
 
     private final OperatorConfigMapSync operatorConfigMapSync;
 
@@ -82,12 +88,12 @@ public class Operator
     @Inject
     public Operator( final TaskRunner taskRunner, final LbServiceIpProducer lbIp, final Informers informers,
                      final OperatorDomainCertSync operatorDomainCertSync, final OperatorDomainDns operatorDomainDns,
-                     final OperatorIngressCertSync operatorIngressCertSync, final OperatorIngress operatorIngress,
+                     final OperatorIngressCertSync operatorIngressCertSync, final OperatorIngress operatorIngress, final OperatorIngressLabel operatorIngressLabel,
                      final OperatorXp7ConfigSync operatorXp7ConfigSync, final OperatorXp7AppInstaller operatorXp7AppInstaller,
                      final OperatorXp7AppStatus operatorXp7AppStatus, final OperatorXp7Config operatorXp7Config,
-                     final OperatorXp7ConfigStatus operatorXp7ConfigStatus, final OperatorConfigMapSync operatorConfigMapSync,
-                     final OperatorDeleteAnnotation operatorDeleteAnnotation, final OperatorXp7DeploymentHelm operatorXp7DeploymentHelm,
-                     final OperatorXp7AppStartStopper operatorXp7AppStartStopper,
+                     final OperatorXp7ConfigStatus operatorXp7ConfigStatus, final OperatorConfigMapEvent operatorConfigMapEvent,
+                     final OperatorConfigMapSync operatorConfigMapSync, final OperatorDeleteAnnotation operatorDeleteAnnotation,
+                     final OperatorXp7DeploymentHelm operatorXp7DeploymentHelm, final OperatorXp7AppStartStopper operatorXp7AppStartStopper,
                      final OperatorXp7DeploymentStatus operatorXp7DeploymentStatus,
                      final OperatorXpClientCacheInvalidate operatorXpClientCacheInvalidate )
     {
@@ -97,11 +103,13 @@ public class Operator
         this.operatorDomainDns = operatorDomainDns;
         this.operatorIngressCertSync = operatorIngressCertSync;
         this.operatorIngress = operatorIngress;
+        this.operatorIngressLabel = operatorIngressLabel;
         this.operatorXp7ConfigSync = operatorXp7ConfigSync;
         this.operatorXp7AppInstaller = operatorXp7AppInstaller;
         this.operatorXp7AppStatus = operatorXp7AppStatus;
         this.operatorXp7Config = operatorXp7Config;
         this.operatorXp7ConfigStatus = operatorXp7ConfigStatus;
+        this.operatorConfigMapEvent = operatorConfigMapEvent;
         this.operatorConfigMapSync = operatorConfigMapSync;
         this.operatorDeleteAnnotation = operatorDeleteAnnotation;
         this.operatorXp7DeploymentHelm = operatorXp7DeploymentHelm;
@@ -125,6 +133,8 @@ public class Operator
                 cfgIfBool( "dns.enabled", () -> {
                     listen( operatorDomainDns, informers.domainInformer() );
                 } );
+                listen( operatorIngressLabel, informers.xp7ConfigInformer() );
+                schedule( operatorIngressLabel, syncInterval );
                 listen( operatorIngressCertSync, informers.ingressInformer() );
 
                 listen( operatorIngress, informers.ingressInformer() );
@@ -138,12 +148,14 @@ public class Operator
                 schedule( operatorXp7AppStatus, syncInterval );
 
                 listen( operatorXp7Config, informers.xp7ConfigInformer() );
+                listen( operatorConfigMapEvent, informers.configMapInformer() );
                 schedule( operatorConfigMapSync, syncInterval );
-                schedule( operatorXp7ConfigStatus, statusInterval );
+                listen( operatorXp7ConfigStatus, informers.eventInformer() );
 
                 listen( operatorDeleteAnnotation, informers.xp7DeploymentInformer() );
                 listen( operatorXp7DeploymentHelm, informers.xp7DeploymentInformer() );
-                schedule( operatorXp7DeploymentStatus, statusInterval );
+                listen( operatorXp7DeploymentStatus, informers.podInformer() );
+                schedule( operatorXp7DeploymentStatus, syncInterval );
                 listen( operatorXpClientCacheInvalidate, informers.xp7DeploymentInformer() );
 
                 log.info( "Starting informers" );

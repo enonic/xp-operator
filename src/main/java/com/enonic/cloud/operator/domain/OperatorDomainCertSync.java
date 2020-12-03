@@ -1,6 +1,7 @@
 package com.enonic.cloud.operator.domain;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -50,9 +51,9 @@ public class OperatorDomainCertSync
     private List<Ingress> relevantIngresses( final Domain domain )
     {
         String host = domain.getDomainSpec().getHost();
-        return searchers.ingress().query().
+        return searchers.ingress().stream().
             filter( operatorIngressCertSync::ingressRelevant ).
             filter( ingress -> operatorIngressCertSync.ingressHosts( ingress ).contains( host ) ).
-            list();
+            collect( Collectors.toList() );
     }
 }

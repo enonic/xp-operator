@@ -55,7 +55,7 @@ public class OperatorIngressCertSync
         // Do nothing
     }
 
-    public void handle( final Ingress ingress )
+    public synchronized void handle( final Ingress ingress )
     {
         // Ignore if ingress is not relevant
         if ( !ingressRelevant( ingress ) )
@@ -66,13 +66,10 @@ public class OperatorIngressCertSync
         // Collect all hosts in ingress
         Set<String> hosts = ingressHosts( ingress );
 
-        // Get domains with those hosts
-        List<Domain> domains = searchers.domain().query().
+        // Sync ingress with relevant domains
+        searchers.domain().stream().
             filter( d -> hosts.contains( d.getDomainSpec().getHost() ) ).
-            list();
-
-        // Sync Ingress with domain
-        domains.forEach( domain -> syncIngress( domain, ingress ) );
+            forEach( d -> syncIngress( d, ingress ) );
     }
 
     public void syncIngress( final Domain domain, final Ingress ingress )
@@ -169,11 +166,10 @@ public class OperatorIngressCertSync
             return false;
         }
 
-        if ( !ingress.getMetadata().getAnnotations().
-            getOrDefault( cfgStr( "operator.charts.values.annotationKeys.ingressCertManage" ), "false" ).equals( "true" ) )
-        {
-            return false;
-        }
-        return true;
+        return ingress.
+            getMetadata().
+            getAnnotations().
+            getOrDefault( cfgStr( "operator.charts.values.annotationKeys.ingressCertManage" ), "false" ).
+            equals( "true" );
     }
 }

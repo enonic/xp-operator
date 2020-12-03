@@ -1,6 +1,5 @@
 package com.enonic.cloud.kubernetes;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
@@ -13,6 +12,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
+
+import static com.enonic.cloud.common.Configuration.cfgStr;
 
 public class ResourceQuery<T extends HasMetadata>
 {
@@ -79,6 +80,11 @@ public class ResourceQuery<T extends HasMetadata>
         return hasLabels().filter( r -> Objects.equals( r.getMetadata().getLabels().get( key ), value ) );
     }
 
+    public ResourceQuery<T> isEnonicManaged()
+    {
+        return this.hasLabel( cfgStr( "operator.charts.values.labelKeys.managed" ), "true" );
+    }
+
     public ResourceQuery<T> hasFinalizer( String key )
     {
         return filter( r -> r.getMetadata().getFinalizers().contains( key ) );
@@ -94,16 +100,24 @@ public class ResourceQuery<T extends HasMetadata>
         return filter( r -> r.getMetadata().getDeletionTimestamp() != null );
     }
 
+    public ResourceQuery<T> olderThen( Instant instant )
+    {
+        return filter( r -> Instant.parse( r.getMetadata().getCreationTimestamp() ).isBefore( instant ) );
+    }
+
     public ResourceQuery<T> olderThen( long seconds )
     {
-        return filter(
-            r -> Duration.between( Instant.parse( r.getMetadata().getCreationTimestamp() ), Instant.now() ).getSeconds() > seconds );
+        return olderThen( Instant.now().minusSeconds( seconds ) );
+    }
+
+    public ResourceQuery<T> youngerThen( Instant instant )
+    {
+        return filter( r -> Instant.parse( r.getMetadata().getCreationTimestamp() ).isAfter( instant ) );
     }
 
     public ResourceQuery<T> youngerThen( long seconds )
     {
-        return filter(
-            r -> Duration.between( Instant.parse( r.getMetadata().getCreationTimestamp() ), Instant.now() ).getSeconds() < seconds );
+        return youngerThen( Instant.now().minusSeconds( seconds ) );
     }
 
     public Stream<T> stream()

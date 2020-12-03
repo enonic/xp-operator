@@ -161,9 +161,9 @@ public class OperatorDomainDns
         if ( cnameRecords.size() == 1 )
         {
             String cnameDomain = cnameRecords.get( 0 ).data();
-            boolean realDomainExists = searchers.domain().
-                query().
-                filter( d -> d.getDomainSpec().getHost().equals( cnameDomain ) ).list().size() == 1;
+            boolean realDomainExists = searchers.domain().stream().
+                filter( d -> d.getDomainSpec().getHost().equals( cnameDomain ) ).
+                count() == 1;
             if ( realDomainExists )
             {
                 updateStatus( domain, DomainStatus.State.READY, "External CNAME record matches", true );

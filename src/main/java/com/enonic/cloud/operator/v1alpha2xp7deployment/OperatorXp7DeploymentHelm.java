@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -22,8 +21,8 @@ import com.enonic.cloud.helm.values.BaseValues;
 import com.enonic.cloud.helm.values.MapValues;
 import com.enonic.cloud.helm.values.ValueBuilder;
 import com.enonic.cloud.helm.values.Values;
-import com.enonic.cloud.kubernetes.Clients;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
+import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentSpec;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentSpecNodeGroup;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentSpecNodeGroupEnvVar;
 import com.enonic.cloud.operator.helpers.HandlerHelm;
@@ -42,9 +41,6 @@ import static com.enonic.cloud.kubernetes.client.Utils.cloneResource;
 public class OperatorXp7DeploymentHelm
     extends HandlerHelm<Xp7Deployment>
 {
-    @Inject
-    Clients clients;
-
     @Inject
     @Named("v1alpha2/xp7deployment")
     Templator templator;
@@ -72,10 +68,11 @@ public class OperatorXp7DeploymentHelm
         return templator;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    protected boolean specEquals( final Xp7Deployment oldResource, final Xp7Deployment newResource )
+    protected Xp7DeploymentSpec getSpec( final Xp7Deployment t )
     {
-        return Objects.equals( oldResource.getXp7DeploymentSpec(), newResource.getXp7DeploymentSpec() );
+        return t.getXp7DeploymentSpec();
     }
 
     @Override
