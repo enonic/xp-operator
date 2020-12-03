@@ -1,10 +1,18 @@
 package com.enonic.cloud.operator.helpers;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import io.fabric8.kubernetes.api.model.HasMetadata;
+
 import com.enonic.cloud.kubernetes.Searchers;
+import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentStatus;
+
+import static com.enonic.cloud.kubernetes.Predicates.inNamespace;
+import static com.enonic.cloud.kubernetes.Predicates.isDeleted;
 
 @Singleton
 public class Xp7DeploymentInfo
@@ -12,21 +20,31 @@ public class Xp7DeploymentInfo
     @Inject
     Searchers searchers;
 
+    public Optional<Xp7Deployment> get( final String namespace )
+    {
+        return searchers.xp7Deployment().stream().
+            filter( inNamespace( namespace ) ).
+            filter( isDeleted().negate() ).
+            findFirst();
+    }
+
+    public Optional<Xp7Deployment> get( final HasMetadata r )
+    {
+        return get( r.getMetadata().getNamespace() );
+    }
+
     public boolean xpRunning( final String namespace )
     {
-        return searchers.xp7Deployment().query().
-            inNamespace( namespace ).
-            hasNotBeenDeleted().
-            filter( d -> d.getXp7DeploymentStatus() != null ).
-            filter( d -> d.getXp7DeploymentStatus().getState().equals( Xp7DeploymentStatus.State.RUNNING ) ).
-            get().isPresent();
+        Optional<Xp7Deployment> deployment = get( namespace );
+        if ( deployment.isEmpty() )
+        {
+            return false;
+        }
+        return deployment.get().getXp7DeploymentStatus().getState().equals( Xp7DeploymentStatus.State.RUNNING );
     }
 
     public boolean xpDeleted( final String namespace )
     {
-        return searchers.xp7Deployment().query().
-            inNamespace( namespace ).
-            hasNotBeenDeleted().get().
-            isEmpty();
+        return get( namespace ).isEmpty();
     }
 }

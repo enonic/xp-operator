@@ -95,6 +95,6 @@ assertResult:
               size: "200Mi"
   status:
     state: "PENDING"
-    message: "Created"
+    message: "Waiting for pods"
     fields:
       pods: [ ]

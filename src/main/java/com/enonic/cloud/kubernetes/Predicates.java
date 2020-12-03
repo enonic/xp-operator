@@ -12,6 +12,7 @@ import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.Namespace;
 
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7config.Xp7Config;
+import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
 
 import static com.enonic.cloud.common.Configuration.cfgStr;
 
@@ -130,5 +131,15 @@ public class Predicates
     public static Predicate<Xp7Config> inNodeGroupAllOr( String nodeGroup )
     {
         return inNodeGroup( cfgStr( "operator.charts.values.allNodesKey" ), nodeGroup );
+    }
+
+    public static Predicate<HasMetadata> isPartOfDeployment( String name )
+    {
+        return matchLabel( cfgStr( "operator.charts.values.labelKeys.deployment" ), name );
+    }
+
+    public static Predicate<HasMetadata> isPartOfDeployment( Xp7Deployment deployment )
+    {
+        return isPartOfDeployment( deployment.getMetadata().getName() );
     }
 }

@@ -97,6 +97,6 @@ assertResult:
           disks: [ ]
   status:
     state: "PENDING"
-    message: "Created"
+    message: "Waiting for pods"
     fields:
       pods: [ ]

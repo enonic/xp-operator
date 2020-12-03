@@ -2,7 +2,6 @@ package com.enonic.cloud.operator.v1alpha2xp7deployment;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -10,27 +9,30 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.fabric8.kubernetes.api.model.ContainerStatus;
-import io.fabric8.kubernetes.api.model.Doneable;
 import io.fabric8.kubernetes.api.model.Pod;
 
 import com.enonic.cloud.kubernetes.Clients;
-import com.enonic.cloud.kubernetes.InformerSearcher;
 import com.enonic.cloud.kubernetes.Searchers;
+import com.enonic.cloud.kubernetes.commands.K8sLogHelper;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentSpecNodeGroup;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentStatus;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentStatusFields;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentStatusFieldsPod;
-import com.enonic.cloud.operator.helpers.HandlerStatus;
+import com.enonic.cloud.operator.helpers.InformerEventHandler;
+import com.enonic.cloud.operator.helpers.Xp7DeploymentInfo;
 
-import static com.enonic.cloud.common.Configuration.cfgStr;
+import static com.enonic.cloud.kubernetes.Predicates.isEnonicManaged;
+import static com.enonic.cloud.kubernetes.Predicates.isPartOfDeployment;
+import static com.enonic.cloud.kubernetes.Predicates.onCondition;
 
 /**
  * This operator class updates Xp7Deployment status fields
  */
 @Singleton
 public class OperatorXp7DeploymentStatus
-    extends HandlerStatus<Xp7Deployment, Xp7DeploymentStatus>
+    extends InformerEventHandler<Pod>
+    implements Runnable
 {
     @Inject
     Clients clients;
@@ -38,70 +40,94 @@ public class OperatorXp7DeploymentStatus
     @Inject
     Searchers searchers;
 
+    @Inject
+    Xp7DeploymentInfo xp7DeploymentInfo;
+
     @Override
-    protected InformerSearcher<Xp7Deployment> informerSearcher()
+    protected void onNewAdd( final Pod newPod )
     {
-        return searchers.xp7Deployment();
+        onCondition( newPod, this::handle, isEnonicManaged() );
     }
 
     @Override
-    protected Xp7DeploymentStatus getStatus( final Xp7Deployment resource )
+    public void onUpdate( final Pod oldPod, final Pod newPod )
     {
-        return resource.getXp7DeploymentStatus();
+        onCondition( newPod, this::handle, isEnonicManaged() );
     }
 
     @Override
-    protected Doneable<Xp7Deployment> updateStatus( final Xp7Deployment resource, final Xp7DeploymentStatus newStatus )
+    public void onDelete( final Pod oldPod, final boolean deletedFinalStateUnknown )
     {
-        return clients.xp7Deployments().crdClient().
-            inNamespace( resource.getMetadata().getNamespace() ).
-            withName( resource.getMetadata().getName() ).
-            edit().
-            withStatus( newStatus );
+        onCondition( oldPod, this::handle, isEnonicManaged() );
     }
 
+    /**
+     * This is meant for status sync if operator for some reason did not receive events
+     */
     @Override
-    protected Xp7DeploymentStatus pollStatus( final Xp7Deployment resource )
+    public void run()
     {
+        // Pick one managed pod in each namespace and update status
+        searchers.pod().stream().
+            filter( isEnonicManaged() ).
+            collect( Collectors.toMap( pod -> pod.getMetadata().getNamespace(), pod -> pod, ( p1, p2 ) -> p1 ) ).
+            values().
+            stream().
+            forEach( this::handle );
+    }
+
+    private synchronized void handle( final Pod pod )
+    {
+        Optional<Xp7Deployment> xp7Deployment = xp7DeploymentInfo.get( pod );
+
+        if ( xp7Deployment.isEmpty() )
+        {
+            return;
+        }
+
         // Get current status
-        Xp7DeploymentStatus currentStatus = resource.getXp7DeploymentStatus();
+        Xp7DeploymentStatus currentStatus = xp7Deployment.get().getXp7DeploymentStatus();
+        int oldStatusHash = currentStatus.hashCode();
 
-        // Get pods in deployment
-        List<Pod> pods = searchers.pod().query().stream().
-            filter( pod -> filterPods( resource, pod ) ).
+        // Get all pods in deployment
+        List<Pod> pods = searchers.pod().stream().
+            filter( isEnonicManaged() ).
+            filter( isPartOfDeployment( xp7Deployment.get() ) ).
             collect( Collectors.toList() );
 
         // Set pod fields
         currentStatus.setXp7DeploymentStatusFields( buildFields( pods ) );
 
         // Get expected number of pods
-        int expectedNumberOfPods = expectedNumberOfPods( resource );
+        int expectedNumberOfPods = expectedNumberOfPods( xp7Deployment.get() );
 
         // If pod count does not match
         if ( pods.size() != expectedNumberOfPods )
         {
-            return currentStatus.
+            updateOnChange( xp7Deployment.get(), oldStatusHash, currentStatus.
                 withState( Xp7DeploymentStatus.State.PENDING ).
-                withMessage( "Pod count mismatch" );
+                withMessage( "Pod count mismatch" ) );
+            return;
         }
 
         // If deployment is disabled
-        if ( !resource.getXp7DeploymentSpec().getEnabled() )
+        if ( !xp7Deployment.get().getXp7DeploymentSpec().getEnabled() )
         {
-            return currentStatus.
+            updateOnChange( xp7Deployment.get(), oldStatusHash, currentStatus.
                 withState( Xp7DeploymentStatus.State.STOPPED ).
-                withMessage( "OK" );
+                withMessage( "OK" ) );
+            return;
         }
 
         // Iterate over pods and check status
         List<String> waitingForPods = new LinkedList<>();
-        for ( Xp7DeploymentStatusFieldsPod pod : currentStatus.
+        for ( Xp7DeploymentStatusFieldsPod p : currentStatus.
             getXp7DeploymentStatusFields().
             getXp7DeploymentStatusFieldsPods() )
         {
-            if ( !pod.getPhase().equals( "Running" ) || !pod.getReady() )
+            if ( !p.getPhase().equals( "Running" ) || !p.getReady() )
             {
-                waitingForPods.add( pod.getName() );
+                waitingForPods.add( p.getName() );
             }
         }
 
@@ -109,21 +135,28 @@ public class OperatorXp7DeploymentStatus
         if ( !waitingForPods.isEmpty() )
         {
             waitingForPods.sort( String::compareTo );
-            return currentStatus.
+            updateOnChange( xp7Deployment.get(), oldStatusHash, currentStatus.
                 withState( Xp7DeploymentStatus.State.PENDING ).
-                withMessage( String.format( "Waiting for pods: %s", waitingForPods ) );
+                withMessage( String.format( "Waiting for pods: %s", waitingForPods.stream().collect( Collectors.joining( ", " ) ) ) ) );
+            return;
         }
 
         // Return OK
-        return currentStatus.
+        updateOnChange( xp7Deployment.get(), oldStatusHash, currentStatus.
             withState( Xp7DeploymentStatus.State.RUNNING ).
-            withMessage( "OK" );
+            withMessage( "OK" ) );
     }
 
-    private boolean filterPods( final Xp7Deployment deployment, final Pod pod )
+    private void updateOnChange( final Xp7Deployment resource, final int oldStatusHash, final Xp7DeploymentStatus newStatus )
     {
-        return Objects.equals( pod.getMetadata().getLabels().get( cfgStr( "operator.charts.values.labelKeys.deployment" ) ),
-                               deployment.getMetadata().getName() );
+        if ( oldStatusHash != newStatus.hashCode() )
+        {
+            K8sLogHelper.logDoneable(clients.xp7Deployments().crdClient().
+                inNamespace( resource.getMetadata().getNamespace() ).
+                withName( resource.getMetadata().getName() ).
+                edit().
+                withStatus( newStatus ));
+        }
     }
 
     private Xp7DeploymentStatusFields buildFields( final List<Pod> pods )

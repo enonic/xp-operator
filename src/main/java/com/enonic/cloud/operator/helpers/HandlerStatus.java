@@ -10,7 +10,9 @@ import io.fabric8.kubernetes.api.model.HasMetadata;
 import com.enonic.cloud.kubernetes.InformerSearcher;
 import com.enonic.cloud.kubernetes.commands.K8sLogHelper;
 
-import static com.enonic.cloud.common.Utils.hasMetadataComparator;
+import static com.enonic.cloud.kubernetes.Comparators.namespaceAndName;
+import static com.enonic.cloud.kubernetes.Predicates.isDeleted;
+import static com.enonic.cloud.kubernetes.Predicates.olderThan;
 
 
 public abstract class HandlerStatus<R extends HasMetadata, S>
@@ -25,12 +27,10 @@ public abstract class HandlerStatus<R extends HasMetadata, S>
     public void run()
     {
         preRun();
-        informerSearcher().
-            query().
-            hasNotBeenDeleted().
-            olderThen( delay / 1000 ).
-            stream().
-            sorted( hasMetadataComparator() ).
+        informerSearcher().stream().
+            filter( isDeleted().negate() ).
+            filter( olderThan( 10 ) ).
+            sorted( namespaceAndName() ).
             forEach( this::handle );
     }
 

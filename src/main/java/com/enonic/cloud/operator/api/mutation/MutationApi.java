@@ -210,7 +210,7 @@ public class MutationApi
 
         // Create default status
         Xp7DeploymentStatus defStatus = new Xp7DeploymentStatus().
-            withMessage( "Created" ).
+            withMessage( "Waiting for pods" ).
             withState( Xp7DeploymentStatus.State.PENDING ).
             withXp7DeploymentStatusFields( new Xp7DeploymentStatusFields().
                 withXp7DeploymentStatusFieldsPods( new LinkedList<>() ) );

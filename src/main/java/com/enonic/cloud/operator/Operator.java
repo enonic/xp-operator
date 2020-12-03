@@ -147,7 +147,8 @@ public class Operator
 
                 listen( operatorDeleteAnnotation, informers.xp7DeploymentInformer() );
                 listen( operatorXp7DeploymentHelm, informers.xp7DeploymentInformer() );
-                schedule( operatorXp7DeploymentStatus, statusInterval );
+                listen( operatorXp7DeploymentStatus, informers.podInformer() );
+                schedule( operatorXp7DeploymentStatus, syncInterval );
                 listen( operatorXpClientCacheInvalidate, informers.xp7DeploymentInformer() );
 
                 log.info( "Starting informers" );

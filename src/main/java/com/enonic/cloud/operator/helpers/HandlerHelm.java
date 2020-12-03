@@ -19,7 +19,8 @@ import com.enonic.cloud.helm.values.ValueBuilder;
 import com.enonic.cloud.kubernetes.commands.K8sCommand;
 import com.enonic.cloud.kubernetes.commands.K8sCommandMapper;
 
-import static com.enonic.cloud.operator.helpers.VeleroBackups.backupRestoreInProgress;
+import static com.enonic.cloud.kubernetes.Predicates.fieldEquals;
+import static com.enonic.cloud.kubernetes.Predicates.isBeingBackupRestored;
 
 public abstract class HandlerHelm<R extends HasMetadata>
     extends InformerEventHandler<R>
@@ -54,7 +55,7 @@ public abstract class HandlerHelm<R extends HasMetadata>
     @Override
     public void onNewAdd( final R newResource )
     {
-        if ( !backupRestoreInProgress( newResource ) )
+        if ( isBeingBackupRestored().negate().test( newResource ) )
         {
             handle( null, newResource );
         }
@@ -63,7 +64,7 @@ public abstract class HandlerHelm<R extends HasMetadata>
     @Override
     public void onUpdate( final R oldResource, final R newResource )
     {
-        if ( !specEquals( oldResource, newResource ) )
+        if ( fieldEquals( oldResource, this::getSpec ).negate().test( newResource ) )
         {
             handle( oldResource, newResource );
         }
@@ -96,5 +97,5 @@ public abstract class HandlerHelm<R extends HasMetadata>
 
     protected abstract Templator getTemplator();
 
-    protected abstract boolean specEquals( final R oldResource, final R newResource );
+    protected abstract <T> T getSpec( final R t );
 }
