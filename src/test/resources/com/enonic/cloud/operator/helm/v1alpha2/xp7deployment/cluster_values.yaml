@@ -91,6 +91,7 @@ image:
 labelKeys:
   data: "enonic.data"
   deployment: "enonic.deployment"
+  ingressVhostLoaded: "enonic.cloud/vhost-loaded"
   managed: "enonic.managed"
   master: "enonic.master"
   nodeGroup: "enonic.nodeGroup"
