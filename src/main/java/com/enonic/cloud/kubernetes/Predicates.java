@@ -136,6 +136,16 @@ public class Predicates
         return ( r ) -> Objects.equals( f.apply( o ), f.apply( r ) );
     }
 
+    public static <T, R> Predicate<T> fieldsEquals( T o, Function<T, R>... functions )
+    {
+        Predicate<T> p = ( a ) -> true;
+        for ( Function<T, R> f : functions )
+        {
+            p = p.and( fieldEquals( o, f ) );
+        }
+        return p;
+    }
+
     public static Predicate<ConfigMap> dataEquals( ConfigMap c )
     {
         return fieldEquals( c, ConfigMap::getData ).and( fieldEquals( c, ConfigMap::getBinaryData ) );

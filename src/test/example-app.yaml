@@ -5,3 +5,4 @@ metadata:
   namespace: mycloud-mysolution-myenv-myservice
 spec:
   url: https://dl.bintray.com/rcd-systems/rcd-repo/systems/rcd/enonic/datatoolbox/5.0.3/datatoolbox-5.0.3.jar
+  sha512: ac17c0ca4f97d7653b0a0ba191460cdd1f250bc90453d430abe1bc7583f4f43385830702c9b39287fa9ca0eda2d80e33c2a1331c4dc8a8238b5b8970db915efe

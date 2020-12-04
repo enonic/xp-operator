@@ -75,10 +75,10 @@ public class XpClientCache
     }
 
     @SuppressWarnings("WeakerAccess")
-    public AppInfo install( final String namespace, final String url )
+    public AppInfo install( final String namespace, final String url, final String sha512 )
     {
         AppInstallResponse res = getClient( XpClientCacheKeyImpl.of( namespace, defaultNodeGroup() ) ).appsApi().appInstall(
-            ImmutableAppInstallRequest.builder().url( url ).build() );
+            ImmutableAppInstallRequest.builder().url( url ).sha512( sha512 ).build() );
         if ( res.failure() == null )
         {
             log( namespace, "INSTALL app", res.applicationInstalledJson().application().key() );

@@ -22,7 +22,7 @@ import com.enonic.cloud.operator.helpers.Xp7DeploymentInfo;
 
 import static com.enonic.cloud.common.Configuration.cfgStr;
 import static com.enonic.cloud.kubernetes.Comparators.namespaceAndName;
-import static com.enonic.cloud.kubernetes.Predicates.fieldEquals;
+import static com.enonic.cloud.kubernetes.Predicates.fieldsEquals;
 import static com.enonic.cloud.kubernetes.Predicates.hasFinalizer;
 import static com.enonic.cloud.kubernetes.Predicates.isDeleted;
 
@@ -57,8 +57,10 @@ public class OperatorXp7AppInstaller
     @Override
     public void onUpdate( final Xp7App oldResource, final Xp7App newResource )
     {
-        // If url has changed
-        if ( fieldEquals( oldResource, r -> r.getXp7AppSpec().getUrl() ).negate().test( newResource ) )
+        // If url or sha512 has changed
+        if ( fieldsEquals( oldResource, r -> r.getXp7AppSpec().getUrl(), r -> r.getXp7AppSpec().getSha512() ).
+            negate().
+            test( newResource ) )
         {
             // Try to reinstall app
             installApp( newResource );
@@ -118,7 +120,8 @@ public class OperatorXp7AppInstaller
         // Try to install
         try
         {
-            AppInfo appInfo = xpClientCache.install( app.getMetadata().getNamespace(), app.getXp7AppSpec().getUrl() );
+            AppInfo appInfo = xpClientCache.
+                install( app.getMetadata().getNamespace(), app.getXp7AppSpec().getUrl(), app.getXp7AppSpec().getSha512() );
 
             updateAppStatus( app, new Xp7AppStatus().
                 withState( Xp7AppStatus.State.RUNNING ).

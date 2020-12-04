@@ -135,7 +135,7 @@ data:
           proxy_set_header        X-Forwarded-Proto $scheme;
 
           # Fix the “It appears that your reverse proxy set up is broken" error.
-          proxy_pass          http://192.168.0.186:8081;
+          proxy_pass          http://192.168.255.6:8081;
           #proxy_pass          http://10.0.10.147:8081;
           proxy_read_timeout  90;
         }

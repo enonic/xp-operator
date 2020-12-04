@@ -26,6 +26,9 @@ spec:
                   nullable: true
                 url:
                   type: string
+                sha512:
+                  type: string
+                  nullable: true
             status:
               type: object
               nullable: true
