@@ -69,13 +69,13 @@ public class XpClientCache
     }
 
     @SuppressWarnings("WeakerAccess")
-    public synchronized void addEventListener( final String namespace, final Consumer<AppEvent> eventConsumer )
+    public synchronized void appAddListener( final String namespace, final Consumer<AppEvent> eventConsumer )
     {
         getClient( XpClientCacheKeyImpl.of( namespace, defaultNodeGroup() ) ).appsSSE().addEventListener( eventConsumer );
     }
 
     @SuppressWarnings("WeakerAccess")
-    public AppInfo install( final String namespace, final String url, final String sha512 )
+    public AppInfo appInstall( final String namespace, final String url, final String sha512 )
     {
         AppInstallResponse res = getClient( XpClientCacheKeyImpl.of( namespace, defaultNodeGroup() ) ).appsApi().appInstall(
             ImmutableAppInstallRequest.builder().url( url ).sha512( sha512 ).build() );
@@ -91,28 +91,28 @@ public class XpClientCache
     }
 
     @SuppressWarnings("WeakerAccess")
-    public void uninstall( final String namespace, final String key )
+    public void appUninstall( final String namespace, final String key )
     {
         log( namespace, "UNINSTALL app", key );
         getClient( XpClientCacheKeyImpl.of( namespace, defaultNodeGroup() ) ).appsApi().appUninstall(
             ImmutableAppKey.builder().key( key ).build() );
     }
 
-    public void start( final String namespace, final String key )
+    public void appStart( final String namespace, final String key )
     {
         log( namespace, "START app", key );
         getClient( XpClientCacheKeyImpl.of( namespace, defaultNodeGroup() ) ).appsApi().appStart(
             ImmutableAppKey.builder().key( key ).build() );
     }
 
-    public void stop( final String namespace, final String key )
+    public void appStop( final String namespace, final String key )
     {
         log( namespace, "STOP app", key );
         getClient( XpClientCacheKeyImpl.of( namespace, defaultNodeGroup() ) ).appsApi().appStop(
             ImmutableAppKey.builder().key( key ).build() );
     }
 
-    public void list( final String namespace )
+    public void appList( final String namespace )
     {
         getClient( XpClientCacheKeyImpl.of( namespace, defaultNodeGroup() ) ).appsSSE().list();
     }

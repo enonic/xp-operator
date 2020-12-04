@@ -86,7 +86,7 @@ public class OperatorXp7AppStartStopper
         {
             try
             {
-                xpClientCache.start( namespace, key );
+                xpClientCache.appStart( namespace, key );
             }
             catch ( Exception e )
             {
@@ -100,7 +100,7 @@ public class OperatorXp7AppStartStopper
         {
             try
             {
-                xpClientCache.stop( namespace, key );
+                xpClientCache.appStop( namespace, key );
             }
             catch ( Exception e )
             {

@@ -51,7 +51,7 @@ public class OperatorXp7AppStatus
             forEach( n -> {
                 if ( xp7DeploymentInfo.xpRunning( n ) )
                 {
-                    xpClientCache.addEventListener( n, this );
+                    xpClientCache.appAddListener( n, this );
                 }
             } );
     }

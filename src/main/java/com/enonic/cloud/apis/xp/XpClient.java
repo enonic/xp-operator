@@ -13,7 +13,6 @@ import org.jboss.resteasy.plugins.interceptors.AcceptEncodingGZIPFilter;
 import org.jboss.resteasy.plugins.interceptors.GZIPDecodingInterceptor;
 import org.jboss.resteasy.plugins.interceptors.GZIPEncodingInterceptor;
 
-import com.enonic.cloud.apis.xp.service.CustomRestHeaderFilter;
 import com.enonic.cloud.apis.xp.service.ManagementApi;
 
 @Value.Immutable
@@ -64,7 +63,6 @@ public abstract class XpClient
     protected XpClientAppListener appsSSE()
     {
         WebTarget target = client().target( uri( "/app/events" ) );
-        target.register( new CustomRestHeaderFilter( "Accept-Encoding", null ) );
         target.register( basicAuthentication() );
         return new XpClientAppListener( target, nodeGroup(), namespace() );
     }

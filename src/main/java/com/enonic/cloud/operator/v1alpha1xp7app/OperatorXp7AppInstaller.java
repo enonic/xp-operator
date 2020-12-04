@@ -121,7 +121,7 @@ public class OperatorXp7AppInstaller
         try
         {
             AppInfo appInfo = xpClientCache.
-                install( app.getMetadata().getNamespace(), app.getXp7AppSpec().getUrl(), app.getXp7AppSpec().getSha512() );
+                appInstall( app.getMetadata().getNamespace(), app.getXp7AppSpec().getUrl(), app.getXp7AppSpec().getSha512() );
 
             updateAppStatus( app, new Xp7AppStatus().
                 withState( Xp7AppStatus.State.RUNNING ).
@@ -173,7 +173,7 @@ public class OperatorXp7AppInstaller
         // Try to uninstall
         try
         {
-            xpClientCache.uninstall( app.getMetadata().getNamespace(), app.
+            xpClientCache.appUninstall( app.getMetadata().getNamespace(), app.
                 getXp7AppStatus().
                 getXp7AppStatusFields().
                 getXp7AppStatusFieldsAppInfo().
