@@ -116,7 +116,9 @@ public class OperatorXp7AppInstaller
         // Check if XP is running
         if ( !xp7DeploymentInfo.xpRunning( app.getMetadata().getNamespace() ) )
         {
-            updateAppStatus( app, f.withMessage( "Cannot install, XP not in RUNNING state" ) );
+            updateAppStatus( app, f.
+                withState( Xp7AppStatus.State.PENDING ).
+                withMessage( "Cannot install, XP not in RUNNING state" ) );
             return;
         }
 
