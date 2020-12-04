@@ -85,6 +85,7 @@ spec:
     discovery.zen.minimum_master_nodes={{ $.Values.deployment.minimumMasterNodes }}
     discovery.unicast.sockets={{ $.Values.discoveryService }}.{{ $.Values.deployment.namespace }}.svc.cluster.local
     network.tcp.keep_alive=true
+    index.auto_expand_replicas = 1-all
 {{- end }}
 ---
 {{- end }}
