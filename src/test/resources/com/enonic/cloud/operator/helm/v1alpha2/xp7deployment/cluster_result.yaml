@@ -1592,7 +1592,7 @@ spec:
   data: "http.enabled=true\ncluster.name=mycloud-mysolution-myenv-myservice\nnode.master=true\n\
     node.data=false\ngateway.expected_master_nodes=2\ngateway.expected_data_nodes=2\n\
     gateway.recover_after_time=5m\ndiscovery.zen.minimum_master_nodes=2\ndiscovery.unicast.sockets=cluster-discovery.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
-    network.tcp.keep_alive=true"
+    network.tcp.keep_alive=true\nindex.auto_expand_replicas = 1-all"
   dataBase64: false
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
@@ -1647,7 +1647,7 @@ spec:
   data: "http.enabled=true\ncluster.name=mycloud-mysolution-myenv-myservice\nnode.master=false\n\
     node.data=true\ngateway.expected_master_nodes=2\ngateway.expected_data_nodes=2\n\
     gateway.recover_after_time=5m\ndiscovery.zen.minimum_master_nodes=2\ndiscovery.unicast.sockets=cluster-discovery.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
-    network.tcp.keep_alive=true"
+    network.tcp.keep_alive=true\nindex.auto_expand_replicas = 1-all"
   dataBase64: false
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
@@ -1702,7 +1702,7 @@ spec:
   data: "http.enabled=true\ncluster.name=mycloud-mysolution-myenv-myservice\nnode.master=false\n\
     node.data=false\ngateway.expected_master_nodes=2\ngateway.expected_data_nodes=2\n\
     gateway.recover_after_time=5m\ndiscovery.zen.minimum_master_nodes=2\ndiscovery.unicast.sockets=cluster-discovery.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
-    network.tcp.keep_alive=true"
+    network.tcp.keep_alive=true\nindex.auto_expand_replicas = 1-all"
   dataBase64: false
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
