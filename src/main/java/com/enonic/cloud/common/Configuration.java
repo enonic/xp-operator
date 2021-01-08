@@ -1,5 +1,8 @@
 package com.enonic.cloud.common;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
 
@@ -15,6 +18,19 @@ public final class Configuration
             _cfg = ConfigProvider.getConfig();
         }
         return _cfg;
+    }
+
+    public static Map<String, String> cfgStrChild( String parent )
+    {
+        Map<String, String> res = new HashMap<>();
+        globalConfig().getPropertyNames().forEach( key -> {
+            String pKey = parent + ".";
+            if ( key.startsWith( pKey ) )
+            {
+                res.put( key.replace( pKey, "" ), cfgStr( key ) );
+            }
+        } );
+        return res;
     }
 
     public static boolean cfgHasKey( String key )

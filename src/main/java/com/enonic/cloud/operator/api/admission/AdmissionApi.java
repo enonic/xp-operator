@@ -295,7 +295,7 @@ public class AdmissionApi
             Preconditions.checkState( xp7Deployments.isEmpty(), "There is already an Xp7Deployment in NS '%s'",
                                       newDeployment.getMetadata().getNamespace() );
 
-            // Assert version is >=7.6, if we cant parse version, just let it go
+            // Assert version is > 7.5.X, if we cant parse version, just let it go
             ComparableVersion currentVersion = new ComparableVersion( "7.6.0" );
             try
             {
@@ -318,7 +318,7 @@ public class AdmissionApi
                 // Just ignore
             }
 
-            Preconditions.checkState( currentVersion.compareTo( new ComparableVersion( "7.6.0" ) ) >= 0,
+            Preconditions.checkState( currentVersion.compareTo( new ComparableVersion( "7.5.100" ) ) > 0,
                                       "Operator only supports XP version 7.6 and higher" );
         }
     }

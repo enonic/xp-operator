@@ -34,6 +34,7 @@ import com.enonic.cloud.kubernetes.model.v1alpha2.domain.DomainStatusFields;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7config.Xp7Config;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7config.Xp7ConfigStatus;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
+import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentSpecNodesPreinstalledApps;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentStatus;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentStatusFields;
 import com.enonic.cloud.operator.api.AdmissionOperation;
@@ -42,6 +43,7 @@ import com.enonic.cloud.operator.domain.LbServiceIpProducer;
 
 import static com.enonic.cloud.common.Configuration.cfgBool;
 import static com.enonic.cloud.common.Configuration.cfgStr;
+import static com.enonic.cloud.common.Configuration.cfgStrChild;
 import static com.enonic.cloud.common.Utils.createOwnerReference;
 
 @ApplicationScoped
@@ -52,6 +54,8 @@ public class MutationApi
     @Inject
     LbServiceIpProducer lbServiceIpProducer;
 
+    List<Xp7DeploymentSpecNodesPreinstalledApps> preInstalledApps;
+
     public MutationApi()
     {
         super();
@@ -60,6 +64,13 @@ public class MutationApi
         addFunction( Xp7Deployment.class, this::xp7deployment );
         addFunction( Domain.class, this::domain );
         addFunction( Ingress.class, this::ingress );
+
+        preInstalledApps = new LinkedList<>();
+        cfgStrChild( "operator.preInstalledApps" ).
+            entrySet().
+            forEach( ( e ) -> preInstalledApps.add( new Xp7DeploymentSpecNodesPreinstalledApps().
+                withName( e.getKey() ).
+                withUrl( e.getValue() ) ) );
     }
 
     @POST
@@ -239,6 +250,12 @@ public class MutationApi
             case DELETE:
                 // Do nothing
                 break;
+        }
+
+        List<Xp7DeploymentSpecNodesPreinstalledApps> preInstall = newR.getXp7DeploymentSpec().getNodesPreinstalledApps();
+        if ( preInstall == null || preInstall.isEmpty() )
+        {
+            patch( mt, true, "/spec/nodesPreinstalledApps", newR.getXp7DeploymentSpec().getNodesPreinstalledApps(), preInstalledApps );
         }
     }
 

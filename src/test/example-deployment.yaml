@@ -10,7 +10,11 @@ metadata:
     service: myservice
 spec:
   enabled: true
-  xpVersion: gcr.io/playground-186616/enonic-xp:nightly
+  xpVersion: 7.6.0-B1
+
+#  nodesPreinstalledApps:
+#    - name: snapshotter
+#      url: https://repo.enonic.com/public/com/enonic/app/snapshotter/3.0.2/snapshotter-3.0.2.jar
 
   nodesSharedDisks:
     - name: blobstore

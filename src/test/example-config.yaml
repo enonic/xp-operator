@@ -4,6 +4,7 @@ metadata:
   name: test
   namespace: mycloud-mysolution-myenv-myservice
 spec:
+  nodeGroup: all
   file: test
   data: |
     metricsUrl = http://asdf:2609/
@@ -17,3 +18,15 @@ spec:
   file: test2
   dataBase64: true
   data: YXNkZg==
+---
+apiVersion: enonic.cloud/v1alpha2
+kind: Xp7Config
+metadata:
+  name: all-com-enonic-xp-app-applications-cfg
+  namespace: mycloud-mysolution-myenv-myservice
+spec:
+  nodeGroup: all
+  file: com.enonic.xp.app.applications.cfg
+  data: |
+    readonlyMode = true
+

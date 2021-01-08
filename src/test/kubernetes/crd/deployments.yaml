@@ -25,6 +25,16 @@ spec:
                   type: boolean
                 xpVersion:
                   type: string
+                nodesPreinstalledApps:
+                  type: array
+                  nullable: true
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      url:
+                        type: string
                 nodesSharedDisks:
                   type: array
                   items:

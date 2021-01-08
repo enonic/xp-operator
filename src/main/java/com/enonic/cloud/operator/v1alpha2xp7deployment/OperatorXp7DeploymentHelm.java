@@ -25,6 +25,7 @@ import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentSpec;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentSpecNodeGroup;
 import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentSpecNodeGroupEnvVar;
+import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentSpecNodesPreinstalledApps;
 import com.enonic.cloud.operator.helpers.HandlerHelm;
 import com.enonic.cloud.operator.ingress.OperatorXp7ConfigSync;
 
@@ -161,6 +162,14 @@ public class OperatorXp7DeploymentHelm
             deployment.put( "clustered", isClustered );
             deployment.put( "suPass", pass );
             deployment.put( "suPassHash", sha512( pass ) );
+            deployment.put( "preInstalledAppHash", sha512( resource.
+                getXp7DeploymentSpec().
+                getNodesPreinstalledApps().
+                stream().
+                map( Xp7DeploymentSpecNodesPreinstalledApps::getUrl ).
+                reduce( String::concat ).
+                orElse( "" ) ) );
+
             if ( isClustered )
             {
                 deployment.put( "clusterMajority", getClusterMajority( resource.getXp7DeploymentSpec().getXp7DeploymentSpecNodeGroups() ) );

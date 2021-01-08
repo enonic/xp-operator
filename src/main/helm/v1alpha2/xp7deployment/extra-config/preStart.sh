@@ -5,14 +5,14 @@ echo "Bootstrap deploy folder apps"
 # Delete apps
 for f in $(find $XP_HOME/deploy -name '*.jar'); do
   name=$(basename $f)
-  if [ "$(echo '{{ range $k, $app := .Values.preInstalledApps }}{{ $k }}.jar{{ end }}' | grep $name)" == "" ]; then
+  if [ "$(echo '{{ range $app := .Values.deployment.spec.nodesPreinstalledApps }}{{ $app.name }}-{{ trunc 10 (sha1sum $app.url) }}.jar{{ end }}' | grep $name)" == "" ]; then
     app.sh remove $name
   fi
 done
 
 # Add apps
-{{- range $k, $app := .Values.preInstalledApps }}
-app.sh add {{ $app }} --name={{ $k }}.jar
+{{- range $app := .Values.deployment.spec.nodesPreinstalledApps }}
+app.sh add {{ $app.url }} --name={{ $app.name }}-{{ trunc 10 (sha1sum $app.url) }}.jar
 {{- end }}
 
 {{- if $.Values.deployment.clustered }}
