@@ -48,6 +48,25 @@ public class OperatorXp7AppInstaller
     @Inject
     Xp7DeploymentInfo xp7DeploymentInfo;
 
+    public static Xp7AppStatusFields fieldsFromAppInfo( AppInfo appInfo )
+    {
+        if ( appInfo == null )
+        {
+            return null;
+        }
+        return new Xp7AppStatusFields().
+            withXp7AppStatusFieldsAppInfo( new Xp7AppStatusFieldsAppInfo().
+                withDescription( appInfo.description() ).
+                withDisplayName( appInfo.displayName() ).
+                withKey( appInfo.key() ).
+                withModifiedTime( appInfo.modifiedTime() ).
+                withState( appInfo.state() ).
+                withUrl( appInfo.url() ).
+                withVendorName( appInfo.vendorName() ).
+                withVendorUrl( appInfo.vendorUrl() ).
+                withVersion( appInfo.version() ) );
+    }
+
     @Override
     public void onNewAdd( final Xp7App newResource )
     {
@@ -190,25 +209,6 @@ public class OperatorXp7AppInstaller
             updateAppStatus( app, f.withMessage( "Cannot uninstall, see operator logs" ) );
             return false;
         }
-    }
-
-    public static Xp7AppStatusFields fieldsFromAppInfo( AppInfo appInfo )
-    {
-        if ( appInfo == null )
-        {
-            return null;
-        }
-        return new Xp7AppStatusFields().
-            withXp7AppStatusFieldsAppInfo( new Xp7AppStatusFieldsAppInfo().
-                withDescription( appInfo.description() ).
-                withDisplayName( appInfo.displayName() ).
-                withKey( appInfo.key() ).
-                withModifiedTime( appInfo.modifiedTime() ).
-                withState( appInfo.state() ).
-                withUrl( appInfo.url() ).
-                withVendorName( appInfo.vendorName() ).
-                withVendorUrl( appInfo.vendorUrl() ).
-                withVersion( appInfo.version() ) );
     }
 
     private void updateAppStatus( Xp7App resource, Xp7AppStatus status )

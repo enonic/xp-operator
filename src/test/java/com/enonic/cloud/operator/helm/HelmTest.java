@@ -35,7 +35,7 @@ public abstract class HelmTest
     protected HelmTest()
     {
         mapper = new ObjectMapper( new YAMLFactory() );
-        mapper.configure( SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
+        mapper.configure( SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true );
         helm = new Helm();
         chartRepository = new LocalRepository( new File( cfgStr( "operator.charts.path" ) ) );
     }

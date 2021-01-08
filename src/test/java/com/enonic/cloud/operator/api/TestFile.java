@@ -1,7 +1,6 @@
 package com.enonic.cloud.operator.api;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.immutables.value.Value;
 import org.wildfly.common.annotation.Nullable;
@@ -21,7 +20,8 @@ public abstract class TestFile
 {
     @Nullable
     @Value.Default
-    public Boolean disabled() {
+    public Boolean disabled()
+    {
         return false;
     }
 

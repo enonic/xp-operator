@@ -5,7 +5,6 @@ import java.util.Optional;
 
 import org.immutables.value.Value;
 
-
 import io.fabric8.kubernetes.api.model.networking.v1beta1.Ingress;
 import io.fabric8.kubernetes.client.KubernetesClient;
 

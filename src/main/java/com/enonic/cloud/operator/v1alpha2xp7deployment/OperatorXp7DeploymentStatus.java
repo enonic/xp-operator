@@ -151,11 +151,11 @@ public class OperatorXp7DeploymentStatus
     {
         if ( oldStatusHash != newStatus.hashCode() )
         {
-            K8sLogHelper.logDoneable(clients.xp7Deployments().crdClient().
+            K8sLogHelper.logDoneable( clients.xp7Deployments().crdClient().
                 inNamespace( resource.getMetadata().getNamespace() ).
                 withName( resource.getMetadata().getName() ).
                 edit().
-                withStatus( newStatus ));
+                withStatus( newStatus ) );
         }
     }
 

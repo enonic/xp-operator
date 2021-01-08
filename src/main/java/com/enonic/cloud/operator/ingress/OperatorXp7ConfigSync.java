@@ -50,6 +50,40 @@ public class OperatorXp7ConfigSync
     @Inject
     Searchers searchers;
 
+    public static Set<Mapping> getAnnotationMappings( final Ingress ingress )
+    {
+        Set<Mapping> result = new HashSet<>();
+        String prefix = cfgStr( "operator.charts.values.annotationKeys.vhostMapping" );
+        Map<String, String> annotations = ingress.getMetadata().getAnnotations();
+
+        // Collect all mapping prefixes
+        Set<String> mPrefix = new HashSet<>();
+        for ( Map.Entry<String, String> e : annotations.entrySet() )
+        {
+            if ( e.getKey().startsWith( prefix ) && e.getKey().endsWith( ".source" ) )
+            {
+                mPrefix.add( e.getKey().replace( ".source", "" ) );
+            }
+        }
+
+        // Create mappings
+        for ( String m : mPrefix )
+        {
+            Function<String, String> g = ( k ) -> annotations.get( m + "." + k );
+            try
+            {
+                String name = m.replace( prefix, ingress.getMetadata().getName() + "-" );
+                result.add( MappingImpl.of( name, g.apply( "host" ), g.apply( "source" ), g.apply( "target" ), g.apply( "idproviders" ) ) );
+            }
+            catch ( Exception e )
+            {
+                log.warn( String.format( "Invalid vhost mappings on ingress '%s'", ingress.getMetadata().getName() ) );
+            }
+        }
+
+        return result;
+    }
+
     @Override
     protected Stream<Xp7Config> resourceStream()
     {
@@ -224,39 +258,5 @@ public class OperatorXp7ConfigSync
                 postFix = "enabled";
             }
         }
-    }
-
-    public static Set<Mapping> getAnnotationMappings( final Ingress ingress )
-    {
-        Set<Mapping> result = new HashSet<>();
-        String prefix = cfgStr( "operator.charts.values.annotationKeys.vhostMapping" );
-        Map<String, String> annotations = ingress.getMetadata().getAnnotations();
-
-        // Collect all mapping prefixes
-        Set<String> mPrefix = new HashSet<>();
-        for ( Map.Entry<String, String> e : annotations.entrySet() )
-        {
-            if ( e.getKey().startsWith( prefix ) && e.getKey().endsWith( ".source" ) )
-            {
-                mPrefix.add( e.getKey().replace( ".source", "" ) );
-            }
-        }
-
-        // Create mappings
-        for ( String m : mPrefix )
-        {
-            Function<String, String> g = ( k ) -> annotations.get( m + "." + k );
-            try
-            {
-                String name = m.replace( prefix, ingress.getMetadata().getName() + "-" );
-                result.add( MappingImpl.of( name, g.apply( "host" ), g.apply( "source" ), g.apply( "target" ), g.apply( "idproviders" ) ) );
-            }
-            catch ( Exception e )
-            {
-                log.warn( String.format( "Invalid vhost mappings on ingress '%s'", ingress.getMetadata().getName() ) );
-            }
-        }
-
-        return result;
     }
 }

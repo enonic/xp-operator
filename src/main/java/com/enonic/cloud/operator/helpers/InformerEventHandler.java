@@ -28,6 +28,5 @@ public abstract class InformerEventHandler<R extends HasMetadata>
     }
 
     protected abstract void onNewAdd( final R newResource );
-
-
+    
 }
