@@ -12,8 +12,8 @@ Creating a simple XP deployment is quite easy, but it quickly gets more complica
 
 Before you can start using the operator you have to:
 
-* Have a running Kubernetes `v1.17` cluster. If you need one, you can look at our ./operator/minikube[minikube] guide.
-* Install the operator according to the ./operator/installation[installation] guide.
+* Have a running Kubernetes `v1.17` cluster. If you need one, you can look at our <<operator/minikube#,minikube>> guide.
+* Install the operator according to the <<operator/installation#,installation>> guide.
 
 == Custom Resources
 
