@@ -1,0 +1,56 @@
+= Minikube
+:toc: right
+:imagesdir: images
+
+This guide goes briefly over how to install and set up minikube for the operator for testing.
+
+== Prerequisites
+
+You need to have installed these programs on your computer:
+
+Minikube:: Is local Kubernetes, focusing on making it easy to learn and develop for Kubernetes. Download it https://minikube.sigs.k8s.io/docs/start/[here].
+
+VirtualBox:: Is a virtualization software. You can use other virtual machine or container manager with Minikube but VirtualBox has proven most stable for minikube. Download it https://www.virtualbox.org/wiki/Downloads[here].
+
+Kubectl:: Is the Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it https://kubernetes.io/docs/tasks/tools/install-kubectl/[here].
+
+== Setup
+
+Once you have minikube working, it is quite easy to start a local cluster.
+
+NOTE: You can run a cluster with less resources, but it wont be able to run any workloads. The amount of resources in this example wont let you run XP clusters. Feel free to add more juice if your machine can handle it.
+
+[source,bash]
+----
+minikube start \
+	--cpus=2 \
+	--memory=4gb \
+	--disk-size=10gb \
+	--vm-driver=virtualbox \
+	--kubernetes-version=v1.17.17
+----
+
+When your cluster is up, it is good to add the ingress controller to it to test load balancing:
+
+[source,bash]
+----
+minikube addons enable ingress
+----
+
+== Verify
+
+Verify you setup by running:
+
+[source,bash]
+----
+kubectl cluster-info
+----
+
+== Teardown
+
+Once you are done with your cluster, you can delete the machine and all the data by running:
+
+[source,bash]
+----
+minikube delete
+----

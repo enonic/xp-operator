@@ -91,7 +91,7 @@ spec:
               properties:
                 state:
                   type: string
-                  enum : ["ERROR", "PENDING", "STOPPED", "RUNNING"]
+                  enum: ["ERROR", "PENDING", "STOPPED", "RUNNING"]
                 message:
                   type: string
                 fields:
