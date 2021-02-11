@@ -6,14 +6,14 @@ The Enonic Kubernetes Operator is a piece of software runs on top of Kubernetes 
 
 == Motivation
 
-Creating a simple XP deployment is quite easy, but it quickly gets more complicated when you try to create production grade clusters. Add on top the complexity of how Kubernetes works and you quickly can get into trouble. The operator removes that complexity for you, and make it easy to create and manage complex deployments with ease.
+Creating a simple XP deployment is quite easy, but it quickly gets more complicated when you try to create production grade clusters. Add on top the complexity of how Kubernetes works and you quickly can get into trouble. The operator removes that complexity for you, and makes it easy to create and manage complex deployments with ease.
 
 == Installation
 
 Before you can start using the operator you have to:
 
-* Have a running Kubernetes v1.17 cluster. If you need one, you can look at our <<operator/minikube,minikube>> guide.
-* Install the operator according to the <<operator/installation,installation>> guide.
+* Have a running Kubernetes `v1.17` cluster. If you need one, you can look at our ./operator/minikube[minikube] guide.
+* Install the operator according to the ./operator/installation[installation] guide.
 
 == Custom Resources
 
