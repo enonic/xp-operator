@@ -8,7 +8,7 @@ The Enonic Kubernetes Operator is a piece of software runs on top of Kubernetes 
 
 Creating a simple XP deployment is quite easy, but it quickly gets more complicated when you try to create production grade clusters. Add on top the complexity of how Kubernetes works and you quickly can get into trouble. The operator removes that complexity for you, and makes it easy to create and manage complex deployments with ease.
 
-== Installation
+== Setup
 
 Before you can start using the operator you have to:
 
@@ -134,6 +134,8 @@ spec:
   data: SGVpISBZb3UgYXJlIG9uZSBub3N5IGZveC4gVGhpcyBpcyB0b3Agc2VjcmV0IGRhdGEuIEdldCBvdXQgb2YgaGVyZS4gU2hvb28uLi4uLi4uLi4uLg==
 ----
 
+NOTE: Xp7Config changes can be instant, but can also take up to a couple of minutes, depending on the Kubernetes cluster setup.
+
 === Xp7App
 
 This resource is to manage apps with the operator. While you can manage them with XP, this provides you with the option to create a deployment complete with your custom apps using the operator.
@@ -167,9 +169,9 @@ enonic.cloud/xp7.vhost.mapping.<MAPPING_NAME>.target: /admin
 enonic.cloud/xp7.vhost.mapping.<MAPPING_NAME>.idproviders: <DEFAULT_IDPROVIDER>,<OTHER_ENABLED_IDPROVIDER>
 ----
 
-A very important thing to keep in mind is that the annotation `enonic.cloud/xp7.vhost.mapping.<MAPPING_NAME>.source` has to match a defined `spec.rules[?].http.paths[?].path` in the same ingress. That is so the operator knows what nodegroups apply. That brings us to the second point. The `serviceName` has to match a nodegroup name defined in the Xp7Deployment.
+A very important thing to keep in mind is that the annotation `enonic.cloud/xp7.vhost.mapping.<MAPPING_NAME>.source` has to match a defined `spec.rules[?].http.paths[?].path` in the same ingress. That is so the operator knows what node groups it needs to update. That brings us to the second point. The `serviceName` has to match a node group name defined in the Xp7Deployment.
 
-A sample of a valid ingress, assuming you have a nodegroup `main`, would look something like this.
+An example of a valid ingress, assuming you have a nodegroup `main`, would look something like this.
 
 [source,yaml]
 ----
@@ -257,17 +259,6 @@ spec:
    - name: snapshotter
      url: https://repo.enonic.com/public/com/enonic/app/snapshotter/3.0.2/snapshotter-3.0.2.jar
 
-  # Create volumes shared by all nodes in this deployment
-  nodesSharedDisks:
-    - name: blobstore
-      size: 100Mi
-
-    - name: snapshots
-      size: 100Mi
-
-    - name: export # Dumps and other data
-      size: 100Mi
-
   # Create one node
   nodeGroups:
     - name: main
@@ -282,6 +273,12 @@ spec:
 
         # Volumes private to the node
         disks:
+          - name: blobstore
+            size: 100Mi
+          - name: snapshots
+            size: 100Mi
+          - name: export  # Dumps and other data
+            size: 100Mi
           - name: deploy  # Apps installed in the deploy folder
             size: 100Mi
           - name: index   # Node ES index
@@ -349,7 +346,9 @@ kubectl apply -f simple.yaml
 
 == Cluster example
 
-.complex.yaml
+Lets deploy a cluster example. Create a file called `cluster.yaml` and paste these contents to it:
+
+.cluster.yaml
 [source,yaml]
 ----
 # Create a namespace

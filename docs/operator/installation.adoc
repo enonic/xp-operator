@@ -6,7 +6,7 @@ This section covers the installation of the Enonic Kubernetes Operator.
 
 == Prerequisites
 
-Kubernetes:: A running Kubernetes cluster version `1.17` has been tested. Newer versions might work.
+Kubernetes:: A running Kubernetes cluster version `1.17` has been tested. Newer versions of Kubernetes might work.
 
 Kubectl:: Is the Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it https://kubernetes.io/docs/tasks/tools/install-kubectl/[here].
 
@@ -26,7 +26,7 @@ The reason why we bring this up is because XP, when running in clustered mode, n
 
 However, for XP clusters to work, you need to have a storage class in your cluster that supports creation of `ReadWriteMany` volumes. For example, the standard storage class in `minikube` supports all modes, but the standard storage class in `GKE` does not support `ReadWriteMany`. You can find a matrix https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes[here] that shows you different options.
 
-You can also create your own storage class with NFS that supports `ReadWriteMany` access mode. See our <<nfs,NFS storage class>> guide for more information.
+You can also create your own storage class with NFS that supports `ReadWriteMany` access mode. See our <<nfs#,NFS storage class>> guide for more information.
 
 == Installation
 
@@ -62,7 +62,7 @@ openssl x509 -in tls.crt -text -noout
 
 NOTE: Here you might have to change the storage classes depending on your cluster.
 
-Now you also need to create a chart values file to configure the deployment:
+Let create a Helm values file to configure the operator:
 
 .values.yaml
 [source,yaml]
@@ -82,8 +82,8 @@ helm upgrade --install \
 	--set-file tls.caCert=ca.crt \
 	--set-file tls.publicKey=tls.crt \
 	--set-file tls.privateKey=tls.key \
-    --version 0.7.0 \
-    -f values.yaml \
+	--version 0.7.0 \
+	-f values.yaml \
 	enonic-operator \
 	enonic/operator
 ----
