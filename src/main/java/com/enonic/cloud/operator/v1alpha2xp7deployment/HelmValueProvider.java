@@ -56,8 +56,6 @@ public class HelmValueProvider
             return () -> realSa;
         }
 
-        log.warn( "Cloud API SA info not defined, permissions for it will not be created" );
-
         return () -> null;
     }
 }

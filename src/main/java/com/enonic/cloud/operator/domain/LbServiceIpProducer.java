@@ -7,6 +7,7 @@ import java.util.function.Supplier;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +32,9 @@ public class LbServiceIpProducer
         // For testing
     }
 
+    @ConfigProperty(name = "dns.enabled")
+    Boolean dnsEnabled = false;
+
     @Inject
     public LbServiceIpProducer( final Clients clients )
     {
@@ -52,7 +56,7 @@ public class LbServiceIpProducer
                 withName( cfgStr( "dns.lb.service.name" ) ).
                 get();
 
-            if ( lbService == null )
+            if ( lbService == null && dnsEnabled )
             {
                 log.warn( "Loadbalancer service not found" );
             }
@@ -68,13 +72,13 @@ public class LbServiceIpProducer
             }
         }
 
-        if ( res.isEmpty() )
-        {
-            log.warn( "Loadbalancer ip not found, domain DNS records wont work" );
-        }
-        else
+        if ( !res.isEmpty() )
         {
             log.info( String.format( "Loadbalancer IPs are %s", res ) );
+        }
+        else if ( dnsEnabled )
+        {
+            log.warn( "Loadbalancer ip not found, domain DNS records wont work" );
         }
 
         return res;
