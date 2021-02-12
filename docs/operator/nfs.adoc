@@ -31,7 +31,7 @@ NOTE: Change `nfs.server` and `nfs.path` to reflect your setup.
 [source,bash]
 ----
 helm upgrade --install \
-	--namespace kube-system \
+    --namespace kube-system \
     --set nfs.server=?.?.?.? \
     --set nfs.path=/some/exported/path \
     --set storageClass.name=nfs \
@@ -42,11 +42,11 @@ helm upgrade --install \
     nfs/nfs-subdir-external-provisioner
 ----
 
-== Create NFS server in cluster
+== Create NFS server in K8s cluster
 
 === Add helm repository
 
-NOTE: As of this writing, the helm community is slowly phasing out the stable channel. New version of https://github.com/kubernetes-sigs/nfs-ganesha-server-and-external-provisioner[this provisioner] but it does not have its own helm repo yet.
+NOTE: As of this writing, the helm community is slowly phasing out the stable channel. The new version of https://github.com/kubernetes-sigs/nfs-ganesha-server-and-external-provisioner[this provisioner] does not have its own helm repo yet.
 
 [source,bash]
 ----
@@ -61,7 +61,7 @@ NOTE: You might want to update `persistence.size` for more capacity.
 [source,bash]
 ----
 helm upgrade --install \
-	--namespace kube-system \
+    --namespace kube-system \
     --set persistence.enabled=true \
     --set persistence.size=1Gi \
     --set storageClass.name=nfs \

@@ -12,8 +12,6 @@ Kubectl:: Is the Kubernetes command-line tool, kubectl, allows you to run comman
 
 Helm:: Is a package manager for Kubernetes. Download it https://helm.sh/docs/intro/install/[here].
 
-OpenSSL:: Binary to create certificates. Preinstalled on most systems. Download it https://wiki.openssl.org/index.php/Binaries[here].
-
 == Storage classes
 
 Before we deploy the operator, we need to talk about storage classes. That should be a familiar concept to people that have managed Kubernetes clusters before. If you do not know what they are, you can basically think of them as different aproaches to store your data (floppy, HDD, SSD, etc). Each storage class can create volumes that have one of these three access modes:
@@ -26,36 +24,18 @@ The reason why we bring this up is because XP, when running in clustered mode, n
 
 However, for XP clusters to work, you need to have a storage class in your cluster that supports creation of `ReadWriteMany` volumes. For example, the standard storage class in `minikube` supports all modes, but the standard storage class in `GKE` does not support `ReadWriteMany`. You can find a matrix https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes[here] that shows you different options.
 
-You can also create your own storage class with NFS that supports `ReadWriteMany` access mode. See our <<nfs#,NFS storage class>> guide for more information.
+You can create your own storage class with NFS that supports `ReadWriteMany` access mode. See our <<nfs#,NFS storage class>> guide for more information.
 
 == Installation
 
 === Helm repository
 
-NOTE: You only need to add the repository once.
-
 Start by adding the Enonic repository to Helm and updating repositories:
 
 [source,bash]
 ----
-helm repo add enonic https://artifactory.enonic.cloud/artifactory/helm
+helm repo add enonic https://repo.enonic.com/helm
 helm repo update
-----
-
-=== Create certificates
-
-NOTE: You might want to change `mysecret` and `myauthority` in these commands.
-
-You need to create certificates for the operator:
-
-[source,bash]
-----
-openssl genrsa -des3 -passout pass:mysecret -out ca.key 4096
-openssl req -x509 -new -passin pass:mysecret -nodes -key ca.key -sha256 -days 3650 -out ca.crt -subj '/CN=myauthority'
-openssl genrsa -out tls.key 4096
-openssl req -new -sha256 -key tls.key -out tls.csr -subj "/CN=enonic-operator.kube-system.svc"
-openssl x509 -req -passin pass:mysecret -in tls.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out tls.crt -days 3650 -sha256
-openssl x509 -in tls.crt -text -noout
 ----
 
 === Create chart values file
@@ -69,8 +49,8 @@ Let create a Helm values file to configure the operator:
 ----
 # Set storage classes for deployments
 config: |-
-  operator.charts.values.storage.default.storageClassName=standard
   operator.charts.values.storage.shared.storageClassName=standard
+  operator.charts.values.storage.default.storageClassName=standard
 ----
 
 === Installing chart
@@ -79,11 +59,8 @@ config: |-
 ----
 helm upgrade --install \
 	--namespace kube-system \
-	--set-file tls.caCert=ca.crt \
-	--set-file tls.publicKey=tls.crt \
-	--set-file tls.privateKey=tls.key \
 	--version 0.7.0 \
-	-f values.yaml \
+	--values values.yaml \
 	enonic-operator \
 	enonic/operator
 ----

@@ -12,12 +12,12 @@ Creating a simple XP deployment is quite easy, but it quickly gets more complica
 
 Before you can start using the operator you have to:
 
-* Have a running Kubernetes `v1.17` cluster. If you need one, you can look at our <<operator/minikube#,minikube>> guide.
+* Have a running Kubernetes cluster, version `1.17`.  Newer versions of Kubernetes might work. If you need one, you can look at our <<operator/minikube#,minikube>> guide.
 * Install the operator according to the <<operator/installation#,installation>> guide.
 
 == Custom Resources
 
-This operator introduces a couple of new resources into your Kubernetes clusters.
+The operator introduces a couple of new resources into your Kubernetes clusters.
 
 === Xp7Deployment
 
@@ -54,7 +54,7 @@ spec:
     - name: main
       replicas: 1
       
-      # Role of these nodes
+      # Role of the node
       data: true
       master: true
 
@@ -80,23 +80,23 @@ spec:
 
 ==== Disks
 
-In the Xp7Deployment we have names of disks that you can define to be shared, private or non existant.
+In the Xp7Deployment resource we have names of disks that you can define to be shared, private or non existant.
 
-blobstore:: Contains all blobs. This should always be shared in a cluster.
+blobstore:: All blob objects. This should always be shared in a cluster.
 
-snapshots:: Contains index snapshots. This should always be shared in a cluster.
+snapshots:: Index snapshots. This should always be shared in a cluster.
 
-export:: Contains data dumps and other data. This should be shared in a cluster.
+export:: Data dumps and other data. This should be shared in a cluster.
 
-index:: Contains node index. This should never be shared.
+index:: Private node index. This should never be shared.
 
-work:: Contains node cache. This should never be shared.
+work:: Private node cache. This should never be shared.
 
-deploy:: Contains locally installed apps on this single node. This should never be shared.
+deploy:: Locally installed apps on this single node. This should never be shared.
 
 === Xp7Config
 
-This resource manages the configuration
+This custom resource manages the configuration of XP nodes.
 
 [source,yaml]
 ----
@@ -134,7 +134,7 @@ spec:
   data: SGVpISBZb3UgYXJlIG9uZSBub3N5IGZveC4gVGhpcyBpcyB0b3Agc2VjcmV0IGRhdGEuIEdldCBvdXQgb2YgaGVyZS4gU2hvb28uLi4uLi4uLi4uLg==
 ----
 
-NOTE: Xp7Config changes can be instant, but can also take up to a couple of minutes, depending on the Kubernetes cluster setup.
+NOTE: It can vary how fast XP registers the Xp7Config changes. It can be instant, but it can also take up to a couple of minutes, depending on the Kubernetes cluster setup.
 
 === Xp7App
 
@@ -203,7 +203,7 @@ spec:
               servicePort: 8080
 ----
 
-NOTE: Like Xp7Config, changes to virtual hosts can take a couple of minutes to update.
+NOTE: Like Xp7Config, changes to virtual hosts can take a couple of minutes to register in XP.
 
 === Namespaces
 
