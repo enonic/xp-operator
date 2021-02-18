@@ -304,8 +304,7 @@ _  _ \_  __ \  __ \_  __ \_  /_  ___/   __  |/_/__  __ \
 
 [source,bash]
 ----
-$ kubectl -n my-namespace logs -c exp main-0
-kubectl -n my-namespace edit xp7configs.enonic.cloud my-config 
+$ kubectl -n my-namespace edit xp7configs.enonic.cloud my-config
 
 xp7config.enonic.cloud/my-config edited
 ----
@@ -314,7 +313,8 @@ xp7config.enonic.cloud/my-config edited
 
 [source,bash]
 ----
-kubectl -n my-namespace get xp7configs.enonic.cloud -w
+$ kubectl -n my-namespace get xp7configs.enonic.cloud -w
+
 NAME                 NODEGROUP   FILE                                 STATE     MSG
 all-admin            all         com.enonic.xp.app.main.cfg           READY     OK
 all-appstatus        all         com.enonic.app.status.cfg            READY     OK
