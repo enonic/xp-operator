@@ -39,7 +39,7 @@ minikube addons enable ingress
 
 == Verify
 
-Verify you setup by running:
+Verify your setup by running:
 
 [source,bash]
 ----

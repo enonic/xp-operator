@@ -59,7 +59,7 @@ config: |-
 ----
 helm upgrade --install \
 	--namespace kube-system \
-	--version 0.7.0 \
+	--version 0.7.1 \
 	--values values.yaml \
 	enonic-operator \
 	enonic/operator
