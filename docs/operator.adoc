@@ -230,13 +230,101 @@ metadata:
     enonic.cloud/remove.with.xp7deployment: my-deployment
 ----
 
-== Fetching SU password
+== Common operations
 
-When you create deployments the operator will automatically generate a super user password for you. To fetch the password, run this command:
+=== Get deployment status
 
 [source,bash]
 ----
-kubectl -n my-namespace get secret su -o go-template="{{ .data.pass | base64decode }}"
+$ kubectl -n my-namespace get xp7deployments.enonic.cloud 
+
+NAME            ENABLED   VERSION   STATE     MSG
+my-deployment   true      7.6.0     RUNNING   OK
+----
+
+=== Get config status
+
+[source,bash]
+----
+$ kubectl -n my-namespace get xp7configs.enonic.cloud 
+
+NAME                 NODEGROUP   FILE                                 STATE   MSG
+all-admin            all         com.enonic.xp.app.main.cfg           READY   OK
+all-appstatus        all         com.enonic.app.status.cfg            READY   OK
+all-cluster          all         com.enonic.xp.cluster.cfg            READY   OK
+all-logback          all         logback.xml                          READY   OK
+all-sessionstore     all         com.enonic.xp.web.sessionstore.cfg   READY   OK
+all-system           all         system.properties                    READY   OK
+main-elasticsearch   main        com.enonic.xp.elasticsearch.cfg      READY   OK
+main-vhosts          main        com.enonic.xp.web.vhost.cfg          READY   OK
+my-config            all         com.my-app.cfg                       READY   OK
+----
+
+=== Get app status
+
+[source,bash]
+----
+$ kubectl -n my-namespace get xp7apps.enonic.cloud 
+
+NAME            KEY                            VERSION   STATE     MSG
+contentstudio   com.enonic.app.contentstudio   3.2.0     RUNNING   OK
+----
+
+=== Fetching SU password
+
+[source,bash]
+----
+$ kubectl -n my-namespace get secret su -o go-template="{{ .data.pass | base64decode }}"
+
+NGDDlGdFYkX8i@#49#Z6N45tfhX6#3Rw
+----
+
+=== View XP logs
+
+[source,bash]
+----
+$ kubectl -n my-namespace logs -c exp main-0
+                         _____
+____________________________(_)______   ____  _________
+_  _ \_  __ \  __ \_  __ \_  /_  ___/   __  |/_/__  __ \
+/  __/  / / / /_/ /  / / /  / / /__     __>  < __  /_/ /
+\___//_/ /_/\____//_/ /_//_/  \___/     /_/|_| _  .___/
+                                               /_/
+
+# Enonic XP 7.6.0
+# Built on 2021-02-02T15:28:02Z (hash = 632195fda1bf0e9ce4a314d70b403ef731955ad0, branch = 7.6)
+# OpenJDK 64-Bit Server VM 11.0.10 (AdoptOpenJDK)
+# Linux 4.19.157 (amd64)
+# Install directory is /enonic-xp
+# Home directory is /enonic-xp/home
+....
+----
+
+=== Edit configuration
+
+[source,bash]
+----
+$ kubectl -n my-namespace logs -c exp main-0
+kubectl -n my-namespace edit xp7configs.enonic.cloud my-config 
+
+xp7config.enonic.cloud/my-config edited
+----
+
+=== Watch configuration
+
+[source,bash]
+----
+kubectl -n my-namespace get xp7configs.enonic.cloud -w
+NAME                 NODEGROUP   FILE                                 STATE     MSG
+all-admin            all         com.enonic.xp.app.main.cfg           READY     OK
+all-appstatus        all         com.enonic.app.status.cfg            READY     OK
+all-cluster          all         com.enonic.xp.cluster.cfg            READY     OK
+all-logback          all         logback.xml                          READY     OK
+all-sessionstore     all         com.enonic.xp.web.sessionstore.cfg   READY     OK
+all-system           all         system.properties                    READY     OK
+main-elasticsearch   main        com.enonic.xp.elasticsearch.cfg      READY     OK
+main-vhosts          main        com.enonic.xp.web.vhost.cfg          READY     OK
+my-config            all         com.my-app.cfg                       PENDING   Not loaded
 ----
 
 == Simple example
@@ -352,10 +440,18 @@ Deploy this by running:
 
 [source,bash]
 ----
-kubectl apply -f simple.yaml
+$ kubectl apply -f simple.yaml
+
+namespace/my-namespace created
+xp7deployment.enonic.cloud/my-deployment created
+xp7app.enonic.cloud/contentstudio created
+xp7config.enonic.cloud/my-config created
+ingress.networking.k8s.io/my-domain-com created
 ----
 
 == Cluster example
+
+WARNING: The values cpu and memory setting in this example are to low for a good cluster setup. They are set this way so you can try it out on a low resource Kubernetes cluster.
 
 Lets deploy a cluster example. Create a file called `cluster.yaml` and paste these contents to it:
 
@@ -407,8 +503,8 @@ spec:
       master: true
 
       resources:
-        cpu: "1"
-        memory: 512Mi
+        cpu: "0.5"
+        memory: 1Gi
 
         # Volumes private to the node
         disks:
@@ -418,7 +514,7 @@ spec:
             size: 100Mi
 
     # 2 data nodes
-    - name: data
+    - name: worker
       replicas: 2
       
       data: true
@@ -426,53 +522,13 @@ spec:
 
       resources:
         cpu: "1"
-        memory: 512Mi
+        memory: 1Gi
 
         # Volumes private to the node
         disks:
           - name: deploy  # Apps installed in the deploy folder
             size: 100Mi
           - name: index   # Node ES index
-            size: 100Mi
-
-    # 2 frontend nodes
-    - name: frontend
-      replicas: 2
-      
-      data: false
-      master: true
-
-      resources:
-        cpu: "1"
-        memory: 512Mi
-
-        # Volumes private to the node
-        disks:
-          - name: deploy  # Apps installed in the deploy folder
-            size: 100Mi
-          - name: index   # Node ES index
-            size: 100Mi
-          - name: work    # Node cache
-            size: 100Mi
-
-    # 2 admin nodes
-    - name: admin
-      replicas: 2
-      
-      data: false
-      master: true
-
-      resources:
-        cpu: "1"
-        memory: 512Mi
-
-        # Volumes private to the node
-        disks:
-          - name: deploy  # Apps installed in the deploy folder
-            size: 100Mi
-          - name: index   # Node ES index
-            size: 100Mi
-          - name: work    # Node cache
             size: 100Mi
 ---
 # Install content studio
@@ -513,14 +569,14 @@ spec:
         paths:
           - path: /
             backend:
-              serviceName: frontend
+              serviceName: worker
               servicePort: 8080
 ---
 # Expose XP admin on admin nodes through an ingress
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
-  name: my-domain-com-site
+  name: my-domain-com-admin
   namespace: my-namespace
   annotations:
     # Enable sticy sessions with nginx
@@ -541,7 +597,7 @@ spec:
         paths:
           - path: /admin
             backend:
-              serviceName: admin
+              serviceName: worker
               servicePort: 8080
 ----
 
@@ -549,5 +605,12 @@ Deploy this by running:
 
 [source,bash]
 ----
-kubectl apply -f cluster.yaml
+$ kubectl apply -f cluster.yaml
+
+namespace/my-namespace created
+xp7deployment.enonic.cloud/my-deployment created
+xp7app.enonic.cloud/contentstudio created
+xp7config.enonic.cloud/my-config created
+ingress.networking.k8s.io/my-domain-com-site created
+ingress.networking.k8s.io/my-domain-com-admin created
 ----

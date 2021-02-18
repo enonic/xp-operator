@@ -22,19 +22,33 @@ NOTE: You can run a cluster with less resources, but it wont be able to run any 
 
 [source,bash]
 ----
-minikube start \
+$ minikube start \
 	--cpus=2 \
 	--memory=4gb \
 	--disk-size=10gb \
 	--vm-driver=virtualbox \
 	--kubernetes-version=v1.17.17
+
+* Using the virtualbox driver based on user configuration
+* Starting control plane node minikube in cluster minikube
+* Creating virtualbox VM (CPUs=2, Memory=4096MB, Disk=10240MB) ...
+* Preparing Kubernetes v1.17.17 on Docker 20.10.0 ...
+  - Generating certificates and keys ...
+  - Booting up control plane ...
+  - Configuring RBAC rules ...
+* Verifying Kubernetes components...
+* Enabled addons: storage-provisioner, default-storageclass
+* Done! kubectl is now configured to use "minikube" cluster and "default" namespace by default
 ----
 
 When your cluster is up, it is good to add the ingress controller to it to test load balancing:
 
 [source,bash]
 ----
-minikube addons enable ingress
+$ minikube addons enable ingress
+
+* Verifying ingress addon...
+* The 'ingress' addon is enabled
 ----
 
 == Verify
@@ -43,7 +57,12 @@ Verify your setup by running:
 
 [source,bash]
 ----
-kubectl cluster-info
+$ kubectl cluster-info
+
+Kubernetes control plane is running at https://192.168.99.252:8443
+KubeDNS is running at https://192.168.99.252:8443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+
+To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 ----
 
 == Teardown
@@ -52,5 +71,8 @@ Once you are done with your cluster, you can delete the machine and all the data
 
 [source,bash]
 ----
-minikube delete
+$ minikube delete
+
+* Deleting "minikube" in virtualbox ...
+* Removed all traces of the "minikube" cluster.
 ----
