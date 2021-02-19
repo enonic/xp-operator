@@ -4,16 +4,11 @@
 
 The Enonic Kubernetes Operator is a piece of software runs on top of Kubernetes to help you manage your XP deployments. It builds on the https://kubernetes.io/docs/concepts/extend-kubernetes/operator/[operator pattern] provided by Kubernetes. 
 
-WARNING: This software is under development and should not be used for production servers. Read more in the <<op-state>> section.
+WARNING: Currently the operator is in development. That applies to every aspect related to it, i.e. CRDs, Helm chart, deployment strategies, etc. It should not be used for production deployments. Expect non-backwards compatible changes and potential dataloss during upgrades while using development versions of the operator.
 
 == Motivation
 
 Creating a simple XP deployment is quite easy, but it quickly gets more complicated when you try to create production grade clusters. Add on top the complexity of how Kubernetes works and you quickly can get into trouble. The operator removes that complexity for you, and makes it easy to create and manage complex deployments with ease.
-
-[#op-state]
-== State
-
-Currently the operator is in development. That applies to every aspect related to it, i.e. CRDs, Helm chart, deployment strategies, etc. It should not be used for production deployments. Expect non-backwards compatible changes and potential dataloss during upgrades while using development versions of the operator.
 
 == Setup
 
@@ -32,7 +27,7 @@ The operator introduces a couple of new resources into your Kubernetes clusters.
 
 === Xp7Deployment
 
-This is the main custom resource that defines your deployment.
+This is the main custom resource that defines your deployment. It is namespaced so you have to create a namespace for it. Only 1 Xp7Deployment can reside in each namespace.
 
 [source,yaml]
 ----
@@ -107,7 +102,7 @@ deploy:: Locally installed apps on this single node. This should never be shared
 
 === Xp7Config
 
-This custom resource manages the configuration of XP nodes.
+This custom resource manages the configuration of XP nodes. This resource namespaced, and should be created in a namespace that already contains a Xp7Deployment.
 
 [source,yaml]
 ----
@@ -149,7 +144,7 @@ NOTE: It can vary how fast XP registers the Xp7Config changes. It can be instant
 
 === Xp7App
 
-This resource is to manage apps with the operator. While you can manage them with XP, this provides you with the option to create a deployment complete with your custom apps using the operator.
+This resource is to manage apps with the operator. While you can manage them with XP, this provides you with the option to create a deployment complete with your custom apps using the operator. This resource namespaced, and should be created in a namespace that already contains a Xp7Deployment.
 
 [source,yaml]
 ----
@@ -180,7 +175,7 @@ enonic.cloud/xp7.vhost.mapping.<MAPPING_NAME>.target: /admin
 enonic.cloud/xp7.vhost.mapping.<MAPPING_NAME>.idproviders: <DEFAULT_IDPROVIDER>,<OTHER_ENABLED_IDPROVIDER>
 ----
 
-A very important thing to keep in mind is that the annotation `enonic.cloud/xp7.vhost.mapping.<MAPPING_NAME>.source` has to match a defined `spec.rules[?].http.paths[?].path` in the same ingress. That is so the operator knows what node groups it needs to update. That brings us to the second point. The `serviceName` has to match a node group name defined in the Xp7Deployment.
+A very important thing to keep in mind is that the annotation `enonic.cloud/xp7.vhost.mapping.<MAPPING_NAME>.source` has to match a defined `spec.rules[?].http.paths[?].path` in the same ingress. That is so the operator knows what node groups it needs to update. That brings us to the second point. The `spec.rules[?].http.paths[?].backend.serviceName` has to match a node group name defined in your Xp7Deployment.
 
 An example of a valid ingress, assuming you have a nodegroup `main`, would look something like this.
 
