@@ -57,38 +57,39 @@ metadata:
     controller: true
     name: "mycloud-mysolution-myenv-myservice"
 data:
-  dns.sh: "#!/bin/bash\n\nset -e\n\nusage () {\n    echo \"Usage: $SCRIPT_NAME [OPTIONS]\"\
-    \n    echo \"Wait until DNS record is present\"\n    echo \"\"\n    echo \"Options:\"\
-    \n    echo \"  -d, --dns=         Record to poll\"\n    echo \"  -t, --timeout=\
-    \     Script timeout\"\n    echo \"  -a, --additional=  Additional seconds to\
-    \ wait at end\"\n    echo \"  -r, --reverse      Wait until record is gone\"\n\
-    \    echo \"  -h, --help         Print usage\"\n    exit 1\n}\n\nDNS=\"\"\nTIMEOUT=\"\
-    20\"\nADDITIONAL_WAIT_SECONDS=\"0\"\nREVERSE=\"0\"\n\nwhile [ \"$#\" -gt 0 ];\
-    \ do\n    case $1 in\n        -h | --help)\n            usage ;;\n        -d)\n\
-    \            shift; DNS=\"$1\" ;;\n        --dns=*)\n            DNS=$(echo $1\
-    \ | awk '{split($0,r,\"=\"); print r[2]}') ;;\n        -t)\n            shift;\
-    \ TIMEOUT=\"$1\" ;;\n        --timeout=*)\n            STATE=$(echo $1 | awk '{split($0,r,\"\
-    =\"); print r[2]}') ;;\n        -a)\n            shift; ADDITIONAL_WAIT_SECONDS=\"\
-    $1\" ;;\n        --additional=*)\n            ADDITIONAL_WAIT_SECONDS=$(echo $1\
-    \ | awk '{split($0,r,\"=\"); print r[2]}') ;;\n        -r | --reverse)\n     \
-    \       REVERSE=\"1\" ;;\n        *)\n            usage\n            ;;\n    esac\n\
-    \    shift\ndone\n\nif [ \"${DNS}\" == \"\" ]; then\n    echo \"Missing dns parameter!\"\
-    \n    usage\nfi\n\nif [ \"$REVERSE\" = \"0\" ]; then\n    echo -n \"Waiting for\
-    \ DNS record to appear: \"\nelse\n    echo -n \"Waiting for DNS record to be removed:\
-    \ \"\nfi\n\necho \"${DNS} [timeout: ${TIMEOUT}, additional: ${ADDITIONAL_WAIT_SECONDS}]\"\
-    \n\nOK=\"0\"\nFOUND=\"0\"\n\nSTART_TIME=$(date +%s)\nwhile [ \"$OK\" == \"0\"\
-    \ ]; do\n    (dig +short ${DNS} | grep -v -e '^$' > /dev/null) && FOUND=\"1\"\
-    \ || true\n\n    if [ \"$FOUND\" == \"1\" ]; then\n        echo \"Record ${DNS}\
-    \ found!\"\n        if [ \"${REVERSE}\" == \"0\" ]; then\n            OK=\"1\"\
-    \n        fi\n    else\n        echo \"Record ${DNS} not found!\"\n        if\
-    \ [ \"${REVERSE}\" == \"1\" ]; then\n            OK=\"1\"\n        fi\n    fi\n\
-    \n    TIME=`printf \"%s\\n\" $(( $(date +%s) - ${START_TIME} ))`\n    if [ \"\
-    $TIME\" -gt \"$TIMEOUT\" ]; then\n        echo \"Operation timed out!\"\n    \
-    \    break\n    fi\n\n    if [ \"$OK\" == \"0\" ]; then\n        sleep 2\n   \
-    \ fi\ndone\n\nif [ \"${ADDITIONAL_WAIT_SECONDS}\" != \"0\" ]; then\n    echo \"\
-    Waiting for additional ${ADDITIONAL_WAIT_SECONDS} seconds\"\n    sleep ${ADDITIONAL_WAIT_SECONDS}\n\
-    fi\n\nif [ \"${OK}\" != \"1\" ]; then\n    exit 1\nfi"
-  endpoints.sh: "#!/bin/bash\n\nset -e\n\nusage () {\n    echo \"Usage: $SCRIPT_NAME\
+  dns.sh: "#!/usr/bin/env bash\n\nset -e\n\nusage () {\n    echo \"Usage: $SCRIPT_NAME\
+    \ [OPTIONS]\"\n    echo \"Wait until DNS record is present\"\n    echo \"\"\n\
+    \    echo \"Options:\"\n    echo \"  -d, --dns=         Record to poll\"\n   \
+    \ echo \"  -t, --timeout=     Script timeout\"\n    echo \"  -a, --additional=\
+    \  Additional seconds to wait at end\"\n    echo \"  -r, --reverse      Wait until\
+    \ record is gone\"\n    echo \"  -h, --help         Print usage\"\n    exit 1\n\
+    }\n\nDNS=\"\"\nTIMEOUT=\"60\"\nADDITIONAL_WAIT_SECONDS=\"0\"\nREVERSE=\"0\"\n\n\
+    while [ \"$#\" -gt 0 ]; do\n    case $1 in\n        -h | --help)\n           \
+    \ usage ;;\n        -d)\n            shift; DNS=\"$1\" ;;\n        --dns=*)\n\
+    \            DNS=$(echo $1 | awk '{split($0,r,\"=\"); print r[2]}') ;;\n     \
+    \   -t)\n            shift; TIMEOUT=\"$1\" ;;\n        --timeout=*)\n        \
+    \    STATE=$(echo $1 | awk '{split($0,r,\"=\"); print r[2]}') ;;\n        -a)\n\
+    \            shift; ADDITIONAL_WAIT_SECONDS=\"$1\" ;;\n        --additional=*)\n\
+    \            ADDITIONAL_WAIT_SECONDS=$(echo $1 | awk '{split($0,r,\"=\"); print\
+    \ r[2]}') ;;\n        -r | --reverse)\n            REVERSE=\"1\" ;;\n        *)\n\
+    \            usage\n            ;;\n    esac\n    shift\ndone\n\nif [ \"${DNS}\"\
+    \ == \"\" ]; then\n    echo \"Missing dns parameter!\"\n    usage\nfi\n\nif [\
+    \ \"$REVERSE\" = \"0\" ]; then\n    echo -n \"Waiting for DNS record to appear:\
+    \ \"\nelse\n    echo -n \"Waiting for DNS record to be removed: \"\nfi\n\necho\
+    \ \"${DNS} [timeout: ${TIMEOUT}, additional: ${ADDITIONAL_WAIT_SECONDS}]\"\n\n\
+    OK=\"0\"\nFOUND=\"0\"\n\nSTART_TIME=$(date +%s)\nwhile [ \"$OK\" == \"0\" ]; do\n\
+    \    (dig +short ${DNS} | grep -v -e '^$' > /dev/null) && FOUND=\"1\" || true\n\
+    \n    if [ \"$FOUND\" == \"1\" ]; then\n        echo \"Record ${DNS} found!\"\n\
+    \        if [ \"${REVERSE}\" == \"0\" ]; then\n            OK=\"1\"\n        fi\n\
+    \    else\n        echo \"Record ${DNS} not found!\"\n        if [ \"${REVERSE}\"\
+    \ == \"1\" ]; then\n            OK=\"1\"\n        fi\n    fi\n\n    TIME=`printf\
+    \ \"%s\\n\" $(( $(date +%s) - ${START_TIME} ))`\n    if [ \"$TIME\" -gt \"$TIMEOUT\"\
+    \ ]; then\n        echo \"Operation timed out!\"\n        break\n    fi\n\n  \
+    \  if [ \"$OK\" == \"0\" ]; then\n        sleep 2\n    fi\ndone\n\nif [ \"${ADDITIONAL_WAIT_SECONDS}\"\
+    \ != \"0\" ]; then\n    echo \"Waiting for additional ${ADDITIONAL_WAIT_SECONDS}\
+    \ seconds\"\n    sleep ${ADDITIONAL_WAIT_SECONDS}\nfi\n\nif [ \"${OK}\" != \"\
+    1\" ]; then\n    exit 1\nfi"
+  endpoints.sh: "#!/usr/bin/env bash\n\nset -e\n\nusage () {\n    echo \"Usage: $SCRIPT_NAME\
     \ [OPTIONS]\"\n    echo \"Wait until IP has been added to endpoints\"\n    echo\
     \ \"\"\n    echo \"Options:\"\n    echo \"  -s, --service=     Service name\"\n\
     \    echo \"  -i, --ip=          IP address\"\n    echo \"  -t, --timeout=   \
@@ -127,7 +128,7 @@ data:
     \ != \"0\" ]; then\n    echo \"Waiting for additional ${ADDITIONAL_WAIT_SECONDS}\
     \ seconds\"\n    sleep ${ADDITIONAL_WAIT_SECONDS}\nfi\n\nif [ \"${OK}\" != \"\
     1\" ]; then\n    exit 1\nfi"
-  events.sh: "#!/bin/sh\n\nset -e\n\nfunction now() {\n  date --iso-8601=seconds\n\
+  events.sh: "#!/usr/bin/env bash\n\nset -e\n\nfunction now() {\n  date --iso-8601=seconds\n\
     }\n\nfunction randomId() {\n  cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 16\
     \ | head -n 1\n}\n\nfunction log() {\n  echo -n \"$(now) $@\"\n}\n\nfunction logWithNL()\
     \ {\n    log \"$@\"\n    echo \"\"\n}\n\nRUNNING=\"true\"\nfunction finish {\n\
@@ -155,15 +156,15 @@ data:
     \ == \"true\" ]]; do\n  NEW_HASHCODE=$(getConfigHash)\n  if [[ \"${NEW_HASHCODE}\"\
     \ != \"${OLD_HASHCODE}\" ]]; then\n    cmEvent\n  fi\n  OLD_HASHCODE=${NEW_HASHCODE}\n\
     \  sleep 2\ndone"
-  preStart.sh: "echo \"Running prescript for node ${XP_NODE_NAME} (${XP_NODE_IP})\"\
-    \n\necho \"Bootstrap deploy folder apps\"\n\n# Delete apps\nfor f in $(find $XP_HOME/deploy\
-    \ -name '*.jar'); do\n  name=$(basename $f)\n  if [ \"$(echo '' | grep $name)\"\
-    \ == \"\" ]; then\n    app.sh remove $name\n  fi\ndone\n\n# Add apps\nbash /enonic-xp/home/extra-config/dns.sh\
-    \ -d cluster-discovery.${NAMESPACE}.svc.cluster.local\nbash /enonic-xp/home/extra-config/dns.sh\
-    \ -d ${XP_NODE_NAME}.cluster-discovery.${NAMESPACE}.svc.cluster.local"
-  preStop.sh: "echo \"Wait for endpoints to be deleted\"\nbash /enonic-xp/home/extra-config/endpoints.sh\
-    \ -r -s all -i ${XP_NODE_IP} -t 10\nbash /enonic-xp/home/extra-config/endpoints.sh\
-    \ -r -s ${XP_NODE_GROUP} -i ${XP_NODE_IP} -t 10 -a 20"
+  preStart.sh: "#!/usr/bin/env bash\n\necho \"Running prescript for node ${XP_NODE_NAME}\
+    \ (${XP_NODE_IP})\"\n\necho \"Bootstrap deploy folder apps\"\n\n# Delete apps\n\
+    for f in $(find $XP_HOME/deploy -name '*.jar'); do\n  name=$(basename $f)\n  if\
+    \ [ \"$(echo '' | grep $name)\" == \"\" ]; then\n    app.sh remove $name\n  fi\n\
+    done\n\n# Add apps\nbash /enonic-xp/home/extra-config/dns.sh -d ${XP_NODE_NAME}.cluster-discovery.${NAMESPACE}.svc.cluster.local"
+  preStop.sh: "#!/usr/bin/env bash\n\necho \"Wait for endpoints to be deleted\"\n\
+    bash /enonic-xp/home/extra-config/endpoints.sh -r -s all -i ${XP_NODE_IP} -t 10\n\
+    bash /enonic-xp/home/extra-config/endpoints.sh -r -s ${XP_NODE_GROUP} -i ${XP_NODE_IP}\
+    \ -t 10 -a 20"
   vhost-defaults.cfg: "enabled = true\n\nmapping.localhost.host = localhost\nmapping.localhost.source\
     \ = /\nmapping.localhost.target = /\nmapping.localhost.idProvider.system = default"
 ---
@@ -1566,8 +1567,7 @@ spec:
   nodeGroup: "all"
   file: "com.enonic.xp.hazelcast.cfg"
   data: "clusterConfigDefaults=false\nsystem.hazelcast.initial.min.cluster.size=${env.XP_HZ_MIN_SIZE}\n\
-    network.join.kubernetes.serviceDns=cluster-discovery.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
-    network.join.kubernetes.enabled=true\nnetwork.join.tcpIp.enabled=false"
+    network.join.tcpIp.enabled=false\nnetwork.join.kubernetes.enabled=true\nnetwork.join.kubernetes.serviceDns=cluster-discovery.mycloud-mysolution-myenv-myservice.svc.cluster.local"
   dataBase64: false
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 set -e
 
@@ -16,7 +16,7 @@ usage () {
 }
 
 DNS=""
-TIMEOUT="20"
+TIMEOUT="60"
 ADDITIONAL_WAIT_SECONDS="0"
 REVERSE="0"
 

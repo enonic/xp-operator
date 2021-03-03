@@ -217,7 +217,7 @@ spec:
   data: |-
     clusterConfigDefaults=false
     system.hazelcast.initial.min.cluster.size=${env.XP_HZ_MIN_SIZE}
-    network.join.kubernetes.serviceDns={{ $.Values.discoveryService }}.{{ $.Values.deployment.namespace }}.svc.cluster.local
-    network.join.kubernetes.enabled=true
     network.join.tcpIp.enabled=false
+    network.join.kubernetes.enabled=true
+    network.join.kubernetes.serviceDns={{ $.Values.discoveryService }}.{{ $.Values.deployment.namespace }}.svc.cluster.local
 {{- end }}

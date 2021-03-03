@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 echo "Running prescript for node ${XP_NODE_NAME} (${XP_NODE_IP})"
 
 echo "Bootstrap deploy folder apps"
@@ -16,6 +18,5 @@ app.sh add {{ $app.url }} --name={{ $app.name }}-{{ trunc 10 (sha1sum $app.url) 
 {{- end }}
 
 {{- if $.Values.deployment.clustered }}
-bash {{ $.Values.dirs.extraConfig }}/dns.sh -d cluster-discovery.${NAMESPACE}.svc.cluster.local
 bash {{ $.Values.dirs.extraConfig }}/dns.sh -d ${XP_NODE_NAME}.cluster-discovery.${NAMESPACE}.svc.cluster.local
 {{- end }}
