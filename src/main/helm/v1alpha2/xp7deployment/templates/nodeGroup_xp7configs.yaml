@@ -59,7 +59,6 @@ metadata:
   name: {{ $nodeGroup.name }}-elasticsearch
   namespace: {{ $.Values.deployment.namespace }}
   annotations:
-    {{ $.Values.annotationKeys.neverOverwrite }}: true
     {{ $.Values.annotationKeys.applyPriority }}: "71"
   labels:
     {{ $.Values.labelKeys.managed }}: true
@@ -77,15 +76,15 @@ spec:
   data: |-
     http.enabled=true
     cluster.name={{ $.Values.deployment.name }}
-    node.master={{ if $nodeGroup.master }}true{{ else }}false{{ end }}
-    node.data={{ if $nodeGroup.data }}true{{ else }}false{{ end }}
-    gateway.expected_master_nodes={{ $.Values.deployment.minimumMasterNodes }}
-    gateway.expected_data_nodes={{ $.Values.deployment.minimumDataNodes }}
+    node.master=${env.XP_IS_MASTER}
+    node.data=${env.XP_IS_DATA}
+    gateway.expected_master_nodes=${env.XP_ES_MIN_MASTERS}
+    gateway.expected_data_nodes=${env.XP_ES_MIN_DATAS}
     gateway.recover_after_time=5m
-    discovery.zen.minimum_master_nodes={{ $.Values.deployment.minimumMasterNodes }}
+    discovery.zen.minimum_master_nodes=${env.XP_ES_MIN_MASTERS}
     discovery.unicast.sockets={{ $.Values.discoveryService }}.{{ $.Values.deployment.namespace }}.svc.cluster.local
     network.tcp.keep_alive=true
-    index.auto_expand_replicas = 1-all
+    index.auto_expand_replicas=1-all
 {{- end }}
 ---
 {{- end }}

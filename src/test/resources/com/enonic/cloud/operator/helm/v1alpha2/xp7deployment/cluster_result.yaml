@@ -623,10 +623,8 @@ spec:
   selector:
     matchLabels:
       cloud: "mycloud"
-      enonic.data: "false"
       enonic.deployment: "mycloud-mysolution-myenv-myservice"
       enonic.managed: "true"
-      enonic.master: "true"
       enonic.nodeGroup: "master"
       environment: "myenv"
       service: "myservice"
@@ -668,6 +666,16 @@ spec:
           value: "master"
         - name: "XP_CLUSTERED"
           value: "true"
+        - name: "XP_HZ_MIN_SIZE"
+          value: "5"
+        - name: "XP_ES_MIN_MASTERS"
+          value: "2"
+        - name: "XP_ES_MIN_DATAS"
+          value: "2"
+        - name: "XP_IS_MASTER"
+          value: "true"
+        - name: "XP_IS_DATA"
+          value: "false"
         - name: "XP_NODE_IP"
           valueFrom:
             fieldRef:
@@ -711,10 +719,10 @@ spec:
             path: "/_cluster/health?wait_for_status=yellow&timeout=1s"
             port: 9200
             scheme: "HTTP"
-          initialDelaySeconds: 20
+          initialDelaySeconds: 30
           periodSeconds: 5
           successThreshold: 3
-          timeoutSeconds: 5
+          timeoutSeconds: 2
         resources:
           limits:
             cpu: "1"
@@ -865,10 +873,8 @@ spec:
   selector:
     matchLabels:
       cloud: "mycloud"
-      enonic.data: "true"
       enonic.deployment: "mycloud-mysolution-myenv-myservice"
       enonic.managed: "true"
-      enonic.master: "false"
       enonic.nodeGroup: "data"
       environment: "myenv"
       service: "myservice"
@@ -909,6 +915,16 @@ spec:
         - name: "XP_NODE_GROUP"
           value: "data"
         - name: "XP_CLUSTERED"
+          value: "true"
+        - name: "XP_HZ_MIN_SIZE"
+          value: "5"
+        - name: "XP_ES_MIN_MASTERS"
+          value: "2"
+        - name: "XP_ES_MIN_DATAS"
+          value: "2"
+        - name: "XP_IS_MASTER"
+          value: "false"
+        - name: "XP_IS_DATA"
           value: "true"
         - name: "XP_NODE_IP"
           valueFrom:
@@ -953,10 +969,10 @@ spec:
             path: "/_cluster/health?wait_for_status=green&timeout=1s"
             port: 9200
             scheme: "HTTP"
-          initialDelaySeconds: 20
+          initialDelaySeconds: 30
           periodSeconds: 5
           successThreshold: 3
-          timeoutSeconds: 5
+          timeoutSeconds: 2
         resources:
           limits:
             cpu: "2"
@@ -1129,10 +1145,8 @@ spec:
   selector:
     matchLabels:
       cloud: "mycloud"
-      enonic.data: "false"
       enonic.deployment: "mycloud-mysolution-myenv-myservice"
       enonic.managed: "true"
-      enonic.master: "false"
       enonic.nodeGroup: "frontend"
       environment: "myenv"
       service: "myservice"
@@ -1174,6 +1188,16 @@ spec:
           value: "frontend"
         - name: "XP_CLUSTERED"
           value: "true"
+        - name: "XP_HZ_MIN_SIZE"
+          value: "5"
+        - name: "XP_ES_MIN_MASTERS"
+          value: "2"
+        - name: "XP_ES_MIN_DATAS"
+          value: "2"
+        - name: "XP_IS_MASTER"
+          value: "false"
+        - name: "XP_IS_DATA"
+          value: "false"
         - name: "XP_NODE_IP"
           valueFrom:
             fieldRef:
@@ -1219,10 +1243,10 @@ spec:
             path: "/_cluster/health?wait_for_status=yellow&timeout=1s"
             port: 9200
             scheme: "HTTP"
-          initialDelaySeconds: 20
+          initialDelaySeconds: 30
           periodSeconds: 5
           successThreshold: 3
-          timeoutSeconds: 5
+          timeoutSeconds: 2
         resources:
           limits:
             cpu: "3"
@@ -1541,7 +1565,7 @@ metadata:
 spec:
   nodeGroup: "all"
   file: "com.enonic.xp.hazelcast.cfg"
-  data: "clusterConfigDefaults=false\nsystem.hazelcast.initial.min.cluster.size=5\n\
+  data: "clusterConfigDefaults=false\nsystem.hazelcast.initial.min.cluster.size=${env.XP_HZ_MIN_SIZE}\n\
     network.join.kubernetes.serviceDns=cluster-discovery.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
     network.join.kubernetes.enabled=true\nnetwork.join.tcpIp.enabled=false"
   dataBase64: false
@@ -1550,7 +1574,6 @@ apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   annotations:
     enonic.applyPriority: "70"
-    enonic.neverOverwrite: "true"
   labels:
     cloud: "mycloud"
     enonic.managed: "true"
@@ -1595,17 +1618,17 @@ metadata:
 spec:
   nodeGroup: "master"
   file: "com.enonic.xp.elasticsearch.cfg"
-  data: "http.enabled=true\ncluster.name=mycloud-mysolution-myenv-myservice\nnode.master=true\n\
-    node.data=false\ngateway.expected_master_nodes=2\ngateway.expected_data_nodes=2\n\
-    gateway.recover_after_time=5m\ndiscovery.zen.minimum_master_nodes=2\ndiscovery.unicast.sockets=cluster-discovery.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
-    network.tcp.keep_alive=true\nindex.auto_expand_replicas = 1-all"
+  data: "http.enabled=true\ncluster.name=mycloud-mysolution-myenv-myservice\nnode.master=${env.XP_IS_MASTER}\n\
+    node.data=${env.XP_IS_DATA}\ngateway.expected_master_nodes=${env.XP_ES_MIN_MASTERS}\n\
+    gateway.expected_data_nodes=${env.XP_ES_MIN_DATAS}\ngateway.recover_after_time=5m\n\
+    discovery.zen.minimum_master_nodes=${env.XP_ES_MIN_MASTERS}\ndiscovery.unicast.sockets=cluster-discovery.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
+    network.tcp.keep_alive=true\nindex.auto_expand_replicas=1-all"
   dataBase64: false
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   annotations:
     enonic.applyPriority: "71"
-    enonic.neverOverwrite: "true"
   labels:
     cloud: "mycloud"
     enonic.managed: "true"
@@ -1650,17 +1673,17 @@ metadata:
 spec:
   nodeGroup: "data"
   file: "com.enonic.xp.elasticsearch.cfg"
-  data: "http.enabled=true\ncluster.name=mycloud-mysolution-myenv-myservice\nnode.master=false\n\
-    node.data=true\ngateway.expected_master_nodes=2\ngateway.expected_data_nodes=2\n\
-    gateway.recover_after_time=5m\ndiscovery.zen.minimum_master_nodes=2\ndiscovery.unicast.sockets=cluster-discovery.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
-    network.tcp.keep_alive=true\nindex.auto_expand_replicas = 1-all"
+  data: "http.enabled=true\ncluster.name=mycloud-mysolution-myenv-myservice\nnode.master=${env.XP_IS_MASTER}\n\
+    node.data=${env.XP_IS_DATA}\ngateway.expected_master_nodes=${env.XP_ES_MIN_MASTERS}\n\
+    gateway.expected_data_nodes=${env.XP_ES_MIN_DATAS}\ngateway.recover_after_time=5m\n\
+    discovery.zen.minimum_master_nodes=${env.XP_ES_MIN_MASTERS}\ndiscovery.unicast.sockets=cluster-discovery.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
+    network.tcp.keep_alive=true\nindex.auto_expand_replicas=1-all"
   dataBase64: false
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   annotations:
     enonic.applyPriority: "71"
-    enonic.neverOverwrite: "true"
   labels:
     cloud: "mycloud"
     enonic.managed: "true"
@@ -1705,17 +1728,17 @@ metadata:
 spec:
   nodeGroup: "frontend"
   file: "com.enonic.xp.elasticsearch.cfg"
-  data: "http.enabled=true\ncluster.name=mycloud-mysolution-myenv-myservice\nnode.master=false\n\
-    node.data=false\ngateway.expected_master_nodes=2\ngateway.expected_data_nodes=2\n\
-    gateway.recover_after_time=5m\ndiscovery.zen.minimum_master_nodes=2\ndiscovery.unicast.sockets=cluster-discovery.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
-    network.tcp.keep_alive=true\nindex.auto_expand_replicas = 1-all"
+  data: "http.enabled=true\ncluster.name=mycloud-mysolution-myenv-myservice\nnode.master=${env.XP_IS_MASTER}\n\
+    node.data=${env.XP_IS_DATA}\ngateway.expected_master_nodes=${env.XP_ES_MIN_MASTERS}\n\
+    gateway.expected_data_nodes=${env.XP_ES_MIN_DATAS}\ngateway.recover_after_time=5m\n\
+    discovery.zen.minimum_master_nodes=${env.XP_ES_MIN_MASTERS}\ndiscovery.unicast.sockets=cluster-discovery.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
+    network.tcp.keep_alive=true\nindex.auto_expand_replicas=1-all"
   dataBase64: false
 kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
 metadata:
   annotations:
     enonic.applyPriority: "71"
-    enonic.neverOverwrite: "true"
   labels:
     cloud: "mycloud"
     enonic.managed: "true"

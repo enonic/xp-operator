@@ -28,8 +28,6 @@ spec:
     matchLabels:
       {{ $.Values.labelKeys.managed }}: true
       {{ $.Values.labelKeys.nodeGroup }}: {{ $nodeGroup.name }}
-      {{ $.Values.labelKeys.master }}: {{ $nodeGroup.master }}
-      {{ $.Values.labelKeys.data }}: {{ $nodeGroup.data }}
       {{ $.Values.labelKeys.deployment }}: {{ $.Values.deployment.name }}
       {{- with $.Values.defaultLabels }}
       {{- toYaml . | nindent 6 }}
@@ -142,6 +140,16 @@ spec:
               value: {{ $nodeGroup.name }}
             - name: XP_CLUSTERED # This is to ensure that XP is restarted when deployment is changed from clustered to non clustered
               value: {{ if $.Values.deployment.clustered }}true{{ else }}false{{ end }}
+            - name: XP_HZ_MIN_SIZE
+              value: {{ $.Values.deployment.clusterMajority }}
+            - name: XP_ES_MIN_MASTERS
+              value: {{ $.Values.deployment.minimumMasterNodes }}
+            - name: XP_ES_MIN_DATAS
+              value: {{ $.Values.deployment.minimumDataNodes }}
+            - name: XP_IS_MASTER
+              value: {{ if $nodeGroup.master }}true{{ else }}false{{ end }}
+            - name: XP_IS_DATA
+              value: {{ if $nodeGroup.data }}true{{ else }}false{{ end }}
             - name: XP_NODE_IP
               valueFrom:
                 fieldRef:
@@ -170,10 +178,10 @@ spec:
               {{- end }}
               port: 9200
               scheme: HTTP
-            initialDelaySeconds: 20
+            initialDelaySeconds: 30
             periodSeconds: 5
             successThreshold: 3
-            timeoutSeconds: 5
+            timeoutSeconds: 2
 
           {{- if $.Values.deployment.clustered }}
           lifecycle:

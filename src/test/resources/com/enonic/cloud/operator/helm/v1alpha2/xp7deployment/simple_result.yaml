@@ -487,10 +487,8 @@ spec:
   selector:
     matchLabels:
       cloud: "mycloud"
-      enonic.data: "true"
       enonic.deployment: "mycloud-mysolution-myenv-myservice"
       enonic.managed: "true"
-      enonic.master: "true"
       enonic.nodeGroup: "fisk"
       environment: "myenv"
       service: "myservice"
@@ -532,6 +530,13 @@ spec:
           value: "fisk"
         - name: "XP_CLUSTERED"
           value: "false"
+        - name: "XP_HZ_MIN_SIZE"
+        - name: "XP_ES_MIN_MASTERS"
+        - name: "XP_ES_MIN_DATAS"
+        - name: "XP_IS_MASTER"
+          value: "true"
+        - name: "XP_IS_DATA"
+          value: "true"
         - name: "XP_NODE_IP"
           valueFrom:
             fieldRef:
@@ -569,10 +574,10 @@ spec:
             path: "/_cluster/health?wait_for_status=yellow&timeout=1s"
             port: 9200
             scheme: "HTTP"
-          initialDelaySeconds: 20
+          initialDelaySeconds: 30
           periodSeconds: 5
           successThreshold: 3
-          timeoutSeconds: 5
+          timeoutSeconds: 2
         resources:
           limits:
             cpu: "1"
