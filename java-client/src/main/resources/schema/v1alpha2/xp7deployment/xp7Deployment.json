@@ -1,0 +1,164 @@
+{
+  "javaName": "Xp7DeploymentPlaceholder",
+  "type": "object",
+  "properties": {
+    "spec": {
+      "javaName": "Xp7DeploymentSpec",
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "xpVersion": {
+          "type": "string"
+        },
+        "nodesPreinstalledApps": {
+          "type": "array",
+          "nullable": true,
+          "items": {
+            "javaName": "Xp7DeploymentSpecNodesPreinstalledApps",
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "nodesSharedDisks": {
+          "javaName": "Xp7DeploymentSpecNodesSharedDisks",
+          "type": "array",
+          "items": {
+            "javaName": "Xp7DeploymentSpecNodesSharedDisk",
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "size": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "nodeGroups": {
+          "javaName": "Xp7DeploymentSpecNodeGroups",
+          "type": "array",
+          "items": {
+            "javaName": "Xp7DeploymentSpecNodeGroup",
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "displayName": {
+                "type": "string"
+              },
+              "data": {
+                "type": "boolean"
+              },
+              "master": {
+                "type": "boolean"
+              },
+              "replicas": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "env": {
+                "javaName": "Xp7DeploymentSpecNodeGroupEnvironment",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "javaName": "Xp7DeploymentSpecNodeGroupEnvVar",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "resources": {
+                "javaName": "Xp7DeploymentSpecNodeGroupResources",
+                "type": "object",
+                "properties": {
+                  "cpu": {
+                    "type": "string"
+                  },
+                  "memory": {
+                    "type": "string"
+                  },
+                  "disks": {
+                    "javaName": "Xp7DeploymentSpecNodeGroupDisks",
+                    "type": "array",
+                    "items": {
+                      "javaName": "Xp7DeploymentSpecNodeGroupDisk",
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "size": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "status": {
+      "javaName": "Xp7DeploymentStatus",
+      "type": "object",
+      "nullable": true,
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": [
+            "ERROR",
+            "PENDING",
+            "STOPPED",
+            "RUNNING"
+          ]
+        },
+        "message": {
+          "type": "string"
+        },
+        "fields": {
+          "javaName": "Xp7DeploymentStatusFields",
+          "type": "object",
+          "properties": {
+            "pods": {
+              "javaName": "Xp7DeploymentStatusFieldsPods",
+              "type": "array",
+              "items": {
+                "javaName": "Xp7DeploymentStatusFieldsPod",
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "phase": {
+                    "type": "string"
+                  },
+                  "ready": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

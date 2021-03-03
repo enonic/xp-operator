@@ -1,6 +1,3 @@
-.mvn
-nfsshare
-
 # Eclipse
 .project
 .classpath
@@ -8,8 +5,7 @@ nfsshare
 bin/
 
 # IntelliJ
-.idea/*
-!.idea/dictionaries
+.idea/
 *.ipr
 *.iml
 *.iws

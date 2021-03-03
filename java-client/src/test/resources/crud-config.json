@@ -1,0 +1,13 @@
+{
+  "apiVersion" : "enonic.cloud/v1alpha2",
+  "kind" : "Xp7Config",
+  "metadata" : {
+    "name" : "test-name"
+  },
+  "spec" : {
+    "nodeGroup" : "test",
+    "file" : "test.cfg",
+    "data" : "test"
+  },
+  "status" : null
+}

@@ -1,5 +1,3 @@
 *
-!target/*-runner
-!target/*-runner.jar
-!target/lib/*
-!src/main/helm
+!java-operator/target/*-runner.jar
+!java-operator/src/main/helm

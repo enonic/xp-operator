@@ -1,0 +1,43 @@
+{
+  "javaName": "Xp7ConfigPlaceholder",
+  "type": "object",
+  "properties": {
+    "spec": {
+      "javaName": "Xp7ConfigSpec",
+      "type": "object",
+      "properties": {
+        "nodeGroup": {
+          "type": "string"
+        },
+        "file": {
+          "type": "string"
+        },
+        "data": {
+          "type": "string"
+        },
+        "dataBase64": {
+          "type": "boolean",
+          "nullable": true
+        }
+      }
+    },
+    "status": {
+      "javaName": "Xp7ConfigStatus",
+      "type": "object",
+      "nullable": true,
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": [
+            "ERROR",
+            "PENDING",
+            "READY"
+          ]
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

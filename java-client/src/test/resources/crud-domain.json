@@ -1,0 +1,16 @@
+{
+  "apiVersion" : "enonic.cloud/v1alpha2",
+  "kind" : "Domain",
+  "metadata" : {
+    "name" : "test-name"
+  },
+  "spec" : {
+    "host" : "test.host.com",
+    "dnsRecord" : true,
+    "cdn" : true,
+    "certificate" : {
+      "authority" : "selfSigned"
+    }
+  },
+  "status" : null
+}

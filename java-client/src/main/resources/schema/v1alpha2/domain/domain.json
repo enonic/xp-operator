@@ -1,0 +1,80 @@
+{
+  "javaName": "DomainPlaceholder",
+  "type": "object",
+  "properties": {
+    "spec": {
+      "javaName": "DomainSpec",
+      "type": "object",
+      "properties": {
+        "host": {
+          "type": "string"
+        },
+        "dnsRecord": {
+          "type": "boolean"
+        },
+        "dnsTTL": {
+          "type": "integer",
+          "nullable": true
+        },
+        "cdn": {
+          "type": "boolean",
+          "nullable": true
+        },
+        "certificate": {
+          "javaName": "DomainSpecCertificate",
+          "type": "object",
+          "nullable": true,
+          "properties": {
+            "authority": {
+              "type": "string",
+              "enum": [
+                "selfSigned",
+                "letsEncrypt",
+                "letsEncryptStaging",
+                "clusterIssuer",
+                "custom"
+              ]
+            },
+            "identifier": {
+              "type": "string",
+              "nullable": true
+            }
+          }
+        }
+      }
+    },
+    "status": {
+      "javaName": "DomainStatus",
+      "type": "object",
+      "nullable": true,
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": [
+            "ERROR",
+            "PENDING",
+            "READY"
+          ]
+        },
+        "message": {
+          "type": "string"
+        },
+        "fields": {
+          "javaName": "DomainStatusFields",
+          "type": "object",
+          "properties": {
+            "publicIps": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "dnsRecordCreated": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    }
+  }
+}

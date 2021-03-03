@@ -1,0 +1,36 @@
+{
+  "apiVersion" : "enonic.cloud/v1alpha2",
+  "kind" : "Xp7Deployment",
+  "metadata" : {
+    "name" : "test-name"
+  },
+  "spec" : {
+    "enabled" : true,
+    "xpVersion" : "unstable",
+    "nodesPreinstalledApps" : [ ],
+    "nodesSharedDisks" : [ {
+      "name" : "blobstore",
+      "size" : "150"
+    } ],
+    "nodeGroups" : [ {
+      "name" : "test",
+      "displayName" : "test",
+      "data" : true,
+      "master" : true,
+      "replicas" : 1,
+      "env" : [ {
+        "name" : "test",
+        "value" : "test"
+      } ],
+      "resources" : {
+        "cpu" : "1",
+        "memory" : "512Mi",
+        "disks" : [ {
+          "name" : "index",
+          "size" : "100m"
+        } ]
+      }
+    } ]
+  },
+  "status" : null
+}
