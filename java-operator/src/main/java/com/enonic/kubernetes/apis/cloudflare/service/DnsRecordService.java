@@ -26,7 +26,7 @@ public interface DnsRecordService
     @GET
     @Path("/")
     @Produces("application/json")
-    @ClientHeaderParam(name = "Authorization", value = "{com.enonic.cloud.apis.cloudflare.service.Auth.getApiToken}")
+    @ClientHeaderParam(name = "Authorization", value = "{com.enonic.kubernetes.apis.cloudflare.service.Auth.getApiToken}")
     DnsRecordListResponse list( @PathParam("zone_identifier") String zone_identifier, @QueryParam("name") String name,
                                 @QueryParam("type") String type );
 
@@ -34,21 +34,21 @@ public interface DnsRecordService
     @Path("/")
     @Consumes("application/json")
     @Produces("application/json")
-    @ClientHeaderParam(name = "Authorization", value = "{com.enonic.cloud.apis.cloudflare.service.Auth.getApiToken}")
+    @ClientHeaderParam(name = "Authorization", value = "{com.enonic.kubernetes.apis.cloudflare.service.Auth.getApiToken}")
     DnsRecordCreateResponse create( @PathParam("zone_identifier") String zone_identifier, DnsRecord record );
 
     @PUT
     @Path("/{record_identifier}")
     @Consumes("application/json")
     @Produces("application/json")
-    @ClientHeaderParam(name = "Authorization", value = "{com.enonic.cloud.apis.cloudflare.service.Auth.getApiToken}")
+    @ClientHeaderParam(name = "Authorization", value = "{com.enonic.kubernetes.apis.cloudflare.service.Auth.getApiToken}")
     DnsRecordCreateResponse update( @PathParam("zone_identifier") String zone_identifier,
                                     @PathParam("record_identifier") String record_identifier, DnsRecord record );
 
     @DELETE
     @Path("/{record_identifier}")
     @Produces("application/json")
-    @ClientHeaderParam(name = "Authorization", value = "{com.enonic.cloud.apis.cloudflare.service.Auth.getApiToken}")
+    @ClientHeaderParam(name = "Authorization", value = "{com.enonic.kubernetes.apis.cloudflare.service.Auth.getApiToken}")
     DnsRecordDeleteResponse delete( @PathParam("zone_identifier") String zone_identifier,
                                     @PathParam("record_identifier") String record_identifier );
 
