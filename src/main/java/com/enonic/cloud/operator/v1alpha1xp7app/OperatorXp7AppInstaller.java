@@ -1,5 +1,7 @@
 package com.enonic.cloud.operator.v1alpha1xp7app;
 
+import java.lang.reflect.Array;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -12,11 +14,11 @@ import com.enonic.cloud.apis.xp.XpClientCache;
 import com.enonic.cloud.apis.xp.service.AppInfo;
 import com.enonic.cloud.kubernetes.Clients;
 import com.enonic.cloud.kubernetes.Searchers;
+import com.enonic.cloud.kubernetes.client.v1alpha1.Xp7App;
+import com.enonic.cloud.kubernetes.client.v1alpha1.xp7app.Xp7AppStatus;
+import com.enonic.cloud.kubernetes.client.v1alpha1.xp7app.Xp7AppStatusFields;
+import com.enonic.cloud.kubernetes.client.v1alpha1.xp7app.Xp7AppStatusFieldsAppInfo;
 import com.enonic.cloud.kubernetes.commands.K8sLogHelper;
-import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7App;
-import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7AppStatus;
-import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7AppStatusFields;
-import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7AppStatusFieldsAppInfo;
 import com.enonic.cloud.operator.helpers.InformerEventHandler;
 import com.enonic.cloud.operator.helpers.Xp7DeploymentInfo;
 
@@ -77,7 +79,7 @@ public class OperatorXp7AppInstaller
     public void onUpdate( final Xp7App oldResource, final Xp7App newResource )
     {
         // If url or sha512 has changed
-        if ( fieldsEquals( oldResource, r -> r.getXp7AppSpec().getUrl(), r -> r.getXp7AppSpec().getSha512() ).
+        if ( fieldsEquals( oldResource, r -> r.getSpec().getUrl(), r -> r.getSpec().getSha512() ).
             negate().
             test( newResource ) )
         {
@@ -104,7 +106,7 @@ public class OperatorXp7AppInstaller
         searchers.xp7App().stream().
             filter( isDeleted().negate() ).
             filter( hasFinalizer( cfgStr( "operator.charts.values.finalizers.app.uninstall" ) ) ).
-            filter( app -> app.getXp7AppStatus().getXp7AppStatusFields().getXp7AppStatusFieldsAppInfo() == null ).
+            filter( app -> app.getStatus().getXp7AppStatusFields().getXp7AppStatusFieldsAppInfo() == null ).
             sorted( namespaceAndName() ).
             forEach( this::installApp );
 
@@ -123,7 +125,7 @@ public class OperatorXp7AppInstaller
             withXp7AppStatusFields( new Xp7AppStatusFields() );
 
         // This is never going to work, do not even try
-        if ( app.getXp7AppSpec().getUrl().startsWith( "http://localhost" ) )
+        if ( app.getSpec().getUrl().startsWith( "http://localhost" ) )
         {
             updateAppStatus( app, f.withMessage( "Cannot install, app URL invalid" ) );
             return;
@@ -142,7 +144,7 @@ public class OperatorXp7AppInstaller
         try
         {
             AppInfo appInfo = xpClientCache.
-                appInstall( app.getMetadata().getNamespace(), app.getXp7AppSpec().getUrl(), app.getXp7AppSpec().getSha512() );
+                appInstall( app.getMetadata().getNamespace(), app.getSpec().getUrl(), app.getSpec().getSha512() );
 
             updateAppStatus( app, new Xp7AppStatus().
                 withState( Xp7AppStatus.State.RUNNING ).
@@ -168,7 +170,7 @@ public class OperatorXp7AppInstaller
         }
 
         // If there is no app info, the app is not installed, hence just remove the app finalizer
-        if ( app.getXp7AppStatus().getXp7AppStatusFields().getXp7AppStatusFieldsAppInfo() == null )
+        if ( app.getStatus().getXp7AppStatusFields().getXp7AppStatusFieldsAppInfo() == null )
         {
             return removeFinalizer( app );
         }
@@ -182,7 +184,7 @@ public class OperatorXp7AppInstaller
         // Create fail status
         Xp7AppStatus f = new Xp7AppStatus().
             withState( Xp7AppStatus.State.ERROR ).
-            withXp7AppStatusFields( app.getXp7AppStatus().getXp7AppStatusFields() );
+            withXp7AppStatusFields( app.getStatus().getXp7AppStatusFields() );
 
         // XP is not running, nothing we can do
         if ( !xp7DeploymentInfo.xpRunning( app.getMetadata().getNamespace() ) )
@@ -195,7 +197,7 @@ public class OperatorXp7AppInstaller
         try
         {
             xpClientCache.appUninstall( app.getMetadata().getNamespace(), app.
-                getXp7AppStatus().
+                getStatus().
                 getXp7AppStatusFields().
                 getXp7AppStatusFieldsAppInfo().
                 getKey() );
@@ -213,13 +215,14 @@ public class OperatorXp7AppInstaller
 
     private void updateAppStatus( Xp7App resource, Xp7AppStatus status )
     {
-        if ( resource.getXp7AppStatus().hashCode() != status.hashCode() )
+        if ( resource.getStatus().hashCode() != status.hashCode() )
         {
-            K8sLogHelper.logDoneable( clients.xp7Apps().crdClient().
+            K8sLogHelper.logEdit( clients.xp7Apps().
                 inNamespace( resource.getMetadata().getNamespace() ).
-                withName( resource.getMetadata().getName() ).
-                edit().
-                withStatus( status ) );
+                withName( resource.getMetadata().getName() ), a -> {
+                a.setStatus( status );
+                return a;
+            });
         }
     }
 
@@ -229,10 +232,12 @@ public class OperatorXp7AppInstaller
 
         if ( finalizers.remove( cfgStr( "operator.charts.values.finalizers.app.uninstall" ) ) )
         {
-            K8sLogHelper.logDoneable( clients.xp7Apps().crdClient().
+            K8sLogHelper.logEdit( clients.xp7Apps().
                 inNamespace( resource.getMetadata().getNamespace() ).
-                withName( resource.getMetadata().getName() ).
-                edit().withNewMetadataLike( resource.getMetadata() ).withFinalizers( finalizers ).endMetadata() );
+                withName( resource.getMetadata().getName() ), a -> {
+                a.getMetadata().setFinalizers( Collections.emptyList() );
+                return a;
+            });
             return true;
         }
         return false;

@@ -8,8 +8,8 @@ import javax.inject.Singleton;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 
 import com.enonic.cloud.kubernetes.Searchers;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentStatus;
+import com.enonic.cloud.kubernetes.client.v1alpha2.Xp7Deployment;
+import com.enonic.cloud.kubernetes.client.v1alpha2.xp7deployment.Xp7DeploymentStatus;
 
 import static com.enonic.cloud.kubernetes.Predicates.inNamespace;
 import static com.enonic.cloud.kubernetes.Predicates.isDeleted;
@@ -40,7 +40,7 @@ public class Xp7DeploymentInfo
         {
             return false;
         }
-        return deployment.get().getXp7DeploymentStatus().getState().equals( Xp7DeploymentStatus.State.RUNNING );
+        return deployment.get().getStatus().getState().equals( Xp7DeploymentStatus.State.RUNNING );
     }
 
     public boolean xpDeleted( final String namespace )

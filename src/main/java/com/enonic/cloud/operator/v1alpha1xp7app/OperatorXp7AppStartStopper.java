@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import com.enonic.cloud.apis.xp.XpClientCache;
 import com.enonic.cloud.kubernetes.Searchers;
-import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7App;
+import com.enonic.cloud.kubernetes.client.v1alpha1.Xp7App;
 import com.enonic.cloud.operator.helpers.InformerEventHandler;
 
 import static com.enonic.cloud.common.Configuration.cfgStr;
@@ -64,18 +64,18 @@ public class OperatorXp7AppStartStopper
     private synchronized void handle( final Xp7App xp7App )
     {
         // If app info is missing
-        if ( xp7App.getXp7AppStatus().getXp7AppStatusFields().getXp7AppStatusFieldsAppInfo() == null )
+        if ( xp7App.getStatus().getXp7AppStatusFields().getXp7AppStatusFieldsAppInfo() == null )
         {
             return;
         }
 
         // Collect info
-        Boolean enabled = xp7App.getXp7AppSpec().getEnabled();
-        String state = xp7App.getXp7AppStatus().
+        Boolean enabled = xp7App.getSpec().getEnabled();
+        String state = xp7App.getStatus().
             getXp7AppStatusFields().
             getXp7AppStatusFieldsAppInfo().
             getState();
-        String key = xp7App.getXp7AppStatus().
+        String key = xp7App.getStatus().
             getXp7AppStatusFields().
             getXp7AppStatusFieldsAppInfo().
             getKey();

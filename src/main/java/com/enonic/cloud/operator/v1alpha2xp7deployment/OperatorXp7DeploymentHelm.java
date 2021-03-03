@@ -11,6 +11,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
 
@@ -21,18 +23,17 @@ import com.enonic.cloud.helm.values.BaseValues;
 import com.enonic.cloud.helm.values.MapValues;
 import com.enonic.cloud.helm.values.ValueBuilder;
 import com.enonic.cloud.helm.values.Values;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentSpec;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentSpecNodeGroup;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentSpecNodeGroupEnvVar;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentSpecNodesPreinstalledApps;
+import com.enonic.cloud.kubernetes.client.v1alpha2.Xp7Deployment;
+import com.enonic.cloud.kubernetes.client.v1alpha2.xp7deployment.Xp7DeploymentSpec;
+import com.enonic.cloud.kubernetes.client.v1alpha2.xp7deployment.Xp7DeploymentSpecNodeGroup;
+import com.enonic.cloud.kubernetes.client.v1alpha2.xp7deployment.Xp7DeploymentSpecNodeGroupEnvVar;
+import com.enonic.cloud.kubernetes.client.v1alpha2.xp7deployment.Xp7DeploymentSpecNodesPreinstalledApps;
 import com.enonic.cloud.operator.helpers.HandlerHelm;
 import com.enonic.cloud.operator.ingress.OperatorXp7ConfigSync;
 
 import static com.enonic.cloud.common.Configuration.cfgFloat;
 import static com.enonic.cloud.common.Configuration.cfgInt;
 import static com.enonic.cloud.common.Utils.createOwnerReference;
-import static com.enonic.cloud.kubernetes.client.Utils.cloneResource;
 
 
 /**
@@ -73,7 +74,7 @@ public class OperatorXp7DeploymentHelm
     @Override
     protected Xp7DeploymentSpec getSpec( final Xp7Deployment t )
     {
-        return t.getXp7DeploymentSpec();
+        return t.getSpec();
     }
 
     @Override
@@ -86,6 +87,8 @@ public class OperatorXp7DeploymentHelm
     public static class Xp7DeploymentValueBuilder
         implements ValueBuilder<Xp7Deployment>
     {
+        private static final ObjectMapper mapper = new ObjectMapper();
+
         private final BaseValues baseValues;
 
         private final Supplier<String> suPassProvider;
@@ -120,7 +123,7 @@ public class OperatorXp7DeploymentHelm
                          Map.of( "name", sa.getMetadata().getName(), "namespace", sa.getMetadata().getNamespace() ) );
             }
 
-            for ( Xp7DeploymentSpecNodeGroup ng : resource.getXp7DeploymentSpec().getXp7DeploymentSpecNodeGroups() )
+            for ( Xp7DeploymentSpecNodeGroup ng : resource.getSpec().getXp7DeploymentSpecNodeGroups() )
             {
                 Optional<Xp7DeploymentSpecNodeGroupEnvVar> optionalXpOpts =
                     ng.getXp7DeploymentSpecNodeGroupEnvironment().stream().filter( e -> e.getName().equals( "XP_OPTS" ) ).findFirst();
@@ -163,7 +166,7 @@ public class OperatorXp7DeploymentHelm
             deployment.put( "suPass", pass );
             deployment.put( "suPassHash", sha512( pass ) );
             deployment.put( "preInstalledAppHash", sha512( resource.
-                getXp7DeploymentSpec().
+                getSpec().
                 getNodesPreinstalledApps().
                 stream().
                 map( Xp7DeploymentSpecNodesPreinstalledApps::getUrl ).
@@ -172,14 +175,12 @@ public class OperatorXp7DeploymentHelm
 
             if ( isClustered )
             {
-                deployment.put( "clusterMajority", getClusterMajority( resource.getXp7DeploymentSpec().getXp7DeploymentSpecNodeGroups() ) );
-                deployment.put( "minimumMasterNodes",
-                                getMinimumMasterNodes( resource.getXp7DeploymentSpec().getXp7DeploymentSpecNodeGroups() ) );
-                deployment.put( "minimumDataNodes",
-                                getMinimumDataNodes( resource.getXp7DeploymentSpec().getXp7DeploymentSpecNodeGroups() ) );
+                deployment.put( "clusterMajority", getClusterMajority( resource.getSpec().getXp7DeploymentSpecNodeGroups() ) );
+                deployment.put( "minimumMasterNodes", getMinimumMasterNodes( resource.getSpec().getXp7DeploymentSpecNodeGroups() ) );
+                deployment.put( "minimumDataNodes", getMinimumDataNodes( resource.getSpec().getXp7DeploymentSpecNodeGroups() ) );
             }
 
-            deployment.put( "spec", resource.getXp7DeploymentSpec() );
+            deployment.put( "spec", resource.getSpec() );
 
             values.put( "defaultLabels", defaultLabels( resource ) );
             values.put( "deployment", deployment );
@@ -187,6 +188,18 @@ public class OperatorXp7DeploymentHelm
             values.put( "ownerReferences", Collections.singletonList( createOwnerReference( resource ) ) );
 
             return values;
+        }
+
+        private Xp7Deployment cloneResource( final Xp7Deployment in )
+        {
+            try
+            {
+                return mapper.readValue( mapper.writeValueAsString( in ), Xp7Deployment.class );
+            }
+            catch ( JsonProcessingException e )
+            {
+                throw new RuntimeException( e );
+            }
         }
 
         private int getClusterMajority( final List<Xp7DeploymentSpecNodeGroup> xp7DeploymentSpecNodeGroups )
@@ -259,7 +272,7 @@ public class OperatorXp7DeploymentHelm
 
         private boolean isClustered( Xp7Deployment resource )
         {
-            return resource.getXp7DeploymentSpec().
+            return resource.getSpec().
                 getXp7DeploymentSpecNodeGroups().
                 stream().
                 mapToInt( Xp7DeploymentSpecNodeGroup::getReplicas ).sum() > 1;

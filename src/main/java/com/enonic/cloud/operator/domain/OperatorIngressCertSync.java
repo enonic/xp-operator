@@ -18,8 +18,8 @@ import io.fabric8.kubernetes.api.model.networking.v1beta1.IngressTLS;
 
 import com.enonic.cloud.kubernetes.Clients;
 import com.enonic.cloud.kubernetes.Searchers;
+import com.enonic.cloud.kubernetes.client.v1alpha2.Domain;
 import com.enonic.cloud.kubernetes.commands.K8sLogHelper;
-import com.enonic.cloud.kubernetes.model.v1alpha2.domain.Domain;
 import com.enonic.cloud.operator.helpers.InformerEventHandler;
 
 import static com.enonic.cloud.common.Configuration.cfgStr;
@@ -68,13 +68,13 @@ public class OperatorIngressCertSync
 
         // Sync ingress with relevant domains
         searchers.domain().stream().
-            filter( d -> hosts.contains( d.getDomainSpec().getHost() ) ).
+            filter( d -> hosts.contains( d.getSpec().getHost() ) ).
             forEach( d -> syncIngress( d, ingress ) );
     }
 
     public void syncIngress( final Domain domain, final Ingress ingress )
     {
-        String host = domain.getDomainSpec().getHost();
+        String host = domain.getSpec().getHost();
 
         // Collect annotations
         Map<String, String> oldAnnotations = ingress.getMetadata().getAnnotations();
@@ -97,9 +97,9 @@ public class OperatorIngressCertSync
         }
 
         // If domain has certificate, set that up on the ingress
-        if ( domain.getDomainSpec().getDomainSpecCertificate() != null )
+        if ( domain.getSpec().getDomainSpecCertificate() != null )
         {
-            switch ( domain.getDomainSpec().getDomainSpecCertificate().getAuthority() )
+            switch ( domain.getSpec().getDomainSpecCertificate().getAuthority() )
             {
                 case SELF_SIGNED:
                 case LETS_ENCRYPT_STAGING:
@@ -109,8 +109,7 @@ public class OperatorIngressCertSync
                     newTLS.add( new IngressTLS( Arrays.asList( host ), domain.getMetadata().getName() + "-cert" ) );
                     break;
                 case CUSTOM:
-                    newTLS.add(
-                        new IngressTLS( Arrays.asList( host ), domain.getDomainSpec().getDomainSpecCertificate().getIdentifier() ) );
+                    newTLS.add( new IngressTLS( Arrays.asList( host ), domain.getSpec().getDomainSpecCertificate().getIdentifier() ) );
                     break;
             }
         }
@@ -118,23 +117,20 @@ public class OperatorIngressCertSync
         // If changes are detected, update ingress
         if ( !Objects.equals( oldAnnotations, newAnnotations ) || !Objects.equals( oldTLS, newTLS ) )
         {
-            K8sLogHelper.logDoneable( clients.k8s().network().ingresses().
+            K8sLogHelper.logEdit( clients.k8s().network().ingresses().
                 inNamespace( ingress.getMetadata().getNamespace() ).
-                withName( ingress.getMetadata().getName() ).
-                edit().
-                editMetadata().
-                withAnnotations( newAnnotations ).
-                endMetadata().
-                editSpec().
-                withTls( newTLS ).
-                endSpec() );
+                withName( ingress.getMetadata().getName() ), i -> {
+                i.getMetadata().setAnnotations( newAnnotations );
+                i.getSpec().setTls( newTLS );
+                return i;
+            } );
         }
     }
 
 
     private String getClusterIssuer( Domain resource )
     {
-        switch ( resource.getDomainSpec().getDomainSpecCertificate().getAuthority() )
+        switch ( resource.getSpec().getDomainSpecCertificate().getAuthority() )
         {
             case SELF_SIGNED:
                 return cfgStr( "operator.certIssuer.selfSigned" );
@@ -143,7 +139,7 @@ public class OperatorIngressCertSync
             case LETS_ENCRYPT:
                 return cfgStr( "operator.certIssuer.letsEncrypt.prod" );
             case CLUSTER_ISSUER:
-                return resource.getDomainSpec().getDomainSpecCertificate().getIdentifier();
+                return resource.getSpec().getDomainSpecCertificate().getIdentifier();
             default:
                 return null;
         }

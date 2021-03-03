@@ -41,7 +41,10 @@ $ make cluster
 Use your IDE to run the `com.enonic.cloud.operator.helpers.Main` class and set the environment to:
 
 ```
-QUARKUS_HTTP_PORT=8081;OPERATOR_TASKS_SYNC_INTERVAL=30000;QUARKUS_HTTP_SSL_CERTIFICATE_FILE=src/test/kubernetes/certs/tls.crt;QUARKUS_HTTP_SSL_CERTIFICATE_KEY_FILE=src/test/kubernetes/certs/tls.key;OPERATOR_CHARTS_VALUES_STORAGE_SHARED_STORAGECLASSNAME=nfs
+QUARKUS_HTTP_SSL_CERTIFICATE_FILE=src/test/kubernetes/certs/tls.crt;
+QUARKUS_HTTP_SSL_CERTIFICATE_KEY_FILE=src/test/kubernetes/certs/tls.key;
+OPERATOR_TASKS_SYNC_INTERVAL=30000;
+OPERATOR_CHARTS_VALUES_STORAGE_SHARED_STORAGECLASSNAME=nfs
 ```
 
 ### Verify it works

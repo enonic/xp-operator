@@ -4,7 +4,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.enonic.cloud.apis.xp.XpClientCache;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
+import com.enonic.cloud.kubernetes.client.v1alpha2.Xp7Deployment;
 import com.enonic.cloud.operator.helpers.InformerEventHandler;
 
 /**

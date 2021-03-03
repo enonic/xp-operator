@@ -20,14 +20,11 @@ import io.fabric8.kubernetes.api.model.networking.v1beta1.IngressList;
 import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
 import io.fabric8.kubernetes.client.informers.SharedInformerFactory;
 
-import com.enonic.cloud.kubernetes.client.v1alpha1.xp7app.Xp7AppList;
-import com.enonic.cloud.kubernetes.client.v1alpha2.domain.DomainList;
-import com.enonic.cloud.kubernetes.client.v1alpha2.xp7config.Xp7ConfigList;
-import com.enonic.cloud.kubernetes.client.v1alpha2.xp7deployment.Xp7DeploymentList;
-import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7App;
-import com.enonic.cloud.kubernetes.model.v1alpha2.domain.Domain;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7config.Xp7Config;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
+import com.enonic.cloud.kubernetes.client.v1alpha1.Xp7App;
+import com.enonic.cloud.kubernetes.client.v1alpha2.Domain;
+import com.enonic.cloud.kubernetes.client.v1alpha2.Xp7Config;
+import com.enonic.cloud.kubernetes.client.v1alpha2.Xp7Deployment;
+
 
 public class InformersProducer
 {
@@ -52,10 +49,10 @@ public class InformersProducer
             namespaceInformer( namespaceInformer( sf ) ).
             podInformer( podInformer( sf ) ).
             eventInformer( eventInformer( sf ) ).
-            xp7AppInformer( xp7AppInformer( clients, sf ) ).
-            xp7ConfigInformer( xp7ConfigInformer( clients, sf ) ).
-            xp7DeploymentInformer( xp7DeploymentInformer( clients, sf ) ).
-            domainInformer( domainInformer( clients, sf ) ).
+            xp7AppInformer( xp7AppInformer( sf ) ).
+            xp7ConfigInformer( xp7ConfigInformer( sf ) ).
+            xp7DeploymentInformer( xp7DeploymentInformer( sf ) ).
+            domainInformer( domainInformer( sf ) ).
             build();
     }
 
@@ -84,25 +81,25 @@ public class InformersProducer
         return sf.sharedIndexInformerFor( Event.class, EventList.class, informerReSync );
     }
 
-    private SharedIndexInformer<Xp7App> xp7AppInformer( final Clients clients, final SharedInformerFactory sf )
+    private SharedIndexInformer<Xp7App> xp7AppInformer( final SharedInformerFactory sf )
     {
-        return sf.sharedIndexInformerForCustomResource( clients.xp7Apps().createContext(), Xp7App.class, Xp7AppList.class, informerReSync );
+        return sf.sharedIndexInformerForCustomResource( Xp7App.createCrdContext(), Xp7App.class, Xp7App.Xp7AppList.class, informerReSync );
     }
 
-    private SharedIndexInformer<Xp7Config> xp7ConfigInformer( final Clients clients, final SharedInformerFactory sf )
+    private SharedIndexInformer<Xp7Config> xp7ConfigInformer( final SharedInformerFactory sf )
     {
-        return sf.sharedIndexInformerForCustomResource( clients.xp7Configs().createContext(), Xp7Config.class, Xp7ConfigList.class,
+        return sf.sharedIndexInformerForCustomResource( Xp7Config.createCrdContext(), Xp7Config.class, Xp7Config.Xp7ConfigList.class,
                                                         informerReSync );
     }
 
-    private SharedIndexInformer<Xp7Deployment> xp7DeploymentInformer( final Clients clients, final SharedInformerFactory sf )
+    private SharedIndexInformer<Xp7Deployment> xp7DeploymentInformer( final SharedInformerFactory sf )
     {
-        return sf.sharedIndexInformerForCustomResource( clients.xp7Deployments().createContext(), Xp7Deployment.class,
-                                                        Xp7DeploymentList.class, informerReSync );
+        return sf.sharedIndexInformerForCustomResource( Xp7Deployment.createCrdContext(), Xp7Deployment.class,
+                                                        Xp7Deployment.Xp7DeploymentList.class, informerReSync );
     }
 
-    private SharedIndexInformer<Domain> domainInformer( final Clients clients, final SharedInformerFactory sf )
+    private SharedIndexInformer<Domain> domainInformer( final SharedInformerFactory sf )
     {
-        return sf.sharedIndexInformerForCustomResource( clients.domain().createContext(), Domain.class, DomainList.class, informerReSync );
+        return sf.sharedIndexInformerForCustomResource( Domain.createCrdContext(), Domain.class, Domain.DomainList.class, informerReSync );
     }
 }

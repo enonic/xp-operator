@@ -3,7 +3,7 @@ package com.enonic.cloud.operator.v1alpha2xp7config;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7config.Xp7Config;
+import com.enonic.cloud.kubernetes.client.v1alpha2.Xp7Config;
 import com.enonic.cloud.operator.helpers.InformerEventHandler;
 
 import static com.enonic.cloud.kubernetes.Predicates.fieldEquals;
@@ -28,7 +28,7 @@ public class OperatorXp7Config
     @Override
     public void onUpdate( final Xp7Config oldResource, final Xp7Config newResource )
     {
-        onCondition( newResource, this::handle, fieldEquals( oldResource, Xp7Config::getXp7ConfigSpec ).negate() );
+        onCondition( newResource, this::handle, fieldEquals( oldResource, Xp7Config::getSpec ).negate() );
     }
 
     @Override

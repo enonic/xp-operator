@@ -1,5 +1,6 @@
 package com.enonic.cloud.operator.ingress;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -12,9 +13,9 @@ import io.fabric8.kubernetes.api.model.networking.v1beta1.IngressRule;
 
 import com.enonic.cloud.kubernetes.Clients;
 import com.enonic.cloud.kubernetes.Searchers;
+import com.enonic.cloud.kubernetes.client.v1alpha2.Xp7Config;
+import com.enonic.cloud.kubernetes.client.v1alpha2.xp7config.Xp7ConfigStatus;
 import com.enonic.cloud.kubernetes.commands.K8sLogHelper;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7config.Xp7Config;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7config.Xp7ConfigStatus;
 import com.enonic.cloud.operator.helpers.InformerEventHandler;
 
 import static com.enonic.cloud.common.Configuration.cfgStr;
@@ -50,7 +51,7 @@ public class OperatorIngressLabel
     public void onUpdate( final Xp7Config oldR, final Xp7Config newR )
     {
         // Only handle if this is a vhost config and it is loaded
-        onCondition( newR, this::handle, this::isVHostConfig, ( c ) -> c.getXp7ConfigStatus().getState() == Xp7ConfigStatus.State.READY );
+        onCondition( newR, this::handle, this::isVHostConfig, ( c ) -> c.getStatus().getState() == Xp7ConfigStatus.State.READY );
     }
 
     @Override
@@ -84,7 +85,7 @@ public class OperatorIngressLabel
             filter( inSameNamespace( ingress ) ).
             filter( isDeleted().negate() ).
             filter( this::isVHostConfig ).
-            collect( Collectors.toMap( c -> c.getXp7ConfigSpec().getNodeGroup(), c -> c.getXp7ConfigStatus().getState() ) );
+            collect( Collectors.toMap( c -> c.getSpec().getNodeGroup(), c -> c.getStatus().getState() ) );
 
         // Set all nodeGroups state
         if ( states.values().stream().anyMatch( s -> !s.equals( Xp7ConfigStatus.State.READY ) ) )
@@ -114,18 +115,23 @@ public class OperatorIngressLabel
         // Update if true
         if ( loaded )
         {
-            K8sLogHelper.logDoneable( clients.k8s().network().ingress().
+            K8sLogHelper.logEdit( clients.k8s().network().ingress().
                 inNamespace( ingress.getMetadata().getNamespace() ).
-                withName( ingress.getMetadata().getName() ).
-                edit().
-                editMetadata().
-                addToLabels( cfgStr( "operator.charts.values.labelKeys.ingressVhostLoaded" ), "true" ).
-                endMetadata() );
+                withName( ingress.getMetadata().getName() ), i -> {
+                Map<String, String> labels = i.getMetadata().getLabels();
+                if ( labels == null )
+                {
+                    labels = new HashMap<>();
+                }
+                labels.put( cfgStr( "operator.charts.values.labelKeys.ingressVhostLoaded" ), "true" );
+                i.getMetadata().setLabels( labels );
+                return i;
+            } );
         }
     }
 
     private boolean isVHostConfig( final Xp7Config c )
     {
-        return c.getXp7ConfigSpec().getFile().equals( cfgStr( "operator.charts.values.files.vhosts" ) );
+        return c.getSpec().getFile().equals( cfgStr( "operator.charts.values.files.vhosts" ) );
     }
 }

@@ -12,11 +12,11 @@ import com.enonic.cloud.apis.xp.service.AppEventType;
 import com.enonic.cloud.apis.xp.service.AppInfo;
 import com.enonic.cloud.kubernetes.Clients;
 import com.enonic.cloud.kubernetes.Searchers;
+import com.enonic.cloud.kubernetes.client.v1alpha1.Xp7App;
+import com.enonic.cloud.kubernetes.client.v1alpha1.xp7app.Xp7AppStatus;
+import com.enonic.cloud.kubernetes.client.v1alpha1.xp7app.Xp7AppStatusFields;
+import com.enonic.cloud.kubernetes.client.v1alpha1.xp7app.Xp7AppStatusFieldsAppInfo;
 import com.enonic.cloud.kubernetes.commands.K8sLogHelper;
-import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7App;
-import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7AppStatus;
-import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7AppStatusFields;
-import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7AppStatusFieldsAppInfo;
 import com.enonic.cloud.operator.helpers.Xp7DeploymentInfo;
 
 import static com.enonic.cloud.kubernetes.Predicates.inNamespace;
@@ -82,8 +82,8 @@ public class OperatorXp7AppStatus
 
         // Collect info
         AppInfo info = appEvent.info();
-        Xp7AppStatusFieldsAppInfo oldState = app.getXp7AppStatus().getXp7AppStatusFields().getXp7AppStatusFieldsAppInfo();
-        int oldStatusHash = app.getXp7AppStatus().hashCode();
+        Xp7AppStatusFieldsAppInfo oldState = app.getStatus().getXp7AppStatusFields().getXp7AppStatusFieldsAppInfo();
+        int oldStatusHash = app.getStatus().hashCode();
 
         // If version in XP does not match version in K8s
         if ( !info.version().equals( oldState.getVersion() ) )
@@ -100,11 +100,12 @@ public class OperatorXp7AppStatus
         if ( newStatus.hashCode() != oldStatusHash )
         {
             // Update status
-            K8sLogHelper.logDoneable( clients.xp7Apps().crdClient().
+            K8sLogHelper.logEdit( clients.xp7Apps().
                 inNamespace( app.getMetadata().getNamespace() ).
-                withName( app.getMetadata().getName() ).
-                edit().
-                withStatus( newStatus ) );
+                withName( app.getMetadata().getName() ), a -> {
+                a.setStatus( newStatus );
+                return a;
+            } );
         }
     }
 
@@ -118,11 +119,11 @@ public class OperatorXp7AppStatus
 
     private boolean filterAppByKey( final Xp7App app, final String key )
     {
-        if ( app.getXp7AppStatus().getXp7AppStatusFields().getXp7AppStatusFieldsAppInfo() == null )
+        if ( app.getStatus().getXp7AppStatusFields().getXp7AppStatusFieldsAppInfo() == null )
         {
             return false;
         }
-        return app.getXp7AppStatus().getXp7AppStatusFields().getXp7AppStatusFieldsAppInfo().getKey().equals( key );
+        return app.getStatus().getXp7AppStatusFields().getXp7AppStatusFieldsAppInfo().getKey().equals( key );
     }
 
     private Xp7AppStatus createNewStatus( final AppInfo info )
@@ -160,10 +161,11 @@ public class OperatorXp7AppStatus
 
     private void reinstall( Xp7App app )
     {
-        K8sLogHelper.logDoneable( clients.xp7Apps().crdClient().
+        K8sLogHelper.logEdit( clients.xp7Apps().
             inNamespace( app.getMetadata().getNamespace() ).
-            withName( app.getMetadata().getName() ).
-            edit().
-            withStatus( null ) );
+            withName( app.getMetadata().getName() ), a -> {
+            a.setStatus( null );
+            return a;
+        } );
     }
 }

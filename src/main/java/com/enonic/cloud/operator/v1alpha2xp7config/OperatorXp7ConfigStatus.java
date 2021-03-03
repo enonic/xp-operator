@@ -13,9 +13,9 @@ import io.fabric8.kubernetes.api.model.Pod;
 
 import com.enonic.cloud.kubernetes.Clients;
 import com.enonic.cloud.kubernetes.Searchers;
+import com.enonic.cloud.kubernetes.client.v1alpha2.Xp7Config;
+import com.enonic.cloud.kubernetes.client.v1alpha2.xp7config.Xp7ConfigStatus;
 import com.enonic.cloud.kubernetes.commands.K8sLogHelper;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7config.Xp7Config;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7config.Xp7ConfigStatus;
 import com.enonic.cloud.operator.helpers.InformerEventHandler;
 
 import static com.enonic.cloud.common.Configuration.cfgStr;
@@ -94,7 +94,7 @@ public class OperatorXp7ConfigStatus
         // Collect relevant XP7 configs and handle them
         searchers.xp7Config().stream().
             filter( inSameNamespace( newEvent ) ).
-            filter( c -> c.getXp7ConfigStatus().getState() != Xp7ConfigStatus.State.READY ).
+            filter( c -> c.getStatus().getState() != Xp7ConfigStatus.State.READY ).
             forEach( c -> handle( c, notUpdatedPods ) );
     }
 
@@ -107,14 +107,14 @@ public class OperatorXp7ConfigStatus
         }
 
         // This should apply to all pods, and some are not ready
-        if ( xp7Config.getXp7ConfigSpec().getNodeGroup().equals( cfgStr( "operator.charts.values.allNodesKey" ) ) )
+        if ( xp7Config.getSpec().getNodeGroup().equals( cfgStr( "operator.charts.values.allNodesKey" ) ) )
         {
             return markPending( xp7Config, notUpdatedPods );
         }
 
         // This should apply to a particular node group
         List<Pod> relevantNonUpdated = notUpdatedPods.stream().
-            filter( matchLabel( cfgStr( "operator.charts.values.labelKeys.nodeGroup" ), xp7Config.getXp7ConfigSpec().getNodeGroup() ) ).
+            filter( matchLabel( cfgStr( "operator.charts.values.labelKeys.nodeGroup" ), xp7Config.getSpec().getNodeGroup() ) ).
             collect( Collectors.toList() );
 
         if ( relevantNonUpdated.isEmpty() )
@@ -133,25 +133,21 @@ public class OperatorXp7ConfigStatus
             map( p -> p.getMetadata().getName() ).
             collect( Collectors.joining( ", " ) );
 
-        K8sLogHelper.logDoneable( clients.xp7Configs().crdClient().
+        K8sLogHelper.logEdit( clients.xp7Configs().
             inNamespace( xp7Config.getMetadata().getNamespace() ).
-            withName( xp7Config.getMetadata().getName() ).
-            edit().
-            withStatus( new Xp7ConfigStatus().
-                withState( Xp7ConfigStatus.State.PENDING ).
-                withMessage( "Not loaded: " + podNames ) ) );
+            withName( xp7Config.getMetadata().getName() ), c -> c.withStatus( new Xp7ConfigStatus().
+            withState( Xp7ConfigStatus.State.PENDING ).
+            withMessage( "Not loaded: " + podNames ) ) );
         return false;
     }
 
     private boolean markReady( final Xp7Config xp7Config )
     {
-        K8sLogHelper.logDoneable( clients.xp7Configs().crdClient().
+        K8sLogHelper.logEdit( clients.xp7Configs().
             inNamespace( xp7Config.getMetadata().getNamespace() ).
-            withName( xp7Config.getMetadata().getName() ).
-            edit().
-            withStatus( new Xp7ConfigStatus().
-                withState( Xp7ConfigStatus.State.READY ).
-                withMessage( "OK" ) ) );
+            withName( xp7Config.getMetadata().getName() ), c -> c.withStatus( new Xp7ConfigStatus().
+            withState( Xp7ConfigStatus.State.READY ).
+            withMessage( "OK" ) ) );
         return true;
     }
 }

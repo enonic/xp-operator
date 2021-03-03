@@ -2,13 +2,17 @@ package com.enonic.cloud.kubernetes;
 
 import org.immutables.value.Value;
 
+
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.dsl.MixedOperation;
+import io.fabric8.kubernetes.client.dsl.Resource;
+
 
 import com.enonic.cloud.common.annotations.Params;
-import com.enonic.cloud.kubernetes.client.v1alpha1.xp7app.Xp7AppClient;
-import com.enonic.cloud.kubernetes.client.v1alpha2.domain.DomainClient;
-import com.enonic.cloud.kubernetes.client.v1alpha2.xp7config.Xp7ConfigClient;
-import com.enonic.cloud.kubernetes.client.v1alpha2.xp7deployment.Xp7DeploymentClient;
+import com.enonic.cloud.kubernetes.client.v1alpha1.Xp7App;
+import com.enonic.cloud.kubernetes.client.v1alpha2.Domain;
+import com.enonic.cloud.kubernetes.client.v1alpha2.Xp7Config;
+import com.enonic.cloud.kubernetes.client.v1alpha2.Xp7Deployment;
 
 
 @Value.Immutable
@@ -17,11 +21,11 @@ public abstract class Clients
 {
     public abstract KubernetesClient k8s();
 
-    public abstract Xp7AppClient xp7Apps();
+    public abstract MixedOperation<Xp7App, Xp7App.Xp7AppList, Resource<Xp7App>> xp7Apps();
 
-    public abstract Xp7ConfigClient xp7Configs();
+    public abstract MixedOperation<Xp7Config, Xp7Config.Xp7ConfigList, Resource<Xp7Config>> xp7Configs();
 
-    public abstract Xp7DeploymentClient xp7Deployments();
+    public abstract MixedOperation<Xp7Deployment, Xp7Deployment.Xp7DeploymentList, Resource<Xp7Deployment>> xp7Deployments();
 
-    public abstract DomainClient domain();
+    public abstract MixedOperation<Domain, Domain.DomainList, Resource<Domain>> domain();
 }

@@ -10,7 +10,7 @@ import io.fabric8.kubernetes.api.model.ServiceAccount;
 
 import com.enonic.cloud.helm.values.BaseValues;
 import com.enonic.cloud.helm.values.ValueBuilder;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
+import com.enonic.cloud.kubernetes.client.v1alpha2.Xp7Deployment;
 import com.enonic.cloud.operator.helm.HelmTest;
 import com.enonic.cloud.operator.v1alpha2xp7deployment.OperatorXp7DeploymentHelm;
 

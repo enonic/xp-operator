@@ -25,8 +25,8 @@ import io.fabric8.kubernetes.api.model.networking.v1beta1.IngressRule;
 
 import com.enonic.cloud.kubernetes.Clients;
 import com.enonic.cloud.kubernetes.Searchers;
+import com.enonic.cloud.kubernetes.client.v1alpha2.Xp7Config;
 import com.enonic.cloud.kubernetes.commands.K8sLogHelper;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7config.Xp7Config;
 import com.enonic.cloud.operator.helpers.HandlerConfig;
 
 import static com.enonic.cloud.common.Configuration.cfgStr;
@@ -98,15 +98,14 @@ public class OperatorXp7ConfigSync
         searchers.xp7Config().stream().
             filter( inNamespace( namespace ) ).
             filter( isDeleted().negate() ).
-            filter( xp7config -> Objects.equals( xp7config.getXp7ConfigSpec().getFile(), file ) ).
+            filter( xp7config -> Objects.equals( xp7config.getSpec().getFile(), file ) ).
             forEach( xp7Config -> handle( namespace, xp7Config ) );
     }
 
     private void handle( final String namespace, final Xp7Config xp7Config )
     {
         // Create a list ['all', '<nodeGroup>']
-        List<String> nodeGroups =
-            Arrays.asList( cfgStr( "operator.charts.values.allNodesKey" ), xp7Config.getXp7ConfigSpec().getNodeGroup() );
+        List<String> nodeGroups = Arrays.asList( cfgStr( "operator.charts.values.allNodesKey" ), xp7Config.getSpec().getNodeGroup() );
 
         // Collect all relevant ingresses
         List<Ingress> ingresses = searchers.ingress().stream().
@@ -119,14 +118,14 @@ public class OperatorXp7ConfigSync
         String data = createVHostData( namespace, ingresses, nodeGroups );
 
         // Update if needed
-        if ( !Objects.equals( xp7Config.getXp7ConfigSpec().getData(), data ) )
+        if ( !Objects.equals( xp7Config.getSpec().getData(), data ) )
         {
-            K8sLogHelper.logDoneable( clients.
-                xp7Configs().crdClient().
+            K8sLogHelper.logEdit( clients.xp7Configs().
                 inNamespace( xp7Config.getMetadata().getNamespace() ).
-                withName( xp7Config.getMetadata().getName() ).
-                edit().
-                withSpecData( data ) );
+                withName( xp7Config.getMetadata().getName() ), c -> {
+                c.getSpec().withData( data );
+                return c;
+            } );
         }
     }
 

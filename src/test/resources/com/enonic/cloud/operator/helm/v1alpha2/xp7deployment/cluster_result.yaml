@@ -1393,14 +1393,8 @@ spec:
       storageClassName: "standard"
       volumeMode: "Filesystem"
 ---
-spec:
-  nodeGroup: "all"
-  file: "system.properties"
-  data: "xp.name = mycloud-mysolution-myenv-myservice\nxp.suPassword = {sha512}${env.SU_PASS_HASH}\n\
-    xp.init.adminUserCreation = false"
-  dataBase64: false
-kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
+kind: "Xp7Config"
 metadata:
   annotations:
     enonic.applyPriority: "70"
@@ -1419,14 +1413,16 @@ metadata:
     blockOwnerDeletion: false
     controller: true
     name: "mycloud-mysolution-myenv-myservice"
----
 spec:
   nodeGroup: "all"
-  file: "com.enonic.xp.app.main.cfg"
-  data: "tourDisabled = true"
+  file: "system.properties"
+  data: "xp.name = mycloud-mysolution-myenv-myservice\nxp.suPassword = {sha512}${env.SU_PASS_HASH}\n\
+    xp.init.adminUserCreation = false"
   dataBase64: false
-kind: "Xp7Config"
+status: null
+---
 apiVersion: "enonic.cloud/v1alpha2"
+kind: "Xp7Config"
 metadata:
   annotations:
     enonic.applyPriority: "70"
@@ -1445,14 +1441,15 @@ metadata:
     blockOwnerDeletion: false
     controller: true
     name: "mycloud-mysolution-myenv-myservice"
----
 spec:
   nodeGroup: "all"
-  file: "com.enonic.xp.web.sessionstore.cfg"
-  data: "storeMode=replicated"
+  file: "com.enonic.xp.app.main.cfg"
+  data: "tourDisabled = true"
   dataBase64: false
-kind: "Xp7Config"
+status: null
+---
 apiVersion: "enonic.cloud/v1alpha2"
+kind: "Xp7Config"
 metadata:
   annotations:
     enonic.applyPriority: "70"
@@ -1470,14 +1467,15 @@ metadata:
     blockOwnerDeletion: false
     controller: true
     name: "mycloud-mysolution-myenv-myservice"
----
 spec:
   nodeGroup: "all"
-  file: "com.enonic.app.status.cfg"
-  data: "metricsUrl = http://localhost:2609/"
+  file: "com.enonic.xp.web.sessionstore.cfg"
+  data: "storeMode=replicated"
   dataBase64: false
-kind: "Xp7Config"
+status: null
+---
 apiVersion: "enonic.cloud/v1alpha2"
+kind: "Xp7Config"
 metadata:
   annotations:
     enonic.applyPriority: "70"
@@ -1495,15 +1493,15 @@ metadata:
     blockOwnerDeletion: false
     controller: true
     name: "mycloud-mysolution-myenv-myservice"
----
 spec:
   nodeGroup: "all"
-  file: "com.enonic.xp.cluster.cfg"
-  data: "network.host=0.0.0.0\nnetwork.publish.host=${env.XP_NODE_IP}\nnode.name=${env.XP_NODE_NAME}\n\
-    cluster.enabled=true"
+  file: "com.enonic.app.status.cfg"
+  data: "metricsUrl = http://localhost:2609/"
   dataBase64: false
-kind: "Xp7Config"
+status: null
+---
 apiVersion: "enonic.cloud/v1alpha2"
+kind: "Xp7Config"
 metadata:
   annotations:
     enonic.applyPriority: "70"
@@ -1521,7 +1519,34 @@ metadata:
     blockOwnerDeletion: false
     controller: true
     name: "mycloud-mysolution-myenv-myservice"
+spec:
+  nodeGroup: "all"
+  file: "com.enonic.xp.cluster.cfg"
+  data: "network.host=0.0.0.0\nnetwork.publish.host=${env.XP_NODE_IP}\nnode.name=${env.XP_NODE_NAME}\n\
+    cluster.enabled=true"
+  dataBase64: false
+status: null
 ---
+apiVersion: "enonic.cloud/v1alpha2"
+kind: "Xp7Config"
+metadata:
+  annotations:
+    enonic.applyPriority: "70"
+    enonic.neverOverwrite: "true"
+  labels:
+    cloud: "mycloud"
+    enonic.managed: "true"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
+  name: "all-logback"
+  namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
 spec:
   nodeGroup: "all"
   file: "logback.xml"
@@ -1542,35 +1567,10 @@ spec:
     \ level=\"WARN\" additivity=\"false\">\n    <appender-ref ref=\"STDOUT\"/>\n \
     \   <appender-ref ref=\"FILE\"/>\n  </logger>\n\n</configuration>"
   dataBase64: false
-kind: "Xp7Config"
-apiVersion: "enonic.cloud/v1alpha2"
-metadata:
-  annotations:
-    enonic.applyPriority: "70"
-    enonic.neverOverwrite: "true"
-  labels:
-    cloud: "mycloud"
-    enonic.managed: "true"
-    environment: "myenv"
-    service: "myservice"
-    solution: "mysolution"
-  name: "all-logback"
-  namespace: "mycloud-mysolution-myenv-myservice"
-  ownerReferences:
-  - apiVersion: "enonic.cloud/v1alpha2"
-    kind: "Xp7Deployment"
-    blockOwnerDeletion: false
-    controller: true
-    name: "mycloud-mysolution-myenv-myservice"
+status: null
 ---
-spec:
-  nodeGroup: "all"
-  file: "com.enonic.xp.hazelcast.cfg"
-  data: "clusterConfigDefaults=false\nsystem.hazelcast.initial.min.cluster.size=${env.XP_HZ_MIN_SIZE}\n\
-    network.join.tcpIp.enabled=false\nnetwork.join.kubernetes.enabled=true\nnetwork.join.kubernetes.serviceDns=cluster-discovery.mycloud-mysolution-myenv-myservice.svc.cluster.local"
-  dataBase64: false
-kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
+kind: "Xp7Config"
 metadata:
   annotations:
     enonic.applyPriority: "70"
@@ -1588,14 +1588,16 @@ metadata:
     blockOwnerDeletion: false
     controller: true
     name: "mycloud-mysolution-myenv-myservice"
----
 spec:
-  nodeGroup: "master"
-  file: "com.enonic.xp.web.vhost.cfg"
-  data: "enabled = true"
+  nodeGroup: "all"
+  file: "com.enonic.xp.hazelcast.cfg"
+  data: "clusterConfigDefaults=false\nsystem.hazelcast.initial.min.cluster.size=${env.XP_HZ_MIN_SIZE}\n\
+    network.join.tcpIp.enabled=false\nnetwork.join.kubernetes.enabled=true\nnetwork.join.kubernetes.serviceDns=cluster-discovery.mycloud-mysolution-myenv-myservice.svc.cluster.local"
   dataBase64: false
-kind: "Xp7Config"
+status: null
+---
 apiVersion: "enonic.cloud/v1alpha2"
+kind: "Xp7Config"
 metadata:
   annotations:
     enonic.applyPriority: "71"
@@ -1614,18 +1616,15 @@ metadata:
     blockOwnerDeletion: false
     controller: true
     name: "mycloud-mysolution-myenv-myservice"
----
 spec:
   nodeGroup: "master"
-  file: "com.enonic.xp.elasticsearch.cfg"
-  data: "http.enabled=true\ncluster.name=mycloud-mysolution-myenv-myservice\nnode.master=${env.XP_IS_MASTER}\n\
-    node.data=${env.XP_IS_DATA}\ngateway.expected_master_nodes=${env.XP_ES_MIN_MASTERS}\n\
-    gateway.expected_data_nodes=${env.XP_ES_MIN_DATAS}\ngateway.recover_after_time=5m\n\
-    discovery.zen.minimum_master_nodes=${env.XP_ES_MIN_MASTERS}\ndiscovery.unicast.sockets=cluster-discovery.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
-    network.tcp.keep_alive=true\nindex.auto_expand_replicas=1-all"
+  file: "com.enonic.xp.web.vhost.cfg"
+  data: "enabled = true"
   dataBase64: false
-kind: "Xp7Config"
+status: null
+---
 apiVersion: "enonic.cloud/v1alpha2"
+kind: "Xp7Config"
 metadata:
   annotations:
     enonic.applyPriority: "71"
@@ -1643,14 +1642,19 @@ metadata:
     blockOwnerDeletion: false
     controller: true
     name: "mycloud-mysolution-myenv-myservice"
----
 spec:
-  nodeGroup: "data"
-  file: "com.enonic.xp.web.vhost.cfg"
-  data: "enabled = true"
+  nodeGroup: "master"
+  file: "com.enonic.xp.elasticsearch.cfg"
+  data: "http.enabled=true\ncluster.name=mycloud-mysolution-myenv-myservice\nnode.master=${env.XP_IS_MASTER}\n\
+    node.data=${env.XP_IS_DATA}\ngateway.expected_master_nodes=${env.XP_ES_MIN_MASTERS}\n\
+    gateway.expected_data_nodes=${env.XP_ES_MIN_DATAS}\ngateway.recover_after_time=5m\n\
+    discovery.zen.minimum_master_nodes=${env.XP_ES_MIN_MASTERS}\ndiscovery.unicast.sockets=cluster-discovery.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
+    network.tcp.keep_alive=true\nindex.auto_expand_replicas=1-all"
   dataBase64: false
-kind: "Xp7Config"
+status: null
+---
 apiVersion: "enonic.cloud/v1alpha2"
+kind: "Xp7Config"
 metadata:
   annotations:
     enonic.applyPriority: "71"
@@ -1669,18 +1673,15 @@ metadata:
     blockOwnerDeletion: false
     controller: true
     name: "mycloud-mysolution-myenv-myservice"
----
 spec:
   nodeGroup: "data"
-  file: "com.enonic.xp.elasticsearch.cfg"
-  data: "http.enabled=true\ncluster.name=mycloud-mysolution-myenv-myservice\nnode.master=${env.XP_IS_MASTER}\n\
-    node.data=${env.XP_IS_DATA}\ngateway.expected_master_nodes=${env.XP_ES_MIN_MASTERS}\n\
-    gateway.expected_data_nodes=${env.XP_ES_MIN_DATAS}\ngateway.recover_after_time=5m\n\
-    discovery.zen.minimum_master_nodes=${env.XP_ES_MIN_MASTERS}\ndiscovery.unicast.sockets=cluster-discovery.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
-    network.tcp.keep_alive=true\nindex.auto_expand_replicas=1-all"
+  file: "com.enonic.xp.web.vhost.cfg"
+  data: "enabled = true"
   dataBase64: false
-kind: "Xp7Config"
+status: null
+---
 apiVersion: "enonic.cloud/v1alpha2"
+kind: "Xp7Config"
 metadata:
   annotations:
     enonic.applyPriority: "71"
@@ -1698,14 +1699,19 @@ metadata:
     blockOwnerDeletion: false
     controller: true
     name: "mycloud-mysolution-myenv-myservice"
----
 spec:
-  nodeGroup: "frontend"
-  file: "com.enonic.xp.web.vhost.cfg"
-  data: "enabled = true"
+  nodeGroup: "data"
+  file: "com.enonic.xp.elasticsearch.cfg"
+  data: "http.enabled=true\ncluster.name=mycloud-mysolution-myenv-myservice\nnode.master=${env.XP_IS_MASTER}\n\
+    node.data=${env.XP_IS_DATA}\ngateway.expected_master_nodes=${env.XP_ES_MIN_MASTERS}\n\
+    gateway.expected_data_nodes=${env.XP_ES_MIN_DATAS}\ngateway.recover_after_time=5m\n\
+    discovery.zen.minimum_master_nodes=${env.XP_ES_MIN_MASTERS}\ndiscovery.unicast.sockets=cluster-discovery.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
+    network.tcp.keep_alive=true\nindex.auto_expand_replicas=1-all"
   dataBase64: false
-kind: "Xp7Config"
+status: null
+---
 apiVersion: "enonic.cloud/v1alpha2"
+kind: "Xp7Config"
 metadata:
   annotations:
     enonic.applyPriority: "71"
@@ -1724,18 +1730,15 @@ metadata:
     blockOwnerDeletion: false
     controller: true
     name: "mycloud-mysolution-myenv-myservice"
----
 spec:
   nodeGroup: "frontend"
-  file: "com.enonic.xp.elasticsearch.cfg"
-  data: "http.enabled=true\ncluster.name=mycloud-mysolution-myenv-myservice\nnode.master=${env.XP_IS_MASTER}\n\
-    node.data=${env.XP_IS_DATA}\ngateway.expected_master_nodes=${env.XP_ES_MIN_MASTERS}\n\
-    gateway.expected_data_nodes=${env.XP_ES_MIN_DATAS}\ngateway.recover_after_time=5m\n\
-    discovery.zen.minimum_master_nodes=${env.XP_ES_MIN_MASTERS}\ndiscovery.unicast.sockets=cluster-discovery.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
-    network.tcp.keep_alive=true\nindex.auto_expand_replicas=1-all"
+  file: "com.enonic.xp.web.vhost.cfg"
+  data: "enabled = true"
   dataBase64: false
-kind: "Xp7Config"
+status: null
+---
 apiVersion: "enonic.cloud/v1alpha2"
+kind: "Xp7Config"
 metadata:
   annotations:
     enonic.applyPriority: "71"
@@ -1753,3 +1756,13 @@ metadata:
     blockOwnerDeletion: false
     controller: true
     name: "mycloud-mysolution-myenv-myservice"
+spec:
+  nodeGroup: "frontend"
+  file: "com.enonic.xp.elasticsearch.cfg"
+  data: "http.enabled=true\ncluster.name=mycloud-mysolution-myenv-myservice\nnode.master=${env.XP_IS_MASTER}\n\
+    node.data=${env.XP_IS_DATA}\ngateway.expected_master_nodes=${env.XP_ES_MIN_MASTERS}\n\
+    gateway.expected_data_nodes=${env.XP_ES_MIN_DATAS}\ngateway.recover_after_time=5m\n\
+    discovery.zen.minimum_master_nodes=${env.XP_ES_MIN_MASTERS}\ndiscovery.unicast.sockets=cluster-discovery.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
+    network.tcp.keep_alive=true\nindex.auto_expand_replicas=1-all"
+  dataBase64: false
+status: null

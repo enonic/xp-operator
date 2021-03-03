@@ -28,11 +28,11 @@ import io.fabric8.kubernetes.api.model.networking.v1beta1.HTTPIngressPath;
 import io.fabric8.kubernetes.api.model.networking.v1beta1.Ingress;
 
 import com.enonic.cloud.common.Validator;
-import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7App;
-import com.enonic.cloud.kubernetes.model.v1alpha2.domain.Domain;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7config.Xp7Config;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentSpecNodeGroup;
+import com.enonic.cloud.kubernetes.client.v1alpha1.Xp7App;
+import com.enonic.cloud.kubernetes.client.v1alpha2.Domain;
+import com.enonic.cloud.kubernetes.client.v1alpha2.Xp7Config;
+import com.enonic.cloud.kubernetes.client.v1alpha2.Xp7Deployment;
+import com.enonic.cloud.kubernetes.client.v1alpha2.xp7deployment.Xp7DeploymentSpecNodeGroup;
 import com.enonic.cloud.operator.api.AdmissionOperation;
 import com.enonic.cloud.operator.api.BaseAdmissionApi;
 import com.enonic.cloud.operator.ingress.Mapping;
@@ -127,15 +127,15 @@ public class AdmissionApi
         Xp7App newApp = (Xp7App) admissionReview.getRequest().getObject();
 
         // Check spec
-        Preconditions.checkState( newApp.getXp7AppSpec() != null, "'spec' cannot be null" );
-        Preconditions.checkState( newApp.getXp7AppSpec().getUrl() != null, "'spec.url' cannot be null" );
-        Preconditions.checkState( newApp.getXp7AppSpec().getEnabled() != null, "'spec.enabled' cannot be null" );
+        Preconditions.checkState( newApp.getSpec() != null, "'spec' cannot be null" );
+        Preconditions.checkState( newApp.getSpec().getUrl() != null, "'spec.url' cannot be null" );
+        Preconditions.checkState( newApp.getSpec().getEnabled() != null, "'spec.enabled' cannot be null" );
 
         // Check status
-        Preconditions.checkState( newApp.getXp7AppStatus() != null, "'status' cannot be null" );
-        Preconditions.checkState( newApp.getXp7AppStatus().getMessage() != null, "'status.message' cannot be null" );
-        Preconditions.checkState( newApp.getXp7AppStatus().getState() != null, "'status.state' cannot be null" );
-        Preconditions.checkState( newApp.getXp7AppStatus().getXp7AppStatusFields() != null, "'status.fields' cannot be null" );
+        Preconditions.checkState( newApp.getStatus() != null, "'status' cannot be null" );
+        Preconditions.checkState( newApp.getStatus().getMessage() != null, "'status.message' cannot be null" );
+        Preconditions.checkState( newApp.getStatus().getState() != null, "'status.state' cannot be null" );
+        Preconditions.checkState( newApp.getStatus().getXp7AppStatusFields() != null, "'status.fields' cannot be null" );
 
         if ( isBeingBackupRestored().negate().
             and( h -> op == AdmissionOperation.CREATE ).
@@ -157,29 +157,29 @@ public class AdmissionApi
         Xp7Config newConfig = (Xp7Config) admissionReview.getRequest().getObject();
 
         // Check spec
-        Preconditions.checkState( newConfig.getXp7ConfigSpec() != null, "'spec' cannot be null" );
-        Preconditions.checkState( newConfig.getXp7ConfigSpec().getNodeGroup() != null, "'spec.nodeGroup' cannot be null" );
-        Preconditions.checkState( newConfig.getXp7ConfigSpec().getData() != null, "'spec.data' cannot be null" );
-        Preconditions.checkState( newConfig.getXp7ConfigSpec().getFile() != null, "'spec.file' cannot be null" );
-        Preconditions.checkState( newConfig.getXp7ConfigSpec().getDataBase64() != null, "'spec.dataBase64' cannot be null" );
+        Preconditions.checkState( newConfig.getSpec() != null, "'spec' cannot be null" );
+        Preconditions.checkState( newConfig.getSpec().getNodeGroup() != null, "'spec.nodeGroup' cannot be null" );
+        Preconditions.checkState( newConfig.getSpec().getData() != null, "'spec.data' cannot be null" );
+        Preconditions.checkState( newConfig.getSpec().getFile() != null, "'spec.file' cannot be null" );
+        Preconditions.checkState( newConfig.getSpec().getDataBase64() != null, "'spec.dataBase64' cannot be null" );
 
         // Check status
-        Preconditions.checkState( newConfig.getXp7ConfigStatus() != null, "'status' cannot be null" );
-        Preconditions.checkState( newConfig.getXp7ConfigStatus().getMessage() != null, "'status.message' cannot be null" );
-        Preconditions.checkState( newConfig.getXp7ConfigStatus().getState() != null, "'status.state' cannot be null" );
+        Preconditions.checkState( newConfig.getStatus() != null, "'status' cannot be null" );
+        Preconditions.checkState( newConfig.getStatus().getMessage() != null, "'status.message' cannot be null" );
+        Preconditions.checkState( newConfig.getStatus().getState() != null, "'status.state' cannot be null" );
 
         // Check for file clash
         List<Xp7Config> presentConfigs = searchers.xp7Config().stream().
             filter( inSameNamespace( newConfig ) ).
             filter( withName( newConfig.getMetadata().getName() ).negate() ).
-            filter( fieldEquals( newConfig, c -> c.getXp7ConfigSpec().getFile() ) ).
-            filter( inNodeGroupAllOr( newConfig.getXp7ConfigSpec().getNodeGroup() ) ).
+            filter( fieldEquals( newConfig, c -> c.getSpec().getFile() ) ).
+            filter( inNodeGroupAllOr( newConfig.getSpec().getNodeGroup() ) ).
             collect( Collectors.toList() );
 
         if ( !presentConfigs.isEmpty() )
         {
             Preconditions.checkState( false, "XpConfig '%s' already defines file '%s'", presentConfigs.get( 0 ).getMetadata().getName(),
-                                      presentConfigs.get( 0 ).getXp7ConfigSpec().getFile() );
+                                      presentConfigs.get( 0 ).getSpec().getFile() );
         }
 
         // Check for present deployment
@@ -187,7 +187,7 @@ public class AdmissionApi
             and( h -> op == AdmissionOperation.CREATE ).
             test( newConfig ) )
         {
-            assertXp7Deployment( admissionReview, Collections.singleton( newConfig.getXp7ConfigSpec().getNodeGroup() ) );
+            assertXp7Deployment( admissionReview, Collections.singleton( newConfig.getSpec().getNodeGroup() ) );
         }
     }
 
@@ -200,28 +200,28 @@ public class AdmissionApi
         if ( op != AdmissionOperation.DELETE )
         {
             // Check spec
-            Preconditions.checkState( newDeployment.getXp7DeploymentSpec() != null, "'spec' cannot be null" );
-            Preconditions.checkState( newDeployment.getXp7DeploymentSpec().getEnabled() != null, "'spec.enabled' cannot be null" );
-            Preconditions.checkState( newDeployment.getXp7DeploymentSpec().getXpVersion() != null, "'spec.xpVersion' cannot be null" );
-            Preconditions.checkState( newDeployment.getXp7DeploymentSpec().getXp7DeploymentSpecNodesSharedDisks() != null,
+            Preconditions.checkState( newDeployment.getSpec() != null, "'spec' cannot be null" );
+            Preconditions.checkState( newDeployment.getSpec().getEnabled() != null, "'spec.enabled' cannot be null" );
+            Preconditions.checkState( newDeployment.getSpec().getXpVersion() != null, "'spec.xpVersion' cannot be null" );
+            Preconditions.checkState( newDeployment.getSpec().getXp7DeploymentSpecNodesSharedDisks() != null,
                                       "'spec.nodesSharedDisks' cannot be null" );
-            Preconditions.checkState( newDeployment.getXp7DeploymentSpec().getXp7DeploymentSpecNodeGroups() != null,
+            Preconditions.checkState( newDeployment.getSpec().getXp7DeploymentSpecNodeGroups() != null,
                                       "'spec.nodeGroups' cannot be null" );
 
             // Check status
-            Preconditions.checkState( newDeployment.getXp7DeploymentStatus() != null, "'status' cannot be null" );
-            Preconditions.checkState( newDeployment.getXp7DeploymentStatus().getMessage() != null, "'status.message' cannot be null" );
-            Preconditions.checkState( newDeployment.getXp7DeploymentStatus().getState() != null, "'status.state' cannot be null" );
-            Preconditions.checkState( newDeployment.getXp7DeploymentStatus().getXp7DeploymentStatusFields() != null,
+            Preconditions.checkState( newDeployment.getStatus() != null, "'status' cannot be null" );
+            Preconditions.checkState( newDeployment.getStatus().getMessage() != null, "'status.message' cannot be null" );
+            Preconditions.checkState( newDeployment.getStatus().getState() != null, "'status.state' cannot be null" );
+            Preconditions.checkState( newDeployment.getStatus().getXp7DeploymentStatusFields() != null,
                                       "'status.fields' cannot be null" );
             Preconditions.checkState(
-                newDeployment.getXp7DeploymentStatus().getXp7DeploymentStatusFields().getXp7DeploymentStatusFieldsPods() != null,
+                newDeployment.getStatus().getXp7DeploymentStatusFields().getXp7DeploymentStatusFieldsPods() != null,
                 "'status.fields.pods' cannot be null" );
 
             // Check node groups
             int nrOfMasterNodes = 0;
             int i = 0;
-            for ( Xp7DeploymentSpecNodeGroup ng : newDeployment.getXp7DeploymentSpec().getXp7DeploymentSpecNodeGroups() )
+            for ( Xp7DeploymentSpecNodeGroup ng : newDeployment.getSpec().getXp7DeploymentSpecNodeGroups() )
             {
                 Preconditions.checkState( ng.getName() != null, "'spec.nodeGroups[" + i + "].name' cannot be null" );
                 Preconditions.checkState( !ng.getName().equals( cfgStr( "operator.charts.values.allNodesKey" ) ),
@@ -299,14 +299,14 @@ public class AdmissionApi
             ComparableVersion currentVersion = new ComparableVersion( "7.6.0" );
             try
             {
-                if ( newDeployment.getXp7DeploymentSpec().getXpVersion().startsWith( "7." ) )
+                if ( newDeployment.getSpec().getXpVersion().startsWith( "7." ) )
                 {
-                    currentVersion = new ComparableVersion( newDeployment.getXp7DeploymentSpec().getXpVersion() );
+                    currentVersion = new ComparableVersion( newDeployment.getSpec().getXpVersion() );
                 }
-                else if ( newDeployment.getXp7DeploymentSpec().getXpVersion().startsWith( "enonic/xp:7." ) )
+                else if ( newDeployment.getSpec().getXpVersion().startsWith( "enonic/xp:7." ) )
                 {
                     String pattern = "^enonic\\/xp:([0-9]+\\.[0-9]+\\.[0-9]+)";
-                    Matcher m = Pattern.compile( pattern ).matcher( newDeployment.getXp7DeploymentSpec().getXpVersion() );
+                    Matcher m = Pattern.compile( pattern ).matcher( newDeployment.getSpec().getXpVersion() );
                     if ( m.find() )
                     {
                         currentVersion = new ComparableVersion( m.group( 1 ) );
@@ -336,45 +336,45 @@ public class AdmissionApi
         Domain newDomain = (Domain) admissionReview.getRequest().getObject();
 
         // Check spec
-        Preconditions.checkState( newDomain.getDomainSpec() != null, "'spec' cannot be null" );
-        Preconditions.checkState( newDomain.getDomainSpec().getHost() != null, "'spec.host' cannot be null" );
-        Validator.dns1123( "spec.host", newDomain.getDomainSpec().getHost() );
-        Preconditions.checkState( newDomain.getDomainSpec().getDnsRecord() != null, "'spec.dnsRecord' cannot be null" );
+        Preconditions.checkState( newDomain.getSpec() != null, "'spec' cannot be null" );
+        Preconditions.checkState( newDomain.getSpec().getHost() != null, "'spec.host' cannot be null" );
+        Validator.dns1123( "spec.host", newDomain.getSpec().getHost() );
+        Preconditions.checkState( newDomain.getSpec().getDnsRecord() != null, "'spec.dnsRecord' cannot be null" );
 
-        if ( newDomain.getDomainSpec().getDnsRecord() )
+        if ( newDomain.getSpec().getDnsRecord() )
         {
-            Preconditions.checkState( newDomain.getDomainSpec().getCdn() != null, "'spec.cdn' cannot be null if dnsRecord = true" );
+            Preconditions.checkState( newDomain.getSpec().getCdn() != null, "'spec.cdn' cannot be null if dnsRecord = true" );
         }
 
-        if ( newDomain.getDomainSpec().getDomainSpecCertificate() != null )
+        if ( newDomain.getSpec().getDomainSpecCertificate() != null )
         {
-            Preconditions.checkState( newDomain.getDomainSpec().getDomainSpecCertificate().getAuthority() != null,
+            Preconditions.checkState( newDomain.getSpec().getDomainSpecCertificate().getAuthority() != null,
                                       "'spec.certificate.authority' cannot be null" );
-            switch ( newDomain.getDomainSpec().getDomainSpecCertificate().getAuthority() )
+            switch ( newDomain.getSpec().getDomainSpecCertificate().getAuthority() )
             {
                 case CUSTOM:
-                    Preconditions.checkState( newDomain.getDomainSpec().getDomainSpecCertificate().getIdentifier() != null,
+                    Preconditions.checkState( newDomain.getSpec().getDomainSpecCertificate().getIdentifier() != null,
                                               "'spec.certificate.identifier' cannot be null when authority is CUSTOM" );
                 case CLUSTER_ISSUER:
-                    Preconditions.checkState( newDomain.getDomainSpec().getDomainSpecCertificate().getIdentifier() != null,
+                    Preconditions.checkState( newDomain.getSpec().getDomainSpecCertificate().getIdentifier() != null,
                                               "'spec.certificate.identifier' cannot be null when authority is CLUSTER_ISSUER" );
             }
         }
 
         // Check status
-        Preconditions.checkState( newDomain.getDomainStatus() != null, "'status' cannot be null" );
-        Preconditions.checkState( newDomain.getDomainStatus().getMessage() != null, "'status.message' cannot be null" );
-        Preconditions.checkState( newDomain.getDomainStatus().getState() != null, "'status.state' cannot be null" );
-        Preconditions.checkState( newDomain.getDomainStatus().getDomainStatusFields() != null, "'status.fields' cannot be null" );
-        Preconditions.checkState( newDomain.getDomainStatus().getDomainStatusFields().getDnsRecordCreated() != null,
+        Preconditions.checkState( newDomain.getStatus() != null, "'status' cannot be null" );
+        Preconditions.checkState( newDomain.getStatus().getMessage() != null, "'status.message' cannot be null" );
+        Preconditions.checkState( newDomain.getStatus().getState() != null, "'status.state' cannot be null" );
+        Preconditions.checkState( newDomain.getStatus().getDomainStatusFields() != null, "'status.fields' cannot be null" );
+        Preconditions.checkState( newDomain.getStatus().getDomainStatusFields().getDnsRecordCreated() != null,
                                   "'status.fields.dnsRecordCreated' cannot be null" );
-        Preconditions.checkState( newDomain.getDomainStatus().getDomainStatusFields().getPublicIps() != null,
+        Preconditions.checkState( newDomain.getStatus().getDomainStatusFields().getPublicIps() != null,
                                   "'status.fields.publicIps' cannot be null" );
 
         if ( op == AdmissionOperation.UPDATE )
         {
             Domain oldDomain = (Domain) admissionReview.getRequest().getOldObject();
-            Preconditions.checkState( oldDomain.getDomainSpec().getHost().equals( newDomain.getDomainSpec().getHost() ),
+            Preconditions.checkState( oldDomain.getSpec().getHost().equals( newDomain.getSpec().getHost() ),
                                       "'spec.host' cannot be changed" );
         }
     }
@@ -387,7 +387,7 @@ public class AdmissionApi
         if ( nodeGroups != null )
         {
             Set<String> xpDeploymentNodeGroups = xp7Deployments.get().
-                getXp7DeploymentSpec().
+                getSpec().
                 getXp7DeploymentSpecNodeGroups().
                 stream().
                 map( Xp7DeploymentSpecNodeGroup::getName ).

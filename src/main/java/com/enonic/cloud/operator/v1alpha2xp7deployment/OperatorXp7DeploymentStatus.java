@@ -13,12 +13,12 @@ import io.fabric8.kubernetes.api.model.Pod;
 
 import com.enonic.cloud.kubernetes.Clients;
 import com.enonic.cloud.kubernetes.Searchers;
+import com.enonic.cloud.kubernetes.client.v1alpha2.Xp7Deployment;
+import com.enonic.cloud.kubernetes.client.v1alpha2.xp7deployment.Xp7DeploymentSpecNodeGroup;
+import com.enonic.cloud.kubernetes.client.v1alpha2.xp7deployment.Xp7DeploymentStatus;
+import com.enonic.cloud.kubernetes.client.v1alpha2.xp7deployment.Xp7DeploymentStatusFields;
+import com.enonic.cloud.kubernetes.client.v1alpha2.xp7deployment.Xp7DeploymentStatusFieldsPod;
 import com.enonic.cloud.kubernetes.commands.K8sLogHelper;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentSpecNodeGroup;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentStatus;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentStatusFields;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentStatusFieldsPod;
 import com.enonic.cloud.operator.helpers.InformerEventHandler;
 import com.enonic.cloud.operator.helpers.Xp7DeploymentInfo;
 
@@ -86,7 +86,7 @@ public class OperatorXp7DeploymentStatus
         }
 
         // Get current status
-        Xp7DeploymentStatus currentStatus = xp7Deployment.get().getXp7DeploymentStatus();
+        Xp7DeploymentStatus currentStatus = xp7Deployment.get().getStatus();
         int oldStatusHash = currentStatus.hashCode();
 
         // Get all pods in deployment
@@ -111,7 +111,7 @@ public class OperatorXp7DeploymentStatus
         }
 
         // If deployment is disabled
-        if ( !xp7Deployment.get().getXp7DeploymentSpec().getEnabled() )
+        if ( !xp7Deployment.get().getSpec().getEnabled() )
         {
             updateOnChange( xp7Deployment.get(), oldStatusHash, currentStatus.
                 withState( Xp7DeploymentStatus.State.STOPPED ).
@@ -151,11 +151,12 @@ public class OperatorXp7DeploymentStatus
     {
         if ( oldStatusHash != newStatus.hashCode() )
         {
-            K8sLogHelper.logDoneable( clients.xp7Deployments().crdClient().
+            K8sLogHelper.logEdit( clients.xp7Deployments().
                 inNamespace( resource.getMetadata().getNamespace() ).
-                withName( resource.getMetadata().getName() ).
-                edit().
-                withStatus( newStatus ) );
+                withName( resource.getMetadata().getName() ), d -> {
+                d.setStatus( newStatus );
+                return d;
+            });
         }
     }
 
@@ -176,12 +177,12 @@ public class OperatorXp7DeploymentStatus
 
     private int expectedNumberOfPods( final Xp7Deployment deployment )
     {
-        if ( !deployment.getXp7DeploymentSpec().getEnabled() )
+        if ( !deployment.getSpec().getEnabled() )
         {
             return 0;
         }
 
-        return deployment.getXp7DeploymentSpec().
+        return deployment.getSpec().
             getXp7DeploymentSpecNodeGroups().stream().
             mapToInt( Xp7DeploymentSpecNodeGroup::getReplicas ).
             sum();

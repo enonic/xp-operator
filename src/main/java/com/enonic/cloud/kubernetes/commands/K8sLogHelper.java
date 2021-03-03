@@ -1,10 +1,13 @@
 package com.enonic.cloud.kubernetes.commands;
 
+import java.util.function.UnaryOperator;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.fabric8.kubernetes.api.model.Doneable;
+import io.fabric8.kubernetes.api.builder.Visitor;
 import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.client.dsl.Editable;
 import io.fabric8.kubernetes.client.dsl.Resource;
 
 public class K8sLogHelper
@@ -17,13 +20,12 @@ public class K8sLogHelper
                               resource.getMetadata().getNamespace() );
     }
 
-    public static <T extends HasMetadata> void logDoneable( final Doneable<T> doneable )
-    {
-        T res = doneable.done();
+    public static <T extends HasMetadata> void logEdit( final Editable<T> editable, UnaryOperator<T> op ) {
+        T res = editable.edit( op );
         log.info( log( K8sCommandAction.UPDATE, res ) );
     }
 
-    public static <T extends HasMetadata, D extends Doneable<T>> void logDelete( Resource<T, D> r )
+    public static <T extends HasMetadata> void logDelete( Resource<T> r )
     {
         T res = r.get();
         log.info( log( K8sCommandAction.DELETE, res ) );

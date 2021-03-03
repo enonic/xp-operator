@@ -28,7 +28,7 @@ import io.fabric8.kubernetes.api.model.admission.AdmissionReview;
 
 import com.enonic.cloud.kubernetes.Searchers;
 import com.enonic.cloud.kubernetes.SearchersImpl;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
+import com.enonic.cloud.kubernetes.client.v1alpha2.Xp7Deployment;
 import com.enonic.cloud.operator.api.admission.AdmissionApi;
 import com.enonic.cloud.operator.api.admission.TestAdmissionApi;
 import com.enonic.cloud.operator.api.mutation.MutationApi;

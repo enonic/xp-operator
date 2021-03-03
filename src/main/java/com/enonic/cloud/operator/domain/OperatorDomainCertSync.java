@@ -9,7 +9,7 @@ import javax.inject.Singleton;
 import io.fabric8.kubernetes.api.model.networking.v1beta1.Ingress;
 
 import com.enonic.cloud.kubernetes.Searchers;
-import com.enonic.cloud.kubernetes.model.v1alpha2.domain.Domain;
+import com.enonic.cloud.kubernetes.client.v1alpha2.Domain;
 import com.enonic.cloud.operator.helpers.InformerEventHandler;
 
 /**
@@ -50,7 +50,7 @@ public class OperatorDomainCertSync
 
     private List<Ingress> relevantIngresses( final Domain domain )
     {
-        String host = domain.getDomainSpec().getHost();
+        String host = domain.getSpec().getHost();
         return searchers.ingress().stream().
             filter( operatorIngressCertSync::ingressRelevant ).
             filter( ingress -> operatorIngressCertSync.ingressHosts( ingress ).contains( host ) ).

@@ -747,14 +747,8 @@ spec:
       storageClassName: "standard"
       volumeMode: "Filesystem"
 ---
-spec:
-  nodeGroup: "all"
-  file: "system.properties"
-  data: "xp.name = mycloud-mysolution-myenv-myservice\nxp.suPassword = {sha512}${env.SU_PASS_HASH}\n\
-    xp.init.adminUserCreation = false"
-  dataBase64: false
-kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
+kind: "Xp7Config"
 metadata:
   annotations:
     enonic.applyPriority: "70"
@@ -773,14 +767,16 @@ metadata:
     blockOwnerDeletion: false
     controller: true
     name: "mycloud-mysolution-myenv-myservice"
----
 spec:
   nodeGroup: "all"
-  file: "com.enonic.xp.app.main.cfg"
-  data: "tourDisabled = true"
+  file: "system.properties"
+  data: "xp.name = mycloud-mysolution-myenv-myservice\nxp.suPassword = {sha512}${env.SU_PASS_HASH}\n\
+    xp.init.adminUserCreation = false"
   dataBase64: false
-kind: "Xp7Config"
+status: null
+---
 apiVersion: "enonic.cloud/v1alpha2"
+kind: "Xp7Config"
 metadata:
   annotations:
     enonic.applyPriority: "70"
@@ -799,14 +795,15 @@ metadata:
     blockOwnerDeletion: false
     controller: true
     name: "mycloud-mysolution-myenv-myservice"
----
 spec:
   nodeGroup: "all"
-  file: "com.enonic.xp.web.sessionstore.cfg"
-  data: "storeMode=non-persistent"
+  file: "com.enonic.xp.app.main.cfg"
+  data: "tourDisabled = true"
   dataBase64: false
-kind: "Xp7Config"
+status: null
+---
 apiVersion: "enonic.cloud/v1alpha2"
+kind: "Xp7Config"
 metadata:
   annotations:
     enonic.applyPriority: "70"
@@ -824,14 +821,15 @@ metadata:
     blockOwnerDeletion: false
     controller: true
     name: "mycloud-mysolution-myenv-myservice"
----
 spec:
   nodeGroup: "all"
-  file: "com.enonic.app.status.cfg"
-  data: "metricsUrl = http://localhost:2609/"
+  file: "com.enonic.xp.web.sessionstore.cfg"
+  data: "storeMode=non-persistent"
   dataBase64: false
-kind: "Xp7Config"
+status: null
+---
 apiVersion: "enonic.cloud/v1alpha2"
+kind: "Xp7Config"
 metadata:
   annotations:
     enonic.applyPriority: "70"
@@ -849,15 +847,15 @@ metadata:
     blockOwnerDeletion: false
     controller: true
     name: "mycloud-mysolution-myenv-myservice"
----
 spec:
   nodeGroup: "all"
-  file: "com.enonic.xp.cluster.cfg"
-  data: "network.host=0.0.0.0\nnetwork.publish.host=${env.XP_NODE_IP}\nnode.name=${env.XP_NODE_NAME}\n\
-    cluster.enabled=false"
+  file: "com.enonic.app.status.cfg"
+  data: "metricsUrl = http://localhost:2609/"
   dataBase64: false
-kind: "Xp7Config"
+status: null
+---
 apiVersion: "enonic.cloud/v1alpha2"
+kind: "Xp7Config"
 metadata:
   annotations:
     enonic.applyPriority: "70"
@@ -875,7 +873,34 @@ metadata:
     blockOwnerDeletion: false
     controller: true
     name: "mycloud-mysolution-myenv-myservice"
+spec:
+  nodeGroup: "all"
+  file: "com.enonic.xp.cluster.cfg"
+  data: "network.host=0.0.0.0\nnetwork.publish.host=${env.XP_NODE_IP}\nnode.name=${env.XP_NODE_NAME}\n\
+    cluster.enabled=false"
+  dataBase64: false
+status: null
 ---
+apiVersion: "enonic.cloud/v1alpha2"
+kind: "Xp7Config"
+metadata:
+  annotations:
+    enonic.applyPriority: "70"
+    enonic.neverOverwrite: "true"
+  labels:
+    cloud: "mycloud"
+    enonic.managed: "true"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
+  name: "all-logback"
+  namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
 spec:
   nodeGroup: "all"
   file: "logback.xml"
@@ -896,34 +921,10 @@ spec:
     \ level=\"WARN\" additivity=\"false\">\n    <appender-ref ref=\"STDOUT\"/>\n \
     \   <appender-ref ref=\"FILE\"/>\n  </logger>\n\n</configuration>"
   dataBase64: false
-kind: "Xp7Config"
-apiVersion: "enonic.cloud/v1alpha2"
-metadata:
-  annotations:
-    enonic.applyPriority: "70"
-    enonic.neverOverwrite: "true"
-  labels:
-    cloud: "mycloud"
-    enonic.managed: "true"
-    environment: "myenv"
-    service: "myservice"
-    solution: "mysolution"
-  name: "all-logback"
-  namespace: "mycloud-mysolution-myenv-myservice"
-  ownerReferences:
-  - apiVersion: "enonic.cloud/v1alpha2"
-    kind: "Xp7Deployment"
-    blockOwnerDeletion: false
-    controller: true
-    name: "mycloud-mysolution-myenv-myservice"
+status: null
 ---
-spec:
-  nodeGroup: "fisk"
-  file: "com.enonic.xp.web.vhost.cfg"
-  data: "enabled = true"
-  dataBase64: false
-kind: "Xp7Config"
 apiVersion: "enonic.cloud/v1alpha2"
+kind: "Xp7Config"
 metadata:
   annotations:
     enonic.applyPriority: "71"
@@ -942,14 +943,15 @@ metadata:
     blockOwnerDeletion: false
     controller: true
     name: "mycloud-mysolution-myenv-myservice"
----
 spec:
   nodeGroup: "fisk"
-  file: "com.enonic.xp.elasticsearch.cfg"
-  data: "http.enabled=true\ncluster.name=mycloud-mysolution-myenv-myservice"
+  file: "com.enonic.xp.web.vhost.cfg"
+  data: "enabled = true"
   dataBase64: false
-kind: "Xp7Config"
+status: null
+---
 apiVersion: "enonic.cloud/v1alpha2"
+kind: "Xp7Config"
 metadata:
   annotations:
     enonic.applyPriority: "71"
@@ -967,3 +969,9 @@ metadata:
     blockOwnerDeletion: false
     controller: true
     name: "mycloud-mysolution-myenv-myservice"
+spec:
+  nodeGroup: "fisk"
+  file: "com.enonic.xp.elasticsearch.cfg"
+  data: "http.enabled=true\ncluster.name=mycloud-mysolution-myenv-myservice"
+  dataBase64: false
+status: null

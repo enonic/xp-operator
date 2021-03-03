@@ -25,18 +25,18 @@ import io.fabric8.kubernetes.api.model.admission.AdmissionResponseBuilder;
 import io.fabric8.kubernetes.api.model.admission.AdmissionReview;
 import io.fabric8.kubernetes.api.model.networking.v1beta1.Ingress;
 
-import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7App;
-import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7AppStatus;
-import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7AppStatusFields;
-import com.enonic.cloud.kubernetes.model.v1alpha2.domain.Domain;
-import com.enonic.cloud.kubernetes.model.v1alpha2.domain.DomainStatus;
-import com.enonic.cloud.kubernetes.model.v1alpha2.domain.DomainStatusFields;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7config.Xp7Config;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7config.Xp7ConfigStatus;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentSpecNodesPreinstalledApps;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentStatus;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7DeploymentStatusFields;
+import com.enonic.cloud.kubernetes.client.v1alpha1.Xp7App;
+import com.enonic.cloud.kubernetes.client.v1alpha1.xp7app.Xp7AppStatus;
+import com.enonic.cloud.kubernetes.client.v1alpha1.xp7app.Xp7AppStatusFields;
+import com.enonic.cloud.kubernetes.client.v1alpha2.Domain;
+import com.enonic.cloud.kubernetes.client.v1alpha2.Xp7Config;
+import com.enonic.cloud.kubernetes.client.v1alpha2.Xp7Deployment;
+import com.enonic.cloud.kubernetes.client.v1alpha2.domain.DomainStatus;
+import com.enonic.cloud.kubernetes.client.v1alpha2.domain.DomainStatusFields;
+import com.enonic.cloud.kubernetes.client.v1alpha2.xp7config.Xp7ConfigStatus;
+import com.enonic.cloud.kubernetes.client.v1alpha2.xp7deployment.Xp7DeploymentSpecNodesPreinstalledApps;
+import com.enonic.cloud.kubernetes.client.v1alpha2.xp7deployment.Xp7DeploymentStatus;
+import com.enonic.cloud.kubernetes.client.v1alpha2.xp7deployment.Xp7DeploymentStatusFields;
 import com.enonic.cloud.operator.api.AdmissionOperation;
 import com.enonic.cloud.operator.api.BaseAdmissionApi;
 import com.enonic.cloud.operator.domain.LbServiceIpProducer;
@@ -120,30 +120,30 @@ public class MutationApi
         switch ( op )
         {
             case CREATE: // Always set the default status on new objects
-                patch( mt, true, "/status", newR.getXp7AppStatus(), defStatus );
+                patch( mt, true, "/status", newR.getStatus(), defStatus );
                 break;
             case UPDATE:
-                if ( newR.getXp7AppSpec() != null && !newR.getXp7AppSpec().getUrl().equals( oldR.getXp7AppSpec().getUrl() ) )
+                if ( newR.getSpec() != null && !newR.getSpec().getUrl().equals( oldR.getSpec().getUrl() ) )
                 {
                     // On url change, set default status
-                    patch( mt, true, "/status", newR.getXp7AppStatus(), defStatus );
+                    patch( mt, true, "/status", newR.getStatus(), defStatus );
                 }
                 else
                 {
                     // Else make sure the old status is not removed
-                    patch( mt, false, "/status", newR.getXp7AppStatus(), oldR.getXp7AppStatus() );
+                    patch( mt, false, "/status", newR.getStatus(), oldR.getStatus() );
                 }
                 break;
             case DELETE:
                 // Set pending deletion status
-                oldR.getXp7AppStatus().setState( Xp7AppStatus.State.PENDING );
-                oldR.getXp7AppStatus().setMessage( "Pending deletion" );
-                patch( mt, true, "/status", newR.getXp7AppStatus(), oldR.getXp7AppStatus() );
+                oldR.getStatus().setState( Xp7AppStatus.State.PENDING );
+                oldR.getStatus().setMessage( "Pending deletion" );
+                patch( mt, true, "/status", newR.getStatus(), oldR.getStatus() );
                 break;
         }
 
         // Ensure enabled
-        patch( mt, false, "/spec/enabled", newR.getXp7AppSpec().getEnabled(), true );
+        patch( mt, false, "/spec/enabled", newR.getSpec().getEnabled(), true );
 
         if ( op == AdmissionOperation.CREATE )
         {
@@ -180,18 +180,18 @@ public class MutationApi
         switch ( op )
         {
             case CREATE: // Always set the default status on new objects
-                patch( mt, true, "/status", newR.getXp7ConfigStatus(), defStatus );
+                patch( mt, true, "/status", newR.getStatus(), defStatus );
                 break;
             case UPDATE:
-                if ( newR.getXp7ConfigSpec() != null && !newR.getXp7ConfigSpec().equals( oldR.getXp7ConfigSpec() ) )
+                if ( newR.getSpec() != null && !newR.getSpec().equals( oldR.getSpec() ) )
                 {
                     // On any change change, set default status
-                    patch( mt, true, "/status", newR.getXp7ConfigStatus(), defStatus );
+                    patch( mt, true, "/status", newR.getStatus(), defStatus );
                 }
                 else
                 {
                     // Else make sure the old status is not removed
-                    patch( mt, false, "/status", newR.getXp7ConfigStatus(), oldR.getXp7ConfigStatus() );
+                    patch( mt, false, "/status", newR.getStatus(), oldR.getStatus() );
                 }
                 break;
             case DELETE:
@@ -200,10 +200,10 @@ public class MutationApi
         }
 
         // Ensure defaults
-        if ( newR.getXp7ConfigSpec() != null )
+        if ( newR.getSpec() != null )
         {
-            patch( mt, false, "/spec/dataBase64", newR.getXp7ConfigSpec().getDataBase64(), false );
-            patch( mt, false, "/spec/nodeGroup", newR.getXp7ConfigSpec().getNodeGroup(), cfgStr( "operator.charts.values.allNodesKey" ) );
+            patch( mt, false, "/spec/dataBase64", newR.getSpec().getDataBase64(), false );
+            patch( mt, false, "/spec/nodeGroup", newR.getSpec().getNodeGroup(), cfgStr( "operator.charts.values.allNodesKey" ) );
         }
 
         if ( op == AdmissionOperation.CREATE )
@@ -233,18 +233,18 @@ public class MutationApi
         switch ( op )
         {
             case CREATE: // Always set the default status on new objects
-                patch( mt, true, "/status", newR.getXp7DeploymentStatus(), defStatus );
+                patch( mt, true, "/status", newR.getStatus(), defStatus );
                 break;
             case UPDATE:
-                if ( newR.getXp7DeploymentSpec() != null && !newR.getXp7DeploymentSpec().equals( oldR.getXp7DeploymentSpec() ) )
+                if ( newR.getSpec() != null && !newR.getSpec().equals( oldR.getSpec() ) )
                 {
                     // On any change change, set default status
-                    patch( mt, true, "/status", newR.getXp7DeploymentStatus(), defStatus );
+                    patch( mt, true, "/status", newR.getStatus(), defStatus );
                 }
                 else
                 {
                     // Else make sure the old status is not removed
-                    patch( mt, false, "/status", newR.getXp7DeploymentStatus(), oldR.getXp7DeploymentStatus() );
+                    patch( mt, false, "/status", newR.getStatus(), oldR.getStatus() );
                 }
                 break;
             case DELETE:
@@ -252,10 +252,10 @@ public class MutationApi
                 break;
         }
 
-        List<Xp7DeploymentSpecNodesPreinstalledApps> preInstall = newR.getXp7DeploymentSpec().getNodesPreinstalledApps();
+        List<Xp7DeploymentSpecNodesPreinstalledApps> preInstall = newR.getSpec().getNodesPreinstalledApps();
         if ( preInstall == null || preInstall.isEmpty() )
         {
-            patch( mt, true, "/spec/nodesPreinstalledApps", newR.getXp7DeploymentSpec().getNodesPreinstalledApps(), preInstalledApps );
+            patch( mt, true, "/spec/nodesPreinstalledApps", newR.getSpec().getNodesPreinstalledApps(), preInstalledApps );
         }
     }
 
@@ -278,18 +278,18 @@ public class MutationApi
         switch ( op )
         {
             case CREATE: // Always set the default status on new objects
-                patch( mt, true, "/status", newR.getDomainStatus(), defStatus );
+                patch( mt, true, "/status", newR.getStatus(), defStatus );
                 break;
             case UPDATE:
-                if ( newR.getDomainSpec() != null && !newR.getDomainSpec().equals( oldR.getDomainSpec() ) )
+                if ( newR.getSpec() != null && !newR.getSpec().equals( oldR.getSpec() ) )
                 {
                     // On any change change, set default status
-                    patch( mt, true, "/status", newR.getDomainStatus(), defStatus );
+                    patch( mt, true, "/status", newR.getStatus(), defStatus );
                 }
                 else
                 {
                     // Else make sure the old status is not removed
-                    patch( mt, false, "/status", newR.getDomainStatus(), oldR.getDomainStatus() );
+                    patch( mt, false, "/status", newR.getStatus(), oldR.getStatus() );
                 }
                 break;
             case DELETE:
@@ -297,10 +297,10 @@ public class MutationApi
                 break;
         }
 
-        if ( newR.getDomainSpec() != null )
+        if ( newR.getSpec() != null )
         {
             // Set default TTL
-            patch( mt, false, "/spec/dnsTTL", newR.getDomainSpec().getDnsTTL(), 3600 );
+            patch( mt, false, "/spec/dnsTTL", newR.getSpec().getDnsTTL(), 3600 );
         }
     }
 

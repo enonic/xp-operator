@@ -23,6 +23,10 @@ import io.fabric8.kubernetes.api.model.rbac.Role;
 import io.fabric8.kubernetes.api.model.rbac.RoleBinding;
 
 import com.enonic.cloud.kubernetes.Clients;
+import com.enonic.cloud.kubernetes.client.v1alpha1.Xp7App;
+import com.enonic.cloud.kubernetes.client.v1alpha2.Domain;
+import com.enonic.cloud.kubernetes.client.v1alpha2.Xp7Config;
+import com.enonic.cloud.kubernetes.client.v1alpha2.Xp7Deployment;
 import com.enonic.cloud.kubernetes.commands.builders.GenericBuilderParams;
 import com.enonic.cloud.kubernetes.commands.builders.ImmutableCommandBuilderConfigMap;
 import com.enonic.cloud.kubernetes.commands.builders.ImmutableCommandBuilderDaemonSet;
@@ -38,10 +42,7 @@ import com.enonic.cloud.kubernetes.commands.builders.ImmutableCommandBuilderV1Al
 import com.enonic.cloud.kubernetes.commands.builders.ImmutableCommandBuilderV1Alpha2Domain;
 import com.enonic.cloud.kubernetes.commands.builders.ImmutableCommandBuilderV1Alpha2Xp7Config;
 import com.enonic.cloud.kubernetes.commands.builders.ImmutableCommandBuilderV1Alpha2Xp7Deployment;
-import com.enonic.cloud.kubernetes.model.v1alpha1.xp7app.Xp7App;
-import com.enonic.cloud.kubernetes.model.v1alpha2.domain.Domain;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7config.Xp7Config;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
+
 
 @SuppressWarnings("unchecked")
 @Singleton

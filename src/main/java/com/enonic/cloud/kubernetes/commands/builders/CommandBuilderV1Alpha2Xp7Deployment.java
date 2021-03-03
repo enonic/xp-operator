@@ -5,18 +5,20 @@ import java.util.Optional;
 
 import org.immutables.value.Value;
 
-import com.enonic.cloud.kubernetes.client.v1alpha2.xp7deployment.Xp7DeploymentClient;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
+import io.fabric8.kubernetes.client.dsl.MixedOperation;
+import io.fabric8.kubernetes.client.dsl.Resource;
+
+import com.enonic.cloud.kubernetes.client.v1alpha2.Xp7Deployment;
 
 
 @Value.Immutable
 public abstract class CommandBuilderV1Alpha2Xp7Deployment
-    extends GenericBuilder<Xp7DeploymentClient, Xp7Deployment>
+    extends GenericBuilder<MixedOperation<Xp7Deployment, Xp7Deployment.Xp7DeploymentList, Resource<Xp7Deployment>>, Xp7Deployment>
 {
     @Override
     protected Optional<Xp7Deployment> getOldResource( final String namespace, final String name )
     {
-        return Optional.ofNullable( client().crdClient().
+        return Optional.ofNullable( client().
             inNamespace( namespace ).
             withName( name ).
             get() );
@@ -25,7 +27,7 @@ public abstract class CommandBuilderV1Alpha2Xp7Deployment
     @Override
     protected Runnable createOrReplaceCommand( final String namespace, final Xp7Deployment resource )
     {
-        return () -> client().crdClient().
+        return () -> client().
             inNamespace( namespace ).
             createOrReplace( resource );
     }
@@ -33,7 +35,7 @@ public abstract class CommandBuilderV1Alpha2Xp7Deployment
     @Override
     protected Runnable updateCommand( final String namespace, final Xp7Deployment resource )
     {
-        return () -> client().crdClient().
+        return () -> client().
             inNamespace( namespace ).
             withName( resource.getMetadata().getName() ).
             patch( resource );
@@ -42,7 +44,7 @@ public abstract class CommandBuilderV1Alpha2Xp7Deployment
     @Override
     protected Runnable deleteCommand( final String namespace, final Xp7Deployment resource )
     {
-        return () -> client().crdClient().
+        return () -> client().
             inNamespace( namespace ).
             withName( resource.getMetadata().getName() ).
             delete();
@@ -51,6 +53,6 @@ public abstract class CommandBuilderV1Alpha2Xp7Deployment
     @Override
     protected boolean equalsSpec( final Xp7Deployment o, final Xp7Deployment n )
     {
-        return Objects.equals( o.getXp7DeploymentSpec(), n.getXp7DeploymentSpec() );
+        return Objects.equals( o.getSpec(), n.getSpec() );
     }
 }

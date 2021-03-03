@@ -7,8 +7,8 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import com.enonic.cloud.kubernetes.Clients;
 import com.enonic.cloud.kubernetes.Searchers;
+import com.enonic.cloud.kubernetes.client.v1alpha2.Xp7Deployment;
 import com.enonic.cloud.kubernetes.commands.K8sLogHelper;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
 import com.enonic.cloud.operator.helpers.InformerEventHandler;
 
 import static com.enonic.cloud.kubernetes.Predicates.isDeleted;
@@ -59,7 +59,7 @@ public class OperatorDeleteAnnotation
         searchers.domain().stream().
             filter( isDeleted().negate() ).
             filter( matchAnnotation( deleteAnnotation, name ) ).
-            forEach( d -> K8sLogHelper.logDelete( clients.domain().crdClient().
+            forEach( d -> K8sLogHelper.logDelete( clients.domain().
                 withName( d.getMetadata().getName() ) ) );
     }
 

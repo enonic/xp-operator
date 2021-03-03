@@ -21,7 +21,7 @@ import io.fabric8.kubernetes.api.model.admission.AdmissionResponseBuilder;
 import io.fabric8.kubernetes.api.model.admission.AdmissionReview;
 
 import com.enonic.cloud.kubernetes.Searchers;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
+import com.enonic.cloud.kubernetes.client.v1alpha2.Xp7Deployment;
 
 import static com.enonic.cloud.common.Configuration.cfgIfBool;
 import static com.enonic.cloud.kubernetes.Predicates.inSameNamespace;

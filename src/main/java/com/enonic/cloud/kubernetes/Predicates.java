@@ -11,8 +11,8 @@ import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.Namespace;
 
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7config.Xp7Config;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7deployment.Xp7Deployment;
+import com.enonic.cloud.kubernetes.client.v1alpha2.Xp7Config;
+import com.enonic.cloud.kubernetes.client.v1alpha2.Xp7Deployment;
 
 import static com.enonic.cloud.common.Configuration.cfgStr;
 
@@ -153,7 +153,7 @@ public class Predicates
 
     public static Predicate<Xp7Config> inNodeGroup( String... nodegroup )
     {
-        return ( r ) -> Arrays.asList( nodegroup ).contains( r.getXp7ConfigSpec().getNodeGroup() );
+        return ( r ) -> Arrays.asList( nodegroup ).contains( r.getSpec().getNodeGroup() );
     }
 
     public static Predicate<Xp7Config> inNodeGroupAllOr( String nodeGroup )

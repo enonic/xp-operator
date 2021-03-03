@@ -57,13 +57,18 @@ public class OperatorIngress
         // Label ingress
         if ( !getXpVHostAnnotations( r ).isEmpty() )
         {
-            K8sLogHelper.logDoneable( clients.k8s().network().ingress().
+            K8sLogHelper.logEdit( clients.k8s().network().ingress().
                 inNamespace( r.getMetadata().getNamespace() ).
-                withName( r.getMetadata().getName() ).
-                edit().
-                editMetadata().
-                addToLabels( cfgStr( "operator.charts.values.labelKeys.ingressVhostLoaded" ), "false" ).
-                endMetadata() );
+                withName( r.getMetadata().getName() ), i -> {
+                Map<String, String> labels = i.getMetadata().getLabels();
+                if ( labels == null )
+                {
+                    labels = new HashMap<>();
+                }
+                labels.put( cfgStr( "operator.charts.values.labelKeys.ingressVhostLoaded" ), "false" );
+                i.getMetadata().setLabels( labels );
+                return  i;
+            } );
         }
     }
 

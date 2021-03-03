@@ -22,9 +22,9 @@ import com.enonic.cloud.apis.doh.service.DohAnswer;
 import com.enonic.cloud.common.functions.RunnableListExecutor;
 import com.enonic.cloud.kubernetes.Clients;
 import com.enonic.cloud.kubernetes.Searchers;
+import com.enonic.cloud.kubernetes.client.v1alpha2.Domain;
+import com.enonic.cloud.kubernetes.client.v1alpha2.domain.DomainStatus;
 import com.enonic.cloud.kubernetes.commands.K8sLogHelper;
-import com.enonic.cloud.kubernetes.model.v1alpha2.domain.Domain;
-import com.enonic.cloud.kubernetes.model.v1alpha2.domain.DomainStatus;
 import com.enonic.cloud.operator.helpers.InformerEventHandler;
 
 import static com.enonic.cloud.common.Configuration.cfgStr;
@@ -84,8 +84,8 @@ public class OperatorDomainDns
     public void onUpdate( final Domain oldResource, final Domain newResource )
     {
         // If domain is ready and spec has not changed, just return
-        if ( newResource.getDomainStatus().getState() == DomainStatus.State.READY &&
-            Objects.equals( oldResource.getDomainSpec(), newResource.getDomainSpec() ) )
+        if ( newResource.getStatus().getState() == DomainStatus.State.READY &&
+            Objects.equals( oldResource.getSpec(), newResource.getSpec() ) )
         {
             return;
         }
@@ -96,7 +96,7 @@ public class OperatorDomainDns
     @Override
     public void onDelete( final Domain oldResource, final boolean b )
     {
-        DomainConfig config = getDomainConfig( oldResource.getDomainSpec().getHost() );
+        DomainConfig config = getDomainConfig( oldResource.getSpec().getHost() );
         if ( config != null )
         {
             syncDnsRecords( config, oldResource, true );
@@ -106,11 +106,11 @@ public class OperatorDomainDns
     private void handle( Domain domainToChange )
     {
         editDomain( domainToChange, domain -> {
-            DomainConfig config = getDomainConfig( domain.getDomainSpec().getHost() );
+            DomainConfig config = getDomainConfig( domain.getSpec().getHost() );
             if ( config != null )
             {
                 // Domain managed by the operator
-                syncDnsRecords( config, domain, !domain.getDomainSpec().getDnsRecord() );
+                syncDnsRecords( config, domain, !domain.getSpec().getDnsRecord() );
             }
             else
             {
@@ -123,7 +123,7 @@ public class OperatorDomainDns
     private void lookupDomain( final Domain domain )
     {
         // We do not expect dns records
-        if ( !domain.getDomainSpec().getDnsRecord() )
+        if ( !domain.getSpec().getDnsRecord() )
         {
             updateStatus( domain, DomainStatus.State.READY, "OK", false );
             return;
@@ -132,7 +132,7 @@ public class OperatorDomainDns
         List<String> ourIps = ips.get();
 
         // Try to find a records
-        List<DohAnswer> aRecords = doh.query( "A", domain.getDomainSpec().getHost() ).answers();
+        List<DohAnswer> aRecords = doh.query( "A", domain.getSpec().getHost() ).answers();
         if ( aRecords.size() > 0 )
         {
             List<String> matches = new LinkedList<>();
@@ -157,12 +157,12 @@ public class OperatorDomainDns
             return;
         }
 
-        List<DohAnswer> cnameRecords = doh.query( "CNAME", domain.getDomainSpec().getHost() ).answers();
+        List<DohAnswer> cnameRecords = doh.query( "CNAME", domain.getSpec().getHost() ).answers();
         if ( cnameRecords.size() == 1 )
         {
             String cnameDomain = cnameRecords.get( 0 ).data();
             boolean realDomainExists = searchers.domain().stream().
-                filter( d -> d.getDomainSpec().getHost().equals( cnameDomain ) ).
+                filter( d -> d.getSpec().getHost().equals( cnameDomain ) ).
                 count() == 1;
             if ( realDomainExists )
             {
@@ -181,7 +181,7 @@ public class OperatorDomainDns
     private void syncDnsRecords( final DomainConfig config, final Domain domain, final boolean delete )
     {
         // Check for ips
-        List<String> ips = domain.getDomainStatus().getDomainStatusFields().getPublicIps();
+        List<String> ips = domain.getStatus().getDomainStatusFields().getPublicIps();
         if ( ips.size() == 0 )
         {
             log.warn( "Domain does not have an external IP, not altering records" );
@@ -190,10 +190,10 @@ public class OperatorDomainDns
         }
 
         // Get current records
-        List<DnsRecord> records = dnsRecordService.list( config.zoneId(), domain.getDomainSpec().getHost(), null );
+        List<DnsRecord> records = dnsRecordService.list( config.zoneId(), domain.getSpec().getHost(), null );
 
         // If we are not suppose to create records
-        if ( records.size() == 0 && !domain.getDomainSpec().getDnsRecord() )
+        if ( records.size() == 0 && !domain.getSpec().getDnsRecord() )
         {
             updateStatus( domain, DomainStatus.State.READY, "OK", false );
             return;
@@ -203,8 +203,8 @@ public class OperatorDomainDns
         DnsRecord heritageRecord = getHeritageRecord( records );
         if ( records.size() > 0 && heritageRecord == null )
         {
-            log.warn( String.format( "Present heritage record does not match this cluster id for domain '%s'",
-                                     domain.getDomainSpec().getHost() ) );
+            log.warn(
+                String.format( "Present heritage record does not match this cluster id for domain '%s'", domain.getSpec().getHost() ) );
             updateStatus( domain, DomainStatus.State.ERROR, "Heritage record mismatch", false );
             return;
         }
@@ -228,7 +228,7 @@ public class OperatorDomainDns
             {
                 toAdd.add( ImmutableDnsRecord.builder().
                     zone_id( config.zoneId() ).
-                    name( domain.getDomainSpec().getHost() ).
+                    name( domain.getSpec().getHost() ).
                     ttl( Integer.MAX_VALUE ).
                     type( "TXT" ).
                     content( createHeritageRecord() ).build() );
@@ -241,20 +241,20 @@ public class OperatorDomainDns
             List<String> currentRecordIps = aRecords.stream().map( DnsRecord::content ).collect( Collectors.toList() );
             ips.stream().filter( ip -> !currentRecordIps.contains( ip ) ).forEach( ip -> toAdd.add( ImmutableDnsRecord.builder().
                 zone_id( config.zoneId() ).
-                name( domain.getDomainSpec().getHost() ).
-                ttl( domain.getDomainSpec().getDnsTTL() ).
+                name( domain.getSpec().getHost() ).
+                ttl( domain.getSpec().getDnsTTL() ).
                 content( ip ).
                 type( "A" ).
-                proxied( domain.getDomainSpec().getCdn() ).
+                proxied( domain.getSpec().getCdn() ).
                 build() ) );
 
             // Modify records that needed modification
             aRecords.stream().filter( r -> !toRemove.contains( r ) ).forEach( r -> {
-                if ( !r.ttl().equals( domain.getDomainSpec().getDnsTTL() ) || r.proxied() != domain.getDomainSpec().getCdn() )
+                if ( !r.ttl().equals( domain.getSpec().getDnsTTL() ) || r.proxied() != domain.getSpec().getCdn() )
                 {
                     toModify.add( ImmutableDnsRecord.builder().from( r ).
-                        ttl( domain.getDomainSpec().getDnsTTL() ).
-                        proxied( domain.getDomainSpec().getCdn() ).
+                        ttl( domain.getSpec().getDnsTTL() ).
+                        proxied( domain.getSpec().getCdn() ).
                         build() );
                 }
             } );
@@ -310,30 +310,29 @@ public class OperatorDomainDns
 
     private void editDomain( final Domain domain, final Consumer<Domain> c )
     {
-        int oldHashSpec = domain.getDomainSpec().hashCode();
-        int oldHashStatus = domain.getDomainStatus().hashCode();
+        int oldHashSpec = domain.getSpec().hashCode();
+        int oldHashStatus = domain.getStatus().hashCode();
 
         c.accept( domain );
 
-        int newHashSpec = domain.getDomainSpec().hashCode();
-        int newHashStatus = domain.getDomainStatus().hashCode();
+        int newHashSpec = domain.getSpec().hashCode();
+        int newHashStatus = domain.getStatus().hashCode();
 
         if ( oldHashSpec != newHashSpec || oldHashStatus != newHashStatus )
         {
-            K8sLogHelper.logDoneable( clients.domain().crdClient().
-                withName( domain.getMetadata().getName() ).
-                edit().
-                withSpec( domain.getDomainSpec() ).
-                withStatus( domain.getDomainStatus() ) );
+            K8sLogHelper.logEdit( clients.domain().
+                withName( domain.getMetadata().getName() ), d -> d.
+                withSpec( domain.getSpec() ).
+                withStatus( domain.getStatus() ) );
         }
     }
 
     private void updateStatus( Domain domain, DomainStatus.State state, String message, boolean dnsRecordCreated )
     {
-        domain.getDomainStatus().
+        domain.getStatus().
             withState( state ).
             withMessage( message ).
-            withDomainStatusFields( domain.getDomainStatus().getDomainStatusFields().
+            withDomainStatusFields( domain.getStatus().getDomainStatusFields().
                 withDnsRecordCreated( dnsRecordCreated ) );
     }
 }

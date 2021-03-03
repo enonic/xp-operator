@@ -17,8 +17,8 @@ import io.fabric8.kubernetes.api.model.ConfigMap;
 
 import com.enonic.cloud.kubernetes.Clients;
 import com.enonic.cloud.kubernetes.Searchers;
+import com.enonic.cloud.kubernetes.client.v1alpha2.Xp7Config;
 import com.enonic.cloud.kubernetes.commands.K8sLogHelper;
-import com.enonic.cloud.kubernetes.model.v1alpha2.xp7config.Xp7Config;
 import com.enonic.cloud.operator.helpers.HandlerConfig;
 
 import static com.enonic.cloud.common.Configuration.cfgStr;
@@ -89,18 +89,18 @@ public class OperatorConfigMapSync
         StringBuilder index = new StringBuilder();
         for ( Xp7Config c : configs )
         {
-            if ( Objects.equals( c.getXp7ConfigSpec().getDataBase64(), true ) )
+            if ( Objects.equals( c.getSpec().getDataBase64(), true ) )
             {
-                binaryData.put( c.getXp7ConfigSpec().getFile(), c.getXp7ConfigSpec().getData() );
+                binaryData.put( c.getSpec().getFile(), c.getSpec().getData() );
             }
             else
             {
-                data.put( c.getXp7ConfigSpec().getFile(), c.getXp7ConfigSpec().getData() );
+                data.put( c.getSpec().getFile(), c.getSpec().getData() );
             }
             index.
                 append( c.getMetadata().getName() ).append( "\t" ).
-                append( c.getXp7ConfigSpec().getNodeGroup() ).append( "\t" ).
-                append( c.getXp7ConfigSpec().getFile() ).append( "\n" );
+                append( c.getSpec().getNodeGroup() ).append( "\t" ).
+                append( c.getSpec().getFile() ).append( "\n" );
         }
         // We add this to be sure that events are always sent when small changes are made
         data.put( "operator-hash", Hashing.sha256().hashBytes( index.toString().getBytes() ).toString() );
@@ -112,13 +112,14 @@ public class OperatorConfigMapSync
         // If data is not the same, do the update
         if ( !Objects.equals( oldData, data ) || !Objects.equals( oldBinaryData, binaryData ) )
         {
-            K8sLogHelper.logDoneable( clients.k8s().
+            K8sLogHelper.logEdit( clients.k8s().
                 configMaps().
                 inNamespace( configMap.getMetadata().getNamespace() ).
-                withName( configMap.getMetadata().getName() ).
-                edit().
-                withData( data ).
-                withBinaryData( binaryData ) );
+                withName( configMap.getMetadata().getName() ), c -> {
+                c.setData( data );
+                c.setBinaryData( binaryData );
+                return c;
+            } );
         }
     }
 }
