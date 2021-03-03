@@ -1,0 +1,9 @@
+concurrency: 1
+base: 'http://localhost'
+iterations: 5000
+rampup: 0
+
+plan:
+  - name: GET
+    request:
+      url: /proxy

@@ -10,7 +10,7 @@ metadata:
     service: myservice
 spec:
   enabled: true
-  xpVersion: 7.6.0-B1
+  xpVersion: 7.6.0
 
 #  nodesPreinstalledApps:
 #    - name: snapshotter
@@ -23,16 +23,16 @@ spec:
       size: 100Mi
 
   nodeGroups:
-    - name: master
+    - name: main
       data: true
       master: true
-      replicas: 1
+      replicas: 3
       env:
         - name: ASD
-          value: asdasdadsa2aaa1aaasd
+          value: asdasdadsa2aaa1aaasdasdasd
       resources:
-        cpu: "1.5"
-        memory: 512Mi
+        cpu: "1"
+        memory: 1Gi
         disks:
           - name: deploy
             size: 100Mi
@@ -42,6 +42,45 @@ spec:
             size: 100Mi
           - name: work
             size: 100Mi
+#    - name: data
+#      data: true
+#      master: false
+#      replicas: 1
+#      env:
+#        - name: WTF
+#          value: adasdasd
+#      resources:
+#        cpu: "0.5"
+#        memory: 1Gi
+#        disks:
+#          - name: deploy
+#            size: 100Mi
+#          - name: export
+#            size: 100Mi
+#          - name: index
+#            size: 100Mi
+#          - name: work
+#            size: 100Mi
+#    - name: frontend
+#      data: false
+#      master: false
+#      replicas: 1
+#      env:
+#        - name: WTF
+#          value: adasdasdasdasd
+#      resources:
+#        cpu: "0.5"
+#        memory: 1Gi
+#        disks:
+#          - name: deploy
+#            size: 100Mi
+#          - name: export
+#            size: 100Mi
+#          - name: index
+#            size: 100Mi
+#          - name: work
+#            size: 100Mi
+
 #    - name: front
 #      data: false
 #      master: false

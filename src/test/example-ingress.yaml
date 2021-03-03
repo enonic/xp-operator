@@ -4,16 +4,22 @@ metadata:
   name: test-domain-enonic-net
   namespace: mycloud-mysolution-myenv-myservice
   annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 100m
+
     enonic.cloud/ingress.cert.manage: "true"
-    enonic.cloud/xp7.vhost.mapping.1.source: /a
-    enonic.cloud/xp7.vhost.mapping.1.target: /admin
+    enonic.cloud/xp7.vhost.mapping.1.source: /proxy
+    enonic.cloud/xp7.vhost.mapping.1.target: /webapp/com.enonic.app.proxydebug
     enonic.cloud/xp7.vhost.mapping.1.idproviders: system
 spec:
   rules:
-    - host: test-domain.enonic.net
+    - host: localhost
       http:
         paths:
           - backend:
-              serviceName: master
+              serviceName: frontend
               servicePort: 8080
-            path: /a
+            path: /
+          - backend:
+              serviceName: frontend
+              servicePort: 8080
+            path: /proxy
