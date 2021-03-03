@@ -26,10 +26,10 @@ spec:
     - name: main
       data: true
       master: true
-      replicas: 3
+      replicas: 1
       env:
-        - name: ASD
-          value: asdasdadsa2aaa1aaasdasdasd
+        - name: MY_ENV
+          value: VAR
       resources:
         cpu: "1"
         memory: 1Gi
@@ -42,77 +42,3 @@ spec:
             size: 100Mi
           - name: work
             size: 100Mi
-#    - name: data
-#      data: true
-#      master: false
-#      replicas: 1
-#      env:
-#        - name: WTF
-#          value: adasdasd
-#      resources:
-#        cpu: "0.5"
-#        memory: 1Gi
-#        disks:
-#          - name: deploy
-#            size: 100Mi
-#          - name: export
-#            size: 100Mi
-#          - name: index
-#            size: 100Mi
-#          - name: work
-#            size: 100Mi
-#    - name: frontend
-#      data: false
-#      master: false
-#      replicas: 1
-#      env:
-#        - name: WTF
-#          value: adasdasdasdasd
-#      resources:
-#        cpu: "0.5"
-#        memory: 1Gi
-#        disks:
-#          - name: deploy
-#            size: 100Mi
-#          - name: export
-#            size: 100Mi
-#          - name: index
-#            size: 100Mi
-#          - name: work
-#            size: 100Mi
-
-#    - name: front
-#      data: false
-#      master: false
-#      replicas: 2
-#      env:
-#        - name: ASD
-#          value: asdasdadsa2aaa1aaasdasd
-#      resources:
-#        cpu: "0.5"
-#        memory: 1024Mi
-#        disks:
-#          - name: deploy
-#            size: 100Mi
-#          - name: export
-#            size: 100Mi
-#          - name: index
-#            size: 100Mi
-#          - name: work
-#            size: 100Mi
-#    - name: data
-#      data: true
-#      master: false
-#      replicas: 1
-#      resources:
-#        cpu: "1"
-#        memory: 512Mi
-#        disks:
-#          - name: deploy
-#            size: 100Mi
-#          - name: export
-#            size: 100Mi
-#          - name: index
-#            size: 100Mi
-#          - name: work
-#            size: 100Mi
