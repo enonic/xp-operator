@@ -12,6 +12,10 @@ Kubectl:: Is the Kubernetes command-line tool, kubectl, allows you to run comman
 
 Helm:: Is a package manager for Kubernetes. Download it https://helm.sh/docs/intro/install/[here].
 
+== Namespaces
+
+This guide instructs you to install the operator (and potentially the NFS provisioner) into the `kube-system` namespace. Although this is not a strict requirement, it is best practices to install kubernetes extentions into a namespace that clearly indicates that it has components vital to the system. Since `kube-system` is present in all clusters and should never be deleted, it is recommended to use that. You can create you own `my-system` namespace and install the operator there. Do not, for example, install the operator and a XP7 deployment into the same namespace.
+
 == Storage classes
 
 Before we deploy the operator, we need to talk about storage classes. That should be a familiar concept to people that have managed Kubernetes clusters before. If you do not know what they are, you can basically think of them as different aproaches to store your data (floppy, HDD, SSD, etc). Each storage class can create volumes that have one of these three access modes:
