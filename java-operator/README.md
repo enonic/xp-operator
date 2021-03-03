@@ -42,7 +42,7 @@ $ make cluster
 Use your IDE to run the `com.enonic.kubernetes.operator.helpers.Main` class and set the VM options to to:
 
 ```
--Doperator.charts.values.storage.shared.storageClassName=nfs -Dquarkus.http.ssl.certificate.file=kubernetes/kind/certs/tls.crt -Dquarkus.http.ssl.certificate.key-file=kubernetes/kind/certs/tls.key
+-Doperator.charts.path=java-operator/src/main/helm -Doperator.charts.values.storage.shared.storageClassName=nfs -Dquarkus.http.ssl.certificate.file=kubernetes/kind/certs/tls.crt -Dquarkus.http.ssl.certificate.key-file=kubernetes/kind/certs/tls.key
 ```
 
 ### Verify it works
