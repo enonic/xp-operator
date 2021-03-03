@@ -1,0 +1,11 @@
+apiVersion: v1
+name: operator
+version: 0.7.1
+appVersion: 0.14.1
+home: https://github.com/enonic/ec-operator
+description: |
+  Enonic Kubernetes operator
+sources:
+  - https://github.com/enonic/ec-operator
+maintainers:
+  - name: Guðmundur Björn Birkisson (gbi@enonic.com)

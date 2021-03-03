@@ -1,0 +1,17 @@
+{{- if not .Values.onlyDeployCrds }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+data:
+  application.properties: |-
+    # Api certificates
+    quarkus.http.ssl.certificate.file=/deployments/ssl/tls.crt
+    quarkus.http.ssl.certificate.key-file=/deployments/ssl/tls.key
+
+    # User defined config
+{{ indent 4 .Values.config }}
+---
+{{- end }}

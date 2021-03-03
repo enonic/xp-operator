@@ -1,0 +1,10 @@
+image:
+  pullPolicy: Always
+
+deployClusterIssuers: false
+onlyDeployCrds: false
+# config: |-
+#   quarkus.log.category."io.fabric8.kubernetes.client.informers.cache.Reflector".level=INFO
+#   quarkus.log.category."io.fabric8.kubernetes.client.informers.cache.ReflectorWatcher".level=INFO
+#   quarkus.log.category."io.fabric8.kubernetes.client.informers.cache.Controller".level=INFO
+#   quarkus.log.category."io.fabric8.kubernetes.client.internal.VersionUsageUtils".level=INFO

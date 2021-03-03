@@ -1,0 +1,89 @@
+{{- if not .Values.onlyDeployCrds }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+      {{- with .Values.annotations }}
+      {{- toYaml . | nindent 6 }}
+      {{- end }}
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+        {{- with .Values.labels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        checksum/config: {{ include (print .Template.BasePath "/config.yaml") . | sha256sum }} # Ensure restart on config change
+        checksum/secret: {{ include (print .Template.BasePath "/secrets.yaml") . | sha256sum }} # Ensure restart on secret change
+        {{- with .Values.annotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ .Release.Name }}
+      containers:
+        - image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          name: {{ .Release.Name }}
+          resources:
+            {{- with .Values.resources }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- if or .Values.env .Values.secrets }}
+          env:
+            {{- range $n, $v := .Values.env }}
+            - name: "{{ $n }}"
+              value: "{{ $v }}"
+            {{- end }}
+            {{- range $n, $v := .Values.secrets }}
+            - name: "{{ $n }}"
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ $.Release.Name }}-secrets"
+                  key: "{{ $n }}"
+            {{- end }}
+          {{- end }}
+          volumeMounts:
+            - name: config
+              mountPath: /deployments/config
+              readOnly: true
+            - name: ssl
+              mountPath: /deployments/ssl
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: {{ .Release.Name }}
+        - name: ssl
+          secret:
+            secretName: {{ .Release.Name }}-tls
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    app: {{ .Release.Name }}
+    {{- with .Values.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 8080
+    - name: https
+      protocol: TCP
+      port: 443
+      targetPort: 8443
+---
+{{- end }}

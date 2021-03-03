@@ -1,0 +1,29 @@
+image:
+  repository: enonic/ec-operator
+  tag: "0.14.1"
+  pullPolicy: IfNotPresent
+
+resources:
+  requests: {}
+  limits: {}
+
+annotations: {}
+labels: {}
+
+secrets: {}
+env: {}
+
+onlyDeployCrds: false
+
+config: |-
+  # Logging
+  # quarkus.log.console.level=DEBUG
+  # quarkus.log.min-level=DEBUG
+
+  # Permissions for OpenShift
+  # operator.charts.values.pods.securityContext.user=1337
+  # operator.charts.values.pods.securityContext.fsGroup=5555
+
+  # Storage classes
+  # operator.charts.values.storage.default.storageClassName=standard
+  # operator.charts.values.storage.shared.storageClassName=nfs

@@ -1,0 +1,127 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: xp7deployments.enonic.cloud
+spec:
+  group: enonic.cloud
+  scope: Namespaced
+  preserveUnknownFields: false
+  names:
+    kind: Xp7Deployment
+    singular: xp7deployment
+    plural: xp7deployments
+  versions:
+    - name: v1alpha2
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                xpVersion:
+                  type: string
+                nodesPreinstalledApps:
+                  type: array
+                  nullable: true
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      url:
+                        type: string
+                nodesSharedDisks:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      size:
+                        type: string
+                nodeGroups:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      displayName:
+                        type: string
+                      data:
+                        type: boolean
+                      master:
+                        type: boolean
+                      replicas:
+                        type: integer
+                        format: int32
+                      env:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                            value:
+                              type: string
+                      resources:
+                        type: object
+                        properties:
+                          cpu:
+                            type: string
+                          memory:
+                            type: string
+                          disks:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                                size:
+                                  type: string
+            status:
+              type: object
+              nullable: true
+              properties:
+                state:
+                  type: string
+                  enum: ["ERROR", "PENDING", "STOPPED", "RUNNING"]
+                message:
+                  type: string
+                fields:
+                  type: object
+                  properties:
+                    pods:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                          phase:
+                            type: string
+                          ready:
+                            type: boolean
+      additionalPrinterColumns:
+        - name: Enabled
+          type: boolean
+          description: XP enabled or not
+          jsonPath: .spec.enabled
+        - name: Version
+          type: string
+          description: XP version running
+          jsonPath: .spec.xpVersion
+        - name: State
+          type: string
+          description: State
+          jsonPath: .status.state
+        - name: Msg
+          type: string
+          description: Message
+          jsonPath: .status.message
