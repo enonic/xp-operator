@@ -72,5 +72,5 @@ Add to your hosts file:
 And run proxy:
 
 ```console
-kubectl -n mycloud-mysolution-myenv-myservice port-forward main-0 8080
+kubectl -n mycloud-mysolution-myenv-myservice port-forward main-0 4848
 ```
