@@ -54,6 +54,9 @@ publish: build validate  ## Publish everything (env var ARTIFACTORY_TOKEN requir
 	# Publishing java-client ...
 	@$(MAKE) -C java-client --no-print-directory publish
 
+	# Push tag
+	@git push origin "v$(shell ./.mvn/get-version)"
+
 test: validate build-docker ## Run k8s kind cluster with operator installed
 	# Start kind cluster
 	@$(MAKE) -C kubernetes/kind --no-print-directory kind-up
