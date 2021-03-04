@@ -7,7 +7,7 @@ test: ## Run k8s kind cluster with operator installed
 dev: ## Run k8s kind cluster setup for development
 	@$(MAKE) -C ../kubernetes/kind --no-print-directory kind-up kind-dev
 
-verify: ## Run k8s kind cluster setup is working
+validate: ## Run k8s kind cluster setup is working
 	@kubectl get --raw='/apis/operator.enonic.cloud/v1alpha1/internal/version' | jq
 
 clean: ## Clean up everything
