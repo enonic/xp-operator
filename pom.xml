@@ -15,7 +15,7 @@
   </modules>
 
   <properties>
-    <revision>0.16.0</revision>
+    <revision>0.16.1-SNAPSHOT</revision>
 
     <maven.compiler.target>1.11</maven.compiler.target>
     <maven.compiler.source>1.11</maven.compiler.source>
