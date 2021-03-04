@@ -49,6 +49,7 @@ test: validate build-docker ## Run k8s kind cluster with operator installed
 
 	# Deploy operator
 	@$(MAKE) -C helm --no-print-directory install
+	# Cluster setup done!
 
 clean: ## Clean up everything
 	# Clean java modules

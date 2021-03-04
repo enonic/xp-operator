@@ -1,3 +1,6 @@
+#K8S_VERSION:=v1.20.2
+#K8S_VERSION:=v1.19.7
+#K8S_VERSION:=v1.18.15
 K8S_VERSION:=v1.17.17
 KIND_CTX:=kind-kind
 NFS_SERVER_NAME:=kind-nfs-server
@@ -41,6 +44,13 @@ kind-bootstrap:
 		--version 3.0.0 \
 		nfs-client \
 		nfs/nfs-subdir-external-provisioner
+	
+	# Preload XP images
+	@docker pull enonic/xp:7.6.0-ubuntu
+	@kind load docker-image enonic/xp:7.6.0-ubuntu
+
+	@docker pull enonic/xp:7.6.1-ubuntu
+	@kind load docker-image enonic/xp:7.6.1-ubuntu
 
 kind-dev: ## Setup cluster for development mode (env var MY_IP required)
 	# Ensure MY_IP is set

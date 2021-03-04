@@ -5,7 +5,7 @@ REPOSITORY:=https://repo.enonic.com/helm
 .PHONY: test template clean package publish help
 
 install: ## Install chart into cluster
-	helm upgrade --install \
+	@helm upgrade --install \
 		--namespace kube-system \
 		--values test/values.yaml \
 		enonic-operator \

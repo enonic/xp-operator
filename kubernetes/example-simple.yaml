@@ -1,0 +1,100 @@
+# Create a namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: my-namespace
+  annotations:
+    # Delete this namespace it the deployment is deleted
+    enonic.cloud/remove.with.xp7deployment: my-deployment
+---
+# Create deployment in the namespace
+apiVersion: enonic.cloud/v1alpha2
+kind: Xp7Deployment
+metadata:
+  name: my-deployment
+  namespace: my-namespace
+spec:
+  enabled: true
+  xpVersion: 7.6.0
+
+  # Preinstall snapshotter on all nodes
+  nodesPreinstalledApps:
+    - name: snapshotter
+      url: https://repo.enonic.com/public/com/enonic/app/snapshotter/3.0.2/snapshotter-3.0.2.jar
+
+  # Create one node
+  nodeGroups:
+    - name: main
+      replicas: 1
+
+      data: true
+      master: true
+
+      resources:
+        cpu: "1"
+        memory: 512Mi
+
+        # Volumes private to the node
+        disks:
+          - name: blobstore
+            size: 1Gi
+          - name: snapshots
+            size: 1Gi
+          - name: export # Dumps and other data
+            size: 1Gi
+          - name: deploy # Apps installed in the deploy folder
+            size: 1Gi
+          - name: index # Node ES index
+            size: 1Gi
+          - name: work # Node cache
+            size: 1Gi
+---
+# Install content studio
+apiVersion: enonic.cloud/v1alpha1
+kind: Xp7App
+metadata:
+  name: contentstudio
+  namespace: my-namespace
+spec:
+  url: https://repo.enonic.com/public/com/enonic/app/contentstudio/3.2.0/contentstudio-3.2.0.jar
+  sha512: d131cdb2b66683455d27977dce7d4268de29f9db0da9602b8d920aa090f2e45d5833c477988e9b18096f43786bc1ac490a95661a588eafd5699d05c68c8e516a
+---
+# Disable management of apps through XP admin
+apiVersion: enonic.cloud/v1alpha2
+kind: Xp7Config
+metadata:
+  name: my-config
+  namespace: my-namespace
+spec:
+  nodeGroup: all
+  file: com.my-app.cfg
+  data: |
+    my = config
+---
+# Expose XP through an ingress
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: my-domain-com
+  namespace: my-namespace
+  annotations:
+    enonic.cloud/xp7.vhost.mapping.my-mapping-site.source: /
+    enonic.cloud/xp7.vhost.mapping.my-mapping-site.target: /site/default/master/homepage
+
+    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.source: /admin
+    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.target: /admin
+    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.idproviders: system
+spec:
+  rules:
+    - host: my-domain.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: main
+              servicePort: 8080
+
+          - path: /admin
+            backend:
+              serviceName: main
+              servicePort: 8080
