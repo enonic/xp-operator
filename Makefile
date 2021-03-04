@@ -32,13 +32,13 @@ publish: build validate ## Publish everything (env var ARTIFACTORY_TOKEN require
 	@echo "# Starting release for $(shell ./.mvn/get-version) ..."
 
 	# Publishing helm chart ...
-	#@$(MAKE) -C helm --no-print-directory publish
+	@$(MAKE) -C helm --no-print-directory publish
 
 	# Publishing docker image ...
-	#@echo docker push ${DOCKER_IMAGE}:$(shell ./.mvn/get-version)
+	@echo docker push ${DOCKER_IMAGE}:$(shell ./.mvn/get-version)
 
 	# Publishing java-client ...
-	#@$(MAKE) -C java-client --no-print-directory publish
+	@$(MAKE) -C java-client --no-print-directory publish
 
 test: validate build-docker ## Run k8s kind cluster with operator installed
 	# Start kind cluster
