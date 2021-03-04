@@ -1,3 +1,3 @@
 *
-!java-operator/target/*-runner.jar
+!java-operator/target/quarkus-app
 !java-operator/src/main/helm

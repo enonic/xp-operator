@@ -8,9 +8,10 @@ ENV JAVA_OPTIONS="-Doperator.charts.path=helm -Djava.util.logging.manager=org.jb
     AB_ENABLED=jmx_exporter
 
 # Copy helm charts
-COPY java-operator/src/main/helm /deployments/helm
+COPY --chown=1000:1000 java-operator/src/main/helm /deployments/helm
 
 # Copy build target
-COPY java-operator/target/*-runner.jar /deployments/operator.jar
+COPY --chown=1000:1000 java-operator/target/quarkus-app /tmp/quarkus-app
+RUN mv /tmp/quarkus-app/* /deployments
 
 CMD [ "/deployments/run-java.sh" ]

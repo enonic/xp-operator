@@ -3,19 +3,20 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-  <parent>
-    <groupId>com.enonic.kubernetes</groupId>
-    <artifactId>all</artifactId>
-    <version>${revision}</version>
-  </parent>
-
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.enonic.kubernetes</groupId>
   <artifactId>operator</artifactId>
+  <version>0.16.0</version>
 
   <properties>
+    <maven.compiler.target>1.11</maven.compiler.target>
+    <maven.compiler.source>1.11</maven.compiler.source>
+    <maven.compiler.release>11</maven.compiler.release>
+
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
     <quarkus.version>1.12.0.Final</quarkus.version>
-    <quarkus.package.type>uber-jar</quarkus.package.type>
     
     <immutables.version>2.8.8</immutables.version>
     <jackson-yaml.version>2.11.2</jackson-yaml.version>
@@ -79,7 +80,9 @@
     <dependency>
       <groupId>com.enonic.kubernetes</groupId>
       <artifactId>client</artifactId>
-      <version>${revision}</version>
+      <version>${project.version}</version>
+      <!-- <scope>system</scope>
+      <systemPath>${project.basedir}/../java-client/target/client-${project.version}.jar</systemPath> -->
       <exclusions>
         <exclusion>
           <groupId>io.fabric8</groupId>

@@ -5,14 +5,9 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>com.enonic.kubernetes</groupId>
-    <artifactId>all</artifactId>
-    <version>${revision}</version>
-  </parent>
-
   <groupId>com.enonic.kubernetes</groupId>
   <artifactId>client</artifactId>
+  <version>0.16.0</version>
 
   <distributionManagement>
     <repository>
@@ -22,6 +17,13 @@
   </distributionManagement>
 
   <properties>
+    <maven.compiler.target>1.11</maven.compiler.target>
+    <maven.compiler.source>1.11</maven.compiler.source>
+    <maven.compiler.release>11</maven.compiler.release>
+
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
     <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
     <maven-antrun-plugin.version>3.0.0</maven-antrun-plugin.version>
     <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
