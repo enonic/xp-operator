@@ -15,6 +15,8 @@ env: {}
 
 onlyDeployCrds: false
 
+# For a full list of configuration options see operator properties file:
+# https://github.com/enonic/ec-operator/blob/master/java-operator/src/main/resources/application.properties
 config: |-
   # Logging
   # quarkus.log.console.level=DEBUG
