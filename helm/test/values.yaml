@@ -1,10 +1,6 @@
-image:
-  pullPolicy: Always
+config: |-
+  operator.charts.values.storage.shared.storageClassName=nfs
+  operator.charts.values.storage.default.storageClassName=standard
 
-deployClusterIssuers: false
-onlyDeployCrds: false
-# config: |-
-#   quarkus.log.category."io.fabric8.kubernetes.client.informers.cache.Reflector".level=INFO
-#   quarkus.log.category."io.fabric8.kubernetes.client.informers.cache.ReflectorWatcher".level=INFO
-#   quarkus.log.category."io.fabric8.kubernetes.client.informers.cache.Controller".level=INFO
-#   quarkus.log.category."io.fabric8.kubernetes.client.internal.VersionUsageUtils".level=INFO
+  operator.charts.values.resources.cpu.defaultRequests=0.2
+  operator.charts.values.resources.memory.defaultRequests=512Mi

@@ -1,6 +1,6 @@
-<h1>Enonic Kubernetes Operator Helm Chart</h1>
+<h1>Enonic XP Kubernetes Operator Helm Chart</h1>
 
-This chart bootstraps the [Enonic Kubernetes Operator](../) on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
+This chart bootstraps the [Enonic XP Kubernetes Operator](../) on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
 
 - [Prerequisites](#prerequisites)
 - [Quick start](#quick-start)
@@ -16,16 +16,16 @@ This chart bootstraps the [Enonic Kubernetes Operator](../) on a [Kubernetes](ht
 ```console
 helm repo add enonic https://repo.enonic.com/helm
 helm repo update
-helm install --namespace kube-system enonic-operator enonic/operator
+helm install --namespace kube-system enonic-operator enonic/xp-operator
 ```
 
 ## Configuration
 
-The following table lists the configurable parameters of the ec-operator chart. For details look at [values.yaml](./values.yaml).
+The following table lists the configurable parameters of the xp-operator chart. For details look at [values.yaml](./values.yaml).
 
 | Parameter            | Description                                                           | Default                            |
 | -------------------- | --------------------------------------------------------------------- | ---------------------------------- |
-| `image.repository`   | Operator image repository                                             | `enonic/ec-operator`               |
+| `image.repository`   | Operator image repository                                             | `enonic/xp-operator`               |
 | `image.tag`          | Operator image tag                                                    | _see [values.yaml](./values.yaml)_ |
 | `image.pullPolicy`   | Operator image pull policy                                            | `IfNotPresent`                     |
 | `resources.limits`   | The resources limits for the Operator container                       | `{}`                               |

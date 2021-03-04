@@ -1,6 +1,6 @@
-<h1>Enonic Kubernetes Operator</h1>
+<h1>Enonic XP Kubernetes Operator</h1>
 
-The Enonic Kubernetes Operator is a piece of software runs on top of Kubernetes to help you manage your XP deployments.
+The Enonic XP Kubernetes Operator is a piece of software runs on top of Kubernetes to help you manage your XP deployments.
 
 - [Local development](#local-development)
   - [Requirements](#requirements)
@@ -34,7 +34,7 @@ Navigate to [./kubernetes/kind](../kubernetes/kind) and run these commands:
 
 ```console
 $ export MY_IP=192.?.?.?
-$ make cluster
+$ make kind-up kind-dev
 ```
 
 ### Starting operator

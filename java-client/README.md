@@ -1,6 +1,6 @@
-<h1>Enonic Kubernetes Operator Client</h1>
+<h1>Enonic XP Kubernetes Operator Client</h1>
 
-This is the Java client for the [Enonic Kubernetes Operator](../). This client includes the latest CRD model and bindings for the [fabric8io/kubernetes-client](https://github.com/fabric8io/kubernetes-client).
+This is the Java client for the [Enonic XP Kubernetes Operator](../). This client includes the latest CRD model and bindings for the [fabric8io/kubernetes-client](https://github.com/fabric8io/kubernetes-client).
 
 - [Installation](#installation)
   - [Maven](#maven)

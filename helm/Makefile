@@ -1,17 +1,17 @@
-CHART_NAME:=operator
+CHART_NAME:=xp-operator
 REPOSITORY:=https://repo.enonic.com/helm
 
 .DEFAULT_GOAL:=help
 .PHONY: test template clean package publish help
 
-# test: ## Deploy chart to current kubectl context with values from ./test dir
-# 	helm upgrade --install \
-# 	--namespace kube-system \
-# 	--values test/values.yaml \
-# 	enonic-operator \
-# 	.
+install: ## Install chart into cluster
+	helm upgrade --install \
+		--namespace kube-system \
+		--values test/values.yaml \
+		enonic-operator \
+		.
 
-template: ## Test chart
+template: ## Test chart by templating
 	@helm template --namespace kube-system .
 
 clean: ## Clean up build files
@@ -49,4 +49,4 @@ publish: package ## Publish chart (env var ARTIFACTORY_TOKEN required)
 
 help: ## Show help
 	@echo "Makefile help:"
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}'

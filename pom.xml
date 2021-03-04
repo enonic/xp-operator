@@ -4,10 +4,6 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-<!-- com.enonic.kubernetes:kubernetes
-com.enonic.kubernetes:operator
-com.enonic.kubernetes:client -->
-
   <groupId>com.enonic.kubernetes</groupId>
   <artifactId>all</artifactId>
   <version>${revision}</version>
@@ -19,7 +15,7 @@ com.enonic.kubernetes:client -->
   </modules>
 
   <properties>
-    <revision>0.16.0-SNAPSHOT</revision>
+    <revision>0.16.0</revision>
 
     <maven.compiler.target>1.11</maven.compiler.target>
     <maven.compiler.source>1.11</maven.compiler.source>
@@ -29,20 +25,4 @@ com.enonic.kubernetes:client -->
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>
 
-  <!-- <build>
-    <plugins>
-      <plugin>
-        <groupId>io.quarkus</groupId>
-        <artifactId>quarkus-maven-plugin</artifactId>
-        <version>${quarkus.version}</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>build</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-   </plugins>
-  </build> -->
 </project>

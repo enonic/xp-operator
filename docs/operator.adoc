@@ -1,8 +1,8 @@
-= Enonic Kubernetes Operator
+= Enonic XP Kubernetes Operator
 :toc: right
 :imagesdir: images
 
-The Enonic Kubernetes Operator is a piece of software runs on top of Kubernetes to help you manage your XP deployments. It builds on the https://kubernetes.io/docs/concepts/extend-kubernetes/operator/[operator pattern] provided by Kubernetes. 
+The Enonic XP Kubernetes Operator is a piece of software runs on top of Kubernetes to help you manage your XP deployments. It builds on the https://kubernetes.io/docs/concepts/extend-kubernetes/operator/[operator pattern] provided by Kubernetes. 
 
 WARNING: Currently the operator is in development. That applies to every aspect related to it, i.e. CRDs, Helm chart, deployment strategies, etc. It should not be used for production deployments. Expect non-backwards compatible changes and potential dataloss during upgrades while using development versions of the operator.
 

@@ -1,24 +1,24 @@
 K8S_VERSION:=v1.17.17
 KIND_CTX:=kind-kind
-NFS_SERVER_NAME:=nfs_server
-NFS_SERVER_DIR:=/tmp/nfsshare
+NFS_SERVER_NAME:=kind-nfs-server
+NFS_SERVER_VOLUME:=kind-nfs-server
 
 .PHONY: kind-setup kind-bootstrap kind-ingress kind-up kind-down help
 .DEFAULT_GOAL:=help
 
 kind-setup:
-	# Ensure MY_IP is set
-	@[ ! -z "${MY_IP}" ] || (echo "Set MY_IP variable to you host IP" && exit 1)
-
 	# Create kind cluster
 	@kind create cluster --image=kindest/node:${K8S_VERSION} --config=kind-config.yaml
+
+	# Create NFS volume
+	-@docker volume create ${NFS_SERVER_VOLUME}
 
 	# Start NFS server
 	@(docker ps | grep ${NFS_SERVER_NAME}) || docker run -d \
 		--name ${NFS_SERVER_NAME} \
 		--network=kind \
 		--privileged \
-		-v ${NFS_SERVER_DIR}:/nfsshare \
+		-v ${NFS_SERVER_VOLUME}:/nfsshare \
 		-e SHARED_DIRECTORY=/nfsshare \
 		itsthenetwork/nfs-server-alpine:latest
 	
@@ -26,9 +26,6 @@ kind-setup:
 	@kubectl config use-context ${KIND_CTX}
 
 kind-bootstrap:
-	# Ensure MY_IP is set
-	@[ ! -z "${MY_IP}" ] || (echo "Set MY_IP variable to you host IP" && exit 1)
-
 	# Ensure kubectl context
 	@[ "$(shell kubectl config current-context)" == "${KIND_CTX}" ] || \
 		(echo "Kubectl should be ${KIND_CTX}" && exit 1)
@@ -45,6 +42,10 @@ kind-bootstrap:
 		nfs-client \
 		nfs/nfs-subdir-external-provisioner
 
+kind-dev: ## Setup cluster for development mode (env var MY_IP required)
+	# Ensure MY_IP is set
+	@[ ! -z "${MY_IP}" ] || (echo "Set MY_IP variable to you host IP" && exit 1)
+
 	# Apply CRDs
 	@ls --color=none ../../helm/crds/* | xargs -I {} kubectl apply -f {}
 
@@ -59,13 +60,6 @@ kind-ingress:
 	# Create nginx-ingress
 	@kubectl apply -f nginx-ingress.yaml
 
-	# Wait for ingress
-	@sleep 30
-	@kubectl wait --namespace ingress-nginx \
-		--for=condition=ready pod \
-		--selector=app.kubernetes.io/component=controller \
-		--timeout=120s
-
 kind-up: kind-setup kind-bootstrap kind-ingress ## Spin up development cluster
 
 kind-down: ## Destroy development cluster
@@ -76,9 +70,12 @@ kind-down: ## Destroy development cluster
 	-@docker stop ${NFS_SERVER_NAME} > /dev/null
 	-@docker rm ${NFS_SERVER_NAME} > /dev/null
 
+	# Delete NFS volume
+	-@docker volume rm ${NFS_SERVER_VOLUME} > /dev/null
+
 drill: ## Run drill
 	@drill -s -b drill.yml
 
 help: ## Show help
 	@echo "Makefile help:"
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}'

@@ -1,7 +1,7 @@
 <img align="right" src="https://raw.githubusercontent.com/enonic/xp/master/misc/logo.png">
-<h1>Enonic Kubernetes Operator</h1>
+<h1>Enonic XP Kubernetes Operator</h1>
 
-The Enonic Kubernetes Operator is a piece of software runs on top of Kubernetes to help you manage your XP deployments.
+The Enonic XP Kubernetes Operator is a piece of software runs on top of Kubernetes to help you manage your XP deployments.
 
 - [Contents of this repository](#contents-of-this-repository)
 - [Usage](#usage)
@@ -10,10 +10,10 @@ The Enonic Kubernetes Operator is a piece of software runs on top of Kubernetes 
 
 This repository contains these. Navigate there for more detailed README.
 
-* [Enonic Kubernetes Operator](./java-operator)
-* [Enonic Kubernetes Operator Helm Chart](./helm)
-* [Enonic Kubernetes Operator Java Client](./java-client)
-* [Enonic Kubernetes Operator Documentation](./docs/operator.adoc)
+* [Enonic XP Kubernetes Operator](./java-operator)
+* [Enonic XP Kubernetes Operator Helm Chart](./helm)
+* [Enonic XP Kubernetes Operator Java Client](./java-client)
+* [Enonic XP Kubernetes Operator Documentation](./docs/operator.adoc)
 
 ## Usage
 

@@ -14,6 +14,13 @@
   <groupId>com.enonic.kubernetes</groupId>
   <artifactId>client</artifactId>
 
+  <distributionManagement>
+    <repository>
+      <id>enonic</id>
+      <url>https://artifactory.enonic.cloud:443/artifactory/public</url>
+    </repository>
+  </distributionManagement>
+
   <properties>
     <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
     <maven-antrun-plugin.version>3.0.0</maven-antrun-plugin.version>
