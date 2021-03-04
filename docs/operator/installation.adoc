@@ -54,7 +54,7 @@ Update Complete. ⎈Happy Helming!⎈
 
 === Create chart values file
 
-The chart `values.yaml` file is how you generally configure a deployment with Helm. You can read more about available values you can configure for the operator in the https://github.com/enonic/ec-operator/tree/master/helm[Helm chart readme]. Lets create a Helm values file to configure the operator:
+The chart `values.yaml` file is how you generally configure a deployment with Helm (to learn more about how Helm uses values files, visit the https://helm.sh/docs/chart_template_guide/values_files/#helm[Helm developer docs]). You can read more about available values you can configure for the operator in the https://github.com/enonic/ec-operator/tree/master/helm[Helm chart readme]. Lets create a Helm values file to configure the operator:
 
 NOTE: Here you might have to change the storage classes depending on your cluster setup.
 
