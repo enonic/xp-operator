@@ -48,11 +48,11 @@ spec:
   # List of disks shared by all nodes (see description of disks below)
   nodesSharedDisks:
     - name: blobstore
-      size: 100Mi
+      size: 1Gi
     - name: snapshots
-      size: 100Mi
+      size: 1Gi
     - name: export
-      size: 100Mi
+      size: 1Gi
 
   # List of nodegroups
   nodeGroups:
@@ -77,11 +77,11 @@ spec:
         # List of disks private to each and every node
         disks:
           - name: deploy
-            size: 100Mi
+            size: 1Gi
           - name: index
-            size: 100Mi
+            size: 1Gi
           - name: work
-            size: 100Mi
+            size: 1Gi
 ----
 
 ==== Disks
@@ -381,17 +381,17 @@ spec:
         # Volumes private to the node
         disks:
           - name: blobstore
-            size: 100Mi
+            size: 1Gi
           - name: snapshots
-            size: 100Mi
+            size: 1Gi
           - name: export  # Dumps and other data
-            size: 100Mi
+            size: 1Gi
           - name: deploy  # Apps installed in the deploy folder
-            size: 100Mi
+            size: 1Gi
           - name: index   # Node ES index
-            size: 100Mi
+            size: 1Gi
           - name: work    # Node cache
-            size: 100Mi
+            size: 1Gi
 ---
 # Install content studio
 apiVersion: enonic.cloud/v1alpha1
@@ -495,13 +495,13 @@ spec:
   # Create volumes shared by all nodes in this deployment
   nodesSharedDisks:
     - name: blobstore
-      size: 100Mi
+      size: 1Gi
 
     - name: snapshots
-      size: 100Mi
+      size: 1Gi
 
     - name: export # Dumps and other data
-      size: 100Mi
+      size: 1Gi
 
   # Create nodes
   nodeGroups:
@@ -519,9 +519,9 @@ spec:
         # Volumes private to the node
         disks:
           - name: deploy  # Apps installed in the deploy folder
-            size: 100Mi
+            size: 1Gi
           - name: index   # Node ES index
-            size: 100Mi
+            size: 1Gi
 
     # 2 data nodes
     - name: worker
@@ -537,9 +537,9 @@ spec:
         # Volumes private to the node
         disks:
           - name: deploy  # Apps installed in the deploy folder
-            size: 100Mi
+            size: 1Gi
           - name: index   # Node ES index
-            size: 100Mi
+            size: 1Gi
 ---
 # Install content studio
 apiVersion: enonic.cloud/v1alpha1
