@@ -2,24 +2,20 @@
 
 The Enonic XP Kubernetes Operator is a piece of software runs on top of Kubernetes to help you manage your XP deployments.
 
-- [Local development](#local-development)
-  - [Requirements](#requirements)
-  - [Setup](#setup)
-  - [Starting K8s cluster](#starting-k8s-cluster)
-  - [Starting operator](#starting-operator)
-  - [Verify it works](#verify-it-works)
+- [Requirements for local development](#requirements-for-local-development)
+- [Setup](#setup)
+- [Running and installing operator to cluster](#running-and-installing-operator-to-cluster)
+- [Running operator in IDE](#running-operator-in-ide)
   - [Spoof hosts for SSE events](#spoof-hosts-for-sse-events)
 
-## Local development
-
-### Requirements
+## Requirements for local development
 
 * [docker](https://docs.docker.com/get-docker/)
 * [kind](https://kind.sigs.k8s.io/)
 * [helm](https://helm.sh/docs/intro/install/)
 * [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 
-### Setup
+## Setup
 
 Kind does not support RWX storage classes by default, so we have to create one. We are using a helm chart for that so we need to add that repository:
 
@@ -28,16 +24,42 @@ $ helm repo add nfs https://kubernetes-sigs.github.io/nfs-subdir-external-provis
 $ helm repo update
 ```
 
-### Starting K8s cluster
+## Running and installing operator to cluster
 
-Navigate to [./kubernetes/kind](../kubernetes/kind) and run these commands:
+Simply run:
 
 ```console
-$ export MY_IP=192.?.?.?
-$ make kind-up kind-dev
+$ make test
+# Validating helm chart ...
+# Validating helm chart done!
+# Building java modules ...
+...
+# Cluster setup done!
 ```
 
-### Starting operator
+Then verify the operator is running:
+
+```console
+$ make verify 
+{
+  "gitCommit": "2a2abb974a0c8ae75a23d79ed02236df1b04cc15",
+  "gitTags": "",
+  "buildDate": "2021-03-04T15:32:53+0100",
+  "version": "0.16.0",
+  "gitTreeState": "dirty"
+}
+```
+
+## Running operator in IDE
+
+Start cluster in dev mode:
+
+```
+$ export MY_IP=192.?.?.?
+$ make dev
+```
+
+Start operator.
 
 Use your IDE to run the `com.enonic.kubernetes.operator.helpers.Main` class and set the VM options to to:
 
@@ -45,20 +67,17 @@ Use your IDE to run the `com.enonic.kubernetes.operator.helpers.Main` class and 
 -Doperator.charts.path=java-operator/src/main/helm -Doperator.charts.values.storage.shared.storageClassName=nfs -Dquarkus.http.ssl.certificate.file=kubernetes/kind/certs/tls.crt -Dquarkus.http.ssl.certificate.key-file=kubernetes/kind/certs/tls.key
 ```
 
-### Verify it works
-
-When its not up:
+Then verify it all works:
 
 ```console
-$ kubectl get --raw='/apis/operator.enonic.cloud/v1alpha1'
-Error from server (ServiceUnavailable): the server is currently unable to handle the request
-```
-
-When its up:
-
-```console
-$ kubectl get --raw='/apis/operator.enonic.cloud/v1alpha1'
-{"apiVersion":"v1","kind":"APIResourceList","groupVersion":"operator.enonic.cloud/v1alpha","resources":[{"kind":"AdmissionReview","name":"validations","verbs":["create"],"version":"v1beta1","namespaced":false,"group":"admission.k8s.io","singularName":""},{"kind":"AdmissionReview","name":"mutations","verbs":["create"],"version":"v1beta1","namespaced":false,"group":"admission.k8s.io","singularName":""}]}
+$ make verify 
+{
+  "gitCommit": "2a2abb974a0c8ae75a23d79ed02236df1b04cc15",
+  "gitTags": "",
+  "buildDate": "2021-03-04T15:32:53+0100",
+  "version": "0.16.0",
+  "gitTreeState": "dirty"
+}
 ```
 
 ### Spoof hosts for SSE events
