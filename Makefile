@@ -21,21 +21,28 @@ build-helm: ## Build helm chart
 build: build-docker build-helm ## Build everything
 
 validate: ## Build and validate everything
+	# Validate version
+	@[[ "$(shell ./.mvn/get-version)" =~ .*"SNAPSHOT" ]] && \
+		(echo "Version is a SNAPSHOT! Aborting ... " && exit 1)
+
 	# Validating helm chart ...
 	@[ "$(shell bash -c 'cat helm/Chart.yaml | yq -r .appVersion')" == "$(shell ./.mvn/get-version)" ] || \
-		(echo "Helm version mismatch: Chart.yaml appVersion" && exit 1)
+		(echo "Helm version mismatch: Chart.yaml appVersion! Aborting ..." && exit 1)
 	@[ "$(shell bash -c 'cat helm/values.yaml | yq -r .image.tag')" == "$(shell ./.mvn/get-version)" ] || \
-		(echo "Helm version mismatch: values.yaml image.tag" && exit 1)
+		(echo "Helm version mismatch: values.yaml image.tag! Aborting ..." && exit 1)
 	# Validating helm chart done!
 
 publish: build validate ## Publish everything (env var ARTIFACTORY_TOKEN required)
+	# Check if token is set ...
+	@test ${ARTIFACTORY_TOKEN} || (echo "Set env variable ARTIFACTORY_TOKEN"; exit 1;)
+
 	@echo "# Starting release for $(shell ./.mvn/get-version) ..."
 
 	# Publishing helm chart ...
 	@$(MAKE) -C helm --no-print-directory publish
 
 	# Publishing docker image ...
-	@echo docker push ${DOCKER_IMAGE}:$(shell ./.mvn/get-version)
+	@docker push ${DOCKER_IMAGE}:$(shell ./.mvn/get-version)
 
 	# Publishing java-client ...
 	@$(MAKE) -C java-client --no-print-directory publish
