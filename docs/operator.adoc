@@ -274,6 +274,19 @@ $ kubectl -n my-namespace get secret su -o go-template="{{ .data.pass | base64de
 NGDDlGdFYkX8i@#49#Z6N45tfhX6#3Rw
 ----
 
+[#access-admin]
+=== Access admin (bypassing ingress)
+
+[source,bash]
+----
+$ kubectl -n my-namespace port-forward main-0 8080
+
+Forwarding from 127.0.0.1:8080 -> 8080
+Forwarding from [::1]:8080 -> 8080
+----
+
+Then open up http://localhost:8080[localhost:8080] in your browser.
+
 === View XP logs
 
 [source,bash]
@@ -444,6 +457,8 @@ xp7config.enonic.cloud/my-config created
 ingress.networking.k8s.io/my-domain-com created
 ----
 
+You can now open up the admin by following the <<access-admin>> section or call the ingress controller, if you have one set up.
+
 == Cluster example
 
 WARNING: The values cpu and memory setting in this example are to low for a good cluster setup. They are set this way so you can try it out on a low resource Kubernetes cluster.
@@ -609,3 +624,5 @@ xp7config.enonic.cloud/my-config created
 ingress.networking.k8s.io/my-domain-com-site created
 ingress.networking.k8s.io/my-domain-com-admin created
 ----
+
+You can now open up the admin by following the <<access-admin>> section or call the ingress controller, if you have one set up.
