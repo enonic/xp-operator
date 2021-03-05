@@ -457,7 +457,7 @@ xp7config.enonic.cloud/my-config created
 ingress.networking.k8s.io/my-domain-com created
 ----
 
-You can now open up the admin by following the <<access-admin>> section or call the ingress controller, if you have one set up.
+Once the XP pods have started you can open up the admin by following the <<access-admin>> section or call the ingress controller, if you have one set up.
 
 == Cluster example
 
@@ -625,4 +625,4 @@ ingress.networking.k8s.io/my-domain-com-site created
 ingress.networking.k8s.io/my-domain-com-admin created
 ----
 
-You can now open up the admin by following the <<access-admin>> section or call the ingress controller, if you have one set up.
+Once the XP pods have started you can open up the admin by following the <<access-admin>> section or call the ingress controller, if you have one set up.

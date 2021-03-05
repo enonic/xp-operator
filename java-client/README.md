@@ -1,6 +1,6 @@
 <h1>Enonic XP Kubernetes Operator Client</h1>
 
-This is the Java client for the [Enonic XP Kubernetes Operator](../). This client includes the latest CRD model and bindings for the [fabric8io/kubernetes-client](https://github.com/fabric8io/kubernetes-client).
+This is the Java client for the [Enonic XP Kubernetes Operator](https://github.com/enonic/xp-operator). This client includes the latest CRD model and bindings for the [fabric8io/kubernetes-client](https://github.com/fabric8io/kubernetes-client).
 
 - [Installation](#installation)
   - [Maven](#maven)
@@ -129,7 +129,7 @@ k8sClient.configMaps().
 
 ### Custom resources
 
-> **_NOTE:_** See more details in the [tests](./src/test/java/com/enonic/cloud/kubernetes/model/CrudTest.java).
+> **_NOTE:_** See more details in the [tests](./src/test/java/com/enonic/kubernetes/client/CrudTest.java).
 
 ```java
 // Create

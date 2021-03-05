@@ -8,7 +8,7 @@ The Enonic XP Kubernetes Operator is a piece of software runs on top of Kubernet
 
 ## Contents of this repository
 
-This repository contains these. Navigate there for more detailed README.
+This repository contains these various parts relating to the operator:
 
 * [Enonic XP Kubernetes Operator](./java-operator)
 * [Enonic XP Kubernetes Operator Helm Chart](./helm)
