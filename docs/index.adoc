@@ -1,4 +1,4 @@
-= Enonic XP Kubernetes Operator
+= Kubernetes Operator for Enonic XP
 :toc: right
 :imagesdir: images
 
