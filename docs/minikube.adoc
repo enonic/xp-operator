@@ -2,7 +2,7 @@
 :toc: right
 :imagesdir: images
 
-This guide goes briefly over how to install and set up minikube for the operator for testing.
+This section briefly describes how to install and set up minikube for testing the operator.
 
 == Prerequisites
 

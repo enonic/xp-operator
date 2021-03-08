@@ -2,7 +2,7 @@
 :toc: right
 :imagesdir: images
 
-In this guide we show how you can setup a storage class that supports `ReadWriteMany` using NFS.
+In this section we show how you can setup a storage class that supports `ReadWriteMany` using NFS.
 
 == Prerequisites
 

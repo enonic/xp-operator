@@ -1,0 +1,20 @@
+{
+    "menuItems": [
+      {
+        "title": "Usage",
+        "document": "usage"
+      },
+      {
+        "title": "Installation",
+        "document": "installation"
+      },
+      {
+        "title": "Minikube",
+        "document": "minikube"
+      },
+      {
+        "title": "NFS storage",
+        "document" : "nfs"
+      }
+    ]
+}
