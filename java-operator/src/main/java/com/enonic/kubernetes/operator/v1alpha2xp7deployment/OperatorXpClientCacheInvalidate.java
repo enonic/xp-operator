@@ -1,11 +1,11 @@
 package com.enonic.kubernetes.operator.v1alpha2xp7deployment;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 import com.enonic.kubernetes.apis.xp.XpClientCache;
 import com.enonic.kubernetes.client.v1alpha2.Xp7Deployment;
 import com.enonic.kubernetes.operator.helpers.InformerEventHandler;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * This operator class invalidates XP client cache if Xp7Deployment is deleted
@@ -33,6 +33,6 @@ public class OperatorXpClientCacheInvalidate
     public void onDelete( final Xp7Deployment oldResource, final boolean b )
     {
         // Invalidate XP client cache for deleted deployments
-        xpClientCache.invalidateCache( oldResource.getMetadata().getNamespace() );
+        xpClientCache.closeClients( oldResource.getMetadata().getNamespace() );
     }
 }
