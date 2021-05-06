@@ -8,10 +8,16 @@ dev: ## Run k8s kind cluster setup for development
 	@$(MAKE) -C ../kubernetes/kind --no-print-directory kind-up kind-dev
 
 validate: ## Run k8s kind cluster setup is working
+	@$(MAKE) -C ../kubernetes/kind --no-print-directory kind-network-info
+	@echo "Operator info:"
 	@kubectl get --raw='/apis/operator.enonic.cloud/v1alpha1/internal/version' | jq
 
 clean: ## Clean up everything
-	@$(MAKE) -C .. --no-print-directory clean
+	# Clean helm chart
+	@$(MAKE) -C ../helm --no-print-directory clean
+
+	# Clean kind cluster
+	@$(MAKE) -C ../kubernetes/kind --no-print-directory kind-down
 
 help: ## Show help
 	@echo "Makefile help:"

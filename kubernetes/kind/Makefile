@@ -2,6 +2,7 @@
 K8S_VERSION:=v1.19.7
 #K8S_VERSION:=v1.18.15
 #K8S_VERSION:=v1.17.17
+KIND_MTU:=$(shell docker network inspect bridge -f '{{ index .Options "com.docker.network.driver.mtu" }}')
 KIND_CTX:=kind-kind
 NFS_SERVER_NAME:=kind-nfs-server
 NFS_SERVER_VOLUME:=kind-nfs-server
@@ -10,6 +11,9 @@ NFS_SERVER_VOLUME:=kind-nfs-server
 .DEFAULT_GOAL:=help
 
 kind-setup:
+	# Create kind network
+	@docker network create -o "com.docker.network.driver.mtu=${KIND_MTU}" kind
+
 	# Create kind cluster
 	@kind create cluster --image=kindest/node:${K8S_VERSION} --config=kind-config.yaml
 
@@ -70,6 +74,14 @@ kind-ingress:
 	# Create nginx-ingress
 	@kubectl apply -f nginx-ingress.yaml
 
+kind-network-info: ## Print out kind network info
+	@echo -n 'Bridge network MTU: '
+	@docker network inspect bridge -f '{{ index .Options "com.docker.network.driver.mtu" }}'
+	@echo -n 'Kind network MTU: '
+	@docker network inspect kind -f '{{ index .Options "com.docker.network.driver.mtu" }}'
+	@echo 'Kind control plane MTU:'
+	@docker exec -it kind-control-plane ip link show | grep -i '^[0-9]:'
+
 kind-up: kind-setup kind-bootstrap kind-ingress ## Spin up development cluster
 
 kind-down: ## Destroy development cluster
@@ -82,6 +94,9 @@ kind-down: ## Destroy development cluster
 
 	# Delete NFS volume
 	-@docker volume rm ${NFS_SERVER_VOLUME} > /dev/null
+
+	# Delete kind network
+	-@docker network rm kind
 
 drill: ## Run drill
 	@drill -s -b drill.yml
