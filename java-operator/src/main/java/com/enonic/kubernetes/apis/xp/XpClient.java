@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -61,6 +62,7 @@ public class XpClient
     private final CountDownLatch onOpenLatch;
 
     public XpClient( final XpClientParams p, final Runnable onClose )
+        throws IOException
     {
         this.onClose = onClose;
         this.appMap = new HashMap<>();
@@ -114,19 +116,29 @@ public class XpClient
             } );
 
         try {
-            onOpenLatch.await();
+            onOpenLatch.await( params.timeout(), TimeUnit.MILLISECONDS );
         } catch (InterruptedException e) {
-            throw new RuntimeException( String.format(
+            throw new IOException( String.format(
                 "XP: SSE event source timed out for '%s' in NS '%s': %s",
                 params.nodeGroup(),
                 params.namespace() ) );
+        }
+        if (!clientAlive) {
+            throw new IOException( "Could not create client" );
+        }
+    }
+
+    private void openLatch()
+    {
+        if (onOpenLatch.getCount() > 0) {
+            onOpenLatch.countDown();
         }
     }
 
     private void onSSEClosed( @NotNull EventSource eventSource )
     {
         log.debug( String.format(
-            "XP: SSE event source closed from '%s' in NS '%s': %s",
+            "XP: SSE event source closed from '%s' in NS '%s'",
             params.nodeGroup(),
             params.namespace() ) );
         closeClient( null );
@@ -148,9 +160,7 @@ public class XpClient
                     mapper.readValue( eventData, AppEventList.class ).
                         applications().
                         forEach( info -> handleAppInfo( type, info ) );
-                    if (onOpenLatch.getCount() > 0) {
-                        onOpenLatch.countDown();
-                    }
+                    openLatch();
                     break;
                 case INSTALLED:
                 case STATE:
@@ -220,7 +230,14 @@ public class XpClient
             log.debug( t.getMessage(), t );
         }
 
+        openLatch();
+
         if (clientAlive) {
+            log.info( String.format(
+                "XP: SSE event source closed to '%s' in NS '%s'",
+                params.nodeGroup(),
+                params.namespace() ) );
+            
             eventSources.cancel();
             sseClient.dispatcher().executorService().shutdown();
             restClient.dispatcher().executorService().shutdown();
@@ -230,9 +247,10 @@ public class XpClient
     }
 
     private synchronized void assertClient()
+        throws IOException
     {
         if (!clientAlive) {
-            throw new RuntimeException( String.format(
+            throw new IOException( String.format(
                 "XP: Client not open to '%s' in NS '%s'",
                 params.nodeGroup(),
                 params.namespace() ) );
@@ -240,6 +258,7 @@ public class XpClient
     }
 
     public synchronized void addEventListener( Consumer<AppEvent> eventListener )
+        throws IOException
     {
         onEventConsumers.add( eventListener );
         appList().forEach( a -> eventListener.accept( ImmutableAppEvent.
@@ -253,51 +272,50 @@ public class XpClient
     }
 
     public synchronized List<AppInfo> appList()
+        throws IOException
     {
         assertClient();
         return new ArrayList<>( appMap.values() );
     }
 
     public AppInstallResponse appInstall( AppInstallRequest req )
+        throws IOException
     {
         assertClient();
-        try {
-            Request request = requestBuilder.apply( "/app/installUrl" )
-                .post( RequestBody.create( MediaType.parse( "application/json" ), mapper.writeValueAsString( req ) ) )
-                .build();
-            Response response = restClient.newCall( request ).execute();
-            Preconditions.checkState( response.code() == 200, "Response code " + response.code() );
-            return mapper.readValue( response.body().bytes(), AppInstallResponse.class );
-        } catch (Exception e) {
-            throw new RuntimeException( e );
-        }
+        Request request = requestBuilder.apply( "/app/installUrl" )
+            .post( RequestBody.create( MediaType.parse( "application/json" ), mapper.writeValueAsString( req ) ) )
+            .build();
+        Response response = restClient.newCall( request ).execute();
+        Preconditions.checkState( response.code() == 200, "Response code " + response.code() );
+        return mapper.readValue( response.body().bytes(), AppInstallResponse.class );
     }
 
     private synchronized void appOp( String op, AppKey req )
+        throws IOException
     {
         assertClient();
-        try {
-            Request request = requestBuilder.apply( "/app/" + op )
-                .post( RequestBody.create( MediaType.parse( "application/json" ), mapper.writeValueAsString( req ) ) )
-                .build();
-            Response response = restClient.newCall( request ).execute();
-            Preconditions.checkState( response.code() == 204, "Response code " + response.code() );
-        } catch (Exception e) {
-            throw new RuntimeException( e );
-        }
+
+        Request request = requestBuilder.apply( "/app/" + op )
+            .post( RequestBody.create( MediaType.parse( "application/json" ), mapper.writeValueAsString( req ) ) )
+            .build();
+        Response response = restClient.newCall( request ).execute();
+        Preconditions.checkState( response.code() == 204, "Response code " + response.code() );
     }
 
     public void appUninstall( AppKey req )
+        throws IOException
     {
         appOp( "uninstall", req );
     }
 
     public void appStart( AppKey req )
+        throws IOException
     {
         appOp( "start", req );
     }
 
     public void appStop( AppKey req )
+        throws IOException
     {
         appOp( "stop", req );
     }

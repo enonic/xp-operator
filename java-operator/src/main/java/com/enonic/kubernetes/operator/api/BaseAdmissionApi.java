@@ -20,7 +20,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import static com.enonic.kubernetes.common.Configuration.cfgIfBool;
-import static com.enonic.kubernetes.kubernetes.Predicates.inSameNamespace;
+import static com.enonic.kubernetes.kubernetes.Predicates.inSameNamespaceAs;
 
 
 public abstract class BaseAdmissionApi<R>
@@ -130,7 +130,7 @@ public abstract class BaseAdmissionApi<R>
     protected Optional<Xp7Deployment> getXp7Deployment( KubernetesResource resource )
     {
         return searchers.xp7Deployment().stream().
-            filter( inSameNamespace( (HasMetadata) resource ) ).
+            filter( inSameNamespaceAs( (HasMetadata) resource ) ).
             findFirst();
     }
 

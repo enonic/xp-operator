@@ -31,7 +31,7 @@ import com.enonic.kubernetes.operator.helpers.HandlerConfig;
 
 import static com.enonic.kubernetes.common.Configuration.cfgStr;
 import static com.enonic.kubernetes.kubernetes.Predicates.inNamespace;
-import static com.enonic.kubernetes.kubernetes.Predicates.inSameNamespace;
+import static com.enonic.kubernetes.kubernetes.Predicates.inSameNamespaceAs;
 import static com.enonic.kubernetes.kubernetes.Predicates.isDeleted;
 import static com.enonic.kubernetes.kubernetes.Predicates.withName;
 
@@ -109,7 +109,7 @@ public class OperatorXp7ConfigSync
 
         // Collect all relevant ingresses
         List<Ingress> ingresses = searchers.ingress().stream().
-            filter( inSameNamespace( xp7Config ) ).
+            filter( inSameNamespaceAs( xp7Config ) ).
             filter( isDeleted().negate() ).
             filter( ingress -> hasMappingsWithNodeGroups( ingress, nodeGroups ) ).
             collect( Collectors.toList() );

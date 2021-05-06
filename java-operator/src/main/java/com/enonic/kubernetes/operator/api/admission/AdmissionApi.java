@@ -38,7 +38,7 @@ import static com.enonic.kubernetes.common.Configuration.cfgStr;
 import static com.enonic.kubernetes.common.Validator.dns1123;
 import static com.enonic.kubernetes.kubernetes.Predicates.fieldEquals;
 import static com.enonic.kubernetes.kubernetes.Predicates.inNodeGroupAllOr;
-import static com.enonic.kubernetes.kubernetes.Predicates.inSameNamespace;
+import static com.enonic.kubernetes.kubernetes.Predicates.inSameNamespaceAs;
 import static com.enonic.kubernetes.kubernetes.Predicates.isBeingBackupRestored;
 import static com.enonic.kubernetes.kubernetes.Predicates.matchAnnotationPrefix;
 import static com.enonic.kubernetes.kubernetes.Predicates.withName;
@@ -160,7 +160,7 @@ public class AdmissionApi
 
         // Check for file clash
         List<Xp7Config> presentConfigs = searchers.xp7Config().stream().
-            filter( inSameNamespace( newConfig ) ).
+            filter( inSameNamespaceAs( newConfig ) ).
             filter( withName( newConfig.getMetadata().getName() ).negate() ).
             filter( fieldEquals( newConfig, c -> c.getSpec().getFile() ) ).
             filter( inNodeGroupAllOr( newConfig.getSpec().getNodeGroup() ) ).

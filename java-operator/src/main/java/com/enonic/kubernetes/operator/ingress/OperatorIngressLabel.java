@@ -19,7 +19,7 @@ import com.enonic.kubernetes.kubernetes.commands.K8sLogHelper;
 import com.enonic.kubernetes.operator.helpers.InformerEventHandler;
 
 import static com.enonic.kubernetes.common.Configuration.cfgStr;
-import static com.enonic.kubernetes.kubernetes.Predicates.inSameNamespace;
+import static com.enonic.kubernetes.kubernetes.Predicates.inSameNamespaceAs;
 import static com.enonic.kubernetes.kubernetes.Predicates.isDeleted;
 import static com.enonic.kubernetes.kubernetes.Predicates.matchLabel;
 import static com.enonic.kubernetes.kubernetes.Predicates.onCondition;
@@ -72,7 +72,7 @@ public class OperatorIngressLabel
     private synchronized void handle( final Xp7Config xp7Config )
     {
         searchers.ingress().stream().
-            filter( inSameNamespace( xp7Config ) ).
+            filter( inSameNamespaceAs( xp7Config ) ).
             filter( isDeleted().negate() ).
             filter( matchLabel( cfgStr( "operator.charts.values.labelKeys.ingressVhostLoaded" ), "false" ) ).
             forEach( this::setStatus );
@@ -82,7 +82,7 @@ public class OperatorIngressLabel
     {
         // Collect all nodegroup vhost states
         Map<String, Xp7ConfigStatus.State> states = searchers.xp7Config().stream().
-            filter( inSameNamespace( ingress ) ).
+            filter( inSameNamespaceAs( ingress ) ).
             filter( isDeleted().negate() ).
             filter( this::isVHostConfig ).
             collect( Collectors.toMap( c -> c.getSpec().getNodeGroup(), c -> c.getStatus().getState() ) );

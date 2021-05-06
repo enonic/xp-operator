@@ -18,8 +18,10 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -51,6 +53,7 @@ public class XpClientCache
 
     @Override
     public XpClient load( final XpClientCacheKey key )
+        throws IOException
     {
         Secret secret = client.secrets().
             inNamespace( key.namespace() ).
@@ -65,7 +68,7 @@ public class XpClientCache
                 .nodeGroup( key.nodeGroup() )
                 .username( "su" )
                 .password( new String( baseEncoding.decode( secret.getData().get( "pass" ) ) ) )
-                .timeout( cfgLong("operator.deployment.xp.management.timeout") )
+                .timeout( cfgLong( "operator.deployment.xp.management.timeout" ) )
                 .build(),
             () -> clientCreatorCache.invalidate( key )
         );
@@ -81,35 +84,43 @@ public class XpClientCache
         log.info( String.format( "XP: %s %s in NS '%s'", action, key, namespace ) );
     }
 
-    private XpClient getClient( XpClientCacheKey key )
+    private synchronized XpClient getClient( XpClientCacheKey key )
+        throws IOException
     {
         try {
             return clientCreatorCache.get( key );
         } catch (ExecutionException e) {
-            throw new RuntimeException( e );
+            if (e.getCause() != null && e.getCause() instanceof IOException) {
+                throw (IOException) e.getCause();
+            } else {
+                throw new RuntimeException( e );
+            }
         }
     }
 
     public synchronized void appAddListener( final String namespace, final Consumer<AppEvent> eventConsumer )
+        throws IOException
     {
         getClient( XpClientCacheKeyImpl.of( namespace, defaultNodeGroup() ) ).addEventListener( eventConsumer );
     }
 
     @SuppressWarnings("WeakerAccess")
     public AppInfo appInstall( final String namespace, final String url, final String sha512 )
+        throws IOException
     {
         AppInstallResponse res = getClient( XpClientCacheKeyImpl.of( namespace, defaultNodeGroup() ) ).appInstall(
             ImmutableAppInstallRequest.builder().url( url ).sha512( sha512 ).build() );
         if (res.failure() == null) {
             log( namespace, "INSTALL app", res.applicationInstalledJson().application().key() );
         } else {
-            throw new RuntimeException( res.failure() );
+            throw new IOException( res.failure() );
         }
         return res.applicationInstalledJson().application();
     }
 
     @SuppressWarnings("WeakerAccess")
     public void appUninstall( final String namespace, final String key )
+        throws IOException
     {
         log( namespace, "UNINSTALL app", key );
         getClient( XpClientCacheKeyImpl.of( namespace, defaultNodeGroup() ) ).appUninstall(
@@ -117,6 +128,7 @@ public class XpClientCache
     }
 
     public void appStart( final String namespace, final String key )
+        throws IOException
     {
         log( namespace, "START app", key );
         getClient( XpClientCacheKeyImpl.of( namespace, defaultNodeGroup() ) ).appStart(
@@ -124,6 +136,7 @@ public class XpClientCache
     }
 
     public void appStop( final String namespace, final String key )
+        throws IOException
     {
         log( namespace, "STOP app", key );
         getClient( XpClientCacheKeyImpl.of( namespace, defaultNodeGroup() ) ).appStop(
@@ -131,8 +144,15 @@ public class XpClientCache
     }
 
     public List<AppInfo> appList( final String namespace )
+        throws IOException
     {
         return getClient( XpClientCacheKeyImpl.of( namespace, defaultNodeGroup() ) ).appList();
+    }
+
+    public Optional<AppInfo> appInfo( final String namespace, final String key )
+        throws IOException
+    {
+        return appList( namespace ).stream().filter( appInfo -> appInfo.key().equals( key ) ).findFirst();
     }
 
     public void closeClients( final String namespace )

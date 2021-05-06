@@ -1,5 +1,15 @@
 package com.enonic.kubernetes.operator.v1alpha2xp7config;
 
+import com.enonic.kubernetes.client.v1alpha2.Xp7Config;
+import com.enonic.kubernetes.kubernetes.Clients;
+import com.enonic.kubernetes.kubernetes.Searchers;
+import com.enonic.kubernetes.kubernetes.commands.K8sLogHelper;
+import com.enonic.kubernetes.operator.helpers.HandlerConfig;
+import com.google.common.hash.Hashing;
+import io.fabric8.kubernetes.api.model.ConfigMap;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -8,27 +18,14 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import com.google.common.hash.Hashing;
-
-import io.fabric8.kubernetes.api.model.ConfigMap;
-
-import com.enonic.kubernetes.kubernetes.Clients;
-import com.enonic.kubernetes.kubernetes.Searchers;
-import com.enonic.kubernetes.client.v1alpha2.Xp7Config;
-import com.enonic.kubernetes.kubernetes.commands.K8sLogHelper;
-import com.enonic.kubernetes.operator.helpers.HandlerConfig;
-
 import static com.enonic.kubernetes.common.Configuration.cfgStr;
+import static com.enonic.kubernetes.kubernetes.Predicates.contains;
 import static com.enonic.kubernetes.kubernetes.Predicates.hasLabel;
 import static com.enonic.kubernetes.kubernetes.Predicates.inNamespace;
 import static com.enonic.kubernetes.kubernetes.Predicates.inNodeGroupAllOr;
-import static com.enonic.kubernetes.kubernetes.Predicates.inSameNamespace;
+import static com.enonic.kubernetes.kubernetes.Predicates.inSameNamespaceAs;
 import static com.enonic.kubernetes.kubernetes.Predicates.isBeingBackupRestored;
 import static com.enonic.kubernetes.kubernetes.Predicates.isDeleted;
-import static com.enonic.kubernetes.kubernetes.Predicates.matchNamespace;
 
 /**
  * This operator class collects all Xp7Configs and merges them into the nodegroup ConfigMaps
@@ -64,9 +61,8 @@ public class OperatorConfigMapSync
     private synchronized void handle( final ConfigMap configMap )
     {
         // Namespace is being deleted
-        if ( searchers.namespace().stream().
-            anyMatch( matchNamespace( configMap ).and( isDeleted() ) ) )
-        {
+        if (searchers.namespace().stream().
+            anyMatch( contains( configMap ).and( isDeleted() ) )) {
             return;
         }
 
@@ -77,7 +73,7 @@ public class OperatorConfigMapSync
 
         // Collect all data from Xp7Config that has nodeGroup 'all' or '<nodeGroup>'
         List<Xp7Config> configs = searchers.xp7Config().stream().
-            filter( inSameNamespace( configMap ) ).
+            filter( inSameNamespaceAs( configMap ) ).
             filter( inNodeGroupAllOr( nodeGroup ) ).
             collect( Collectors.toList() );
 
@@ -87,14 +83,10 @@ public class OperatorConfigMapSync
 
         // Populate data
         StringBuilder index = new StringBuilder();
-        for ( Xp7Config c : configs )
-        {
-            if ( Objects.equals( c.getSpec().getDataBase64(), true ) )
-            {
+        for (Xp7Config c : configs) {
+            if (Objects.equals( c.getSpec().getDataBase64(), true )) {
                 binaryData.put( c.getSpec().getFile(), c.getSpec().getData() );
-            }
-            else
-            {
+            } else {
                 data.put( c.getSpec().getFile(), c.getSpec().getData() );
             }
             index.
@@ -110,8 +102,7 @@ public class OperatorConfigMapSync
         Map<String, String> oldBinaryData = configMap.getBinaryData() != null ? configMap.getBinaryData() : Collections.emptyMap();
 
         // If data is not the same, do the update
-        if ( !Objects.equals( oldData, data ) || !Objects.equals( oldBinaryData, binaryData ) )
-        {
+        if (!Objects.equals( oldData, data ) || !Objects.equals( oldBinaryData, binaryData )) {
             K8sLogHelper.logEdit( clients.k8s().
                 configMaps().
                 inNamespace( configMap.getMetadata().getNamespace() ).
