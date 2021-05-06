@@ -2,13 +2,13 @@ package com.enonic.kubernetes.operator.api;
 
 import java.util.List;
 
+import io.fabric8.kubernetes.api.model.admission.v1.AdmissionReview;
 import org.immutables.value.Value;
 import org.wildfly.common.annotation.Nullable;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import io.fabric8.kubernetes.api.model.KubernetesResource;
-import io.fabric8.kubernetes.api.model.admission.AdmissionReview;
 
 import com.enonic.kubernetes.common.annotations.Params;
 import com.enonic.kubernetes.operator.api.mutation.Patch;

@@ -1,9 +1,10 @@
 package com.enonic.kubernetes.operator.api.mutation;
 
+import io.fabric8.kubernetes.api.model.admission.v1.AdmissionReview;
+
 import java.util.LinkedList;
 import java.util.List;
 
-import io.fabric8.kubernetes.api.model.admission.AdmissionReview;
 
 public class MutationRequest
 {

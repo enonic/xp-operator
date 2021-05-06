@@ -1,29 +1,22 @@
 package com.enonic.kubernetes.kubernetes;
 
-import javax.inject.Singleton;
-import javax.ws.rs.Produces;
-
-import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.api.model.ConfigMapList;
-import io.fabric8.kubernetes.api.model.Event;
-import io.fabric8.kubernetes.api.model.EventList;
-import io.fabric8.kubernetes.api.model.Namespace;
-import io.fabric8.kubernetes.api.model.NamespaceList;
-import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.api.model.PodList;
-import io.fabric8.kubernetes.api.model.networking.v1beta1.Ingress;
-import io.fabric8.kubernetes.api.model.networking.v1beta1.IngressList;
-import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
-import io.fabric8.kubernetes.client.informers.SharedInformerFactory;
-
 import com.enonic.kubernetes.client.v1alpha1.Xp7App;
 import com.enonic.kubernetes.client.v1alpha2.Domain;
 import com.enonic.kubernetes.client.v1alpha2.Xp7Config;
 import com.enonic.kubernetes.client.v1alpha2.Xp7Deployment;
+import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.Event;
+import io.fabric8.kubernetes.api.model.Namespace;
+import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.networking.v1beta1.Ingress;
+import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
+import io.fabric8.kubernetes.client.informers.SharedInformerFactory;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Singleton;
+import javax.ws.rs.Produces;
 
 
 public class InformersProducer
@@ -58,48 +51,48 @@ public class InformersProducer
 
     private SharedIndexInformer<ConfigMap> configInformer( final SharedInformerFactory sf )
     {
-        return sf.sharedIndexInformerFor( ConfigMap.class, ConfigMapList.class, informerReSync );
+        return sf.sharedIndexInformerFor( ConfigMap.class, informerReSync );
     }
 
     private SharedIndexInformer<Ingress> ingressInformer( final SharedInformerFactory sf )
     {
-        return sf.sharedIndexInformerFor( Ingress.class, IngressList.class, informerReSync );
+        return sf.sharedIndexInformerFor( Ingress.class, informerReSync );
     }
 
     private SharedIndexInformer<Namespace> namespaceInformer( final SharedInformerFactory sf )
     {
-        return sf.sharedIndexInformerFor( Namespace.class, NamespaceList.class, informerReSync );
+        return sf.sharedIndexInformerFor( Namespace.class, informerReSync );
     }
 
     private SharedIndexInformer<Pod> podInformer( final SharedInformerFactory sf )
     {
-        return sf.sharedIndexInformerFor( Pod.class, PodList.class, informerReSync );
+        return sf.sharedIndexInformerFor( Pod.class, informerReSync );
     }
 
     private SharedIndexInformer<Event> eventInformer( final SharedInformerFactory sf )
     {
-        return sf.sharedIndexInformerFor( Event.class, EventList.class, informerReSync );
+        return sf.sharedIndexInformerFor( Event.class, informerReSync );
     }
 
     private SharedIndexInformer<Xp7App> xp7AppInformer( final SharedInformerFactory sf )
     {
-        return sf.sharedIndexInformerForCustomResource( Xp7App.createCrdContext(), Xp7App.class, Xp7App.Xp7AppList.class, informerReSync );
+        return sf.sharedIndexInformerForCustomResource( Xp7App.class, Xp7App.Xp7AppList.class, informerReSync );
     }
 
     private SharedIndexInformer<Xp7Config> xp7ConfigInformer( final SharedInformerFactory sf )
     {
-        return sf.sharedIndexInformerForCustomResource( Xp7Config.createCrdContext(), Xp7Config.class, Xp7Config.Xp7ConfigList.class,
-                                                        informerReSync );
+        return sf.sharedIndexInformerForCustomResource( Xp7Config.class, Xp7Config.Xp7ConfigList.class,
+            informerReSync );
     }
 
     private SharedIndexInformer<Xp7Deployment> xp7DeploymentInformer( final SharedInformerFactory sf )
     {
-        return sf.sharedIndexInformerForCustomResource( Xp7Deployment.createCrdContext(), Xp7Deployment.class,
-                                                        Xp7Deployment.Xp7DeploymentList.class, informerReSync );
+        return sf.sharedIndexInformerForCustomResource( Xp7Deployment.class,
+            Xp7Deployment.Xp7DeploymentList.class, informerReSync );
     }
 
     private SharedIndexInformer<Domain> domainInformer( final SharedInformerFactory sf )
     {
-        return sf.sharedIndexInformerForCustomResource( Domain.createCrdContext(), Domain.class, Domain.DomainList.class, informerReSync );
+        return sf.sharedIndexInformerForCustomResource( Domain.class, Domain.DomainList.class, informerReSync );
     }
 }

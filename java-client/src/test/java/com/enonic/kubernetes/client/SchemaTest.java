@@ -1,23 +1,22 @@
 package com.enonic.kubernetes.client;
 
 
-import java.io.IOException;
-import java.util.Map;
-
-import org.junit.Rule;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.fabric8.kubernetes.api.model.apiextensions.v1beta1.CustomResourceDefinition;
 import io.fabric8.kubernetes.api.model.apiextensions.v1beta1.CustomResourceDefinitionVersion;
 import io.fabric8.kubernetes.api.model.apiextensions.v1beta1.JSONSchemaProps;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.server.mock.KubernetesServer;
+import org.junit.Rule;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
 
-import static org.junit.Assert.*;
+import java.io.IOException;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 @EnableRuleMigrationSupport
 public class SchemaTest
@@ -70,8 +69,12 @@ public class SchemaTest
     private CustomResourceDefinition loadCRD( final String file )
     {
         KubernetesClient client = server.getClient();
-        CustomResourceDefinition customResourceDefinition =
-            client.apiextensions().v1beta1().customResourceDefinitions().load( getClass().getResourceAsStream( file ) ).get();
+        CustomResourceDefinition customResourceDefinition = client
+            .apiextensions()
+            .v1beta1()
+            .customResourceDefinitions()
+            .load( getClass().getResourceAsStream( file ) )
+            .get();
         assertNotNull( customResourceDefinition );
         return customResourceDefinition;
     }
@@ -79,10 +82,8 @@ public class SchemaTest
     @SuppressWarnings("SameParameterValue")
     private JSONSchemaProps getSchemaVersion( final CustomResourceDefinition crd, final String version )
     {
-        for ( CustomResourceDefinitionVersion v : crd.getSpec().getVersions() )
-        {
-            if ( v.getName().equals( version ) )
-            {
+        for (CustomResourceDefinitionVersion v : crd.getSpec().getVersions()) {
+            if (v.getName().equals( version )) {
                 return v.getSchema().getOpenAPIV3Schema();
             }
         }
@@ -103,10 +104,8 @@ public class SchemaTest
     {
         map.remove( "extends" );
         map.remove( "javaName" );
-        for ( Object o : map.values() )
-        {
-            if ( o instanceof Map )
-            {
+        for (Object o : map.values()) {
+            if (o instanceof Map) {
                 cleanMap( (Map<String, Object>) o );
             }
         }
@@ -116,6 +115,6 @@ public class SchemaTest
         throws JsonProcessingException
     {
         assertEquals( mapper.writerWithDefaultPrettyPrinter().writeValueAsString( s1 ),
-                      mapper.writerWithDefaultPrettyPrinter().writeValueAsString( s2 ) );
+            mapper.writerWithDefaultPrettyPrinter().writeValueAsString( s2 ) );
     }
 }

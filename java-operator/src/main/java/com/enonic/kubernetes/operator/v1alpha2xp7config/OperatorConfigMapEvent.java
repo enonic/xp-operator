@@ -1,18 +1,16 @@
 package com.enonic.kubernetes.operator.v1alpha2xp7config;
 
-import java.time.Instant;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.api.model.Event;
-import io.fabric8.kubernetes.api.model.EventBuilder;
-
 import com.enonic.kubernetes.kubernetes.Clients;
 import com.enonic.kubernetes.kubernetes.commands.ImmutableK8sCommand;
 import com.enonic.kubernetes.kubernetes.commands.K8sCommandAction;
 import com.enonic.kubernetes.operator.helpers.InformerEventHandler;
+import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.events.v1beta1.Event;
+import io.fabric8.kubernetes.api.model.events.v1beta1.EventBuilder;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.time.Instant;
 
 import static com.enonic.kubernetes.kubernetes.Predicates.dataEquals;
 import static com.enonic.kubernetes.kubernetes.Predicates.isEnonicManaged;
@@ -50,27 +48,24 @@ public class OperatorConfigMapEvent
     private void handle( final ConfigMap newCm )
     {
         // Build new Event
-        Event event = new EventBuilder().editOrNewMetadata().
-            withNamespace( newCm.getMetadata().getNamespace() ).
-            withName( newCm.getMetadata().getName() + "." + getRandomScramble( "0123456789abcdefghijklmnopqrstuvwxyz", 16 ) ).
-            endMetadata().
-            withMessage( "ConfigMap " + newCm.getMetadata().getName() + " updated " ).
-            withReason( "ConfigModified" ).
-            editOrNewInvolvedObject().
-            withApiVersion( newCm.getApiVersion() ).
-            withKind( newCm.getKind() ).
-            withName( newCm.getMetadata().getName() ).
-            withNamespace( newCm.getMetadata().getNamespace() ).
-            endInvolvedObject().
-            withLastTimestamp( Instant.now().toString() ).
-            withType( "Normal" ).
-            build();
+        Event event = new EventBuilder()
+            .editOrNewMetadata()
+            .withNamespace( newCm.getMetadata().getNamespace() )
+            .withName( newCm.getMetadata().getName() + "." + getRandomScramble( "0123456789abcdefghijklmnopqrstuvwxyz", 16 ) ).endMetadata()
+            //            withMessage( "ConfigMap " + newCm.getMetadata().getName() + " updated " )
+            .withReason( "ConfigModified" )
+            .editOrNewRegarding()
+            .withApiVersion( newCm.getApiVersion() )
+            .withKind( newCm.getKind() )
+            .withName( newCm.getMetadata().getName() )
+            .withNamespace( newCm.getMetadata().getNamespace() ).endRegarding().withDeprecatedLastTimestamp( Instant.now().toString() ).withType(
+                "Normal" ).build();
 
         // Send event
         ImmutableK8sCommand.builder().
             action( K8sCommandAction.CREATE ).
             resource( event ).
-            wrappedRunnable( () -> clients.k8s().events().create( event ) ).
+            wrappedRunnable( () -> clients.k8s().events().v1beta1().events().create( event ) ).
             build().
             run();
     }

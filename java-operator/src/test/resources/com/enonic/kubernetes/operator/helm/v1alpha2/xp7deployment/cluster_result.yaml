@@ -1419,7 +1419,6 @@ spec:
   data: "xp.name = mycloud-mysolution-myenv-myservice\nxp.suPassword = {sha512}${env.SU_PASS_HASH}\n\
     xp.init.adminUserCreation = false"
   dataBase64: false
-status: null
 ---
 apiVersion: "enonic.cloud/v1alpha2"
 kind: "Xp7Config"
@@ -1446,7 +1445,6 @@ spec:
   file: "com.enonic.xp.app.main.cfg"
   data: "tourDisabled = true"
   dataBase64: false
-status: null
 ---
 apiVersion: "enonic.cloud/v1alpha2"
 kind: "Xp7Config"
@@ -1472,7 +1470,6 @@ spec:
   file: "com.enonic.xp.web.sessionstore.cfg"
   data: "storeMode=replicated"
   dataBase64: false
-status: null
 ---
 apiVersion: "enonic.cloud/v1alpha2"
 kind: "Xp7Config"
@@ -1498,7 +1495,6 @@ spec:
   file: "com.enonic.app.status.cfg"
   data: "metricsUrl = http://localhost:2609/"
   dataBase64: false
-status: null
 ---
 apiVersion: "enonic.cloud/v1alpha2"
 kind: "Xp7Config"
@@ -1525,7 +1521,6 @@ spec:
   data: "network.host=0.0.0.0\nnetwork.publish.host=${env.XP_NODE_IP}\nnode.name=${env.XP_NODE_NAME}\n\
     cluster.enabled=true"
   dataBase64: false
-status: null
 ---
 apiVersion: "enonic.cloud/v1alpha2"
 kind: "Xp7Config"
@@ -1567,7 +1562,6 @@ spec:
     \ level=\"WARN\" additivity=\"false\">\n    <appender-ref ref=\"STDOUT\"/>\n \
     \   <appender-ref ref=\"FILE\"/>\n  </logger>\n\n</configuration>"
   dataBase64: false
-status: null
 ---
 apiVersion: "enonic.cloud/v1alpha2"
 kind: "Xp7Config"
@@ -1594,7 +1588,6 @@ spec:
   data: "clusterConfigDefaults=false\nsystem.hazelcast.initial.min.cluster.size=${env.XP_HZ_MIN_SIZE}\n\
     network.join.tcpIp.enabled=false\nnetwork.join.kubernetes.enabled=true\nnetwork.join.kubernetes.serviceDns=cluster-discovery.mycloud-mysolution-myenv-myservice.svc.cluster.local"
   dataBase64: false
-status: null
 ---
 apiVersion: "enonic.cloud/v1alpha2"
 kind: "Xp7Config"
@@ -1621,7 +1614,6 @@ spec:
   file: "com.enonic.xp.web.vhost.cfg"
   data: "enabled = true"
   dataBase64: false
-status: null
 ---
 apiVersion: "enonic.cloud/v1alpha2"
 kind: "Xp7Config"
@@ -1651,7 +1643,6 @@ spec:
     discovery.zen.minimum_master_nodes=${env.XP_ES_MIN_MASTERS}\ndiscovery.unicast.sockets=cluster-discovery.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
     network.tcp.keep_alive=true\nindex.auto_expand_replicas=1-all"
   dataBase64: false
-status: null
 ---
 apiVersion: "enonic.cloud/v1alpha2"
 kind: "Xp7Config"
@@ -1678,7 +1669,6 @@ spec:
   file: "com.enonic.xp.web.vhost.cfg"
   data: "enabled = true"
   dataBase64: false
-status: null
 ---
 apiVersion: "enonic.cloud/v1alpha2"
 kind: "Xp7Config"
@@ -1708,7 +1698,6 @@ spec:
     discovery.zen.minimum_master_nodes=${env.XP_ES_MIN_MASTERS}\ndiscovery.unicast.sockets=cluster-discovery.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
     network.tcp.keep_alive=true\nindex.auto_expand_replicas=1-all"
   dataBase64: false
-status: null
 ---
 apiVersion: "enonic.cloud/v1alpha2"
 kind: "Xp7Config"
@@ -1735,7 +1724,6 @@ spec:
   file: "com.enonic.xp.web.vhost.cfg"
   data: "enabled = true"
   dataBase64: false
-status: null
 ---
 apiVersion: "enonic.cloud/v1alpha2"
 kind: "Xp7Config"
@@ -1765,4 +1753,3 @@ spec:
     discovery.zen.minimum_master_nodes=${env.XP_ES_MIN_MASTERS}\ndiscovery.unicast.sockets=cluster-discovery.mycloud-mysolution-myenv-myservice.svc.cluster.local\n\
     network.tcp.keep_alive=true\nindex.auto_expand_replicas=1-all"
   dataBase64: false
-status: null

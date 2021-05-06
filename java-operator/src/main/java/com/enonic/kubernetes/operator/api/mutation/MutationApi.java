@@ -1,30 +1,5 @@
 package com.enonic.kubernetes.operator.api.mutation;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.common.io.BaseEncoding;
-
-import io.fabric8.kubernetes.api.model.HasMetadata;
-import io.fabric8.kubernetes.api.model.admission.AdmissionResponseBuilder;
-import io.fabric8.kubernetes.api.model.admission.AdmissionReview;
-import io.fabric8.kubernetes.api.model.networking.v1beta1.Ingress;
-
 import com.enonic.kubernetes.client.v1alpha1.Xp7App;
 import com.enonic.kubernetes.client.v1alpha1.xp7app.Xp7AppStatus;
 import com.enonic.kubernetes.client.v1alpha1.xp7app.Xp7AppStatusFields;
@@ -40,6 +15,28 @@ import com.enonic.kubernetes.client.v1alpha2.xp7deployment.Xp7DeploymentStatusFi
 import com.enonic.kubernetes.operator.api.AdmissionOperation;
 import com.enonic.kubernetes.operator.api.BaseAdmissionApi;
 import com.enonic.kubernetes.operator.domain.LbServiceIpProducer;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.io.BaseEncoding;
+import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.admission.v1.AdmissionResponseBuilder;
+import io.fabric8.kubernetes.api.model.admission.v1.AdmissionReview;
+import io.fabric8.kubernetes.api.model.networking.v1beta1.Ingress;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 
 import static com.enonic.kubernetes.common.Configuration.cfgBool;
 import static com.enonic.kubernetes.common.Configuration.cfgStr;
@@ -93,8 +90,7 @@ public class MutationApi
     protected void postRequestHook( final MutationRequest mutationRequest, final AdmissionResponseBuilder builder )
         throws JsonProcessingException
     {
-        if ( mutationRequest.hasPatches() )
-        {
+        if (mutationRequest.hasPatches()) {
             builder.
                 withPatch( BaseEncoding.base64().encode( mapper.writeValueAsString( mutationRequest.getPatches() ).getBytes() ) ).
                 withPatchType( "JSONPatch" );
@@ -117,19 +113,15 @@ public class MutationApi
         AdmissionOperation op = getOperation( mt.getAdmissionReview() );
 
         // Ensure status
-        switch ( op )
-        {
+        switch (op) {
             case CREATE: // Always set the default status on new objects
                 patch( mt, true, "/status", newR.getStatus(), defStatus );
                 break;
             case UPDATE:
-                if ( newR.getSpec() != null && !newR.getSpec().getUrl().equals( oldR.getSpec().getUrl() ) )
-                {
+                if (newR.getSpec() != null && !newR.getSpec().getUrl().equals( oldR.getSpec().getUrl() )) {
                     // On url change, set default status
                     patch( mt, true, "/status", newR.getStatus(), defStatus );
-                }
-                else
-                {
+                } else {
                     // Else make sure the old status is not removed
                     patch( mt, false, "/status", newR.getStatus(), oldR.getStatus() );
                 }
@@ -145,14 +137,12 @@ public class MutationApi
         // Ensure enabled
         patch( mt, false, "/spec/enabled", newR.getSpec().getEnabled(), true );
 
-        if ( op == AdmissionOperation.CREATE )
-        {
+        if (op == AdmissionOperation.CREATE) {
             // Ensure finalizers
-            List<String> oldFinalizers = ( (HasMetadata) mt.getAdmissionReview().getRequest().getObject() ).getMetadata().getFinalizers();
+            List<String> oldFinalizers = ((HasMetadata) mt.getAdmissionReview().getRequest().getObject()).getMetadata().getFinalizers();
             Set<String> newFinalizers = oldFinalizers != null ? new HashSet<>( oldFinalizers ) : new HashSet<>();
             String uninstallFinalizer = cfgStr( "operator.charts.values.finalizers.app.uninstall" );
-            if ( !newFinalizers.contains( uninstallFinalizer ) )
-            {
+            if (!newFinalizers.contains( uninstallFinalizer )) {
                 newFinalizers.add( uninstallFinalizer );
                 patch( mt, true, "/metadata/finalizers", null, newFinalizers );
             }
@@ -177,19 +167,15 @@ public class MutationApi
         AdmissionOperation op = getOperation( mt.getAdmissionReview() );
 
         // Ensure status
-        switch ( op )
-        {
+        switch (op) {
             case CREATE: // Always set the default status on new objects
                 patch( mt, true, "/status", newR.getStatus(), defStatus );
                 break;
             case UPDATE:
-                if ( newR.getSpec() != null && !newR.getSpec().equals( oldR.getSpec() ) )
-                {
+                if (newR.getSpec() != null && !newR.getSpec().equals( oldR.getSpec() )) {
                     // On any change change, set default status
                     patch( mt, true, "/status", newR.getStatus(), defStatus );
-                }
-                else
-                {
+                } else {
                     // Else make sure the old status is not removed
                     patch( mt, false, "/status", newR.getStatus(), oldR.getStatus() );
                 }
@@ -200,14 +186,12 @@ public class MutationApi
         }
 
         // Ensure defaults
-        if ( newR.getSpec() != null )
-        {
+        if (newR.getSpec() != null) {
             patch( mt, false, "/spec/dataBase64", newR.getSpec().getDataBase64(), false );
             patch( mt, false, "/spec/nodeGroup", newR.getSpec().getNodeGroup(), cfgStr( "operator.charts.values.allNodesKey" ) );
         }
 
-        if ( op == AdmissionOperation.CREATE )
-        {
+        if (op == AdmissionOperation.CREATE) {
             // Ensure owner reference
             ensureOwnerReference( mt );
         }
@@ -230,19 +214,15 @@ public class MutationApi
         AdmissionOperation op = getOperation( mt.getAdmissionReview() );
 
         // Ensure status
-        switch ( op )
-        {
+        switch (op) {
             case CREATE: // Always set the default status on new objects
                 patch( mt, true, "/status", newR.getStatus(), defStatus );
                 break;
             case UPDATE:
-                if ( newR.getSpec() != null && !newR.getSpec().equals( oldR.getSpec() ) )
-                {
+                if (newR.getSpec() != null && !newR.getSpec().equals( oldR.getSpec() )) {
                     // On any change change, set default status
                     patch( mt, true, "/status", newR.getStatus(), defStatus );
-                }
-                else
-                {
+                } else {
                     // Else make sure the old status is not removed
                     patch( mt, false, "/status", newR.getStatus(), oldR.getStatus() );
                 }
@@ -253,8 +233,7 @@ public class MutationApi
         }
 
         List<Xp7DeploymentSpecNodesPreinstalledApps> preInstall = newR.getSpec().getNodesPreinstalledApps();
-        if ( preInstall == null || preInstall.isEmpty() )
-        {
+        if (preInstall == null || preInstall.isEmpty()) {
             patch( mt, true, "/spec/nodesPreinstalledApps", newR.getSpec().getNodesPreinstalledApps(), preInstalledApps );
         }
     }
@@ -275,19 +254,15 @@ public class MutationApi
         AdmissionOperation op = getOperation( mt.getAdmissionReview() );
 
         // Ensure status
-        switch ( op )
-        {
+        switch (op) {
             case CREATE: // Always set the default status on new objects
                 patch( mt, true, "/status", newR.getStatus(), defStatus );
                 break;
             case UPDATE:
-                if ( newR.getSpec() != null && !newR.getSpec().equals( oldR.getSpec() ) )
-                {
+                if (newR.getSpec() != null && !newR.getSpec().equals( oldR.getSpec() )) {
                     // On any change change, set default status
                     patch( mt, true, "/status", newR.getStatus(), defStatus );
-                }
-                else
-                {
+                } else {
                     // Else make sure the old status is not removed
                     patch( mt, false, "/status", newR.getStatus(), oldR.getStatus() );
                 }
@@ -297,8 +272,7 @@ public class MutationApi
                 break;
         }
 
-        if ( newR.getSpec() != null )
-        {
+        if (newR.getSpec() != null) {
             // Set default TTL
             patch( mt, false, "/spec/dnsTTL", newR.getSpec().getDnsTTL(), 3600 );
         }
@@ -310,8 +284,7 @@ public class MutationApi
         Ingress oldR = (Ingress) mt.getAdmissionReview().getRequest().getOldObject();
         Ingress newR = (Ingress) mt.getAdmissionReview().getRequest().getObject();
 
-        if ( newR == null )
-        {
+        if (newR == null) {
             return;
         }
 
@@ -320,8 +293,7 @@ public class MutationApi
 
         setDefaultValueInMap( na, "kubernetes.io/ingress.class", "nginx" );
 
-        if ( "nginx".equals( na.get( "kubernetes.io/ingress.class" ) ) && cfgBool( "operator.charts.values.settings.linkerd" ) )
-        {
+        if ("nginx".equals( na.get( "kubernetes.io/ingress.class" ) ) && cfgBool( "operator.charts.values.settings.linkerd" )) {
             // If linkerd is enabled
             String cfgSnippet = na.get( "nginx.ingress.kubernetes.io/configuration-snippet" );
             StringBuilder sb = new StringBuilder( cfgSnippet != null ? cfgSnippet : "" ).
@@ -336,8 +308,7 @@ public class MutationApi
 
     private void setDefaultValueInMap( Map<String, String> m, String key, String def )
     {
-        if ( !m.containsKey( key ) )
-        {
+        if (!m.containsKey( key )) {
             m.put( key, def );
         }
     }
@@ -346,14 +317,12 @@ public class MutationApi
     {
         HasMetadata obj = (HasMetadata) mt.getAdmissionReview().getRequest().getObject();
 
-        if ( obj.getMetadata().getOwnerReferences() != null && !obj.getMetadata().getOwnerReferences().isEmpty() )
-        {
+        if (obj.getMetadata().getOwnerReferences() != null && !obj.getMetadata().getOwnerReferences().isEmpty()) {
             return;
         }
 
         Optional<Xp7Deployment> xp7Deployments = getXp7Deployment( obj );
-        if ( xp7Deployments.isEmpty() )
-        {
+        if (xp7Deployments.isEmpty()) {
             return;
         }
 
@@ -362,13 +331,10 @@ public class MutationApi
 
     private <T> boolean patch( MutationRequest mt, boolean force, String path, T currentValue, T value )
     {
-        if ( currentValue == null )
-        {
+        if (currentValue == null) {
             mt.addPatch( "add", path, value );
             return true;
-        }
-        else if ( force && !Objects.equals( currentValue, value ) )
-        {
+        } else if (force && !Objects.equals( currentValue, value )) {
             mt.addPatch( "replace", path, value );
             return true;
         }

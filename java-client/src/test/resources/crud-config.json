@@ -8,6 +8,5 @@
     "nodeGroup" : "test",
     "file" : "test.cfg",
     "data" : "test"
-  },
-  "status" : null
+  }
 }

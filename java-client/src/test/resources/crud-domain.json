@@ -11,6 +11,5 @@
     "certificate" : {
       "authority" : "selfSigned"
     }
-  },
-  "status" : null
+  }
 }

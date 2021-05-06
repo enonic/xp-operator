@@ -1,19 +1,17 @@
 package com.enonic.kubernetes.client;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-
-import io.fabric8.kubernetes.api.KubernetesResourceMappingProvider;
-import io.fabric8.kubernetes.api.model.KubernetesResource;
-import io.fabric8.kubernetes.internal.KubernetesDeserializer;
-
 import com.enonic.kubernetes.client.v1alpha1.Xp7App;
 import com.enonic.kubernetes.client.v1alpha2.Domain;
 import com.enonic.kubernetes.client.v1alpha2.Xp7Config;
 import com.enonic.kubernetes.client.v1alpha2.Xp7Deployment;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import io.fabric8.kubernetes.api.KubernetesResourceMappingProvider;
+import io.fabric8.kubernetes.api.model.KubernetesResource;
+import io.fabric8.kubernetes.internal.KubernetesDeserializer;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class CrdMappingProvider
     implements KubernetesResourceMappingProvider
@@ -32,8 +30,7 @@ public class CrdMappingProvider
     public static void register()
     {
         CrdMappingProvider m = new CrdMappingProvider();
-        for ( Map.Entry<String, Class<? extends KubernetesResource>> s : m.getMappings().entrySet() )
-        {
+        for (Map.Entry<String, Class<? extends KubernetesResource>> s : m.getMappings().entrySet()) {
             KubernetesDeserializer.registerCustomKind( s.getKey(), s.getValue() );
         }
     }
