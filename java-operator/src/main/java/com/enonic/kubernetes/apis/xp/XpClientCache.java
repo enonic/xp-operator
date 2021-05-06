@@ -25,6 +25,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static com.enonic.kubernetes.common.Configuration.cfgLong;
+
 @Singleton
 public class XpClientCache
     extends CacheLoader<XpClientCacheKey, XpClient>
@@ -63,6 +65,7 @@ public class XpClientCache
                 .nodeGroup( key.nodeGroup() )
                 .username( "su" )
                 .password( new String( baseEncoding.decode( secret.getData().get( "pass" ) ) ) )
+                .timeout( cfgLong("operator.deployment.xp.management.timeout") )
                 .build(),
             () -> clientCreatorCache.invalidate( key )
         );
