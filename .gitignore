@@ -5,7 +5,8 @@
 bin/
 
 # IntelliJ
-.idea/
+.idea/*
+!.idea/codeStyles/
 *.ipr
 *.iml
 *.iws
