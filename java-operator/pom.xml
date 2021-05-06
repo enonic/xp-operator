@@ -19,7 +19,7 @@
     <quarkus.version>1.12.0.Final</quarkus.version>
     
     <immutables.version>2.8.8</immutables.version>
-    <jackson-yaml.version>2.11.2</jackson-yaml.version>
+    <jackson-yaml.version>2.12.3</jackson-yaml.version>
     <okhttp.version>4.9.1</okhttp.version>
 
     <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
