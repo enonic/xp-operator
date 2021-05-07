@@ -56,6 +56,9 @@ kind-bootstrap:
 	@docker pull enonic/xp:7.6.1-ubuntu
 	@kind load docker-image enonic/xp:7.6.1-ubuntu
 
+	@docker pull gcr.io/playground-186616/enonic-xp:nightly
+	@kind load docker-image gcr.io/playground-186616/enonic-xp:nightly
+
 kind-dev: ## Setup cluster for development mode (env var MY_IP required)
 	# Ensure MY_IP is set
 	@[ ! -z "${MY_IP}" ] || (echo "Set MY_IP variable to you host IP" && exit 1)
