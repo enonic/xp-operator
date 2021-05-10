@@ -15,6 +15,8 @@ import static com.enonic.kubernetes.kubernetes.Comparators.namespaceAndName;
 import static com.enonic.kubernetes.kubernetes.Predicates.hasFinalizer;
 import static com.enonic.kubernetes.kubernetes.Predicates.isNotDeleted;
 import static com.enonic.kubernetes.operator.v1alpha1xp7app.Predicates.notSuccessfullyInstalled;
+import static com.enonic.kubernetes.operator.v1alpha2xp7deployment.Predicates.parent;
+import static com.enonic.kubernetes.operator.v1alpha2xp7deployment.Predicates.running;
 
 
 /**
@@ -66,6 +68,11 @@ public class OperatorXp7AppStartStopper
     {
         // Bail if app has not been installed
         if (notSuccessfullyInstalled().test( xp7App )) {
+            return;
+        }
+
+        // XP is not running, nothing we can do
+        if (!searchers.xp7Deployment().match( parent( xp7App ), running() )) {
             return;
         }
 
