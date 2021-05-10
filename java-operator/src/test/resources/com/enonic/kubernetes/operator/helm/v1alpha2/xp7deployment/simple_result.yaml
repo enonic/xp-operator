@@ -247,6 +247,49 @@ spec:
   storageClassName: "standard"
 ---
 apiVersion: "rbac.authorization.k8s.io/v1"
+kind: "ClusterRole"
+metadata:
+  annotations:
+    enonic.applyPriority: "30"
+  name: "mycloud-mysolution-myenv-myservice-hazelcast"
+  namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
+rules:
+- apiGroups:
+  - "*"
+  resources:
+  - "nodes"
+  verbs:
+  - "get"
+---
+apiVersion: "rbac.authorization.k8s.io/v1"
+kind: "ClusterRoleBinding"
+metadata:
+  annotations:
+    enonic.applyPriority: "40"
+  name: "mycloud-mysolution-myenv-myservice-hazelcast"
+  namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
+roleRef:
+  kind: "ClusterRole"
+  apiGroup: "rbac.authorization.k8s.io"
+  name: "mycloud-mysolution-myenv-myservice-hazelcast"
+subjects:
+- kind: "ServiceAccount"
+  name: "xp-node-sa"
+  namespace: "mycloud-mysolution-myenv-myservice"
+---
+apiVersion: "rbac.authorization.k8s.io/v1"
 kind: "Role"
 metadata:
   annotations:
@@ -272,6 +315,15 @@ rules:
   - "events"
   verbs:
   - "create"
+- apiGroups:
+  - "*"
+  resources:
+  - "endpoints"
+  - "pods"
+  - "services"
+  verbs:
+  - "get"
+  - "list"
 ---
 apiVersion: "rbac.authorization.k8s.io/v1"
 kind: "Role"
@@ -553,7 +605,8 @@ spec:
         - name: "PRE_APP_HASH"
           value: "957ee10a49f2be0d0e2b1272ef611a5a93fe59c95c4044d792118aec0221021e6eb3685822a057b80343f8bcd14d7c37140eb2967042a1486bdedc5456f3fde4"
         - name: "XP_OPTS"
-          value: "-Xms154m -Xmx154m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof"
+          value: "-Xms154m -Xmx154m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof\
+            \ -Dhazelcast.shutdownhook.policy=GRACEFUL -Dhazelcast.graceful.shutdown.max.wait=600"
         image: "enonic/xp:7.1.2-ubuntu"
         imagePullPolicy: "IfNotPresent"
         name: "exp"

@@ -35,7 +35,8 @@ deployment:
       replicas: 1
       env:
       - name: "XP_OPTS"
-        value: " -Xms154m -Xmx154m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof"
+        value: " -Xms154m -Xmx154m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof\
+          \ -Dhazelcast.shutdownhook.policy=GRACEFUL -Dhazelcast.graceful.shutdown.max.wait=600"
       resources:
         cpu: "1"
         memory: "512Mi"
@@ -93,6 +94,7 @@ settings:
   cloudApiServiceAccount:
     name: "cloudApi"
     namespace: "ec-system"
+  hzApiDiscovery: true
   linkerd: false
 storage:
   default:

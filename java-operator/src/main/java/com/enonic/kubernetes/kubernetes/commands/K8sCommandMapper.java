@@ -1,33 +1,13 @@
 package com.enonic.kubernetes.kubernetes.commands;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import com.google.common.base.Preconditions;
-
-import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.api.model.HasMetadata;
-import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
-import io.fabric8.kubernetes.api.model.Secret;
-import io.fabric8.kubernetes.api.model.Service;
-import io.fabric8.kubernetes.api.model.ServiceAccount;
-import io.fabric8.kubernetes.api.model.apps.DaemonSet;
-import io.fabric8.kubernetes.api.model.apps.StatefulSet;
-import io.fabric8.kubernetes.api.model.networking.v1beta1.Ingress;
-import io.fabric8.kubernetes.api.model.rbac.Role;
-import io.fabric8.kubernetes.api.model.rbac.RoleBinding;
-
-import com.enonic.kubernetes.kubernetes.Clients;
 import com.enonic.kubernetes.client.v1alpha1.Xp7App;
 import com.enonic.kubernetes.client.v1alpha2.Domain;
 import com.enonic.kubernetes.client.v1alpha2.Xp7Config;
 import com.enonic.kubernetes.client.v1alpha2.Xp7Deployment;
+import com.enonic.kubernetes.kubernetes.Clients;
 import com.enonic.kubernetes.kubernetes.commands.builders.GenericBuilderParams;
+import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilderClusterRole;
+import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilderClusterRoleBinding;
 import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilderConfigMap;
 import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilderDaemonSet;
 import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilderIngress;
@@ -42,6 +22,27 @@ import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilde
 import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilderV1Alpha2Domain;
 import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilderV1Alpha2Xp7Config;
 import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilderV1Alpha2Xp7Deployment;
+import com.google.common.base.Preconditions;
+import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
+import io.fabric8.kubernetes.api.model.Secret;
+import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.ServiceAccount;
+import io.fabric8.kubernetes.api.model.apps.DaemonSet;
+import io.fabric8.kubernetes.api.model.apps.StatefulSet;
+import io.fabric8.kubernetes.api.model.networking.v1beta1.Ingress;
+import io.fabric8.kubernetes.api.model.rbac.ClusterRole;
+import io.fabric8.kubernetes.api.model.rbac.ClusterRoleBinding;
+import io.fabric8.kubernetes.api.model.rbac.Role;
+import io.fabric8.kubernetes.api.model.rbac.RoleBinding;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
 
 
 @SuppressWarnings("unchecked")
@@ -60,6 +61,8 @@ public class K8sCommandMapper
         this.clients = clients;
 
         this.builderMap = new HashMap<>();
+        this.builderMap.put( ClusterRole.class, this::clusterRole );
+        this.builderMap.put( ClusterRoleBinding.class, this::clusterRoleBinding );
         this.builderMap.put( ConfigMap.class, this::configMap );
         this.builderMap.put( DaemonSet.class, this::daemonSet );
         this.builderMap.put( Ingress.class, this::ingress );
@@ -80,8 +83,24 @@ public class K8sCommandMapper
     {
         Function<GenericBuilderParams, Optional<K8sCommand>> builderFunc = this.builderMap.get( params.resource().getClass() );
         Preconditions.checkState( builderFunc != null, String.format( "CommandBuilder for class '%s' not found",
-                                                                      params.resource().getClass().getSimpleName() ) );
+            params.resource().getClass().getSimpleName() ) );
         return builderFunc.apply( params );
+    }
+
+    private Optional<K8sCommand> clusterRole( final GenericBuilderParams params )
+    {
+        return ImmutableCommandBuilderClusterRole.builder().
+            client( clients.k8s() ).
+            build().
+            apply( params );
+    }
+
+    private Optional<K8sCommand> clusterRoleBinding( final GenericBuilderParams params )
+    {
+        return ImmutableCommandBuilderClusterRoleBinding.builder().
+            client( clients.k8s() ).
+            build().
+            apply( params );
     }
 
     private Optional<K8sCommand> configMap( final GenericBuilderParams params )

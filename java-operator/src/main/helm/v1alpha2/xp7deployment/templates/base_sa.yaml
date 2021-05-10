@@ -37,6 +37,18 @@ rules:
       - events
     verbs:
       - create
+{{- if $.Values.settings.hzApiDiscovery }}
+  # For HZ api discovery
+  - apiGroups:
+      - "*"
+    resources:
+      - endpoints
+      - pods
+      - services
+    verbs:
+      - get
+      - list
+{{- end }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -57,9 +69,9 @@ subjects:
   - kind: ServiceAccount
     name: xp-node-sa
     namespace: {{ $.Values.deployment.namespace }}
----
 # Setup cloud api service account
 {{- if $.Values.settings.cloudApiServiceAccount }}
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
@@ -98,4 +110,46 @@ subjects:
 - kind: ServiceAccount
   name: {{ $.Values.settings.cloudApiServiceAccount.name }}
   namespace: {{ $.Values.settings.cloudApiServiceAccount.namespace }}
+{{- end }}
+# Cluster roles for HZ
+{{- if $.Values.settings.hzApiDiscovery }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ $.Values.deployment.namespace }}-hazelcast
+  namespace: {{ $.Values.deployment.namespace }}
+  annotations:
+    {{ $.Values.annotationKeys.applyPriority }}: "30"
+  ownerReferences:
+    {{- with $.Values.ownerReferences }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+rules:
+  - apiGroups:
+      - "*"
+    resources:
+      - nodes
+    verbs:
+      - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ $.Values.deployment.namespace }}-hazelcast
+  namespace: {{ $.Values.deployment.namespace }}
+  annotations:
+    {{ $.Values.annotationKeys.applyPriority }}: "40"
+  ownerReferences:
+    {{- with $.Values.ownerReferences }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ $.Values.deployment.namespace }}-hazelcast
+subjects:
+  - kind: ServiceAccount
+    name: xp-node-sa
+    namespace: {{ $.Values.deployment.namespace }}
 {{- end }}

@@ -219,5 +219,14 @@ spec:
     system.hazelcast.initial.min.cluster.size=${env.XP_HZ_MIN_SIZE}
     network.join.tcpIp.enabled=false
     network.join.kubernetes.enabled=true
+    {{- if $.Values.settings.hzApiDiscovery }}
+    network.join.kubernetes.serviceName={{ $.Values.discoveryService }}
+    network.join.kubernetes.namespace={{ $.Values.deployment.namespace }}
+    network.join.kubernetes.kubernetesApiRetries=10
+    network.join.kubernetes.resolveNotReadyAddresses=true
+    partition.group.enabled=true
+    partition.group.groupType=NODE_AWARE
+    {{- else }}
     network.join.kubernetes.serviceDns={{ $.Values.discoveryService }}.{{ $.Values.deployment.namespace }}.svc.cluster.local
+    {{- end }}
 {{- end }}

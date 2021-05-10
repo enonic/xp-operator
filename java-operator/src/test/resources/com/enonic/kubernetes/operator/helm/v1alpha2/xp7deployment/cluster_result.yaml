@@ -292,6 +292,49 @@ spec:
   storageClassName: "standard"
 ---
 apiVersion: "rbac.authorization.k8s.io/v1"
+kind: "ClusterRole"
+metadata:
+  annotations:
+    enonic.applyPriority: "30"
+  name: "mycloud-mysolution-myenv-myservice-hazelcast"
+  namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
+rules:
+- apiGroups:
+  - "*"
+  resources:
+  - "nodes"
+  verbs:
+  - "get"
+---
+apiVersion: "rbac.authorization.k8s.io/v1"
+kind: "ClusterRoleBinding"
+metadata:
+  annotations:
+    enonic.applyPriority: "40"
+  name: "mycloud-mysolution-myenv-myservice-hazelcast"
+  namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
+roleRef:
+  kind: "ClusterRole"
+  apiGroup: "rbac.authorization.k8s.io"
+  name: "mycloud-mysolution-myenv-myservice-hazelcast"
+subjects:
+- kind: "ServiceAccount"
+  name: "xp-node-sa"
+  namespace: "mycloud-mysolution-myenv-myservice"
+---
+apiVersion: "rbac.authorization.k8s.io/v1"
 kind: "Role"
 metadata:
   annotations:
@@ -317,6 +360,15 @@ rules:
   - "events"
   verbs:
   - "create"
+- apiGroups:
+  - "*"
+  resources:
+  - "endpoints"
+  - "pods"
+  - "services"
+  verbs:
+  - "get"
+  - "list"
 ---
 apiVersion: "rbac.authorization.k8s.io/v1"
 kind: "Role"
@@ -691,7 +743,8 @@ spec:
         - name: "PRE_APP_HASH"
           value: "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e"
         - name: "XP_OPTS"
-          value: "-Xms768m -Xmx768m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof"
+          value: "-Xms768m -Xmx768m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof\
+            \ -Dhazelcast.shutdownhook.policy=GRACEFUL -Dhazelcast.graceful.shutdown.max.wait=600"
         image: "enonic/xp:7.1.2-ubuntu"
         imagePullPolicy: "IfNotPresent"
         lifecycle:
@@ -941,7 +994,8 @@ spec:
         - name: "PRE_APP_HASH"
           value: "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e"
         - name: "XP_OPTS"
-          value: "-Xms614m -Xmx614m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof"
+          value: "-Xms614m -Xmx614m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof\
+            \ -Dhazelcast.shutdownhook.policy=GRACEFUL -Dhazelcast.graceful.shutdown.max.wait=600"
         image: "enonic/xp:7.1.2-ubuntu"
         imagePullPolicy: "IfNotPresent"
         lifecycle:
@@ -1215,7 +1269,8 @@ spec:
         - name: "CUSTOM_ENV"
           value: "myenvvar"
         - name: "XP_OPTS"
-          value: "-bla -Xms2304m -Xmx2304m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof"
+          value: "-bla -Xms2304m -Xmx2304m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof\
+            \ -Dhazelcast.shutdownhook.policy=GRACEFUL -Dhazelcast.graceful.shutdown.max.wait=600"
         image: "enonic/xp:7.1.2-ubuntu"
         imagePullPolicy: "IfNotPresent"
         lifecycle:
@@ -1586,7 +1641,10 @@ spec:
   nodeGroup: "all"
   file: "com.enonic.xp.hazelcast.cfg"
   data: "clusterConfigDefaults=false\nsystem.hazelcast.initial.min.cluster.size=${env.XP_HZ_MIN_SIZE}\n\
-    network.join.tcpIp.enabled=false\nnetwork.join.kubernetes.enabled=true\nnetwork.join.kubernetes.serviceDns=cluster-discovery.mycloud-mysolution-myenv-myservice.svc.cluster.local"
+    network.join.tcpIp.enabled=false\nnetwork.join.kubernetes.enabled=true\nnetwork.join.kubernetes.serviceName=cluster-discovery\n\
+    network.join.kubernetes.namespace=mycloud-mysolution-myenv-myservice\nnetwork.join.kubernetes.kubernetesApiRetries=10\n\
+    network.join.kubernetes.resolveNotReadyAddresses=true\npartition.group.enabled=true\n\
+    partition.group.groupType=NODE_AWARE"
   dataBase64: false
 ---
 apiVersion: "enonic.cloud/v1alpha2"
