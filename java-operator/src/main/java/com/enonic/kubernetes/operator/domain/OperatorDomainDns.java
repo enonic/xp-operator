@@ -305,7 +305,7 @@ public class OperatorDomainDns
 
     private String createHeritageRecord()
     {
-        return "heritage=ec-operator,id=" + clusterId;
+        return "heritage=xp-operator,id=" + clusterId;
     }
 
     private void editDomain( final Domain domain, final Consumer<Domain> c )
