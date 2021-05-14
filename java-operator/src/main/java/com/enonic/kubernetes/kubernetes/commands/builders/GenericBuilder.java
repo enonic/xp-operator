@@ -93,8 +93,8 @@ public abstract class GenericBuilder<C, R extends HasMetadata>
 
     protected boolean equals( final R o, final R n )
     {
-        Preconditions.checkState( Objects.equals( o.getMetadata().getName(), n.getMetadata().getName() ) );
-        Preconditions.checkState( Objects.equals( o.getMetadata().getNamespace(), n.getMetadata().getNamespace() ) );
+        Preconditions.checkState( Objects.equals( o.getMetadata().getName(), n.getMetadata().getName() ), "Names do not match" );
+        Preconditions.checkState( Objects.equals( o.getMetadata().getNamespace(), n.getMetadata().getNamespace() ), "Namespaces do not match" );
 
         if ( !equalLabels( getOrDefault( o.getMetadata().getLabels() ), getOrDefault( n.getMetadata().getLabels() ) ) )
         {

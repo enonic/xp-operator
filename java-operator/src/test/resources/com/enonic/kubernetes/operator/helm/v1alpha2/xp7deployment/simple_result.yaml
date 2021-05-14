@@ -252,7 +252,6 @@ metadata:
   annotations:
     enonic.applyPriority: "30"
   name: "mycloud-mysolution-myenv-myservice-hazelcast"
-  namespace: "mycloud-mysolution-myenv-myservice"
   ownerReferences:
   - apiVersion: "enonic.cloud/v1alpha2"
     kind: "Xp7Deployment"
@@ -273,7 +272,6 @@ metadata:
   annotations:
     enonic.applyPriority: "40"
   name: "mycloud-mysolution-myenv-myservice-hazelcast"
-  namespace: "mycloud-mysolution-myenv-myservice"
   ownerReferences:
   - apiVersion: "enonic.cloud/v1alpha2"
     kind: "Xp7Deployment"
