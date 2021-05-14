@@ -171,7 +171,7 @@ spec:
           readinessProbe:
             failureThreshold: 2
             httpGet:
-              {{- if and $nodeGroup.data $.Values.deployment.clustered }}
+              {{- if and (and $nodeGroup.data $.Values.deployment.clustered) $.Values.deployment.hasDedicatedFrontendNodes }}
               path: /_cluster/health?wait_for_status=green&timeout=1s
               {{ else }}
               path: /_cluster/health?wait_for_status=yellow&timeout=1s

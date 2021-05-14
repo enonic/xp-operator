@@ -153,6 +153,7 @@ public class OperatorXp7DeploymentHelm
             deployment.put( "name", resource.getMetadata().getName() );
             deployment.put( "namespace", resource.getMetadata().getNamespace() );
             deployment.put( "clustered", isClustered );
+            deployment.put( "hasDedicatedFrontendNodes", hasDedicatedFrontendNodes(resource) );
             deployment.put( "suPass", pass );
             deployment.put( "suPassHash", sha512( pass ) );
             deployment.put( "preInstalledAppHash", sha512( resource.
@@ -177,6 +178,13 @@ public class OperatorXp7DeploymentHelm
             values.put( "ownerReferences", Collections.singletonList( createOwnerReference( resource ) ) );
 
             return values;
+        }
+
+        private boolean hasDedicatedFrontendNodes( Xp7Deployment deployment )
+        {
+            return deployment.getSpec().getXp7DeploymentSpecNodeGroups().stream()
+                .filter( n -> !n.getData() )
+                .anyMatch( n -> !n.getMaster() );
         }
 
         private Xp7Deployment cloneResource( final Xp7Deployment in )
