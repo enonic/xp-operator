@@ -32,8 +32,6 @@ public class InformersProducer
     {
         SharedInformerFactory sf = clients.k8s().informers();
 
-        sf.addSharedInformerEventListener( e -> log.error( "Informer exception: " + e.getMessage(), e ) );
-
         return InformersImpl.builder().
             clients( clients ).
             informerFactory( sf ).
