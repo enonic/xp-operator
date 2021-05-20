@@ -353,8 +353,11 @@ public class AdmissionApi
     private void assertXp7Deployment( AdmissionReview admissionReview, Set<String> nodeGroups )
     {
         Optional<Xp7Deployment> xp7Deployments = getXp7Deployment( admissionReview.getRequest().getObject() );
-        Preconditions.checkState( xp7Deployments.isPresent(), "No Xp7Deployment found in NS '%s'",
-            ((HasMetadata) admissionReview.getRequest().getObject()).getMetadata().getNamespace() );
+
+        if(xp7Deployments.isEmpty()) {
+            return;
+        }
+
         if (nodeGroups != null) {
             Set<String> xpDeploymentNodeGroups = xp7Deployments.get().
                 getSpec().
