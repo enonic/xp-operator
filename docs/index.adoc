@@ -10,7 +10,11 @@ WARNING: *BETA release:* The operator is currently in development. That applies 
 
 Creating a simple XP deployment is quite easy, but it quickly gets more complicated when you try to create production grade clusters. Add on top the complexity of how Kubernetes works and you quickly can get into trouble. The operator removes that complexity for you, and makes it easy to create and manage complex deployments with ease.
 
-== Setup
+== Usage
+
+Take a look at the <<usage#,usage>> section see how to use the operator.
+
+== Installation
 
 Before you can start using the operator you have to:
 
