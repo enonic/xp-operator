@@ -27,7 +27,7 @@ kind-setup:
 		--privileged \
 		-v ${NFS_SERVER_VOLUME}:/nfsshare \
 		-e SHARED_DIRECTORY=/nfsshare \
-		itsthenetwork/nfs-server-alpine:latest
+		itsthenetwork/nfs-server-alpine:12
 	
 	# Set kubectl context to kind
 	@kubectl config use-context ${KIND_CTX}

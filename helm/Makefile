@@ -8,7 +8,7 @@ install: ## Install chart into cluster
 	@helm upgrade --install \
 		--namespace kube-system \
 		--values test/values.yaml \
-		enonic-operator \
+		xp-operator \
 		.
 
 template: ## Test chart by templating
