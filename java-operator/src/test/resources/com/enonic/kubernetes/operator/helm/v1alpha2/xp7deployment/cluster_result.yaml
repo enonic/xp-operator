@@ -1510,56 +1510,6 @@ metadata:
     environment: "myenv"
     service: "myservice"
     solution: "mysolution"
-  name: "all-sessionstore"
-  namespace: "mycloud-mysolution-myenv-myservice"
-  ownerReferences:
-  - apiVersion: "enonic.cloud/v1alpha2"
-    kind: "Xp7Deployment"
-    blockOwnerDeletion: false
-    controller: true
-    name: "mycloud-mysolution-myenv-myservice"
-spec:
-  nodeGroup: "all"
-  file: "com.enonic.xp.web.sessionstore.cfg"
-  data: "storeMode=replicated"
-  dataBase64: false
----
-apiVersion: "enonic.cloud/v1alpha2"
-kind: "Xp7Config"
-metadata:
-  annotations:
-    enonic.applyPriority: "70"
-  labels:
-    cloud: "mycloud"
-    enonic.managed: "true"
-    environment: "myenv"
-    service: "myservice"
-    solution: "mysolution"
-  name: "all-appstatus"
-  namespace: "mycloud-mysolution-myenv-myservice"
-  ownerReferences:
-  - apiVersion: "enonic.cloud/v1alpha2"
-    kind: "Xp7Deployment"
-    blockOwnerDeletion: false
-    controller: true
-    name: "mycloud-mysolution-myenv-myservice"
-spec:
-  nodeGroup: "all"
-  file: "com.enonic.app.status.cfg"
-  data: "metricsUrl = http://localhost:2609/"
-  dataBase64: false
----
-apiVersion: "enonic.cloud/v1alpha2"
-kind: "Xp7Config"
-metadata:
-  annotations:
-    enonic.applyPriority: "70"
-  labels:
-    cloud: "mycloud"
-    enonic.managed: "true"
-    environment: "myenv"
-    service: "myservice"
-    solution: "mysolution"
   name: "all-cluster"
   namespace: "mycloud-mysolution-myenv-myservice"
   ownerReferences:
@@ -1573,6 +1523,35 @@ spec:
   file: "com.enonic.xp.cluster.cfg"
   data: "network.host=0.0.0.0\nnetwork.publish.host=${env.XP_NODE_IP}\nnode.name=${env.XP_NODE_NAME}\n\
     cluster.enabled=true"
+  dataBase64: false
+---
+apiVersion: "enonic.cloud/v1alpha2"
+kind: "Xp7Config"
+metadata:
+  annotations:
+    enonic.applyPriority: "70"
+  labels:
+    cloud: "mycloud"
+    enonic.managed: "true"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
+  name: "all-hazelcast"
+  namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1alpha2"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
+spec:
+  nodeGroup: "all"
+  file: "com.enonic.xp.hazelcast.cfg"
+  data: "clusterConfigDefaults=false\nsystem.hazelcast.initial.min.cluster.size=${env.XP_HZ_MIN_SIZE}\n\
+    network.join.tcpIp.enabled=false\nnetwork.join.kubernetes.enabled=true\nnetwork.join.kubernetes.serviceName=cluster-discovery\n\
+    network.join.kubernetes.namespace=mycloud-mysolution-myenv-myservice\nnetwork.join.kubernetes.kubernetesApiRetries=10\n\
+    network.join.kubernetes.resolveNotReadyAddresses=true\npartition.group.enabled=true\n\
+    partition.group.groupType=NODE_AWARE"
   dataBase64: false
 ---
 apiVersion: "enonic.cloud/v1alpha2"
@@ -1614,35 +1593,6 @@ spec:
     \   <appender-ref ref=\"FILE\"/>\n  </logger>\n\n  <logger name=\"Events.Bundle\"\
     \ level=\"WARN\" additivity=\"false\">\n    <appender-ref ref=\"STDOUT\"/>\n \
     \   <appender-ref ref=\"FILE\"/>\n  </logger>\n\n</configuration>"
-  dataBase64: false
----
-apiVersion: "enonic.cloud/v1alpha2"
-kind: "Xp7Config"
-metadata:
-  annotations:
-    enonic.applyPriority: "70"
-  labels:
-    cloud: "mycloud"
-    enonic.managed: "true"
-    environment: "myenv"
-    service: "myservice"
-    solution: "mysolution"
-  name: "all-hazelcast"
-  namespace: "mycloud-mysolution-myenv-myservice"
-  ownerReferences:
-  - apiVersion: "enonic.cloud/v1alpha2"
-    kind: "Xp7Deployment"
-    blockOwnerDeletion: false
-    controller: true
-    name: "mycloud-mysolution-myenv-myservice"
-spec:
-  nodeGroup: "all"
-  file: "com.enonic.xp.hazelcast.cfg"
-  data: "clusterConfigDefaults=false\nsystem.hazelcast.initial.min.cluster.size=${env.XP_HZ_MIN_SIZE}\n\
-    network.join.tcpIp.enabled=false\nnetwork.join.kubernetes.enabled=true\nnetwork.join.kubernetes.serviceName=cluster-discovery\n\
-    network.join.kubernetes.namespace=mycloud-mysolution-myenv-myservice\nnetwork.join.kubernetes.kubernetesApiRetries=10\n\
-    network.join.kubernetes.resolveNotReadyAddresses=true\npartition.group.enabled=true\n\
-    partition.group.groupType=NODE_AWARE"
   dataBase64: false
 ---
 apiVersion: "enonic.cloud/v1alpha2"

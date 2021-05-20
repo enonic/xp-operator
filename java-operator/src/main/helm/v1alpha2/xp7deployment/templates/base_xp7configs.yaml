@@ -50,58 +50,6 @@ spec:
   data: |-
     tourDisabled = true
 ---
-# Set session store
-apiVersion: enonic.cloud/v1alpha2
-kind: Xp7Config
-metadata:
-  name: {{ .Values.allNodesKey }}-sessionstore
-  namespace: {{ $.Values.deployment.namespace }}
-  annotations:
-    {{ $.Values.annotationKeys.applyPriority }}: "70"
-  labels:
-    {{ $.Values.labelKeys.managed }}: true
-    {{- with .Values.defaultLabels }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
-  ownerReferences:
-    {{- with $.Values.ownerReferences }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
-spec:
-  nodeGroup: {{ .Values.allNodesKey }}
-  file: com.enonic.xp.web.sessionstore.cfg
-  dataBase64: false
-  data: |-
-    {{- if $.Values.deployment.clustered }}
-    storeMode=replicated
-    {{- else }}
-    storeMode=non-persistent
-    {{- end }}
----
-# Set app status endpoint
-apiVersion: enonic.cloud/v1alpha2
-kind: Xp7Config
-metadata:
-  name: {{ .Values.allNodesKey }}-appstatus
-  namespace: {{ $.Values.deployment.namespace }}
-  annotations:
-    {{ $.Values.annotationKeys.applyPriority }}: "70"
-  labels:
-    {{ $.Values.labelKeys.managed }}: true
-    {{- with .Values.defaultLabels }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
-  ownerReferences:
-    {{- with $.Values.ownerReferences }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
-spec:
-  nodeGroup: {{ .Values.allNodesKey }}
-  file: com.enonic.app.status.cfg
-  dataBase64: false
-  data: |-
-    metricsUrl = http://localhost:2609/
----
 # Cluster configuration
 apiVersion: enonic.cloud/v1alpha2
 kind: Xp7Config
@@ -129,6 +77,45 @@ spec:
     node.name=${env.XP_NODE_NAME}
     cluster.enabled={{ if $.Values.deployment.clustered }}true{{ else }}false{{ end }}
 ---
+{{- if $.Values.deployment.clustered }}
+# Hazelcast configuration
+apiVersion: enonic.cloud/v1alpha2
+kind: Xp7Config
+metadata:
+  name: {{ .Values.allNodesKey }}-hazelcast
+  namespace: {{ $.Values.deployment.namespace }}
+  annotations:
+    {{ $.Values.annotationKeys.applyPriority }}: "70"
+  labels:
+    {{ $.Values.labelKeys.managed }}: true
+    {{- with $.Values.defaultLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  ownerReferences:
+    {{- with $.Values.ownerReferences }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  nodeGroup: {{ .Values.allNodesKey }}
+  file: com.enonic.xp.hazelcast.cfg
+  dataBase64: false
+  data: |-
+    clusterConfigDefaults=false
+    system.hazelcast.initial.min.cluster.size=${env.XP_HZ_MIN_SIZE}
+    network.join.tcpIp.enabled=false
+    network.join.kubernetes.enabled=true
+    {{- if $.Values.settings.hzApiDiscovery }}
+    network.join.kubernetes.serviceName={{ $.Values.discoveryService }}
+    network.join.kubernetes.namespace={{ $.Values.deployment.namespace }}
+    network.join.kubernetes.kubernetesApiRetries=10
+    network.join.kubernetes.resolveNotReadyAddresses=true
+    partition.group.enabled=true
+    partition.group.groupType=NODE_AWARE
+    {{- else }}
+    network.join.kubernetes.serviceDns={{ $.Values.discoveryService }}.{{ $.Values.deployment.namespace }}.svc.cluster.local
+    {{- end }}
+---
+{{- end }}
 # Logging
 apiVersion: enonic.cloud/v1alpha2
 kind: Xp7Config
@@ -191,42 +178,3 @@ spec:
       </logger>
 
     </configuration>
----
-{{- if $.Values.deployment.clustered }}
-# Hazelcast configuration
-apiVersion: enonic.cloud/v1alpha2
-kind: Xp7Config
-metadata:
-  name: {{ .Values.allNodesKey }}-hazelcast
-  namespace: {{ $.Values.deployment.namespace }}
-  annotations:
-    {{ $.Values.annotationKeys.applyPriority }}: "70"
-  labels:
-    {{ $.Values.labelKeys.managed }}: true
-    {{- with $.Values.defaultLabels }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
-  ownerReferences:
-    {{- with $.Values.ownerReferences }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
-spec:
-  nodeGroup: {{ .Values.allNodesKey }}
-  file: com.enonic.xp.hazelcast.cfg
-  dataBase64: false
-  data: |-
-    clusterConfigDefaults=false
-    system.hazelcast.initial.min.cluster.size=${env.XP_HZ_MIN_SIZE}
-    network.join.tcpIp.enabled=false
-    network.join.kubernetes.enabled=true
-    {{- if $.Values.settings.hzApiDiscovery }}
-    network.join.kubernetes.serviceName={{ $.Values.discoveryService }}
-    network.join.kubernetes.namespace={{ $.Values.deployment.namespace }}
-    network.join.kubernetes.kubernetesApiRetries=10
-    network.join.kubernetes.resolveNotReadyAddresses=true
-    partition.group.enabled=true
-    partition.group.groupType=NODE_AWARE
-    {{- else }}
-    network.join.kubernetes.serviceDns={{ $.Values.discoveryService }}.{{ $.Values.deployment.namespace }}.svc.cluster.local
-    {{- end }}
-{{- end }}

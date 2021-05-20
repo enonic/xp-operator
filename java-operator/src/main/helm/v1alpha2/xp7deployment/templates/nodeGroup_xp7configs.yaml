@@ -25,8 +25,7 @@ spec:
   data: |-
     enabled = true
 ---
-{{- if not $.Values.deployment.clustered }}
-# Elastic Search non clustered configuration
+# Elastic Search configuration
 apiVersion: enonic.cloud/v1alpha2
 kind: Xp7Config
 metadata:
@@ -50,32 +49,7 @@ spec:
   data: |-
     http.enabled=true
     cluster.name={{ $.Values.deployment.name }}
----
-{{- else }}
-# Elastic Search clustered configuration
-apiVersion: enonic.cloud/v1alpha2
-kind: Xp7Config
-metadata:
-  name: {{ $nodeGroup.name }}-elasticsearch
-  namespace: {{ $.Values.deployment.namespace }}
-  annotations:
-    {{ $.Values.annotationKeys.applyPriority }}: "71"
-  labels:
-    {{ $.Values.labelKeys.managed }}: true
-    {{- with $.Values.defaultLabels }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
-  ownerReferences:
-    {{- with $.Values.ownerReferences }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
-spec:
-  nodeGroup: {{ $nodeGroup.name }}
-  file: com.enonic.xp.elasticsearch.cfg
-  dataBase64: false
-  data: |-
-    http.enabled=true
-    cluster.name={{ $.Values.deployment.name }}
+    {{- if $.Values.deployment.clustered }}
     node.master=${env.XP_IS_MASTER}
     node.data=${env.XP_IS_DATA}
     gateway.expected_master_nodes=${env.XP_ES_MIN_MASTERS}
@@ -85,6 +59,6 @@ spec:
     discovery.unicast.sockets={{ $.Values.discoveryService }}.{{ $.Values.deployment.namespace }}.svc.cluster.local
     network.tcp.keep_alive=true
     index.auto_expand_replicas=1-all
-{{- end }}
+    {{- end }}
 ---
 {{- end }}

@@ -862,56 +862,6 @@ metadata:
     environment: "myenv"
     service: "myservice"
     solution: "mysolution"
-  name: "all-sessionstore"
-  namespace: "mycloud-mysolution-myenv-myservice"
-  ownerReferences:
-  - apiVersion: "enonic.cloud/v1alpha2"
-    kind: "Xp7Deployment"
-    blockOwnerDeletion: false
-    controller: true
-    name: "mycloud-mysolution-myenv-myservice"
-spec:
-  nodeGroup: "all"
-  file: "com.enonic.xp.web.sessionstore.cfg"
-  data: "storeMode=non-persistent"
-  dataBase64: false
----
-apiVersion: "enonic.cloud/v1alpha2"
-kind: "Xp7Config"
-metadata:
-  annotations:
-    enonic.applyPriority: "70"
-  labels:
-    cloud: "mycloud"
-    enonic.managed: "true"
-    environment: "myenv"
-    service: "myservice"
-    solution: "mysolution"
-  name: "all-appstatus"
-  namespace: "mycloud-mysolution-myenv-myservice"
-  ownerReferences:
-  - apiVersion: "enonic.cloud/v1alpha2"
-    kind: "Xp7Deployment"
-    blockOwnerDeletion: false
-    controller: true
-    name: "mycloud-mysolution-myenv-myservice"
-spec:
-  nodeGroup: "all"
-  file: "com.enonic.app.status.cfg"
-  data: "metricsUrl = http://localhost:2609/"
-  dataBase64: false
----
-apiVersion: "enonic.cloud/v1alpha2"
-kind: "Xp7Config"
-metadata:
-  annotations:
-    enonic.applyPriority: "70"
-  labels:
-    cloud: "mycloud"
-    enonic.managed: "true"
-    environment: "myenv"
-    service: "myservice"
-    solution: "mysolution"
   name: "all-cluster"
   namespace: "mycloud-mysolution-myenv-myservice"
   ownerReferences:
