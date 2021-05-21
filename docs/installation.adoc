@@ -79,7 +79,7 @@ config: |-
 ----
 $ helm upgrade --install \
 	--namespace kube-system \
-	--version 0.9.3 \
+	--version 0.9.2 \
 	--values values.yaml \
 	xp-operator \
 	enonic/xp-operator
