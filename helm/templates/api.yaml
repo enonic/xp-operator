@@ -42,6 +42,11 @@ webhooks:
         apiVersions: ["v1alpha1", "v1alpha2"]
         resources: ["xp7deployments", "xp7apps", "xp7configs", "domains"]
         scope: "*"
+      - apiGroups: ["networking.k8s.io"]
+        operations: ["*"]
+        apiVersions: ["v1"]
+        resources: ["ingresses"]
+        scope: "*"
     admissionReviewVersions: ["v1"]
     failurePolicy: Fail
     sideEffects: None
@@ -67,7 +72,7 @@ webhooks:
         scope: "*"
       - apiGroups: ["networking.k8s.io"]
         operations: ["*"]
-        apiVersions: ["v1beta1"]
+        apiVersions: ["v1"]
         resources: ["ingresses"]
         scope: "*"
     admissionReviewVersions: ["v1"]

@@ -1,7 +1,5 @@
 #K8S_VERSION:=v1.20.2
-K8S_VERSION:=v1.19.7
-#K8S_VERSION:=v1.18.15
-#K8S_VERSION:=v1.17.17
+K8S_VERSION:=v1.19.11
 KIND_MTU:=$(shell docker network inspect bridge -f '{{ index .Options "com.docker.network.driver.mtu" }}')
 KIND_CTX:=kind-kind
 NFS_SERVER_NAME:=kind-nfs-server

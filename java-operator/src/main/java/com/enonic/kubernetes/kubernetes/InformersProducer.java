@@ -8,7 +8,7 @@ import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Event;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.api.model.networking.v1beta1.Ingress;
+import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
 import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
 import io.fabric8.kubernetes.client.informers.SharedInformerFactory;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -32,7 +32,7 @@ public class InformersProducer
     @Produces
     Informers createInformers( final Clients clients )
     {
-        singletonAssert(this, "createInformers");
+        singletonAssert( this, "createInformers" );
 
         SharedInformerFactory sf = clients.k8s().informers();
 

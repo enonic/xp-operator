@@ -20,7 +20,7 @@ import com.google.common.io.BaseEncoding;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.admission.v1.AdmissionResponseBuilder;
 import io.fabric8.kubernetes.api.model.admission.v1.AdmissionReview;
-import io.fabric8.kubernetes.api.model.networking.v1beta1.Ingress;
+import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -281,7 +281,6 @@ public class MutationApi
     private void ingress( final MutationRequest mt )
     {
         // Collect old and new object
-        Ingress oldR = (Ingress) mt.getAdmissionReview().getRequest().getOldObject();
         Ingress newR = (Ingress) mt.getAdmissionReview().getRequest().getObject();
 
         if (newR == null) {
@@ -291,9 +290,8 @@ public class MutationApi
         Map<String, String> oa = newR.getMetadata().getAnnotations() != null ? newR.getMetadata().getAnnotations() : new HashMap<>();
         Map<String, String> na = new HashMap<>( oa );
 
-        setDefaultValueInMap( na, "kubernetes.io/ingress.class", "nginx" );
-
-        if ("nginx".equals( na.get( "kubernetes.io/ingress.class" ) ) && cfgBool( "operator.charts.values.settings.linkerd" )) {
+        boolean isNginx = "nginx".equals( newR.getSpec().getIngressClassName() ) || "nginx".equals( na.get( "kubernetes.io/ingress.class" ) );
+        if (isNginx && cfgBool( "operator.charts.values.settings.linkerd" )) {
             // If linkerd is enabled
             String cfgSnippet = na.get( "nginx.ingress.kubernetes.io/configuration-snippet" );
             StringBuilder sb = new StringBuilder( cfgSnippet != null ? cfgSnippet : "" ).

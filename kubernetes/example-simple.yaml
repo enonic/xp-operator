@@ -72,7 +72,7 @@ spec:
     my = config
 ---
 # Expose XP through an ingress
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: my-domain-com
@@ -90,11 +90,17 @@ spec:
       http:
         paths:
           - path: /
+            pathType: ImplementationSpecific
             backend:
-              serviceName: main
-              servicePort: 8080
+              service:
+                name: main
+                port:
+                  number: 8080
 
           - path: /admin
+            pathType: ImplementationSpecific
             backend:
-              serviceName: main
-              servicePort: 8080
+              service:
+                name: main
+                port:
+                  number: 8080

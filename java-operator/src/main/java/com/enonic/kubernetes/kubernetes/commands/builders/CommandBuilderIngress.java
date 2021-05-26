@@ -1,12 +1,11 @@
 package com.enonic.kubernetes.kubernetes.commands.builders;
 
-import java.util.Objects;
-import java.util.Optional;
-
+import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
+import io.fabric8.kubernetes.client.KubernetesClient;
 import org.immutables.value.Value;
 
-import io.fabric8.kubernetes.api.model.networking.v1beta1.Ingress;
-import io.fabric8.kubernetes.client.KubernetesClient;
+import java.util.Objects;
+import java.util.Optional;
 
 
 @Value.Immutable
@@ -18,6 +17,7 @@ public abstract class CommandBuilderIngress
     {
         return Optional.ofNullable( client().
             network().
+            v1().
             ingresses().
             inNamespace( namespace ).
             withName( name ).
@@ -29,6 +29,7 @@ public abstract class CommandBuilderIngress
     {
         return () -> client().
             network().
+            v1().
             ingresses().
             inNamespace( namespace ).
             createOrReplace( resource );
@@ -39,6 +40,7 @@ public abstract class CommandBuilderIngress
     {
         return () -> client().
             network().
+            v1().
             ingresses().
             inNamespace( namespace ).
             withName( resource.getMetadata().getName() ).
@@ -50,6 +52,7 @@ public abstract class CommandBuilderIngress
     {
         return () -> client().
             network().
+            v1().
             ingresses().
             inNamespace( namespace ).
             withName( resource.getMetadata().getName() ).

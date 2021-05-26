@@ -2,7 +2,7 @@ admissionRequest:
   request:
     operation: CREATE
     object:
-      apiVersion: networking.k8s.io/v1beta1
+      apiVersion: networking.k8s.io/v1
       kind: Ingress
       metadata:
         name: test-domain-purplejs-io
@@ -17,9 +17,12 @@ admissionRequest:
           - host: test-domain.purplejs.io
             http:
               paths:
-                - backend:
-                    serviceName: master
-                    servicePort: 4848
-                  path: /
+                - path: /
+                  pathType: ImplementationSpecific
+                  backend:
+                    service:
+                      name: master
+                      port:
+                        number: 4848
 
 assertException: "source '/' in 'enonic.cloud/xp7.vhost.mapping' annotation not defined in ingress rules on host test-domain.purplejs.io, port 8080"

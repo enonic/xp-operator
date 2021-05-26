@@ -6,7 +6,7 @@ This section covers the installation of the Enonic XP Kubernetes Operator.
 
 == Prerequisites
 
-Kubernetes:: A running Kubernetes cluster version `1.17+`.
+Kubernetes:: A running Kubernetes cluster version `1.19+`.
 
 Kubectl:: Is the Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it https://kubernetes.io/docs/tasks/tools/install-kubectl/[here].
 

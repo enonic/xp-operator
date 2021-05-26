@@ -6,9 +6,9 @@ import com.enonic.kubernetes.kubernetes.Informers;
 import com.enonic.kubernetes.kubernetes.Searchers;
 import com.enonic.kubernetes.kubernetes.commands.K8sLogHelper;
 import com.enonic.kubernetes.operator.helpers.InformerEventHandler;
-import io.fabric8.kubernetes.api.model.networking.v1beta1.Ingress;
-import io.fabric8.kubernetes.api.model.networking.v1beta1.IngressRule;
-import io.fabric8.kubernetes.api.model.networking.v1beta1.IngressTLS;
+import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
+import io.fabric8.kubernetes.api.model.networking.v1.IngressRule;
+import io.fabric8.kubernetes.api.model.networking.v1.IngressTLS;
 import io.quarkus.runtime.StartupEvent;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -120,7 +120,7 @@ public class OperatorIngressCertSync
 
         // If changes are detected, update ingress
         if (!Objects.equals( oldAnnotations, newAnnotations ) || !Objects.equals( oldTLS, newTLS )) {
-            K8sLogHelper.logEdit( clients.k8s().network().ingresses().
+            K8sLogHelper.logEdit( clients.k8s().network().v1().ingresses().
                 inNamespace( ingress.getMetadata().getNamespace() ).
                 withName( ingress.getMetadata().getName() ), i -> {
                 i.getMetadata().setAnnotations( newAnnotations );

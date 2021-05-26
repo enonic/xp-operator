@@ -7,9 +7,9 @@ import com.enonic.kubernetes.kubernetes.commands.K8sLogHelper;
 import com.enonic.kubernetes.operator.Operator;
 import com.google.common.base.Function;
 import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.api.model.networking.v1beta1.HTTPIngressPath;
-import io.fabric8.kubernetes.api.model.networking.v1beta1.Ingress;
-import io.fabric8.kubernetes.api.model.networking.v1beta1.IngressRule;
+import io.fabric8.kubernetes.api.model.networking.v1.HTTPIngressPath;
+import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
+import io.fabric8.kubernetes.api.model.networking.v1.IngressRule;
 import io.quarkus.runtime.StartupEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -152,18 +152,16 @@ public class OperatorXp7ConfigSync
 
             for (HTTPIngressPath path : rule.getHttp().getPaths()) {
                 // No backend
-                if (path.getBackend() == null || path.getBackend().getServiceName() == null || path.getBackend().getServicePort() == null) {
+                if (path.getBackend() == null || path.getBackend().getService().getName() == null || path.getBackend().getService().getPort() == null) {
                     return false;
                 }
 
                 // Get service and port
-                String service = path.getBackend().getServiceName();
-                String port = path.getBackend().getServicePort().getStrVal() != null
-                    ? path.getBackend().getServicePort().getStrVal()
-                    : path.getBackend().getServicePort().getIntVal().toString();
+                String service = path.getBackend().getService().getName();
+                Integer port = path.getBackend().getService().getPort().getNumber();
 
                 // Only if service is the same as a nodegroup and port is 8080
-                if (nodeGroups.contains( service ) && port.equals( "8080" )) {
+                if (nodeGroups.contains( service ) && port == 8080) {
                     return true;
                 }
             }
@@ -216,7 +214,7 @@ public class OperatorXp7ConfigSync
                     // Iterate over paths
                     for (HTTPIngressPath path : rule.getHttp().getPaths()) {
                         // Path matches mapping
-                        if (nodeGroups.contains( path.getBackend().getServiceName() ) && mapping.source().equals( path.getPath() )) {
+                        if (nodeGroups.contains( path.getBackend().getService().getName() ) && mapping.source().equals( path.getPath() )) {
                             addVHostMappings( sb, mapping );
                         }
                     }

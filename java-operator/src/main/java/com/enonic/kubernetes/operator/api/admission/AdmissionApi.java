@@ -11,11 +11,9 @@ import com.enonic.kubernetes.operator.api.BaseAdmissionApi;
 import com.enonic.kubernetes.operator.ingress.Mapping;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Preconditions;
-import io.fabric8.kubernetes.api.model.HasMetadata;
-import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.admission.v1.AdmissionReview;
-import io.fabric8.kubernetes.api.model.networking.v1beta1.HTTPIngressPath;
-import io.fabric8.kubernetes.api.model.networking.v1beta1.Ingress;
+import io.fabric8.kubernetes.api.model.networking.v1.HTTPIngressPath;
+import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
 import org.apache.maven.artifact.versioning.ComparableVersion;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -93,12 +91,10 @@ public class AdmissionApi
         Preconditions.checkArgument( !mappings.isEmpty(), "malformed 'enonic.cloud/xp7.vhost.mapping' annotations" );
 
         for (Mapping m : mappings) {
-            Preconditions.checkArgument( m.host() != null, "missing host in 'enonic.cloud/xp7.vhost.mapping'" );
             List<String> paths = newIngress.getSpec().getRules().stream().
-                filter( r -> m.host().equals( r.getHost() ) ).
                 map( r -> r.getHttp().getPaths().stream().
                     // TODO: Filter nodegroups
-                        filter( p -> p.getBackend().getServicePort().equals( new IntOrString( 8080 ) ) ).
+                        filter( p -> p.getBackend().getService().getPort().getNumber() == 8080 ).
                         map( HTTPIngressPath::getPath ).collect( Collectors.toList() ) ).
                 flatMap( Collection::stream ).
                 collect( Collectors.toList() );
@@ -354,7 +350,7 @@ public class AdmissionApi
     {
         Optional<Xp7Deployment> xp7Deployments = getXp7Deployment( admissionReview.getRequest().getObject() );
 
-        if(xp7Deployments.isEmpty()) {
+        if (xp7Deployments.isEmpty()) {
             return;
         }
 

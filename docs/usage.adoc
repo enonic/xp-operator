@@ -164,7 +164,7 @@ An example of a valid ingress, assuming you have a nodegroup `main`, would look 
 
 [source,yaml]
 ----
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: my-domain-com
@@ -182,14 +182,20 @@ spec:
       http:
         paths:
           - path: /
+            pathType: ImplementationSpecific
             backend:
-              serviceName: main
-              servicePort: 8080
+              service:
+                name: main
+                port:
+                  number: 8080
 
           - path: /admin
+            pathType: ImplementationSpecific
             backend:
-              serviceName: main
-              servicePort: 8080
+              service:
+                name: main
+                port:
+                  number: 8080
 ----
 
 NOTE: Like Xp7Config, changes to virtual hosts can take a couple of minutes to register in XP.
@@ -399,7 +405,7 @@ spec:
     my = config
 ---
 # Expose XP through an ingress
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: my-domain-com
@@ -417,14 +423,20 @@ spec:
       http:
         paths:
           - path: /
+            pathType: ImplementationSpecific
             backend:
-              serviceName: main
-              servicePort: 8080
+              service:
+                name: main
+                port:
+                  number: 8080
 
           - path: /admin
+            pathType: ImplementationSpecific
             backend:
-              serviceName: main
-              servicePort: 8080
+              service:
+                name: main
+                port:
+                  number: 8080
 ----
 
 Deploy this by running:
@@ -547,7 +559,7 @@ spec:
     my = config
 ---
 # Expose XP site on frontend nodes through an ingress
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: my-domain-com-site
@@ -561,12 +573,15 @@ spec:
       http:
         paths:
           - path: /
+            pathType: ImplementationSpecific
             backend:
-              serviceName: worker
-              servicePort: 8080
+              service:
+                name: worker
+                port:
+                  number: 8080
 ---
 # Expose XP admin on admin nodes through an ingress
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: my-domain-com-admin
@@ -589,9 +604,12 @@ spec:
       http:
         paths:
           - path: /admin
+            pathType: ImplementationSpecific
             backend:
-              serviceName: worker
-              servicePort: 8080
+              service:
+                name: worker
+                port:
+                  number: 8080
 ----
 
 Deploy this by running:

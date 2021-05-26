@@ -2,7 +2,7 @@ admissionRequest:
   request:
     operation: CREATE
     object:
-      apiVersion: networking.k8s.io/v1beta1
+      apiVersion: networking.k8s.io/v1
       kind: Ingress
       metadata:
         name: test-domain-purplejs-io
@@ -18,30 +18,35 @@ admissionRequest:
           - host: test-domain.purplejs.io
             http:
               paths:
-                - backend:
-                    serviceName: master
-                    servicePort: 8080
-                  path: /
+                - path: /
+                  pathType: ImplementationSpecific
+                  backend:
+                    service:
+                      name: master
+                      port:
+                        number: 8080
 
 assertResult:
-  apiVersion: networking.k8s.io/v1beta1
+  apiVersion: networking.k8s.io/v1
   kind: Ingress
   metadata:
     name: test-domain-purplejs-io
     namespace: mycloud-mysolution-myenv-myservice
     annotations:
+      enonic.cloud/ingress.cert.manage: "true"
       enonic.cloud/xp7.vhost.mapping.1.host: test-domain.purplejs.io
       enonic.cloud/xp7.vhost.mapping.1.source: "/"
       enonic.cloud/xp7.vhost.mapping.1.target: "/admin"
       enonic.cloud/xp7.vhost.mapping.1.idproviders: "system"
-      kubernetes.io/ingress.class: "nginx"
-      enonic.cloud/ingress.cert.manage: "true"
   spec:
     rules:
       - host: test-domain.purplejs.io
         http:
           paths:
-            - backend:
-                serviceName: master
-                servicePort: 8080
-              path: /
+            - path: /
+              pathType: ImplementationSpecific
+              backend:
+                service:
+                  name: master
+                  port:
+                    number: 8080

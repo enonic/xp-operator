@@ -18,7 +18,7 @@ Take a look at the <<usage#,usage>> section see how to use the operator.
 
 Before you can start using the operator you have to:
 
-* Have a running Kubernetes cluster, version `1.17+`. If you need one, you can look at our <<minikube#,minikube>> guide.
+* Have a running Kubernetes cluster, version `1.19+`. If you need one, you can look at our <<minikube#,minikube>> guide.
 * Install the operator according to the <<installation#,installation>> guide.
 
 == Supported XP versions

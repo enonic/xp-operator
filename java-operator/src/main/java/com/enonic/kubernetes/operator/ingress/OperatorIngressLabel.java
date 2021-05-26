@@ -7,9 +7,9 @@ import com.enonic.kubernetes.kubernetes.Informers;
 import com.enonic.kubernetes.kubernetes.Searchers;
 import com.enonic.kubernetes.kubernetes.commands.K8sLogHelper;
 import com.enonic.kubernetes.operator.helpers.InformerEventHandler;
-import io.fabric8.kubernetes.api.model.networking.v1beta1.HTTPIngressPath;
-import io.fabric8.kubernetes.api.model.networking.v1beta1.Ingress;
-import io.fabric8.kubernetes.api.model.networking.v1beta1.IngressRule;
+import io.fabric8.kubernetes.api.model.networking.v1.HTTPIngressPath;
+import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
+import io.fabric8.kubernetes.api.model.networking.v1.IngressRule;
 import io.quarkus.runtime.StartupEvent;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -105,7 +105,7 @@ public class OperatorIngressLabel
         boolean loaded = true;
         for (IngressRule r : ingress.getSpec().getRules()) {
             for (HTTPIngressPath p : r.getHttp().getPaths()) {
-                Xp7ConfigStatus.State pathState = states.get( p.getBackend().getServiceName() );
+                Xp7ConfigStatus.State pathState = states.get( p.getBackend().getService().getName() );
                 if (pathState != null && !pathState.equals( Xp7ConfigStatus.State.READY )) {
                     loaded = false;
                     break;
