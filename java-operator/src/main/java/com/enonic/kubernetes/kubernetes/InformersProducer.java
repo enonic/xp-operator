@@ -18,6 +18,8 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Singleton;
 import javax.ws.rs.Produces;
 
+import static com.enonic.kubernetes.common.SingletonAssert.singletonAssert;
+
 
 public class InformersProducer
 {
@@ -30,6 +32,8 @@ public class InformersProducer
     @Produces
     Informers createInformers( final Clients clients )
     {
+        singletonAssert(this, "createInformers");
+
         SharedInformerFactory sf = clients.k8s().informers();
 
         return InformersImpl.builder().

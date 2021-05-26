@@ -4,12 +4,15 @@ import javax.enterprise.inject.Produces;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import static com.enonic.kubernetes.common.SingletonAssert.singletonAssert;
+
 public class BaseValuesProducer
 {
     @Produces
     @Singleton
-    public BaseValues producerBaseValues( @Named("clusterId") String clusterId )
+    public BaseValues createBaseValues( @Named("clusterId") String clusterId )
     {
+        singletonAssert(this, "createBaseValues");
         return new BaseValues( clusterId );
     }
 }

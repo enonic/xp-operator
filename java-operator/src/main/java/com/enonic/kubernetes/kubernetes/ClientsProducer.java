@@ -11,12 +11,15 @@ import com.enonic.kubernetes.client.v1alpha2.Domain;
 import com.enonic.kubernetes.client.v1alpha2.Xp7Config;
 import com.enonic.kubernetes.client.v1alpha2.Xp7Deployment;
 
+import static com.enonic.kubernetes.common.SingletonAssert.singletonAssert;
+
 public class ClientsProducer
 {
     @Singleton
     @Produces
-    Clients crdClient()
+    Clients createClients()
     {
+        singletonAssert(this, "createClients");
         KubernetesClient client = new DefaultKubernetesClient().inAnyNamespace();
         return ClientsImpl.of( client, Xp7App.createCrdClient( client ), Xp7Config.createCrdClient( client ),
                                Xp7Deployment.createCrdClient( client ), Domain.createCrdClient( client ) );

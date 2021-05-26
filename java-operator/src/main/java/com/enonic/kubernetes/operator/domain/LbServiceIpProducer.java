@@ -18,6 +18,7 @@ import com.enonic.kubernetes.kubernetes.Clients;
 
 import static com.enonic.kubernetes.common.Configuration.cfgHasKey;
 import static com.enonic.kubernetes.common.Configuration.cfgStr;
+import static com.enonic.kubernetes.common.SingletonAssert.singletonAssert;
 
 @Singleton
 public class LbServiceIpProducer
@@ -38,6 +39,7 @@ public class LbServiceIpProducer
     @Inject
     public LbServiceIpProducer( final Clients clients )
     {
+        singletonAssert(this, "constructor");
         ips = getLbIp( clients );
     }
 

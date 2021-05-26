@@ -12,6 +12,7 @@ import com.enonic.kubernetes.apis.doh.service.DohResponse;
 import com.enonic.kubernetes.apis.doh.service.DohService;
 
 import static com.enonic.kubernetes.apis.ApiUtils.formatWebApplicationException;
+import static com.enonic.kubernetes.common.SingletonAssert.singletonAssert;
 
 @Singleton
 public class DohServiceWrapper
@@ -23,6 +24,7 @@ public class DohServiceWrapper
     @Inject
     public DohServiceWrapper( @RestClient final DohService doh )
     {
+        singletonAssert(this, "constructor");
         this.doh = doh;
     }
 

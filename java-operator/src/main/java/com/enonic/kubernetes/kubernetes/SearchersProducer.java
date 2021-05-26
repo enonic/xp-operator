@@ -3,12 +3,15 @@ package com.enonic.kubernetes.kubernetes;
 import javax.inject.Singleton;
 import javax.ws.rs.Produces;
 
+import static com.enonic.kubernetes.common.SingletonAssert.singletonAssert;
+
 public class SearchersProducer
 {
     @Singleton
     @Produces
     Searchers searchers( Informers informers )
     {
+        singletonAssert(this, "createSearchers");
         return SearchersImpl.builder().
             configMap( new InformerSearcher<>( informers.configMapInformer() ) ).
             ingress( new InformerSearcher<>( informers.ingressInformer() ) ).

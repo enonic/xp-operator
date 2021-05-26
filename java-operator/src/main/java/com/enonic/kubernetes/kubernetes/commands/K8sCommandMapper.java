@@ -44,6 +44,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
+import static com.enonic.kubernetes.common.SingletonAssert.singletonAssert;
+
 
 @SuppressWarnings("unchecked")
 @Singleton
@@ -58,6 +60,8 @@ public class K8sCommandMapper
     @Inject
     public K8sCommandMapper( final Clients clients )
     {
+        singletonAssert(this, "constructor");
+
         this.clients = clients;
 
         this.builderMap = new HashMap<>();

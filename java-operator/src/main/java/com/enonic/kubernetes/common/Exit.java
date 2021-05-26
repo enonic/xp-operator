@@ -10,7 +10,9 @@ public class Exit
 
     public enum Code
     {
-        INFORMER_FAILED( 156 );
+        INFORMER_FAILED( 701 ),
+        SINGLETON_FAILED(702),
+        STARTUP_FAILED( 703 );
 
         private final int value;
 
@@ -20,9 +22,19 @@ public class Exit
         }
     }
 
+    public static void exit( Code code, Throwable error )
+    {
+        exit( code, error.getMessage(), error );
+    }
+
     public static void exit( Code code, String message )
     {
-        log.error( "FATAL: " + message );
+        exit( code, message, null );
+    }
+
+    public static void exit( Code code, String message, Throwable error )
+    {
+        log.error( "FATAL: " + message, error );
         Quarkus.asyncExit( code.value );
     }
 }

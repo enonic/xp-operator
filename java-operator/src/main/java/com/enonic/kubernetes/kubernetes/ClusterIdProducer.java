@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 
 import io.fabric8.kubernetes.api.model.Namespace;
 
+import static com.enonic.kubernetes.common.SingletonAssert.singletonAssert;
+
 public class ClusterIdProducer
 {
     private static final Logger log = LoggerFactory.getLogger( ClusterIdProducer.class );
@@ -18,8 +20,9 @@ public class ClusterIdProducer
     @Singleton
     @Produces
     @Named("clusterId")
-    String produceClusterId( Clients clients )
+    String createClusterId( Clients clients )
     {
+        singletonAssert(this, "createClusterId");
         Namespace ns = clients.k8s().namespaces().withName( "kube-system" ).get();
         if ( ns == null )
         {

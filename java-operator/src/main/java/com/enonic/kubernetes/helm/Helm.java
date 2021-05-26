@@ -24,6 +24,8 @@ import io.fabric8.kubernetes.api.model.HasMetadata;
 
 import com.enonic.kubernetes.helm.charts.Chart;
 
+import static com.enonic.kubernetes.common.SingletonAssert.singletonAssert;
+
 
 @SuppressWarnings("unused")
 @Singleton
@@ -38,6 +40,7 @@ public class Helm
     @Inject
     public Helm()
     {
+        singletonAssert(this, "constructor");
         assertHelmVersion();
         this.objectMapper = new ObjectMapper( new YAMLFactory() );
     }

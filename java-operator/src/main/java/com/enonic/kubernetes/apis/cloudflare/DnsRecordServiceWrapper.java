@@ -14,6 +14,7 @@ import com.enonic.kubernetes.apis.cloudflare.service.DnsRecordService;
 import com.enonic.kubernetes.apis.cloudflare.service.model.DnsRecord;
 
 import static com.enonic.kubernetes.apis.ApiUtils.formatWebApplicationException;
+import static com.enonic.kubernetes.common.SingletonAssert.singletonAssert;
 
 @Singleton
 public class DnsRecordServiceWrapper
@@ -25,6 +26,7 @@ public class DnsRecordServiceWrapper
     @Inject
     public DnsRecordServiceWrapper( @RestClient final DnsRecordService service )
     {
+        singletonAssert(this, "constructor");
         this.service = service;
     }
 

@@ -28,6 +28,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static com.enonic.kubernetes.common.Configuration.cfgLong;
+import static com.enonic.kubernetes.common.SingletonAssert.singletonAssert;
 
 @Singleton
 public class XpClientCache
@@ -44,6 +45,7 @@ public class XpClientCache
     @Inject
     public XpClientCache( final Clients clients )
     {
+        singletonAssert(this, "constructor");
         this.client = clients.k8s();
         clientCreatorCache = CacheBuilder.newBuilder().
             maximumSize( 1000 ).

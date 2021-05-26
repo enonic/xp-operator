@@ -8,6 +8,8 @@ import javax.inject.Singleton;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
+import static com.enonic.kubernetes.common.SingletonAssert.singletonAssert;
+
 public class RepositoriesProducer
 {
     @ConfigProperty(name = "operator.charts.path")
@@ -16,8 +18,9 @@ public class RepositoriesProducer
     @Produces
     @Singleton
     @Named("local")
-    public ChartRepository local()
+    public ChartRepository createLocalRepository()
     {
+        singletonAssert(this, "createLocalRepository");
         return new LocalRepository( new File( helmChartsPath ) );
     }
 }
