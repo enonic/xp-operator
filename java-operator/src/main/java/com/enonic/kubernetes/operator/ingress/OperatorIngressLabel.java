@@ -1,22 +1,23 @@
 package com.enonic.kubernetes.operator.ingress;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
+import com.enonic.kubernetes.client.v1alpha2.Xp7Config;
+import com.enonic.kubernetes.client.v1alpha2.xp7config.Xp7ConfigStatus;
+import com.enonic.kubernetes.kubernetes.Clients;
+import com.enonic.kubernetes.kubernetes.Informers;
+import com.enonic.kubernetes.kubernetes.Searchers;
+import com.enonic.kubernetes.kubernetes.commands.K8sLogHelper;
+import com.enonic.kubernetes.operator.helpers.InformerEventHandler;
 import io.fabric8.kubernetes.api.model.networking.v1beta1.HTTPIngressPath;
 import io.fabric8.kubernetes.api.model.networking.v1beta1.Ingress;
 import io.fabric8.kubernetes.api.model.networking.v1beta1.IngressRule;
+import io.quarkus.runtime.StartupEvent;
 
-import com.enonic.kubernetes.kubernetes.Clients;
-import com.enonic.kubernetes.kubernetes.Searchers;
-import com.enonic.kubernetes.client.v1alpha2.Xp7Config;
-import com.enonic.kubernetes.client.v1alpha2.xp7config.Xp7ConfigStatus;
-import com.enonic.kubernetes.kubernetes.commands.K8sLogHelper;
-import com.enonic.kubernetes.operator.helpers.InformerEventHandler;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.enonic.kubernetes.common.Configuration.cfgStr;
 import static com.enonic.kubernetes.kubernetes.Predicates.inSameNamespaceAs;
@@ -27,7 +28,7 @@ import static com.enonic.kubernetes.kubernetes.Predicates.onCondition;
 /**
  * This operator class triggers vhost sync on Ingress changes
  */
-@Singleton
+@ApplicationScoped
 public class OperatorIngressLabel
     extends InformerEventHandler<Xp7Config>
     implements Runnable
@@ -39,7 +40,13 @@ public class OperatorIngressLabel
     Searchers searchers;
 
     @Inject
-    OperatorXp7ConfigSync operatorXp7ConfigSync;
+    Informers informers;
+
+    void onStart( @Observes StartupEvent ev )
+    {
+        listen( informers.xp7ConfigInformer() );
+        scheduleSync( this );
+    }
 
     @Override
     protected void onNewAdd( final Xp7Config newR )
@@ -88,24 +95,18 @@ public class OperatorIngressLabel
             collect( Collectors.toMap( c -> c.getSpec().getNodeGroup(), c -> c.getStatus().getState() ) );
 
         // Set all nodeGroups state
-        if ( states.values().stream().anyMatch( s -> !s.equals( Xp7ConfigStatus.State.READY ) ) )
-        {
+        if (states.values().stream().anyMatch( s -> !s.equals( Xp7ConfigStatus.State.READY ) )) {
             states.put( cfgStr( "operator.charts.values.allNodesKey" ), Xp7ConfigStatus.State.PENDING );
-        }
-        else
-        {
+        } else {
             states.put( cfgStr( "operator.charts.values.allNodesKey" ), Xp7ConfigStatus.State.READY );
         }
 
         // Figure out state
         boolean loaded = true;
-        for ( IngressRule r : ingress.getSpec().getRules() )
-        {
-            for ( HTTPIngressPath p : r.getHttp().getPaths() )
-            {
+        for (IngressRule r : ingress.getSpec().getRules()) {
+            for (HTTPIngressPath p : r.getHttp().getPaths()) {
                 Xp7ConfigStatus.State pathState = states.get( p.getBackend().getServiceName() );
-                if ( pathState != null && !pathState.equals( Xp7ConfigStatus.State.READY ) )
-                {
+                if (pathState != null && !pathState.equals( Xp7ConfigStatus.State.READY )) {
                     loaded = false;
                     break;
                 }
@@ -113,14 +114,12 @@ public class OperatorIngressLabel
         }
 
         // Update if true
-        if ( loaded )
-        {
+        if (loaded) {
             K8sLogHelper.logEdit( clients.k8s().network().ingress().
                 inNamespace( ingress.getMetadata().getNamespace() ).
                 withName( ingress.getMetadata().getName() ), i -> {
                 Map<String, String> labels = i.getMetadata().getLabels();
-                if ( labels == null )
-                {
+                if (labels == null) {
                     labels = new HashMap<>();
                 }
                 labels.put( cfgStr( "operator.charts.values.labelKeys.ingressVhostLoaded" ), "true" );

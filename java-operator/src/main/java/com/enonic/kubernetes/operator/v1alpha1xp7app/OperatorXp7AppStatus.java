@@ -7,17 +7,21 @@ import com.enonic.kubernetes.client.v1alpha1.Xp7App;
 import com.enonic.kubernetes.client.v1alpha2.Xp7Deployment;
 import com.enonic.kubernetes.kubernetes.Clients;
 import com.enonic.kubernetes.kubernetes.Searchers;
+import com.enonic.kubernetes.operator.Operator;
+import io.quarkus.runtime.StartupEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static com.enonic.kubernetes.common.Configuration.cfgLong;
 import static com.enonic.kubernetes.common.Configuration.cfgStr;
 import static com.enonic.kubernetes.kubernetes.Comparators.namespaceAndName;
 import static com.enonic.kubernetes.kubernetes.Predicates.hasFinalizer;
@@ -32,12 +36,15 @@ import static com.enonic.kubernetes.operator.v1alpha2xp7deployment.Predicates.ru
 /**
  * This operator class updates Xp7App status fields
  */
-@Singleton
+@ApplicationScoped
 public class OperatorXp7AppStatus
     implements Runnable,
     Consumer<AppEvent>
 {
     private static final Logger log = LoggerFactory.getLogger( OperatorXp7AppStatus.class );
+
+    @Inject
+    Operator operator;
 
     @Inject
     HandlerStatus handlerStatus;
@@ -50,6 +57,11 @@ public class OperatorXp7AppStatus
 
     @Inject
     XpClientCache xpClientCache;
+
+    void onStart( @Observes StartupEvent ev )
+    {
+        operator.schedule( cfgLong( "operator.tasks.sync.interval" ), this );
+    }
 
     @Override
     public void run()

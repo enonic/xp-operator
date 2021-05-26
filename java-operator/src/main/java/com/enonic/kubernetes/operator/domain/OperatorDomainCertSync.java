@@ -1,21 +1,22 @@
 package com.enonic.kubernetes.operator.domain;
 
+import com.enonic.kubernetes.client.v1alpha2.Domain;
+import com.enonic.kubernetes.kubernetes.Informers;
+import com.enonic.kubernetes.kubernetes.Searchers;
+import com.enonic.kubernetes.operator.helpers.InformerEventHandler;
+import io.fabric8.kubernetes.api.model.networking.v1beta1.Ingress;
+import io.quarkus.runtime.StartupEvent;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import io.fabric8.kubernetes.api.model.networking.v1beta1.Ingress;
-
-import com.enonic.kubernetes.kubernetes.Searchers;
-import com.enonic.kubernetes.client.v1alpha2.Domain;
-import com.enonic.kubernetes.operator.helpers.InformerEventHandler;
 
 /**
  * This operator triggers ingress certificate configuration on domain changes
  */
-@Singleton
+@ApplicationScoped
 public class OperatorDomainCertSync
     extends InformerEventHandler<Domain>
 {
@@ -24,6 +25,14 @@ public class OperatorDomainCertSync
 
     @Inject
     Searchers searchers;
+
+    @Inject
+    Informers informers;
+
+    void onStart( @Observes StartupEvent ev )
+    {
+        listen( informers.domainInformer() );
+    }
 
     @Override
     protected void onNewAdd( final Domain newResource )

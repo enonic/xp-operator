@@ -1,15 +1,18 @@
 package com.enonic.kubernetes.operator.v1alpha2xp7config;
 
 import com.enonic.kubernetes.kubernetes.Clients;
+import com.enonic.kubernetes.kubernetes.Informers;
 import com.enonic.kubernetes.kubernetes.commands.ImmutableK8sCommand;
 import com.enonic.kubernetes.kubernetes.commands.K8sCommandAction;
 import com.enonic.kubernetes.operator.helpers.InformerEventHandler;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.events.v1beta1.Event;
 import io.fabric8.kubernetes.api.model.events.v1beta1.EventBuilder;
+import io.quarkus.runtime.StartupEvent;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.time.Instant;
 
 import static com.enonic.kubernetes.kubernetes.Predicates.dataEquals;
@@ -20,12 +23,20 @@ import static com.enonic.kubernetes.operator.helpers.PasswordGenerator.getRandom
 /**
  * This operator class sends events on ConfigMap changes
  */
-@Singleton
+@ApplicationScoped
 public class OperatorConfigMapEvent
     extends InformerEventHandler<ConfigMap>
 {
     @Inject
     Clients clients;
+
+    @Inject
+    Informers informers;
+
+    void onStart( @Observes StartupEvent ev )
+    {
+        listen( informers.configMapInformer() );
+    }
 
     @Override
     protected void onNewAdd( final ConfigMap newCm )

@@ -9,6 +9,7 @@ import com.enonic.kubernetes.helm.values.BaseValues;
 import com.enonic.kubernetes.helm.values.MapValues;
 import com.enonic.kubernetes.helm.values.ValueBuilder;
 import com.enonic.kubernetes.helm.values.Values;
+import com.enonic.kubernetes.kubernetes.Informers;
 import com.enonic.kubernetes.operator.helpers.HandlerHelm;
 import com.enonic.kubernetes.operator.ingress.OperatorXp7ConfigSync;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -16,10 +17,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
 import io.fabric8.kubernetes.api.model.ServiceAccount;
+import io.quarkus.runtime.StartupEvent;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.inject.Singleton;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +39,7 @@ import static com.enonic.kubernetes.common.Utils.createOwnerReference;
 /**
  * This operator class creates/updates/deletes resources defined in the xp7deployment helm chart
  */
-@Singleton
+@ApplicationScoped
 public class OperatorXp7DeploymentHelm
     extends HandlerHelm<Xp7Deployment>
 {
@@ -54,6 +57,14 @@ public class OperatorXp7DeploymentHelm
     @Inject
     @Named("cloudApi")
     Supplier<ServiceAccount> cloudApi;
+
+    @Inject
+    Informers informers;
+
+    void onStart( @Observes StartupEvent ev )
+    {
+        listen( informers.xp7DeploymentInformer() );
+    }
 
     @Override
     protected ValueBuilder<Xp7Deployment> getValueBuilder( final BaseValues baseValues )
@@ -153,7 +164,7 @@ public class OperatorXp7DeploymentHelm
             deployment.put( "name", resource.getMetadata().getName() );
             deployment.put( "namespace", resource.getMetadata().getNamespace() );
             deployment.put( "clustered", isClustered );
-            deployment.put( "hasDedicatedFrontendNodes", hasDedicatedFrontendNodes(resource) );
+            deployment.put( "hasDedicatedFrontendNodes", hasDedicatedFrontendNodes( resource ) );
             deployment.put( "suPass", pass );
             deployment.put( "suPassHash", sha512( pass ) );
             deployment.put( "preInstalledAppHash", sha512( resource.

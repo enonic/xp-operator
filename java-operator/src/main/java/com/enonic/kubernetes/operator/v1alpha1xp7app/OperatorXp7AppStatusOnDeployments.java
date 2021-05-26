@@ -1,18 +1,21 @@
 package com.enonic.kubernetes.operator.v1alpha1xp7app;
 
 import com.enonic.kubernetes.client.v1alpha2.Xp7Deployment;
+import com.enonic.kubernetes.kubernetes.Informers;
 import com.enonic.kubernetes.operator.helpers.InformerEventHandler;
+import io.quarkus.runtime.StartupEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.io.IOException;
 
 /**
  * This operator class updates Xp7App status fields
  */
-@Singleton
+@ApplicationScoped
 public class OperatorXp7AppStatusOnDeployments
     extends InformerEventHandler<Xp7Deployment>
 {
@@ -20,6 +23,14 @@ public class OperatorXp7AppStatusOnDeployments
 
     @Inject
     HandlerStatus handlerStatus;
+
+    @Inject
+    Informers informers;
+
+    void onStart( @Observes StartupEvent ev )
+    {
+        listen( informers.xp7DeploymentInformer() );
+    }
 
     @Override
     protected void onNewAdd( Xp7Deployment newResource )

@@ -17,15 +17,15 @@ import com.enonic.kubernetes.client.v1alpha2.Xp7Deployment;
 
 @Value.Immutable
 @Params
-public abstract class Clients
+public interface Clients
 {
-    public abstract KubernetesClient k8s();
+    KubernetesClient k8s();
 
-    public abstract MixedOperation<Xp7App, Xp7App.Xp7AppList, Resource<Xp7App>> xp7Apps();
+    MixedOperation<Xp7App, Xp7App.Xp7AppList, Resource<Xp7App>> xp7Apps();
 
-    public abstract MixedOperation<Xp7Config, Xp7Config.Xp7ConfigList, Resource<Xp7Config>> xp7Configs();
+    MixedOperation<Xp7Config, Xp7Config.Xp7ConfigList, Resource<Xp7Config>> xp7Configs();
 
-    public abstract MixedOperation<Xp7Deployment, Xp7Deployment.Xp7DeploymentList, Resource<Xp7Deployment>> xp7Deployments();
+    MixedOperation<Xp7Deployment, Xp7Deployment.Xp7DeploymentList, Resource<Xp7Deployment>> xp7Deployments();
 
-    public abstract MixedOperation<Domain, Domain.DomainList, Resource<Domain>> domain();
+    MixedOperation<Domain, Domain.DomainList, Resource<Domain>> domain();
 }

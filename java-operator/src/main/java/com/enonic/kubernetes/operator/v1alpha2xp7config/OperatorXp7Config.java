@@ -1,10 +1,13 @@
 package com.enonic.kubernetes.operator.v1alpha2xp7config;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 import com.enonic.kubernetes.client.v1alpha2.Xp7Config;
+import com.enonic.kubernetes.kubernetes.Informers;
 import com.enonic.kubernetes.operator.helpers.InformerEventHandler;
+import io.quarkus.runtime.StartupEvent;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
 
 import static com.enonic.kubernetes.kubernetes.Predicates.fieldEquals;
 import static com.enonic.kubernetes.kubernetes.Predicates.onCondition;
@@ -12,12 +15,20 @@ import static com.enonic.kubernetes.kubernetes.Predicates.onCondition;
 /**
  * This operator class triggers ConfigMap sync on Xp7Config changes
  */
-@Singleton
+@ApplicationScoped
 public class OperatorXp7Config
     extends InformerEventHandler<Xp7Config>
 {
     @Inject
     OperatorConfigMapSync operatorConfigMapSync;
+
+    @Inject
+    Informers informers;
+
+    void onStart( @Observes StartupEvent ev )
+    {
+        listen( informers.xp7ConfigInformer() );
+    }
 
     @Override
     public void onNewAdd( final Xp7Config newResource )

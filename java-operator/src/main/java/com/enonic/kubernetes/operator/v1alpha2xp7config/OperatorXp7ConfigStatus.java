@@ -3,14 +3,17 @@ package com.enonic.kubernetes.operator.v1alpha2xp7config;
 import com.enonic.kubernetes.client.v1alpha2.Xp7Config;
 import com.enonic.kubernetes.client.v1alpha2.xp7config.Xp7ConfigStatus;
 import com.enonic.kubernetes.kubernetes.Clients;
+import com.enonic.kubernetes.kubernetes.Informers;
 import com.enonic.kubernetes.kubernetes.Searchers;
 import com.enonic.kubernetes.kubernetes.commands.K8sLogHelper;
 import com.enonic.kubernetes.operator.helpers.InformerEventHandler;
 import io.fabric8.kubernetes.api.model.Event;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.quarkus.runtime.StartupEvent;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -26,7 +29,7 @@ import static com.enonic.kubernetes.kubernetes.Predicates.matchLabel;
 /**
  * This operator class triggers maintains the Xp7Config status field
  */
-@Singleton
+@ApplicationScoped
 public class OperatorXp7ConfigStatus
     extends InformerEventHandler<Event>
 {
@@ -35,6 +38,14 @@ public class OperatorXp7ConfigStatus
 
     @Inject
     Searchers searchers;
+
+    @Inject
+    Informers informers;
+
+    void onStart( @Observes StartupEvent ev )
+    {
+        listen( informers.eventInformer() );
+    }
 
     @Override
     public void onNewAdd( final Event newEvent )

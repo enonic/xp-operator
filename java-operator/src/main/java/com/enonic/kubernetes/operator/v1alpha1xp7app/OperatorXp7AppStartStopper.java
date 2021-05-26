@@ -2,13 +2,16 @@ package com.enonic.kubernetes.operator.v1alpha1xp7app;
 
 import com.enonic.kubernetes.apis.xp.XpClientCache;
 import com.enonic.kubernetes.client.v1alpha1.Xp7App;
+import com.enonic.kubernetes.kubernetes.Informers;
 import com.enonic.kubernetes.kubernetes.Searchers;
 import com.enonic.kubernetes.operator.helpers.InformerEventHandler;
+import io.quarkus.runtime.StartupEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import static com.enonic.kubernetes.common.Configuration.cfgStr;
 import static com.enonic.kubernetes.kubernetes.Comparators.namespaceAndName;
@@ -22,7 +25,7 @@ import static com.enonic.kubernetes.operator.v1alpha2xp7deployment.Predicates.ru
 /**
  * This operator class starts/stops apps in XP
  */
-@Singleton
+@ApplicationScoped
 public class OperatorXp7AppStartStopper
     extends InformerEventHandler<Xp7App>
     implements Runnable
@@ -34,6 +37,15 @@ public class OperatorXp7AppStartStopper
 
     @Inject
     XpClientCache xpClientCache;
+
+    @Inject
+    Informers informers;
+
+    void onStart( @Observes StartupEvent ev )
+    {
+        listen( informers.xp7AppInformer() );
+        scheduleSync( this );
+    }
 
     @Override
     public void onNewAdd( final Xp7App newResource )

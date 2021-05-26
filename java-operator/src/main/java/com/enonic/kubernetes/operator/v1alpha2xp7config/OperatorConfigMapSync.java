@@ -4,20 +4,22 @@ import com.enonic.kubernetes.client.v1alpha2.Xp7Config;
 import com.enonic.kubernetes.kubernetes.Clients;
 import com.enonic.kubernetes.kubernetes.Searchers;
 import com.enonic.kubernetes.kubernetes.commands.K8sLogHelper;
-import com.enonic.kubernetes.operator.helpers.HandlerConfig;
+import com.enonic.kubernetes.operator.Operator;
 import com.google.common.hash.Hashing;
 import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.quarkus.runtime.StartupEvent;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
+import static com.enonic.kubernetes.common.Configuration.cfgLong;
 import static com.enonic.kubernetes.common.Configuration.cfgStr;
 import static com.enonic.kubernetes.kubernetes.Predicates.contains;
 import static com.enonic.kubernetes.kubernetes.Predicates.hasLabel;
@@ -26,27 +28,37 @@ import static com.enonic.kubernetes.kubernetes.Predicates.inNodeGroupAllOr;
 import static com.enonic.kubernetes.kubernetes.Predicates.inSameNamespaceAs;
 import static com.enonic.kubernetes.kubernetes.Predicates.isBeingBackupRestored;
 import static com.enonic.kubernetes.kubernetes.Predicates.isDeleted;
+import static java.util.stream.Collectors.groupingBy;
 
 /**
  * This operator class collects all Xp7Configs and merges them into the nodegroup ConfigMaps
  */
-@Singleton
+@ApplicationScoped
 public class OperatorConfigMapSync
-    extends HandlerConfig<Xp7Config>
+    implements Runnable
 {
+    @Inject
+    Operator operator;
+
     @Inject
     Clients clients;
 
     @Inject
     Searchers searchers;
 
-    @Override
-    protected Stream<Xp7Config> resourceStream()
+    void onStart( @Observes StartupEvent ev )
     {
-        return searchers.xp7Config().stream();
+        operator.schedule( cfgLong( "operator.tasks.sync.interval" ), this );
     }
 
     @Override
+    public void run()
+    {
+        searchers.xp7Config().stream().collect( groupingBy( r -> r.getMetadata().getNamespace() ) ).
+            keySet().
+            forEach( this::handle );
+    }
+
     protected void handle( final String namespace )
     {
         // Handle all ConfigMaps in namespace with nodeGroup label

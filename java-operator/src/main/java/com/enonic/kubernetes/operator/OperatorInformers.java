@@ -17,7 +17,9 @@ import java.util.Objects;
 
 import static com.enonic.kubernetes.common.Configuration.cfgLong;
 
-
+/**
+ * This operator class kills the operator if it fails to keep informers in sync
+ */
 @ApplicationScoped
 public class OperatorInformers
     implements Runnable
@@ -28,7 +30,7 @@ public class OperatorInformers
     private final Map<Class<? extends HasMetadata>, String> resourceVersionMap = new HashMap<>();
 
     @Inject
-    OperatorApplicationScoped operator;
+    Operator operator;
 
     @Inject
     Informers informers;

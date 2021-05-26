@@ -1,13 +1,16 @@
 package com.enonic.kubernetes.operator.ingress;
 
 import com.enonic.kubernetes.kubernetes.Clients;
+import com.enonic.kubernetes.kubernetes.Informers;
 import com.enonic.kubernetes.kubernetes.Searchers;
 import com.enonic.kubernetes.kubernetes.commands.K8sLogHelper;
 import com.enonic.kubernetes.operator.helpers.InformerEventHandler;
 import io.fabric8.kubernetes.api.model.networking.v1beta1.Ingress;
+import io.quarkus.runtime.StartupEvent;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -19,7 +22,7 @@ import static com.enonic.kubernetes.kubernetes.Predicates.isDeleted;
 /**
  * This operator class triggers vhost sync on Ingress changes
  */
-@Singleton
+@ApplicationScoped
 public class OperatorIngress
     extends InformerEventHandler<Ingress>
 {
@@ -31,6 +34,14 @@ public class OperatorIngress
 
     @Inject
     Searchers searchers;
+
+    @Inject
+    Informers informers;
+
+    void onStart( @Observes StartupEvent ev )
+    {
+        listen( informers.ingressInformer() );
+    }
 
     @Override
     public void onNewAdd( final Ingress newResource )

@@ -1,15 +1,17 @@
 package com.enonic.kubernetes.operator.v1alpha2xp7deployment;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import org.eclipse.microprofile.config.inject.ConfigProperty;
-
-import com.enonic.kubernetes.kubernetes.Clients;
-import com.enonic.kubernetes.kubernetes.Searchers;
 import com.enonic.kubernetes.client.v1alpha2.Xp7Deployment;
+import com.enonic.kubernetes.kubernetes.Clients;
+import com.enonic.kubernetes.kubernetes.Informers;
+import com.enonic.kubernetes.kubernetes.Searchers;
 import com.enonic.kubernetes.kubernetes.commands.K8sLogHelper;
 import com.enonic.kubernetes.operator.helpers.InformerEventHandler;
+import io.quarkus.runtime.StartupEvent;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
 
 import static com.enonic.kubernetes.kubernetes.Predicates.isDeleted;
 import static com.enonic.kubernetes.kubernetes.Predicates.matchAnnotation;
@@ -18,7 +20,7 @@ import static com.enonic.kubernetes.kubernetes.Predicates.matchAnnotation;
 /**
  * This operator class deletes resources that are annotated with the delete annotation
  */
-@Singleton
+@ApplicationScoped
 public class OperatorDeleteAnnotation
     extends InformerEventHandler<Xp7Deployment>
 {
@@ -30,6 +32,14 @@ public class OperatorDeleteAnnotation
 
     @ConfigProperty(name = "operator.charts.values.annotationKeys.removeWithDeployment")
     String deleteAnnotation;
+
+    @Inject
+    Informers informers;
+
+    void onStart( @Observes StartupEvent ev )
+    {
+        listen( informers.xp7DeploymentInformer() );
+    }
 
     @Override
     public void onNewAdd( final Xp7Deployment newResource )
