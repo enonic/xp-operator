@@ -42,6 +42,7 @@ import static com.enonic.kubernetes.common.Configuration.cfgBool;
 import static com.enonic.kubernetes.common.Configuration.cfgStr;
 import static com.enonic.kubernetes.common.Configuration.cfgStrChild;
 import static com.enonic.kubernetes.common.Utils.createOwnerReference;
+import static com.enonic.kubernetes.kubernetes.Predicates.matchAnnotationPrefix;
 
 @ApplicationScoped
 @Path("/apis/operator.enonic.cloud/v1alpha1")
@@ -285,6 +286,18 @@ public class MutationApi
 
         if (newR == null) {
             return;
+        }
+
+        if (matchAnnotationPrefix( cfgStr( "operator.charts.values.annotationKeys.vhostMapping" ) ).negate().test( newR )) {
+            return;
+        }
+
+        Map<String, String> labels = newR.getMetadata().getLabels() != null ?
+            newR.getMetadata().getLabels() : new HashMap<>();
+
+        if (!labels.containsKey( cfgStr( "operator.charts.values.labelKeys.ingressVhostLoaded" ) )) {
+            labels.put( cfgStr( "operator.charts.values.labelKeys.ingressVhostLoaded" ), "false" );
+            patch( mt, true, "/metadata/labels", newR.getMetadata().getLabels(), labels );
         }
 
         Map<String, String> oa = newR.getMetadata().getAnnotations() != null ? newR.getMetadata().getAnnotations() : new HashMap<>();
