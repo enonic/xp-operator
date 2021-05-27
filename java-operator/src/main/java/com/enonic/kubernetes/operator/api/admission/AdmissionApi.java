@@ -11,6 +11,7 @@ import com.enonic.kubernetes.operator.api.BaseAdmissionApi;
 import com.enonic.kubernetes.operator.ingress.Mapping;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Preconditions;
+import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.admission.v1.AdmissionReview;
 import io.fabric8.kubernetes.api.model.networking.v1.HTTPIngressPath;
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
@@ -349,11 +350,8 @@ public class AdmissionApi
     private void assertXp7Deployment( AdmissionReview admissionReview, Set<String> nodeGroups )
     {
         Optional<Xp7Deployment> xp7Deployments = getXp7Deployment( admissionReview.getRequest().getObject() );
-
-        if (xp7Deployments.isEmpty()) {
-            return;
-        }
-
+        Preconditions.checkState( xp7Deployments.isPresent(), "No Xp7Deployment found in NS '%s'",
+            ((HasMetadata) admissionReview.getRequest().getObject()).getMetadata().getNamespace() );
         if (nodeGroups != null) {
             Set<String> xpDeploymentNodeGroups = xp7Deployments.get().
                 getSpec().
