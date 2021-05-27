@@ -35,10 +35,13 @@ function buildEventConfigMapChange() {
         "apiVersion": "v1",
         "kind": "Pod",
         "name": "${XP_NODE_NAME}",
-        "namespace": "${NAMESPACE}"
+        "namespace": "${NAMESPACE}",
+        "fieldPath": "spec.containers{exp}",
+        "uid": "${POD_UID}"
     },
     "kind": "Event",
     "lastTimestamp": "$(now)",
+    "firstTimestamp": "$(now)",
     "message": "Pod ${XP_NODE_NAME} reloaded ConfigMap ${XP_NODE_GROUP}",
     "metadata": {
         "name": "${XP_NODE_NAME}.$(randomId)",
@@ -50,6 +53,9 @@ function buildEventConfigMapChange() {
         "kind": "ConfigMap",
         "name": "${XP_NODE_GROUP}",
         "namespace": "${NAMESPACE}"
+    },
+    "source": {
+      "component": "pod/${XP_NODE_NAME}"
     },
     "type": "Normal"
 }

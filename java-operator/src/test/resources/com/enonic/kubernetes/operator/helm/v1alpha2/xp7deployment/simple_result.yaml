@@ -136,15 +136,17 @@ data:
     \ EXIT\n\n\nfunction buildEventConfigMapChange() {\n    cat << EOF\n{\n    \"\
     apiVersion\": \"v1\",\n    \"involvedObject\": {\n        \"apiVersion\": \"v1\"\
     ,\n        \"kind\": \"Pod\",\n        \"name\": \"${XP_NODE_NAME}\",\n      \
-    \  \"namespace\": \"${NAMESPACE}\"\n    },\n    \"kind\": \"Event\",\n    \"lastTimestamp\"\
-    : \"$(now)\",\n    \"message\": \"Pod ${XP_NODE_NAME} reloaded ConfigMap ${XP_NODE_GROUP}\"\
-    ,\n    \"metadata\": {\n        \"name\": \"${XP_NODE_NAME}.$(randomId)\",\n \
-    \       \"namespace\": \"${NAMESPACE}\"\n    },\n    \"reason\": \"ConfigReload\"\
-    ,\n    \"related\": {\n        \"apiVersion\": \"v1\",\n        \"kind\": \"ConfigMap\"\
-    ,\n        \"name\": \"${XP_NODE_GROUP}\",\n        \"namespace\": \"${NAMESPACE}\"\
-    \n    },\n    \"type\": \"Normal\"\n}\nEOF\n}\n\nfunction sendEvent() {\n    (cat\
-    \ - | curl -f -s -X POST -H \"Accept: application/json\" -H \"Content-Type: application/json\"\
-    \ -H \"Authorization: Bearer `cat /run/secrets/kubernetes.io/serviceaccount/token`\"\
+    \  \"namespace\": \"${NAMESPACE}\",\n        \"fieldPath\": \"spec.containers{exp}\"\
+    ,\n        \"uid\": \"${POD_UID}\"\n    },\n    \"kind\": \"Event\",\n    \"lastTimestamp\"\
+    : \"$(now)\",\n    \"firstTimestamp\": \"$(now)\",\n    \"message\": \"Pod ${XP_NODE_NAME}\
+    \ reloaded ConfigMap ${XP_NODE_GROUP}\",\n    \"metadata\": {\n        \"name\"\
+    : \"${XP_NODE_NAME}.$(randomId)\",\n        \"namespace\": \"${NAMESPACE}\"\n\
+    \    },\n    \"reason\": \"ConfigReload\",\n    \"related\": {\n        \"apiVersion\"\
+    : \"v1\",\n        \"kind\": \"ConfigMap\",\n        \"name\": \"${XP_NODE_GROUP}\"\
+    ,\n        \"namespace\": \"${NAMESPACE}\"\n    },\n    \"source\": {\n      \"\
+    component\": \"pod/${XP_NODE_NAME}\"\n    },\n    \"type\": \"Normal\"\n}\nEOF\n\
+    }\n\nfunction sendEvent() {\n    (cat - | curl -f -s -X POST -H \"Accept: application/json\"\
+    \ -H \"Content-Type: application/json\" -H \"Authorization: Bearer `cat /run/secrets/kubernetes.io/serviceaccount/token`\"\
     \ --cacert /run/secrets/kubernetes.io/serviceaccount/ca.crt -d @- https://kubernetes.default.svc.cluster.local/api/v1/namespaces/`cat\
     \ /run/secrets/kubernetes.io/serviceaccount/namespace`/events > /dev/null || (echo\
     \ \"failed\" && false)) && echo \"success\"\n    #(cat - | kubectl apply -f -\
@@ -155,7 +157,7 @@ data:
     }\n\nOLD_HASHCODE=\"\"\n\nlogWithNL \"Starting event loop\"\n\nwhile [[ \"${RUNNING}\"\
     \ == \"true\" ]]; do\n  NEW_HASHCODE=$(getConfigHash)\n  if [[ \"${NEW_HASHCODE}\"\
     \ != \"${OLD_HASHCODE}\" ]]; then\n    cmEvent\n  fi\n  OLD_HASHCODE=${NEW_HASHCODE}\n\
-    \  sleep 2\ndone"
+    \  sleep 2\ndone\n"
   preStart.sh: "#!/usr/bin/env bash\n\necho \"Running prescript for node ${XP_NODE_NAME}\
     \ (${XP_NODE_IP})\"\n\necho \"Bootstrap deploy folder apps\"\n\n# Delete apps\n\
     for f in $(find $XP_HOME/deploy -name '*.jar'); do\n  name=$(basename $f)\n  if\
@@ -674,6 +676,11 @@ spec:
             fieldRef:
               apiVersion: "v1"
               fieldPath: "metadata.namespace"
+        - name: "POD_UID"
+          valueFrom:
+            fieldRef:
+              apiVersion: "v1"
+              fieldPath: "metadata.uid"
         - name: "XP_NODE_NAME"
           valueFrom:
             fieldRef:

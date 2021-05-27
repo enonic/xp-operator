@@ -152,6 +152,11 @@ public class Predicates
         return fieldEquals( c, ConfigMap::getData ).and( fieldEquals( c, ConfigMap::getBinaryData ) );
     }
 
+    public static Predicate<ConfigMap> dataNotEquals( ConfigMap c )
+    {
+        return dataEquals( c ).negate();
+    }
+
     public static Predicate<Xp7Config> inNodeGroup( String... nodegroup )
     {
         return ( r ) -> Arrays.asList( nodegroup ).contains( r.getSpec().getNodeGroup() );

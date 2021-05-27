@@ -1,6 +1,8 @@
 package com.enonic.kubernetes.operator.v1alpha2xp7config;
 
 import com.enonic.kubernetes.client.v1alpha2.Xp7Config;
+import com.enonic.kubernetes.common.TaskRunner;
+import com.enonic.kubernetes.kubernetes.ActionLimiter;
 import com.enonic.kubernetes.kubernetes.Clients;
 import com.enonic.kubernetes.kubernetes.Searchers;
 import com.enonic.kubernetes.kubernetes.commands.K8sLogHelper;
@@ -46,8 +48,14 @@ public class OperatorConfigMapSync
     @Inject
     Searchers searchers;
 
+    @Inject
+    TaskRunner taskRunner;
+
+    ActionLimiter limiter;
+
     void onStart( @Observes StartupEvent ev )
     {
+        limiter = new ActionLimiter( taskRunner );
         operator.schedule( cfgLong( "operator.tasks.sync.interval" ), this );
     }
 
@@ -62,12 +70,12 @@ public class OperatorConfigMapSync
     protected void handle( final String namespace )
     {
         // Handle all ConfigMaps in namespace with nodeGroup label
-        searchers.configMap().stream().
+        limiter.limit( 1000L, namespace, String::hashCode, () -> searchers.configMap().stream().
             filter( inNamespace( namespace ) ).
             filter( isDeleted().negate() ).
             filter( hasLabel( cfgStr( "operator.charts.values.labelKeys.nodeGroup" ) ) ).
             filter( isBeingBackupRestored().negate() ).
-            forEach( this::handle );
+            forEach( this::handle ) );
     }
 
     private synchronized void handle( final ConfigMap configMap )
