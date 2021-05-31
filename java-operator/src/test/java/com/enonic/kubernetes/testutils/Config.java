@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
@@ -33,6 +34,12 @@ public class Config
     public Map<String, String> getProperties()
     {
         return map;
+    }
+
+    @Override
+    public Set<String> getPropertyNames()
+    {
+        return map.keySet();
     }
 
     @Override
