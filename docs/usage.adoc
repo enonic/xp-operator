@@ -21,7 +21,7 @@ metadata:
   namespace: my-namespace
 spec:
   enabled: true     # Should the pods be running
-  xpVersion: 7.6.0  # XP version, has to be >=7.6.0
+  xpVersion: 7.7.0  # XP version, has to be >=7.7.0
 
   # List of preinstalled apps
   nodesPreinstalledApps:
@@ -223,7 +223,7 @@ metadata:
 $ kubectl -n my-namespace get xp7deployments.enonic.cloud 
 
 NAME            ENABLED   VERSION   STATE     MSG
-my-deployment   true      7.6.0     RUNNING   OK
+my-deployment   true      7.7.0     RUNNING   OK
 ----
 
 === Get config status
@@ -288,7 +288,7 @@ _  _ \_  __ \  __ \_  __ \_  /_  ___/   __  |/_/__  __ \
 \___//_/ /_/\____//_/ /_//_/  \___/     /_/|_| _  .___/
                                                /_/
 
-# Enonic XP 7.6.0
+# Enonic XP 7.7.0
 # Built on 2021-02-02T15:28:02Z (hash = 632195fda1bf0e9ce4a314d70b403ef731955ad0, branch = 7.6)
 # OpenJDK 64-Bit Server VM 11.0.10 (AdoptOpenJDK)
 # Linux 4.19.157 (amd64)
@@ -348,7 +348,7 @@ metadata:
   namespace: my-namespace
 spec:
   enabled: true
-  xpVersion: 7.6.0
+  xpVersion: 7.7.0
 
   # Preinstall snapshotter on all nodes
   nodesPreinstalledApps:
@@ -480,7 +480,7 @@ metadata:
   namespace: my-namespace
 spec:
   enabled: true
-  xpVersion: 7.6.0
+  xpVersion: 7.7.0
 
   # Preinstall snapshotter on all nodes
   nodesPreinstalledApps:
