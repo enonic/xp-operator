@@ -5,6 +5,8 @@ KIND_CTX:=kind-kind
 NFS_SERVER_NAME:=kind-nfs-server
 NFS_SERVER_VOLUME:=kind-nfs-server
 
+PRELOAD_IMAGES:=gcr.io/playground-186616/enonic-xp:nightly enonic/xp:7.7.0-B2-ubuntu
+
 .PHONY: kind-setup kind-bootstrap kind-ingress kind-up kind-down help
 .DEFAULT_GOAL:=help
 
@@ -48,14 +50,8 @@ kind-bootstrap:
 		nfs/nfs-subdir-external-provisioner
 	
 	# Preload XP images
-	@docker pull enonic/xp:7.6.0-ubuntu
-	@kind load docker-image enonic/xp:7.6.0-ubuntu
-
-	@docker pull enonic/xp:7.6.1-ubuntu
-	@kind load docker-image enonic/xp:7.6.1-ubuntu
-
-	@docker pull gcr.io/playground-186616/enonic-xp:nightly
-	@kind load docker-image gcr.io/playground-186616/enonic-xp:nightly
+	@for IMG in ${PRELOAD_IMAGES}; do docker pull $${IMG}; done
+	@for IMG in ${PRELOAD_IMAGES}; do kind load docker-image $${IMG}; done
 
 kind-dev: ## Setup cluster for development mode (env var MY_IP required)
 	# Ensure MY_IP is set
