@@ -7,7 +7,7 @@
 
     <groupId>com.enonic.kubernetes</groupId>
     <artifactId>client</artifactId>
-    <version>0.17.3</version>
+    <version>0.17.4-SNAPSHOT</version>
 
     <distributionManagement>
         <repository>
