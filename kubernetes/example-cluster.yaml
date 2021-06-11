@@ -15,7 +15,7 @@ metadata:
   namespace: my-namespace
 spec:
   enabled: true
-  xpVersion: 7.6.0
+  xpVersion: 7.7.0-B2
 
   # Preinstall snapshotter on all nodes
   nodesPreinstalledApps:
@@ -144,4 +144,4 @@ spec:
               service:
                 name: worker
                 port:
-number:8080
+                  number: 8080

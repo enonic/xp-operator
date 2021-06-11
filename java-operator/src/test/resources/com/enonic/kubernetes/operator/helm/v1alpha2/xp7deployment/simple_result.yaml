@@ -607,7 +607,7 @@ spec:
         - name: "XP_OPTS"
           value: "-Xms154m -Xmx154m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof\
             \ -Dhazelcast.shutdownhook.policy=GRACEFUL -Dhazelcast.graceful.shutdown.max.wait=600"
-        image: "enonic/xp:7.1.2-ubuntu"
+        image: "enonic/xp:7.7.0-ubuntu"
         imagePullPolicy: "IfNotPresent"
         name: "exp"
         ports:
@@ -688,7 +688,7 @@ spec:
               fieldPath: "metadata.name"
         - name: "XP_NODE_GROUP"
           value: "fisk"
-        image: "enonic/xp:7.1.2-ubuntu"
+        image: "enonic/xp:7.7.0-ubuntu"
         imagePullPolicy: "IfNotPresent"
         name: "events"
         securityContext:
@@ -710,7 +710,7 @@ spec:
         - "sysctl"
         - "-w"
         - "vm.max_map_count=262144"
-        image: "enonic/xp:7.1.2-ubuntu"
+        image: "enonic/xp:7.7.0-ubuntu"
         imagePullPolicy: "IfNotPresent"
         name: "configure-sysctl"
         resources: {}

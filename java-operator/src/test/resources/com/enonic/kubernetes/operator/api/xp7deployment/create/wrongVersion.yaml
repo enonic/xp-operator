@@ -45,7 +45,7 @@ assertResult:
     namespace: "mycloud-mysolution-myenv-myservice2"
   spec:
     enabled: true
-    xpVersion: "7.1.2"
+    xpVersion: "7.7.0"
     nodesSharedDisks:
       - name: "blobstore"
         size: "1Gi"
@@ -69,4 +69,4 @@ assertResult:
     fields:
       pods: [ ]
 
-assertException: "Operator only supports XP version 7.6 and higher"
+assertException: "Operator only supports XP version 7.7 and higher"

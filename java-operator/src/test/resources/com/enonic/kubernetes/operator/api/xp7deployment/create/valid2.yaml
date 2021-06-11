@@ -14,7 +14,7 @@ admissionRequest:
           service: myservice2
       spec:
         enabled: true
-        xpVersion: enonic/xp:7.6.1-ubuntu
+        xpVersion: enonic/xp:7.7.1-ubuntu
         nodesSharedDisks:
           - name: blobstore
             size: 1Gi
@@ -45,7 +45,7 @@ assertResult:
     namespace: "mycloud-mysolution-myenv-myservice2"
   spec:
     enabled: true
-    xpVersion: "enonic/xp:7.6.1-ubuntu"
+    xpVersion: "enonic/xp:7.7.1-ubuntu"
     nodesSharedDisks:
       - name: "blobstore"
         size: "1Gi"

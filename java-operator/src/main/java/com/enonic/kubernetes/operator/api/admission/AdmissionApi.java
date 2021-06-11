@@ -276,7 +276,7 @@ public class AdmissionApi
                 newDeployment.getMetadata().getNamespace() );
 
             // Assert version is > 7.5.X, if we cant parse version, just let it go
-            ComparableVersion currentVersion = new ComparableVersion( "7.6.0" );
+            ComparableVersion currentVersion = new ComparableVersion( "7.7.0" );
             try {
                 if (newDeployment.getSpec().getXpVersion().startsWith( "7." )) {
                     currentVersion = new ComparableVersion( newDeployment.getSpec().getXpVersion() );
@@ -291,8 +291,8 @@ public class AdmissionApi
                 // Just ignore
             }
 
-            Preconditions.checkState( currentVersion.compareTo( new ComparableVersion( "7.5.100" ) ) > 0,
-                "Operator only supports XP version 7.6 and higher" );
+            Preconditions.checkState( currentVersion.compareTo( new ComparableVersion( "7.6.100" ) ) > 0,
+                "Operator only supports XP version 7.7 and higher" );
         }
     }
 
