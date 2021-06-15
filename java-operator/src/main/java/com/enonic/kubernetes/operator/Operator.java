@@ -44,7 +44,7 @@ public class Operator
         taskRunner.scheduleOneTime( () -> {
             log.info( "Starting informers" );
             informers.informerFactory().startAllRegisteredInformers();
-        }, initialDelay + 1000L, TimeUnit.MILLISECONDS );
+        }, initialDelay + 5000L, TimeUnit.MILLISECONDS );
     }
 
     public void schedule( long periodMs, Runnable runnable )
