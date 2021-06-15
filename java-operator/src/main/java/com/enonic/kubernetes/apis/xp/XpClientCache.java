@@ -83,7 +83,7 @@ public class XpClientCache
         return client;
     }
 
-    private synchronized void invalidate( final XpClientCacheKey key )
+    private void invalidate( final XpClientCacheKey key )
     {
         log.debug( String.format( "XpClientCache invalidate: %s", key ) );
         clientCreatorCache.invalidate( key );

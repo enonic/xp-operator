@@ -36,7 +36,7 @@ public class HandlerStatus
     @Inject
     XpClientCache xpClientCache;
 
-    public synchronized boolean updateStatus( final Xp7Deployment deployment, final Xp7App app )
+    public boolean updateStatus( final Xp7Deployment deployment, final Xp7App app )
     {
         Optional<AppInfo> appInfo = Optional.empty();
 
@@ -51,7 +51,7 @@ public class HandlerStatus
         return updateStatus( Optional.of( app ), findDeployment( app.getMetadata().getNamespace() ), appInfo, Optional.empty() );
     }
 
-    public synchronized boolean updateStatus( final Xp7Deployment deployment )
+    public boolean updateStatus( final Xp7Deployment deployment )
         throws IOException
     {
         return searchers.xp7App()
@@ -61,17 +61,17 @@ public class HandlerStatus
             .contains( true );
     }
 
-    public synchronized boolean updateStatus( final Xp7App app, final AppEvent appEvent )
+    public boolean updateStatus( final Xp7App app, final AppEvent appEvent )
     {
         return updateStatus( Optional.of( app ), findDeployment( appEvent.namespace() ), Optional.of( appEvent.info() ), Optional.empty() );
     }
 
-    public synchronized boolean updateStatus( final Xp7App app, final AppInfo appInfo )
+    public boolean updateStatus( final Xp7App app, final AppInfo appInfo )
     {
         return updateStatus( Optional.of( app ), findDeployment( app.getMetadata().getNamespace() ), Optional.of( appInfo ), Optional.empty() );
     }
 
-    public synchronized boolean updateStatus( final Xp7App app, final String error )
+    public boolean updateStatus( final Xp7App app, final String error )
     {
         return updateStatus( Optional.of( app ), findDeployment( app.getMetadata().getNamespace() ), Optional.empty(), Optional.of( error ) );
     }

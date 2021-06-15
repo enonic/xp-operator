@@ -83,7 +83,7 @@ public class OperatorXp7DeploymentStatus
             forEach( this::handle );
     }
 
-    private synchronized void handle( final Pod pod )
+    private void handle( final Pod pod )
     {
         Optional<Xp7Deployment> xp7Deployment = searchers.xp7Deployment().find( inSameNamespaceAs( pod ) );
 

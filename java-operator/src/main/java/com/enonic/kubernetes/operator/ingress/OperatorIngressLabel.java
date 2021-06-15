@@ -76,7 +76,7 @@ public class OperatorIngressLabel
             forEach( this::setStatus );
     }
 
-    private synchronized void handle( final Xp7Config xp7Config )
+    private void handle( final Xp7Config xp7Config )
     {
         searchers.ingress().stream().
             filter( inSameNamespaceAs( xp7Config ) ).
@@ -85,7 +85,7 @@ public class OperatorIngressLabel
             forEach( this::setStatus );
     }
 
-    private synchronized void setStatus( final Ingress ingress )
+    private void setStatus( final Ingress ingress )
     {
         // Collect all nodegroup vhost states
         Map<String, Xp7ConfigStatus.State> states = searchers.xp7Config().stream().

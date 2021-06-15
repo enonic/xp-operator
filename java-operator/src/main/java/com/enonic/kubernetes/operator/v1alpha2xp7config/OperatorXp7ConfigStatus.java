@@ -67,7 +67,7 @@ public class OperatorXp7ConfigStatus
         // Do nothing
     }
 
-    private synchronized void handle( final Event newEvent )
+    private void handle( final Event newEvent )
     {
         // Find out when the configmap was last updated
         Optional<Instant> configMapLastModifiedAt = searchers.event().stream().

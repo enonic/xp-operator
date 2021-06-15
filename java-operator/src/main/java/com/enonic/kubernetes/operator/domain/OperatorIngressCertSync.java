@@ -64,7 +64,7 @@ public class OperatorIngressCertSync
         // Do nothing
     }
 
-    public synchronized void handle( final Ingress ingress )
+    public void handle( final Ingress ingress )
     {
         // Ignore if ingress is not relevant
         if (!ingressRelevant( ingress )) {

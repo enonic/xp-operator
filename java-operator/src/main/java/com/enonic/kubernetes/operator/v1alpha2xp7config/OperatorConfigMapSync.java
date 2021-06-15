@@ -78,7 +78,7 @@ public class OperatorConfigMapSync
             forEach( this::handle ) );
     }
 
-    private synchronized void handle( final ConfigMap configMap )
+    private void handle( final ConfigMap configMap )
     {
         // Namespace is being deleted
         if (searchers.namespace().stream().

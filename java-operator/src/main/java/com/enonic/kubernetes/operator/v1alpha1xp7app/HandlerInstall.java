@@ -39,7 +39,7 @@ public class HandlerInstall
     @Inject
     XpClientCache xpClientCache;
 
-    public synchronized void installApp( final Xp7App app )
+    public void installApp( final Xp7App app )
     {
         // XP not in running
         if (!searchers.xp7Deployment().match( parent( app ), running(), isNotDeleted() )) {
@@ -67,7 +67,7 @@ public class HandlerInstall
     }
 
     @SuppressWarnings("UnusedReturnValue")
-    public synchronized boolean uninstallApp( final Xp7App app )
+    public boolean uninstallApp( final Xp7App app )
     {
         // If whole namespace is being deleted just remove the app finalizer
         if (searchers.namespace().match( contains( app ), isDeleted() )) {

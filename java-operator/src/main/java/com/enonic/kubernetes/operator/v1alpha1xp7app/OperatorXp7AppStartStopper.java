@@ -76,7 +76,7 @@ public class OperatorXp7AppStartStopper
             .forEach( this::handle );
     }
 
-    private synchronized void handle( final Xp7App xp7App )
+    private void handle( final Xp7App xp7App )
     {
         // Bail if app has not been installed
         if (notSuccessfullyInstalled().test( xp7App )) {
