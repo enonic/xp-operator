@@ -101,10 +101,10 @@ public class XpClient
         try {
             boolean connected = onOpenLatch.await( timeout, TimeUnit.MILLISECONDS );
             if (!connected) {
-                throw new XpClientException( String.format( "Timed out waiting for SSE connection on ''", params.url() ) );
+                throw new XpClientException( String.format( "Timed out waiting for SSE connection on '%s'", params.url() ) );
             }
         } catch (InterruptedException e) {
-            throw new XpClientException( String.format( "Interrupted while waiting for SSE connection on ''", params.url() ) );
+            throw new XpClientException( String.format( "Interrupted while waiting for SSE connection on '%s'", params.url() ) );
         }
     }
 
