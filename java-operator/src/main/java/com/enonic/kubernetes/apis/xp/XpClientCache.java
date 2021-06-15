@@ -45,7 +45,7 @@ public class XpClientCache
     @Inject
     public XpClientCache( final Clients clients )
     {
-        singletonAssert(this, "constructor");
+        singletonAssert( this, "constructor" );
         this.client = clients.k8s();
         clientCreatorCache = CacheBuilder.newBuilder().
             maximumSize( 1000 ).
@@ -55,8 +55,9 @@ public class XpClientCache
 
     @Override
     public XpClient load( final XpClientCacheKey key )
-        throws IOException
+        throws XpClientException
     {
+        log.debug( String.format( "XpClientCache load: %s", key ) );
         Secret secret = client.secrets().
             inNamespace( key.namespace() ).
             withName( "su" ).
@@ -64,7 +65,7 @@ public class XpClientCache
         Preconditions.checkState( secret != null, "Cannot find 'su' secret" );
         Preconditions.checkState( secret.getData().containsKey( "pass" ), "Cannot find key 'pass' in 'su' secret" );
 
-        return new XpClient(
+        XpClient client = new XpClient(
             XpClientParamsImpl.builder()
                 .namespace( key.namespace() )
                 .nodeGroup( key.nodeGroup() )
@@ -72,8 +73,20 @@ public class XpClientCache
                 .password( new String( baseEncoding.decode( secret.getData().get( "pass" ) ) ) )
                 .timeout( cfgLong( "operator.deployment.xp.management.timeout" ) )
                 .build(),
-            () -> clientCreatorCache.invalidate( key )
+            () -> this.invalidate( key )
         );
+
+        log.debug( String.format( "XpClientCache load waiting for SSE connection: %s", key ) );
+        client.waitForConnection( cfgLong( "operator.deployment.xp.management.timeout" ) );
+        log.debug( String.format( "XpClientCache load successful: %s", key ) );
+
+        return client;
+    }
+
+    private synchronized void invalidate( final XpClientCacheKey key )
+    {
+        log.debug( String.format( "XpClientCache invalidate: %s", key ) );
+        clientCreatorCache.invalidate( key );
     }
 
     private String defaultNodeGroup()
@@ -87,42 +100,42 @@ public class XpClientCache
     }
 
     private synchronized XpClient getClient( XpClientCacheKey key )
-        throws IOException
+        throws XpClientException
     {
         try {
             return clientCreatorCache.get( key );
         } catch (ExecutionException e) {
             if (e.getCause() != null && e.getCause() instanceof IOException) {
-                throw (IOException) e.getCause();
+                throw (XpClientException) e.getCause();
             } else {
                 throw new RuntimeException( e );
             }
         }
     }
 
-    public synchronized void appAddListener( final String namespace, final Consumer<AppEvent> eventConsumer )
-        throws IOException
+    public void appAddListener( final String namespace, final Consumer<AppEvent> eventConsumer )
+        throws XpClientException
     {
         getClient( XpClientCacheKeyImpl.of( namespace, defaultNodeGroup() ) ).addEventListener( eventConsumer );
     }
 
     @SuppressWarnings("WeakerAccess")
     public AppInfo appInstall( final String namespace, final String url, final String sha512 )
-        throws IOException
+        throws XpClientException
     {
         AppInstallResponse res = getClient( XpClientCacheKeyImpl.of( namespace, defaultNodeGroup() ) ).appInstall(
             ImmutableAppInstallRequest.builder().url( url ).sha512( sha512 ).build() );
         if (res.failure() == null) {
             log( namespace, "INSTALL app", res.applicationInstalledJson().application().key() );
         } else {
-            throw new IOException( res.failure() );
+            throw new XpClientException( res.failure() );
         }
         return res.applicationInstalledJson().application();
     }
 
     @SuppressWarnings("WeakerAccess")
     public void appUninstall( final String namespace, final String key )
-        throws IOException
+        throws XpClientException
     {
         log( namespace, "UNINSTALL app", key );
         getClient( XpClientCacheKeyImpl.of( namespace, defaultNodeGroup() ) ).appUninstall(
@@ -130,7 +143,7 @@ public class XpClientCache
     }
 
     public void appStart( final String namespace, final String key )
-        throws IOException
+        throws XpClientException
     {
         log( namespace, "START app", key );
         getClient( XpClientCacheKeyImpl.of( namespace, defaultNodeGroup() ) ).appStart(
@@ -138,7 +151,7 @@ public class XpClientCache
     }
 
     public void appStop( final String namespace, final String key )
-        throws IOException
+        throws XpClientException
     {
         log( namespace, "STOP app", key );
         getClient( XpClientCacheKeyImpl.of( namespace, defaultNodeGroup() ) ).appStop(
@@ -146,13 +159,13 @@ public class XpClientCache
     }
 
     public List<AppInfo> appList( final String namespace )
-        throws IOException
+        throws XpClientException
     {
         return getClient( XpClientCacheKeyImpl.of( namespace, defaultNodeGroup() ) ).appList();
     }
 
     public Optional<AppInfo> appInfo( final String namespace, final String key )
-        throws IOException
+        throws XpClientException
     {
         return appList( namespace ).stream().filter( appInfo -> appInfo.key().equals( key ) ).findFirst();
     }
@@ -164,6 +177,5 @@ public class XpClientCache
             collect( Collectors.toList() );
 
         clients.forEach( e -> e.getValue().closeClient( null ) );
-        clients.forEach( e -> clientCreatorCache.invalidate( e.getKey() ) );
     }
 }

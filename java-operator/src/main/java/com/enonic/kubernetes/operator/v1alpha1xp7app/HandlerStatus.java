@@ -1,6 +1,7 @@
 package com.enonic.kubernetes.operator.v1alpha1xp7app;
 
 import com.enonic.kubernetes.apis.xp.XpClientCache;
+import com.enonic.kubernetes.apis.xp.XpClientException;
 import com.enonic.kubernetes.apis.xp.service.AppEvent;
 import com.enonic.kubernetes.apis.xp.service.AppInfo;
 import com.enonic.kubernetes.client.v1alpha1.Xp7App;
@@ -42,7 +43,7 @@ public class HandlerStatus
         if (successfullyInstalled().test( app ) && running().test( deployment )) {
             try {
                 appInfo = xpClientCache.appInfo( app.getMetadata().getNamespace(), app.getStatus().getXp7AppStatusFields().getXp7AppStatusFieldsAppInfo().getKey() );
-            } catch (IOException e) {
+            } catch (XpClientException e) {
                 return updateStatus( Optional.of( app ), findDeployment( app.getMetadata().getNamespace() ), appInfo, Optional.of( "Unable to connect to XP" ) );
             }
         }

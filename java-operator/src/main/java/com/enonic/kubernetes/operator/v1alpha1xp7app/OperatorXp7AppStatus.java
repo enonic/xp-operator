@@ -1,6 +1,7 @@
 package com.enonic.kubernetes.operator.v1alpha1xp7app;
 
 import com.enonic.kubernetes.apis.xp.XpClientCache;
+import com.enonic.kubernetes.apis.xp.XpClientException;
 import com.enonic.kubernetes.apis.xp.service.AppEvent;
 import com.enonic.kubernetes.apis.xp.service.AppEventType;
 import com.enonic.kubernetes.client.v1alpha1.Xp7App;
@@ -15,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -82,7 +82,7 @@ public class OperatorXp7AppStatus
             if (running().test( deployment )) {
                 try {
                     xpClientCache.appAddListener( deployment.getMetadata().getNamespace(), this );
-                } catch (IOException e) {
+                } catch (XpClientException e) {
                     log.warn( String.format( "Failed adding app status listener in NS %s: %s", deployment.getMetadata().getNamespace(),
                         e.getMessage() ) );
                 }

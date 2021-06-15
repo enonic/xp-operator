@@ -25,17 +25,18 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class XpClient
+    extends EventSourceListener
 {
     private static final Logger log = LoggerFactory.getLogger( XpClient.class );
 
@@ -51,8 +52,6 @@ public class XpClient
 
     private final Function<String, Request.Builder> requestBuilder;
 
-    private Boolean clientAlive;
-
     private final XpClientParams params;
 
     private final Map<String, AppInfo> appMap;
@@ -62,12 +61,11 @@ public class XpClient
     private final CountDownLatch onOpenLatch;
 
     public XpClient( final XpClientParams p, final Runnable onClose )
-        throws IOException
     {
+        log.debug( String.format( "XP: Creating client for %s", p.url() ) );
         this.onClose = onClose;
-        this.appMap = new HashMap<>();
+        this.appMap = new ConcurrentHashMap<>();
         this.params = p;
-        this.clientAlive = false;
 
         requestBuilder = url -> new Request.Builder().url( params.url() + url );
 
@@ -80,51 +78,27 @@ public class XpClient
             .callTimeout( params.timeout(), TimeUnit.MILLISECONDS )
             .readTimeout( 0L, TimeUnit.MILLISECONDS )
             .build();
-        restClient = sseClient.newBuilder()
+
+        restClient = new OkHttpClient().newBuilder()
+            .addInterceptor( new XpAuthenticator( params.username(), params.password() ) )
+            .connectTimeout( params.timeout(), TimeUnit.MILLISECONDS )
+            .callTimeout( params.timeout(), TimeUnit.MILLISECONDS )
             .readTimeout( params.timeout(), TimeUnit.MILLISECONDS )
             .build();
-
 
         // Open up SSE
         eventSources = EventSources
             .createFactory( sseClient )
-            .newEventSource( requestBuilder.apply( "/app/events" ).build(), new EventSourceListener()
-            {
-                @Override
-                public void onClosed( @NotNull EventSource eventSource )
-                {
-                    onSSEClosed( eventSource );
-                }
+            .newEventSource( requestBuilder.apply( "/app/events" ).build(), this );
+    }
 
-                @Override
-                public void onEvent( @NotNull EventSource eventSource, @Nullable String id, @Nullable String type, @NotNull String data )
-                {
-                    onSSEEvent( eventSource, id, type, data );
-                }
-
-                @Override
-                public void onFailure( @NotNull EventSource eventSource, @Nullable Throwable t, @Nullable Response response )
-                {
-                    onSSEFailure( eventSource, t, response );
-                }
-
-                @Override
-                public void onOpen( @NotNull EventSource eventSource, @NotNull Response response )
-                {
-                    onSSEOpen( eventSource, response );
-                }
-            } );
-
+    public void waitForConnection( final long timeout )
+        throws XpClientException
+    {
         try {
-            onOpenLatch.await( params.timeout(), TimeUnit.MILLISECONDS );
+            onOpenLatch.await( timeout, TimeUnit.MILLISECONDS );
         } catch (InterruptedException e) {
-            throw new IOException( String.format(
-                "XP: SSE event source timed out for '%s' in NS '%s': %s",
-                params.nodeGroup(),
-                params.namespace() ) );
-        }
-        if (!clientAlive) {
-            throw new IOException( "Could not create client" );
+            throw new XpClientException( String.format( "Timed out waiting for SSE connection on ''", params.url() ) );
         }
     }
 
@@ -135,7 +109,8 @@ public class XpClient
         }
     }
 
-    private void onSSEClosed( @NotNull EventSource eventSource )
+    @Override
+    public void onClosed( @NotNull EventSource eventSource )
     {
         log.debug( String.format(
             "XP: SSE event source closed from '%s' in NS '%s'",
@@ -144,7 +119,8 @@ public class XpClient
         closeClient( null );
     }
 
-    private void onSSEEvent( @NotNull EventSource eventSource, @Nullable String eventId, @Nullable String eventType, @NotNull String eventData )
+    @Override
+    public void onEvent( @NotNull EventSource eventSource, @Nullable String id, @Nullable String eventType, @NotNull String eventData )
     {
         log.debug( String.format(
             "XP: SSE event '%s' received from '%s' in NS '%s': %s",
@@ -180,7 +156,8 @@ public class XpClient
         }
     }
 
-    private void onSSEFailure( @NotNull EventSource eventSource, @Nullable Throwable t, @Nullable Response response )
+    @Override
+    public void onFailure( @NotNull EventSource eventSource, @Nullable Throwable t, @Nullable Response response )
     {
         log.error( String.format(
             "XP: SSE event source error from '%s' in NS '%s': %s",
@@ -190,16 +167,16 @@ public class XpClient
         closeClient( t );
     }
 
-    private synchronized void onSSEOpen( @NotNull EventSource eventSource, @NotNull Response response )
+    @Override
+    public void onOpen( @NotNull EventSource eventSource, @NotNull Response response )
     {
         log.info( String.format(
             "XP: SSE event source opened to '%s' in NS '%s'",
             params.nodeGroup(),
             params.namespace() ) );
-        clientAlive = true;
     }
 
-    private synchronized void handleAppInfo( final AppEventType type, final AppInfo info )
+    private void handleAppInfo( final AppEventType type, final AppInfo info )
     {
         appMap.put( info.key(), info );
         onEventConsumers.forEach( consumer -> consumer.accept( ImmutableAppEvent.
@@ -212,7 +189,7 @@ public class XpClient
             build() ) );
     }
 
-    private synchronized void handleAppUninstall( final AppEventType type, final AppKey key )
+    private void handleAppUninstall( final AppEventType type, final AppKey key )
     {
         appMap.remove( key.key() );
         onEventConsumers.forEach( consumer -> consumer.accept( ImmutableAppEvent.
@@ -224,41 +201,24 @@ public class XpClient
             build() ) );
     }
 
-    public synchronized void closeClient( Throwable t )
+    public void closeClient( Throwable t )
     {
         if (t != null) {
             log.debug( t.getMessage(), t );
         }
 
-        openLatch();
+        log.warn( String.format(
+            "XP: SSE event source closed to '%s' in NS '%s'",
+            params.nodeGroup(),
+            params.namespace() ) );
 
-        if (clientAlive) {
-            log.info( String.format(
-                "XP: SSE event source closed to '%s' in NS '%s'",
-                params.nodeGroup(),
-                params.namespace() ) );
-            
-            eventSources.cancel();
-            sseClient.dispatcher().executorService().shutdown();
-            restClient.dispatcher().executorService().shutdown();
-            clientAlive = false;
-            onClose.run();
-        }
+        eventSources.cancel();
+        sseClient.dispatcher().executorService().shutdown();
+        restClient.dispatcher().executorService().shutdown();
+        onClose.run();
     }
 
-    private synchronized void assertClient()
-        throws IOException
-    {
-        if (!clientAlive) {
-            throw new IOException( String.format(
-                "XP: Client not open to '%s' in NS '%s'",
-                params.nodeGroup(),
-                params.namespace() ) );
-        }
-    }
-
-    public synchronized void addEventListener( Consumer<AppEvent> eventListener )
-        throws IOException
+    public void addEventListener( Consumer<AppEvent> eventListener )
     {
         onEventConsumers.add( eventListener );
         appList().forEach( a -> eventListener.accept( ImmutableAppEvent.
@@ -271,30 +231,29 @@ public class XpClient
             build() ) );
     }
 
-    public synchronized List<AppInfo> appList()
-        throws IOException
+    public List<AppInfo> appList()
     {
-        assertClient();
         return new ArrayList<>( appMap.values() );
     }
 
     public AppInstallResponse appInstall( AppInstallRequest req )
-        throws IOException
+        throws XpClientException
     {
-        assertClient();
-        Request request = requestBuilder.apply( "/app/installUrl" )
-            .post( RequestBody.create( MediaType.parse( "application/json" ), mapper.writeValueAsString( req ) ) )
-            .build();
-        Response response = restClient.newCall( request ).execute();
-        Preconditions.checkState( response.code() == 200, "Response code " + response.code() );
-        return mapper.readValue( response.body().bytes(), AppInstallResponse.class );
+        try {
+            Request request = requestBuilder.apply( "/app/installUrl" )
+                .post( RequestBody.create( MediaType.parse( "application/json" ), mapper.writeValueAsString( req ) ) )
+                .build();
+            Response response = restClient.newCall( request ).execute();
+            Preconditions.checkState( response.code() == 200, "Response code " + response.code() );
+            return mapper.readValue( response.body().bytes(), AppInstallResponse.class );
+        } catch (IOException e) {
+            throw new XpClientException( String.format( "Failed installing app on '%s'", params.url() ), e );
+        }
     }
 
-    private synchronized void appOp( String op, AppKey req )
+    private void appOp( String op, AppKey req )
         throws IOException
     {
-        assertClient();
-
         Request request = requestBuilder.apply( "/app/" + op )
             .post( RequestBody.create( MediaType.parse( "application/json" ), mapper.writeValueAsString( req ) ) )
             .build();
@@ -303,20 +262,32 @@ public class XpClient
     }
 
     public void appUninstall( AppKey req )
-        throws IOException
+        throws XpClientException
     {
-        appOp( "uninstall", req );
+        try {
+            appOp( "uninstall", req );
+        } catch (IOException e) {
+            throw new XpClientException( String.format( "Failed uninstalling app on '%s'", params.url() ), e );
+        }
     }
 
     public void appStart( AppKey req )
-        throws IOException
+        throws XpClientException
     {
-        appOp( "start", req );
+        try {
+            appOp( "start", req );
+        } catch (IOException e) {
+            throw new XpClientException( String.format( "Failed starting app on '%s'", params.url() ), e );
+        }
     }
 
     public void appStop( AppKey req )
-        throws IOException
+        throws XpClientException
     {
-        appOp( "stop", req );
+        try {
+            appOp( "stop", req );
+        } catch (IOException e) {
+            throw new XpClientException( String.format( "Failed stopping app on '%s'", params.url() ), e );
+        }
     }
 }

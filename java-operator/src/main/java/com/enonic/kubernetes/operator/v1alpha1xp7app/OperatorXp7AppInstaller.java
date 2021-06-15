@@ -59,6 +59,8 @@ public class OperatorXp7AppInstaller
         if (!fieldsEquals( oldResource, r -> r.getSpec().getUrl(), r -> r.getSpec().getSha512() ).test( newResource )) {
             // Try to reinstall app
             handlerInstall.triggerAppReinstall( newResource );
+        } else if (notSuccessfullyInstalled().test( newResource )) {
+            handlerInstall.installApp( newResource );
         }
     }
 
