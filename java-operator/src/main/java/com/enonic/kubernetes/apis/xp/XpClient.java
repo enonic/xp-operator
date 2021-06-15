@@ -50,26 +50,29 @@ public class XpClient
 
     private final Set<Consumer<AppEvent>> onEventConsumers;
 
+    private final Set<Consumer<Throwable>> onCloseConsumers;
+
     private final Function<String, Request.Builder> requestBuilder;
 
     private final XpClientParams params;
 
     private final Map<String, AppInfo> appMap;
 
-    private final Runnable onClose;
+    //private final Runnable onClose;
 
     private final CountDownLatch onOpenLatch;
 
-    public XpClient( final XpClientParams p, final Runnable onClose )
+    public XpClient( final XpClientParams p )
     {
         log.debug( String.format( "XP: Creating client for %s", p.url() ) );
-        this.onClose = onClose;
         this.appMap = new ConcurrentHashMap<>();
         this.params = p;
 
         requestBuilder = url -> new Request.Builder().url( params.url() + url );
 
         onEventConsumers = new HashSet<>();
+        onCloseConsumers = new HashSet<>();
+
         onOpenLatch = new CountDownLatch( 1 );
 
         sseClient = new OkHttpClient().newBuilder()
@@ -96,9 +99,12 @@ public class XpClient
         throws XpClientException
     {
         try {
-            onOpenLatch.await( timeout, TimeUnit.MILLISECONDS );
+            boolean connected = onOpenLatch.await( timeout, TimeUnit.MILLISECONDS );
+            if (!connected) {
+                throw new XpClientException( String.format( "Timed out waiting for SSE connection on ''", params.url() ) );
+            }
         } catch (InterruptedException e) {
-            throw new XpClientException( String.format( "Timed out waiting for SSE connection on ''", params.url() ) );
+            throw new XpClientException( String.format( "Interrupted while waiting for SSE connection on ''", params.url() ) );
         }
     }
 
@@ -215,7 +221,7 @@ public class XpClient
         eventSources.cancel();
         sseClient.dispatcher().executorService().shutdown();
         restClient.dispatcher().executorService().shutdown();
-        onClose.run();
+        onCloseConsumers.forEach( c -> c.accept( t ) );
     }
 
     public void addEventListener( Consumer<AppEvent> eventListener )
@@ -229,6 +235,11 @@ public class XpClient
             key( a.key() ).
             info( a ).
             build() ) );
+    }
+
+    public void addOnCloseListener( Consumer<Throwable> onCloseListener )
+    {
+        onCloseConsumers.add( onCloseListener );
     }
 
     public List<AppInfo> appList()

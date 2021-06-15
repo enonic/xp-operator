@@ -72,13 +72,14 @@ public class XpClientCache
                 .username( "su" )
                 .password( new String( baseEncoding.decode( secret.getData().get( "pass" ) ) ) )
                 .timeout( cfgLong( "operator.deployment.xp.management.timeout" ) )
-                .build(),
-            () -> this.invalidate( key )
+                .build()
         );
 
         log.debug( String.format( "XpClientCache load waiting for SSE connection: %s", key ) );
         client.waitForConnection( cfgLong( "operator.deployment.xp.management.timeout" ) );
         log.debug( String.format( "XpClientCache load successful: %s", key ) );
+
+        client.addOnCloseListener( ( t ) -> this.invalidate( key ) );
 
         return client;
     }
