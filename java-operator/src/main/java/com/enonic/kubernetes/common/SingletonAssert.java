@@ -1,13 +1,14 @@
 package com.enonic.kubernetes.common;
 
-import java.util.HashSet;
+import io.vertx.core.impl.ConcurrentHashSet;
+
 import java.util.Set;
 
 import static com.enonic.kubernetes.common.Exit.exit;
 
 public class SingletonAssert
 {
-    private static Set<String> set = new HashSet<>();
+    private static final Set<String> set = new ConcurrentHashSet<>();
 
     public static void singletonAssert( Object obj, String key )
     {
@@ -17,11 +18,9 @@ public class SingletonAssert
     public static void singletonAssert( Class klass, String key )
     {
         String k = klass.getSimpleName() + ":" + key;
-        synchronized (set) {
-            if (set.contains( k )) {
-                exit( Exit.Code.SINGLETON_FAILED, String.format( "Singleton %s called multiple times", k ) );
-            }
-            set.add( k );
+        if (set.contains( k )) {
+            exit( Exit.Code.SINGLETON_FAILED, String.format( "Singleton %s called multiple times", k ) );
         }
+        set.add( k );
     }
 }
