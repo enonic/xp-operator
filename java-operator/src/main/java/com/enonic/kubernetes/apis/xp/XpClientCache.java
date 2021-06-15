@@ -106,7 +106,7 @@ public class XpClientCache
         try {
             return clientCreatorCache.get( key );
         } catch (ExecutionException e) {
-            if (e.getCause() != null && e.getCause() instanceof IOException) {
+            if (e.getCause() != null && e.getCause() instanceof XpClientException) {
                 throw (XpClientException) e.getCause();
             } else {
                 throw new RuntimeException( e );
