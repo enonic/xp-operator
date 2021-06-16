@@ -48,8 +48,8 @@ public class XpClientCache
         singletonAssert( this, "constructor" );
         this.client = clients.k8s();
         clientCreatorCache = CacheBuilder.newBuilder().
-            maximumSize( 1000 ).
-            expireAfterWrite( 10, TimeUnit.MINUTES ).
+            maximumSize( 100000 ).
+            expireAfterWrite( 3650, TimeUnit.DAYS ).
             build( this );
     }
 
