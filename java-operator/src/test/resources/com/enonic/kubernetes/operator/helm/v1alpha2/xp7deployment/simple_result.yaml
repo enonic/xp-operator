@@ -626,11 +626,11 @@ spec:
         readinessProbe:
           failureThreshold: 2
           httpGet:
-            path: "/_cluster/health?wait_for_status=yellow&timeout=1s"
+            path: "/_cluster/health?wait_for_status=green&timeout=1s"
             port: 9200
             scheme: "HTTP"
           initialDelaySeconds: 30
-          periodSeconds: 5
+          periodSeconds: 8
           successThreshold: 3
           timeoutSeconds: 2
         resources:
@@ -973,5 +973,5 @@ metadata:
 spec:
   nodeGroup: "fisk"
   file: "com.enonic.xp.elasticsearch.cfg"
-  data: "http.enabled=true\ncluster.name=mycloud-mysolution-myenv-myservice"
+  data: "http.enabled=true\ncluster.name=mycloud-mysolution-myenv-myservice\nindex.auto_expand_replicas=0-all"
   dataBase64: false

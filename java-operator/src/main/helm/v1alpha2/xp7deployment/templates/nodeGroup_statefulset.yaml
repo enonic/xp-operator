@@ -171,15 +171,20 @@ spec:
           readinessProbe:
             failureThreshold: 2
             httpGet:
-              {{- if and (and $nodeGroup.data $.Values.deployment.clustered) $.Values.deployment.hasDedicatedFrontendNodes }}
+              {{- if not $.Values.deployment.clustered }}
+              # Single nodes
+              path: /_cluster/health?wait_for_status=green&timeout=1s
+              {{- else if and (and $nodeGroup.data $.Values.deployment.clustered) $.Values.deployment.hasDedicatedFrontendNodes }}
+              # Cluster with dedicated frontend nodes
               path: /_cluster/health?wait_for_status=green&timeout=1s
               {{ else }}
+              # Cluster with no dedicated cluster nodes
               path: /_cluster/health?wait_for_status=yellow&timeout=1s
               {{- end }}
               port: 9200
               scheme: HTTP
             initialDelaySeconds: 30
-            periodSeconds: 5
+            periodSeconds: 8
             successThreshold: 3
             timeoutSeconds: 2
 

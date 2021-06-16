@@ -774,7 +774,7 @@ spec:
             port: 9200
             scheme: "HTTP"
           initialDelaySeconds: 30
-          periodSeconds: 5
+          periodSeconds: 8
           successThreshold: 3
           timeoutSeconds: 2
         resources:
@@ -1030,7 +1030,7 @@ spec:
             port: 9200
             scheme: "HTTP"
           initialDelaySeconds: 30
-          periodSeconds: 5
+          periodSeconds: 8
           successThreshold: 3
           timeoutSeconds: 2
         resources:
@@ -1310,7 +1310,7 @@ spec:
             port: 9200
             scheme: "HTTP"
           initialDelaySeconds: 30
-          periodSeconds: 5
+          periodSeconds: 8
           successThreshold: 3
           timeoutSeconds: 2
         resources:

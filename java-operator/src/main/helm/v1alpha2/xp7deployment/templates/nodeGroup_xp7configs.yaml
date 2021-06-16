@@ -49,7 +49,9 @@ spec:
   data: |-
     http.enabled=true
     cluster.name={{ $.Values.deployment.name }}
-    {{- if $.Values.deployment.clustered }}
+    {{- if not $.Values.deployment.clustered }}
+    index.auto_expand_replicas=0-all
+    {{ else }}
     node.master=${env.XP_IS_MASTER}
     node.data=${env.XP_IS_DATA}
     gateway.expected_master_nodes=${env.XP_ES_MIN_MASTERS}
