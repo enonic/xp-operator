@@ -42,7 +42,7 @@ public class OperatorConfigMapEvent
 
     void onStart( @Observes StartupEvent ev )
     {
-        limiter = new ActionLimiter( taskRunner );
+        limiter = new ActionLimiter( this.getClass().getSimpleName(), taskRunner, 1000L );
         listen( informers.configMapInformer() );
     }
 
@@ -56,7 +56,7 @@ public class OperatorConfigMapEvent
     public void onUpdate( final ConfigMap oldCm, final ConfigMap newCm )
     {
         if (dataNotEquals( oldCm ).and( isEnonicManaged() ).test( newCm )) {
-            limiter.limit( 1000L, newCm, this::handle );
+            limiter.limit( newCm, this::handle );
         }
     }
 

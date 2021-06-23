@@ -3,12 +3,16 @@ package com.enonic.kubernetes.operator.v1alpha1xp7app;
 import com.enonic.kubernetes.apis.xp.XpClientCache;
 import com.enonic.kubernetes.apis.xp.service.AppInfo;
 import com.enonic.kubernetes.client.v1alpha1.Xp7App;
+import com.enonic.kubernetes.common.TaskRunner;
+import com.enonic.kubernetes.kubernetes.ActionLimiter;
 import com.enonic.kubernetes.kubernetes.Clients;
 import com.enonic.kubernetes.kubernetes.Searchers;
 import com.enonic.kubernetes.kubernetes.commands.K8sLogHelper;
+import io.quarkus.runtime.StartupEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Collections;
@@ -39,19 +43,63 @@ public class HandlerInstall
     @Inject
     XpClientCache xpClientCache;
 
+    @Inject
+    TaskRunner taskRunner;
+
+    ActionLimiter limiter;
+
+    void onStart( @Observes StartupEvent ev )
+    {
+        limiter = new ActionLimiter( this.getClass().getSimpleName(), taskRunner, 1000L, 15000L );
+    }
+
     public void installApp( final Xp7App app )
     {
-        // XP not in running
-        if (!searchers.xp7Deployment().match( parent( app ), running(), isNotDeleted() )) {
-            return;
-        }
-
         // This is never going to work, do not even try
         if (app.getSpec().getUrl().startsWith( "http://localhost" )) {
             handlerStatus.updateStatus( app, "Cannot install, app URL invalid" );
             return;
         }
 
+        // XP not in running
+        if (!searchers.xp7Deployment().match( parent( app ), running(), isNotDeleted() )) {
+            return;
+        }
+
+        limiter.limit( app, this::doInstallApp );
+    }
+
+    public void uninstallApp( final Xp7App app )
+    {
+        // If whole namespace is being deleted just remove the app finalizer
+        if (searchers.namespace().match( contains( app ), isDeleted() )) {
+            removeFinalizer( app );
+            return;
+        }
+
+        // If the app is not installed, just remove the app finalizer
+        if (notSuccessfullyInstalled().test( app )) {
+            removeFinalizer( app );
+            return;
+        }
+
+        // If deployment is being deleted just remove the app finalizer
+        if (!searchers.xp7Deployment().match( parent( app ), isNotDeleted() )) {
+            removeFinalizer( app );
+            return;
+        }
+
+        // XP is not running, nothing we can do
+        if (!searchers.xp7Deployment().match( parent( app ), running() )) {
+            return;
+        }
+
+        limiter.limit( app, this::doUninstallApp );
+    }
+
+
+    private void doInstallApp( final Xp7App app )
+    {
         // Try to install
         try {
             AppInfo appInfo = xpClientCache.
@@ -67,28 +115,8 @@ public class HandlerInstall
     }
 
     @SuppressWarnings("UnusedReturnValue")
-    public boolean uninstallApp( final Xp7App app )
+    private boolean doUninstallApp( final Xp7App app )
     {
-        // If whole namespace is being deleted just remove the app finalizer
-        if (searchers.namespace().match( contains( app ), isDeleted() )) {
-            return removeFinalizer( app );
-        }
-
-        // If the app is not installed, just remove the app finalizer
-        if (notSuccessfullyInstalled().test( app )) {
-            return removeFinalizer( app );
-        }
-
-        // If deployment is being deleted just remove the app finalizer
-        if (!searchers.xp7Deployment().match( parent( app ), isNotDeleted() )) {
-            return removeFinalizer( app );
-        }
-
-        // XP is not running, nothing we can do
-        if (!searchers.xp7Deployment().match( parent( app ), running() )) {
-            return false;
-        }
-
         // Try to uninstall
         try {
             xpClientCache.appUninstall( app.getMetadata().getNamespace(), app.getStatus()

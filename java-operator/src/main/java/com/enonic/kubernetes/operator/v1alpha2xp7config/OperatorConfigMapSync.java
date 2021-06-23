@@ -55,7 +55,7 @@ public class OperatorConfigMapSync
 
     void onStart( @Observes StartupEvent ev )
     {
-        limiter = new ActionLimiter( taskRunner );
+        limiter = new ActionLimiter( this.getClass().getSimpleName(), taskRunner, 1000L );
         operator.schedule( cfgLong( "operator.tasks.sync.interval" ), this );
     }
 
@@ -70,7 +70,7 @@ public class OperatorConfigMapSync
     protected void handle( final String namespace )
     {
         // Handle all ConfigMaps in namespace with nodeGroup label
-        limiter.limit( 1000L, namespace, String::hashCode, () -> searchers.configMap().stream().
+        limiter.limit( namespace, String::toString, () -> searchers.configMap().stream().
             filter( inNamespace( namespace ) ).
             filter( isDeleted().negate() ).
             filter( hasLabel( cfgStr( "operator.charts.values.labelKeys.nodeGroup" ) ) ).
