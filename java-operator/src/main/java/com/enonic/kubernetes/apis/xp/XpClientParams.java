@@ -1,6 +1,7 @@
 package com.enonic.kubernetes.apis.xp;
 
 import com.enonic.kubernetes.common.annotations.Params;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.immutables.value.Value;
 
 @Value.Immutable
@@ -20,6 +21,8 @@ public abstract class XpClientParams
     public abstract String username();
 
     public abstract String password();
+
+    public abstract MeterRegistry registry();
 
     @Value.Default
     public Long timeout()

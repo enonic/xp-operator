@@ -10,6 +10,8 @@ import com.enonic.kubernetes.apis.xp.service.AppKey;
 import com.enonic.kubernetes.apis.xp.service.ImmutableAppEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tags;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -58,15 +60,21 @@ public class XpClient
 
     private final Map<String, AppInfo> appMap;
 
-    //private final Runnable onClose;
-
     private final CountDownLatch onOpenLatch;
+
+    private final MeterRegistry registry;
+
+    private final Tags tags;
 
     public XpClient( final XpClientParams p )
     {
         log.debug( String.format( "XP: Creating client for %s", p.url() ) );
+        this.registry = p.registry();
+        this.tags = Tags.of( "namespace", p.namespace(), "nodeGroup", p.nodeGroup() );
         this.appMap = new ConcurrentHashMap<>();
         this.params = p;
+
+        registry.gauge( "xp_apps_total", tags, appMap, Map::size );
 
         requestBuilder = url -> new Request.Builder().url( params.url() + url );
 
@@ -184,6 +192,7 @@ public class XpClient
 
     private void handleAppInfo( final AppEventType type, final AppInfo info )
     {
+        registry.counter( "xp_apps_events", tags ).increment();
         appMap.put( info.key(), info );
         onEventConsumers.forEach( consumer -> consumer.accept( ImmutableAppEvent.
             builder().
@@ -197,6 +206,7 @@ public class XpClient
 
     private void handleAppUninstall( final AppEventType type, final AppKey key )
     {
+        registry.counter( "xp_apps_events", tags ).increment();
         appMap.remove( key.key() );
         onEventConsumers.forEach( consumer -> consumer.accept( ImmutableAppEvent.
             builder().
@@ -250,6 +260,7 @@ public class XpClient
     public AppInstallResponse appInstall( AppInstallRequest req )
         throws XpClientException
     {
+        registry.counter( "xp_apps_install", tags ).increment();
         try {
             Request request = requestBuilder.apply( "/app/installUrl" )
                 .post( RequestBody.create( MediaType.parse( "application/json" ), mapper.writeValueAsString( req ) ) )
@@ -258,47 +269,44 @@ public class XpClient
             Preconditions.checkState( response.code() == 200, "Response code " + response.code() );
             return mapper.readValue( response.body().bytes(), AppInstallResponse.class );
         } catch (IOException e) {
+            registry.counter( "xp_apps_error", tags ).increment();
             throw new XpClientException( String.format( "Failed installing app on '%s'", params.url() ), e );
         }
     }
 
-    private void appOp( String op, AppKey req )
-        throws IOException
+    private void appOp( String op, AppKey req, String exceptionToThrow )
+        throws XpClientException
     {
-        Request request = requestBuilder.apply( "/app/" + op )
-            .post( RequestBody.create( MediaType.parse( "application/json" ), mapper.writeValueAsString( req ) ) )
-            .build();
-        Response response = restClient.newCall( request ).execute();
-        Preconditions.checkState( response.code() == 204, "Response code " + response.code() );
+        try {
+            Request request = requestBuilder.apply( "/app/" + op )
+                .post( RequestBody.create( MediaType.parse( "application/json" ), mapper.writeValueAsString( req ) ) )
+                .build();
+            Response response = restClient.newCall( request ).execute();
+            Preconditions.checkState( response.code() == 204, "Response code " + response.code() );
+        } catch (Exception e) {
+            registry.counter( "xp_apps_error", tags ).increment();
+            throw new XpClientException( exceptionToThrow, e );
+        }
     }
 
     public void appUninstall( AppKey req )
         throws XpClientException
     {
-        try {
-            appOp( "uninstall", req );
-        } catch (IOException e) {
-            throw new XpClientException( String.format( "Failed uninstalling app on '%s'", params.url() ), e );
-        }
+        registry.counter( "xp_apps_uninstall", tags ).increment();
+        appOp( "uninstall", req,  String.format( "Failed uninstalling app on '%s'", params.url() ));
     }
 
     public void appStart( AppKey req )
         throws XpClientException
     {
-        try {
-            appOp( "start", req );
-        } catch (IOException e) {
-            throw new XpClientException( String.format( "Failed starting app on '%s'", params.url() ), e );
-        }
+        registry.counter( "xp_apps_start", tags ).increment();
+        appOp( "start", req, String.format( "Failed starting app on '%s'", params.url() ) );
     }
 
     public void appStop( AppKey req )
         throws XpClientException
     {
-        try {
-            appOp( "stop", req );
-        } catch (IOException e) {
-            throw new XpClientException( String.format( "Failed stopping app on '%s'", params.url() ), e );
-        }
+        registry.counter( "xp_apps_stop", tags ).increment();
+        appOp( "stop", req, String.format( "Failed stopping app on '%s'", params.url() ) );
     }
 }

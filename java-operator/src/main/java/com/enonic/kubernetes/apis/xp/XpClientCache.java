@@ -7,18 +7,19 @@ import com.enonic.kubernetes.apis.xp.service.ImmutableAppInstallRequest;
 import com.enonic.kubernetes.apis.xp.service.ImmutableAppKey;
 import com.enonic.kubernetes.kubernetes.Clients;
 import com.google.common.base.Preconditions;
+import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.io.BaseEncoding;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -40,17 +41,21 @@ public class XpClientCache
 
     private final KubernetesClient client;
 
+    private final MeterRegistry registry;
+
     private final LoadingCache<XpClientCacheKey, XpClient> clientCreatorCache;
 
     @Inject
-    public XpClientCache( final Clients clients )
+    public XpClientCache( final Clients clients, MeterRegistry registry )
     {
         singletonAssert( this, "constructor" );
         this.client = clients.k8s();
+        this.registry = registry;
         clientCreatorCache = CacheBuilder.newBuilder().
             maximumSize( 100000 ).
             expireAfterWrite( 3650, TimeUnit.DAYS ).
             build( this );
+        registry.gauge( "xp_clients", clientCreatorCache, Cache::size );
     }
 
     @Override
@@ -72,6 +77,7 @@ public class XpClientCache
                 .username( "su" )
                 .password( new String( baseEncoding.decode( secret.getData().get( "pass" ) ) ) )
                 .timeout( cfgLong( "operator.deployment.xp.management.timeout" ) )
+                .registry( registry )
                 .build()
         );
 
@@ -79,7 +85,9 @@ public class XpClientCache
         client.waitForConnection( cfgLong( "operator.deployment.xp.management.timeout" ) );
         log.debug( String.format( "XpClientCache load successful: %s", key ) );
 
-        client.addOnCloseListener( ( t ) -> this.invalidate( key ) );
+        client.addOnCloseListener( ( t ) -> {
+            this.invalidate( key );
+        } );
 
         return client;
     }
