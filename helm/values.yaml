@@ -1,6 +1,6 @@
 image:
   repository: enonic/xp-operator
-  tag: "0.17.6"
+  tag: "0.17.7-SNAPSHOT"
   pullPolicy: IfNotPresent
 
 resources:
