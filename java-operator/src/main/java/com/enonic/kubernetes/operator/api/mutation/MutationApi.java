@@ -211,6 +211,11 @@ public class MutationApi
             withXp7DeploymentStatusFields( new Xp7DeploymentStatusFields().
                 withXp7DeploymentStatusFieldsPods( new LinkedList<>() ) );
 
+        if(newR.getSpec() != null && newR.getSpec().getEnabled() != null && !newR.getSpec().getEnabled()) {
+            defStatus.setState( Xp7DeploymentStatus.State.STOPPED );
+            defStatus.setMessage( "XP deployment stopped" );
+        }
+
         // Get OP
         AdmissionOperation op = getOperation( mt.getAdmissionReview() );
 
