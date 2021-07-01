@@ -913,16 +913,16 @@ spec:
     >\n      <fileNamePattern>${xp.home}/logs/server.%d{yyyy-MM-dd}.%i.log</fileNamePattern>\n\
     \      <maxFileSize>100MB</maxFileSize>\n      <maxHistory>7</maxHistory>\n  \
     \    <totalSizeCap>3GB</totalSizeCap>\n    </rollingPolicy>\n    <encoder>\n \
-    \     <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>\n    </encoder>\n\
+    \     <pattern>%date{ISO8601} %-5level %logger{36} - %msg%n</pattern>\n    </encoder>\n\
     \  </appender>\n\n  <appender name=\"STDOUT\" class=\"ch.qos.logback.core.ConsoleAppender\"\
     >\n    <withJansi>true</withJansi>\n    <encoder>\n      <pattern>%date{ISO8601}\
-    \ %highlight(%-5level) %cyan(%logger{36}) - %msg%n</pattern>\n    </encoder>\n\
-    \  </appender>\n\n  <root level=\"info\">\n    <appender-ref ref=\"STDOUT\"/>\n\
-    \    <appender-ref ref=\"FILE\"/>\n  </root>\n\n  <logger name=\"Events.Service\"\
-    \ level=\"WARN\" additivity=\"false\">\n    <appender-ref ref=\"STDOUT\"/>\n \
-    \   <appender-ref ref=\"FILE\"/>\n  </logger>\n\n  <logger name=\"Events.Bundle\"\
-    \ level=\"WARN\" additivity=\"false\">\n    <appender-ref ref=\"STDOUT\"/>\n \
-    \   <appender-ref ref=\"FILE\"/>\n  </logger>\n\n</configuration>"
+    \ %-5level %logger{36} - %msg%n</pattern>\n    </encoder>\n  </appender>\n\n \
+    \ <root level=\"info\">\n    <appender-ref ref=\"STDOUT\"/>\n    <appender-ref\
+    \ ref=\"FILE\"/>\n  </root>\n\n  <logger name=\"Events.Service\" level=\"WARN\"\
+    \ additivity=\"false\">\n    <appender-ref ref=\"STDOUT\"/>\n    <appender-ref\
+    \ ref=\"FILE\"/>\n  </logger>\n\n  <logger name=\"Events.Bundle\" level=\"WARN\"\
+    \ additivity=\"false\">\n    <appender-ref ref=\"STDOUT\"/>\n    <appender-ref\
+    \ ref=\"FILE\"/>\n  </logger>\n\n</configuration>"
   dataBase64: false
 ---
 apiVersion: "enonic.cloud/v1alpha2"
