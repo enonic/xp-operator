@@ -151,14 +151,14 @@ spec:
           <totalSizeCap>3GB</totalSizeCap>
         </rollingPolicy>
         <encoder>
-          <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
+          <pattern>%date{ISO8601} %-5level %logger{36} - %msg%n</pattern>
         </encoder>
       </appender>
 
       <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <withJansi>true</withJansi>
         <encoder>
-          <pattern>%date{ISO8601} %highlight(%-5level) %cyan(%logger{36}) - %msg%n</pattern>
+          <pattern>%date{ISO8601} %-5level %logger{36} - %msg%n</pattern>
         </encoder>
       </appender>
 
