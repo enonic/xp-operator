@@ -35,7 +35,7 @@
         <fabric8-kubernetes-client.version>5.4.1</fabric8-kubernetes-client.version>
 
         <junit.version>5.7.2</junit.version>
-        <slf4j-simple.version>1.7.30</slf4j-simple.version>
+        <slf4j-simple.version>1.7.31</slf4j-simple.version>
     </properties>
 
     <dependencies>
