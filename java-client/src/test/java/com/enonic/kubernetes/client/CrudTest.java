@@ -72,7 +72,7 @@ public class CrudTest
         MixedOperation<Xp7App, Xp7App.Xp7AppList, Resource<Xp7App>> crdClient = Xp7App.createCrdClient( k8sClient );
 
         // Create resource
-        ObjectMetaBuilder metadataBuilder = new ObjectMetaBuilder().withName( "test-name" );
+        ObjectMetaBuilder metadataBuilder = new ObjectMetaBuilder().withNamespace( "test" ).withName( "test-name" );
         Xp7App resource = new Xp7App().withSpec( new Xp7AppSpec().withUrl( "test" ) );
         resource.setMetadata( metadataBuilder.build() );
         assertCrd( resource, "/crud-app.json" );
@@ -178,7 +178,7 @@ public class CrudTest
         MixedOperation<Xp7Config, Xp7Config.Xp7ConfigList, Resource<Xp7Config>> crdClient = Xp7Config.createCrdClient( k8sClient );
 
         // Create resource
-        ObjectMetaBuilder metadataBuilder = new ObjectMetaBuilder().withName( "test-name" );
+        ObjectMetaBuilder metadataBuilder = new ObjectMetaBuilder().withNamespace( "test" ).withName( "test-name" );
         Xp7Config resource =
             new Xp7Config().withSpec( new Xp7ConfigSpec().withData( "test" ).withFile( "test.cfg" ).withNodeGroup( "test" ) );
         resource.setMetadata( metadataBuilder.build() );
@@ -233,7 +233,7 @@ public class CrudTest
             Xp7Deployment.createCrdClient( k8sClient );
 
         // Create resource
-        ObjectMetaBuilder metadataBuilder = new ObjectMetaBuilder().withName( "test-name" );
+        ObjectMetaBuilder metadataBuilder = new ObjectMetaBuilder().withNamespace( "test" ).withName( "test-name" );
         Xp7Deployment resource = new Xp7Deployment()
             .withSpec( new Xp7DeploymentSpec()
                 .withEnabled( true )

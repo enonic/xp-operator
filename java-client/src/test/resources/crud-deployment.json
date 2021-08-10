@@ -2,7 +2,8 @@
   "apiVersion" : "enonic.cloud/v1alpha2",
   "kind" : "Xp7Deployment",
   "metadata" : {
-    "name" : "test-name"
+    "name" : "test-name",
+    "namespace" : "test"
   },
   "spec" : {
     "enabled" : true,

@@ -1,5 +1,6 @@
 package com.enonic.kubernetes.kubernetes.commands.builders;
 
+import com.google.common.base.Preconditions;
 import io.fabric8.kubernetes.api.model.rbac.ClusterRole;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import org.immutables.value.Value;
@@ -15,10 +16,10 @@ public abstract class CommandBuilderClusterRole
     @Override
     protected Optional<ClusterRole> getOldResource( final String namespace, final String name )
     {
+        Preconditions.checkArgument( namespace == null, "Cannot assign namespace to ClusterRole" );
         return Optional.ofNullable( client().
             rbac().
             clusterRoles().
-            inNamespace( namespace ).
             withName( name ).
             get() );
     }
@@ -26,20 +27,20 @@ public abstract class CommandBuilderClusterRole
     @Override
     protected Runnable createOrReplaceCommand( final String namespace, final ClusterRole resource )
     {
+        Preconditions.checkArgument( namespace == null, "Cannot assign namespace to ClusterRole" );
         return () -> client().
             rbac().
             clusterRoles().
-            inNamespace( namespace ).
             createOrReplace( resource );
     }
 
     @Override
     protected Runnable updateCommand( final String namespace, final ClusterRole resource )
     {
+        Preconditions.checkArgument( namespace == null, "Cannot assign namespace to ClusterRole" );
         return () -> client().
             rbac().
             clusterRoles().
-            inNamespace( namespace ).
             withName( resource.getMetadata().getName() ).
             patch( resource );
     }
@@ -47,10 +48,10 @@ public abstract class CommandBuilderClusterRole
     @Override
     protected Runnable deleteCommand( final String namespace, final ClusterRole resource )
     {
+        Preconditions.checkArgument( namespace == null, "Cannot assign namespace to ClusterRole" );
         return () -> client().
             rbac().
             clusterRoles().
-            inNamespace( namespace ).
             withName( resource.getMetadata().getName() ).
             delete();
     }

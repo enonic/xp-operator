@@ -15,7 +15,7 @@ metadata:
   namespace: my-namespace
 spec:
   enabled: true
-  xpVersion: 7.7.0
+  xpVersion: 7.7.1
 
   # Preinstall snapshotter on all nodes
   nodesPreinstalledApps:

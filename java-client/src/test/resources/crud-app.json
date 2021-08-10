@@ -2,7 +2,8 @@
   "apiVersion" : "enonic.cloud/v1alpha1",
   "kind" : "Xp7App",
   "metadata" : {
-    "name" : "test-name"
+    "name" : "test-name",
+    "namespace" : "test"
   },
   "spec" : {
     "url" : "test"
