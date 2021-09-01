@@ -27,7 +27,7 @@
 
         <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
         <versions-maven-plugin.version>2.8.1</versions-maven-plugin.version>
-        <git-plugin.version>4.0.5</git-plugin.version>
+        <git-plugin.version>4.9.10</git-plugin.version>
     </properties>
 
     <dependencyManagement>
