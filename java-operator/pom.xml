@@ -27,7 +27,7 @@
 
         <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
         <versions-maven-plugin.version>2.8.1</versions-maven-plugin.version>
-        <git-plugin.version>4.0.5</git-plugin.version>
+        <git-plugin.version>5.0.0</git-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -191,8 +191,8 @@
             </plugin>
 
             <plugin>
-                <groupId>pl.project13.maven</groupId>
-                <artifactId>git-commit-id-plugin</artifactId>
+                <groupId>io.github.git-commit-id</groupId>
+                <artifactId>git-commit-id-maven-plugin</artifactId>
                 <version>${git-plugin.version}</version>
                 <executions>
                     <execution>
