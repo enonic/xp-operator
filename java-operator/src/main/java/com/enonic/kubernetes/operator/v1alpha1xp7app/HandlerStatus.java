@@ -42,7 +42,7 @@ public class HandlerStatus
 
         if (successfullyInstalled().test( app ) && running().test( deployment )) {
             try {
-                appInfo = xpClientCache.appInfo( app.getMetadata().getNamespace(), app.getStatus().getXp7AppStatusFields().getXp7AppStatusFieldsAppInfo().getKey() );
+                appInfo = xpClientCache.appInfo( deployment.getMetadata().getNamespace(), deployment.getMetadata().getName(), app.getStatus().getXp7AppStatusFields().getXp7AppStatusFieldsAppInfo().getKey() );
             } catch (XpClientException e) {
                 return updateStatus( Optional.of( app ), findDeployment( app.getMetadata().getNamespace() ), appInfo, Optional.of( "Unable to connect to XP" ) );
             }

@@ -3,6 +3,7 @@ package com.enonic.kubernetes.operator.v1alpha1xp7app;
 import com.enonic.kubernetes.apis.xp.XpClientCache;
 import com.enonic.kubernetes.apis.xp.service.AppInfo;
 import com.enonic.kubernetes.client.v1alpha1.Xp7App;
+import com.enonic.kubernetes.client.v1alpha2.Xp7Deployment;
 import com.enonic.kubernetes.common.TaskRunner;
 import com.enonic.kubernetes.kubernetes.ActionLimiter;
 import com.enonic.kubernetes.kubernetes.Clients;
@@ -17,11 +18,10 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static com.enonic.kubernetes.common.Configuration.cfgStr;
-import static com.enonic.kubernetes.kubernetes.Predicates.contains;
-import static com.enonic.kubernetes.kubernetes.Predicates.isDeleted;
-import static com.enonic.kubernetes.kubernetes.Predicates.isNotDeleted;
+import static com.enonic.kubernetes.kubernetes.Predicates.*;
 import static com.enonic.kubernetes.operator.v1alpha1xp7app.Predicates.notSuccessfullyInstalled;
 import static com.enonic.kubernetes.operator.v1alpha2xp7deployment.Predicates.parent;
 import static com.enonic.kubernetes.operator.v1alpha2xp7deployment.Predicates.running;
@@ -61,12 +61,14 @@ public class HandlerInstall
             return;
         }
 
-        // XP not in running
-        if (!searchers.xp7Deployment().match( parent( app ), running(), isNotDeleted() )) {
+        Optional<Xp7Deployment> xp7Deployment = searchers.xp7Deployment().find( parent( app ), running(), isNotDeleted() );
+
+        // XP is not running, nothing we can do
+        if (xp7Deployment.isEmpty()) {
             return;
         }
 
-        limiter.limit( app, this::doInstallApp );
+        limiter.limit( app, xp7App -> doInstallApp(xp7Deployment.get(), xp7App) );
     }
 
     public void uninstallApp( final Xp7App app )
@@ -89,21 +91,23 @@ public class HandlerInstall
             return;
         }
 
+        Optional<Xp7Deployment> xp7Deployment = searchers.xp7Deployment().find( parent( app ), running() );
+
         // XP is not running, nothing we can do
-        if (!searchers.xp7Deployment().match( parent( app ), running() )) {
+        if (xp7Deployment.isEmpty()) {
             return;
         }
 
-        limiter.limit( app, this::doUninstallApp );
+        limiter.limit( app, xp7App -> doUninstallApp(xp7Deployment.get(), xp7App));
     }
 
 
-    private void doInstallApp( final Xp7App app )
+    private void doInstallApp( final Xp7Deployment deployment, final Xp7App app )
     {
         // Try to install
         try {
             AppInfo appInfo = xpClientCache.
-                appInstall( app.getMetadata().getNamespace(), app.getSpec().getUrl(), app.getSpec().getSha512() );
+                appInstall( app.getMetadata().getNamespace(), deployment.getMetadata().getName(), app.getSpec().getUrl(), app.getSpec().getSha512() );
 
             handlerStatus.updateStatus( app, appInfo );
         } catch (Exception e) {
@@ -115,11 +119,11 @@ public class HandlerInstall
     }
 
     @SuppressWarnings("UnusedReturnValue")
-    private boolean doUninstallApp( final Xp7App app )
+    private boolean doUninstallApp( final Xp7Deployment deployment, final Xp7App app )
     {
         // Try to uninstall
         try {
-            xpClientCache.appUninstall( app.getMetadata().getNamespace(), app.getStatus()
+            xpClientCache.appUninstall( deployment.getMetadata().getNamespace(), deployment.getMetadata().getName(), app.getStatus()
                 .getXp7AppStatusFields()
                 .getXp7AppStatusFieldsAppInfo()
                 .getKey() );
