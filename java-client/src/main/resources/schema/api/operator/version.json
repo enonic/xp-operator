@@ -1,0 +1,21 @@
+{
+  "javaName": "OperatorVersion",
+  "type": "object",
+  "properties": {
+    "gitCommit": {
+      "type": "string"
+    },
+    "gitTags": {
+      "type": "string"
+    },
+    "buildDate": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "gitTreeState": {
+      "type": "string"
+    }
+  }
+}

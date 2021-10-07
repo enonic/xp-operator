@@ -9,5 +9,7 @@ public interface XpClientCacheKey
 {
     String namespace();
 
+    String name();
+
     String nodeGroup();
 }

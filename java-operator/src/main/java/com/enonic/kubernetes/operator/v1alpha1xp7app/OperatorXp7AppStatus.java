@@ -81,7 +81,7 @@ public class OperatorXp7AppStatus
             // Make sure there is an app listener on all deployments
             if (running().test( deployment )) {
                 try {
-                    xpClientCache.appAddListener( deployment.getMetadata().getNamespace(), this );
+                    xpClientCache.appAddListener( deployment.getMetadata().getNamespace(), deployment.getMetadata().getName(), this );
                 } catch (XpClientException e) {
                     log.warn( String.format( "Failed adding app status listener in NS %s: %s", deployment.getMetadata().getNamespace(),
                         e.getMessage() ) );

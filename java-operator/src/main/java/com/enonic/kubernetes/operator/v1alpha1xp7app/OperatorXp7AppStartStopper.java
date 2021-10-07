@@ -2,6 +2,7 @@ package com.enonic.kubernetes.operator.v1alpha1xp7app;
 
 import com.enonic.kubernetes.apis.xp.XpClientCache;
 import com.enonic.kubernetes.client.v1alpha1.Xp7App;
+import com.enonic.kubernetes.client.v1alpha2.Xp7Deployment;
 import com.enonic.kubernetes.kubernetes.Informers;
 import com.enonic.kubernetes.kubernetes.Searchers;
 import com.enonic.kubernetes.operator.helpers.InformerEventHandler;
@@ -12,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
+import java.util.Optional;
 
 import static com.enonic.kubernetes.common.Configuration.cfgStr;
 import static com.enonic.kubernetes.kubernetes.Comparators.namespaceAndName;
@@ -83,8 +85,10 @@ public class OperatorXp7AppStartStopper
             return;
         }
 
+        Optional<Xp7Deployment> xp7Deployment = searchers.xp7Deployment().find( parent( xp7App ), running() );
+
         // XP is not running, nothing we can do
-        if (!searchers.xp7Deployment().match( parent( xp7App ), running() )) {
+        if (xp7Deployment.isEmpty()) {
             return;
         }
 
@@ -99,11 +103,12 @@ public class OperatorXp7AppStartStopper
             .getXp7AppStatusFieldsAppInfo()
             .getKey();
         String namespace = xp7App.getMetadata().getNamespace();
+        String name = xp7Deployment.get().getMetadata().getName();
 
         // Try to start
         if (enabled && !state.equals( "started" )) {
             try {
-                xpClientCache.appStart( namespace, key );
+                xpClientCache.appStart( namespace, name, key );
             } catch (Exception e) {
                 log.warn( String.format( "XP: Failed starting app %s in NS %s: %s", xp7App.getMetadata().getName(),
                     xp7App.getMetadata().getNamespace(), e.getMessage() ) );
@@ -113,7 +118,7 @@ public class OperatorXp7AppStartStopper
         // Try to stop
         if (!enabled && !state.equals( "stopped" )) {
             try {
-                xpClientCache.appStop( namespace, key );
+                xpClientCache.appStop( namespace, name, key );
             } catch (Exception e) {
                 log.warn( String.format( "XP: Failed starting app %s in NS %s: %s", xp7App.getMetadata().getName(),
                     xp7App.getMetadata().getNamespace(), e.getMessage() ) );
