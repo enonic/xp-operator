@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+set -e
+
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+source $SCRIPT_DIR/_kubectl-enonic-common
+
+cat <<EOF
+The Enonic kubectl plugin.
+You can invoke it through kubectl: "kubectl enonic [command]..."
+
+Find more information at: https://github.com/enonic/xp-operator
+
+Usage:
+  kubectl enonic [command]
+
+Available Commands:
+  operator      Enonic XP Operator commands
+  xp            Enonic XP commands
+EOF

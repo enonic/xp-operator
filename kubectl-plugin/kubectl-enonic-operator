@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+set -e
+
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+source $SCRIPT_DIR/_kubectl-enonic-common
+
+cat <<EOF
+Run commands agains the Enonic XP operator running in K8s
+
+Usage:
+  kubectl enonic operator [command]
+
+Available Commands:
+  version      Print operator version
+EOF

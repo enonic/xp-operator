@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+
+set -e
+
+ROOT="/apis/operator.enonic.cloud/v1alpha1"
+
+# Check for needed binaries
+command -v jq &>/dev/null || (
+    echo "install 'jq' to continue"
+    exit 1
+)
+command -v fzf &>/dev/null || (
+    echo "install 'fzf' to continue"
+    exit 1
+)
+
+function get_url() {
+    echo -n "/apis/operator.enonic.cloud/v1alpha1"
+    for var in "$@"; do
+        [[ $var == /* ]] || echo -n "/"
+        echo -n "$var"
+    done
+
+}
+
+function get_namespace() {
+    namespace=$(kubectl config view --minify --output 'jsonpath={..namespace}')
+    [ -z "$namespace" ] && namespace=$(kubectl get ns --no-headers -o custom-columns=":metadata.name" | fzf --prompt "Select namespace!")
+    echo -n $namespace
+}
+
+function get_deployment() {
+    namespace=$1
+
+    tmpfile=$(mktemp /tmp/kubectl.XXXXXX)
+    kubectl -n $namespace get xp7deployments.enonic.cloud --no-headers -o custom-columns=":metadata.name" >$tmpfile
+
+    if [ "$(cat $tmpfile | wc -l)" == "1" ]; then
+        deployment="$(cat $tmpfile)"
+    else
+        deployment=$(cat $tmpfile | fzf --prompt "Select deployment!")
+    fi
+    rm $tmpfile
+    echo -n $deployment
+}
+
+function get_nodegroup() {
+    namespace=$1
+    deployment=$2
+
+    tmpfile=$(mktemp /tmp/kubectl.XXXXXX)
+    kubectl -n $namespace get xp7deployments.enonic.cloud $deployment --no-headers -o custom-columns=":spec.nodeGroups[].name" | sed 's% %\n%g' >$tmpfile
+
+    if [ "$(cat $tmpfile | wc -l)" == "1" ]; then
+        nodegroup="all"
+    else
+        nodegroup="$(cat $tmpfile | (echo all && cat) | fzf --prompt "Select node group!")"
+    fi
+
+    rm $tmpfile
+    echo -n $nodegroup
+}
+
+function get_pod() {
+    namespace=$1
+    deployment=$2
+
+    tmpfile=$(mktemp /tmp/kubectl.XXXXXX)
+    kubectl -n $namespace get pods --selector=enonic.deployment=$deployment --no-headers -o custom-columns=":metadata.name" >$tmpfile
+
+    if [ "$(cat $tmpfile | wc -l)" == "1" ]; then
+        pod="$(cat $tmpfile)"
+    else
+        pod="$(cat $tmpfile | fzf --prompt "Select pod!")"
+    fi
+
+    rm $tmpfile
+    echo -n $pod
+}
+
+function kubectl_get() {
+    kubectl get --raw=$(get_url $@)
+}
+
+export -f get_url
+
+export -f get_namespace
+export -f get_deployment
+export -f get_nodegroup
+export -f get_pod
+
+export -f kubectl_get

@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+set -e
+
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+source $SCRIPT_DIR/_kubectl-enonic-common
+
+ns=$(get_namespace)
+dp=$(get_deployment $ns)
+pd=$(get_pod $ns $dp)
+
+if [ $# -eq 0 ]; then
+    kubectl -n $ns port-forward $pd 2609:2609 4848:4848 8080:8080
+else
+    kubectl -n $ns port-forward $pd $@
+fi

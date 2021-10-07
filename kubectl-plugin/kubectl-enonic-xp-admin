@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+set -e
+
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+source $SCRIPT_DIR/_kubectl-enonic-common
+
+ns=$(get_namespace)
+dp=$(get_deployment $ns)
+pd=$(get_pod $ns $dp)
+port=$((9999 + $RANDOM % 10000))
+
+echo "Url:  http://localhost:$port"
+echo "Pass: $(kubectl enonic xp supass)"
+kubectl enonic xp forward $port:8080

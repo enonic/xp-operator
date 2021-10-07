@@ -13,6 +13,7 @@ This repository contains these various parts relating to the operator:
 * [Enonic XP Kubernetes Operator](./java-operator)
 * [Enonic XP Kubernetes Operator Helm Chart](./helm)
 * [Enonic XP Kubernetes Operator Java Client](./java-client)
+* [Enonic XP kubectl plugin](./kubectl-plugin)
 * [Enonic XP Kubernetes Operator Documentation](./docs/operator.adoc)
 
 ## Usage
