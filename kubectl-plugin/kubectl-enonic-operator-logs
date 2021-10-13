@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+set -e
+
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+source $SCRIPT_DIR/_kubectl-enonic-common
+
+pd=$(kubectl get -A pod --selector=app=xp-operator --no-headers -o custom-columns=":metadata.namespace,:metadata.name")
+[ -z "$pd" ] && (echo "Operator pod not found!" 1>&2; exit 1;)
+
+echo $pd | xargs bash -c 'kubectl -n $0 logs $1 -f'

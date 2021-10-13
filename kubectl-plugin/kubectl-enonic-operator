@@ -12,5 +12,6 @@ Usage:
   kubectl enonic operator [command]
 
 Available Commands:
+  logs         View the operator logs
   version      Print operator version
 EOF
