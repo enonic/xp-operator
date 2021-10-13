@@ -11,11 +11,7 @@ ns=$(get_namespace)
 dp=$(get_deployment $ns)
 [ -z "$dp" ] && (echo "No deployment selected!" 1>&2; exit 1;)
 
-pd=$(get_pod $ns $dp)
-[ -z "$pd" ] && (echo "No pod selected!" 1>&2; exit 1;)
+ng=$(get_nodegroup $ns $dp)
+[ -z "$ng" ] && (echo "No node group selected!" 1>&2; exit 1;)
 
-port=$((9999 + $RANDOM % 10000))
-
-echo "Url:  http://localhost:$port"
-echo "Pass: $(kubectl enonic xp supass)"
-kubectl enonic xp forward $port:8080
+kubectl_get /xp7/$ns/$dp/$ng/mgmt/cloud-utils/idproviders | jq -r .results[]

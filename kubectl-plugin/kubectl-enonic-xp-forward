@@ -6,8 +6,13 @@ SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 source $SCRIPT_DIR/_kubectl-enonic-common
 
 ns=$(get_namespace)
+[ -z "$ns" ] && (echo "No namespace selected!" 1>&2; exit 1;)
+
 dp=$(get_deployment $ns)
+[ -z "$dp" ] && (echo "No deployment selected!" 1>&2; exit 1;)
+
 pd=$(get_pod $ns $dp)
+[ -z "$pd" ] && (echo "No pod selected!" 1>&2; exit 1;)
 
 if [ $# -eq 0 ]; then
     kubectl -n $ns port-forward $pd 2609:2609 4848:4848 8080:8080

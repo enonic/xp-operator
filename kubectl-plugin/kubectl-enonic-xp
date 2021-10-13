@@ -15,7 +15,9 @@ Available Commands:
   admin         Print su password and port forward to XP pod
   exec          Exec into a XP container
   forward       Port forward to a XP pod
+  idproviders   List available idproviders
   logs          Show XP logs
+  routes        List available internal routes
   snapshots     List available snapshots
   supass        Show XP su password
 EOF
