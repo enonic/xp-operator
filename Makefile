@@ -9,9 +9,7 @@ build-java: ## Build java modules
 	# Building java modules done!
 
 build-docker: build-java ## Build docker image
-	# Building docker image ...
-	@docker build -f docker/Dockerfile -t ${DOCKER_IMAGE}:$(shell ./.mvn/get-version) .
-	# Building docker image done!
+	@TAG=$(shell ./.mvn/get-version) $(MAKE) -C docker --no-print-directory build
 
 build-helm: ## Build helm chart
 	# Building helm chart ...
@@ -29,6 +27,9 @@ validate: ## Build and validate everything
 	# Validating helm chart done!
 
 publish: build validate  ## Publish everything (env var ARTIFACTORY_USER and ARTIFACTORY_PASS required)
+	# Check if docker is logged in
+	@: | docker login | grep "Login Succeeded" || (echo "Not logged in to docker"; exit 1;)
+
 	# Check if token is set ...
 	@test ${ARTIFACTORY_USER} || (echo "Set env variable ARTIFACTORY_USER"; exit 1;)
 	@test ${ARTIFACTORY_PASS} || (echo "Set env variable ARTIFACTORY_PASS"; exit 1;)
@@ -46,10 +47,14 @@ publish: build validate  ## Publish everything (env var ARTIFACTORY_USER and ART
 
 	@echo "# Starting release for $(shell ./.mvn/get-version) ..."
 
+	# Build docker image ....
+	@TAG=$(shell ./.mvn/get-version) $(MAKE) -C docker --no-print-directory buildx
+
 	# Publishing helm chart ...
 	@$(MAKE) -C helm --no-print-directory publish
 
 	# Publishing docker image ...
+	@TAG=$(shell ./.mvn/get-version) BUILD_ARGS=--push $(MAKE) -C docker --no-print-directory buildx
 	@docker push ${DOCKER_IMAGE}:$(shell ./.mvn/get-version)
 
 	# Publishing java-client ...
