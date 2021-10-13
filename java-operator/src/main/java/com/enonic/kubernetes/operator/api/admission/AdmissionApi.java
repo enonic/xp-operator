@@ -275,7 +275,7 @@ public class AdmissionApi
             Preconditions.checkState( xp7Deployments.isEmpty(), "There is already an Xp7Deployment in NS '%s'",
                 newDeployment.getMetadata().getNamespace() );
 
-            // Assert version is > 7.5.X, if we cant parse version, just let it go
+            // Assert version is > 7.7.X, if we cant parse version, just let it go
             ComparableVersion currentVersion = new ComparableVersion( "7.7.0" );
             try {
                 if (newDeployment.getSpec().getXpVersion().startsWith( "7." )) {
