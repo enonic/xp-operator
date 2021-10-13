@@ -13,8 +13,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
-import static com.enonic.kubernetes.kubernetes.Predicates.isDeleted;
-import static com.enonic.kubernetes.kubernetes.Predicates.matchAnnotation;
+import static com.enonic.kubernetes.kubernetes.Predicates.*;
 
 
 /**
@@ -56,11 +55,11 @@ public class OperatorDeleteAnnotation
     @Override
     public void onDelete( final Xp7Deployment oldResource, final boolean b )
     {
-        // Get name
+        String namespace = oldResource.getMetadata().getNamespace();
         String name = oldResource.getMetadata().getName();
 
         deleteDomains( name );
-        deleteNamespaces( name );
+        deleteNamespaces( namespace, name );
     }
 
     private void deleteDomains( final String name )
@@ -73,10 +72,11 @@ public class OperatorDeleteAnnotation
                 withName( d.getMetadata().getName() ) ) );
     }
 
-    private void deleteNamespaces( final String name )
+    private void deleteNamespaces( final String deploymentNamespace, final String name )
     {
         // Delete all annotated namespaces
         searchers.namespace().stream().
+            filter( withName(deploymentNamespace) ).
             filter( isDeleted().negate() ).
             filter( matchAnnotation( deleteAnnotation, name ) ).
             forEach( ns -> K8sLogHelper.logDelete( clients.k8s().namespaces().
