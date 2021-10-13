@@ -17,28 +17,23 @@ import io.fabric8.kubernetes.model.annotation.Version;
 @Version("v1alpha1")
 @Kind("Xp7App")
 public class Xp7App
-    extends Crd<Xp7AppSpec, Xp7AppStatus>
-    implements Namespaced
-{
-    public static MixedOperation<Xp7App, Xp7AppList, Resource<Xp7App>> createCrdClient( final KubernetesClient client )
-    {
-        return client.customResources( Xp7App.class, Xp7AppList.class );
+        extends Crd<Xp7AppSpec, Xp7AppStatus>
+        implements Namespaced {
+    public static MixedOperation<Xp7App, Xp7AppList, Resource<Xp7App>> createCrdClient(final KubernetesClient client) {
+        return client.customResources(Xp7App.class, Xp7AppList.class);
     }
 
-    public Xp7App withSpec( final Xp7AppSpec spec )
-    {
-        this.setSpec( spec );
+    public Xp7App withSpec(final Xp7AppSpec spec) {
+        this.setSpec(spec);
         return this;
     }
 
-    public Xp7App withStatus( final Xp7AppStatus status )
-    {
-        this.setStatus( status );
+    public Xp7App withStatus(final Xp7AppStatus status) {
+        this.setStatus(status);
         return this;
     }
 
     public static class Xp7AppList
-        extends CustomResourceList<Xp7App>
-    {
+            extends CustomResourceList<Xp7App> {
     }
 }

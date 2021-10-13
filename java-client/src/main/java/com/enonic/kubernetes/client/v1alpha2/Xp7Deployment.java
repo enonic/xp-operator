@@ -16,29 +16,24 @@ import io.fabric8.kubernetes.model.annotation.Version;
 @Version("v1alpha2")
 @Kind("Xp7Deployment")
 public class Xp7Deployment
-    extends Crd<Xp7DeploymentSpec, Xp7DeploymentStatus>
-    implements Namespaced
-{
+        extends Crd<Xp7DeploymentSpec, Xp7DeploymentStatus>
+        implements Namespaced {
 
-    public static MixedOperation<Xp7Deployment, Xp7DeploymentList, Resource<Xp7Deployment>> createCrdClient( final KubernetesClient client )
-    {
-        return client.customResources( Xp7Deployment.class, Xp7DeploymentList.class );
+    public static MixedOperation<Xp7Deployment, Xp7DeploymentList, Resource<Xp7Deployment>> createCrdClient(final KubernetesClient client) {
+        return client.customResources(Xp7Deployment.class, Xp7DeploymentList.class);
     }
 
-    public Xp7Deployment withSpec( final Xp7DeploymentSpec spec )
-    {
-        this.setSpec( spec );
+    public Xp7Deployment withSpec(final Xp7DeploymentSpec spec) {
+        this.setSpec(spec);
         return this;
     }
 
-    public Xp7Deployment withStatus( final Xp7DeploymentStatus status )
-    {
-        this.setStatus( status );
+    public Xp7Deployment withStatus(final Xp7DeploymentStatus status) {
+        this.setStatus(status);
         return this;
     }
 
     public static class Xp7DeploymentList
-        extends CustomResourceList<Xp7Deployment>
-    {
+            extends CustomResourceList<Xp7Deployment> {
     }
 }

@@ -1,12 +1,12 @@
 package com.enonic.kubernetes.client.apis.xp7;
 
 import com.enonic.kubernetes.client.apis.Named;
-import com.enonic.kubernetes.client.apis.Namespaced;
 import com.enonic.kubernetes.client.apis.NodeGrouped;
+import com.enonic.kubernetes.client.apis.TargetSelector;
 import io.fabric8.kubernetes.client.Config;
 import okhttp3.OkHttpClient;
 
-public abstract class Xp7ClientBuilder<T> implements Namespaced<Named<NodeGrouped<T>>>, Named<NodeGrouped<T>>, NodeGrouped<T> {
+public abstract class Xp7ClientBuilder<T> implements TargetSelector<T>, Named<NodeGrouped<T>>, NodeGrouped<T> {
 
     private final OkHttpClient client;
     private final Config config;
