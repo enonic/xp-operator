@@ -16,5 +16,9 @@
         "title": "NFS storage",
         "document" : "nfs"
       }
+      {
+        "title": "EFS storage",
+        "document" : "efs"
+      }
     ]
 }
