@@ -14,7 +14,7 @@ Helm:: Is a package manager for Kubernetes. Download it https://helm.sh/docs/int
 
 == Namespaces
 
-This guide instructs you to install the operator (and potentially the NFS provisioner) into the `kube-system` namespace. Although this is not a strict requirement, it is best practices to install kubernetes extentions into a namespace that clearly indicates that it has components vital to the system. Since `kube-system` is present in all clusters and should never be deleted, it is recommended to use that. You can create you own `my-system` namespace and install the operator there. Do not, for example, install the operator and a XP7 deployment into the same namespace. 
+This guide instructs you to install the operator (and potentially the NFS provisioner) into the `kube-system` namespace. Although this is not a strict requirement, it is best practices to install kubernetes extentions into a namespace that clearly indicates that it has components vital to the system. Since `kube-system` is present in all clusters and should never be deleted, it is recommended to use that. You can create you own `my-system` namespace and install the operator there. Do not, for example, install the operator and a XP7 deployment into the same namespace.
 
 == Storage classes
 
@@ -29,7 +29,8 @@ The reason why we bring this up is because XP, when running in clustered mode, n
 However, for XP clusters to work, you need to have a storage class in your cluster that supports creation of `ReadWriteMany` volumes. For example, the standard storage class in `minikube` supports all modes, but the standard storage class in `GKE` does not support `ReadWriteMany`. Like GKE the standard storage class on Amazon EKS (gp2) does not support `ReadWriteMany` but you can use Amazon EFS storage class with dynamic provisioning. See our <<efs#,EFS storage class>> guide for more information. You can find a matrix https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes[here] that shows you different options.
 
 You can create your own storage class with NFS that supports `ReadWriteMany` access mode. See our <<nfs#,NFS storage class>> guide for more information. 
-NB: Azurefile storageclass on AKS supports RWM access mode but xp-operator fails to work on that and we recommend usage of NFS on AKS.  
+NOTE: The azurefile storageclass on AKS supports RWM access mode, but using that in conjunction with the xp-operator has proven unstable. We recommend usage of NFS on AKS.
+
 == Installation
 
 === Helm repository
@@ -155,11 +156,9 @@ __  ____  __  _____   ___  __ ____  ______
 2021-03-05 12:26:43,200 INFO  com.eno.kub.ope.Operator - Starting informers
 ----
 
-=== Delete xp from your cluster
+=== Uninstall xp from your cluster
 In case you have to re-deploy xp7 deployment and xp-operator on your cluster from scratch or if you for some reason want to delete xp from your cluster, we strongly recommend you to follow the following steps.
 
-* Remove xp7deployment and all related resources like PVCs, cluster role and cluster role bindings. If you used a separate namespace for your xp7deployment with no other k8s resource, it will be easier to delete the entire namespace. 
-* Uninstall xp-operator using helm: $ helm uninstall xp-operator
-
- 
+* Remove xp7deployment and all related resources like PVCs. If you used a separate namespace for your xp7deployment with no other k8s resource, it will be easier to delete the entire namespace. 
+* Uninstall xp-operator using helm: $ helm uninstall xp-operator 
 ----
