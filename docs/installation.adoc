@@ -155,10 +155,3 @@ __  ____  __  _____   ___  __ ____  ______
 2021-03-05 12:26:43,200 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXpClientCacheInvalidate'
 2021-03-05 12:26:43,200 INFO  com.eno.kub.ope.Operator - Starting informers
 ----
-
-=== Uninstall xp from your cluster
-In case you have to re-deploy xp7 deployment and xp-operator on your cluster from scratch or if you for some reason want to delete xp from your cluster, we strongly recommend you to follow the following steps.
-
-* Remove xp7deployment and all related resources like PVCs. If you used a separate namespace for your xp7deployment with no other k8s resource, it will be easier to delete the entire namespace. 
-* Uninstall xp-operator using helm: $ helm uninstall xp-operator 
-----
