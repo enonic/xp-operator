@@ -167,13 +167,13 @@ public class Predicates
         return inNodeGroup( cfgStr( "operator.charts.values.allNodesKey" ), nodeGroup );
     }
 
-    public static Predicate<HasMetadata> isPartOfDeployment( String name )
+    public static Predicate<HasMetadata> isPartOfDeployment( String namespace, String name )
     {
-        return matchLabel( cfgStr( "operator.charts.values.labelKeys.deployment" ), name );
+        return inNamespace(namespace).and(matchLabel( cfgStr( "operator.charts.values.labelKeys.deployment" ), name ));
     }
 
     public static Predicate<HasMetadata> isPartOfDeployment( Xp7Deployment deployment )
     {
-        return isPartOfDeployment( deployment.getMetadata().getName() );
+        return isPartOfDeployment( deployment.getMetadata().getNamespace(), deployment.getMetadata().getName() );
     }
 }
