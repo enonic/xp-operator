@@ -28,15 +28,8 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.enonic.kubernetes.common.Configuration.cfgBool;
 import static com.enonic.kubernetes.common.Configuration.cfgStr;
@@ -241,6 +234,11 @@ public class MutationApi
         List<Xp7DeploymentSpecNodesPreinstalledApps> preInstall = newR.getSpec().getNodesPreinstalledApps();
         if (preInstall == null || preInstall.isEmpty()) {
             patch( mt, true, "/spec/nodesPreinstalledApps", newR.getSpec().getNodesPreinstalledApps(), preInstalledApps );
+        } else {
+            List<String> names = preInstall.stream().map(Xp7DeploymentSpecNodesPreinstalledApps::getName).collect(Collectors.toList());
+            List<Xp7DeploymentSpecNodesPreinstalledApps> newList = new LinkedList<>(preInstall);
+            preInstalledApps.stream().filter(a -> !names.contains(a.getName())).forEach(newList::add);
+            patch( mt, true, "/spec/nodesPreinstalledApps", newR.getSpec().getNodesPreinstalledApps(), newList );
         }
     }
 

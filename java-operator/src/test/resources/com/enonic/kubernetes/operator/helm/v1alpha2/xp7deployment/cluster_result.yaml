@@ -770,7 +770,7 @@ spec:
         readinessProbe:
           failureThreshold: 2
           httpGet:
-            path: "/_cluster/health?wait_for_status=yellow&timeout=1s"
+            path: "/_cluster/health?timeout=1s&wait_for_status=yellow"
             port: 9200
             scheme: "HTTP"
           initialDelaySeconds: 30
@@ -1026,7 +1026,7 @@ spec:
         readinessProbe:
           failureThreshold: 2
           httpGet:
-            path: "/_cluster/health?wait_for_status=green&timeout=1s"
+            path: "/_cluster/health?timeout=1s&wait_for_status=green"
             port: 9200
             scheme: "HTTP"
           initialDelaySeconds: 30
@@ -1306,7 +1306,7 @@ spec:
         readinessProbe:
           failureThreshold: 2
           httpGet:
-            path: "/_cluster/health?wait_for_status=yellow&timeout=1s"
+            path: "/_cluster/health?timeout=1s&wait_for_status=yellow"
             port: 9200
             scheme: "HTTP"
           initialDelaySeconds: 30

@@ -30,9 +30,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static com.enonic.kubernetes.common.Configuration.cfgFloat;
-import static com.enonic.kubernetes.common.Configuration.cfgInt;
-import static com.enonic.kubernetes.common.Configuration.cfgStr;
+import static com.enonic.kubernetes.common.Configuration.*;
 import static com.enonic.kubernetes.common.Utils.createOwnerReference;
 
 
@@ -167,6 +165,7 @@ public class OperatorXp7DeploymentHelm
             deployment.put( "hasDedicatedFrontendNodes", hasDedicatedFrontendNodes( resource ) );
             deployment.put( "suPass", pass );
             deployment.put( "suPassHash", sha512( pass ) );
+            deployment.put("preInstalledCloudUtils", cfgHasKey("operator.preInstalledApps.cloudutils"));
             deployment.put( "preInstalledAppHash", sha512( resource.
                 getSpec().
                 getNodesPreinstalledApps().

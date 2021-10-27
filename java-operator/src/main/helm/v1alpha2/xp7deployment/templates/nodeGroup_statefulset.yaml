@@ -173,15 +173,15 @@ spec:
             httpGet:
               {{- if not $.Values.deployment.clustered }}
               # Single nodes
-              path: /_cluster/health?wait_for_status=green&timeout=1s
+              path: {{ $.Values.deployment.preInstalledCloudUtils | ternary "/cloud-utils/health?state=" "/_cluster/health?timeout=1s&wait_for_status=" }}green
               {{- else if and (and $nodeGroup.data $.Values.deployment.clustered) $.Values.deployment.hasDedicatedFrontendNodes }}
               # Cluster with dedicated frontend nodes
-              path: /_cluster/health?wait_for_status=green&timeout=1s
+              path: {{ $.Values.deployment.preInstalledCloudUtils | ternary "/cloud-utils/health?state=" "/_cluster/health?timeout=1s&wait_for_status=" }}green
               {{ else }}
               # Cluster with no dedicated cluster nodes
-              path: /_cluster/health?wait_for_status=yellow&timeout=1s
+              path: {{ $.Values.deployment.preInstalledCloudUtils | ternary "/cloud-utils/health?state=" "/_cluster/health?timeout=1s&wait_for_status=" }}yellow
               {{- end }}
-              port: 9200
+              port: {{ $.Values.deployment.preInstalledCloudUtils | ternary 4848 9200 }}
               scheme: HTTP
             initialDelaySeconds: 30
             periodSeconds: 8
