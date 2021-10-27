@@ -5,9 +5,9 @@ import org.immutables.value.Value;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 
-@JsonDeserialize(builder = ImmutableApiResponseError.Builder.class)
+@JsonDeserialize(builder = ImmutableApiResponseMessage.Builder.class)
 @Value.Immutable
-public abstract class ApiResponseError
+public abstract class ApiResponseMessage
 {
     public abstract Integer code();
 

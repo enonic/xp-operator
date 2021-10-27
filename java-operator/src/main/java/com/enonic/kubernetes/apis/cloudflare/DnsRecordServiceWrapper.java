@@ -6,6 +6,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.WebApplicationException;
 
+import com.enonic.kubernetes.apis.cloudflare.service.model.DnsRecordCreateResponse;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +49,12 @@ public class DnsRecordServiceWrapper
         return ImmutableCloudflareCommand.builder().
             action( "CREATE" ).
             dnsRecord( record ).
-            wrappedRunnable( () -> service.create( record.zone_id(), record ) ).
+            wrappedRunnable( () -> {
+                DnsRecordCreateResponse res = service.create( record.zone_id(), record );
+                if(!res.messages().isEmpty()) {
+                    res.messages().forEach(m -> log.warn(String.format("Message [%d]: %s", m.code(), m.message())));
+                }
+            } ).
             build();
     }
 

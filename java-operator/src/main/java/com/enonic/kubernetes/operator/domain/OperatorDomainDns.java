@@ -210,7 +210,7 @@ public class OperatorDomainDns
                 toAdd.add( ImmutableDnsRecord.builder().
                     zone_id( config.zoneId() ).
                     name( domain.getSpec().getHost() ).
-                    ttl( Integer.MAX_VALUE ).
+                    ttl( domain.getSpec().getDnsTTL() ).
                     type( "TXT" ).
                     content( createHeritageRecord() ).build() );
             }

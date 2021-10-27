@@ -8,9 +8,9 @@ public abstract class ApiResponse<T>
 {
     public abstract boolean success();
 
-    public abstract List<String> messages();
+    public abstract List<ApiResponseMessage> messages();
 
-    public abstract List<ApiResponseError> errors();
+    public abstract List<ApiResponseMessage> errors();
 
     @Nullable
     public abstract ApiResponseInfo result_info();
