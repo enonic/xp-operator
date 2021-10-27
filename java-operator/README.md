@@ -7,6 +7,7 @@ The Enonic XP Kubernetes Operator is a piece of software runs on top of Kubernet
 - [Running and installing operator to cluster](#running-and-installing-operator-to-cluster)
 - [Running operator in IDE](#running-operator-in-ide)
   - [Spoof hosts for SSE events](#spoof-hosts-for-sse-events)
+  - [Enable dns records](#enable-dns-records)
 
 ## Requirements for local development
 
@@ -92,4 +93,12 @@ And run proxy:
 
 ```console
 kubectl -n mycloud-mysolution-myenv-myservice port-forward main-0 4848
+```
+
+### Enable dns records
+
+Set these in your IDE environment:
+
+```
+DNS_ENABLED=true;DNS_LB_STATICIP=192.168.0.69;DNS_CLOUDFLARE_APITOKEN=??
 ```
