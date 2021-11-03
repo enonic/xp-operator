@@ -1,34 +1,9 @@
 package com.enonic.kubernetes.client;
 
-import com.enonic.kubernetes.client.apis.operator.OperatorApi;
-import com.enonic.kubernetes.client.apis.operator.OperatorApiImpl;
-import com.enonic.kubernetes.client.apis.xp7.mgmt.Xp7MgmtApi;
-import com.enonic.kubernetes.client.apis.xp7.mgmt.Xp7MgmtApiImpl;
-import io.fabric8.kubernetes.client.Config;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
-import okhttp3.OkHttpClient;
+import io.fabric8.kubernetes.client.KubernetesClient;
 
-public class EnonicKubernetesClient extends DefaultKubernetesClient {
-    public EnonicKubernetesClient() {
-    }
+public interface EnonicKubernetesClient {
+    KubernetesClient k8s();
 
-    public EnonicKubernetesClient(String masterUrl) {
-        super(masterUrl);
-    }
-
-    public EnonicKubernetesClient(Config config) {
-        super(config);
-    }
-
-    public EnonicKubernetesClient(OkHttpClient httpClient, Config config) {
-        super(httpClient, config);
-    }
-
-    public OperatorApi operator() {
-        return new OperatorApiImpl(this.getHttpClient(), this.getConfiguration());
-    }
-
-    public Xp7MgmtApi xp7() {
-        return new Xp7MgmtApiImpl(this.getHttpClient(), this.getConfiguration());
-    }
+    CustomClient enonic();
 }

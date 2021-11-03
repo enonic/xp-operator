@@ -1,9 +1,9 @@
 package com.enonic.kubernetes.client;
 
-import com.enonic.kubernetes.client.v1alpha1.Xp7App;
-import com.enonic.kubernetes.client.v1alpha2.Domain;
-import com.enonic.kubernetes.client.v1alpha2.Xp7Config;
-import com.enonic.kubernetes.client.v1alpha2.Xp7Deployment;
+import com.enonic.kubernetes.client.v1.domain.Domain;
+import com.enonic.kubernetes.client.v1.xp7app.Xp7App;
+import com.enonic.kubernetes.client.v1.xp7config.Xp7Config;
+import com.enonic.kubernetes.client.v1.xp7deployment.Xp7Deployment;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.fabric8.kubernetes.api.KubernetesResourceMappingProvider;
@@ -42,10 +42,10 @@ public class CrdMappingProvider
     private Map<String, Class<? extends KubernetesResource>> createMappings() {
         Map<String, Class<? extends KubernetesResource>> map = new HashMap<>();
 
-        put(map, "v1alpha1", "Xp7App", Xp7App.class);
-        put(map, "v1alpha2", "Xp7Config", Xp7Config.class);
-        put(map, "v1alpha2", "Xp7Deployment", Xp7Deployment.class);
-        put(map, "v1alpha2", "Domain", Domain.class);
+        put(map, "v1", "Xp7App", Xp7App.class);
+        put(map, "v1", "Xp7Config", Xp7Config.class);
+        put(map, "v1", "Xp7Deployment", Xp7Deployment.class);
+        put(map, "v1", "Domain", Domain.class);
 
         return map;
     }

@@ -6,6 +6,27 @@ import java.util.Objects;
 
 public class Crd<S, T>
         extends CustomResource<S, T> {
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(this.getClass().getName()).append('@').append(Integer.toHexString(System.identityHashCode(this))).append('[');
+        sb.append("spec");
+        sb.append('=');
+        sb.append(((this.getSpec() == null) ? "<null>" : this.getSpec()));
+        sb.append(',');
+        sb.append("status");
+        sb.append('=');
+        sb.append(((this.getStatus() == null) ? "<null>" : this.getStatus()));
+        sb.append(',');
+        if (sb.charAt((sb.length() - 1)) == ',') {
+            sb.setCharAt((sb.length() - 1), ']');
+        } else {
+            sb.append(']');
+        }
+        return sb.toString();
+    }
+
     @Override
     public int hashCode() {
         int result = 1;
@@ -31,6 +52,7 @@ public class Crd<S, T>
             return false;
         }
 
+        //noinspection rawtypes
         Crd rhs = ((Crd) other);
         return Objects.equals(rhs.getApiVersion(), this.getApiVersion()) &&
                 Objects.equals(rhs.getKind(), this.getKind()) &&

@@ -137,10 +137,10 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <target>
-                                <delete file="${basedir}/target/generated-sources/jsonschema2pojo/com/enonic/kubernetes/client/v1alpha1/xp7app/Xp7AppPlaceholder.java"/>
-                                <delete file="${basedir}/target/generated-sources/jsonschema2pojo/com/enonic/kubernetes/client/v1alpha2/domain/DomainPlaceholder.java"/>
-                                <delete file="${basedir}/target/generated-sources/jsonschema2pojo/com/enonic/kubernetes/client/v1alpha2/xp7config/Xp7ConfigPlaceholder.java"/>
-                                <delete file="${basedir}/target/generated-sources/jsonschema2pojo/com/enonic/kubernetes/client/v1alpha2/xp7deployment/Xp7DeploymentPlaceholder.java"/>
+                                <delete file="${basedir}/target/generated-sources/jsonschema2pojo/com/enonic/kubernetes/client/v1/xp7app/Xp7AppPlaceholder.java"/>
+                                <delete file="${basedir}/target/generated-sources/jsonschema2pojo/com/enonic/kubernetes/client/v1/domain/DomainPlaceholder.java"/>
+                                <delete file="${basedir}/target/generated-sources/jsonschema2pojo/com/enonic/kubernetes/client/v1/xp7config/Xp7ConfigPlaceholder.java"/>
+                                <delete file="${basedir}/target/generated-sources/jsonschema2pojo/com/enonic/kubernetes/client/v1/xp7deployment/Xp7DeploymentPlaceholder.java"/>
                             </target>
                         </configuration>
                         <goals>

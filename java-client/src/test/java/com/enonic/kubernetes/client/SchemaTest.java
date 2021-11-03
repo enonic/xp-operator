@@ -15,8 +15,8 @@ import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
 import java.io.IOException;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @EnableRuleMigrationSupport
 public class SchemaTest
@@ -27,43 +27,43 @@ public class SchemaTest
     public KubernetesServer server = new KubernetesServer();
 
     @Test
-    void v1alpha1Xp7Apps()
+    void v1Xp7App()
         throws IOException
     {
         CustomResourceDefinition customResourceDefinition = loadCRD( "/crds/apps.yaml" );
-        JSONSchemaProps schema = loadSchema( "/schema/v1alpha1/xp7app/xp7App.json" );
+        JSONSchemaProps schema = loadSchema( "/schema/v1/xp7app/xp7App.json" );
 
-        assertSchema( getSchemaVersion( customResourceDefinition, "v1alpha1" ), schema );
+        assertSchema( getSchemaVersion( customResourceDefinition, "v1" ), schema );
     }
 
     @Test
-    void v1alpha2Domains()
+    void v1Domain()
         throws IOException
     {
         CustomResourceDefinition customResourceDefinition = loadCRD( "/crds/domains.yaml" );
-        JSONSchemaProps schema = loadSchema( "/schema/v1alpha2/domain/domain.json" );
+        JSONSchemaProps schema = loadSchema( "/schema/v1/domain/domain.json" );
 
-        assertSchema( getSchemaVersion( customResourceDefinition, "v1alpha2" ), schema );
+        assertSchema( getSchemaVersion( customResourceDefinition, "v1" ), schema );
     }
 
     @Test
-    void v1alpha1Xp7Configs()
+    void v1Xp7Config()
         throws IOException
     {
         CustomResourceDefinition customResourceDefinition = loadCRD( "/crds/configs.yaml" );
-        JSONSchemaProps schema = loadSchema( "/schema/v1alpha2/xp7config/xp7Config.json" );
+        JSONSchemaProps schema = loadSchema( "/schema/v1/xp7config/xp7Config.json" );
 
-        assertSchema( getSchemaVersion( customResourceDefinition, "v1alpha2" ), schema );
+        assertSchema( getSchemaVersion( customResourceDefinition, "v1" ), schema );
     }
 
     @Test
-    void v1alpha1Xp7Deployments()
+    void v1Xp7Deployment()
         throws IOException
     {
         CustomResourceDefinition customResourceDefinition = loadCRD( "/crds/deployments.yaml" );
-        JSONSchemaProps schema = loadSchema( "/schema/v1alpha2/xp7deployment/xp7Deployment.json" );
+        JSONSchemaProps schema = loadSchema( "/schema/v1/xp7deployment/xp7Deployment.json" );
 
-        assertSchema( getSchemaVersion( customResourceDefinition, "v1alpha2" ), schema );
+        assertSchema( getSchemaVersion( customResourceDefinition, "v1" ), schema );
     }
 
     private CustomResourceDefinition loadCRD( final String file )

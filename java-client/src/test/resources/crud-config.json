@@ -1,5 +1,5 @@
 {
-  "apiVersion" : "enonic.cloud/v1alpha2",
+  "apiVersion" : "enonic.cloud/v1",
   "kind" : "Xp7Config",
   "metadata" : {
     "name" : "test-name",
