@@ -2,7 +2,7 @@ admissionRequest:
   request:
     operation: CREATE
     object:
-      apiVersion: enonic.cloud/v1alpha1
+      apiVersion: enonic.cloud/v1
       kind: Xp7App
       metadata:
         name: contentstudio
@@ -11,7 +11,7 @@ admissionRequest:
         url: https://repo.enonic.com/public/com/enonic/app/contentstudio/2.2.3/contentstudio-2.2.3.jar
 
 assertResult:
-  apiVersion: enonic.cloud/v1alpha1
+  apiVersion: enonic.cloud/v1
   kind: Xp7App
   metadata:
     name: contentstudio
@@ -19,7 +19,7 @@ assertResult:
     finalizers:
       - uninstall.app.enonic.cloud
     ownerReferences:
-      - apiVersion: enonic.cloud/v1alpha2
+      - apiVersion: enonic.cloud/v1
         kind: Xp7Deployment
         blockOwnerDeletion: false
         controller: true

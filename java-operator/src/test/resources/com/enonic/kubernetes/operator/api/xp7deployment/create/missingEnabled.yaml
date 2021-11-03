@@ -2,7 +2,7 @@ admissionRequest:
   request:
     operation: CREATE
     object:
-      apiVersion: enonic.cloud/v1alpha2
+      apiVersion: enonic.cloud/v1
       kind: Xp7Deployment
       metadata:
         name: mycloud-mysolution-myenv-myservice

@@ -2,7 +2,7 @@ admissionRequest:
   request:
     operation: CREATE
     object:
-      apiVersion: enonic.cloud/v1alpha2
+      apiVersion: enonic.cloud/v1
       kind: Xp7Config
       metadata:
         name: test
@@ -14,13 +14,13 @@ admissionRequest:
           hello
 
 assertResult:
-  apiVersion: "enonic.cloud/v1alpha2"
+  apiVersion: "enonic.cloud/v1"
   kind: "Xp7Config"
   metadata:
     name: "test"
     namespace: "mycloud-mysolution-myenv-myservice"
     ownerReferences:
-      - apiVersion: "enonic.cloud/v1alpha2"
+      - apiVersion: "enonic.cloud/v1"
         kind: "Xp7Deployment"
         blockOwnerDeletion: false
         controller: true

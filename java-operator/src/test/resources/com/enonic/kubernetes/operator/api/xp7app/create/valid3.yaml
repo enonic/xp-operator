@@ -2,7 +2,7 @@ admissionRequest:
   request:
     operation: CREATE
     object:
-      apiVersion: enonic.cloud/v1alpha1
+      apiVersion: enonic.cloud/v1
       kind: Xp7App
       metadata:
         name: contentstudio
@@ -16,7 +16,7 @@ admissionRequest:
         fields: { }
 
 assertResult:
-  apiVersion: enonic.cloud/v1alpha1
+  apiVersion: enonic.cloud/v1
   kind: Xp7App
   metadata:
     name: contentstudio
@@ -24,7 +24,7 @@ assertResult:
     finalizers:
       - uninstall.app.enonic.cloud
     ownerReferences:
-      - apiVersion: enonic.cloud/v1alpha2
+      - apiVersion: enonic.cloud/v1
         kind: Xp7Deployment
         blockOwnerDeletion: false
         controller: true

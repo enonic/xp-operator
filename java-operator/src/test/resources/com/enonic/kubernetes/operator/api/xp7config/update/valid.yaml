@@ -2,7 +2,7 @@ admissionRequest:
   request:
     operation: UPDATE
     oldObject:
-      apiVersion: enonic.cloud/v1alpha2
+      apiVersion: enonic.cloud/v1
       kind: Xp7Config
       metadata:
         name: test
@@ -16,7 +16,7 @@ admissionRequest:
         state: READY
         message: Loaded
     object:
-      apiVersion: enonic.cloud/v1alpha2
+      apiVersion: enonic.cloud/v1
       kind: Xp7Config
       metadata:
         name: test
@@ -28,7 +28,7 @@ admissionRequest:
           world
 
 assertResult:
-  apiVersion: "enonic.cloud/v1alpha2"
+  apiVersion: "enonic.cloud/v1"
   kind: "Xp7Config"
   metadata:
     name: "test"

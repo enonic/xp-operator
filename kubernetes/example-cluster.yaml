@@ -8,7 +8,7 @@ metadata:
     enonic.cloud/remove.with.xp7deployment: my-deployment
 ---
 # Create deployment in the namespace
-apiVersion: enonic.cloud/v1alpha2
+apiVersion: enonic.cloud/v1
 kind: Xp7Deployment
 metadata:
   name: my-deployment
@@ -72,7 +72,7 @@ spec:
             size: 1Gi
 ---
 # Install content studio
-apiVersion: enonic.cloud/v1alpha1
+apiVersion: enonic.cloud/v1
 kind: Xp7App
 metadata:
   name: contentstudio
@@ -82,7 +82,7 @@ spec:
   sha512: d131cdb2b66683455d27977dce7d4268de29f9db0da9602b8d920aa090f2e45d5833c477988e9b18096f43786bc1ac490a95661a588eafd5699d05c68c8e516a
 ---
 # Disable management of apps through XP admin
-apiVersion: enonic.cloud/v1alpha2
+apiVersion: enonic.cloud/v1
 kind: Xp7Config
 metadata:
   name: my-config

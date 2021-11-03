@@ -1,0 +1,147 @@
+---
+allNodesKey: "all"
+annotationKeys:
+  applyPriority: "enonic.applyPriority"
+  ingressCertManage: "enonic.cloud/ingress.cert.manage"
+  neverOverwrite: "enonic.neverOverwrite"
+  removeWithDeployment: "enonic.cloud/remove.with.xp7deployment"
+  vhostMapping: "enonic.cloud/xp7.vhost.mapping."
+clusterId: "44ddc40b-266c-4c99-b094-e758328fc6ba"
+defaultLabels:
+  cloud: "mycloud"
+  environment: "myenv"
+  service: "myservice"
+  solution: "mysolution"
+deployment:
+  clusterMajority: 5
+  clustered: true
+  hasDedicatedFrontendNodes: true
+  minimumDataNodes: 2
+  minimumMasterNodes: 2
+  name: "mycloud-mysolution-myenv-myservice"
+  namespace: "mycloud-mysolution-myenv-myservice"
+  preInstalledAppHash: "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e"
+  preInstalledCloudUtils: false
+  spec:
+    enabled: true
+    xpVersion: "7.7.0"
+    nodesPreinstalledApps: []
+    nodesSharedDisks:
+    - name: "blobstore"
+      size: "1Gi"
+    - name: "snapshots"
+      size: "2Gi"
+    nodeGroups:
+    - name: "master"
+      data: false
+      master: true
+      replicas: 3
+      env:
+      - name: "XP_OPTS"
+        value: " -Xms512m -Xmx512m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof\
+          \ -Dhazelcast.shutdownhook.policy=GRACEFUL -Dhazelcast.graceful.shutdown.max.wait=600"
+      resources:
+        cpu: "1"
+        memory: "1Gi"
+        disks:
+        - name: "export"
+          size: "3Gi"
+    - name: "data"
+      data: true
+      master: false
+      replicas: 2
+      env:
+      - name: "XP_OPTS"
+        value: " -Xms614m -Xmx614m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof\
+          \ -Dhazelcast.shutdownhook.policy=GRACEFUL -Dhazelcast.graceful.shutdown.max.wait=600"
+      resources:
+        cpu: "2"
+        memory: "2Gi"
+        disks:
+        - name: "export"
+          size: "4Gi"
+        - name: "index"
+          size: "5Gi"
+    - name: "frontend"
+      data: false
+      master: false
+      replicas: 3
+      env:
+      - name: "CUSTOM_ENV"
+        value: "myenvvar"
+      - name: "XP_OPTS"
+        value: "-bla -Xms1536m -Xmx1536m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof\
+          \ -Dhazelcast.shutdownhook.policy=GRACEFUL -Dhazelcast.graceful.shutdown.max.wait=600"
+      resources:
+        cpu: "3"
+        memory: "3Gi"
+        disks:
+        - name: "export"
+          value: "6Gi"
+        - name: "work"
+          value: "7Gi"
+  suPass: "password"
+  suPassHash: "b109f3bbbc244eb82441917ed06d618b9008dd09b3befd1b5e07394c706a8bb980b1d7785e5976ec049b46df5f1326af5a2ea6d103fd07c95385ffab0cacbc86"
+dirs:
+  config: "/enonic-xp/home/config"
+  extraConfig: "/enonic-xp/home/extra-config"
+discoveryService: "cluster-discovery"
+files:
+  setEnv: "/enonic-xp/home/setenv.sh"
+  vhosts: "com.enonic.xp.web.vhost.cfg"
+finalizers:
+  app:
+    uninstall: "uninstall.app.enonic.cloud"
+image:
+  nameTemplate: "enonic/xp:%s-ubuntu"
+  pullPolicy: "IfNotPresent"
+labelKeys:
+  data: "enonic.data"
+  deployment: "enonic.deployment"
+  ingressVhostLoaded: "enonic.cloud/vhost-loaded"
+  managed: "enonic.managed"
+  master: "enonic.master"
+  nodeGroup: "enonic.nodeGroup"
+  veleroBackupName: "velero.io/backup-name"
+  veleroBackupRestore: "velero.io/restore-name"
+ownerReferences:
+- apiVersion: "enonic.cloud/v1"
+  kind: "Xp7Deployment"
+  blockOwnerDeletion: false
+  controller: true
+  name: "mycloud-mysolution-myenv-myservice"
+pods:
+  nodeGroupAntiAffinity: false
+  securityContext:
+    fsGroup: "0"
+    user: "1337"
+  sysctlInitContainer: true
+  terminationGracePeriodSeconds: "600"
+  updateStrategy: "RollingUpdate"
+resources:
+  cpu:
+    defaultRequests: null
+  memory:
+    defaultRequests: null
+settings:
+  cloudApiServiceAccount:
+    name: "cloudApi"
+    namespace: "ec-system"
+  hzApiDiscovery: true
+  linkerd: false
+storage:
+  default:
+    storageClassName: "standard"
+  shared:
+    storageClassName: "standard"
+volumes:
+  backups:
+  - "blobstore"
+  - "snapshots"
+  mounts:
+    blobstore: "/enonic-xp/home/repo/blob"
+    deploy: "/enonic-xp/home/deploy"
+    export: "/enonic-xp/home/data"
+    index: "/enonic-xp/home/repo/index"
+    snapshots: "/enonic-xp/home/snapshots"
+    work: "/enonic-xp/home/work"

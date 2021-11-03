@@ -1,7 +1,7 @@
 package com.enonic.kubernetes.apis.xp;
 
 import com.enonic.kubernetes.apis.xp.service.*;
-import com.enonic.kubernetes.client.api.xp7.snapshots.Xp7MgmtSnapshotsList;
+import com.enonic.kubernetes.client.v1.api.xp7.snapshots.Xp7MgmtSnapshotsList;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;

@@ -2,7 +2,7 @@ admissionRequest:
   request:
     operation: UPDATE
     oldObject:
-      apiVersion: enonic.cloud/v1alpha2
+      apiVersion: enonic.cloud/v1
       kind: Domain
       metadata:
         name: my-test-domain
@@ -20,7 +20,7 @@ admissionRequest:
           publicIps: [ ]
           dnsRecordCreated: false
     object:
-      apiVersion: enonic.cloud/v1alpha2
+      apiVersion: enonic.cloud/v1
       kind: Domain
       metadata:
         name: my-test-domain
@@ -32,7 +32,7 @@ admissionRequest:
           authority: letsEncrypt
 
 assertResult:
-  apiVersion: enonic.cloud/v1alpha2
+  apiVersion: enonic.cloud/v1
   kind: Domain
   metadata:
     name: my-test-domain

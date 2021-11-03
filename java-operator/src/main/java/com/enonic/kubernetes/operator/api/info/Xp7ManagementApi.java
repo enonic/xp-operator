@@ -4,10 +4,10 @@ import com.enonic.kubernetes.apis.xp.XpClient;
 import com.enonic.kubernetes.apis.xp.XpClientCache;
 import com.enonic.kubernetes.apis.xp.XpClientCacheKeyImpl;
 import com.enonic.kubernetes.apis.xp.XpClientException;
-import com.enonic.kubernetes.client.api.xp7.idproviders.Xp7MgmtIdProvidersList;
-import com.enonic.kubernetes.client.api.xp7.routes.Xp7MgmtRoutesList;
-import com.enonic.kubernetes.client.api.xp7.snapshots.Xp7MgmtSnapshotsList;
-import com.enonic.kubernetes.client.v1alpha2.Xp7Deployment;
+import com.enonic.kubernetes.client.v1.api.xp7.idproviders.Xp7MgmtIdProvidersList;
+import com.enonic.kubernetes.client.v1.api.xp7.routes.Xp7MgmtRoutesList;
+import com.enonic.kubernetes.client.v1.api.xp7.snapshots.Xp7MgmtSnapshotsList;
+import com.enonic.kubernetes.client.v1.xp7deployment.Xp7Deployment;
 import com.enonic.kubernetes.kubernetes.Searchers;
 import io.fabric8.kubernetes.api.model.StatusBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
@@ -24,11 +24,11 @@ import java.util.Optional;
 
 import static com.enonic.kubernetes.kubernetes.Predicates.inNamespace;
 import static com.enonic.kubernetes.kubernetes.Predicates.withName;
-import static com.enonic.kubernetes.operator.v1alpha2xp7deployment.Predicates.running;
-import static com.enonic.kubernetes.operator.v1alpha2xp7deployment.Predicates.withNodeGroup;
+import static com.enonic.kubernetes.operator.xp7deployment.Predicates.running;
+import static com.enonic.kubernetes.operator.xp7deployment.Predicates.withNodeGroup;
 
 @ApplicationScoped
-@Path("/apis/operator.enonic.cloud/v1alpha1")
+@Path("/apis/operator.enonic.cloud/v1")
 public class Xp7ManagementApi {
 
     public static Logger logger = LoggerFactory.getLogger(Xp7ManagementApi.class);

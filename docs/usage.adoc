@@ -14,7 +14,7 @@ This is the main custom resource that defines your deployment. It is namespaced 
 
 [source,yaml]
 ----
-apiVersion: enonic.cloud/v1alpha2
+apiVersion: enonic.cloud/v1
 kind: Xp7Deployment
 metadata:
   name: my-deployment
@@ -89,7 +89,7 @@ This custom resource manages the configuration of XP nodes. This resource namesp
 
 [source,yaml]
 ----
-apiVersion: enonic.cloud/v1alpha2
+apiVersion: enonic.cloud/v1
 kind: Xp7Config
 metadata:
   name: my-config
@@ -111,7 +111,7 @@ You can also create Xp7Config files that hold binary data. To do that you have t
 
 [source,yaml]
 ----
-apiVersion: enonic.cloud/v1alpha2
+apiVersion: enonic.cloud/v1
 kind: Xp7Config
 metadata:
   name: my-config
@@ -131,7 +131,7 @@ This resource is to manage apps with the operator. While you can manage them wit
 
 [source,yaml]
 ----
-apiVersion: enonic.cloud/v1alpha1
+apiVersion: enonic.cloud/v1
 kind: Xp7App
 metadata:
   name: contentstudio
@@ -341,7 +341,7 @@ metadata:
     enonic.cloud/remove.with.xp7deployment: my-deployment
 ---
 # Create deployment in the namespace
-apiVersion: enonic.cloud/v1alpha2
+apiVersion: enonic.cloud/v1
 kind: Xp7Deployment
 metadata:
   name: my-deployment
@@ -383,7 +383,7 @@ spec:
             size: 1Gi
 ---
 # Install content studio
-apiVersion: enonic.cloud/v1alpha1
+apiVersion: enonic.cloud/v1
 kind: Xp7App
 metadata:
   name: contentstudio
@@ -393,7 +393,7 @@ spec:
   sha512: d131cdb2b66683455d27977dce7d4268de29f9db0da9602b8d920aa090f2e45d5833c477988e9b18096f43786bc1ac490a95661a588eafd5699d05c68c8e516a
 ---
 # Add your own custom config
-apiVersion: enonic.cloud/v1alpha2
+apiVersion: enonic.cloud/v1
 kind: Xp7Config
 metadata:
   name: my-config
@@ -473,7 +473,7 @@ metadata:
     enonic.cloud/remove.with.xp7deployment: my-deployment
 ---
 # Create deployment in the namespace
-apiVersion: enonic.cloud/v1alpha2
+apiVersion: enonic.cloud/v1
 kind: Xp7Deployment
 metadata:
   name: my-deployment
@@ -537,7 +537,7 @@ spec:
             size: 1Gi
 ---
 # Install content studio
-apiVersion: enonic.cloud/v1alpha1
+apiVersion: enonic.cloud/v1
 kind: Xp7App
 metadata:
   name: contentstudio
@@ -547,7 +547,7 @@ spec:
   sha512: d131cdb2b66683455d27977dce7d4268de29f9db0da9602b8d920aa090f2e45d5833c477988e9b18096f43786bc1ac490a95661a588eafd5699d05c68c8e516a
 ---
 # Add your own custom config
-apiVersion: enonic.cloud/v1alpha2
+apiVersion: enonic.cloud/v1
 kind: Xp7Config
 metadata:
   name: my-config

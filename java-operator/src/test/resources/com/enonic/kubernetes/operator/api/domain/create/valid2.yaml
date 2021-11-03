@@ -2,7 +2,7 @@ admissionRequest:
   request:
     operation: CREATE
     object:
-      apiVersion: enonic.cloud/v1alpha2
+      apiVersion: enonic.cloud/v1
       kind: Domain
       metadata:
         name: my-test-domain
@@ -11,7 +11,7 @@ admissionRequest:
         dnsRecord: false
 
 assertResult:
-  apiVersion: enonic.cloud/v1alpha2
+  apiVersion: enonic.cloud/v1
   kind: Domain
   metadata:
     name: my-test-domain

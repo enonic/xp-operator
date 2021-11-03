@@ -2,7 +2,7 @@ admissionRequest:
   request:
     operation: DELETE
     oldObject:
-      apiVersion: enonic.cloud/v1alpha1
+      apiVersion: enonic.cloud/v1
       kind: Xp7App
       metadata:
         name: contentstudio

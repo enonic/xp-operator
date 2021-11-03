@@ -3,13 +3,11 @@ package com.enonic.kubernetes.kubernetes;
 import javax.inject.Singleton;
 import javax.ws.rs.Produces;
 
+import com.enonic.kubernetes.client.DefaultEnonicKubernetesClient;
+import com.enonic.kubernetes.client.EnonicKubernetesClient;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClient;
 
-import com.enonic.kubernetes.client.v1alpha1.Xp7App;
-import com.enonic.kubernetes.client.v1alpha2.Domain;
-import com.enonic.kubernetes.client.v1alpha2.Xp7Config;
-import com.enonic.kubernetes.client.v1alpha2.Xp7Deployment;
+import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 
 import static com.enonic.kubernetes.common.SingletonAssert.singletonAssert;
 
@@ -20,8 +18,14 @@ public class ClientsProducer
     Clients createClients()
     {
         singletonAssert(this, "createClients");
-        KubernetesClient client = new DefaultKubernetesClient().inAnyNamespace();
-        return ClientsImpl.of( client, Xp7App.createCrdClient( client ), Xp7Config.createCrdClient( client ),
-                               Xp7Deployment.createCrdClient( client ), Domain.createCrdClient( client ) );
+        NamespacedKubernetesClient defaultKubernetesClient = new DefaultKubernetesClient().inAnyNamespace();
+        EnonicKubernetesClient client = new DefaultEnonicKubernetesClient(defaultKubernetesClient);
+        return ClientsImpl.of(
+                client.k8s(),
+                client.enonic(),
+                client.enonic().v1().crds().xp7apps(),
+                client.enonic().v1().crds().xp7configs(),
+                client.enonic().v1().crds().xp7deployments(),
+                client.enonic().v1().crds().domains() );
     }
 }

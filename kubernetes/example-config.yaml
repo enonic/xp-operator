@@ -1,4 +1,4 @@
-apiVersion: enonic.cloud/v1alpha2
+apiVersion: enonic.cloud/v1
 kind: Xp7Config
 metadata:
   name: test
@@ -9,7 +9,7 @@ spec:
   data: |
     metricsUrl = http://asdf:2609/
 ---
-apiVersion: enonic.cloud/v1alpha2
+apiVersion: enonic.cloud/v1
 kind: Xp7Config
 metadata:
   name: test2
@@ -19,7 +19,7 @@ spec:
   dataBase64: true
   data: YXNkZg==
 ---
-apiVersion: enonic.cloud/v1alpha2
+apiVersion: enonic.cloud/v1
 kind: Xp7Config
 metadata:
   name: all-com-enonic-xp-app-applications-cfg

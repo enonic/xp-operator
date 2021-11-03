@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @ApplicationScoped
-@Path("/apis/operator.enonic.cloud/v1alpha1")
+@Path("/apis/operator.enonic.cloud/v1")
 public class InfoApi {
     @ConfigProperty(name = "operator.api.version")
     String apiVersion;

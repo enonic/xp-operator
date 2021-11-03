@@ -1,4 +1,4 @@
-- apiVersion: enonic.cloud/v1alpha2
+- apiVersion: enonic.cloud/v1
   kind: Xp7Deployment
   metadata:
     uid: 9265a02a-000f-421a-b4aa-4768e8eab21e

@@ -26,7 +26,7 @@ subsets:
 apiVersion: apiregistration.k8s.io/v1
 kind: APIService
 metadata:
-  name: v1alpha1.operator.enonic.cloud
+  name: v1.operator.enonic.cloud
 spec:
   group: operator.enonic.cloud
   groupPriorityMinimum: 1000
@@ -35,18 +35,18 @@ spec:
   service:
     name: "operator"
     namespace: "default"
-  version: v1alpha1
+  version: v1
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
   name: operator
 webhooks:
-- name: operator.enonic.cloud
+- name: v1.operator.enonic.cloud
   rules:
     - apiGroups: ["enonic.cloud"]
       operations: ["*"]
-      apiVersions: ["*"]
+      apiVersions: ["v1"]
       resources: ["xp7deployments", "xp7vhosts", "xp7apps", "xp7configs", "domains"]
       scope: "*"
     - apiGroups: ["networking.k8s.io"]
@@ -63,18 +63,18 @@ webhooks:
     service:
       name: "operator"
       namespace: "default"
-      path: /apis/operator.enonic.cloud/v1alpha1/validations
+      path: /apis/operator.enonic.cloud/v1/validations
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
   name: operator
 webhooks:
-  - name: operator.enonic.cloud
+  - name: v1.operator.enonic.cloud
     rules:
       - apiGroups: ["enonic.cloud"]
         operations: ["*"]
-        apiVersions: ["*"]
+        apiVersions: ["v1"]
         resources: ["xp7deployments", "xp7vhosts", "xp7apps", "xp7configs", "domains"]
         scope: "*"
       - apiGroups: ["networking.k8s.io"]
@@ -91,4 +91,4 @@ webhooks:
       service:
         name: "operator"
         namespace: "default"
-        path: /apis/operator.enonic.cloud/v1alpha1/mutations
+        path: /apis/operator.enonic.cloud/v1/mutations

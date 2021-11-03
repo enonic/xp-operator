@@ -1,10 +1,10 @@
 package com.enonic.kubernetes.operator.api.admission;
 
-import com.enonic.kubernetes.client.v1alpha1.Xp7App;
-import com.enonic.kubernetes.client.v1alpha2.Domain;
-import com.enonic.kubernetes.client.v1alpha2.Xp7Config;
-import com.enonic.kubernetes.client.v1alpha2.Xp7Deployment;
-import com.enonic.kubernetes.client.v1alpha2.xp7deployment.Xp7DeploymentSpecNodeGroup;
+import com.enonic.kubernetes.client.v1.xp7app.Xp7App;
+import com.enonic.kubernetes.client.v1.domain.Domain;
+import com.enonic.kubernetes.client.v1.xp7config.Xp7Config;
+import com.enonic.kubernetes.client.v1.xp7deployment.Xp7Deployment;
+import com.enonic.kubernetes.client.v1.xp7deployment.Xp7DeploymentSpecNodeGroup;
 import com.enonic.kubernetes.common.Validator;
 import com.enonic.kubernetes.operator.api.AdmissionOperation;
 import com.enonic.kubernetes.operator.api.BaseAdmissionApi;
@@ -44,7 +44,7 @@ import static com.enonic.kubernetes.kubernetes.Predicates.withName;
 import static com.enonic.kubernetes.operator.ingress.OperatorXp7ConfigSync.getAnnotationMappings;
 
 @ApplicationScoped
-@Path("/apis/operator.enonic.cloud/v1alpha1")
+@Path("/apis/operator.enonic.cloud/v1")
 public class AdmissionApi
     extends BaseAdmissionApi<AdmissionReview>
 {

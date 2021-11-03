@@ -1,6 +1,6 @@
 package com.enonic.kubernetes.operator.api.info;
 
-import com.enonic.kubernetes.client.api.operator.OperatorVersion;
+import com.enonic.kubernetes.client.v1.api.operator.OperatorVersion;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.GET;
@@ -8,15 +8,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.Objects;
 import java.util.Properties;
 
 @ApplicationScoped
-@Path("/apis/operator.enonic.cloud/v1alpha1")
+@Path("/apis/operator.enonic.cloud/v1")
 public class OperatorApi {
     @GET
     @Path("/operator/version")

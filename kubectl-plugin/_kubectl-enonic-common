@@ -2,7 +2,7 @@
 
 set -e
 
-ROOT="/apis/operator.enonic.cloud/v1alpha1"
+ROOT="/apis/operator.enonic.cloud/v1"
 
 # Check for needed binaries
 command -v jq &>/dev/null || (
@@ -15,7 +15,7 @@ command -v fzf &>/dev/null || (
 )
 
 function get_url() {
-    echo -n "/apis/operator.enonic.cloud/v1alpha1"
+    echo -n $ROOT
     for var in "$@"; do
         [[ $var == /* ]] || echo -n "/"
         echo -n "$var"

@@ -1,4 +1,4 @@
-apiVersion: enonic.cloud/v1alpha2
+apiVersion: enonic.cloud/v1
 kind: Domain
 metadata:
   name: test-domain-enonic-net

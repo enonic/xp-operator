@@ -10,7 +10,7 @@ dev: ## Run k8s kind cluster setup for development
 validate: ## Run k8s kind cluster setup is working
 	@$(MAKE) -C ../kubernetes/kind --no-print-directory kind-network-info
 	@echo "Operator info:"
-	@kubectl get --raw='/apis/operator.enonic.cloud/v1alpha1/operator/version' | jq
+	@kubectl get --raw='/apis/operator.enonic.cloud/v1/operator/version' | jq
 
 clean: ## Clean up everything
 	# Clean helm chart

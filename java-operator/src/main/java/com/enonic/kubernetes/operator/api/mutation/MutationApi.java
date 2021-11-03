@@ -1,17 +1,17 @@
 package com.enonic.kubernetes.operator.api.mutation;
 
-import com.enonic.kubernetes.client.v1alpha1.Xp7App;
-import com.enonic.kubernetes.client.v1alpha1.xp7app.Xp7AppStatus;
-import com.enonic.kubernetes.client.v1alpha1.xp7app.Xp7AppStatusFields;
-import com.enonic.kubernetes.client.v1alpha2.Domain;
-import com.enonic.kubernetes.client.v1alpha2.Xp7Config;
-import com.enonic.kubernetes.client.v1alpha2.Xp7Deployment;
-import com.enonic.kubernetes.client.v1alpha2.domain.DomainStatus;
-import com.enonic.kubernetes.client.v1alpha2.domain.DomainStatusFields;
-import com.enonic.kubernetes.client.v1alpha2.xp7config.Xp7ConfigStatus;
-import com.enonic.kubernetes.client.v1alpha2.xp7deployment.Xp7DeploymentSpecNodesPreinstalledApps;
-import com.enonic.kubernetes.client.v1alpha2.xp7deployment.Xp7DeploymentStatus;
-import com.enonic.kubernetes.client.v1alpha2.xp7deployment.Xp7DeploymentStatusFields;
+import com.enonic.kubernetes.client.v1.xp7app.Xp7App;
+import com.enonic.kubernetes.client.v1.xp7app.Xp7AppStatus;
+import com.enonic.kubernetes.client.v1.xp7app.Xp7AppStatusFields;
+import com.enonic.kubernetes.client.v1.domain.Domain;
+import com.enonic.kubernetes.client.v1.xp7config.Xp7Config;
+import com.enonic.kubernetes.client.v1.xp7deployment.Xp7Deployment;
+import com.enonic.kubernetes.client.v1.domain.DomainStatus;
+import com.enonic.kubernetes.client.v1.domain.DomainStatusFields;
+import com.enonic.kubernetes.client.v1.xp7config.Xp7ConfigStatus;
+import com.enonic.kubernetes.client.v1.xp7deployment.Xp7DeploymentSpecNodesPreinstalledApps;
+import com.enonic.kubernetes.client.v1.xp7deployment.Xp7DeploymentStatus;
+import com.enonic.kubernetes.client.v1.xp7deployment.Xp7DeploymentStatusFields;
 import com.enonic.kubernetes.operator.api.AdmissionOperation;
 import com.enonic.kubernetes.operator.api.BaseAdmissionApi;
 import com.enonic.kubernetes.operator.domain.LbServiceIpProducer;
@@ -38,7 +38,7 @@ import static com.enonic.kubernetes.common.Utils.createOwnerReference;
 import static com.enonic.kubernetes.kubernetes.Predicates.matchAnnotationPrefix;
 
 @ApplicationScoped
-@Path("/apis/operator.enonic.cloud/v1alpha1")
+@Path("/apis/operator.enonic.cloud/v1")
 public class MutationApi
     extends BaseAdmissionApi<MutationRequest>
 {

@@ -1,6 +1,6 @@
 package com.enonic.kubernetes.operator.domain;
 
-import com.enonic.kubernetes.client.v1alpha2.Domain;
+import com.enonic.kubernetes.client.v1.domain.Domain;
 import com.enonic.kubernetes.kubernetes.Informers;
 import com.enonic.kubernetes.kubernetes.Searchers;
 import com.enonic.kubernetes.operator.helpers.InformerEventHandler;

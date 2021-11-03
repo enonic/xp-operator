@@ -1,6 +1,6 @@
 package com.enonic.kubernetes.operator.api;
 
-import com.enonic.kubernetes.client.v1alpha2.Xp7Deployment;
+import com.enonic.kubernetes.client.v1.xp7deployment.Xp7Deployment;
 import com.enonic.kubernetes.kubernetes.Searchers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

@@ -1,5 +1,6 @@
 package com.enonic.kubernetes.kubernetes;
 
+import com.enonic.kubernetes.client.CustomClient;
 import org.immutables.value.Value;
 
 
@@ -9,10 +10,10 @@ import io.fabric8.kubernetes.client.dsl.Resource;
 
 
 import com.enonic.kubernetes.common.annotations.Params;
-import com.enonic.kubernetes.client.v1alpha1.Xp7App;
-import com.enonic.kubernetes.client.v1alpha2.Domain;
-import com.enonic.kubernetes.client.v1alpha2.Xp7Config;
-import com.enonic.kubernetes.client.v1alpha2.Xp7Deployment;
+import com.enonic.kubernetes.client.v1.xp7app.Xp7App;
+import com.enonic.kubernetes.client.v1.domain.Domain;
+import com.enonic.kubernetes.client.v1.xp7config.Xp7Config;
+import com.enonic.kubernetes.client.v1.xp7deployment.Xp7Deployment;
 
 
 @Value.Immutable
@@ -20,6 +21,8 @@ import com.enonic.kubernetes.client.v1alpha2.Xp7Deployment;
 public interface Clients
 {
     KubernetesClient k8s();
+
+    CustomClient enonic();
 
     MixedOperation<Xp7App, Xp7App.Xp7AppList, Resource<Xp7App>> xp7Apps();
 

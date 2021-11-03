@@ -1,6 +1,6 @@
 package com.enonic.kubernetes.operator.ingress;
 
-import com.enonic.kubernetes.client.v1alpha2.Xp7Config;
+import com.enonic.kubernetes.client.v1.xp7config.Xp7Config;
 import com.enonic.kubernetes.kubernetes.Clients;
 import com.enonic.kubernetes.kubernetes.Searchers;
 import com.enonic.kubernetes.kubernetes.commands.K8sLogHelper;

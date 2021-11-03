@@ -2,7 +2,7 @@ admissionRequest:
   request:
     operation: DELETE
     object:
-      apiVersion: enonic.cloud/v1alpha2
+      apiVersion: enonic.cloud/v1
       kind: Domain
       metadata:
         name: my-test-domain
@@ -14,7 +14,7 @@ admissionRequest:
           authority: selfSigned
 
 assertResult:
-  apiVersion: enonic.cloud/v1alpha2
+  apiVersion: enonic.cloud/v1
   kind: Domain
   metadata:
     name: my-test-domain
