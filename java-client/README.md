@@ -50,20 +50,14 @@ CrdMappingProvider.registerDeserializer(objectMapper);
 
 ```java
 // Create config
-Config k8sClientConfig = new ConfigBuilder().
-    withMasterUrl( "https://<CLUSTER>" ).
-    withNewClientCertData( "<CA_CERT>" ).
-    withOauthToken( "<TOKEN>" ).
-    build();
+Config config = new ConfigBuilder().
+        withMasterUrl( "https://<CLUSTER>" ).
+        withNewClientCertData( "<CA_CERT>" ).
+        withOauthToken( "<TOKEN>" ).
+        build();
 
-// Create standard client
-KubernetesClient k8sClient = new DefaultKubernetesClient( k8sClientConfig );
-
-// Create CRD clients
-MixedOperation<Xp7App, Xp7App.Xp7AppList, Resource<Xp7App>> xp7AppClient = Xp7App.createCrdClient( k8sClient );
-MixedOperation<Xp7Config, Xp7Config.Xp7ConfigList, Resource<Xp7Config>> xp7ConfigClient = Xp7Config.createCrdClient( k8sClient );
-MixedOperation<Xp7Deployment, Xp7Deployment.Xp7DeploymentList, Resource<Xp7Deployment>> xp7DeploymentClient = Xp7Deployment.createCrdClient( k8sClient );
-MixedOperation<Domain, Domain.DomainList, Resource<Domain>> xp7VHostClient = Domain.createCrdClient( k8sClient );
+// Create client
+EnonicKubernetesClient client = new DefaultEnonicKubernetesClient( new DefaultKubernetesClient( config ).inAnyNamespace() );
 ```
 
 ## CRUD
@@ -74,7 +68,7 @@ MixedOperation<Domain, Domain.DomainList, Resource<Domain>> xp7VHostClient = Dom
 
 ```java
 // Create
-ConfigMap configMap = k8sClient.configMaps().
+ConfigMap configMap = client.k8s().configMaps().
     inNamespace( "my-namespace" ).
     withName( "my-config-map" ).
     create( new ConfigMapBuilder().
@@ -82,7 +76,7 @@ ConfigMap configMap = k8sClient.configMaps().
         build() );
 
 // Create or Replace
-configMap = k8sClient.configMaps().
+configMap = client.k8s().configMaps().
     inNamespace( "my-namespace" ).
     withName( "my-config-map" ).
     createOrReplace( new ConfigMapBuilder().
@@ -90,7 +84,7 @@ configMap = k8sClient.configMaps().
         build() );
 
 // Patch
-configMap = k8sClient.configMaps().
+configMap = client.k8s().configMaps().
     inNamespace( "my-namespace" ).
     withName( "my-config-map" ).
     patch( new ConfigMapBuilder().
@@ -98,7 +92,7 @@ configMap = k8sClient.configMaps().
         build() );
 
 // Replace
-configMap = k8sClient.configMaps().
+configMap = client.k8s().configMaps().
     inNamespace( "my-namespace" ).
     withName( "my-config-map" ).
     replace( new ConfigMapBuilder().
@@ -106,7 +100,7 @@ configMap = k8sClient.configMaps().
         build() );
 
 // Edit
-configMap = k8sClient.configMaps().
+configMap = client.k8s().configMaps().
     inNamespace( "my-namespace" ).
     withName( "my-config-map" ).
     edit( c -> {
@@ -115,13 +109,13 @@ configMap = k8sClient.configMaps().
     } );
 
 // Get
-configMap = k8sClient.configMaps().
+configMap = client.k8s().configMaps().
     inNamespace("my-namespace").
     withName( "my-config-map" ).
     get();
 
 // Delete
-k8sClient.configMaps().
+client.k8s().configMaps().
     inNamespace("my-namespace").
     withName( "my-config-map" ).
     delete();
@@ -132,6 +126,9 @@ k8sClient.configMaps().
 > **_NOTE:_** See more details in the [tests](./src/test/java/com/enonic/kubernetes/client/CrudTest.java).
 
 ```java
+// Get CRD client
+MixedOperation<Xp7App, Xp7App.Xp7AppList, Resource<Xp7App>> xp7AppClient = client.enonic().v1().crds().xp7apps();
+
 // Create
 Xp7App xp7App = xp7AppClient.
     inNamespace( "my-namespace" ).
@@ -190,7 +187,7 @@ xp7AppClient.
 
 ```java
 // Watch
-k8sClient.configMaps().
+client.k8s().configMaps().
     inAnyNamespace().
     watch( new Watcher<>()
     {
@@ -250,11 +247,11 @@ xp7AppClient.
 
 ```java
 // Get informer factory
-SharedInformerFactory sharedInformerFactory = k8sClient.informers();
+SharedInformerFactory sharedInformerFactory = client.k8s().informers();
                                                                     
 // Create informer
 SharedIndexInformer<ConfigMap> configMapInformer = sharedInformerFactory.
-    sharedIndexInformerFor( ConfigMap.class, ConfigMapList.class, 30 * 1000L );
+    sharedIndexInformerFor( ConfigMap.class, 30 * 1000L );
 
 // Add event handler
 configMapInformer.addEventHandler( new ResourceEventHandler<ConfigMap>()
@@ -291,11 +288,11 @@ sharedInformerFactory.stopAllRegisteredInformers();
 
 ```java
 // Get informer factory
-SharedInformerFactory sharedInformerFactory = k8sClient.informers();
+SharedInformerFactory sharedInformerFactory = client.k8s().informers();
 
 // Create informer
 SharedIndexInformer<Xp7App> xp7AppInformer = sharedInformerFactory.
-    sharedIndexInformerForCustomResource( xp7AppClient.createContext(), Xp7App.class, Xp7AppList.class, 30 * 1000L );
+    sharedIndexInformerFor( Xp7App.class, 30 * 1000L );
 
 // Add event handler
 xp7AppInformer.addEventHandler( new ResourceEventHandler<Xp7App>()

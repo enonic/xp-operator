@@ -4,7 +4,7 @@ The Enonic XP Kubernetes Operator is a piece of software runs on top of Kubernet
 
 - [Requirements for local development](#requirements-for-local-development)
 - [Setup](#setup)
-- [Running and installing operator to cluster](#running-and-installing-operator-to-cluster)
+- [Running and installing operator to kind cluster](#running-and-installing-operator-to-kind-cluster)
 - [Running operator in IDE](#running-operator-in-ide)
   - [Spoof hosts for SSE events](#spoof-hosts-for-sse-events)
   - [Enable dns records](#enable-dns-records)
@@ -25,7 +25,7 @@ $ helm repo add nfs https://kubernetes-sigs.github.io/nfs-subdir-external-provis
 $ helm repo update
 ```
 
-## Running and installing operator to cluster
+## Running and installing operator to kind cluster
 
 Simply run:
 
@@ -53,7 +53,7 @@ $ make verify
 
 ## Running operator in IDE
 
-Start cluster in dev mode:
+Start kind cluster in dev mode:
 
 ```
 $ export MY_IP=192.?.?.?
