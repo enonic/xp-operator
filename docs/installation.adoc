@@ -26,9 +26,10 @@ Before we deploy the operator, we need to talk about storage classes. That shoul
 
 The reason why we bring this up is because XP, when running in clustered mode, needs shared volumes for some data. If you do not plan on running any XP clusters in your Kubernetes cluster, you are fine and you do not need to worry about storage classes.
 
-However, for XP clusters to work, you need to have a storage class in your cluster that supports creation of `ReadWriteMany` volumes. For example, the standard storage class in `minikube` supports all modes, but the standard storage class in `GKE` does not support `ReadWriteMany`. You can find a matrix https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes[here] that shows you different options.
+However, for XP clusters to work, you need to have a storage class in your cluster that supports creation of `ReadWriteMany` volumes. For example, the standard storage class in `minikube` supports all modes, but the standard storage class in `GKE` does not support `ReadWriteMany`. Like GKE the standard storage class on Amazon EKS (gp2) does not support `ReadWriteMany` but you can use Amazon EFS storage class with dynamic provisioning. See our <<efs#,EFS storage class>> guide for more information. You can find a matrix https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes[here] that shows you different options.
 
-You can create your own storage class with NFS that supports `ReadWriteMany` access mode. See our <<nfs#,NFS storage class>> guide for more information.
+You can create your own storage class with NFS that supports `ReadWriteMany` access mode. See our <<nfs#,NFS storage class>> guide for more information. 
+NOTE: The azurefile storageclass on AKS supports RWM access mode, but using that in conjunction with the xp-operator has proven unstable. We recommend usage of NFS on AKS.
 
 == Installation
 
