@@ -12,6 +12,9 @@ The operator introduces a couple of new resources into your Kubernetes cluster.
 
 This is the main custom resource that defines your deployment. It is namespaced so you have to create a namespace for it. Only 1 Xp7Deployment can reside in each namespace.
 
+Note: When deploying xp on an Openshift cluster, it fails to create resources due to security restrictions by Openshift. To be able to run xp on openshift you need to add the following policy to the namespace you are going to deploy xp. That will grant the service account "xp-node-sa" (within the name space for xp deployment)  access to privileged security context configuration. And xp related resource can then run in that name space.  
+$ oc adm policy add-scc-to-user privileged -z xp-node-sa -n <xp-deployment-namespace>
+
 [source,yaml]
 ----
 apiVersion: enonic.cloud/v1alpha2
