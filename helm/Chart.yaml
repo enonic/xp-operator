@@ -1,7 +1,7 @@
 apiVersion: v1
 name: xp-operator
-version: 0.9.12
-appVersion: 0.17.12
+version: 0.9.13
+appVersion: 0.17.13-SNAPSHOT
 home: https://github.com/enonic/xp-operator
 description: |
   Enonic XP Kubernetes operator
