@@ -32,7 +32,7 @@
 
         <jsonschema2pojo.version>1.1.1</jsonschema2pojo.version>
 
-        <fabric8-kubernetes-client.version>5.8.0</fabric8-kubernetes-client.version>
+        <fabric8-kubernetes-client.version>5.10.1</fabric8-kubernetes-client.version>
 
         <junit.version>5.8.1</junit.version>
         <slf4j-simple.version>1.7.32</slf4j-simple.version>
