@@ -16,14 +16,14 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <quarkus.version>2.4.0.Final</quarkus.version>
+        <quarkus.version>2.5.0.Final</quarkus.version>
 
         <immutables.version>2.8.9-ea-1</immutables.version>
         <jackson-yaml.version>2.12.5</jackson-yaml.version>
-        <okhttp.version>4.9.2</okhttp.version>
+        <okhttp.version>4.9.3</okhttp.version>
 
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
-        <maven-artifact-version>3.8.3</maven-artifact-version>
+        <maven-artifact-version>3.8.4</maven-artifact-version>
 
         <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
         <versions-maven-plugin.version>2.8.1</versions-maven-plugin.version>
