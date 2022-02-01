@@ -22,7 +22,7 @@
         <jackson-yaml.version>2.12.5</jackson-yaml.version>
         <okhttp.version>4.9.3</okhttp.version>
 
-        <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+        <maven-compiler-plugin.version>3.9.0</maven-compiler-plugin.version>
         <maven-artifact-version>3.8.4</maven-artifact-version>
 
         <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
