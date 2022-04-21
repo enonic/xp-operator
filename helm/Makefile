@@ -1,5 +1,5 @@
 CHART_NAME:=xp-operator
-REPOSITORY:=https://repo.enonic.com/helm
+REPOSITORY:=https://enonic-nexus.enonic.cloud/repository/helm
 
 .DEFAULT_GOAL:=help
 .PHONY: test template clean package publish help
@@ -27,8 +27,8 @@ package: clean ## Package chart
 
 publish: package ## Publish chart (env var ARTIFACTORY_USER and ARTIFACTORY_PASS required)
 	# Setup environment ...
-	@test ${ARTIFACTORY_USER} || (echo "Set env variable ARTIFACTORY_USER"; exit 1;)
-	@test ${ARTIFACTORY_PASS} || (echo "Set env variable ARTIFACTORY_PASS"; exit 1;)
+	@test "${ARTIFACTORY_USER}" || (echo "Set env variable ARTIFACTORY_USER"; exit 1;)
+	@test "${ARTIFACTORY_PASS}" || (echo "Set env variable ARTIFACTORY_PASS"; exit 1;)
 	@$(eval FILE := $(shell find target/ -name '*.tgz'))
 	@$(eval URL := ${REPOSITORY}/${CHART_NAME}/`basename ${FILE}`)
 	@$(eval MD5 := $(shell openssl md5 ${FILE} | cut -d ' ' -f 2))
@@ -40,7 +40,7 @@ publish: package ## Publish chart (env var ARTIFACTORY_USER and ARTIFACTORY_PASS
 	@if [ ${EXISTS} == "1" ]; then echo "Artifact $(shell basename ${FILE}) already exists!"; exit 1; fi;
 
 	# Upload artifact ...
-	@curl -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" \
+	@curl --fail -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" \
 	-H "X-Checksum-MD5:${MD5}" \
 	-H "X-Checksum-SHA1:${SHA1}" \
 	-H "X-Checksum-SHA256:${SHA256}" \
