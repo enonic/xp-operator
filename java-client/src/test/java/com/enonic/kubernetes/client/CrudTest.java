@@ -10,10 +10,9 @@ import com.enonic.kubernetes.client.v1.xp7config.Xp7ConfigSpec;
 import com.enonic.kubernetes.client.v1.xp7deployment.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
-import io.fabric8.kubernetes.api.model.apiextensions.v1beta1.CustomResourceDefinition;
-import io.fabric8.kubernetes.api.model.apiextensions.v1beta1.CustomResourceDefinitionVersion;
+import io.fabric8.kubernetes.api.model.apiextensions.v1.CustomResourceDefinition;
+import io.fabric8.kubernetes.api.model.apiextensions.v1.CustomResourceDefinitionVersion;
 import io.fabric8.kubernetes.client.CustomResource;
-import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
@@ -47,14 +46,14 @@ public class CrudTest {
 
         CustomResourceDefinition crd = client.k8s()
                 .apiextensions()
-                .v1beta1()
+                .v1()
                 .customResourceDefinitions()
                 .load(getClass().getResourceAsStream("/crds/apps.yaml"))
                 .get();
 
         client.k8s()
                 .apiextensions()
-                .v1beta1()
+                .v1()
                 .customResourceDefinitions()
                 .create(crd);
 
@@ -98,14 +97,14 @@ public class CrudTest {
         // Create crd
         CustomResourceDefinition crd = client.k8s()
                 .apiextensions()
-                .v1beta1()
+                .v1()
                 .customResourceDefinitions()
                 .load(getClass().getResourceAsStream("/crds/domains.yaml"))
                 .get();
 
         client.k8s()
                 .apiextensions()
-                .v1beta1()
+                .v1()
                 .customResourceDefinitions()
                 .create(crd);
 
@@ -151,14 +150,14 @@ public class CrudTest {
         // Create crd
         CustomResourceDefinition crd = client.k8s()
                 .apiextensions()
-                .v1beta1()
+                .v1()
                 .customResourceDefinitions()
                 .load(getClass().getResourceAsStream("/crds/configs.yaml"))
                 .get();
 
         client.k8s()
                 .apiextensions()
-                .v1beta1()
+                .v1()
                 .customResourceDefinitions()
                 .create(crd);
 
@@ -204,14 +203,14 @@ public class CrudTest {
         // Create crd
         CustomResourceDefinition crd = client.k8s()
                 .apiextensions()
-                .v1beta1()
+                .v1()
                 .customResourceDefinitions()
                 .load(getClass().getResourceAsStream("/crds/deployments.yaml"))
                 .get();
 
         client.k8s()
                 .apiextensions()
-                .v1beta1()
+                .v1()
                 .customResourceDefinitions()
                 .create(crd);
 

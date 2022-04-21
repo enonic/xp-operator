@@ -1,16 +1,16 @@
 package com.enonic.kubernetes.client.v1.api.xp7;
 
 import io.fabric8.kubernetes.client.Config;
-import okhttp3.OkHttpClient;
+import io.fabric8.kubernetes.client.http.HttpClient;
 
 public abstract class Xp7ClientBuilder<T> implements TargetSelector<T>, Named<NodeGrouped<T>>, NodeGrouped<T> {
 
-    private final OkHttpClient client;
+    private final HttpClient client;
     private final Config config;
     private String namespace;
     private String name;
 
-    public Xp7ClientBuilder(OkHttpClient client, Config config) {
+    public Xp7ClientBuilder(HttpClient client, Config config) {
         this.client = client;
         this.config = config;
     }
@@ -32,5 +32,5 @@ public abstract class Xp7ClientBuilder<T> implements TargetSelector<T>, Named<No
         return build(client, config, namespace, name, s);
     }
 
-    protected abstract T build(OkHttpClient client, Config config, String namespace, String name, String nodeGroup);
+    protected abstract T build(HttpClient client, Config config, String namespace, String name, String nodeGroup);
 }
