@@ -6,17 +6,17 @@ import com.enonic.kubernetes.client.v1.api.xp7.mgmt.Xp7MgmtApi;
 import com.enonic.kubernetes.client.v1.api.xp7.mgmt.Xp7MgmtApiImpl;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import okhttp3.OkHttpClient;
+import io.fabric8.kubernetes.client.http.HttpClient;
 
 public class ClientsImpl implements Clients {
 
     private final KubernetesClient k8sClient;
 
-    private final OkHttpClient httpClient;
+    private final HttpClient httpClient;
 
     private final Config config;
 
-    public ClientsImpl(KubernetesClient k8sClient, OkHttpClient httpClient, Config config) {
+    public ClientsImpl(KubernetesClient k8sClient, HttpClient httpClient, Config config) {
         this.k8sClient = k8sClient;
         this.httpClient = httpClient;
         this.config = config;

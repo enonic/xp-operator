@@ -3,9 +3,9 @@ package com.enonic.kubernetes.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.fabric8.kubernetes.api.model.apiextensions.v1beta1.CustomResourceDefinition;
-import io.fabric8.kubernetes.api.model.apiextensions.v1beta1.CustomResourceDefinitionVersion;
-import io.fabric8.kubernetes.api.model.apiextensions.v1beta1.JSONSchemaProps;
+import io.fabric8.kubernetes.api.model.apiextensions.v1.CustomResourceDefinition;
+import io.fabric8.kubernetes.api.model.apiextensions.v1.CustomResourceDefinitionVersion;
+import io.fabric8.kubernetes.api.model.apiextensions.v1.JSONSchemaProps;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.server.mock.KubernetesServer;
 import org.junit.Rule;
@@ -71,7 +71,7 @@ public class SchemaTest
         KubernetesClient client = server.getClient();
         CustomResourceDefinition customResourceDefinition = client
             .apiextensions()
-            .v1beta1()
+            .v1()
             .customResourceDefinitions()
             .load( getClass().getResourceAsStream( file ) )
             .get();

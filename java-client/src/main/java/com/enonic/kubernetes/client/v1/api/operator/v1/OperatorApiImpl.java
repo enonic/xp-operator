@@ -3,11 +3,11 @@ package com.enonic.kubernetes.client.v1.api.operator.v1;
 import com.enonic.kubernetes.client.RawClient;
 import com.enonic.kubernetes.client.v1.api.operator.OperatorVersion;
 import io.fabric8.kubernetes.client.Config;
-import okhttp3.OkHttpClient;
+import io.fabric8.kubernetes.client.http.HttpClient;
 
 public class OperatorApiImpl extends RawClient implements OperatorApi {
 
-    public OperatorApiImpl(OkHttpClient client, Config config) {
+    public OperatorApiImpl(HttpClient client, Config config) {
         super(client, config, "v1");
     }
 
@@ -17,6 +17,6 @@ public class OperatorApiImpl extends RawClient implements OperatorApi {
     }
 
     public OperatorVersion version() {
-        return request(requestBuilder("version"), OperatorVersion.class);
+        return request(requestUrlBuilder("version"), OperatorVersion.class);
     }
 }

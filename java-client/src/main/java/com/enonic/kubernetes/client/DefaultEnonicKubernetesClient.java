@@ -3,15 +3,14 @@ package com.enonic.kubernetes.client;
 import com.enonic.kubernetes.client.v1.ClientsImpl;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
-import io.fabric8.kubernetes.client.HttpClientAware;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import okhttp3.OkHttpClient;
+import io.fabric8.kubernetes.client.http.HttpClient;
 
 public class DefaultEnonicKubernetesClient implements EnonicKubernetesClient {
 
     private final KubernetesClient k8sClient;
 
-    private final OkHttpClient httpClient;
+    private final HttpClient httpClient;
 
     private final Config config;
 
@@ -25,8 +24,7 @@ public class DefaultEnonicKubernetesClient implements EnonicKubernetesClient {
 
     public DefaultEnonicKubernetesClient(final KubernetesClient client) {
         this.config = client.getConfiguration();
-        assert client instanceof HttpClientAware;
-        this.httpClient = ((HttpClientAware) client).getHttpClient();
+        this.httpClient = client.getHttpClient();
         this.k8sClient = client;
     }
 
