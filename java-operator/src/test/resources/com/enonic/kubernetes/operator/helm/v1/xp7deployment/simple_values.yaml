@@ -6,6 +6,17 @@ annotationKeys:
   neverOverwrite: "enonic.neverOverwrite"
   removeWithDeployment: "enonic.cloud/remove.with.xp7deployment"
   vhostMapping: "enonic.cloud/xp7.vhost.mapping."
+backup:
+  agent:
+    enabled: false
+    image: "ghcr.io/enonic-cloud/ec-backup-agent:0.7.1"
+    limits:
+      cpu: "1"
+      memory: "500Mi"
+    restic_repo_prefix: "/restic/repo"
+    schedule: "0 0 * * *"
+  cacheSize: "1Gi"
+  enabled: true
 clusterId: "44ddc40b-266c-4c99-b094-e758328fc6ba"
 defaultLabels:
   cloud: "mycloud"
@@ -13,6 +24,7 @@ defaultLabels:
   service: "myservice"
   solution: "mysolution"
 deployment:
+  backupPass: "password"
   clustered: false
   hasDedicatedFrontendNodes: false
   name: "mycloud-mysolution-myenv-myservice"

@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: xp-events-sa
+  namespace: {{ $.Values.deployment.namespace }}
+  annotations:
+    {{ $.Values.annotationKeys.applyPriority }}: "20"
+  ownerReferences:
+    {{- with $.Values.ownerReferences }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: xp-events-role
+  namespace: {{ $.Values.deployment.namespace }}
+  annotations:
+    {{ $.Values.annotationKeys.applyPriority }}: "30"
+  ownerReferences:
+    {{- with $.Values.ownerReferences }}
+      {{- toYaml . | nindent 4 }}
+      {{- end }}
+rules:
+  - apiGroups:
+      - '*'
+    resources:
+      - events
+    verbs:
+      - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: xp-events-role-bindings
+  namespace: {{ $.Values.deployment.namespace }}
+  annotations:
+    {{ $.Values.annotationKeys.applyPriority }}: "40"
+  ownerReferences:
+    {{- with $.Values.ownerReferences }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: xp-events-role
+subjects:
+  - kind: ServiceAccount
+    name: xp-events-sa
+    namespace: {{ $.Values.deployment.namespace }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: xp-events-sa-secret
+  namespace: {{ $.Values.deployment.namespace }}
+  annotations:
+    {{ $.Values.annotationKeys.applyPriority }}: "60"
+    kubernetes.io/service-account.name: xp-events-sa
+type: kubernetes.io/service-account-token

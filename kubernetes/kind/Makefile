@@ -5,7 +5,7 @@ KIND_CTX:=kind-kind
 NFS_SERVER_NAME:=kind-nfs-server
 NFS_SERVER_VOLUME:=kind-nfs-server
 
-PRELOAD_IMAGES:=busybox gcr.io/playground-186616/enonic-xp:nightly enonic/xp:7.7.3-ubuntu
+PRELOAD_IMAGES:=busybox gcr.io/playground-186616/enonic-xp:nightly enonic/xp:7.7.3-ubuntu ghcr.io/enonic-cloud/ec-backup-agent:0.7.1
 
 .PHONY: kind-setup kind-bootstrap kind-ingress kind-up kind-down help
 .DEFAULT_GOAL:=help

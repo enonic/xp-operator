@@ -1,0 +1,49 @@
+# Setup cloud api service account
+{{- if $.Values.settings.cloudApiServiceAccount }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: cloud-api-role
+  namespace: {{ $.Values.deployment.namespace }}
+  annotations:
+    {{ $.Values.annotationKeys.applyPriority }}: "30"
+  ownerReferences:
+    {{- with $.Values.ownerReferences }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+rules:
+- apiGroups:
+  - '*'
+  resources:
+  - secrets
+  verbs:
+  - get
+- apiGroups:
+    - '*'
+  resources:
+    - configmaps
+  verbs:
+    - get
+    - update
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: cloud-api-role-binding
+  namespace: {{ $.Values.deployment.namespace }}
+  annotations:
+    {{ $.Values.annotationKeys.applyPriority }}: "40"
+  ownerReferences:
+    {{- with $.Values.ownerReferences }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: cloud-api-role
+subjects:
+- kind: ServiceAccount
+  name: {{ $.Values.settings.cloudApiServiceAccount.name }}
+  namespace: {{ $.Values.settings.cloudApiServiceAccount.namespace }}
+{{- end }}

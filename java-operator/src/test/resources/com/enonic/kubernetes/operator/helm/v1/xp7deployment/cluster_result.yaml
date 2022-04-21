@@ -14,6 +14,54 @@ metadata:
     name: "mycloud-mysolution-myenv-myservice"
 ---
 apiVersion: "v1"
+kind: "ServiceAccount"
+metadata:
+  annotations:
+    enonic.applyPriority: "20"
+  name: "xp-backup-sa"
+  namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
+---
+apiVersion: "v1"
+kind: "ServiceAccount"
+metadata:
+  annotations:
+    enonic.applyPriority: "20"
+  name: "xp-events-sa"
+  namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
+---
+apiVersion: "v1"
+kind: "Secret"
+metadata:
+  annotations:
+    enonic.applyPriority: "60"
+    kubernetes.io/service-account.name: "xp-backup-sa"
+  name: "xp-backup-sa-secret"
+  namespace: "mycloud-mysolution-myenv-myservice"
+type: "kubernetes.io/service-account-token"
+---
+apiVersion: "v1"
+kind: "Secret"
+metadata:
+  annotations:
+    enonic.applyPriority: "60"
+    kubernetes.io/service-account.name: "xp-events-sa"
+  name: "xp-events-sa-secret"
+  namespace: "mycloud-mysolution-myenv-myservice"
+type: "kubernetes.io/service-account-token"
+---
+apiVersion: "v1"
 kind: "Secret"
 metadata:
   annotations:
@@ -146,7 +194,7 @@ data:
     ,\n        \"namespace\": \"${NAMESPACE}\"\n    },\n    \"source\": {\n      \"\
     component\": \"pod/${XP_NODE_NAME}\"\n    },\n    \"type\": \"Normal\"\n}\nEOF\n\
     }\n\nfunction sendEvent() {\n    (cat - | curl -f -s -X POST -H \"Accept: application/json\"\
-    \ -H \"Content-Type: application/json\" -H \"Authorization: Bearer `cat /run/secrets/kubernetes.io/serviceaccount/token`\"\
+    \ -H \"Content-Type: application/json\" -H \"Authorization: Bearer $K8S_TOKEN\"\
     \ --cacert /run/secrets/kubernetes.io/serviceaccount/ca.crt -d @- https://kubernetes.default.svc.cluster.local/api/v1/namespaces/`cat\
     \ /run/secrets/kubernetes.io/serviceaccount/namespace`/events > /dev/null || (echo\
     \ \"failed\" && false)) && echo \"success\"\n    #(cat - | kubectl apply -f -\
@@ -169,6 +217,31 @@ data:
     \ -t 10 -a 20"
   vhost-defaults.cfg: "enabled = true\n\nmapping.localhost.host = localhost\nmapping.localhost.source\
     \ = /\nmapping.localhost.target = /\nmapping.localhost.idProvider.system = default"
+---
+apiVersion: "v1"
+kind: "ConfigMap"
+metadata:
+  annotations:
+    enonic.applyPriority: "60"
+    enonic.neverOverwrite: "true"
+  labels:
+    cloud: "mycloud"
+    enonic.managed: "true"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
+  name: "backup-config"
+  namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
+data:
+  config.yaml: "# Basic backup parameters\nbackup:\n  enabled: false\n  schedule:\
+    \ \"0 0 * * *\"\n\nrestic:\n  env:\n    restic_repository: /restic/repo/mycloud-mysolution-myenv-myservice\n\
+    \    restic_password: password\n"
 ---
 apiVersion: "v1"
 kind: "ConfigMap"
@@ -352,18 +425,6 @@ rules:
   - "*"
   resources:
   - "endpoints"
-  verbs:
-  - "get"
-- apiGroups:
-  - "*"
-  resources:
-  - "events"
-  verbs:
-  - "create"
-- apiGroups:
-  - "*"
-  resources:
-  - "endpoints"
   - "pods"
   - "services"
   verbs:
@@ -375,7 +436,35 @@ kind: "Role"
 metadata:
   annotations:
     enonic.applyPriority: "30"
-  name: "read-secrets"
+  name: "xp-backup-role"
+  namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
+rules:
+- apiGroups:
+  - "*"
+  resources:
+  - "pods"
+  verbs:
+  - "get"
+  - "list"
+- apiGroups:
+  - "*"
+  resources:
+  - "pods/exec"
+  verbs:
+  - "create"
+---
+apiVersion: "rbac.authorization.k8s.io/v1"
+kind: "Role"
+metadata:
+  annotations:
+    enonic.applyPriority: "30"
+  name: "cloud-api-role"
   namespace: "mycloud-mysolution-myenv-myservice"
   ownerReferences:
   - apiVersion: "enonic.cloud/v1"
@@ -390,6 +479,34 @@ rules:
   - "secrets"
   verbs:
   - "get"
+- apiGroups:
+  - "*"
+  resources:
+  - "configmaps"
+  verbs:
+  - "get"
+  - "update"
+---
+apiVersion: "rbac.authorization.k8s.io/v1"
+kind: "Role"
+metadata:
+  annotations:
+    enonic.applyPriority: "30"
+  name: "xp-events-role"
+  namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
+rules:
+- apiGroups:
+  - "*"
+  resources:
+  - "events"
+  verbs:
+  - "create"
 ---
 apiVersion: "rbac.authorization.k8s.io/v1"
 kind: "RoleBinding"
@@ -418,7 +535,7 @@ kind: "RoleBinding"
 metadata:
   annotations:
     enonic.applyPriority: "40"
-  name: "cloud-api-read-secrets"
+  name: "xp-backup-role-bindings"
   namespace: "mycloud-mysolution-myenv-myservice"
   ownerReferences:
   - apiVersion: "enonic.cloud/v1"
@@ -429,11 +546,55 @@ metadata:
 roleRef:
   kind: "Role"
   apiGroup: "rbac.authorization.k8s.io"
-  name: "read-secrets"
+  name: "xp-backup-role"
+subjects:
+- kind: "ServiceAccount"
+  name: "xp-backup-sa"
+  namespace: "mycloud-mysolution-myenv-myservice"
+---
+apiVersion: "rbac.authorization.k8s.io/v1"
+kind: "RoleBinding"
+metadata:
+  annotations:
+    enonic.applyPriority: "40"
+  name: "cloud-api-role-binding"
+  namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
+roleRef:
+  kind: "Role"
+  apiGroup: "rbac.authorization.k8s.io"
+  name: "cloud-api-role"
 subjects:
 - kind: "ServiceAccount"
   name: "cloudApi"
   namespace: "ec-system"
+---
+apiVersion: "rbac.authorization.k8s.io/v1"
+kind: "RoleBinding"
+metadata:
+  annotations:
+    enonic.applyPriority: "40"
+  name: "xp-events-role-bindings"
+  namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
+roleRef:
+  kind: "Role"
+  apiGroup: "rbac.authorization.k8s.io"
+  name: "xp-events-role"
+subjects:
+- kind: "ServiceAccount"
+  name: "xp-events-sa"
+  namespace: "mycloud-mysolution-myenv-myservice"
 ---
 apiVersion: "v1"
 kind: "Service"
@@ -657,6 +818,146 @@ metadata:
   labels:
     cloud: "mycloud"
     enonic.managed: "true"
+    environment: "myenv"
+    service: "myservice"
+    solution: "mysolution"
+  name: "backup"
+  namespace: "mycloud-mysolution-myenv-myservice"
+  ownerReferences:
+  - apiVersion: "enonic.cloud/v1"
+    kind: "Xp7Deployment"
+    blockOwnerDeletion: false
+    controller: true
+    name: "mycloud-mysolution-myenv-myservice"
+spec:
+  podManagementPolicy: "Parallel"
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      cloud: "mycloud"
+      enonic.deployment: "mycloud-mysolution-myenv-myservice"
+      enonic.managed: "true"
+      environment: "myenv"
+      service: "myservice"
+      solution: "mysolution"
+  serviceName: "backup"
+  template:
+    metadata:
+      annotations:
+        backup.velero.io/backup-volumes: "blobstore,snapshots"
+      labels:
+        cloud: "mycloud"
+        enonic.deployment: "mycloud-mysolution-myenv-myservice"
+        enonic.managed: "true"
+        environment: "myenv"
+        service: "myservice"
+        solution: "mysolution"
+    spec:
+      containers:
+      - env:
+        - name: "AGENT_MODE"
+          value: "k8s"
+        - name: "AGENT_K8S_TOKEN"
+          valueFrom:
+            secretKeyRef:
+              key: "token"
+              name: "xp-backup-sa-secret"
+        - name: "AGENT_K8S_NAMESPACE"
+          valueFrom:
+            fieldRef:
+              apiVersion: "v1"
+              fieldPath: "metadata.namespace"
+        - name: "AGENT_K8S_POD"
+          valueFrom:
+            fieldRef:
+              apiVersion: "v1"
+              fieldPath: "metadata.name"
+        - name: "AGENT_K8S_CONTAINER"
+          value: "backup"
+        - name: "RESTIC_CACHE_DIR"
+          value: "/restic/cache"
+        - name: "AGENT_K8S_ANNOTATIONS_VOLUME"
+          value: "backup.velero.io/backup-volumes"
+        - name: "AGENT_K8S_ANNOTATIONS_PRESCRIPT"
+          value: "pre.hook.backup.velero.io/command"
+        - name: "AGENT_K8S_ANNOTATIONS_PRESCRIPTCONTAINER"
+          value: "pre.hook.backup.velero.io/container"
+        - name: "AGENT_K8S_ANNOTATIONS_POSTSCRIPT"
+          value: "post.hook.backup.velero.io/command"
+        - name: "AGENT_K8S_ANNOTATIONS_POSTSCRIPTCONTAINER"
+          value: "post.hook.backup.velero.io/container"
+        image: "ghcr.io/enonic-cloud/ec-backup-agent:0.7.1"
+        imagePullPolicy: "IfNotPresent"
+        name: "backup"
+        ports:
+        - containerPort: 8000
+          name: "backup"
+          protocol: "TCP"
+        resources:
+          limits:
+            cpu: "1"
+            memory: "500Mi"
+        securityContext:
+          capabilities:
+            drop:
+            - "ALL"
+          runAsNonRoot: true
+          runAsUser: 1337
+        terminationMessagePath: "/dev/termination-log"
+        terminationMessagePolicy: "File"
+        volumeMounts:
+        - mountPath: "/etc/ec/backup-agent"
+          name: "backup-config"
+        - mountPath: "/restic"
+          name: "restic"
+        - mountPath: "/enonic-xp/home/repo/blob"
+          name: "blobstore"
+        - mountPath: "/enonic-xp/home/snapshots"
+          name: "snapshots"
+      dnsPolicy: "ClusterFirst"
+      restartPolicy: "Always"
+      schedulerName: "default-scheduler"
+      securityContext:
+        fsGroup: 0
+      serviceAccount: "xp-backup-sa"
+      serviceAccountName: "xp-backup-sa"
+      terminationGracePeriodSeconds: 600
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: "backup-config"
+        name: "backup-config"
+      - name: "blobstore"
+        persistentVolumeClaim:
+          claimName: "blobstore"
+      - name: "snapshots"
+        persistentVolumeClaim:
+          claimName: "snapshots"
+  updateStrategy:
+    type: "RollingUpdate"
+  volumeClaimTemplates:
+  - apiVersion: "v1"
+    kind: "PersistentVolumeClaim"
+    metadata:
+      name: "restic"
+    spec:
+      accessModes:
+      - "ReadWriteOnce"
+      resources:
+        requests:
+          storage: "1Gi"
+      storageClassName: "standard"
+      volumeMode: "Filesystem"
+---
+apiVersion: "apps/v1"
+kind: "StatefulSet"
+metadata:
+  annotations:
+    enonic.applyPriority: "90"
+  labels:
+    cloud: "mycloud"
+    enonic.managed: "true"
     enonic.nodeGroup: "master"
     environment: "myenv"
     service: "myservice"
@@ -689,8 +990,7 @@ spec:
         backup.velero.io/backup-volumes: "blobstore,snapshots"
         enonic.cloud/logs.xp7: "true"
         enonic.cloud/metrics.xp7: "true"
-        pre.hook.backup.velero.io/command: "[\"bash\", \"-c\", \"/usr/local/bin/backup.sh\"\
-          ]"
+        pre.hook.backup.velero.io/command: "[\"/usr/local/bin/backup.sh\"]"
         pre.hook.backup.velero.io/container: "exp"
       labels:
         cloud: "mycloud"
@@ -828,6 +1128,11 @@ spec:
               fieldPath: "metadata.name"
         - name: "XP_NODE_GROUP"
           value: "master"
+        - name: "K8S_TOKEN"
+          valueFrom:
+            secretKeyRef:
+              key: "token"
+              name: "xp-events-sa-secret"
         image: "enonic/xp:7.7.0-ubuntu"
         imagePullPolicy: "IfNotPresent"
         name: "events"
@@ -875,6 +1180,10 @@ spec:
           defaultMode: 420
           name: "extra-config"
         name: "extra-config"
+      - configMap:
+          defaultMode: 420
+          name: "backup-config"
+        name: "backup-config"
       - name: "blobstore"
         persistentVolumeClaim:
           claimName: "blobstore"
@@ -945,8 +1254,7 @@ spec:
         backup.velero.io/backup-volumes: "blobstore,snapshots"
         enonic.cloud/logs.xp7: "true"
         enonic.cloud/metrics.xp7: "true"
-        pre.hook.backup.velero.io/command: "[\"bash\", \"-c\", \"/usr/local/bin/backup.sh\"\
-          ]"
+        pre.hook.backup.velero.io/command: "[\"/usr/local/bin/backup.sh\"]"
         pre.hook.backup.velero.io/container: "exp"
       labels:
         cloud: "mycloud"
@@ -1086,6 +1394,11 @@ spec:
               fieldPath: "metadata.name"
         - name: "XP_NODE_GROUP"
           value: "data"
+        - name: "K8S_TOKEN"
+          valueFrom:
+            secretKeyRef:
+              key: "token"
+              name: "xp-events-sa-secret"
         image: "enonic/xp:7.7.0-ubuntu"
         imagePullPolicy: "IfNotPresent"
         name: "events"
@@ -1133,6 +1446,10 @@ spec:
           defaultMode: 420
           name: "extra-config"
         name: "extra-config"
+      - configMap:
+          defaultMode: 420
+          name: "backup-config"
+        name: "backup-config"
       - name: "blobstore"
         persistentVolumeClaim:
           claimName: "blobstore"
@@ -1223,8 +1540,7 @@ spec:
         backup.velero.io/backup-volumes: "blobstore,snapshots"
         enonic.cloud/logs.xp7: "true"
         enonic.cloud/metrics.xp7: "true"
-        pre.hook.backup.velero.io/command: "[\"bash\", \"-c\", \"/usr/local/bin/backup.sh\"\
-          ]"
+        pre.hook.backup.velero.io/command: "[\"/usr/local/bin/backup.sh\"]"
         pre.hook.backup.velero.io/container: "exp"
       labels:
         cloud: "mycloud"
@@ -1366,6 +1682,11 @@ spec:
               fieldPath: "metadata.name"
         - name: "XP_NODE_GROUP"
           value: "frontend"
+        - name: "K8S_TOKEN"
+          valueFrom:
+            secretKeyRef:
+              key: "token"
+              name: "xp-events-sa-secret"
         image: "enonic/xp:7.7.0-ubuntu"
         imagePullPolicy: "IfNotPresent"
         name: "events"
@@ -1413,6 +1734,10 @@ spec:
           defaultMode: 420
           name: "extra-config"
         name: "extra-config"
+      - configMap:
+          defaultMode: 420
+          name: "backup-config"
+        name: "backup-config"
       - name: "blobstore"
         persistentVolumeClaim:
           claimName: "blobstore"

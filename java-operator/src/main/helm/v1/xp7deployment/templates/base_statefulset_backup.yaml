@@ -1,0 +1,153 @@
+# Only used for clustered deployments
+{{ if and $.Values.deployment.clustered $.Values.backup.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: backup
+  namespace: {{ $.Values.deployment.namespace }}
+  annotations:
+    {{ $.Values.annotationKeys.applyPriority }}: "90"
+  labels:
+    {{ $.Values.labelKeys.managed }}: true
+    {{- with $.Values.defaultLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  ownerReferences:
+    {{- with $.Values.ownerReferences }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  serviceName: backup
+  replicas: 1
+  revisionHistoryLimit: 10
+  podManagementPolicy: Parallel
+  updateStrategy:
+    type: {{ $.Values.pods.updateStrategy }}
+  selector:
+    matchLabels:
+      {{ $.Values.labelKeys.managed }}: true
+      {{ $.Values.labelKeys.deployment }}: {{ $.Values.deployment.name }}
+      {{- with $.Values.defaultLabels }}
+      {{- toYaml . | nindent 6 }}
+      {{- end }}
+  template:
+    metadata:
+      annotations:
+        backup.velero.io/backup-volumes: "{{- join "," $.Values.volumes.backups }}"
+        {{- if index $.Values "settings.linkerd" }}
+        linkerd.io/inject: enabled
+        {{- end }}
+      labels:
+        {{ $.Values.labelKeys.managed }}: true
+        {{ $.Values.labelKeys.deployment }}: {{ $.Values.deployment.name }}
+        {{- with $.Values.defaultLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccount: xp-backup-sa
+      serviceAccountName: xp-backup-sa
+      restartPolicy: Always
+      dnsPolicy: ClusterFirst
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: {{ $.Values.pods.terminationGracePeriodSeconds }}
+
+      securityContext:
+        fsGroup: {{ $.Values.pods.securityContext.fsGroup }}
+
+      containers:
+        - name: backup
+          image: {{ $.Values.backup.agent.image }}
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+
+          securityContext:
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
+            runAsUser: {{ $.Values.pods.securityContext.user }}
+
+          resources:
+            limits:
+              cpu: {{ $.Values.backup.agent.limits.cpu }}
+              memory: {{ $.Values.backup.agent.limits.memory }}
+
+          ports:
+            - name: backup
+              containerPort: 8000
+              protocol: TCP
+
+          env:
+            # Basic k8s configuration
+            - name: AGENT_MODE
+              value: k8s
+            - name: AGENT_K8S_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: xp-backup-sa-secret
+                  key: token
+            - name: AGENT_K8S_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
+            - name: AGENT_K8S_POD
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+            - name: AGENT_K8S_CONTAINER
+              value: backup
+            - name: RESTIC_CACHE_DIR
+              value: /restic/cache
+            # Annotation configuration
+            - name: AGENT_K8S_ANNOTATIONS_VOLUME
+              value: backup.velero.io/backup-volumes
+            - name: AGENT_K8S_ANNOTATIONS_PRESCRIPT
+              value: pre.hook.backup.velero.io/command
+            - name: AGENT_K8S_ANNOTATIONS_PRESCRIPTCONTAINER
+              value: pre.hook.backup.velero.io/container
+            - name: AGENT_K8S_ANNOTATIONS_POSTSCRIPT
+              value: post.hook.backup.velero.io/command
+            - name: AGENT_K8S_ANNOTATIONS_POSTSCRIPTCONTAINER
+              value: post.hook.backup.velero.io/container
+            # Any extra config
+            {{- range $k, $v := $.Values.backup.agent.env }}
+            - name: {{ $k }}
+              value: {{ $v }}
+            {{- end }}
+
+          volumeMounts:
+            - name: backup-config
+              mountPath: /etc/ec/backup-agent
+            - name: restic
+              mountPath: /restic
+            {{- range $volume := $.Values.deployment.spec.nodesSharedDisks }}
+            - name: {{ $volume.name }}
+              mountPath: {{ index $.Values.volumes.mounts $volume.name }}
+            {{- end }}
+
+      volumes:
+        - name: backup-config
+          configMap:
+            defaultMode: "420"
+            name: backup-config
+        {{- range $volume := $.Values.deployment.spec.nodesSharedDisks }}
+        - name: {{ $volume.name }}
+          persistentVolumeClaim:
+            claimName: {{ $volume.name }}
+        {{- end }}
+
+  volumeClaimTemplates:
+    - metadata:
+        name: restic
+      spec:
+        volumeMode: Filesystem
+        storageClassName: {{ $.Values.storage.default.storageClassName }}
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ $.Values.backup.cacheSize }}
+{{- end }}
