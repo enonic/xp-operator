@@ -31,8 +31,8 @@ publish: build validate  ## Publish everything (env var ARTIFACTORY_USER and ART
 	@: | docker login | grep "Login Succeeded" || (echo "Not logged in to docker"; exit 1;)
 
 	# Check if token is set ...
-	@test ${ARTIFACTORY_USER} || (echo "Set env variable ARTIFACTORY_USER"; exit 1;)
-	@test ${ARTIFACTORY_PASS} || (echo "Set env variable ARTIFACTORY_PASS"; exit 1;)
+	@test "${ARTIFACTORY_USER}" || (echo "Set env variable ARTIFACTORY_USER"; exit 1;)
+	@test "${ARTIFACTORY_PASS}" || (echo "Set env variable ARTIFACTORY_PASS"; exit 1;)
 
 	# Validate version
 	@[[ ! "$(shell ./.mvn/get-version)" =~ .*"SNAPSHOT" ]] || \

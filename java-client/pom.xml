@@ -12,7 +12,7 @@
     <distributionManagement>
         <repository>
             <id>enonic</id>
-            <url>https://repo.enonic.com/artifactory/public</url>
+            <url>https://enonic-nexus.enonic.cloud/repository/public/</url>
         </repository>
     </distributionManagement>
 
