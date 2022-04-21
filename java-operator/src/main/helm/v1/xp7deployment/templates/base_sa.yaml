@@ -23,20 +23,6 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
 rules:
-  # For preStopHook
-  - apiGroups:
-      - '*'
-    resources:
-      - endpoints
-    verbs:
-      - get
-  # For event creation
-  - apiGroups:
-      - '*'
-    resources:
-      - events
-    verbs:
-      - create
 {{- if $.Values.settings.hzApiDiscovery }}
   # For HZ api discovery
   - apiGroups:
@@ -48,6 +34,14 @@ rules:
     verbs:
       - get
       - list
+{{- else }}
+  # For preStopHook
+  - apiGroups:
+      - '*'
+    resources:
+      - endpoints
+    verbs:
+      - get
 {{- end }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -69,48 +63,6 @@ subjects:
   - kind: ServiceAccount
     name: xp-node-sa
     namespace: {{ $.Values.deployment.namespace }}
-# Setup cloud api service account
-{{- if $.Values.settings.cloudApiServiceAccount }}
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: read-secrets
-  namespace: {{ $.Values.deployment.namespace }}
-  annotations:
-    {{ $.Values.annotationKeys.applyPriority }}: "30"
-  ownerReferences:
-    {{- with $.Values.ownerReferences }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
-rules:
-- apiGroups:
-  - '*'
-  resources:
-  - secrets
-  verbs:
-  - get
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: cloud-api-read-secrets
-  namespace: {{ $.Values.deployment.namespace }}
-  annotations:
-    {{ $.Values.annotationKeys.applyPriority }}: "40"
-  ownerReferences:
-    {{- with $.Values.ownerReferences }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: read-secrets
-subjects:
-- kind: ServiceAccount
-  name: {{ $.Values.settings.cloudApiServiceAccount.name }}
-  namespace: {{ $.Values.settings.cloudApiServiceAccount.namespace }}
-{{- end }}
 # Cluster roles for HZ
 {{- if and $.Values.settings.hzApiDiscovery $.Values.deployment.clustered }}
 ---

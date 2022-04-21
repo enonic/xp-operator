@@ -136,8 +136,14 @@ public class Helm
         Process process = pb.start();
         try (BufferedReader outReader = new BufferedReader( new InputStreamReader( process.getInputStream() ) ))
         {
+            StringBuilder sb = new StringBuilder();
+            String outputLine;
+            while ((outputLine = outReader.readLine()) != null) {
+                sb.append(outputLine).append('\n');
+            }
+
             int exit = process.waitFor();
-            String output = outReader.lines().collect( Collectors.joining( System.lineSeparator() ) );
+            String output = sb.toString();
             if ( exit != 0 )
             {
                 throw new IOException( output );

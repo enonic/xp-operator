@@ -90,15 +90,15 @@ public class OperatorXp7DeploymentHelm
 
         private final BaseValues baseValues;
 
-        private final Supplier<String> suPassProvider;
+        private final Supplier<String> passSupplier;
 
         private final Supplier<ServiceAccount> cloudApiSa;
 
-        public Xp7DeploymentValueBuilder( final BaseValues baseValues, final Supplier<String> suPassProvider,
+        public Xp7DeploymentValueBuilder( final BaseValues baseValues, final Supplier<String> passSupplier,
                                           final Supplier<ServiceAccount> cloudApiSa )
         {
             this.baseValues = baseValues;
-            this.suPassProvider = suPassProvider;
+            this.passSupplier = passSupplier;
             this.cloudApiSa = cloudApiSa;
         }
 
@@ -156,7 +156,7 @@ public class OperatorXp7DeploymentHelm
             }
 
             boolean isClustered = isClustered( resource );
-            String pass = suPassProvider.get();
+            String pass = passSupplier.get();
 
             Map<String, Object> deployment = new HashMap<>();
             deployment.put( "name", resource.getMetadata().getName() );
@@ -165,6 +165,7 @@ public class OperatorXp7DeploymentHelm
             deployment.put( "hasDedicatedFrontendNodes", hasDedicatedFrontendNodes( resource ) );
             deployment.put( "suPass", pass );
             deployment.put( "suPassHash", sha512( pass ) );
+            deployment.put( "backupPass", passSupplier.get() );
             deployment.put("preInstalledCloudUtils", cfgHasKey("operator.preInstalledApps.cloudutils"));
             deployment.put( "preInstalledAppHash", sha512( resource.
                 getSpec().
