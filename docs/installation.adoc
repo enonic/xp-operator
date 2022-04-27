@@ -33,26 +33,6 @@ NOTE: The azurefile storageclass on AKS supports RWM access mode, but using that
 
 == Installation
 
-=== Helm repository
-
-Start by adding the Enonic repository to Helm and updating repositories:
-
-[source,bash]
-----
-$ helm repo add enonic https://repo.enonic.com/helm
-
-"enonic" has been added to your repositories
-----
-
-[source,bash]
-----
-$ helm repo update
-
-Hang tight while we grab the latest from your chart repositories...
-...Successfully got an update from the "enonic" chart repository
-Update Complete. ⎈Happy Helming!⎈
-----
-
 === Create chart values file
 
 The chart `values.yaml` file is how you generally configure a deployment with Helm (to learn more about how Helm uses values files, visit the https://helm.sh/docs/chart_template_guide/values_files/#helm[Helm developer docs]). You can read more about available values you can configure for the operator in the https://github.com/enonic/xp-operator/tree/master/helm[Helm chart readme]. Lets create a Helm values file to configure the operator:
@@ -80,14 +60,13 @@ config: |-
 ----
 $ helm upgrade --install \
 	--namespace kube-system \
-	--version 0.9.13 \
 	--values values.yaml \
 	xp-operator \
-	enonic/xp-operator
+	https://repo.enonic.com/helm/xp-operator/xp-operator-0.9.13.tgz
 
 Release "xp-operator" does not exist. Installing it now.
 NAME: xp-operator
-LAST DEPLOYED: Thu Feb 18 16:45:03 2021
+LAST DEPLOYED: Wed Apr 27 17:18:38 2022
 NAMESPACE: kube-system
 STATUS: deployed
 REVISION: 1
@@ -124,34 +103,35 @@ Then look at the operator logs to see if there are any errors:
 $ kubectl -n kube-system logs -f xp-operator-5869fcf9f4-xrzll
 
 exec java -Doperator.charts.path=helm -Djava.util.logging.manager=org.jboss.logmanager.LogManager -javaagent:/opt/agent-bond/agent-bond.jar=jmx_exporter{{9779:/opt/agent-bond/jmx_exporter_config.yml}} -XX:+ExitOnOutOfMemoryError -cp . -jar /deployments/quarkus-run.jar
-__  ____  __  _____   ___  __ ____  ______ 
- --/ __ \/ / / / _ | / _ \/ //_/ / / / __/ 
- -/ /_/ / /_/ / __ |/ , _/ ,< / /_/ /\ \   
---\___\_\____/_/ |_/_/|_/_/|_|\____/___/   
-2021-03-05 12:26:33,130 INFO  com.eno.kub.ope.Operator - Starting api and other components
-2021-03-05 12:26:33,532 INFO  io.quarkus - operator 0.16.0 on JVM (powered by Quarkus 1.12.0.Final) started in 1.978s. Listening on: https://0.0.0.0:8443
-2021-03-05 12:26:33,535 INFO  io.quarkus - Profile prod activated. 
-2021-03-05 12:26:33,535 INFO  io.quarkus - Installed features: [cdi, kubernetes-client, rest-client, resteasy, resteasy-jackson]
-2021-03-05 12:26:43,139 INFO  com.eno.kub.ope.Operator - Starting schedules and other components
-2021-03-05 12:26:43,141 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorDomainCertSync'
-2021-03-05 12:26:43,147 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorIngressLabel'
-2021-03-05 12:26:43,148 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorIngressLabel' [delay: 6996, period: 60000]
-2021-03-05 12:26:43,164 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorIngressCertSync'
-2021-03-05 12:26:43,164 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorIngress'
-2021-03-05 12:26:43,166 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7ConfigSync' [delay: 3243, period: 60000]
-2021-03-05 12:26:43,169 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppInstaller'
-2021-03-05 12:26:43,169 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7AppInstaller' [delay: 4856, period: 60000]
-2021-03-05 12:26:43,177 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppStartStopper'
-2021-03-05 12:26:43,178 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7AppStartStopper' [delay: 5026, period: 60000]
-2021-03-05 12:26:43,179 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7AppStatus' [delay: 8770, period: 60000]
-2021-03-05 12:26:43,182 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7Config'
-2021-03-05 12:26:43,184 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorConfigMapEvent'
-2021-03-05 12:26:43,185 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorConfigMapSync' [delay: 3679, period: 60000]
-2021-03-05 12:26:43,186 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7ConfigStatus'
-2021-03-05 12:26:43,186 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorDeleteAnnotation'
-2021-03-05 12:26:43,186 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7DeploymentHelm'
-2021-03-05 12:26:43,189 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7DeploymentStatus'
-2021-03-05 12:26:43,191 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7DeploymentStatus' [delay: 1975, period: 60000]
-2021-03-05 12:26:43,200 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXpClientCacheInvalidate'
-2021-03-05 12:26:43,200 INFO  com.eno.kub.ope.Operator - Starting informers
+__  ____  __  _____   ___  __ ____  ______
+ --/ __ \/ / / / _ | / _ \/ //_/ / / / __/
+ -/ /_/ / /_/ / __ |/ , _/ ,< / /_/ /\ \
+--\___\_\____/_/ |_/_/|_/_/|_|\____/___/
+2022-04-27 15:18:45,068 INFO  io.quarkus - operator 0.17.13 on JVM (powered by Quarkus 2.8.1.Final) started in 1.572s. Listening on: https://0.0.0.0:8443
+2022-04-27 15:18:45,070 INFO  io.quarkus - Profile prod activated.
+2022-04-27 15:18:45,070 INFO  io.quarkus - Installed features: [cdi, kubernetes-client, micrometer, rest-client, resteasy, resteasy-jackson, smallrye-context-propagation, vertx]
+2022-04-27 15:18:48,480 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppInstaller'
+2022-04-27 15:18:48,481 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7AppStatus' [delay: 19241, period: 60000]
+2022-04-27 15:18:48,481 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7AppInstaller' [delay: 4497, period: 60000]
+2022-04-27 15:18:48,480 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorIngressCertSync'
+2022-04-27 15:18:48,484 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7DeploymentStatus'
+2022-04-27 15:18:48,484 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7DeploymentStatus' [delay: 6627, period: 60000]
+2022-04-27 15:18:48,485 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXpClientCacheInvalidate'
+2022-04-27 15:18:48,488 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppStatusOnDeployments'
+2022-04-27 15:18:48,488 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorIngress'
+2022-04-27 15:18:48,488 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7ConfigSync' [delay: 13876, period: 60000]
+2022-04-27 15:18:48,488 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorDomainCertSync'
+2022-04-27 15:18:48,727 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7DeploymentHelm'
+2022-04-27 15:18:48,727 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppStartStopper'
+2022-04-27 15:18:48,728 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7AppStartStopper' [delay: 4061, period: 60000]
+2022-04-27 15:18:48,728 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7ConfigStatus'
+2022-04-27 15:18:48,728 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorIngressLabel'
+2022-04-27 15:18:48,729 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorIngressLabel' [delay: 3996, period: 60000]
+2022-04-27 15:18:48,729 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorInformers' [delay: 10390, period: 30000]
+2022-04-27 15:18:48,729 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorDeleteAnnotation'
+2022-04-27 15:18:48,729 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorConfigMapEvent'
+2022-04-27 15:18:48,730 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7Config'
+2022-04-27 15:18:48,730 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorConfigMapSync' [delay: 18077, period: 60000]
+2022-04-27 15:18:48,831 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppInstallerOnDeployments'
+2022-04-27 15:18:53,830 INFO  com.eno.kub.ope.Operator - Starting informers
 ----
