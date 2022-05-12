@@ -1,7 +1,7 @@
 IMAGE_BASE:=enonic/xp-operator
 TAG?=refs/heads/dev
 
-DOCKER_IMAGE:=${IMAGE_BASE}:$(shell echo -n ${TAG} | sed s!refs/tags/!!g | sed s!refs/heads/!!g)
+DOCKER_IMAGE:=$(shell echo ${IMAGE_BASE}:${TAG} | sed 's/refs\/tags\///g' | sed 's/refs\/heads\///g')
 
 #BUILD_PLATFORMS:=linux/amd64,linux/arm64,linux/riscv64,linux/ppc64le,linux/s390x,linux/386,linux/arm/v7,linux/arm/v6
 BUILD_PLATFORMS:=linux/amd64,linux/arm64,linux/ppc64le,linux/s390x,linux/arm/v7
