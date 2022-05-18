@@ -20,9 +20,9 @@ build: build-docker build-helm ## Build everything
 
 validate: ## Build and validate everything
 	# Validating helm chart ...
-	@[ "$(shell bash -c 'cat helm/Chart.yaml | yq -r .appVersion')" == "$(shell ./.mvn/get-version)" ] || \
+	@[ "$(shell bash -c 'cat helm/Chart.yaml | yq .appVersion')" == "$(shell ./.mvn/get-version)" ] || \
 		(echo "Helm version mismatch: Chart.yaml appVersion! Aborting ..." && exit 1)
-	@[ "$(shell bash -c 'cat helm/values.yaml | yq -r .image.tag')" == "$(shell ./.mvn/get-version)" ] || \
+	@[ "$(shell bash -c 'cat helm/values.yaml | yq .image.tag')" == "$(shell ./.mvn/get-version)" ] || \
 		(echo "Helm version mismatch: values.yaml image.tag! Aborting ..." && exit 1)
 	# Validating helm chart done!
 

@@ -3,7 +3,6 @@
 The Enonic XP Kubernetes Operator is a piece of software runs on top of Kubernetes to help you manage your XP deployments.
 
 - [Requirements for local development](#requirements-for-local-development)
-- [Setup](#setup)
 - [Running and installing operator to kind cluster](#running-and-installing-operator-to-kind-cluster)
 - [Running operator in IDE](#running-operator-in-ide)
   - [Spoof hosts for SSE events](#spoof-hosts-for-sse-events)
@@ -15,15 +14,6 @@ The Enonic XP Kubernetes Operator is a piece of software runs on top of Kubernet
 * [kind](https://kind.sigs.k8s.io/)
 * [helm](https://helm.sh/docs/intro/install/)
 * [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
-
-## Setup
-
-Kind does not support RWX storage classes by default, so we have to create one. We are using a helm chart for that so we need to add that repository:
-
-```console
-$ helm repo add nfs https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
-$ helm repo update
-```
 
 ## Running and installing operator to kind cluster
 
