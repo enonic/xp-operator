@@ -5,7 +5,7 @@ KIND_CTX:=kind-kind
 NFS_SERVER_NAME:=kind-nfs-server
 NFS_SERVER_VOLUME:=kind-nfs-server
 
-PRELOAD_IMAGES:=enonic/xp:7.7.3-ubuntu ghcr.io/enonic-cloud/ec-backup-agent:0.7.1
+#PRELOAD_IMAGES:=enonic/xp:7.7.3-ubuntu ghcr.io/enonic-cloud/ec-backup-agent:0.7.1
 
 .PHONY: kind-setup kind-bootstrap kind-ingress kind-up kind-down help
 .DEFAULT_GOAL:=help
@@ -49,8 +49,8 @@ kind-bootstrap:
 		https://github.com/kubernetes-sigs/nfs-subdir-external-provisioner/releases/download/nfs-subdir-external-provisioner-3.0.0/nfs-subdir-external-provisioner-3.0.0.tgz
 	
 	# Preload XP images
-	@for IMG in ${PRELOAD_IMAGES}; do docker pull $${IMG}; done
-	@for IMG in ${PRELOAD_IMAGES}; do kind load docker-image $${IMG}; done
+	# @for IMG in ${PRELOAD_IMAGES}; do docker pull $${IMG}; done
+	# @for IMG in ${PRELOAD_IMAGES}; do kind load docker-image $${IMG}; done
 
 kind-dev: ## Setup cluster for development mode (env var MY_IP required)
 	# Ensure MY_IP is set
