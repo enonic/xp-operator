@@ -26,42 +26,35 @@ validate: ## Build and validate everything
 		(echo "Helm version mismatch: values.yaml image.tag! Aborting ..." && exit 1)
 	# Validating helm chart done!
 
-publish: build validate  ## Publish everything (env var ARTIFACTORY_USER and ARTIFACTORY_PASS required)
-	# Check if docker is logged in
-	@: | docker login | grep "Login Succeeded" || (echo "Not logged in to docker"; exit 1;)
-
-	# Check if token is set ...
-	@test "${ARTIFACTORY_USER}" || (echo "Set env variable ARTIFACTORY_USER"; exit 1;)
-	@test "${ARTIFACTORY_PASS}" || (echo "Set env variable ARTIFACTORY_PASS"; exit 1;)
-
-	# Validate version
-	@[[ ! "$(shell ./.mvn/get-version)" =~ .*"SNAPSHOT" ]] || \
-		(echo "Version is a SNAPSHOT! Aborting ... " && exit 1)
+publish: ## Setup repo for release. Provide VERSION as env var i.e. 'VERSION=0.17.13 make release'
+	# Checking prerequisites
+	@test "${VERSION}" != "" || (echo 'You must provide a version!'; exit 1)
+	@[[ ${VERSION} != v* ]] || (echo 'Version cannot start with "v"!'; exit 1)
+	@test "$(shell git rev-parse --abbrev-ref HEAD)" == "master" || (echo 'You must be on the master branch!'; exit 1)
+	@git diff --quiet || (echo 'Git repo is not clean, commit your changes first!'; exit 1)
 	
-	# Validate that git is clean
-	@git diff --quiet || (echo "Git repo is dirty! Aborting ..." && exit 1)
+	# Setting chart version
+	@yq -i '.version = "${VERSION}"' helm/Chart.yaml
+	@yq -i '.appVersion = "${VERSION}"' helm/Chart.yaml
 
-	# Validate
-	@[[ "v$(shell ./.mvn/get-version)" == "$(shell git tag --points-at HEAD)" ]] || \
-		(echo "Git tag does not match version! Aborting ..." && exit 1)
+	# Setting java-client version
+	@./mvnw -f java-client/ versions:set -DnewVersion=${VERSION} > /dev/null
 
-	@echo "# Starting release for $(shell ./.mvn/get-version) ..."
+	# Setting java-operator version
+	@./mvnw -f java-operator/ versions:set -DnewVersion=${VERSION} > /dev/null
 
-	# Build docker image ....
-	@TAG=$(shell ./.mvn/get-version) $(MAKE) -C docker --no-print-directory buildx
+	# Setting parent pom version
+	@./mvnw -f . versions:set -DnewVersion=${VERSION} > /dev/null
 
-	# Publishing helm chart ...
-	@$(MAKE) -C helm --no-print-directory publish
+	# Creating and pushing release commit
+	@git add helm/Chart.yaml pom.xml java-client/pom.xml java-operator/pom.xml
+	@git commit -m "Set version to ${VERSION}"
+	@git push origin master
 
-	# Publishing docker image ...
-	@TAG=$(shell ./.mvn/get-version) BUILD_ARGS=--push $(MAKE) -C docker --no-print-directory buildx
-	@docker push ${DOCKER_IMAGE}:$(shell ./.mvn/get-version)
-
-	# Publishing java-client ...
-	@$(MAKE) -C java-client --no-print-directory publish
-
-	# Push tag
-	@git push origin "v$(shell ./.mvn/get-version)"
+	@echo
+	@echo If build succeedes on github actions, tag and push to release:
+	@echo '  $$' git tag -a v${VERSION} -m "\"v${VERSION}\""
+	@echo '  $$' git push origin v${VERSION}
 
 test: validate build-docker ## Run k8s kind cluster with operator installed
 	# Start kind cluster
