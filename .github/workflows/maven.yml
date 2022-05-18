@@ -68,8 +68,8 @@ jobs:
           [ "${{ steps.tag.outputs.tag }}" == "$(./mvnw -f . help:evaluate -Dexpression=project.version -q -DforceStdout)" ] || (echo "version in pom.xml does not match tag"; exit 1)
           [ "${{ steps.tag.outputs.tag }}" == "$(./mvnw -f java-client help:evaluate -Dexpression=project.version -q -DforceStdout)" ] || (echo "version in java-client/pom.xml does not match tag"; exit 1)
           [ "${{ steps.tag.outputs.tag }}" == "$(./mvnw -f java-operator help:evaluate -Dexpression=project.version -q -DforceStdout)" ] || (echo "version in java-operator/pom.xml does not match tag"; exit 1)
-          [ "${{ steps.tag.outputs.tag }}" == "$(yq -r '.appVersion' helm/Chart.yaml)" ] || (echo "appVersion in helm/Chart.yaml does not match tag"; exit 1)
-          [ "${{ steps.tag.outputs.tag }}" == "$(yq -r '.version' helm/Chart.yaml)" ] || (echo "version in helm/Chart.yaml does not match tag"; exit 1)
+          [ "${{ steps.tag.outputs.tag }}" == "$(yq '.appVersion' helm/Chart.yaml)" ] || (echo "appVersion in helm/Chart.yaml does not match tag"; exit 1)
+          [ "${{ steps.tag.outputs.tag }}" == "$(yq '.version' helm/Chart.yaml)" ] || (echo "version in helm/Chart.yaml does not match tag"; exit 1)
 
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v1
