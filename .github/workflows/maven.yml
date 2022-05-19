@@ -104,11 +104,11 @@ jobs:
         working-directory: helm
         run: make publish
         env:
-          MAVEN_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
+          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USERNAME }}
+          ARTIFACTORY_PASS: ${{ secrets.ARTIFACTORY_PASSWORD }}
 
       - name: Publish java-client
         run: ./mvnw --batch-mode -f java-client deploy
         env:
-          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USERNAME }}
-          ARTIFACTORY_PASS: ${{ secrets.ARTIFACTORY_PASSWORD }}
+          MAVEN_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
