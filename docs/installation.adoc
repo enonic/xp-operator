@@ -62,7 +62,7 @@ $ helm upgrade --install \
 	--namespace kube-system \
 	--values values.yaml \
 	xp-operator \
-	https://repo.enonic.com/helm/xp-operator/xp-operator-0.17.15.tgz
+	https://repo.enonic.com/helm/xp-operator/xp-operator-0.17.16.tgz
 
 Release "xp-operator" does not exist. Installing it now.
 NAME: xp-operator

@@ -36,6 +36,7 @@ publish: ## Setup repo for release. Provide VERSION as env var i.e. 'VERSION=0.1
 	# Setting chart version
 	@yq -i '.version = "${VERSION}"' helm/Chart.yaml
 	@yq -i '.appVersion = "${VERSION}"' helm/Chart.yaml
+	@yq -i '.image.tag = "${VERSION}"' helm/values.yaml
 
 	# Setting java-client version
 	@./mvnw -f java-client/ versions:set -DnewVersion=${VERSION} > /dev/null

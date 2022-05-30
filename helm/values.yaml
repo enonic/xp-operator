@@ -1,20 +1,15 @@
 image:
   repository: enonic/xp-operator
-  tag: "0.17.14-SNAPSHOT"
+  tag: "0.17.16"
   pullPolicy: IfNotPresent
-
 resources:
   requests: {}
   limits: {}
-
 annotations: {}
 labels: {}
-
 secrets: {}
 env: {}
-
 onlyDeployCrds: false
-
 # For a full list of configuration options see operator properties file:
 # https://github.com/enonic/xp-operator/blob/master/java-operator/src/main/resources/application.properties
 config: |-
