@@ -6,7 +6,7 @@
 
   <groupId>com.enonic.kubernetes</groupId>
   <artifactId>all</artifactId>
-  <version>0.17.15-SNAPSHOT</version>
+  <version>0.17.15</version>
   <packaging>pom</packaging>
 
   <modules>
