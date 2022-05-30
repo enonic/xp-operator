@@ -165,7 +165,6 @@ public class OperatorXp7DeploymentHelm
             deployment.put( "hasDedicatedFrontendNodes", hasDedicatedFrontendNodes( resource ) );
             deployment.put( "suPass", pass );
             deployment.put( "suPassHash", sha512( pass ) );
-            deployment.put( "backupPass", passSupplier.get() );
             deployment.put("preInstalledCloudUtils", cfgHasKey("operator.preInstalledApps.cloudutils"));
             deployment.put( "preInstalledAppHash", sha512( resource.
                 getSpec().

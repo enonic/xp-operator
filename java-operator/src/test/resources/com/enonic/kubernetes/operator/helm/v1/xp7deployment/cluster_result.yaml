@@ -241,7 +241,7 @@ metadata:
 data:
   config.yaml: "# Basic backup parameters\nbackup:\n  enabled: false\n  schedule:\
     \ \"0 0 * * *\"\n\nrestic:\n  env:\n    restic_repository: /restic/repo/mycloud-mysolution-myenv-myservice\n\
-    \    restic_password: password\n"
+    \    restic_password: unset\n"
 ---
 apiVersion: "v1"
 kind: "ConfigMap"
@@ -887,7 +887,7 @@ spec:
           value: "post.hook.backup.velero.io/command"
         - name: "AGENT_K8S_ANNOTATIONS_POSTSCRIPTCONTAINER"
           value: "post.hook.backup.velero.io/container"
-        image: "ghcr.io/enonic-cloud/ec-backup-agent:0.7.1"
+        image: "ghcr.io/enonic-cloud/ec-backup-agent:0.7.2"
         imagePullPolicy: "IfNotPresent"
         name: "backup"
         ports:

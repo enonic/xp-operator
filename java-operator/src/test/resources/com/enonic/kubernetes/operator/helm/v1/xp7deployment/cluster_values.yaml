@@ -9,7 +9,7 @@ annotationKeys:
 backup:
   agent:
     enabled: false
-    image: "ghcr.io/enonic-cloud/ec-backup-agent:0.7.1"
+    image: "ghcr.io/enonic-cloud/ec-backup-agent:0.7.2"
     limits:
       cpu: "1"
       memory: "500Mi"
@@ -24,7 +24,6 @@ defaultLabels:
   service: "myservice"
   solution: "mysolution"
 deployment:
-  backupPass: "password"
   clusterMajority: 5
   clustered: true
   hasDedicatedFrontendNodes: true

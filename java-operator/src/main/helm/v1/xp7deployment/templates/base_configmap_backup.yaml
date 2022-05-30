@@ -27,5 +27,5 @@ data:
     restic:
       env:
         restic_repository: {{ $.Values.backup.agent.restic_repo_prefix }}/{{ $.Values.deployment.namespace }}
-        restic_password: {{ $.Values.deployment.backupPass }}
+        restic_password: unset
 {{- end }}
