@@ -48,7 +48,7 @@ publish: ## Setup repo for release. Provide VERSION as env var i.e. 'VERSION=0.1
 	@./mvnw -f . versions:set -DnewVersion=${VERSION} > /dev/null
 
 	# Creating and pushing release commit
-	@git add helm/Chart.yaml pom.xml java-client/pom.xml java-operator/pom.xml
+	@git add helm/values.yaml helm/Chart.yaml pom.xml java-client/pom.xml java-operator/pom.xml
 	@git commit -m "Set version to ${VERSION}"
 	@git push origin master
 
