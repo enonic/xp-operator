@@ -26,7 +26,7 @@
         <maven-artifact-version>3.8.5</maven-artifact-version>
 
         <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
-        <versions-maven-plugin.version>2.10.0</versions-maven-plugin.version>
+        <versions-maven-plugin.version>2.11.0</versions-maven-plugin.version>
         <git-plugin.version>5.0.0</git-plugin.version>
         <guava.version>31.1-jre</guava.version>
     </properties>
