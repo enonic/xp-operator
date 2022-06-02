@@ -240,10 +240,9 @@ metadata:
     controller: true
     name: "mycloud-mysolution-myenv-myservice"
 data:
-  config.json: "{\n  \"backup\": {\n    \"enabled\": false,\n    \"schedule\": \"\
-    0 0 * * *\" \n  },\n  \"restic\": {\n    \"env\": {\n      \"restic_password\"\
-    : \"unset\",\n      \"restic_repository\": \"/restic/repo/mycloud-mysolution-myenv-myservice\"\
-    ,\n    }\n  }\n}\n"
+  config.json: "{\"backup\":{\"enabled\":false,\"schedule\":\"0 0 * * *\"},\"restic\"\
+    :{\"env\":{\"restic_password\":\"UNSET\",\"restic_repository\":\"/restic/repo/mycloud-mysolution-myenv-myservice\"\
+    }}}"
 ---
 apiVersion: "v1"
 kind: "ConfigMap"
