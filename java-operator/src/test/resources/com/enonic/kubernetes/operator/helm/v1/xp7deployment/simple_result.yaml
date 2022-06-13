@@ -18,20 +18,6 @@ kind: "ServiceAccount"
 metadata:
   annotations:
     enonic.applyPriority: "20"
-  name: "xp-backup-sa"
-  namespace: "mycloud-mysolution-myenv-myservice"
-  ownerReferences:
-  - apiVersion: "enonic.cloud/v1"
-    kind: "Xp7Deployment"
-    blockOwnerDeletion: false
-    controller: true
-    name: "mycloud-mysolution-myenv-myservice"
----
-apiVersion: "v1"
-kind: "ServiceAccount"
-metadata:
-  annotations:
-    enonic.applyPriority: "20"
   name: "xp-events-sa"
   namespace: "mycloud-mysolution-myenv-myservice"
   ownerReferences:
@@ -40,16 +26,6 @@ metadata:
     blockOwnerDeletion: false
     controller: true
     name: "mycloud-mysolution-myenv-myservice"
----
-apiVersion: "v1"
-kind: "Secret"
-metadata:
-  annotations:
-    enonic.applyPriority: "60"
-    kubernetes.io/service-account.name: "xp-backup-sa"
-  name: "xp-backup-sa-secret"
-  namespace: "mycloud-mysolution-myenv-myservice"
-type: "kubernetes.io/service-account-token"
 ---
 apiVersion: "v1"
 kind: "Secret"
@@ -223,31 +199,6 @@ apiVersion: "v1"
 kind: "ConfigMap"
 metadata:
   annotations:
-    enonic.applyPriority: "60"
-    enonic.neverOverwrite: "true"
-  labels:
-    cloud: "mycloud"
-    enonic.managed: "true"
-    environment: "myenv"
-    service: "myservice"
-    solution: "mysolution"
-  name: "backup-config"
-  namespace: "mycloud-mysolution-myenv-myservice"
-  ownerReferences:
-  - apiVersion: "enonic.cloud/v1"
-    kind: "Xp7Deployment"
-    blockOwnerDeletion: false
-    controller: true
-    name: "mycloud-mysolution-myenv-myservice"
-data:
-  config.json: "{\"backup\":{\"enabled\":false,\"schedule\":\"0 0 * * *\"},\"restic\"\
-    :{\"env\":{\"restic_password\":\"UNSET\",\"restic_repository\":\"/restic/repo/mycloud-mysolution-myenv-myservice\"\
-    }}}"
----
-apiVersion: "v1"
-kind: "ConfigMap"
-metadata:
-  annotations:
     enonic.applyPriority: "50"
     enonic.neverOverwrite: "true"
   labels:
@@ -350,34 +301,6 @@ kind: "Role"
 metadata:
   annotations:
     enonic.applyPriority: "30"
-  name: "xp-backup-role"
-  namespace: "mycloud-mysolution-myenv-myservice"
-  ownerReferences:
-  - apiVersion: "enonic.cloud/v1"
-    kind: "Xp7Deployment"
-    blockOwnerDeletion: false
-    controller: true
-    name: "mycloud-mysolution-myenv-myservice"
-rules:
-- apiGroups:
-  - "*"
-  resources:
-  - "pods"
-  verbs:
-  - "get"
-  - "list"
-- apiGroups:
-  - "*"
-  resources:
-  - "pods/exec"
-  verbs:
-  - "create"
----
-apiVersion: "rbac.authorization.k8s.io/v1"
-kind: "Role"
-metadata:
-  annotations:
-    enonic.applyPriority: "30"
   name: "cloud-api-role"
   namespace: "mycloud-mysolution-myenv-myservice"
   ownerReferences:
@@ -442,28 +365,6 @@ roleRef:
 subjects:
 - kind: "ServiceAccount"
   name: "xp-node-sa"
-  namespace: "mycloud-mysolution-myenv-myservice"
----
-apiVersion: "rbac.authorization.k8s.io/v1"
-kind: "RoleBinding"
-metadata:
-  annotations:
-    enonic.applyPriority: "40"
-  name: "xp-backup-role-bindings"
-  namespace: "mycloud-mysolution-myenv-myservice"
-  ownerReferences:
-  - apiVersion: "enonic.cloud/v1"
-    kind: "Xp7Deployment"
-    blockOwnerDeletion: false
-    controller: true
-    name: "mycloud-mysolution-myenv-myservice"
-roleRef:
-  kind: "Role"
-  apiGroup: "rbac.authorization.k8s.io"
-  name: "xp-backup-role"
-subjects:
-- kind: "ServiceAccount"
-  name: "xp-backup-sa"
   namespace: "mycloud-mysolution-myenv-myservice"
 ---
 apiVersion: "rbac.authorization.k8s.io/v1"
@@ -671,11 +572,8 @@ spec:
   template:
     metadata:
       annotations:
-        backup.velero.io/backup-volumes: "blobstore,snapshots"
         enonic.cloud/logs.xp7: "true"
         enonic.cloud/metrics.xp7: "true"
-        pre.hook.backup.velero.io/command: "[\"/usr/local/bin/backup.sh\"]"
-        pre.hook.backup.velero.io/container: "exp"
       labels:
         cloud: "mycloud"
         enonic.data: "true"
@@ -828,72 +726,6 @@ spec:
           name: "config"
         - mountPath: "/enonic-xp/home/extra-config"
           name: "extra-config"
-      - env:
-        - name: "AGENT_MODE"
-          value: "k8s"
-        - name: "AGENT_K8S_TOKEN"
-          valueFrom:
-            secretKeyRef:
-              key: "token"
-              name: "xp-backup-sa-secret"
-        - name: "AGENT_K8S_NAMESPACE"
-          valueFrom:
-            fieldRef:
-              apiVersion: "v1"
-              fieldPath: "metadata.namespace"
-        - name: "AGENT_K8S_POD"
-          valueFrom:
-            fieldRef:
-              apiVersion: "v1"
-              fieldPath: "metadata.name"
-        - name: "AGENT_K8S_CONTAINER"
-          value: "backup"
-        - name: "RESTIC_CACHE_DIR"
-          value: "/restic/cache"
-        - name: "AGENT_K8S_ANNOTATIONS_VOLUME"
-          value: "backup.velero.io/backup-volumes"
-        - name: "AGENT_K8S_ANNOTATIONS_PRESCRIPT"
-          value: "pre.hook.backup.velero.io/command"
-        - name: "AGENT_K8S_ANNOTATIONS_PRESCRIPTCONTAINER"
-          value: "pre.hook.backup.velero.io/container"
-        - name: "AGENT_K8S_ANNOTATIONS_POSTSCRIPT"
-          value: "post.hook.backup.velero.io/command"
-        - name: "AGENT_K8S_ANNOTATIONS_POSTSCRIPTCONTAINER"
-          value: "post.hook.backup.velero.io/container"
-        image: "ghcr.io/enonic-cloud/ec-backup-agent:0.7.2"
-        imagePullPolicy: "IfNotPresent"
-        name: "backup"
-        ports:
-        - containerPort: 8000
-          name: "backup"
-          protocol: "TCP"
-        resources:
-          limits:
-            cpu: "1"
-            memory: "500Mi"
-        securityContext:
-          capabilities:
-            drop:
-            - "ALL"
-          runAsNonRoot: true
-          runAsUser: 1337
-        terminationMessagePath: "/dev/termination-log"
-        terminationMessagePolicy: "File"
-        volumeMounts:
-        - mountPath: "/etc/ec/backup-agent"
-          name: "backup-config"
-        - mountPath: "/restic"
-          name: "restic"
-        - mountPath: "/enonic-xp/home/data"
-          name: "export"
-        - mountPath: "/enonic-xp/home/repo/index"
-          name: "index"
-        - mountPath: "/enonic-xp/home/work"
-          name: "work"
-        - mountPath: "/enonic-xp/home/repo/blob"
-          name: "blobstore"
-        - mountPath: "/enonic-xp/home/snapshots"
-          name: "snapshots"
       dnsPolicy: "ClusterFirst"
       initContainers:
       - command:
@@ -948,7 +780,6 @@ spec:
         environment: "myenv"
         service: "myservice"
         solution: "mysolution"
-        velero.io/exclude-from-backup: "true"
       name: "export"
     spec:
       accessModes:
@@ -968,7 +799,6 @@ spec:
         environment: "myenv"
         service: "myservice"
         solution: "mysolution"
-        velero.io/exclude-from-backup: "true"
       name: "index"
     spec:
       accessModes:
@@ -988,7 +818,6 @@ spec:
         environment: "myenv"
         service: "myservice"
         solution: "mysolution"
-        velero.io/exclude-from-backup: "true"
       name: "work"
     spec:
       accessModes:
@@ -996,18 +825,6 @@ spec:
       resources:
         requests:
           storage: "400Mi"
-      storageClassName: "standard"
-      volumeMode: "Filesystem"
-  - apiVersion: "v1"
-    kind: "PersistentVolumeClaim"
-    metadata:
-      name: "restic"
-    spec:
-      accessModes:
-      - "ReadWriteOnce"
-      resources:
-        requests:
-          storage: "1Gi"
       storageClassName: "standard"
       volumeMode: "Filesystem"
 ---

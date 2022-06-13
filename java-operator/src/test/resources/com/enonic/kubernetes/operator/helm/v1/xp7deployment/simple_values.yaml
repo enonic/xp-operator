@@ -16,7 +16,7 @@ backup:
     restic_repo_prefix: "/restic/repo"
     schedule: "0 0 * * *"
   cacheSize: "1Gi"
-  enabled: true
+  enabled: false
 clusterId: "44ddc40b-266c-4c99-b094-e758328fc6ba"
 defaultLabels:
   cloud: "mycloud"
