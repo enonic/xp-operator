@@ -44,7 +44,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: '11'
-          distribution: 'adopt'
+          distribution: 'temurin'
           cache: 'maven'
           server-id: enonic
           server-username: MAVEN_USERNAME
