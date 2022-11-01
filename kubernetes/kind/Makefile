@@ -38,7 +38,7 @@ kind-bootstrap:
 		(echo "Kubectl should be ${KIND_CTX}" && exit 1)
 
 	# Setup NFS storage class
-	@helm upgrade --install \
+	@sudo helm upgrade --install \
 		--namespace kube-system \
 		--set nfs.server=${NFS_SERVER_NAME} \
 		--set nfs.path=/ \
