@@ -16,19 +16,19 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <quarkus.version>2.11.1.Final</quarkus.version>
-
-        <immutables.version>2.9.0</immutables.version>
-        <jackson-yaml.version>2.13.3</jackson-yaml.version>
-        <okhttp.version>4.10.0</okhttp.version>
+        <quarkus.version>2.13.3.Final</quarkus.version>
+        <immutables.version>2.9.2</immutables.version>
+        <jackson-yaml.version>2.13.4</jackson-yaml.version>
 
         <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
         <maven-artifact-version>3.8.6</maven-artifact-version>
 
         <surefire-plugin.version>3.0.0-M7</surefire-plugin.version>
-        <versions-maven-plugin.version>2.11.0</versions-maven-plugin.version>
+        <versions-maven-plugin.version>2.13.0</versions-maven-plugin.version>
         <git-plugin.version>5.0.0</git-plugin.version>
         <guava.version>31.1-jre</guava.version>
+        <okhttp.version>3.12.12</okhttp.version>
+
     </properties>
 
     <dependencyManagement>
@@ -100,14 +100,6 @@
             <groupId>com.enonic.kubernetes</groupId>
             <artifactId>client</artifactId>
             <version>${project.version}</version>
-            <!-- <scope>system</scope>
-            <systemPath>${project.basedir}/../java-client/target/client-${project.version}.jar</systemPath> -->
-            <exclusions>
-                <exclusion>
-                    <groupId>io.fabric8</groupId>
-                    <artifactId>kubernetes-client</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>

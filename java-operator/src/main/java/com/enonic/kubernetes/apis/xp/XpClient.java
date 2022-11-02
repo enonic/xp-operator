@@ -11,8 +11,6 @@ import okhttp3.*;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSourceListener;
 import okhttp3.sse.EventSources;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,7 +105,7 @@ public class XpClient
     }
 
     @Override
-    public void onClosed(@NotNull EventSource eventSource) {
+    public void onClosed(final EventSource eventSource) {
         log.debug(String.format(
                 "XP: SSE event source closed from '%s' in NS '%s'",
                 params.nodeGroup(),
@@ -116,7 +114,7 @@ public class XpClient
     }
 
     @Override
-    public void onEvent(@NotNull EventSource eventSource, @Nullable String id, @Nullable String eventType, @NotNull String eventData) {
+    public void onEvent( final EventSource eventSource, String id, String eventType, final String eventData) {
         log.debug(String.format(
                 "XP: SSE event '%s' received from '%s' in NS '%s': %s",
                 eventType,
@@ -152,7 +150,7 @@ public class XpClient
     }
 
     @Override
-    public void onFailure(@NotNull EventSource eventSource, @Nullable Throwable t, @Nullable Response response) {
+    public void onFailure(final EventSource eventSource, Throwable t, Response response) {
         log.error(String.format(
                 "XP: SSE event source error from '%s' in NS '%s': %s",
                 params.nodeGroup(),
@@ -162,7 +160,7 @@ public class XpClient
     }
 
     @Override
-    public void onOpen(@NotNull EventSource eventSource, @NotNull Response response) {
+    public void onOpen(final EventSource eventSource, final Response response) {
         log.info(String.format(
                 "XP: SSE event source opened to '%s' in NS '%s'",
                 params.nodeGroup(),

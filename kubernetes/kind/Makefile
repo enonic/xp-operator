@@ -1,11 +1,8 @@
-#K8S_VERSION:=v1.20.2
-K8S_VERSION:=v1.19.11
+K8S_VERSION:=v1.21.14
 KIND_MTU:=$(shell docker network inspect bridge -f '{{ index .Options "com.docker.network.driver.mtu" }}')
 KIND_CTX:=kind-kind
 NFS_SERVER_NAME:=kind-nfs-server
 NFS_SERVER_VOLUME:=kind-nfs-server
-
-#PRELOAD_IMAGES:=enonic/xp:7.7.3-ubuntu ghcr.io/enonic-cloud/ec-backup-agent:0.7.1
 
 .PHONY: kind-setup kind-bootstrap kind-ingress kind-up kind-down help
 .DEFAULT_GOAL:=help
@@ -46,11 +43,7 @@ kind-bootstrap:
 		--set storageClass.archiveOnDelete=false \
 		--set storageClass.allowVolumeExpansion=true \
 		nfs-client \
-		https://github.com/kubernetes-sigs/nfs-subdir-external-provisioner/releases/download/nfs-subdir-external-provisioner-3.0.0/nfs-subdir-external-provisioner-3.0.0.tgz
-	
-	# Preload XP images
-	# @for IMG in ${PRELOAD_IMAGES}; do docker pull $${IMG}; done
-	# @for IMG in ${PRELOAD_IMAGES}; do kind load docker-image $${IMG}; done
+		https://github.com/kubernetes-sigs/nfs-subdir-external-provisioner/releases/download/nfs-subdir-external-provisioner-4.0.17/nfs-subdir-external-provisioner-4.0.17.tgz
 
 kind-dev: ## Setup cluster for development mode (env var MY_IP required)
 	# Ensure MY_IP is set

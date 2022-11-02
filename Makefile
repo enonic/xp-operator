@@ -68,6 +68,9 @@ test: validate build-docker ## Run k8s kind cluster with operator installed
 	@$(MAKE) -C helm --no-print-directory install
 	# Cluster setup done!
 
+dev:
+	@$(MAKE) -C kubernetes/kind --no-print-directory kind-up kind-dev
+
 clean: ## Clean up everything
 	# Clean java modules
 	@./mvnw clean
