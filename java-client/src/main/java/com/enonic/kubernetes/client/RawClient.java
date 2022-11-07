@@ -5,34 +5,35 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.http.HttpClient;
 import io.fabric8.kubernetes.client.http.HttpRequest;
 import io.fabric8.kubernetes.client.http.HttpResponse;
-import io.fabric8.kubernetes.client.utils.internal.ExponentialBackoffIntervalCalculator;
+import io.fabric8.kubernetes.client.utils.Serialization;
 import okhttp3.HttpUrl;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 
 public abstract class RawClient
 {
-    private static final Logger logger = LoggerFactory.getLogger( RawClient.class );
-
-    private final int requestRetryBackoffLimit;
-
-    private final ExponentialBackoffIntervalCalculator retryIntervalCalculator;
-
     private final HttpClient client;
 
     private final String baseUrl;
 
+    private final HttpRequestRetrier httpRequestRetrier;
+
     public RawClient( final HttpClient client, final Config config, String apiVersion )
     {
         this.client = client;
-        this.requestRetryBackoffLimit = config.getRequestRetryBackoffLimit();
-        this.retryIntervalCalculator = new ExponentialBackoffIntervalCalculator( config.getRequestRetryBackoffInterval(), 5 );
+        int requestRetryBackoffLimit = config.getRequestRetryBackoffLimit();
+        int requestRetryBackoffInterval = config.getRequestRetryBackoffInterval();
         this.baseUrl = String.format( "%s%s%s", config.getMasterUrl(), "apis/operator.enonic.cloud/", apiVersion );
+
+        this.httpRequestRetrier = HttpRequestRetrier.create()
+            .retries( requestRetryBackoffLimit )
+            .conditionsToRetry( List.of( ( response ) -> response.code() >= 500 ) )
+            .retryInterval( requestRetryBackoffInterval )
+            .client( client )
+            .build();
     }
 
     protected String baseUrl()
@@ -40,7 +41,7 @@ public abstract class RawClient
         return baseUrl;
     }
 
-    protected HttpUrl.Builder requestUrlBuilder( String... url )
+    protected HttpUrl requestUrl( String... url )
     {
         StringBuilder sb = new StringBuilder( baseUrl() );
         for ( String s : url )
@@ -51,85 +52,29 @@ public abstract class RawClient
             }
             sb.append( s );
         }
-        return Objects.requireNonNull( HttpUrl.parse( sb.toString() ) ).newBuilder();
+        return Objects.requireNonNull( HttpUrl.parse( sb.toString() ) ).newBuilder().build();
     }
 
-    protected <T> T request( HttpUrl.Builder httpBuilder, Class<T> type )
+    protected <T> T request( HttpUrl httpUrl, Class<T> type )
     {
         try
         {
-            return request( client.newHttpRequestBuilder().url( httpBuilder.build().url() ), type );
-        }
-        catch ( KubernetesClientException e )
-        {
-            throw e;
+            return request( client.newHttpRequestBuilder().url( httpUrl.url() ).build(), type );
         }
         catch ( Exception e )
         {
-            throw new KubernetesClientException( "RawClient request failed", e );
+            throw new IllegalStateException( "RawClient request failed", e );
         }
     }
 
-    private <T> T request( HttpRequest.Builder requestBuilder, Class<T> type )
-        throws IOException, InterruptedException
+    private <T> T request( HttpRequest request, Class<T> type )
     {
-        HttpRequest request = requestBuilder.build();
-        return retryWithExponentialBackoff( client, request, type );
+        final HttpResponse<InputStream> response = retryWithExponentialBackoff( request );
+        return Serialization.unmarshal( response.body(), type );
     }
 
-    private <T> T retryWithExponentialBackoff( HttpClient client, HttpRequest request, Class<T> type )
-        throws InterruptedException, IOException
+    private HttpResponse<InputStream> retryWithExponentialBackoff( HttpRequest request )
     {
-        int numRetries = 0;
-        long retryInterval;
-        while ( true )
-        {
-            try
-            {
-                final HttpResponse<T> response = client.sendAsync( request, type ).get();
-
-                if ( numRetries < requestRetryBackoffLimit && response.code() >= 500 )
-                {
-                    retryInterval = retryIntervalCalculator.getInterval( numRetries );
-                    logger.debug( "HTTP operation on url: {} should be retried as the response code was {}, retrying after {} millis",
-                                  request.uri(), response.code(), retryInterval );
-                }
-                else
-                {
-                    return response.body();
-                }
-            }
-            catch ( ExecutionException e )
-            {
-                final Throwable cause = e.getCause();
-
-                if ( cause instanceof IOException )
-                {
-                    if ( numRetries < requestRetryBackoffLimit )
-                    {
-                        retryInterval = retryIntervalCalculator.getInterval( numRetries );
-                        logger.debug( String.format( "HTTP operation on url: %s should be retried after %d millis because of IOException",
-                                                     request.uri(), retryInterval ), cause );
-                    }
-                    else
-                    {
-                        throw (IOException) cause;
-                    }
-                }
-                else
-                {
-                    if ( cause instanceof RuntimeException )
-                    {
-                        throw (RuntimeException) cause;
-                    } else  {
-                        throw new RuntimeException( cause );
-                    }
-                }
-            }
-
-            //noinspection BusyWait
-            Thread.sleep( retryInterval );
-            numRetries++;
-        }
+        return httpRequestRetrier.execute( request );
     }
 }

@@ -10,6 +10,6 @@ public class Xp7MgmtApiRoutesImpl extends Xp7MgmtClient implements Xp7MgmtApiRou
     }
 
     public Xp7MgmtRoutesList list() {
-        return request(requestUrlBuilder("cloud-utils/routes"), Xp7MgmtRoutesList.class);
+        return request( requestUrl( "cloud-utils/routes"), Xp7MgmtRoutesList.class);
     }
 }

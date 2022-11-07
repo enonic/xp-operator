@@ -10,6 +10,6 @@ public class Xp7MgmtApiIdProvidersImpl extends Xp7MgmtClient implements Xp7MgmtA
     }
 
     public Xp7MgmtIdProvidersList list() {
-        return request(requestUrlBuilder("cloud-utils/idproviders"), Xp7MgmtIdProvidersList.class);
+        return request( requestUrl( "cloud-utils/idproviders"), Xp7MgmtIdProvidersList.class);
     }
 }
