@@ -1,6 +1,6 @@
 image:
   repository: enonic/xp-operator
-  tag: "0.17.19-SNAPSHOT"
+  tag: "0.17.19-B3"
   pullPolicy: IfNotPresent
 resources:
   requests: {}

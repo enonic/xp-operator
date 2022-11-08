@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.enonic.kubernetes</groupId>
     <artifactId>operator</artifactId>
-    <version>0.17.19-SNAPSHOT</version>
+    <version>0.17.19-B3</version>
 
     <properties>
         <maven.compiler.target>1.11</maven.compiler.target>
