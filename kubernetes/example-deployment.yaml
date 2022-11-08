@@ -10,7 +10,7 @@ metadata:
     service: myservice
 spec:
   enabled: true
-  xpVersion: 7.7.3
+  xpVersion: 7.10.3
 
 #  nodesPreinstalledApps:
 #    - name: snapshotter

@@ -32,10 +32,12 @@
 
         <jsonschema2pojo.version>1.1.2</jsonschema2pojo.version>
 
-        <fabric8-kubernetes-client.version>5.12.2</fabric8-kubernetes-client.version>
-
-        <junit.version>5.9.0</junit.version>
+        <fabric8-kubernetes-client.version>6.2.0</fabric8-kubernetes-client.version>
+        <junit.version>5.9.1</junit.version>
         <slf4j-simple.version>1.7.36</slf4j-simple.version>
+        <okhttp.version>3.12.12</okhttp.version>
+        <mockito.version>4.8.1</mockito.version>
+
     </properties>
 
     <dependencies>
@@ -45,6 +47,12 @@
             <artifactId>kubernetes-client</artifactId>
             <version>${fabric8-kubernetes-client.version}</version>
         </dependency>
+
+      <dependency>
+        <groupId>com.squareup.okhttp3</groupId>
+        <artifactId>okhttp</artifactId>
+        <version>${okhttp.version}</version>
+      </dependency>
 
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -79,6 +87,13 @@
             <version>${slf4j-simple.version}</version>
             <scope>test</scope>
         </dependency>
+
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-core</artifactId>
+        <version>${mockito.version}</version>
+        <scope>test</scope>
+      </dependency>
 
     </dependencies>
 

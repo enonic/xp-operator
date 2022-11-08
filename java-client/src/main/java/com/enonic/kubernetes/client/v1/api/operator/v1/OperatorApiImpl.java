@@ -17,6 +17,6 @@ public class OperatorApiImpl extends RawClient implements OperatorApi {
     }
 
     public OperatorVersion version() {
-        return request(requestUrlBuilder("version"), OperatorVersion.class);
+        return request( requestUrl( "version"), OperatorVersion.class);
     }
 }

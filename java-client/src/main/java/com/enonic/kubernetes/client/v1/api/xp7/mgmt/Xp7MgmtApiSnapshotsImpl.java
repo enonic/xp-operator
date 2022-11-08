@@ -10,6 +10,6 @@ public class Xp7MgmtApiSnapshotsImpl extends Xp7MgmtClient implements Xp7MgmtApi
     }
 
     public Xp7MgmtSnapshotsList list() {
-        return request(requestUrlBuilder("repo/snapshot/list"), Xp7MgmtSnapshotsList.class);
+        return request( requestUrl( "repo/snapshot/list"), Xp7MgmtSnapshotsList.class);
     }
 }

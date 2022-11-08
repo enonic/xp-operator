@@ -5,7 +5,7 @@ test: ## Run k8s kind cluster with operator installed
 	@$(MAKE) -C .. --no-print-directory test
 
 dev: ## Run k8s kind cluster setup for development
-	@$(MAKE) -C ../kubernetes/kind --no-print-directory kind-up kind-dev
+	@$(MAKE) -C .. --no-print-directory dev
 
 validate: ## Run k8s kind cluster setup is working
 	@$(MAKE) -C ../kubernetes/kind --no-print-directory kind-network-info

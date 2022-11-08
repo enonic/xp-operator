@@ -86,7 +86,7 @@ public class CrudTest {
         crdClient.withName("test-name").replace(resource);
 
         // Delete from server
-        assertTrue(crdClient.withName("test-name").delete());
+        assertFalse( crdClient.withName( "test-name" ).delete().isEmpty() );
     }
 
     @Test
@@ -139,7 +139,7 @@ public class CrudTest {
         crdClient.withName("test-name").replace(resource);
 
         // Delete from server
-        assertTrue(crdClient.withName("test-name").delete());
+        assertFalse( crdClient.withName( "test-name" ).delete().isEmpty() );
     }
 
     @Test
@@ -192,7 +192,7 @@ public class CrudTest {
         crdClient.withName("test-name").replace(resource);
 
         // Delete from server
-        assertTrue(crdClient.withName("test-name").delete());
+        assertFalse( crdClient.withName( "test-name" ).delete().isEmpty() );
     }
 
     @Test
@@ -271,7 +271,7 @@ public class CrudTest {
         crdClient.withName("test-name").replace(resource);
 
         // Delete from server
-        assertTrue(crdClient.withName("test-name").delete());
+        assertFalse( crdClient.withName( "test-name" ).delete().isEmpty() );
     }
 
     private void assertContext(final CustomResourceDefinition customResourceDefinition,
