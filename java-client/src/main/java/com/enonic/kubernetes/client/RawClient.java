@@ -1,7 +1,6 @@
 package com.enonic.kubernetes.client;
 
 import io.fabric8.kubernetes.client.Config;
-import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.http.HttpClient;
 import io.fabric8.kubernetes.client.http.HttpRequest;
 import io.fabric8.kubernetes.client.http.HttpResponse;
@@ -9,8 +8,9 @@ import io.fabric8.kubernetes.client.utils.Serialization;
 import okhttp3.HttpUrl;
 
 
+import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
+import java.time.Duration;
 import java.util.Objects;
 
 public abstract class RawClient
@@ -21,17 +21,17 @@ public abstract class RawClient
 
     private final HttpRequestRetrier httpRequestRetrier;
 
-    public RawClient( final HttpClient client, final Config config, String apiVersion )
+    public RawClient( final HttpClient client, final Config config, final String apiVersion )
     {
         this.client = client;
         int requestRetryBackoffLimit = config.getRequestRetryBackoffLimit();
         int requestRetryBackoffInterval = config.getRequestRetryBackoffInterval();
-        this.baseUrl = String.format( "%s%s%s", config.getMasterUrl(), "apis/operator.enonic.cloud/", apiVersion );
+        this.baseUrl = config.getMasterUrl() + "apis/operator.enonic.cloud/" + apiVersion;
 
         this.httpRequestRetrier = HttpRequestRetrier.create()
-            .retries( requestRetryBackoffLimit )
-            .conditionsToRetry( List.of( ( response ) -> response.code() >= 500 ) )
-            .retryInterval( requestRetryBackoffInterval )
+            .attempts( requestRetryBackoffLimit )
+            .conditionsToRetry(  ( response ) -> response.code() >= 500 )
+            .retryInterval( Duration.ofMillis( requestRetryBackoffInterval ))
             .client( client )
             .build();
     }
@@ -68,12 +68,14 @@ public abstract class RawClient
     }
 
     private <T> T request( HttpRequest request, Class<T> type )
+        throws InterruptedException, IOException
     {
         final HttpResponse<InputStream> response = retryWithExponentialBackoff( request );
         return Serialization.unmarshal( response.body(), type );
     }
 
     private HttpResponse<InputStream> retryWithExponentialBackoff( HttpRequest request )
+        throws InterruptedException, IOException
     {
         return httpRequestRetrier.execute( request );
     }

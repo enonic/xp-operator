@@ -11,9 +11,8 @@ import org.junit.jupiter.api.Assertions;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UncheckedIOException;
 import java.net.URI;
-import java.util.List;
+import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -32,21 +31,20 @@ public class HttpRequestRetrierTest
         HttpRequest request = mock( HttpRequest.class );
 
         final HttpRequestRetrier retrier = HttpRequestRetrier.create()
-            .retries( 10 )
-            .retryInterval( 100 )
-            .conditionsToRetry( List.of( ( response ) -> response.code() >= 500 ) )
+            .attempts( 10 )
+            .retryInterval( Duration.ofMillis( 100 ) )
+            .conditionsToRetry( ( response ) -> response.code() >= 500 )
             .client( httpClient )
             .build();
 
         final String testErrorMessage = "test error message";
-
 
         when( httpClient.sendAsync( request, InputStream.class ) ).thenThrow( new RuntimeException( testErrorMessage ) );
 
         final Exception ex = Assertions.assertThrows( RuntimeException.class, () -> retrier.execute( request ) );
         Assertions.assertEquals( testErrorMessage, ex.getMessage() );
 
-        verify( httpClient, times( 1 ) ).sendAsync( request,InputStream.class );
+        verify( httpClient, times( 1 ) ).sendAsync( request, InputStream.class );
     }
 
     @Test
@@ -58,21 +56,21 @@ public class HttpRequestRetrierTest
         final CompletableFuture<HttpResponse<InputStream>> future = mock( CompletableFuture.class );
 
         final HttpRequestRetrier retrier = HttpRequestRetrier.create()
-            .retries( 3 )
-            .retryInterval( 100 )
-            .conditionsToRetry( List.of( ( response ) -> response.code() >= 500 ) )
+            .attempts( 3 )
+            .retryInterval( Duration.ofMillis( 100 ) )
+            .conditionsToRetry( ( response ) -> response.code() >= 500 )
             .client( httpClient )
             .build();
 
         final String causeErrorMessage = "cause error message";
 
         when( httpClient.sendAsync( request, InputStream.class ) ).thenReturn( future );
-        when( future.get() ).thenThrow(  new ExecutionException( "test error message", new IOException(causeErrorMessage) ) );
+        when( future.get() ).thenThrow( new ExecutionException( "test error message", new IOException( causeErrorMessage ) ) );
 
-        final Exception ex = Assertions.assertThrows( UncheckedIOException.class, () -> retrier.execute( request ) );
-        Assertions.assertEquals( causeErrorMessage, ex.getCause().getMessage() );
+        final Exception ex = Assertions.assertThrows( IOException.class, () -> retrier.execute( request ) );
+        Assertions.assertEquals( causeErrorMessage, ex.getMessage() );
 
-        verify( httpClient, times( 4 ) ).sendAsync( request,InputStream.class );
+        verify( httpClient, times( 3 ) ).sendAsync( request, InputStream.class );
 
     }
 
@@ -85,21 +83,21 @@ public class HttpRequestRetrierTest
         final CompletableFuture<HttpResponse<InputStream>> future = mock( CompletableFuture.class );
 
         final HttpRequestRetrier retrier = HttpRequestRetrier.create()
-            .retries( 10 )
-            .retryInterval( 500 )
-            .conditionsToRetry( List.of( ( response ) -> response.code() >= 500 ) )
+            .attempts( 10 )
+            .retryInterval( Duration.ofMillis( 500 ) )
+            .conditionsToRetry( ( response ) -> response.code() >= 500 )
             .client( httpClient )
             .build();
 
         final String causeErrorMessage = "cause error message";
 
         when( httpClient.sendAsync( request, InputStream.class ) ).thenReturn( future );
-        when( future.get() ).thenThrow(  new ExecutionException( "test error message", new Exception(causeErrorMessage) ) );
+        when( future.get() ).thenThrow( new ExecutionException( "test error message", new Exception( causeErrorMessage ) ) );
 
         final Exception ex = Assertions.assertThrows( RuntimeException.class, () -> retrier.execute( request ) );
         Assertions.assertEquals( causeErrorMessage, ex.getCause().getMessage() );
 
-        verify( httpClient, times( 1 ) ).sendAsync( request,InputStream.class );
+        verify( httpClient, times( 1 ) ).sendAsync( request, InputStream.class );
 
     }
 
@@ -113,12 +111,12 @@ public class HttpRequestRetrierTest
         final CompletableFuture<HttpResponse<InputStream>> future = mock( CompletableFuture.class );
 
         when( response.code() ).thenReturn( 500 );
-        when( request.uri() ).thenReturn( URI.create(  "http://localhost" ));
+        when( request.uri() ).thenReturn( URI.create( "http://localhost" ) );
 
         final HttpRequestRetrier retrier = HttpRequestRetrier.create()
-            .retries( 4 )
-            .retryInterval( 100 )
-            .conditionsToRetry( List.of( ( r ) -> r.code() >= 500 ) )
+            .attempts( 4 )
+            .retryInterval( Duration.ofMillis( 100 ) )
+            .conditionsToRetry( ( r ) -> r.code() >= 500 )
             .client( httpClient )
             .build();
 
@@ -128,7 +126,7 @@ public class HttpRequestRetrierTest
         final Exception ex = Assertions.assertThrows( RuntimeException.class, () -> retrier.execute( request ) );
         Assertions.assertEquals( "HTTP operation on url: \'http://localhost\' failed", ex.getMessage() );
 
-        verify( httpClient, times( 5 ) ).sendAsync( request,InputStream.class );
+        verify( httpClient, times( 4 ) ).sendAsync( request, InputStream.class );
     }
 
     @Test
@@ -140,20 +138,20 @@ public class HttpRequestRetrierTest
         final CompletableFuture<HttpResponse<InputStream>> future = mock( CompletableFuture.class );
 
         final HttpRequestRetrier retrier = HttpRequestRetrier.create()
-            .retries( 10 )
-            .retryInterval( 100 )
-            .conditionsToRetry( List.of( ( response ) -> response.code() >= 500 ) )
+            .attempts( 10 )
+            .retryInterval( Duration.ofMillis( 100 ) )
+            .conditionsToRetry( response -> response.code() >= 500 )
             .client( httpClient )
             .build();
 
         final String testErrorMessage = "test error message";
 
         when( httpClient.sendAsync( request, InputStream.class ) ).thenReturn( future );
-        when( future.get() ).thenThrow( new InterruptedException(testErrorMessage) );
+        when( future.get() ).thenThrow( new InterruptedException( testErrorMessage ) );
 
-        final Exception ex = Assertions.assertThrows( RuntimeException.class, () -> retrier.execute( request ) );
-        Assertions.assertEquals( testErrorMessage, ex.getCause().getMessage() );
+        final Exception ex = Assertions.assertThrows( InterruptedException.class, () -> retrier.execute( request ) );
+        Assertions.assertEquals( testErrorMessage, ex.getMessage() );
 
-        verify( httpClient, times( 1 ) ).sendAsync( request,InputStream.class );
+        verify( httpClient, times( 1 ) ).sendAsync( request, InputStream.class );
     }
 }

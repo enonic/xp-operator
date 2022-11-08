@@ -7,8 +7,9 @@ import io.fabric8.kubernetes.client.utils.internal.ExponentialBackoffIntervalCal
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UncheckedIOException;
+import java.time.Duration;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 
@@ -20,73 +21,54 @@ public class HttpRequestRetrier
 
     private final ExponentialBackoffIntervalCalculator intervalCalculator;
 
-    private final int retries;
+    private final int attempts;
 
 
     public HttpRequestRetrier( final Builder builder )
     {
         this.client = builder.client;
-        this.retries = builder.retries;
+        this.attempts = builder.attempts;
         this.conditionsToRetry = builder.conditionsToRetry;
-        this.intervalCalculator = new ExponentialBackoffIntervalCalculator( builder.retryInterval, 5 );
+        this.intervalCalculator = new ExponentialBackoffIntervalCalculator( (int) builder.retryInterval.toMillis(), 5 );
     }
 
     public HttpResponse<InputStream> execute( final HttpRequest request )
+        throws InterruptedException, IOException
     {
         return doExecuteWithRetry( request );
     }
 
     private HttpResponse<InputStream> doExecuteWithRetry( final HttpRequest request )
+        throws InterruptedException, IOException
     {
-        int currentTry = 1;
-
-        while ( true )
+        for ( int currentTry = 1; currentTry <= attempts; currentTry++ )
         {
             try
             {
                 HttpResponse<InputStream> response = doExecute( request );
 
-                if ( conditionsToRetry.stream().anyMatch( f -> f.apply( response ) ) )
+                if ( conditionsToRetry.stream().anyMatch( f -> f.apply( response ) ) && currentTry != attempts )
                 {
-                    if ( !sleepIfPossible( currentTry++ ) )
-                    {
-                        throw new RuntimeException( String.format( "HTTP operation on url: '%s' failed", request.uri() ) );
-                    }
+                    Thread.sleep( intervalCalculator.getInterval( currentTry ) );
                 }
 
             }
             catch ( IOException ex )
             {
-                if ( !sleepIfPossible( currentTry++ ) )
+                if ( currentTry == attempts )
                 {
-                    throw new UncheckedIOException( ex );
+                    throw ex;
                 }
-            }
-        }
-    }
 
-    private boolean sleepIfPossible( final int currentTry )
-    {
-        if ( currentTry <= retries )
-        {
-            try
-            {
                 Thread.sleep( intervalCalculator.getInterval( currentTry ) );
-                return true;
-            }
-            catch ( InterruptedException e )
-            {
-                throw new RuntimeException( e );
             }
         }
-        else
-        {
-            return false;
-        }
+
+        throw new RuntimeException( String.format( "HTTP operation on url: '%s' failed", request.uri() ) );
     }
 
     private HttpResponse<InputStream> doExecute( final HttpRequest request )
-        throws IOException
+        throws IOException, InterruptedException
     {
         try
         {
@@ -105,10 +87,6 @@ public class HttpRequestRetrier
                 throw new RuntimeException( String.format( "HTTP operation on url: '%s' failed", request.uri() ), cause );
             }
         }
-        catch ( InterruptedException e )
-        {
-            throw new RuntimeException( String.format( "HTTP operation on url: '%s' failed", request.uri() ), e );
-        }
     }
 
     public static Builder create()
@@ -122,9 +100,9 @@ public class HttpRequestRetrier
 
         private Collection<Function<HttpResponse<InputStream>, Boolean>> conditionsToRetry;
 
-        private int retries;
+        private int attempts;
 
-        private int retryInterval;
+        private Duration retryInterval;
 
         public Builder client( final HttpClient client )
         {
@@ -132,21 +110,21 @@ public class HttpRequestRetrier
             return this;
         }
 
-        public Builder conditionsToRetry( final Collection<Function<HttpResponse<InputStream>, Boolean>> conditionsToRetry )
+        public Builder conditionsToRetry( final Function<HttpResponse<InputStream>, Boolean>... conditionsToRetry )
         {
-            this.conditionsToRetry = conditionsToRetry;
+            this.conditionsToRetry = List.of(conditionsToRetry);
             return this;
 
         }
 
-        public Builder retries( final int retries )
+        public Builder attempts( final int retries )
         {
-            this.retries = retries;
+            this.attempts = retries;
             return this;
 
         }
 
-        public Builder retryInterval( final int retryInterval )
+        public Builder retryInterval( final Duration retryInterval )
         {
             this.retryInterval = retryInterval;
             return this;
