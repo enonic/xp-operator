@@ -21,13 +21,13 @@ public class HttpRequestRetrier
 
     private final ExponentialBackoffIntervalCalculator intervalCalculator;
 
-    private final int attempts;
+    private final int retries;
 
 
     public HttpRequestRetrier( final Builder builder )
     {
         this.client = builder.client;
-        this.attempts = builder.attempts;
+        this.retries = builder.retries;
         this.conditionsToRetry = builder.conditionsToRetry;
         this.intervalCalculator = new ExponentialBackoffIntervalCalculator( (int) builder.retryInterval.toMillis(), 5 );
     }
@@ -41,21 +41,31 @@ public class HttpRequestRetrier
     private HttpResponse<InputStream> doExecuteWithRetry( final HttpRequest request )
         throws InterruptedException, IOException
     {
-        for ( int currentTry = 1; currentTry <= attempts; currentTry++ )
+        for ( int currentTry = 0; currentTry <= retries; currentTry++ )
         {
             try
             {
                 HttpResponse<InputStream> response = doExecute( request );
 
-                if ( conditionsToRetry.stream().anyMatch( f -> f.apply( response ) ) && currentTry != attempts )
+                if ( conditionsToRetry.stream().anyMatch( f -> f.apply( response ) ) )
                 {
+                    if ( currentTry == retries )
+                    {
+                        throw new RuntimeException(
+                            String.format( "HTTP operation on url: '%s' failed with '%s' status", request.uri(), response.code() ) );
+                    }
+
                     Thread.sleep( intervalCalculator.getInterval( currentTry ) );
+                }
+                else
+                {
+                    return response;
                 }
 
             }
             catch ( IOException ex )
             {
-                if ( currentTry == attempts )
+                if ( currentTry == retries )
                 {
                     throw ex;
                 }
@@ -100,7 +110,7 @@ public class HttpRequestRetrier
 
         private Collection<Function<HttpResponse<InputStream>, Boolean>> conditionsToRetry;
 
-        private int attempts;
+        private int retries;
 
         private Duration retryInterval;
 
@@ -112,14 +122,14 @@ public class HttpRequestRetrier
 
         public Builder conditionsToRetry( final Function<HttpResponse<InputStream>, Boolean>... conditionsToRetry )
         {
-            this.conditionsToRetry = List.of(conditionsToRetry);
+            this.conditionsToRetry = List.of( conditionsToRetry );
             return this;
 
         }
 
-        public Builder attempts( final int retries )
+        public Builder retries( final int retries )
         {
-            this.attempts = retries;
+            this.retries = retries;
             return this;
 
         }
@@ -131,8 +141,17 @@ public class HttpRequestRetrier
 
         }
 
+        private void validate()
+        {
+            if ( retries < 0 )
+            {
+                throw new IllegalArgumentException( "retries must be positive or 0" );
+            }
+        }
+
         public HttpRequestRetrier build()
         {
+            validate();
             return new HttpRequestRetrier( this );
         }
     }
