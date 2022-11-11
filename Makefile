@@ -26,7 +26,7 @@ validate: ## Build and validate everything
 		(echo "Helm version mismatch: values.yaml image.tag! Aborting ..." && exit 1)
 	# Validating helm chart done!
 
-publish: ## Setup repo for release. Provide VERSION as env var i.e. 'VERSION=0.17.13 make release'
+publish: ## Setup repo for release. Provide VERSION as env var i.e. 'VERSION=0.18 make release'
 	# Checking prerequisites
 	@test "${VERSION}" != "" || (echo 'You must provide a version!'; exit 1)
 	@[[ ${VERSION} != v* ]] || (echo 'Version cannot start with "v"!'; exit 1)
