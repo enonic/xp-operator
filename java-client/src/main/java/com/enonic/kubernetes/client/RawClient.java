@@ -29,7 +29,7 @@ public abstract class RawClient
         this.baseUrl = config.getMasterUrl() + "apis/operator.enonic.cloud/" + apiVersion;
 
         this.httpRequestRetrier = HttpRequestRetrier.create()
-            .attempts( requestRetryBackoffLimit )
+            .retries( requestRetryBackoffLimit )
             .conditionsToRetry(  ( response ) -> response.code() >= 500 )
             .retryInterval( Duration.ofMillis( requestRetryBackoffInterval ))
             .client( client )

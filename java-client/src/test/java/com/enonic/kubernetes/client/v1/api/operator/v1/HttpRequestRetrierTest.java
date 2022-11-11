@@ -31,7 +31,7 @@ public class HttpRequestRetrierTest
         HttpRequest request = mock( HttpRequest.class );
 
         final HttpRequestRetrier retrier = HttpRequestRetrier.create()
-            .attempts( 10 )
+            .retries( 10 )
             .retryInterval( Duration.ofMillis( 100 ) )
             .conditionsToRetry( ( response ) -> response.code() >= 500 )
             .client( httpClient )
@@ -56,7 +56,7 @@ public class HttpRequestRetrierTest
         final CompletableFuture<HttpResponse<InputStream>> future = mock( CompletableFuture.class );
 
         final HttpRequestRetrier retrier = HttpRequestRetrier.create()
-            .attempts( 3 )
+            .retries( 3 )
             .retryInterval( Duration.ofMillis( 100 ) )
             .conditionsToRetry( ( response ) -> response.code() >= 500 )
             .client( httpClient )
@@ -70,7 +70,7 @@ public class HttpRequestRetrierTest
         final Exception ex = Assertions.assertThrows( IOException.class, () -> retrier.execute( request ) );
         Assertions.assertEquals( causeErrorMessage, ex.getMessage() );
 
-        verify( httpClient, times( 3 ) ).sendAsync( request, InputStream.class );
+        verify( httpClient, times( 4 ) ).sendAsync( request, InputStream.class );
 
     }
 
@@ -83,7 +83,7 @@ public class HttpRequestRetrierTest
         final CompletableFuture<HttpResponse<InputStream>> future = mock( CompletableFuture.class );
 
         final HttpRequestRetrier retrier = HttpRequestRetrier.create()
-            .attempts( 10 )
+            .retries( 10 )
             .retryInterval( Duration.ofMillis( 500 ) )
             .conditionsToRetry( ( response ) -> response.code() >= 500 )
             .client( httpClient )
@@ -114,7 +114,7 @@ public class HttpRequestRetrierTest
         when( request.uri() ).thenReturn( URI.create( "http://localhost" ) );
 
         final HttpRequestRetrier retrier = HttpRequestRetrier.create()
-            .attempts( 4 )
+            .retries( 4 )
             .retryInterval( Duration.ofMillis( 100 ) )
             .conditionsToRetry( ( r ) -> r.code() >= 500 )
             .client( httpClient )
@@ -124,9 +124,9 @@ public class HttpRequestRetrierTest
         when( future.get() ).thenReturn( response );
 
         final Exception ex = Assertions.assertThrows( RuntimeException.class, () -> retrier.execute( request ) );
-        Assertions.assertEquals( "HTTP operation on url: \'http://localhost\' failed", ex.getMessage() );
+        Assertions.assertEquals( "HTTP operation on url: \'http://localhost\' failed with '500' status", ex.getMessage() );
 
-        verify( httpClient, times( 4 ) ).sendAsync( request, InputStream.class );
+        verify( httpClient, times( 5 ) ).sendAsync( request, InputStream.class );
     }
 
     @Test
@@ -138,7 +138,7 @@ public class HttpRequestRetrierTest
         final CompletableFuture<HttpResponse<InputStream>> future = mock( CompletableFuture.class );
 
         final HttpRequestRetrier retrier = HttpRequestRetrier.create()
-            .attempts( 10 )
+            .retries( 10 )
             .retryInterval( Duration.ofMillis( 100 ) )
             .conditionsToRetry( response -> response.code() >= 500 )
             .client( httpClient )
