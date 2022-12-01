@@ -27,7 +27,7 @@
         <versions-maven-plugin.version>2.13.0</versions-maven-plugin.version>
         <git-plugin.version>5.0.0</git-plugin.version>
         <guava.version>31.1-jre</guava.version>
-        <okhttp.version>3.12.12</okhttp.version>
+        <okhttp.version>4.10.0</okhttp.version>
 
     </properties>
 
