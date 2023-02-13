@@ -20,9 +20,9 @@ build: build-docker build-helm ## Build everything
 
 validate: ## Build and validate everything
 	# Validating helm chart ...
-	@[ "$(shell bash -c 'cat helm/Chart.yaml | yq .appVersion')" == "$(shell ./.mvn/get-version)" ] || \
+	@[ "$(shell bash -c 'cat helm/Chart.yaml | yq .appVersion')" = "$(shell ./.mvn/get-version)" ] || \
 		(echo "Helm version mismatch: Chart.yaml appVersion! Aborting ..." && exit 1)
-	@[ "$(shell bash -c 'cat helm/values.yaml | yq .image.tag')" == "$(shell ./.mvn/get-version)" ] || \
+	@[ "$(shell bash -c 'cat helm/values.yaml | yq .image.tag')" = "$(shell ./.mvn/get-version)" ] || \
 		(echo "Helm version mismatch: values.yaml image.tag! Aborting ..." && exit 1)
 	# Validating helm chart done!
 
@@ -32,7 +32,7 @@ publish: ## Setup repo for release. Provide VERSION as env var i.e. 'VERSION=0.1
 	@[[ ${VERSION} != v* ]] || (echo 'Version cannot start with "v"!'; exit 1)
 	@test "$(shell git rev-parse --abbrev-ref HEAD)" == "master" || (echo 'You must be on the master branch!'; exit 1)
 	@git diff --quiet || (echo 'Git repo is not clean, commit your changes first!'; exit 1)
-	
+
 	# Setting chart version
 	@yq -i '.version = "${VERSION}"' helm/Chart.yaml
 	@yq -i '.appVersion = "${VERSION}"' helm/Chart.yaml

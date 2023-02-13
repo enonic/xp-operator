@@ -25,13 +25,13 @@ kind-setup:
 		-v ${NFS_SERVER_VOLUME}:/nfsshare \
 		-e SHARED_DIRECTORY=/nfsshare \
 		itsthenetwork/nfs-server-alpine:12
-	
+
 	# Set kubectl context to kind
 	@kubectl config use-context ${KIND_CTX}
 
 kind-bootstrap:
 	# Ensure kubectl context
-	@[ "$(shell kubectl config current-context)" == "${KIND_CTX}" ] || \
+	@[ "$(shell kubectl config current-context)" = "${KIND_CTX}" ] || \
 		(echo "Kubectl should be ${KIND_CTX}" && exit 1)
 
 	# Setup NFS storage class
@@ -57,9 +57,9 @@ kind-dev: ## Setup cluster for development mode (env var MY_IP required)
 
 kind-ingress:
 	# Ensure kubectl context
-	@[ "$(shell kubectl config current-context)" == "${KIND_CTX}" ] || \
+	@[ "$(shell kubectl config current-context)" = "${KIND_CTX}" ] || \
 		(echo "Kubectl should be ${KIND_CTX}" && exit 1)
-	
+
 	# Create nginx-ingress
 	@kubectl apply -f nginx-ingress.yaml
 
