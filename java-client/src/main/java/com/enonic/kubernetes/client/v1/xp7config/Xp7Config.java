@@ -1,6 +1,8 @@
 package com.enonic.kubernetes.client.v1.xp7config;
 
 import com.enonic.kubernetes.client.Crd;
+
+import io.fabric8.kubernetes.api.model.DefaultKubernetesResourceList;
 import io.fabric8.kubernetes.api.model.Namespaced;
 import io.fabric8.kubernetes.client.CustomResourceList;
 import io.fabric8.kubernetes.model.annotation.Group;
@@ -25,6 +27,7 @@ public class Xp7Config
     }
 
     public static class Xp7ConfigList
-            extends CustomResourceList<Xp7Config> {
+            extends DefaultKubernetesResourceList<Xp7Config>
+    {
     }
 }

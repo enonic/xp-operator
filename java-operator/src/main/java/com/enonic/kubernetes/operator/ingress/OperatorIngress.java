@@ -75,7 +75,7 @@ public class OperatorIngress
 
         // Label ingress
         if (!getXpVHostAnnotations( r ).isEmpty()) {
-            K8sLogHelper.logEdit( clients.k8s().network().ingress().
+            K8sLogHelper.logEdit( clients.k8s().network().v1().ingresses().
                 inNamespace( r.getMetadata().getNamespace() ).
                 withName( r.getMetadata().getName() ), i -> {
                 Map<String, String> labels = i.getMetadata().getLabels();

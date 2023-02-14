@@ -4,6 +4,7 @@ import com.enonic.kubernetes.client.v1.xp7app.Xp7App;
 import com.enonic.kubernetes.client.v1.domain.Domain;
 import com.enonic.kubernetes.client.v1.xp7config.Xp7Config;
 import com.enonic.kubernetes.client.v1.xp7deployment.Xp7Deployment;
+
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Event;
 import io.fabric8.kubernetes.api.model.Namespace;
@@ -11,6 +12,7 @@ import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
 import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
 import io.fabric8.kubernetes.client.informers.SharedInformerFactory;
+
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,19 +38,19 @@ public class InformersProducer
 
         SharedInformerFactory sf = clients.k8s().informers();
 
-        return InformersImpl.builder().
-            clients( clients ).
-            informerFactory( sf ).
-            configMapInformer( configInformer( sf ) ).
-            ingressInformer( ingressInformer( sf ) ).
-            namespaceInformer( namespaceInformer( sf ) ).
-            podInformer( podInformer( sf ) ).
-            eventInformer( eventInformer( sf ) ).
-            xp7AppInformer( xp7AppInformer( sf ) ).
-            xp7ConfigInformer( xp7ConfigInformer( sf ) ).
-            xp7DeploymentInformer( xp7DeploymentInformer( sf ) ).
-            domainInformer( domainInformer( sf ) ).
-            build();
+        return InformersImpl.builder()
+            .clients( clients )
+            .informerFactory( sf )
+            .configMapInformer( configInformer( sf ) )
+            .ingressInformer( ingressInformer( sf ) )
+            .namespaceInformer( namespaceInformer( sf ) )
+            .podInformer( podInformer( sf ) )
+            .eventInformer( eventInformer( sf ) )
+            .xp7AppInformer( xp7AppInformer( sf ) )
+            .xp7ConfigInformer( xp7ConfigInformer( sf ) )
+            .xp7DeploymentInformer( xp7DeploymentInformer( sf ) )
+            .domainInformer( domainInformer( sf ) )
+            .build();
     }
 
     private SharedIndexInformer<ConfigMap> configInformer( final SharedInformerFactory sf )
@@ -78,23 +80,21 @@ public class InformersProducer
 
     private SharedIndexInformer<Xp7App> xp7AppInformer( final SharedInformerFactory sf )
     {
-        return sf.sharedIndexInformerForCustomResource( Xp7App.class, Xp7App.Xp7AppList.class, informerReSync );
+        return sf.sharedIndexInformerFor( Xp7App.class, informerReSync );
     }
 
     private SharedIndexInformer<Xp7Config> xp7ConfigInformer( final SharedInformerFactory sf )
     {
-        return sf.sharedIndexInformerForCustomResource( Xp7Config.class, Xp7Config.Xp7ConfigList.class,
-            informerReSync );
+        return sf.sharedIndexInformerFor( Xp7Config.class, informerReSync );
     }
 
     private SharedIndexInformer<Xp7Deployment> xp7DeploymentInformer( final SharedInformerFactory sf )
     {
-        return sf.sharedIndexInformerForCustomResource( Xp7Deployment.class,
-            Xp7Deployment.Xp7DeploymentList.class, informerReSync );
+        return sf.sharedIndexInformerFor( Xp7Deployment.class, informerReSync );
     }
 
     private SharedIndexInformer<Domain> domainInformer( final SharedInformerFactory sf )
     {
-        return sf.sharedIndexInformerForCustomResource( Domain.class, Domain.DomainList.class, informerReSync );
+        return sf.sharedIndexInformerFor( Domain.class, informerReSync );
     }
 }

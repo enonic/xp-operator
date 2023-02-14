@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
-import io.fabric8.kubernetes.client.dsl.Editable;
 import io.fabric8.kubernetes.client.dsl.Resource;
 
 public class K8sLogHelper
@@ -19,8 +18,8 @@ public class K8sLogHelper
                               resource.getMetadata().getNamespace() );
     }
 
-    public static <T extends HasMetadata> void logEdit( final Editable<T> editable, UnaryOperator<T> op ) {
-        T res = editable.edit( op );
+    public static <T extends HasMetadata> void logEdit( final Resource<T> r, UnaryOperator<T> op ) {
+        T res = r.edit( op );
         log.info( log( K8sCommandAction.UPDATE, res ) );
     }
 
