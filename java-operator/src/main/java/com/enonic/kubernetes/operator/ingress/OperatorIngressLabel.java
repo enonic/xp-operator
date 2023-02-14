@@ -115,7 +115,7 @@ public class OperatorIngressLabel
 
         // Update if true
         if (loaded) {
-            K8sLogHelper.logEdit( clients.k8s().network().ingress().
+            K8sLogHelper.logEdit( clients.k8s().network().v1().ingresses().
                 inNamespace( ingress.getMetadata().getNamespace() ).
                 withName( ingress.getMetadata().getName() ), i -> {
                 Map<String, String> labels = i.getMetadata().getLabels();

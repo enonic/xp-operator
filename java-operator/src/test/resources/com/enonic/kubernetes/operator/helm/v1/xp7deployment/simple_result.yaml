@@ -216,7 +216,6 @@ metadata:
     blockOwnerDeletion: false
     controller: true
     name: "mycloud-mysolution-myenv-myservice"
-data: {}
 ---
 apiVersion: "v1"
 kind: "PersistentVolumeClaim"
