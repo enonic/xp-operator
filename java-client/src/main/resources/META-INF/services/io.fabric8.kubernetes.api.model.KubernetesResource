@@ -1,0 +1,4 @@
+com.enonic.kubernetes.client.v1.xp7deployment.Xp7Deployment
+com.enonic.kubernetes.client.v1.xp7app.Xp7App
+com.enonic.kubernetes.client.v1.xp7config.Xp7Config
+com.enonic.kubernetes.client.v1.domain.Domain

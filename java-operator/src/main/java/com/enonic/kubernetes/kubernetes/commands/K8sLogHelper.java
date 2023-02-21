@@ -18,8 +18,8 @@ public class K8sLogHelper
                               resource.getMetadata().getNamespace() );
     }
 
-    public static <T extends HasMetadata> void logEdit( final Resource<T> r, UnaryOperator<T> op ) {
-        T res = r.edit( op );
+    public static <T extends HasMetadata> void logEdit( final Resource<T> editable, UnaryOperator<T> op ) {
+        T res = editable.edit( op );
         log.info( log( K8sCommandAction.UPDATE, res ) );
     }
 

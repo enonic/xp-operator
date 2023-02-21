@@ -13,21 +13,24 @@ import io.fabric8.kubernetes.model.annotation.Version;
 @Version("v1")
 @Kind("Xp7Deployment")
 public class Xp7Deployment
-        extends Crd<Xp7DeploymentSpec, Xp7DeploymentStatus>
-        implements Namespaced {
+    extends Crd<Xp7DeploymentSpec, Xp7DeploymentStatus>
+    implements Namespaced
+{
 
-    public Xp7Deployment withSpec(final Xp7DeploymentSpec spec) {
-        this.setSpec(spec);
+    public Xp7Deployment withSpec( final Xp7DeploymentSpec spec )
+    {
+        this.setSpec( spec );
         return this;
     }
 
-    public Xp7Deployment withStatus(final Xp7DeploymentStatus status) {
-        this.setStatus(status);
+    public Xp7Deployment withStatus( final Xp7DeploymentStatus status )
+    {
+        this.setStatus( status );
         return this;
     }
 
     public static class Xp7DeploymentList
-            extends DefaultKubernetesResourceList<Xp7Deployment>
+        extends DefaultKubernetesResourceList<Xp7Deployment>
     {
     }
 }
