@@ -32,7 +32,7 @@
 
         <jsonschema2pojo.version>1.1.2</jsonschema2pojo.version>
 
-        <fabric8-kubernetes-client.version>6.2.0</fabric8-kubernetes-client.version>
+        <fabric8-kubernetes-client.version>6.4.1</fabric8-kubernetes-client.version>
         <junit.version>5.9.1</junit.version>
         <slf4j-simple.version>1.7.36</slf4j-simple.version>
         <okhttp.version>3.12.12</okhttp.version>
@@ -80,6 +80,13 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
+      <dependency>
+        <groupId>io.fabric8</groupId>
+        <artifactId>crd-generator-apt</artifactId>
+        <version>${fabric8-kubernetes-client.version}</version>
+        <scope>provided</scope>
+      </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>

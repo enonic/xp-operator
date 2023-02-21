@@ -74,7 +74,7 @@ public class SchemaTest
             .v1()
             .customResourceDefinitions()
             .load( getClass().getResourceAsStream( file ) )
-            .get();
+            .item();
         assertNotNull( customResourceDefinition );
         return customResourceDefinition;
     }
