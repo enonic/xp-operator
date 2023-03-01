@@ -23,7 +23,7 @@
         <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
         <maven-artifact-version>3.8.6</maven-artifact-version>
 
-        <surefire-plugin.version>3.0.0-M7</surefire-plugin.version>
+        <surefire-plugin.version>3.0.0-M9</surefire-plugin.version>
         <versions-maven-plugin.version>2.13.0</versions-maven-plugin.version>
         <git-plugin.version>5.0.0</git-plugin.version>
         <guava.version>31.1-jre</guava.version>
