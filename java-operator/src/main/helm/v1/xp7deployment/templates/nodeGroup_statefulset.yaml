@@ -170,25 +170,34 @@ spec:
               value: {{ $env.value }}
           {{- end }}
 
-          readinessProbe:
-            failureThreshold: 2
+
+          {{- if semverCompare "gt" $.Values.deployment.spec.xpVersion "1.0.0" }}
+          startupProbe:
             httpGet:
-              {{- if not $.Values.deployment.clustered }}
-              # Single nodes
-              path: {{ $.Values.deployment.preInstalledCloudUtils | ternary "/cloud-utils/health?state=" "/_cluster/health?timeout=1s&wait_for_status=" }}green
-              {{- else if and (and $nodeGroup.data $.Values.deployment.clustered) $.Values.deployment.hasDedicatedFrontendNodes }}
-              # Cluster with dedicated frontend nodes
-              path: {{ $.Values.deployment.preInstalledCloudUtils | ternary "/cloud-utils/health?state=" "/_cluster/health?timeout=1s&wait_for_status=" }}green
-              {{ else }}
-              # Cluster with no dedicated cluster nodes
-              path: {{ $.Values.deployment.preInstalledCloudUtils | ternary "/cloud-utils/health?state=" "/_cluster/health?timeout=1s&wait_for_status=" }}yellow
-              {{- end }}
-              port: {{ $.Values.deployment.preInstalledCloudUtils | ternary 4848 9200 }}
+              path: "/healthz"
+              port: 2609
               scheme: HTTP
+            failureThreshold: 20
             initialDelaySeconds: 30
-            periodSeconds: 8
-            successThreshold: 3
+            periodSeconds: 5
             timeoutSeconds: 2
+          livenessProbe:
+            httpGet:
+              path: "/healthz"
+              port: 2609
+              scheme: HTTP
+            failureThreshold: 10
+            timeoutSeconds: 2
+          readinessProbe:
+            httpGet:
+              path: "/ready"
+              port: 2609
+              scheme: HTTP
+            failureThreshold: 2
+            timeoutSeconds: 2
+          {{ else }}
+          {{- end }}
+
 
           {{- if $.Values.deployment.clustered }}
           lifecycle:

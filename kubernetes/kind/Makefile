@@ -3,6 +3,7 @@ KIND_MTU:=$(shell docker network inspect bridge -f '{{ index .Options "com.docke
 KIND_CTX:=kind-kind
 NFS_SERVER_NAME:=kind-nfs-server
 NFS_SERVER_VOLUME:=kind-nfs-server
+MY_IP:=192.168.0.30
 
 .PHONY: kind-setup kind-bootstrap kind-ingress kind-up kind-down help
 .DEFAULT_GOAL:=help

@@ -808,6 +808,13 @@ spec:
               command:
               - "/bin/bash"
               - "/enonic-xp/home/extra-config/preStop.sh"
+        livenessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: "/healthz"
+            port: 2609
+            scheme: "HTTP"
+          timeoutSeconds: 2
         name: "exp"
         ports:
         - containerPort: 2609
@@ -825,12 +832,9 @@ spec:
         readinessProbe:
           failureThreshold: 2
           httpGet:
-            path: "/_cluster/health?timeout=1s&wait_for_status=yellow"
-            port: 9200
+            path: "/ready"
+            port: 2609
             scheme: "HTTP"
-          initialDelaySeconds: 30
-          periodSeconds: 8
-          successThreshold: 3
           timeoutSeconds: 2
         resources:
           limits:
@@ -845,6 +849,15 @@ spec:
             - "ALL"
           runAsNonRoot: true
           runAsUser: 1337
+        startupProbe:
+          failureThreshold: 20
+          httpGet:
+            path: "/healthz"
+            port: 2609
+            scheme: "HTTP"
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          timeoutSeconds: 2
         terminationMessagePath: "/dev/termination-log"
         terminationMessagePolicy: "File"
         volumeMounts:
@@ -1068,6 +1081,13 @@ spec:
               command:
               - "/bin/bash"
               - "/enonic-xp/home/extra-config/preStop.sh"
+        livenessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: "/healthz"
+            port: 2609
+            scheme: "HTTP"
+          timeoutSeconds: 2
         name: "exp"
         ports:
         - containerPort: 2609
@@ -1085,12 +1105,9 @@ spec:
         readinessProbe:
           failureThreshold: 2
           httpGet:
-            path: "/_cluster/health?timeout=1s&wait_for_status=green"
-            port: 9200
+            path: "/ready"
+            port: 2609
             scheme: "HTTP"
-          initialDelaySeconds: 30
-          periodSeconds: 8
-          successThreshold: 3
           timeoutSeconds: 2
         resources:
           limits:
@@ -1105,6 +1122,15 @@ spec:
             - "ALL"
           runAsNonRoot: true
           runAsUser: 1337
+        startupProbe:
+          failureThreshold: 20
+          httpGet:
+            path: "/healthz"
+            port: 2609
+            scheme: "HTTP"
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          timeoutSeconds: 2
         terminationMessagePath: "/dev/termination-log"
         terminationMessagePolicy: "File"
         volumeMounts:
@@ -1351,6 +1377,13 @@ spec:
               command:
               - "/bin/bash"
               - "/enonic-xp/home/extra-config/preStop.sh"
+        livenessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: "/healthz"
+            port: 2609
+            scheme: "HTTP"
+          timeoutSeconds: 2
         name: "exp"
         ports:
         - containerPort: 2609
@@ -1368,12 +1401,9 @@ spec:
         readinessProbe:
           failureThreshold: 2
           httpGet:
-            path: "/_cluster/health?timeout=1s&wait_for_status=yellow"
-            port: 9200
+            path: "/ready"
+            port: 2609
             scheme: "HTTP"
-          initialDelaySeconds: 30
-          periodSeconds: 8
-          successThreshold: 3
           timeoutSeconds: 2
         resources:
           limits:
@@ -1388,6 +1418,15 @@ spec:
             - "ALL"
           runAsNonRoot: true
           runAsUser: 1337
+        startupProbe:
+          failureThreshold: 20
+          httpGet:
+            path: "/healthz"
+            port: 2609
+            scheme: "HTTP"
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          timeoutSeconds: 2
         terminationMessagePath: "/dev/termination-log"
         terminationMessagePolicy: "File"
         volumeMounts:

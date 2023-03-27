@@ -15,17 +15,26 @@ metadata:
   namespace: my-namespace
 spec:
   enabled: true
-  xpVersion: 7.10.3
+  xpVersion: 7.13.0-SNAPSHOT
 
   # Preinstall snapshotter on all nodes
   nodesPreinstalledApps:
     - name: snapshotter
       url: https://repo.enonic.com/public/com/enonic/app/snapshotter/3.0.2/snapshotter-3.0.2.jar
 
+  # List of disks shared by all nodes (see description of disks below)
+  nodesSharedDisks:
+    - name: blobstore
+      size: 1Gi
+    - name: snapshots
+      size: 1Gi
+    - name: export
+      size: 1Gi
+
   # Create one node
   nodeGroups:
     - name: main
-      replicas: 1
+      replicas: 3
 
       data: true
       master: true
@@ -36,12 +45,6 @@ spec:
 
         # Volumes private to the node
         disks:
-          - name: blobstore
-            size: 1Gi
-          - name: snapshots
-            size: 1Gi
-          - name: export # Dumps and other data
-            size: 1Gi
           - name: deploy # Apps installed in the deploy folder
             size: 1Gi
           - name: index # Node ES index
