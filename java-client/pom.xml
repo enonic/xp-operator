@@ -34,7 +34,7 @@
 
         <fabric8-kubernetes-client.version>6.4.1</fabric8-kubernetes-client.version>
         <junit.version>5.9.2</junit.version>
-        <slf4j-simple.version>1.7.36</slf4j-simple.version>
+        <slf4j-simple.version>2.0.7</slf4j-simple.version>
         <okhttp.version>3.12.12</okhttp.version>
         <mockito.version>4.9.0</mockito.version>
 
