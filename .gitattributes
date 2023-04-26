@@ -5,4 +5,4 @@ mvnw eol=lf
 Makefile eol=lf
 kubectl-plugin/* eol=lf
 docker/agent-bond-opts eol=lf
-vhost-defaults.cfg
+vhost-defaults.cfg eol=lf
