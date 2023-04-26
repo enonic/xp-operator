@@ -293,8 +293,7 @@ public class CrudTest
     void assertCrd( CustomResource<?, ?> crd, String file )
         throws IOException, URISyntaxException
     {
-        Path path = Path.of( Objects.requireNonNull( getClass().getResource( file ) ).toURI() );
-        assertEquals( Files.readString( path ), mapper.writerWithDefaultPrettyPrinter().writeValueAsString( crd ) + "\n" );
+        assertEquals( mapper.readTree( getClass().getResource( file ) ), mapper.valueToTree(crd ) );
     }
 
     private void assertEqualsCrd( final CustomResource<?, ?> expected, final CustomResource<?, ?> actual )

@@ -9,7 +9,7 @@ build-java: ## Build java modules
 	# Building java modules done!
 
 build-docker: build-java ## Build docker image
-	@TAG=$(shell ./.mvn/get-version) $(MAKE) -C docker --no-print-directory build
+	@TAG=$(shell ./.mvn/get-version.sh) $(MAKE) -C docker --no-print-directory build
 
 build-helm: ## Build helm chart
 	# Building helm chart ...
@@ -20,9 +20,9 @@ build: build-docker build-helm ## Build everything
 
 validate: ## Build and validate everything
 	# Validating helm chart ...
-	@[ "$(shell bash -c 'cat helm/Chart.yaml | yq .appVersion')" = "$(shell ./.mvn/get-version)" ] || \
+	@[ "$(shell bash -c 'cat helm/Chart.yaml | yq .appVersion')" = "$(shell ./.mvn/get-version.sh)" ] || \
 		(echo "Helm version mismatch: Chart.yaml appVersion! Aborting ..." && exit 1)
-	@[ "$(shell bash -c 'cat helm/values.yaml | yq .image.tag')" = "$(shell ./.mvn/get-version)" ] || \
+	@[ "$(shell bash -c 'cat helm/values.yaml | yq .image.tag')" = "$(shell ./.mvn/get-version.sh)" ] || \
 		(echo "Helm version mismatch: values.yaml image.tag! Aborting ..." && exit 1)
 	# Validating helm chart done!
 
@@ -62,7 +62,7 @@ test: validate build-docker ## Run k8s kind cluster with operator installed
 	@$(MAKE) -C kubernetes/kind --no-print-directory kind-up
 
 	# Load docker image into cluster
-	@kind load docker-image ${DOCKER_IMAGE}:$(shell ./.mvn/get-version)
+	@kind load docker-image ${DOCKER_IMAGE}:$(shell ./.mvn/get-version.sh)
 
 	# Deploy operator
 	@$(MAKE) -C helm --no-print-directory install

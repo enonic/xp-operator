@@ -1,0 +1,8 @@
+gradlew eol=lf
+mvnw eol=lf
+*.sh eol=lf
+*.bat eol=crlf
+Makefile eol=lf
+kubectl-plugin/* eol=lf
+docker/agent-bond-opts eol=lf
+vhost-defaults.cfg

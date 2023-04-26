@@ -17,19 +17,32 @@ This repository contains these various parts relating to the operator:
 * [Enonic XP kubectl plugin](./kubectl-plugin)
 * [Enonic XP Kubernetes Operator Documentation](./docs/index.adoc)
 
+## Building
+
+Prerequisites:
+- Java 11 installed
+- helm 3 installed https://helm.sh/docs/intro/install/
+
+
+To build the operator, run:
+
+```bash
+./mvnw clean package
+```
+
 ## Usage
 
 Read about how to install and use the operator in the [documentation](./docs/index.adoc).
 
 ## Release
 
-Make sure you workspace contains no uncommited changes and then run:
+Make sure you workspace contains no uncommitted changes and then run:
 
 ```make
 $ VERSION=0.18 make publish
 ```
 
-That will update versions to `0.18` and push to github. That will trigger a build. If that build succeeds, tag it for release:
+That will update versions to `0.18` and push to GitHub. That will trigger a build. If that build succeeds, tag it for release:
 
 ```
 $ git tag -a v0.18 -m "v0.18"
