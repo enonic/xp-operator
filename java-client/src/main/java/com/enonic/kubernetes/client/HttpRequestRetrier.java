@@ -3,7 +3,7 @@ package com.enonic.kubernetes.client;
 import io.fabric8.kubernetes.client.http.HttpClient;
 import io.fabric8.kubernetes.client.http.HttpRequest;
 import io.fabric8.kubernetes.client.http.HttpResponse;
-import io.fabric8.kubernetes.client.utils.internal.ExponentialBackoffIntervalCalculator;
+import io.fabric8.kubernetes.client.utils.ExponentialBackoffIntervalCalculator;
 
 import java.io.IOException;
 import java.io.InputStream;
