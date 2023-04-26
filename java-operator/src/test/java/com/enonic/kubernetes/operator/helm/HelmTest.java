@@ -43,18 +43,15 @@ public abstract class HelmTest
     void test( String chartName, Object values, String expectedValuesFile, String expectedResultFile )
         throws IOException
     {
-        String expectedValues = Files.readString( new File( expectedValuesFile ).toPath(), StandardCharsets.UTF_8 );
+        assertEquals(mapper.readTree(new File(expectedValuesFile)), mapper.valueToTree(values),
+                "Values do not match (" + new File(expectedValuesFile).getName() + ":0)");
 
-        assertEquals( expectedValues, mapper.writeValueAsString( values ),
-                      "Values do not match (" + new File( expectedValuesFile ).getName() + ":0)" );
-
-        String expectedResult = Files.readString( new File( expectedResultFile ).toPath(), StandardCharsets.UTF_8 );
         StringBuilder sb = new StringBuilder();
         for ( HasMetadata r : helm.templateObjects( chartRepository.get( chartName ), values ) )
         {
             sb.append( mapper.writeValueAsString( r ) );
         }
-        assertEquals( expectedResult, sb.toString(), "Result does not match: (" + new File( expectedResultFile ).getName() + ":0)" );
+        assertEquals( mapper.readTree(new File(expectedResultFile)), mapper.readTree(sb.toString()), "Result does not match: (" + new File( expectedResultFile ).getName() + ":0)" );
     }
 
     @SuppressWarnings("SameReturnValue")
