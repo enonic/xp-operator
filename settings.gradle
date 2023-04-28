@@ -1,0 +1,3 @@
+rootProject.name = 'xp-operator'
+
+include 'java-client', 'java-operator'
