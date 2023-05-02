@@ -1,17 +1,5 @@
 plugins {
-    id 'java-library'
-    id 'maven-publish'
     id 'io.quarkus' version '2.16.5.Final'
-}
-
-repositories {
-    mavenLocal()
-    mavenCentral()
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
 }
 
 dependencies {
@@ -19,21 +7,26 @@ dependencies {
 
     implementation 'com.squareup.okhttp3:okhttp:3.12.2'
     implementation 'com.squareup.okhttp3:okhttp-sse:3.12.2'
+    implementation( project(":java-client") )
 
-    annotationProcessor "org.immutables:value:2.7.3"
-    compileOnly "org.immutables:value-annotations:2.7.3"
+    annotationProcessor 'org.immutables:value:2.7.3'
+    compileOnly 'org.immutables:value-annotations:2.7.3'
 
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.1'
-    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.12.1'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.14.1'
 
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
-    testImplementation 'org.junit.jupiter:junit-jupiter-migrationsupport:5.9.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
-    testImplementation 'io.fabric8:kubernetes-server-mock:6.5.1'
-    testImplementation 'org.mockito:mockito-core:5.3.1'
+    implementation 'com.google.guava:guava:31.1-jre'
+    implementation 'org.apache.maven:maven-artifact:3.9.1'
+
+    implementation 'io.quarkus:quarkus-micrometer-registry-prometheus'
+    implementation 'io.quarkus:quarkus-resteasy'
+    implementation 'io.quarkus:quarkus-resteasy-jackson'
+    implementation 'io.quarkus:quarkus-rest-client'
+
     testImplementation "io.quarkus:quarkus-junit5"
     testImplementation "io.rest-assured:rest-assured"
 
+    testCompileOnly 'org.immutables:value-annotations:2.7.3'
+    testAnnotationProcessor 'org.immutables:value:2.7.3'
 }
 
 

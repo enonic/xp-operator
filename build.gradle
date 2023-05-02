@@ -1,0 +1,50 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id "com.gorylenko.gradle-git-properties" version "2.4.1"
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+
+allprojects {
+    group = 'com.enonic.kubernetes'
+    version = '0.19.0-SNAPOSHOT'
+}
+
+subprojects {
+    apply plugin: 'java-library'
+    apply plugin: 'maven-publish'
+
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                from(components.java)
+            }
+        }
+
+        repositories {
+            maven {
+                credentials {
+                    username rootProject.findProperty( 'repoUser' )
+                    password rootProject.findProperty( 'repoPassword' )
+                }
+                name "public"
+                url "https://repo.enonic.com/${rootProject.version.endsWith( 'SNAPSHOT' ) ? 'snapshot' : 'public'}"
+            }
+        }
+    }
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+
+    java {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+}

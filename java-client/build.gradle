@@ -1,14 +1,9 @@
 plugins {
-    id 'java-library'
-    id 'maven-publish'
     id "org.jsonschema2pojo" version "1.2.1"
-}
-repositories {
-    mavenLocal()
-    mavenCentral()
 }
 
 dependencies {
+    api 'io.fabric8:kubernetes-client-api:6.5.1'
     implementation 'io.fabric8:kubernetes-client:6.5.1'
     implementation 'com.squareup.okhttp3:okhttp:3.12.2'
 
@@ -18,9 +13,8 @@ dependencies {
     testImplementation 'io.fabric8:kubernetes-server-mock:6.5.1'
     testImplementation 'org.mockito:mockito-core:5.3.1'
 
-    implementation 'javax.validation:validation-api:1.1.0.CR2'
-    implementation 'jakarta.validation:jakarta.validation-api:3.0.0'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.1'
+    implementation 'jakarta.validation:jakarta.validation-api:2.0.2'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.14.1'
 }
 
 jar {
