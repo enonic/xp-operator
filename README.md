@@ -27,7 +27,7 @@ Prerequisites:
 To build the operator, run:
 
 ```bash
-./mvnw clean package
+make build
 ```
 
 ## Usage

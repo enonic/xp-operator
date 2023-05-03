@@ -35,7 +35,7 @@ ENV JAVA_OPTIONS="-Doperator.charts.path=helm -Djava.util.logging.manager=org.jb
 COPY --chown=1000:1000 java-operator/src/main/helm /deployments/helm
 
 # Copy build target
-COPY --chown=1000:1000 java-operator/target/quarkus-app /tmp/quarkus-app
+COPY --chown=1000:1000 java-operator/build/quarkus-app /tmp/quarkus-app
 RUN mv /tmp/quarkus-app/* /deployments
 
 CMD [ "/deployments/run-java.sh" ]

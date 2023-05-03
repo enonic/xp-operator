@@ -1,5 +1,6 @@
 plugins {
     id 'io.quarkus' version '2.16.5.Final'
+    id "com.gorylenko.gradle-git-properties" version "2.4.1"
 }
 
 dependencies {
@@ -28,5 +29,3 @@ dependencies {
     testCompileOnly 'org.immutables:value-annotations:2.7.3'
     testAnnotationProcessor 'org.immutables:value:2.7.3'
 }
-
-

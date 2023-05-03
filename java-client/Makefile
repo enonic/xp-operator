@@ -2,7 +2,7 @@
 .DEFAULT_GOAL:=help
 
 publish: ## Publish client
-	@../mvnw deploy
+	@../gradlew publish
 
 help: ## Show help
 	@echo "Makefile help:"

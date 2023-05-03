@@ -5,7 +5,7 @@ DOCKER_IMAGE:=enonic/xp-operator
 
 build-java: ## Build java modules
 	# Building java modules ...
-	@./mvnw clean package
+	@./gradlew build
 	# Building java modules done!
 
 build-docker: build-java ## Build docker image
@@ -73,7 +73,7 @@ dev:
 
 clean: ## Clean up everything
 	# Clean java modules
-	@./mvnw clean
+	@./gradlew clean
 
 	# Clean helm chart
 	@$(MAKE) -C helm --no-print-directory clean

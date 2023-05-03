@@ -68,9 +68,7 @@ jobs:
 
       - name: Assert versions
         run: |
-          [ "${{ steps.tag.outputs.tag }}" == "$(./mvnw -f . help:evaluate -Dexpression=project.version -q -DforceStdout)" ] || (echo "version in pom.xml does not match tag"; exit 1)
-          [ "${{ steps.tag.outputs.tag }}" == "$(./mvnw -f java-client help:evaluate -Dexpression=project.version -q -DforceStdout)" ] || (echo "version in java-client/pom.xml does not match tag"; exit 1)
-          [ "${{ steps.tag.outputs.tag }}" == "$(./mvnw -f java-operator help:evaluate -Dexpression=project.version -q -DforceStdout)" ] || (echo "version in java-operator/pom.xml does not match tag"; exit 1)
+          [ "${{ steps.tag.outputs.tag }}" == "$(./get-version.sh`" ] || (echo "version in pom.xml does not match tag"; exit 1)
           [ "${{ steps.tag.outputs.tag }}" == "$(yq '.appVersion' helm/Chart.yaml)" ] || (echo "appVersion in helm/Chart.yaml does not match tag"; exit 1)
           [ "${{ steps.tag.outputs.tag }}" == "$(yq '.version' helm/Chart.yaml)" ] || (echo "version in helm/Chart.yaml does not match tag"; exit 1)
 
@@ -90,7 +88,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build java-client and java-operator
-        run: ./mvnw clean package -DskipTests
+        run: ./gradlew build
 
       - name: Publish docker image
         uses: docker/build-push-action@v4
@@ -111,7 +109,4 @@ jobs:
           ARTIFACTORY_PASS: ${{ secrets.ARTIFACTORY_PASSWORD }}
 
       - name: Publish java-client
-        run: ./mvnw --batch-mode -f java-client deploy
-        env:
-          MAVEN_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
+        run: ./gradlew publish -PrepoUser=${{ secrets.ARTIFACTORY_USERNAME }} -PrepoPassword=${{ secrets.ARTIFACTORY_PASSWORD }}
