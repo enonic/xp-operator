@@ -1,25 +1,9 @@
-plugins {
-    id 'java-library'
-    id 'maven-publish'
-}
-
-repositories {
-    mavenLocal()
-    mavenCentral()
-}
-
 allprojects {
     group = 'com.enonic.kubernetes'
-    version = '0.19.0-SNAPSHOT'
 }
 
 subprojects {
     apply plugin: 'java-library'
-
-    repositories {
-        mavenLocal()
-        mavenCentral()
-    }
 
     java {
         sourceCompatibility = JavaVersion.VERSION_11

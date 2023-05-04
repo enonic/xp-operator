@@ -37,18 +37,10 @@ publish: ## Setup repo for release. Provide VERSION as env var i.e. 'VERSION=0.1
 	@yq -i '.version = "${VERSION}"' helm/Chart.yaml
 	@yq -i '.appVersion = "${VERSION}"' helm/Chart.yaml
 	@yq -i '.image.tag = "${VERSION}"' helm/values.yaml
-
-	# Setting java-client version
-	@./mvnw -f java-client/ versions:set -DnewVersion=${VERSION} > /dev/null
-
-	# Setting java-operator version
-	@./mvnw -f java-operator/ versions:set -DnewVersion=${VERSION} > /dev/null
-
-	# Setting parent pom version
-	@./mvnw -f . versions:set -DnewVersion=${VERSION} > /dev/null
+	@yq -i -p=props -o=props '.version = "${VERSION}"' gradle.properties
 
 	# Creating and pushing release commit
-	@git add helm/values.yaml helm/Chart.yaml pom.xml java-client/pom.xml java-operator/pom.xml
+	@git add helm/values.yaml helm/Chart.yaml gradle.properties
 	@git commit -m "Set version to ${VERSION}"
 	@git push origin master
 

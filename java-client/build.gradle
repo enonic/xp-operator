@@ -1,21 +1,21 @@
 plugins {
     id 'maven-publish'
-    id "org.jsonschema2pojo" version "1.2.1"
+    alias(libs.plugins.jsonschema2pojo)
 }
 
 dependencies {
-    api 'io.fabric8:kubernetes-client-api:6.5.1'
-    implementation 'io.fabric8:kubernetes-client:6.5.1'
-    implementation 'com.squareup.okhttp3:okhttp:3.12.2'
+    api libs.fabric8.kubernetes.clientapi
+    implementation libs.fabric8.kubernetes.client
+    implementation libs.okhttp3.okhttp
 
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
-    testImplementation 'org.junit.jupiter:junit-jupiter-migrationsupport:5.9.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
-    testImplementation 'io.fabric8:kubernetes-server-mock:6.5.1'
-    testImplementation 'org.mockito:mockito-core:5.3.1'
+    implementation libs.jakarta.validation
+    implementation libs.jackson.databind
 
-    implementation 'jakarta.validation:jakarta.validation-api:2.0.2'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.14.1'
+    testImplementation libs.junit.jupiter.api
+    testImplementation libs.junit.jupiter.migrationsupport
+    testRuntimeOnly libs.junit.jupiter.engine
+    testImplementation libs.fabric8.kubernetes.servermock
+    testImplementation libs.mockito.core
 }
 
 jar {

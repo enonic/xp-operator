@@ -1,22 +1,22 @@
 plugins {
-    id 'io.quarkus' version '2.16.5.Final'
-    id "com.gorylenko.gradle-git-properties" version "2.4.1"
+    alias(libs.plugins.quarkus)
+    alias(libs.plugins.gitProperties)
 }
 
 dependencies {
-    implementation enforcedPlatform("io.quarkus:quarkus-universe-bom:2.16.5.Final")
+    implementation enforcedPlatform(libs.quarkus.universe.bom)
 
-    implementation 'com.squareup.okhttp3:okhttp:3.12.2'
-    implementation 'com.squareup.okhttp3:okhttp-sse:3.12.2'
     implementation( project(":java-client") )
 
-    annotationProcessor 'org.immutables:value:2.7.3'
-    compileOnly 'org.immutables:value-annotations:2.7.3'
+    implementation libs.okhttp3.okhttp
+    implementation libs.okhttp3.okhttpsse
 
-    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.14.1'
+    compileOnly libs.immutables.valueannotations
+    annotationProcessor libs.immutables.value
 
-    implementation 'com.google.guava:guava:31.1-jre'
-    implementation 'org.apache.maven:maven-artifact:3.9.1'
+    implementation libs.jackson.dataformat.yaml
+    implementation libs.guava
+    implementation libs.maven.mavenartifact
 
     implementation 'io.quarkus:quarkus-micrometer-registry-prometheus'
     implementation 'io.quarkus:quarkus-resteasy'
@@ -26,6 +26,6 @@ dependencies {
     testImplementation "io.quarkus:quarkus-junit5"
     testImplementation "io.rest-assured:rest-assured"
 
-    testCompileOnly 'org.immutables:value-annotations:2.7.3'
-    testAnnotationProcessor 'org.immutables:value:2.7.3'
+    testCompileOnly libs.immutables.valueannotations
+    testAnnotationProcessor libs.immutables.value
 }
