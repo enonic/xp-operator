@@ -7,10 +7,9 @@ import io.fabric8.kubernetes.api.model.apiextensions.v1.CustomResourceDefinition
 import io.fabric8.kubernetes.api.model.apiextensions.v1.CustomResourceDefinitionVersion;
 import io.fabric8.kubernetes.api.model.apiextensions.v1.JSONSchemaProps;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.server.mock.KubernetesServer;
-import org.junit.Rule;
+import io.fabric8.kubernetes.client.server.mock.EnableKubernetesMockClient;
+import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
 
 import java.io.IOException;
 import java.util.Map;
@@ -18,19 +17,18 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@EnableRuleMigrationSupport
+@EnableKubernetesMockClient(crud = true)
 public class SchemaTest
 {
     private final ObjectMapper mapper = new ObjectMapper();
 
-    @Rule
-    public KubernetesServer server = new KubernetesServer();
-
+    private KubernetesClient kubernetesClient;
+    private KubernetesMockServer server;
     @Test
     void v1Xp7App()
         throws IOException
     {
-        CustomResourceDefinition customResourceDefinition = loadCRD( "/crds/apps.yaml" );
+        CustomResourceDefinition customResourceDefinition = loadCRD( "/apps.yaml" );
         JSONSchemaProps schema = loadSchema( "/schema/v1/xp7app/xp7App.json" );
 
         assertSchema( getSchemaVersion( customResourceDefinition, "v1" ), schema );
@@ -40,7 +38,7 @@ public class SchemaTest
     void v1Domain()
         throws IOException
     {
-        CustomResourceDefinition customResourceDefinition = loadCRD( "/crds/domains.yaml" );
+        CustomResourceDefinition customResourceDefinition = loadCRD( "/domains.yaml" );
         JSONSchemaProps schema = loadSchema( "/schema/v1/domain/domain.json" );
 
         assertSchema( getSchemaVersion( customResourceDefinition, "v1" ), schema );
@@ -50,7 +48,7 @@ public class SchemaTest
     void v1Xp7Config()
         throws IOException
     {
-        CustomResourceDefinition customResourceDefinition = loadCRD( "/crds/configs.yaml" );
+        CustomResourceDefinition customResourceDefinition = loadCRD( "/configs.yaml" );
         JSONSchemaProps schema = loadSchema( "/schema/v1/xp7config/xp7Config.json" );
 
         assertSchema( getSchemaVersion( customResourceDefinition, "v1" ), schema );
@@ -60,7 +58,7 @@ public class SchemaTest
     void v1Xp7Deployment()
         throws IOException
     {
-        CustomResourceDefinition customResourceDefinition = loadCRD( "/crds/deployments.yaml" );
+        CustomResourceDefinition customResourceDefinition = loadCRD( "/deployments.yaml" );
         JSONSchemaProps schema = loadSchema( "/schema/v1/xp7deployment/xp7Deployment.json" );
 
         assertSchema( getSchemaVersion( customResourceDefinition, "v1" ), schema );
@@ -68,8 +66,7 @@ public class SchemaTest
 
     private CustomResourceDefinition loadCRD( final String file )
     {
-        KubernetesClient client = server.getClient();
-        CustomResourceDefinition customResourceDefinition = client
+        CustomResourceDefinition customResourceDefinition = kubernetesClient
             .apiextensions()
             .v1()
             .customResourceDefinitions()

@@ -12,16 +12,15 @@ dependencies {
     implementation libs.jackson.databind
 
     testImplementation libs.junit.jupiter.api
-    testImplementation libs.junit.jupiter.migrationsupport
     testRuntimeOnly libs.junit.jupiter.engine
     testImplementation libs.fabric8.kubernetes.servermock
     testImplementation libs.mockito.core
 }
 
-jar {
-    into 'crds', {
-        from ("${rootDir}/helm/crds") {
-            include '*.yaml'
+sourceSets {
+    test {
+        resources {
+            srcDirs += "${rootDir}/helm/crds"
         }
     }
 }
@@ -51,4 +50,8 @@ publishing {
             url "https://repo.enonic.com/${rootProject.version.endsWith( 'SNAPSHOT' ) ? 'snapshot' : 'public'}"
         }
     }
+}
+
+test {
+    useJUnitPlatform()
 }

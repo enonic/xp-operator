@@ -8,53 +8,47 @@ import com.enonic.kubernetes.client.v1.xp7app.Xp7AppSpec;
 import com.enonic.kubernetes.client.v1.xp7config.Xp7Config;
 import com.enonic.kubernetes.client.v1.xp7config.Xp7ConfigSpec;
 import com.enonic.kubernetes.client.v1.xp7deployment.*;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.apiextensions.v1.CustomResourceDefinition;
 import io.fabric8.kubernetes.api.model.apiextensions.v1.CustomResourceDefinitionList;
 import io.fabric8.kubernetes.api.model.apiextensions.v1.CustomResourceDefinitionVersion;
 import io.fabric8.kubernetes.client.CustomResource;
+import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
-import io.fabric8.kubernetes.client.server.mock.KubernetesServer;
-
-import org.junit.Rule;
+import io.fabric8.kubernetes.client.server.mock.EnableKubernetesMockClient;
+import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 
-@EnableRuleMigrationSupport
+@EnableKubernetesMockClient(crud = true)
 public class CrudTest
 {
     private final ObjectMapper mapper = new ObjectMapper();
 
-    @Rule
-    public KubernetesServer server = new KubernetesServer( false, true );
+    private KubernetesClient kubernetesClient;
+    private KubernetesMockServer server;
 
     @Test
     void v1Xp7App()
         throws IOException, URISyntaxException
     {
-        final EnonicKubernetesClient client = new DefaultEnonicKubernetesClient( server.getClient() );
+        final EnonicKubernetesClient client = new DefaultEnonicKubernetesClient( kubernetesClient );
 
         final NonNamespaceOperation<CustomResourceDefinition, CustomResourceDefinitionList, Resource<CustomResourceDefinition>>
             customResourceDefinitions = client.k8s().apiextensions().v1().customResourceDefinitions();
 
-        final CustomResourceDefinition crd = customResourceDefinitions.load( getClass().getResourceAsStream( "/crds/apps.yaml" ) ).item();
+        final CustomResourceDefinition crd = customResourceDefinitions.load( getClass().getResourceAsStream( "/apps.yaml" ) ).item();
 
         customResourceDefinitions.resource( crd ).create();
 
@@ -94,14 +88,14 @@ public class CrudTest
     void v1Domain()
         throws IOException, URISyntaxException
     {
-        final EnonicKubernetesClient client = new DefaultEnonicKubernetesClient( server.getClient() );
+        final EnonicKubernetesClient client = new DefaultEnonicKubernetesClient( kubernetesClient );
 
         // Create crd
         final CustomResourceDefinition crd = client.k8s()
             .apiextensions()
             .v1()
             .customResourceDefinitions()
-            .load( getClass().getResourceAsStream( "/crds/domains.yaml" ) )
+            .load( getClass().getResourceAsStream( "/domains.yaml" ) )
             .item();
 
         client.k8s().apiextensions().v1().customResourceDefinitions().resource( crd ).create();
@@ -146,14 +140,14 @@ public class CrudTest
     void v1xp7Config()
         throws IOException, URISyntaxException
     {
-        final EnonicKubernetesClient client = new DefaultEnonicKubernetesClient( server.getClient() );
+        final EnonicKubernetesClient client = new DefaultEnonicKubernetesClient( kubernetesClient );
 
         // Create crd
         final CustomResourceDefinition crd = client.k8s()
             .apiextensions()
             .v1()
             .customResourceDefinitions()
-            .load( getClass().getResourceAsStream( "/crds/configs.yaml" ) )
+            .load( getClass().getResourceAsStream( "/configs.yaml" ) )
             .item();
 
         client.k8s().apiextensions().v1().customResourceDefinitions().resource( crd ).create();
@@ -196,14 +190,14 @@ public class CrudTest
     void v1Xp7Deployment()
         throws IOException, URISyntaxException
     {
-        EnonicKubernetesClient client = new DefaultEnonicKubernetesClient( server.getClient() );
+        EnonicKubernetesClient client = new DefaultEnonicKubernetesClient( kubernetesClient );
 
         // Create crd
         CustomResourceDefinition crd = client.k8s()
             .apiextensions()
             .v1()
             .customResourceDefinitions()
-            .load( getClass().getResourceAsStream( "/crds/deployments.yaml" ) )
+            .load( getClass().getResourceAsStream( "/deployments.yaml" ) )
             .item();
 
         client.k8s().apiextensions().v1().customResourceDefinitions().resource( crd ).create();
