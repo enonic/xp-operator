@@ -45,10 +45,7 @@ jobs:
         with:
           java-version: '11'
           distribution: 'temurin'
-          cache: 'maven'
-          server-id: enonic
-          server-username: MAVEN_USERNAME
-          server-password: MAVEN_PASSWORD
+          cache: 'gradle'
 
       - name: Setup Helm
         uses: azure/setup-helm@v3
@@ -69,8 +66,6 @@ jobs:
       - name: Assert versions
         run: |
           [ "${{ steps.tag.outputs.tag }}" == "$(./get-version.sh`" ] || (echo "version in gradle.properties does not match tag"; exit 1)
-          [ "${{ steps.tag.outputs.tag }}" == "$(yq '.appVersion' helm/Chart.yaml)" ] || (echo "appVersion in helm/Chart.yaml does not match tag"; exit 1)
-          [ "${{ steps.tag.outputs.tag }}" == "$(yq '.version' helm/Chart.yaml)" ] || (echo "version in helm/Chart.yaml does not match tag"; exit 1)
 
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v2
@@ -102,8 +97,7 @@ jobs:
           platforms: linux/amd64,linux/arm64,linux/ppc64le,linux/s390x,linux/arm/v7
 
       - name: Publish helm chart
-        working-directory: helm
-        run: make publish
+        run: make publish-helm
         env:
           ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USERNAME }}
           ARTIFACTORY_PASS: ${{ secrets.ARTIFACTORY_PASSWORD }}

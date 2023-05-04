@@ -31,7 +31,7 @@ $ make test
 Then verify the operator is running:
 
 ```console
-$ make verify 
+$ make verify-kind
 {
   "gitCommit": "2a2abb974a0c8ae75a23d79ed02236df1b04cc15",
   "gitTags": "",
@@ -61,7 +61,7 @@ Use your IDE to run the `com.enonic.kubernetes.operator.helpers.Main` class and 
 Then verify it all works:
 
 ```console
-$ make verify 
+$ make verify-kind 
 {
   "gitCommit": "2a2abb974a0c8ae75a23d79ed02236df1b04cc15",
   "gitTags": "",

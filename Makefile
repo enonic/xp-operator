@@ -1,6 +1,6 @@
 DOCKER_IMAGE:=enonic/xp-operator
 
-.PHONY: help
+.PHONY: help build clean test
 .DEFAULT_GOAL:=help
 
 build-java: ## Build java modules
@@ -13,18 +13,10 @@ build-docker: build-java ## Build docker image
 
 build-helm: ## Build helm chart
 	# Building helm chart ...
-	@$(MAKE) -C helm --no-print-directory package
+	@helm package ./helm --app-version $(shell ./get-version.sh) --version $(shell ./get-version.sh) --destination helm/target > /dev/null
 	# Building helm chart done!
 
 build: build-docker build-helm ## Build everything
-
-validate: ## Build and validate everything
-	# Validating helm chart ...
-	@[ "$(shell bash -c 'cat helm/Chart.yaml | yq .appVersion')" = "$(shell ./get-version.sh)" ] || \
-		(echo "Helm version mismatch: Chart.yaml appVersion! Aborting ..." && exit 1)
-	@[ "$(shell bash -c 'cat helm/values.yaml | yq .image.tag')" = "$(shell ./get-version.sh)" ] || \
-		(echo "Helm version mismatch: values.yaml image.tag! Aborting ..." && exit 1)
-	# Validating helm chart done!
 
 publish: ## Setup repo for release. Provide VERSION as env var i.e. 'VERSION=0.18 make release'
 	# Checking prerequisites
@@ -34,22 +26,43 @@ publish: ## Setup repo for release. Provide VERSION as env var i.e. 'VERSION=0.1
 	@git diff --quiet || (echo 'Git repo is not clean, commit your changes first!'; exit 1)
 
 	# Setting chart version
-	@yq -i '.version = "${VERSION}"' helm/Chart.yaml
-	@yq -i '.appVersion = "${VERSION}"' helm/Chart.yaml
 	@yq -i '.image.tag = "${VERSION}"' helm/values.yaml
 	@yq -i -p=props -o=props '.version = "${VERSION}"' gradle.properties
 
 	# Creating and pushing release commit
-	@git add helm/values.yaml helm/Chart.yaml gradle.properties
+	@git add helm/values.yaml gradle.properties
 	@git commit -m "Set version to ${VERSION}"
 	@git push origin master
 
 	@echo
-	@echo If build succeedes on github actions, tag and push to release:
+	@echo If build succeeds on github actions, tag and push to release:
 	@echo '  $$' git tag -a v${VERSION} -m "\"v${VERSION}\""
 	@echo '  $$' git push origin v${VERSION}
 
-test: validate build-docker ## Run k8s kind cluster with operator installed
+publish-helm: build-helm ## Publish chart (env var ARTIFACTORY_USER and ARTIFACTORY_PASS required)
+	# Setup environment ...
+	@test "${ARTIFACTORY_USER}" || (echo "Set env variable ARTIFACTORY_USER"; exit 1;)
+	@test "${ARTIFACTORY_PASS}" || (echo "Set env variable ARTIFACTORY_PASS"; exit 1;)
+	@$(eval FILE := $(shell find helm/target/ -name '*.tgz'))
+	@$(eval URL := ${REPOSITORY}/${CHART_NAME}/`basename ${FILE}`)
+	@$(eval MD5 := $(shell openssl md5 ${FILE} | cut -d ' ' -f 2))
+	@$(eval SHA1 := $(shell openssl sha1 ${FILE} | cut -d ' ' -f 2))
+	@$(eval SHA256 := $(shell openssl sha256 ${FILE} | cut -d ' ' -f 2))
+
+	# Check if version already exists ...
+	@$(eval EXISTS := $(shell curl -s -f -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" ${URL}.sha256 > /dev/null && echo "1" || echo "0"))
+	@if [ ${EXISTS} == "1" ]; then echo "Artifact $(shell basename ${FILE}) already exists!"; exit 1; fi;
+
+	# Upload artifact ...
+	@curl --fail -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" \
+	-H "X-Checksum-MD5:${MD5}" \
+	-H "X-Checksum-SHA1:${SHA1}" \
+	-H "X-Checksum-SHA256:${SHA256}" \
+	-X PUT \
+	-T ${FILE} \
+	${URL}
+
+test: build-helm build-docker ## Run k8s kind cluster with operator installed
 	# Start kind cluster
 	@$(MAKE) -C kubernetes/kind --no-print-directory kind-up
 
@@ -57,18 +70,31 @@ test: validate build-docker ## Run k8s kind cluster with operator installed
 	@kind load docker-image ${DOCKER_IMAGE}:$(shell ./get-version.sh)
 
 	# Deploy operator
-	@$(MAKE) -C helm --no-print-directory install
+	@helm upgrade --install \
+     		--namespace kube-system \
+     		--values helm/test/values.yaml \
+     		--set=image.tag=$(shell ./get-version.sh) \
+     		xp-operator \
+     		./helm/target/xp-operator-$(shell ./get-version.sh).tgz
 	# Cluster setup done!
+	@echo
+    @echo Now you can setup a simple XP instance with:
+	echo '  $$' kubectl apply -f kubernetes/example-simple.yaml
 
 dev:
 	@$(MAKE) -C kubernetes/kind --no-print-directory kind-up kind-dev
+
+verify-kind: ## Run k8s kind cluster setup is working
+	@$(MAKE) -C kubernetes/kind --no-print-directory kind-network-info
+	@echo "Operator info:"
+	@kubectl get --raw='/apis/operator.enonic.cloud/v1/operator/version' | jq
 
 clean: ## Clean up everything
 	# Clean java modules
 	@./gradlew clean
 
 	# Clean helm chart
-	@$(MAKE) -C helm --no-print-directory clean
+	@[ -d "helm/target" ] && rm -r helm/target || true
 
 	# Clean kind cluster
 	@$(MAKE) -C kubernetes/kind --no-print-directory kind-down
