@@ -105,6 +105,7 @@ finalizers:
     uninstall: "uninstall.app.enonic.cloud"
 image:
   nameTemplate: "enonic/xp:%s-ubuntu"
+#  nameTemplate: "vbonik/test:%s-ubuntu"
   pullPolicy: "IfNotPresent"
 labelKeys:
   data: "enonic.data"

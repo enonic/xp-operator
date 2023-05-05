@@ -16,24 +16,15 @@ import java.util.Map;
 
 public class CrdMappingProvider
 {
-    private static final String group = "enonic.cloud";
-
-    private final Map<String, Class<? extends KubernetesResource>> mappings;
-
-    @SuppressWarnings("WeakerAccess")
-    public CrdMappingProvider()
-    {
-        mappings = createMappings();
-    }
+    private static final String API_VERSION = "enonic.cloud/v1";
 
     @SuppressWarnings("unused")
     public static void register()
     {
-        CrdMappingProvider m = new CrdMappingProvider();
-        for ( Map.Entry<String, Class<? extends KubernetesResource>> s : m.mappings.entrySet() )
-        {
-            KubernetesDeserializer.registerCustomKind( s.getKey(), s.getValue() );
-        }
+        KubernetesDeserializer.registerCustomKind( API_VERSION, "Xp7App", Xp7App.class );
+        KubernetesDeserializer.registerCustomKind( API_VERSION, "Xp7Config", Xp7Config.class );
+        KubernetesDeserializer.registerCustomKind( API_VERSION, "Xp7Deployment", Xp7Deployment.class );
+        KubernetesDeserializer.registerCustomKind( API_VERSION, "Domain", Domain.class );
     }
 
     @SuppressWarnings("unused")
@@ -44,7 +35,7 @@ public class CrdMappingProvider
         objectMapper.registerModule( module );
     }
 
-    private Map<String, Class<? extends KubernetesResource>> createMappings()
+    /*private Map<String, Class<? extends KubernetesResource>> createMappings()
     {
         Map<String, Class<? extends KubernetesResource>> map = new HashMap<>();
 
@@ -54,11 +45,11 @@ public class CrdMappingProvider
         put( map, "v1", "Domain", Domain.class );
 
         return map;
-    }
+    }*/
 
-    private void put( Map<String, Class<? extends KubernetesResource>> map, String apiVersion, String kind,
+ /*   private void put( Map<String, Class<? extends KubernetesResource>> map, String apiVersion, String kind,
                       Class<? extends KubernetesResource> klass )
     {
         map.put( String.format( "%s/%s#%s", group, apiVersion, kind ), klass );
-    }
+    }*/
 }

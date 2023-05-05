@@ -11,6 +11,7 @@ import okhttp3.HttpUrl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Duration;
+import java.util.List;
 import java.util.Objects;
 
 public abstract class RawClient
@@ -67,11 +68,30 @@ public abstract class RawClient
         }
     }
 
+    protected <T> List<T> requestList( HttpUrl httpUrl, Class<T> type )
+    {
+        try
+        {
+            return requestList( client.newHttpRequestBuilder().url( httpUrl.url() ).build(), type );
+        }
+        catch ( Exception e )
+        {
+            throw new IllegalStateException( "RawClient request failed", e );
+        }
+    }
+
     private <T> T request( HttpRequest request, Class<T> type )
         throws InterruptedException, IOException
     {
         final HttpResponse<InputStream> response = retryWithExponentialBackoff( request );
         return Serialization.unmarshal( response.body(), type );
+    }
+
+    private <T> List<T> requestList( HttpRequest request, Class<T> type )
+        throws InterruptedException, IOException
+    {
+        final HttpResponse<InputStream> response = retryWithExponentialBackoff( request );
+        return Serialization.jsonMapper().readerForListOf( type).readValue( response.body() );
     }
 
     private HttpResponse<InputStream> retryWithExponentialBackoff( HttpRequest request )

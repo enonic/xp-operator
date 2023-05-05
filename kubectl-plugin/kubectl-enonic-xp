@@ -20,4 +20,6 @@ Available Commands:
   routes        List available internal routes
   snapshots     List available snapshots
   supass        Show XP su password
+  projects      List available projects
+  webapps       List available webapps
 EOF

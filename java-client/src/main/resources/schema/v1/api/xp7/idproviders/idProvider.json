@@ -1,0 +1,15 @@
+{
+  "javaName" : "Xp7MgmtIdProvider",
+  "type" : "object",
+  "properties" : {
+    "key" : {
+      "type" : "string"
+    },
+    "displayName" : {
+      "type" : "string"
+    },
+    "description" : {
+      "type" : "string"
+    }
+  }
+}
