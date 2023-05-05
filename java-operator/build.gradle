@@ -1,0 +1,37 @@
+plugins {
+    id 'java-library'
+    alias(libs.plugins.quarkus)
+    alias(libs.plugins.gitProperties)
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+dependencies {
+    implementation enforcedPlatform(libs.quarkus.universe.bom)
+
+    implementation( project(":java-client") )
+
+    implementation libs.okhttp3.okhttp
+    implementation libs.okhttp3.okhttpsse
+
+    compileOnly libs.immutables.valueannotations
+    annotationProcessor libs.immutables.value
+
+    implementation libs.jackson.dataformat.yaml
+    implementation libs.guava
+    implementation libs.maven.mavenartifact
+
+    implementation 'io.quarkus:quarkus-micrometer-registry-prometheus'
+    implementation 'io.quarkus:quarkus-resteasy'
+    implementation 'io.quarkus:quarkus-resteasy-jackson'
+    implementation 'io.quarkus:quarkus-rest-client'
+
+    testImplementation "io.quarkus:quarkus-junit5"
+    testImplementation "io.rest-assured:rest-assured"
+
+    testCompileOnly libs.immutables.valueannotations
+    testAnnotationProcessor libs.immutables.value
+}

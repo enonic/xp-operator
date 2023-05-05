@@ -17,18 +17,15 @@ jobs:
         with:
           java-version: '11'
           distribution: 'temurin'
-          cache: 'maven'
+          cache: 'gradle'
 
       - name: Setup Helm
         uses: azure/setup-helm@v3
         with:
           version: '3.7.0'
 
-      - name: Build and test helm chart
-        run: make build-helm
-
-      - name: Build and test java-client and java-operator
-        run: make build-java
+      - name: Build
+        run: ./gradlew build
 
   release:
     runs-on: ubuntu-latest
@@ -45,10 +42,7 @@ jobs:
         with:
           java-version: '11'
           distribution: 'temurin'
-          cache: 'maven'
-          server-id: enonic
-          server-username: MAVEN_USERNAME
-          server-password: MAVEN_PASSWORD
+          cache: 'gradle'
 
       - name: Setup Helm
         uses: azure/setup-helm@v3
@@ -68,11 +62,7 @@ jobs:
 
       - name: Assert versions
         run: |
-          [ "${{ steps.tag.outputs.tag }}" == "$(./mvnw -f . help:evaluate -Dexpression=project.version -q -DforceStdout)" ] || (echo "version in pom.xml does not match tag"; exit 1)
-          [ "${{ steps.tag.outputs.tag }}" == "$(./mvnw -f java-client help:evaluate -Dexpression=project.version -q -DforceStdout)" ] || (echo "version in java-client/pom.xml does not match tag"; exit 1)
-          [ "${{ steps.tag.outputs.tag }}" == "$(./mvnw -f java-operator help:evaluate -Dexpression=project.version -q -DforceStdout)" ] || (echo "version in java-operator/pom.xml does not match tag"; exit 1)
-          [ "${{ steps.tag.outputs.tag }}" == "$(yq '.appVersion' helm/Chart.yaml)" ] || (echo "appVersion in helm/Chart.yaml does not match tag"; exit 1)
-          [ "${{ steps.tag.outputs.tag }}" == "$(yq '.version' helm/Chart.yaml)" ] || (echo "version in helm/Chart.yaml does not match tag"; exit 1)
+          [ "${{ steps.tag.outputs.tag }}" == "$(./get-version.sh`" ] || (echo "version in gradle.properties does not match tag"; exit 1)
 
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v2
@@ -90,7 +80,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build java-client and java-operator
-        run: ./mvnw clean package -DskipTests
+        run: ./gradlew build
 
       - name: Publish docker image
         uses: docker/build-push-action@v4
@@ -104,14 +94,10 @@ jobs:
           platforms: linux/amd64,linux/arm64,linux/ppc64le,linux/s390x,linux/arm/v7
 
       - name: Publish helm chart
-        working-directory: helm
-        run: make publish
+        run: make publish-helm
         env:
           ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USERNAME }}
           ARTIFACTORY_PASS: ${{ secrets.ARTIFACTORY_PASSWORD }}
 
       - name: Publish java-client
-        run: ./mvnw --batch-mode -f java-client deploy
-        env:
-          MAVEN_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
+        run: ./gradlew publish -PrepoUser=${{ secrets.ARTIFACTORY_USERNAME }} -PrepoPassword=${{ secrets.ARTIFACTORY_PASSWORD }}

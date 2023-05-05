@@ -1,0 +1,67 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    alias(libs.plugins.jsonschema2pojo)
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+dependencies {
+    api libs.fabric8.kubernetes.clientapi
+    implementation libs.fabric8.kubernetes.client
+    implementation libs.okhttp3.okhttp
+
+    implementation libs.jakarta.validation
+    implementation libs.jackson.databind
+
+    testImplementation libs.junit.jupiter.api
+    testRuntimeOnly libs.junit.jupiter.engine
+    testImplementation libs.fabric8.kubernetes.servermock
+    testImplementation libs.mockito.core
+}
+
+sourceSets {
+    test {
+        resources {
+            srcDirs += "${rootDir}/helm/build/resources/main/crds"
+        }
+    }
+}
+
+jsonSchema2Pojo {
+    source = files( "${sourceSets.main.output.resourcesDir}/schema" )
+    targetPackage = 'com.enonic.kubernetes.client'
+    generateBuilders = true
+    includeConstructors = true
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifactId 'client'
+            from(components.java)
+        }
+    }
+
+    repositories {
+        maven {
+            credentials {
+                username rootProject.findProperty( 'repoUser' )
+                password rootProject.findProperty( 'repoPassword' )
+            }
+            name "public"
+            url "https://repo.enonic.com/${rootProject.version.endsWith( 'SNAPSHOT' ) ? 'snapshot' : 'public'}"
+        }
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+tasks.named("processTestResources") {
+    dependsOn(":helm:processHelmResources")
+}

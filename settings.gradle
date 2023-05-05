@@ -1,0 +1,11 @@
+rootProject.name = 'xp-operator'
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+}
+
+include 'java-client', 'java-operator', 'helm'
