@@ -1,0 +1,29 @@
+plugins {
+    id("ivy-publish")
+}
+task processHelmResources(type: Copy) {
+    from 'src/main' into "${buildDir}/resources/main"
+    filesMatching('values.yaml') {
+        expand version: "${project.version}"
+    }
+}
+
+task helmPackage(type: Exec, dependsOn: processHelmResources) {
+    def cmd = ['helm', 'package', "${buildDir}/resources/main", '--app-version', "${project.version}", '--version', "${project.version}", '--destination', "${buildDir}/libs"]
+
+    if (System.getProperty("os.name").toLowerCase().contains("windows")) {
+        cmd = ['cmd', '/c'] + cmd
+    }
+    commandLine cmd
+    inputs.files processHelmResources.outputs.files
+    outputs.file("${buildDir}/libs/${project.name}-${project.version}.tgz")
+}
+
+task build(dependsOn: helmPackage) {
+}
+
+task clean {
+    doLast {
+        delete "${buildDir}"
+    }
+}

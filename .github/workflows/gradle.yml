@@ -24,11 +24,8 @@ jobs:
         with:
           version: '3.7.0'
 
-      - name: Build and test helm chart
-        run: make build-helm
-
-      - name: Build and test java-client and java-operator
-        run: make build-java
+      - name: Build
+        run: ./gradlew build
 
   release:
     runs-on: ubuntu-latest

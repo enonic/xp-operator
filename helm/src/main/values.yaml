@@ -1,5 +1,6 @@
 image:
   repository: enonic/xp-operator
+  tag: "${version}"
   pullPolicy: IfNotPresent
 resources:
   requests: {}

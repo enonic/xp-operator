@@ -11,14 +11,9 @@ build-java: ## Build java modules
 build-docker: build-java ## Build docker image
 	@TAG=$(shell ./get-version.sh) $(MAKE) -C docker --no-print-directory build
 
-build-helm: ## Build helm chart
-	# Building helm chart ...
-	@helm package ./helm --app-version $(shell ./get-version.sh) --version $(shell ./get-version.sh) --destination helm/target > /dev/null
-	# Building helm chart done!
+build: build-docker
 
-build: build-docker build-helm ## Build everything
-
-publish: ## Setup repo for release. Provide VERSION as env var i.e. 'VERSION=0.18 make release'
+release: ## Setup repo for release. Provide VERSION as env var i.e. 'VERSION=0.18 make release'
 	# Checking prerequisites
 	@test "${VERSION}" != "" || (echo 'You must provide a version!'; exit 1)
 	@[[ ${VERSION} != v* ]] || (echo 'Version cannot start with "v"!'; exit 1)
@@ -26,11 +21,10 @@ publish: ## Setup repo for release. Provide VERSION as env var i.e. 'VERSION=0.1
 	@git diff --quiet || (echo 'Git repo is not clean, commit your changes first!'; exit 1)
 
 	# Setting chart version
-	@yq -i '.image.tag = "${VERSION}"' helm/values.yaml
 	@yq -i -p=props -o=props '.version = "${VERSION}"' gradle.properties
 
 	# Creating and pushing release commit
-	@git add helm/values.yaml gradle.properties
+	@git add gradle.properties
 	@git commit -m "Set version to ${VERSION}"
 	@git push origin master
 
@@ -39,11 +33,11 @@ publish: ## Setup repo for release. Provide VERSION as env var i.e. 'VERSION=0.1
 	@echo '  $$' git tag -a v${VERSION} -m "\"v${VERSION}\""
 	@echo '  $$' git push origin v${VERSION}
 
-publish-helm: build-helm ## Publish chart (env var ARTIFACTORY_USER and ARTIFACTORY_PASS required)
+publish-helm: build-java ## Publish chart (env var ARTIFACTORY_USER and ARTIFACTORY_PASS required)
 	# Setup environment ...
 	@test "${ARTIFACTORY_USER}" || (echo "Set env variable ARTIFACTORY_USER"; exit 1;)
 	@test "${ARTIFACTORY_PASS}" || (echo "Set env variable ARTIFACTORY_PASS"; exit 1;)
-	@$(eval FILE := $(shell find helm/target/ -name '*.tgz'))
+	@$(eval FILE := $(shell find helm/build/libs/ -name '*.tgz'))
 	@$(eval URL := ${REPOSITORY}/${CHART_NAME}/`basename ${FILE}`)
 	@$(eval MD5 := $(shell openssl md5 ${FILE} | cut -d ' ' -f 2))
 	@$(eval SHA1 := $(shell openssl sha1 ${FILE} | cut -d ' ' -f 2))
@@ -62,7 +56,7 @@ publish-helm: build-helm ## Publish chart (env var ARTIFACTORY_USER and ARTIFACT
 	-T ${FILE} \
 	${URL}
 
-test: build-helm build-docker ## Run k8s kind cluster with operator installed
+test: build-docker ## Run k8s kind cluster with operator installed
 	# Start kind cluster
 	@$(MAKE) -C kubernetes/kind --no-print-directory kind-up
 
@@ -72,10 +66,9 @@ test: build-helm build-docker ## Run k8s kind cluster with operator installed
 	# Deploy operator
 	@helm upgrade --install \
      		--namespace kube-system \
-     		--values helm/test/values.yaml \
-     		--set=image.tag=$(shell ./get-version.sh) \
+     		--values helm/src/test/values.yaml \
      		xp-operator \
-     		./helm/target/xp-operator-$(shell ./get-version.sh).tgz
+     		./helm/build/libs/xp-operator-$(shell ./get-version.sh).tgz
 	# Cluster setup done!
 	@echo
     @echo Now you can setup a simple XP instance with:
@@ -89,15 +82,11 @@ verify-kind: ## Run k8s kind cluster setup is working
 	@echo "Operator info:"
 	@kubectl get --raw='/apis/operator.enonic.cloud/v1/operator/version' | jq
 
-clean: ## Clean up everything
-	# Clean java modules
-	@./gradlew clean
-
-	# Clean helm chart
-	@[ -d "helm/target" ] && rm -r helm/target || true
-
-	# Clean kind cluster
+stop-kind: ## Stop k8s kind cluster
 	@$(MAKE) -C kubernetes/kind --no-print-directory kind-down
+
+clean: stop-kind ## Clean up everything
+	@./gradlew clean
 
 help: ## Show help
 	@echo "Makefile help:"
