@@ -65,14 +65,14 @@ test: build-docker ## Run k8s kind cluster with operator installed
 
 	# Deploy operator
 	@helm upgrade --install \
-     		--namespace kube-system \
-     		--values helm/src/test/values.yaml \
-     		xp-operator \
-     		./helm/build/libs/xp-operator-$(shell ./get-version.sh).tgz
+			--namespace kube-system \
+			--values helm/src/test/values.yaml \
+			xp-operator \
+			./helm/build/libs/xp-operator-$(shell ./get-version.sh).tgz
 	# Cluster setup done!
 	@echo
-    @echo Now you can setup a simple XP instance with:
-	echo '  $$' kubectl apply -f kubernetes/example-simple.yaml
+	@echo Now you can setup a simple XP instance with:
+	@echo '  $$' kubectl apply -f kubernetes/example-simple.yaml
 
 dev:
 	@$(MAKE) -C kubernetes/kind --no-print-directory kind-up kind-dev
