@@ -24,7 +24,7 @@ jobs:
         with:
           version: '3.7.0'
 
-      - name: Build
+      - name: Build and Publish
         run: |
           if [[ "$(./get-version.sh)" == *"-SNAPSHOT" ]]
           then
