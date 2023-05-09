@@ -28,8 +28,10 @@ jobs:
         run: |
           if [[ "$(./get-version.sh)" == *"-SNAPSHOT" ]]
           then
+            echo "Building and publishing snapshot version"
             ./gradlew publish -PrepoUser=${{ secrets.ARTIFACTORY_USERNAME }} -PrepoPassword=${{ secrets.ARTIFACTORY_PASSWORD }}
           else
+            echo "Building release version"
             ./gradlew build 
           fi
 
