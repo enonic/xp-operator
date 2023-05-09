@@ -39,13 +39,13 @@ Read about how to install and use the operator in the [documentation](./docs/ind
 Make sure you workspace contains no uncommitted changes and then run:
 
 ```bash
-$ VERSION=0.18 make publish
+$ VERSION=0.18.0 make release
 ```
 
 That will update versions to `0.18.0` and push to GitHub. That will trigger a build. If that build succeeds, tag it for release:
 
 ```bash
-$ git tag -a v0.18 -m "v0.18.0"
+$ git tag -a v0.18.0 -m "v0.18.0"
 $ git push origin v0.18.0
 ```
 
