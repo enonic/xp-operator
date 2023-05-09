@@ -1,3 +1,24 @@
+plugins {
+    id 'base'
+    id 'jacoco-report-aggregation'
+}
 allprojects {
     group = 'com.enonic.kubernetes'
+}
+
+dependencies {
+    jacocoAggregation project(':java-client')
+    jacocoAggregation project(':java-operator')
+}
+
+reporting {
+    reports {
+        testCodeCoverageReport(JacocoCoverageReport) {
+            testType = TestSuiteType.UNIT_TEST
+        }
+    }
+}
+
+tasks.register('ci') {
+    dependsOn tasks.named('build'), tasks.named('testCodeCoverageReport', JacocoReport)
 }
