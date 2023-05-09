@@ -37,7 +37,8 @@ jobs:
 
       - name: Codecov
         uses: codecov/codecov-action@v3
-
+        with:
+          files: ./build/testCodeCoverageReport.xml
 
   release:
     runs-on: ubuntu-latest
