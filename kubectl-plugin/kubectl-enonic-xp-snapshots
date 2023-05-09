@@ -14,4 +14,4 @@ dp=$(get_deployment $ns)
 ng=$(get_nodegroup $ns $dp)
 [ -z "$ng" ] && (echo "No node group selected!" 1>&2; exit 1;)
 
-kubectl_get /xp7/$ns/$dp/$ng/mgmt/repo/snapshot/list | jq -r .results[].name
+kubectl_get /xp7/$ns/$dp/$ng/mgmt/repo/snapshots/list | jq -r .results[].name

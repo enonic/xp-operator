@@ -623,7 +623,7 @@ spec:
         - name: "XP_OPTS"
           value: "-Xms154m -Xmx154m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof\
             \ -Dhazelcast.shutdownhook.policy=GRACEFUL -Dhazelcast.graceful.shutdown.max.wait=600"
-        image: "enonic/xp:7.7.0-ubuntu"
+        image: "enonic/xp:7.12.2-ubuntu"
         imagePullPolicy: "IfNotPresent"
         name: "exp"
         ports:
@@ -709,7 +709,7 @@ spec:
             secretKeyRef:
               key: "token"
               name: "xp-events-sa-secret"
-        image: "enonic/xp:7.7.0-ubuntu"
+        image: "enonic/xp:7.12.2-ubuntu"
         imagePullPolicy: "IfNotPresent"
         name: "events"
         securityContext:

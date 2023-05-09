@@ -1,0 +1,48 @@
+{
+  "javaName" : "Xp7MgmtProject",
+  "type" : "object",
+  "properties" : {
+    "name" : {
+      "type" : "string"
+    },
+    "displayName" : {
+      "type" : "string"
+    },
+    "description" : {
+      "type" : "string"
+    },
+    "parent" : {
+      "type" : "string"
+    },
+    "branches" : {
+      "type" : "array",
+      "items" : {
+        "javaName" : "Xp7MgmtBranch",
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "name" : "string"
+          },
+          "sites" : {
+            "type" : "array",
+            "items" : {
+              "javaName" : "Xp7MgmtSite",
+              "type" : "object",
+              "properties" : {
+                "displayName" : {
+                  "type" : "string"
+                },
+                "path" : {
+                  "type" : "string"
+                },
+                "language" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

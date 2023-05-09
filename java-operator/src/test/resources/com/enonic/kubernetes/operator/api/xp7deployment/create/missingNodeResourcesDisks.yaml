@@ -13,7 +13,7 @@ admissionRequest:
           name: qaxp
       spec:
         enabled: true
-        xpVersion: 7.7.0
+        xpVersion: 7.12.2
         nodesSharedDisks:
           - name: blobstore
             size: 1Gi

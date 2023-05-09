@@ -32,7 +32,7 @@ deployment:
   preInstalledCloudUtils: false
   spec:
     enabled: true
-    xpVersion: "7.7.0"
+    xpVersion: "7.12.2"
     nodesPreinstalledApps:
     - name: "snapshotter"
       url: "https://repo.enonic.com/public/com/enonic/app/snapshotter/3.0.2/snapshotter-3.0.2.jar"

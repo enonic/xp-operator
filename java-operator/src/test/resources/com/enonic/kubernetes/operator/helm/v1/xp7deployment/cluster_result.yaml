@@ -800,7 +800,7 @@ spec:
         - name: "XP_OPTS"
           value: "-Xms512m -Xmx512m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof\
             \ -Dhazelcast.shutdownhook.policy=GRACEFUL -Dhazelcast.graceful.shutdown.max.wait=600"
-        image: "enonic/xp:7.7.0-ubuntu"
+        image: "enonic/xp:7.12.2-ubuntu"
         imagePullPolicy: "IfNotPresent"
         lifecycle:
           preStop:
@@ -888,7 +888,7 @@ spec:
             secretKeyRef:
               key: "token"
               name: "xp-events-sa-secret"
-        image: "enonic/xp:7.7.0-ubuntu"
+        image: "enonic/xp:7.12.2-ubuntu"
         imagePullPolicy: "IfNotPresent"
         name: "events"
         securityContext:
@@ -1060,7 +1060,7 @@ spec:
         - name: "XP_OPTS"
           value: "-Xms614m -Xmx614m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof\
             \ -Dhazelcast.shutdownhook.policy=GRACEFUL -Dhazelcast.graceful.shutdown.max.wait=600"
-        image: "enonic/xp:7.7.0-ubuntu"
+        image: "enonic/xp:7.12.2-ubuntu"
         imagePullPolicy: "IfNotPresent"
         lifecycle:
           preStop:
@@ -1150,7 +1150,7 @@ spec:
             secretKeyRef:
               key: "token"
               name: "xp-events-sa-secret"
-        image: "enonic/xp:7.7.0-ubuntu"
+        image: "enonic/xp:7.12.2-ubuntu"
         imagePullPolicy: "IfNotPresent"
         name: "events"
         securityContext:
@@ -1343,7 +1343,7 @@ spec:
         - name: "XP_OPTS"
           value: "-bla -Xms1536m -Xmx1536m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof\
             \ -Dhazelcast.shutdownhook.policy=GRACEFUL -Dhazelcast.graceful.shutdown.max.wait=600"
-        image: "enonic/xp:7.7.0-ubuntu"
+        image: "enonic/xp:7.12.2-ubuntu"
         imagePullPolicy: "IfNotPresent"
         lifecycle:
           preStop:
@@ -1433,7 +1433,7 @@ spec:
             secretKeyRef:
               key: "token"
               name: "xp-events-sa-secret"
-        image: "enonic/xp:7.7.0-ubuntu"
+        image: "enonic/xp:7.12.2-ubuntu"
         imagePullPolicy: "IfNotPresent"
         name: "events"
         securityContext:

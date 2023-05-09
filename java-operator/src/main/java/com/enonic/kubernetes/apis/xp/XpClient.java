@@ -1,8 +1,9 @@
 package com.enonic.kubernetes.apis.xp;
 
 import com.enonic.kubernetes.apis.xp.service.*;
+import com.enonic.kubernetes.client.v1.api.xp7.idproviders.Xp7MgmtIdProvider;
+import com.enonic.kubernetes.client.v1.api.xp7.projects.Xp7MgmtProject;
 import com.enonic.kubernetes.client.v1.api.xp7.snapshots.Xp7MgmtSnapshotsList;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -291,7 +292,7 @@ public class XpClient
         appOp("stop", req, String.format("Failed stopping app on '%s'", params.url()));
     }
 
-    public Xp7MgmtSnapshotsList snapshotList() throws XpClientException {
+    public Xp7MgmtSnapshotsList snapshotsList() throws XpClientException {
         try {
             Response response = get("/repo/snapshot/list");
             return mapper.readValue(response.body().bytes(), Xp7MgmtSnapshotsList.class);
@@ -300,23 +301,30 @@ public class XpClient
         }
     }
 
-    public List<String> routesList() throws XpClientException {
+    public List<Xp7MgmtIdProvider> idProvidersList() throws XpClientException {
         try {
-            Response response = get("/cloud-utils/routes");
-            return mapper.readValue(response.body().bytes(), new TypeReference<>() {
-            });
+            Response response = get("/idproviders/list");
+            return mapper.readerForListOf( Xp7MgmtIdProvider.class ).readValue( response.body().bytes());
         } catch (Exception e) {
-            throw new XpClientException("Failed to list routes", e);
+            throw new XpClientException("Failed to list idproviders", e);
         }
     }
 
-    public List<String> idProvidersList() throws XpClientException {
+    public List<Xp7MgmtProject> projectsList() throws XpClientException {
         try {
-            Response response = get("/cloud-utils/idproviders");
-            return mapper.readValue(response.body().bytes(), new TypeReference<>() {
-            });
+            Response response = get("/content/projects/list");
+            return mapper.readerForListOf( Xp7MgmtProject.class ).readValue( response.body().bytes());
         } catch (Exception e) {
-            throw new XpClientException("Failed to list idproviders", e);
+            throw new XpClientException("Failed to list projects", e);
+        }
+    }
+
+    public List<Xp7MgmtProject> webappsList() throws XpClientException {
+        try {
+            Response response = get("/webapps/list");
+            return mapper.readerForListOf( Xp7MgmtProject.class ).readValue( response.body().bytes());
+        } catch (Exception e) {
+            throw new XpClientException("Failed to list webapps", e);
         }
     }
 }
