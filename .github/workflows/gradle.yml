@@ -25,7 +25,13 @@ jobs:
           version: '3.7.0'
 
       - name: Build
-        run: ./gradlew build
+        run: |
+          if [[ "$(./get-version.sh)" == *"-SNAPSHOT" ]]
+          then
+            ./gradlew publish -PrepoUser=${{ secrets.ARTIFACTORY_USERNAME }} -PrepoPassword=${{ secrets.ARTIFACTORY_PASSWORD }}
+          else
+            ./gradlew build 
+          fi
 
   release:
     runs-on: ubuntu-latest
@@ -62,7 +68,7 @@ jobs:
 
       - name: Assert versions
         run: |
-          [ "${{ steps.tag.outputs.tag }}" == "$(./get-version.sh`" ] || (echo "version in gradle.properties does not match tag"; exit 1)
+          [ "${{ steps.tag.outputs.tag }}" == "$(./get-version.sh)" ] || (echo "version in gradle.properties does not match tag"; exit 1)
 
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v2
