@@ -29,16 +29,15 @@ jobs:
           if [[ "$(./get-version.sh)" == *"-SNAPSHOT" ]]
           then
             echo "Building and publishing snapshot version"
-            ./gradlew publish -PrepoUser=${{ secrets.ARTIFACTORY_USERNAME }} -PrepoPassword=${{ secrets.ARTIFACTORY_PASSWORD }}
+            ./gradlew ci publish -PrepoUser=${{ secrets.ARTIFACTORY_USERNAME }} -PrepoPassword=${{ secrets.ARTIFACTORY_PASSWORD }}
           else
             echo "Building release version"
-            ./gradlew build 
+            ./gradlew ci 
           fi
 
       - name: Codecov
         uses: codecov/codecov-action@v3
-        with:
-          files: ./build/testCodeCoverageReport.xml
+
 
   release:
     runs-on: ubuntu-latest
