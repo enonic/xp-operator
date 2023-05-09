@@ -14,7 +14,7 @@ admissionRequest:
           service: myservice2
       spec:
         enabled: false
-        xpVersion: 7.7.0
+        xpVersion: 7.12.2
         nodesSharedDisks:
           - name: blobstore
             size: 1Gi
