@@ -42,11 +42,11 @@ Make sure you workspace contains no uncommitted changes and then run:
 $ VERSION=0.18 make publish
 ```
 
-That will update versions to `0.18` and push to GitHub. That will trigger a build. If that build succeeds, tag it for release:
+That will update versions to `0.18.0` and push to GitHub. That will trigger a build. If that build succeeds, tag it for release:
 
 ```bash
-$ git tag -a v0.18 -m "v0.18"
-$ git push origin v0.18
+$ git tag -a v0.18 -m "v0.18.0"
+$ git push origin v0.18.0
 ```
 
 This will trigger a release!
