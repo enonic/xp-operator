@@ -20,5 +20,5 @@ reporting {
 }
 
 tasks.register('ci') {
-    dependsOn tasks.named('testCodeCoverageReport', JacocoReport)
+    dependsOn tasks.named('build'), tasks.named('testCodeCoverageReport', JacocoReport)
 }
