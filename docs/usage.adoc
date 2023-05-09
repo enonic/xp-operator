@@ -21,7 +21,7 @@ metadata:
   namespace: my-namespace
 spec:
   enabled: true     # Should the pods be running
-  xpVersion: 7.12.2  # XP version, has to be >=7.7.0
+  xpVersion: 7.12.2  # XP version, has to be >=7.13.0
 
   # List of preinstalled apps
   nodesPreinstalledApps:
