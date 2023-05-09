@@ -1,5 +1,6 @@
 plugins {
     id 'java-library'
+    id 'jacoco'
     id 'maven-publish'
     alias(libs.plugins.jsonschema2pojo)
 }
@@ -64,4 +65,8 @@ test {
 
 tasks.named("processTestResources") {
     dependsOn(":helm:processHelmResources")
+}
+
+jacocoTestReport {
+    dependsOn test
 }

@@ -35,6 +35,9 @@ jobs:
             ./gradlew build 
           fi
 
+      - name: Codecov
+        uses: codecov/codecov-action@v3
+
   release:
     runs-on: ubuntu-latest
 
