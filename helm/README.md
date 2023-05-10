@@ -13,7 +13,7 @@ This chart bootstraps the [Enonic XP Kubernetes Operator](../) on a [Kubernetes]
 
 ## Quick start
 
-```console
+```bash
 helm repo add enonic https://repo.enonic.com/helm
 helm repo update
 helm install --namespace kube-system enonic-operator enonic/xp-operator

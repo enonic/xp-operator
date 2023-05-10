@@ -2,8 +2,6 @@
 
 FROM adoptopenjdk:11-jre-hotspot
 
-RUN mkdir -p /deployments
-
 # JAVA_APP_DIR is used by run-java.sh for finding the binaries
 ENV JAVA_APP_DIR=/deployments \
     JAVA_MAJOR_VERSION=11
@@ -21,21 +19,20 @@ RUN mkdir -p /opt/agent-bond && \
 COPY docker/jmx_exporter_config.yml /opt/agent-bond/
 EXPOSE 8778 9779
 
-# Add run script as /deployments/run-java.sh
-COPY docker/run-java.sh /deployments/
-
 # Install helm
-COPY --from=alpine/helm:3.7.0 /usr/bin/helm /usr/bin/helm
+COPY --from=alpine/helm:3.11.3 /usr/bin/helm /usr/bin/helm
 
 # Set ENV vars
 ENV JAVA_OPTIONS="-Doperator.charts.path=helm -Djava.util.logging.manager=org.jboss.logmanager.LogManager" \
     AB_ENABLED=jmx_exporter
 
+# Add run script as /deployments/run-java.sh
+COPY docker/run-java.sh /deployments/
+
 # Copy helm charts
-COPY --chown=1000:1000 java-operator/src/main/helm /deployments/helm
+COPY --chown=1000:1000 java-operator/src/main/helm /deployments/helm/
 
 # Copy build target
-COPY --chown=1000:1000 java-operator/build/quarkus-app /tmp/quarkus-app
-RUN mv /tmp/quarkus-app/* /deployments
+COPY --chown=1000:1000 java-operator/build/quarkus-app /deployments/
 
 CMD [ "/deployments/run-java.sh" ]

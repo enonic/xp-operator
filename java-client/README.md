@@ -19,6 +19,22 @@ This is the Java client for the [Enonic XP Kubernetes Operator](https://github.c
 
 ## Installation
 
+### Gradle
+
+For XP Application:
+```groovy
+dependencies {
+    include "com.enonic.kubernetes:client:${k8s-client-version}"
+}
+```
+
+For non-XP Application:
+```groovy
+dependencies {
+    implementation "com.enonic.kubernetes:client:${k8s-client-version}"
+}
+```
+
 ### Maven
 
 ```xml
@@ -27,14 +43,6 @@ This is the Java client for the [Enonic XP Kubernetes Operator](https://github.c
   <artifactId>client</artifactId>
   <version>${k8s-client-version}</version>
 </dependency>
-```
-
-### Gradle
-
-```groovy
-dependencies {
-    include "com.enonic.kubernetes:client:${k8s-client-version}"
-}
 ```
 
 ## K8s CRD deserialization
