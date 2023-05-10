@@ -1,3 +1,7 @@
+plugins {
+    id 'base'
+}
+
 task processHelmResources(type: Copy) {
     from 'src/main' into "${buildDir}/resources/main"
     filesMatching('values.yaml') {
@@ -5,22 +9,15 @@ task processHelmResources(type: Copy) {
     }
 }
 
-task helmPackage(type: Exec, dependsOn: processHelmResources) {
+task helmPackage(type: Exec) {
     def cmd = ['helm', 'package', "${buildDir}/resources/main", '--app-version', "${project.version}", '--version', "${project.version}", '--destination', "${buildDir}/libs"]
 
     if (System.getProperty("os.name").toLowerCase().contains("windows")) {
         cmd = ['cmd', '/c'] + cmd
     }
     commandLine cmd
-    inputs.files processHelmResources.outputs.files
-    outputs.file("${buildDir}/libs/${project.name}-${project.version}.tgz")
+    inputs.files processHelmResources
+    outputs.dir "${buildDir}/libs"
 }
 
-task build(dependsOn: helmPackage) {
-}
-
-task clean {
-    doLast {
-        delete "${buildDir}"
-    }
-}
+build.dependsOn helmPackage

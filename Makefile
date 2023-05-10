@@ -33,29 +33,6 @@ release: ## Setup repo for release. Provide VERSION as env var i.e. 'VERSION=0.1
 	@echo '  $$' git tag -a v${VERSION} -m "\"v${VERSION}\""
 	@echo '  $$' git push origin v${VERSION}
 
-publish-helm: build-java ## Publish chart (env var ARTIFACTORY_USER and ARTIFACTORY_PASS required)
-	# Setup environment ...
-	@test "${ARTIFACTORY_USER}" || (echo "Set env variable ARTIFACTORY_USER"; exit 1;)
-	@test "${ARTIFACTORY_PASS}" || (echo "Set env variable ARTIFACTORY_PASS"; exit 1;)
-	@$(eval FILE := $(shell find helm/build/libs/ -name '*.tgz'))
-	@$(eval URL := ${REPOSITORY}/${CHART_NAME}/`basename ${FILE}`)
-	@$(eval MD5 := $(shell openssl md5 ${FILE} | cut -d ' ' -f 2))
-	@$(eval SHA1 := $(shell openssl sha1 ${FILE} | cut -d ' ' -f 2))
-	@$(eval SHA256 := $(shell openssl sha256 ${FILE} | cut -d ' ' -f 2))
-
-	# Check if version already exists ...
-	@$(eval EXISTS := $(shell curl -s -f -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" ${URL}.sha256 > /dev/null && echo "1" || echo "0"))
-	@if [ ${EXISTS} == "1" ]; then echo "Artifact $(shell basename ${FILE}) already exists!"; exit 1; fi;
-
-	# Upload artifact ...
-	@curl --fail -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" \
-	-H "X-Checksum-MD5:${MD5}" \
-	-H "X-Checksum-SHA1:${SHA1}" \
-	-H "X-Checksum-SHA256:${SHA256}" \
-	-X PUT \
-	-T ${FILE} \
-	${URL}
-
 test: build-docker ## Run k8s kind cluster with operator installed
 	# Start kind cluster
 	@$(MAKE) -C kubernetes/kind --no-print-directory kind-up

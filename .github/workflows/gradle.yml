@@ -60,7 +60,7 @@ jobs:
       - name: Setup Helm
         uses: azure/setup-helm@v3
         with:
-          version: '3.7.0'
+          version: '3.11.0'
 
       - name: Setup YQ
         uses: chrisdickinson/setup-yq@latest
@@ -107,10 +107,7 @@ jobs:
           platforms: linux/amd64,linux/arm64,linux/ppc64le,linux/s390x,linux/arm/v7
 
       - name: Publish helm chart
-        run: make publish-helm
-        env:
-          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USERNAME }}
-          ARTIFACTORY_PASS: ${{ secrets.ARTIFACTORY_PASSWORD }}
+        run: curl -u "${{ secrets.ARTIFACTORY_USERNAME }}:${{ secrets.ARTIFACTORY_PASSWORD }}" https://repo.enonic.com/helm/ --upload-file helm/build/libs/xp-operator-$(./get-version.sh).tgz -v
 
       - name: Publish java-client
         run: ./gradlew publish -PrepoUser=${{ secrets.ARTIFACTORY_USERNAME }} -PrepoPassword=${{ secrets.ARTIFACTORY_PASSWORD }}
