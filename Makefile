@@ -9,7 +9,7 @@ build-java: ## Build java modules
 	# Building java modules done!
 
 build-docker: build-java ## Build docker image
-	@TAG=$(shell ./get-version.sh) $(MAKE) -C docker --no-print-directory build
+	@docker build -f Dockerfile -t ${DOCKER_IMAGE}:$(shell ./get-version.sh) .
 
 build: build-docker
 
@@ -57,12 +57,12 @@ dev:
 verify-kind: ## Run k8s kind cluster setup is working
 	@$(MAKE) -C kubernetes/kind --no-print-directory kind-network-info
 	@echo "Operator info:"
-	@kubectl get --raw='/apis/operator.enonic.cloud/v1/operator/version' | jq
+	@kubectl get --raw='/apis/operator.enonic.cloud/v1/operator/version' | yq
 
-stop-kind: ## Stop k8s kind cluster
+clean-kind: ## Stop k8s kind cluster
 	@$(MAKE) -C kubernetes/kind --no-print-directory kind-down
 
-clean: stop-kind ## Clean up everything
+clean: clean-kind ## Clean up everything
 	@./gradlew clean
 
 help: ## Show help
