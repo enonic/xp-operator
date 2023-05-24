@@ -29,7 +29,6 @@ deployment:
   name: "mycloud-mysolution-myenv-myservice"
   namespace: "mycloud-mysolution-myenv-myservice"
   preInstalledAppHash: "957ee10a49f2be0d0e2b1272ef611a5a93fe59c95c4044d792118aec0221021e6eb3685822a057b80343f8bcd14d7c37140eb2967042a1486bdedc5456f3fde4"
-  preInstalledCloudUtils: false
   spec:
     enabled: true
     xpVersion: "7.12.2"
