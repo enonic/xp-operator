@@ -15,7 +15,7 @@ immutables-valueannotations = { module = "org.immutables:value-annotations", ver
 
 guava = { module = "com.google.guava:guava", version = "31.1-jre" }
 
-maven-mavenartifact = { module = "org.apache.maven:maven-artifact", version = "3.9.1" }
+maven-mavenartifact = { module = "org.apache.maven:maven-artifact", version = "3.9.2" }
 
 jackson-dataformat-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version = "2.15.0" }
 jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version = "2.15.0" }
