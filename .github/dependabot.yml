@@ -9,19 +9,19 @@ updates:
       - "rymsha"
     reviewers:
       - "rymsha"
-  - package-ecosystem: "maven"
+  - package-ecosystem: "gradle"
     directory: "/java-client"
     schedule:
-      interval: "monthly"
+      interval: "daily"
     open-pull-requests-limit: 10
     assignees:
       - "rymsha"
     reviewers:
       - "rymsha"
-  - package-ecosystem: "maven"
+  - package-ecosystem: "gradle"
     directory: "/java-operator"
     schedule:
-      interval: "monthly"
+      interval: "daily"
     open-pull-requests-limit: 10
     assignees:
       - "rymsha"
