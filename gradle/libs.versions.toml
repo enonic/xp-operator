@@ -17,7 +17,7 @@ guava = { module = "com.google.guava:guava", version = "31.1-jre" }
 
 maven-mavenartifact = { module = "org.apache.maven:maven-artifact", version = "3.9.1" }
 
-jackson-dataformat-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version = "2.15.0" }
+jackson-dataformat-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version = "2.15.1" }
 jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version = "2.15.0" }
 jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version = "2.15.0" }
 
