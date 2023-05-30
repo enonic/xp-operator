@@ -10,7 +10,7 @@ updates:
     reviewers:
       - "rymsha"
   - package-ecosystem: "gradle"
-    directory: "/java-client"
+    directory: "/"
     schedule:
       interval: "daily"
     open-pull-requests-limit: 10
@@ -18,12 +18,4 @@ updates:
       - "rymsha"
     reviewers:
       - "rymsha"
-  - package-ecosystem: "gradle"
-    directory: "/java-operator"
-    schedule:
-      interval: "daily"
-    open-pull-requests-limit: 10
-    assignees:
-      - "rymsha"
-    reviewers:
-      - "rymsha"
+
