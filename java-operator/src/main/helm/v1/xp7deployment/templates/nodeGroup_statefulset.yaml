@@ -212,14 +212,12 @@ spec:
             - name: extra-config
               mountPath: {{ $.Values.files.setEnv }}
               subPath: preStart.sh
-            {{- range $volume := $nodeGroup.resources.disks }}
-            - name: {{ $volume.name }}
-              mountPath: {{ index $.Values.volumes.mounts $volume.name }}
-            {{- end }}
-            {{- range $volume := $.Values.deployment.spec.nodesSharedDisks }}
-            - name: {{ $volume.name }}
-              mountPath: {{ index $.Values.volumes.mounts $volume.name }}
-            {{- end }}
+        {{- range $disk := $nodeGroup.resources.disks }}
+        {{- include "volumeMount" (dict "disk" $disk "Values" $.Values) | indent 12 }}
+        {{- end }}
+        {{- range $disk := $.Values.deployment.spec.nodesSharedDisks }}
+        {{- include "volumeMount" (dict "disk" $disk "Values" $.Values) | indent 12 }}
+        {{- end }}
         - name: events
           image: {{ $.Values.image.nameTemplate | replace "%s" $.Values.deployment.spec.xpVersion }}
           imagePullPolicy: {{ $.Values.image.pullPolicy }}
@@ -336,14 +334,12 @@ spec:
               mountPath: /etc/ec/backup-agent
             - name: restic
               mountPath: /restic
-            {{- range $volume := $nodeGroup.resources.disks }}
-            - name: {{ $volume.name }}
-              mountPath: {{ index $.Values.volumes.mounts $volume.name }}
-            {{- end }}
-            {{- range $volume := $.Values.deployment.spec.nodesSharedDisks }}
-            - name: {{ $volume.name }}
-              mountPath: {{ index $.Values.volumes.mounts $volume.name }}
-            {{- end }}
+          {{- range $disk := $nodeGroup.resources.disks }}
+            {{- include "volumeMount" (dict "disk" $disk "Values" $.Values) | indent 12 }}
+          {{- end }}
+          {{- range $disk := $.Values.deployment.spec.nodesSharedDisks }}
+            {{- include "volumeMount" (dict "disk" $disk "Values" $.Values) | indent 12 }}
+          {{- end }}
         {{- end }}
 
       volumes:
@@ -359,37 +355,26 @@ spec:
           configMap:
             defaultMode: "420"
             name: backup-config
-        {{- range $volume := $.Values.deployment.spec.nodesSharedDisks }}
+        {{- range $volume := $.Values.deployment.spec.nodesSharedVolumes }}
         - name: {{ $volume.name }}
           persistentVolumeClaim:
             claimName: {{ $volume.name }}
         {{- end }}
-
+        {{- range $disk := $.Values.deployment.spec.nodesSharedDisks }}
+        {{- if not $disk.volume }}
+        - name: {{ $disk.name }}
+          persistentVolumeClaim:
+            claimName: {{ $disk.name }}
+        {{- end }}
+        {{- end }}
   volumeClaimTemplates:
+    {{- range $volume := $nodeGroup.resources.volumes }}
+    {{ include "volumeClaimTemplate" (dict "volume" $volume "nodeGroup" $nodeGroup "Values" $.Values) | indent 4 }}
+    {{- end }}
     {{- range $volume := $nodeGroup.resources.disks }}
-    - metadata:
-        name: {{ $volume.name }}
-        annotations:
-          {{- with $.Values.storage.default.annotations }}
-          {{- toYaml . | nindent 10 }}
-          {{- end }}
-        labels:
-          {{- if and $.Values.backup.enabled (not (has $volume.name $.Values.volumes.backups)) }}
-          velero.io/exclude-from-backup: true
-          {{- end }}
-          {{ $.Values.labelKeys.managed }}: true
-          {{ $.Values.labelKeys.nodeGroup }}: {{ $nodeGroup.name }}
-          {{- with $.Values.defaultLabels }}
-          {{- toYaml . | nindent 10 }}
-          {{- end }}
-      spec:
-        volumeMode: Filesystem
-        storageClassName: {{ $.Values.storage.default.storageClassName }}
-        accessModes:
-          - ReadWriteOnce
-        resources:
-          requests:
-            storage: {{ $volume.size }}
+    {{- if not $volume.volume }}
+    {{ include "volumeClaimTemplate" (dict "volume" $volume "nodeGroup" $nodeGroup "Values" $.Values) | indent 4 }}
+    {{- end }}
     {{- end }}
     {{ if and (not $.Values.deployment.clustered) $.Values.backup.enabled }}
     - metadata:
@@ -404,4 +389,41 @@ spec:
             storage: {{ $.Values.backup.cacheSize }}
     {{- end }}
 ---
+{{- end }}
+
+{{- define "volumeMount" -}}
+{{- if .disk.volume }}
+- name: {{ .disk.volume }}
+  mountPath: {{ index .Values.volumes.mounts .disk.name }}
+  subPath: {{ .disk.name }}
+{{- else }}
+- name: {{ .disk.name }}
+  mountPath: {{ index .Values.volumes.mounts .disk.name }}
+{{- end }}
+{{- end }}
+
+{{ define "volumeClaimTemplate" }}
+- metadata:
+    name: {{ .volume.name }}
+    annotations:
+      {{- with .Values.storage.default.annotations }}
+      {{- toYaml . | nindent 6 }}
+      {{- end }}
+    labels:
+      {{- if and .Values.backup.enabled (not (has .volume.name .Values.volumes.backups)) }}
+      velero.io/exclude-from-backup: true
+      {{- end }}
+      {{ .Values.labelKeys.managed }}: true
+      {{ .Values.labelKeys.nodeGroup }}: {{ .nodeGroup.name }}
+      {{- with .Values.defaultLabels }}
+      {{- toYaml . | nindent 6 }}
+      {{- end }}
+  spec:
+    volumeMode: Filesystem
+    storageClassName: {{ .volume.class | default .Values.storage.default.storageClassName }}
+    accessModes:
+      - ReadWriteOnce
+    resources:
+      requests:
+        storage: {{ .volume.size }}
 {{- end }}

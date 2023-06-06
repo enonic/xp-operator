@@ -1,0 +1,73 @@
+apiVersion: enonic.cloud/v1
+kind: Xp7Deployment
+metadata:
+  name: mycloud-mysolution-myenv-myservice
+  namespace: mycloud-mysolution-myenv-myservice
+  labels:
+    cloud: mycloud
+    solution: mysolution
+    environment: myenv
+    service: myservice
+spec:
+  enabled: true
+  xpVersion: 7.12.2
+
+  nodesSharedVolumes:
+    - name: shared
+      size: 1Gi
+      class: sharedClass
+
+  # Create volumes shared by all nodes in this deployment
+  nodesSharedDisks:
+    - name: blobstore
+      volume: shared
+
+    - name: snapshots
+      volume: shared
+
+    - name: export # Dumps and other data
+      size: 2Gi
+
+  nodeGroups:
+    - name: master
+      data: false
+      master: true
+      replicas: 3
+      resources:
+        cpu: "1"
+        memory: 1Gi
+    - name: data
+      data: true
+      master: false
+      replicas: 2
+      resources:
+        cpu: "2"
+        memory: 2Gi
+        volumes:
+          - name: inner
+            size: 1Gi
+            class: innerClass
+        disks:
+          - name: index
+            volume: inner
+          - name: work
+            volume: inner
+          - name: deploy
+            size: 1Gi
+    - name: frontend
+      data: false
+      master: false
+      replicas: 3
+
+      resources:
+        cpu: "3"
+        memory: 3Gi
+        disks:
+          - name: work
+            size: 7Gi
+            class: innerClass
+      env:
+        - name: CUSTOM_ENV
+          value: "myenvvar"
+        - name: XP_OPTS
+          value: "-bla"

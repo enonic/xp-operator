@@ -1,33 +1,48 @@
+# Setup shared disks persistent claims
+{{- range $disk := $.Values.deployment.spec.nodesSharedDisks }}
+  {{- if not $disk.volume }}
+    {{- template "persistentVolumeClaim" (dict "claim" $disk "Values" $.Values) }}
+  {{- end }}
+{{- end }}
+
 # Setup shared volumes persistent claims
-{{- range $volume := .Values.deployment.spec.nodesSharedDisks }}
+{{- range $volume := $.Values.deployment.spec.nodesSharedVolumes }}
+  {{- template "persistentVolumeClaim" (dict "claim" $volume "Values" $.Values) }}
+{{- end }}
+
+
+{{- define "persistentVolumeClaim" -}}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ $volume.name }}
-  namespace: {{ $.Values.deployment.namespace }}
+  name: {{ .claim.name }}
+  namespace: {{ .Values.deployment.namespace }}
   annotations:
-    {{ $.Values.annotationKeys.applyPriority }}: "10"
-    {{- with $.Values.storage.shared.annotations }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
+    {{ .Values.annotationKeys.applyPriority }}: "10"
+      {{- with .Values.storage.shared.annotations }}
+      {{- toYaml . | nindent 4 }}
+      {{- end }}
   labels:
-    {{- if and $.Values.backup.enabled (not (has $volume.name $.Values.volumes.backups)) }}
+    {{- if and .Values.backup.enabled (not (has .claim.name .Values.volumes.backups)) }}
     velero.io/exclude-from-backup: true
     {{- end }}
-    {{ $.Values.labelKeys.managed }}: true
-    {{- with $.Values.defaultLabels }}
+    {{ .Values.labelKeys.managed }}: true
+    {{- with .Values.defaultLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
   ownerReferences:
-    {{- with $.Values.ownerReferences }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
+    {{- with .Values.ownerReferences }}
+      {{- toYaml . | nindent 4 }}
+      {{- end }}
 spec:
-  storageClassName: {{ $.Values.storage.shared.storageClassName }}
+  storageClassName: {{ .claim.class | default .Values.storage.shared.storageClassName }}
   accessModes:
     - ReadWriteMany
   resources:
     requests:
-      storage: {{ $volume.size }}
+      storage: {{ .claim.size }}
 {{- end }}
+
+
+
