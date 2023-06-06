@@ -28,9 +28,10 @@ nb-configuration.xml
 *.orig
 *.rej
 
-# Maven
-target/
-pom.xml.tag
-pom.xml.releaseBackup
-pom.xml.versionsBackup
-release.properties
+# Gradle
+/.gradle/*
+
+# Build
+/helm/build/*
+/java-client/build/*
+/java-operator/build/*

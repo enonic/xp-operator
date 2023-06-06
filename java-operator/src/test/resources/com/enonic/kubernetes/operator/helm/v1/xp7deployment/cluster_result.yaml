@@ -822,16 +822,6 @@ spec:
         - containerPort: 9300
           name: "es-transport"
           protocol: "TCP"
-        readinessProbe:
-          failureThreshold: 2
-          httpGet:
-            path: "/_cluster/health?timeout=1s&wait_for_status=yellow"
-            port: 9200
-            scheme: "HTTP"
-          initialDelaySeconds: 30
-          periodSeconds: 8
-          successThreshold: 3
-          timeoutSeconds: 2
         resources:
           limits:
             cpu: "1"
@@ -1082,16 +1072,6 @@ spec:
         - containerPort: 9300
           name: "es-transport"
           protocol: "TCP"
-        readinessProbe:
-          failureThreshold: 2
-          httpGet:
-            path: "/_cluster/health?timeout=1s&wait_for_status=green"
-            port: 9200
-            scheme: "HTTP"
-          initialDelaySeconds: 30
-          periodSeconds: 8
-          successThreshold: 3
-          timeoutSeconds: 2
         resources:
           limits:
             cpu: "2"
@@ -1365,16 +1345,6 @@ spec:
         - containerPort: 9300
           name: "es-transport"
           protocol: "TCP"
-        readinessProbe:
-          failureThreshold: 2
-          httpGet:
-            path: "/_cluster/health?timeout=1s&wait_for_status=yellow"
-            port: 9200
-            scheme: "HTTP"
-          initialDelaySeconds: 30
-          periodSeconds: 8
-          successThreshold: 3
-          timeoutSeconds: 2
         resources:
           limits:
             cpu: "3"

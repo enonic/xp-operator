@@ -9,6 +9,7 @@
     "enabled" : true,
     "xpVersion" : "unstable",
     "nodesPreinstalledApps" : [ ],
+    "nodesSharedVolumes" : [ ],
     "nodesSharedDisks" : [ {
       "name" : "blobstore",
       "size" : "150"
@@ -26,6 +27,7 @@
       "resources" : {
         "cpu" : "1",
         "memory" : "512Mi",
+        "volumes" : [ ],
         "disks" : [ {
           "name" : "index",
           "size" : "100m"

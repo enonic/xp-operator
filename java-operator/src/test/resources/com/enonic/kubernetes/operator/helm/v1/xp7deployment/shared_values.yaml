@@ -24,43 +24,83 @@ defaultLabels:
   service: "myservice"
   solution: "mysolution"
 deployment:
-  clustered: false
-  hasDedicatedFrontendNodes: false
+  clusterMajority: 5
+  clustered: true
+  hasDedicatedFrontendNodes: true
+  minimumDataNodes: 2
+  minimumMasterNodes: 2
   name: "mycloud-mysolution-myenv-myservice"
   namespace: "mycloud-mysolution-myenv-myservice"
-  preInstalledAppHash: "957ee10a49f2be0d0e2b1272ef611a5a93fe59c95c4044d792118aec0221021e6eb3685822a057b80343f8bcd14d7c37140eb2967042a1486bdedc5456f3fde4"
+  preInstalledAppHash: "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e"
   spec:
     enabled: true
-    xpVersion: "7.13.0"
-    nodesPreinstalledApps:
-    - name: "snapshotter"
-      url: "https://repo.enonic.com/public/com/enonic/app/snapshotter/3.0.2/snapshotter-3.0.2.jar"
-    nodesSharedVolumes: []
+    xpVersion: "7.12.2"
+    nodesPreinstalledApps: []
+    nodesSharedVolumes:
+    - name: shared
+      size: "1Gi"
+      class: sharedClass
     nodesSharedDisks:
     - name: "blobstore"
-      size: "2Gi"
+      volume: shared
     - name: "snapshots"
-      size: "3Gi"
+      volume: shared
+    - name: export
+      size: 2Gi
     nodeGroups:
-    - name: "fisk"
-      data: true
+    - name: "master"
+      data: false
       master: true
-      replicas: 1
+      replicas: 3
       env:
       - name: "XP_OPTS"
-        value: " -Xms154m -Xmx154m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof\
+        value: " -Xms512m -Xmx512m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof\
           \ -Dhazelcast.shutdownhook.policy=GRACEFUL -Dhazelcast.graceful.shutdown.max.wait=600"
       resources:
         cpu: "1"
-        memory: "512Mi"
+        memory: "1Gi"
+        volumes: []
+        disks: []
+    - name: "data"
+      data: true
+      master: false
+      replicas: 2
+      env:
+      - name: "XP_OPTS"
+        value: " -Xms614m -Xmx614m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof\
+          \ -Dhazelcast.shutdownhook.policy=GRACEFUL -Dhazelcast.graceful.shutdown.max.wait=600"
+      resources:
+        cpu: "2"
+        memory: "2Gi"
+        volumes:
+        - name: inner
+          size: "1Gi"
+          class: "innerClass"
+        disks:
+        - name: "index"
+          volume: "inner"
+        - name: "work"
+          volume: "inner"
+        - name: "deploy"
+          size: "1Gi"
+    - name: "frontend"
+      data: false
+      master: false
+      replicas: 3
+      env:
+      - name: "CUSTOM_ENV"
+        value: "myenvvar"
+      - name: "XP_OPTS"
+        value: "-bla -Xms1536m -Xmx1536m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof\
+          \ -Dhazelcast.shutdownhook.policy=GRACEFUL -Dhazelcast.graceful.shutdown.max.wait=600"
+      resources:
+        cpu: "3"
+        memory: "3Gi"
         volumes: []
         disks:
-        - name: "export"
-          size: "234Mi"
-        - name: "index"
-          size: "200Mi"
         - name: "work"
-          size: "400Mi"
+          size: "7Gi"
+          class: "innerClass"
   suPass: "password"
   suPassHash: "b109f3bbbc244eb82441917ed06d618b9008dd09b3befd1b5e07394c706a8bb980b1d7785e5976ec049b46df5f1326af5a2ea6d103fd07c95385ffab0cacbc86"
 dirs:

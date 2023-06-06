@@ -9,7 +9,10 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
@@ -51,7 +54,21 @@ public abstract class HelmTest
         {
             sb.append( mapper.writeValueAsString( r ) );
         }
-        assertEquals( mapper.readTree(new File(expectedResultFile)), mapper.readTree(sb.toString()), "Result does not match: (" + new File( expectedResultFile ).getName() + ":0)" );
+        final ObjectReader reader = mapper.reader();
+
+        final JsonParser expectedParser = reader.createParser( new File( expectedResultFile ) );
+        final JsonParser actualParser = reader.createParser( sb.toString() );
+
+        JsonNode expected;
+        JsonNode actual;
+
+        do
+        {
+            expected = expectedParser.readValueAsTree();
+            actual = actualParser.readValueAsTree();
+
+            assertEquals( expected, actual, "Result does not match: (" + new File( expectedResultFile ).getName() + ":0)" );
+        } while ( expected != null || actual != null );
     }
 
     @SuppressWarnings("SameReturnValue")

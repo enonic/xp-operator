@@ -28,6 +28,25 @@
             }
           }
         },
+        "nodesSharedVolumes": {
+          "javaName": "Xp7DeploymentSpecNodesSharedVolumes",
+          "type": "array",
+          "items": {
+            "javaName": "Xp7DeploymentSpecNodesSharedVolume",
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "size": {
+                "type": "string"
+              },
+              "class": {
+                "type": "string"
+              }
+            }
+          }
+        },
         "nodesSharedDisks": {
           "javaName": "Xp7DeploymentSpecNodesSharedDisks",
           "type": "array",
@@ -39,6 +58,12 @@
                 "type": "string"
               },
               "size": {
+                "type": "string"
+              },
+              "volume": {
+                "type": "string"
+              },
+              "class": {
                 "type": "string"
               }
             }
@@ -93,6 +118,25 @@
                   "memory": {
                     "type": "string"
                   },
+                  "volumes": {
+                    "javaName": "Xp7DeploymentSpecNodeGroupVolumes",
+                    "type": "array",
+                    "items": {
+                      "javaName": "Xp7DeploymentSpecNodeGroupVolume",
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "size": {
+                          "type": "string"
+                        },
+                        "class": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
                   "disks": {
                     "javaName": "Xp7DeploymentSpecNodeGroupDisks",
                     "type": "array",
@@ -104,6 +148,12 @@
                           "type": "string"
                         },
                         "size": {
+                          "type": "string"
+                        },
+                        "volume": {
+                          "type": "string"
+                        },
+                        "class": {
                           "type": "string"
                         }
                       }

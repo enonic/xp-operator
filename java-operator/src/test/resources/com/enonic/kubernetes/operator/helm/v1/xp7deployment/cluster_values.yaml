@@ -36,6 +36,7 @@ deployment:
     enabled: true
     xpVersion: "7.12.2"
     nodesPreinstalledApps: []
+    nodesSharedVolumes: []
     nodesSharedDisks:
     - name: "blobstore"
       size: "1Gi"
@@ -53,6 +54,7 @@ deployment:
       resources:
         cpu: "1"
         memory: "1Gi"
+        volumes: []
         disks:
         - name: "export"
           size: "3Gi"
@@ -67,6 +69,7 @@ deployment:
       resources:
         cpu: "2"
         memory: "2Gi"
+        volumes: [ ]
         disks:
         - name: "export"
           size: "4Gi"
@@ -85,6 +88,7 @@ deployment:
       resources:
         cpu: "3"
         memory: "3Gi"
+        volumes: [ ]
         disks:
         - name: "export"
           value: "6Gi"

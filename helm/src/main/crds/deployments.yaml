@@ -153,6 +153,17 @@ spec:
                         type: string
                       url:
                         type: string
+                nodesSharedVolumes:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      size:
+                        type: string
+                      class:
+                        type: string
                 nodesSharedDisks:
                   type: array
                   items:
@@ -161,6 +172,10 @@ spec:
                       name:
                         type: string
                       size:
+                        type: string
+                      volume:
+                        type: string
+                      class:
                         type: string
                 nodeGroups:
                   type: array
@@ -194,6 +209,17 @@ spec:
                             type: string
                           memory:
                             type: string
+                          volumes:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                                size:
+                                  type: string
+                                class:
+                                  type: string
                           disks:
                             type: array
                             items:
@@ -202,6 +228,10 @@ spec:
                                 name:
                                   type: string
                                 size:
+                                  type: string
+                                volume:
+                                  type: string
+                                class:
                                   type: string
             status:
               type: object
