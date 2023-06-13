@@ -174,7 +174,7 @@ spec:
           {{- if semverCompare ">= 7.13.0" $.Values.deployment.spec.xpVersion }}
           startupProbe:
             httpGet:
-              path: "/healthz"
+              path: "/health"
               port: 2609
               scheme: HTTP
             failureThreshold: 20
@@ -183,7 +183,7 @@ spec:
             timeoutSeconds: 2
           livenessProbe:
             httpGet:
-              path: "/healthz"
+              path: "/health"
               port: 2609
               scheme: HTTP
             failureThreshold: 10

@@ -628,7 +628,7 @@ spec:
         livenessProbe:
           failureThreshold: 10
           httpGet:
-            path: "/healthz"
+            path: "/health"
             port: 2609
             scheme: "HTTP"
           timeoutSeconds: 2
@@ -669,7 +669,7 @@ spec:
         startupProbe:
           failureThreshold: 20
           httpGet:
-            path: "/healthz"
+            path: "/health"
             port: 2609
             scheme: "HTTP"
           initialDelaySeconds: 30
