@@ -125,13 +125,6 @@ public class Predicates
         return isDeleted().negate();
     }
 
-    public static Predicate<HasMetadata> isBeingBackupRestored()
-    {
-        return hasLabel( cfgStr( "operator.charts.values.labelKeys.veleroBackupName" ) )
-            .and( hasLabel( cfgStr( "operator.charts.values.labelKeys.veleroBackupRestore" ) ) )
-            .and( youngerThan( 60 ) );
-    }
-
     public static <T, R> Predicate<T> fieldEquals( T o, Function<T, R> f )
     {
         return ( r ) -> Objects.equals( f.apply( o ), f.apply( r ) );

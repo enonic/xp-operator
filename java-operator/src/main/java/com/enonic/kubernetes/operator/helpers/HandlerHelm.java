@@ -21,7 +21,6 @@ import com.enonic.kubernetes.kubernetes.commands.K8sCommand;
 import com.enonic.kubernetes.kubernetes.commands.K8sCommandMapper;
 
 import static com.enonic.kubernetes.kubernetes.Predicates.fieldEquals;
-import static com.enonic.kubernetes.kubernetes.Predicates.isBeingBackupRestored;
 
 public abstract class HandlerHelm<R extends HasMetadata>
     extends InformerEventHandler<R>
@@ -56,10 +55,7 @@ public abstract class HandlerHelm<R extends HasMetadata>
     @Override
     public void onNewAdd( final R newResource )
     {
-        if ( isBeingBackupRestored().negate().test( newResource ) )
-        {
-            handle( null, newResource );
-        }
+        handle( null, newResource );
     }
 
     @Override

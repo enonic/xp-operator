@@ -38,7 +38,6 @@ import static com.enonic.kubernetes.common.Validator.dns1123;
 import static com.enonic.kubernetes.kubernetes.Predicates.fieldEquals;
 import static com.enonic.kubernetes.kubernetes.Predicates.inNodeGroupAllOr;
 import static com.enonic.kubernetes.kubernetes.Predicates.inSameNamespaceAs;
-import static com.enonic.kubernetes.kubernetes.Predicates.isBeingBackupRestored;
 import static com.enonic.kubernetes.kubernetes.Predicates.matchAnnotationPrefix;
 import static com.enonic.kubernetes.kubernetes.Predicates.withName;
 import static com.enonic.kubernetes.operator.ingress.OperatorXp7ConfigSync.getAnnotationMappings;
@@ -126,9 +125,7 @@ public class AdmissionApi
         Preconditions.checkState( newApp.getStatus().getState() != null, "'status.state' cannot be null" );
         Preconditions.checkState( newApp.getStatus().getXp7AppStatusFields() != null, "'status.fields' cannot be null" );
 
-        if (isBeingBackupRestored().negate().
-            and( h -> op == AdmissionOperation.CREATE ).
-            test( newApp )) {
+        if (op == AdmissionOperation.CREATE) {
             assertXp7Deployment( admissionReview, null );
         }
     }
@@ -169,9 +166,7 @@ public class AdmissionApi
         }
 
         // Check for present deployment
-        if (isBeingBackupRestored().negate().
-            and( h -> op == AdmissionOperation.CREATE ).
-            test( newConfig )) {
+        if ( op == AdmissionOperation.CREATE ) {
             assertXp7Deployment( admissionReview, Collections.singleton( newConfig.getSpec().getNodeGroup() ) );
         }
     }

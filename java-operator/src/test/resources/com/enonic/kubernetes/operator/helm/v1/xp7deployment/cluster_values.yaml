@@ -6,17 +6,6 @@ annotationKeys:
   neverOverwrite: "enonic.neverOverwrite"
   removeWithDeployment: "enonic.cloud/remove.with.xp7deployment"
   vhostMapping: "enonic.cloud/xp7.vhost.mapping."
-backup:
-  agent:
-    enabled: false
-    image: "ghcr.io/enonic-cloud/ec-backup-agent:0.7.2"
-    limits:
-      cpu: "1"
-      memory: "500Mi"
-    restic_repo_prefix: "/restic/repo"
-    schedule: "0 0 * * *"
-  cacheSize: "1Gi"
-  enabled: false
 clusterId: "44ddc40b-266c-4c99-b094-e758328fc6ba"
 defaultLabels:
   cloud: "mycloud"
@@ -116,8 +105,6 @@ labelKeys:
   managed: "enonic.managed"
   master: "enonic.master"
   nodeGroup: "enonic.nodeGroup"
-  veleroBackupName: "velero.io/backup-name"
-  veleroBackupRestore: "velero.io/restore-name"
 ownerReferences:
 - apiVersion: "enonic.cloud/v1"
   kind: "Xp7Deployment"
@@ -149,9 +136,6 @@ storage:
   shared:
     storageClassName: "standard"
 volumes:
-  backups:
-  - "blobstore"
-  - "snapshots"
   mounts:
     blobstore: "/enonic-xp/home/repo/blob"
     deploy: "/enonic-xp/home/deploy"

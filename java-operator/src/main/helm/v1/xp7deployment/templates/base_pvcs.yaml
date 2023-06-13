@@ -24,9 +24,6 @@ metadata:
       {{- toYaml . | nindent 4 }}
       {{- end }}
   labels:
-    {{- if and .Values.backup.enabled (not (has .claim.name .Values.volumes.backups)) }}
-    velero.io/exclude-from-backup: true
-    {{- end }}
     {{ .Values.labelKeys.managed }}: true
     {{- with .Values.defaultLabels }}
     {{- toYaml . | nindent 4 }}
