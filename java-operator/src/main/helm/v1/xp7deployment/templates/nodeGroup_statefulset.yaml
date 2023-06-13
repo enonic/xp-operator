@@ -37,11 +37,6 @@ spec:
       annotations:
         enonic.cloud/metrics.xp7: "true"
         enonic.cloud/logs.xp7: "true"
-        {{- if $.Values.backup.enabled }}
-        backup.velero.io/backup-volumes: "{{- join "," $.Values.volumes.backups }}"
-        pre.hook.backup.velero.io/container: "exp"
-        pre.hook.backup.velero.io/command: '["/usr/local/bin/backup.sh"]'
-        {{- end }}
         {{- if index $.Values "settings.linkerd" }}
         linkerd.io/inject: enabled
         {{- end }}
@@ -264,84 +259,6 @@ spec:
           command: ["bash"]
           args: ["extra-config/events.sh"]
 
-        {{ if and (not $.Values.deployment.clustered) $.Values.backup.enabled }}
-        - name: backup
-          image: {{ $.Values.backup.agent.image }}
-          imagePullPolicy: {{ $.Values.image.pullPolicy }}
-          terminationMessagePath: /dev/termination-log
-          terminationMessagePolicy: File
-
-          securityContext:
-            capabilities:
-              drop:
-                - ALL
-            runAsNonRoot: true
-            runAsUser: {{ $.Values.pods.securityContext.user }}
-
-          resources:
-            limits:
-              cpu: {{ $.Values.backup.agent.limits.cpu }}
-              memory: {{ $.Values.backup.agent.limits.memory }}
-
-          ports:
-            - name: backup
-              containerPort: 8000
-              protocol: TCP
-
-          env:
-            # Basic k8s configuration
-            - name: AGENT_MODE
-              value: k8s
-            - name: AGENT_K8S_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: xp-backup-sa-secret
-                  key: token
-            - name: AGENT_K8S_NAMESPACE
-              valueFrom:
-                fieldRef:
-                  apiVersion: v1
-                  fieldPath: metadata.namespace
-            - name: AGENT_K8S_POD
-              valueFrom:
-                fieldRef:
-                  apiVersion: v1
-                  fieldPath: metadata.name
-            - name: AGENT_K8S_CONTAINER
-              value: backup
-            - name: RESTIC_CACHE_DIR
-              value: /restic/cache
-            # Annotation configuration
-            - name: AGENT_K8S_ANNOTATIONS_VOLUME
-              value: backup.velero.io/backup-volumes
-            - name: AGENT_K8S_ANNOTATIONS_PRESCRIPT
-              value: pre.hook.backup.velero.io/command
-            - name: AGENT_K8S_ANNOTATIONS_PRESCRIPTCONTAINER
-              value: pre.hook.backup.velero.io/container
-            - name: AGENT_K8S_ANNOTATIONS_POSTSCRIPT
-              value: post.hook.backup.velero.io/command
-            - name: AGENT_K8S_ANNOTATIONS_POSTSCRIPTCONTAINER
-              value: post.hook.backup.velero.io/container
-            # Any extra config
-            {{- range $k, $v := $.Values.backup.agent.env }}
-            - name: {{ $k }}
-              value: {{ $v }}
-            {{- end }}
-
-
-          volumeMounts:
-            - name: backup-config
-              mountPath: /etc/ec/backup-agent
-            - name: restic
-              mountPath: /restic
-          {{- range $disk := $nodeGroup.resources.disks }}
-            {{- include "volumeMount" (dict "disk" $disk "Values" $.Values) | indent 12 }}
-          {{- end }}
-          {{- range $disk := $.Values.deployment.spec.nodesSharedDisks }}
-            {{- include "volumeMount" (dict "disk" $disk "Values" $.Values) | indent 12 }}
-          {{- end }}
-        {{- end }}
-
       volumes:
         - name: config
           configMap:
@@ -351,10 +268,6 @@ spec:
           configMap:
             defaultMode: "420"
             name: extra-config
-        - name: backup-config
-          configMap:
-            defaultMode: "420"
-            name: backup-config
         {{- range $volume := $.Values.deployment.spec.nodesSharedVolumes }}
         - name: {{ $volume.name }}
           persistentVolumeClaim:
@@ -375,18 +288,6 @@ spec:
     {{- if not $volume.volume }}
     {{ include "volumeClaimTemplate" (dict "volume" $volume "nodeGroup" $nodeGroup "Values" $.Values) | indent 4 }}
     {{- end }}
-    {{- end }}
-    {{ if and (not $.Values.deployment.clustered) $.Values.backup.enabled }}
-    - metadata:
-        name: restic
-      spec:
-        volumeMode: Filesystem
-        storageClassName: {{ $.Values.storage.default.storageClassName }}
-        accessModes:
-          - ReadWriteOnce
-        resources:
-          requests:
-            storage: {{ $.Values.backup.cacheSize }}
     {{- end }}
 ---
 {{- end }}
@@ -410,9 +311,6 @@ spec:
       {{- toYaml . | nindent 6 }}
       {{- end }}
     labels:
-      {{- if and .Values.backup.enabled (not (has .volume.name .Values.volumes.backups)) }}
-      velero.io/exclude-from-backup: true
-      {{- end }}
       {{ .Values.labelKeys.managed }}: true
       {{ .Values.labelKeys.nodeGroup }}: {{ .nodeGroup.name }}
       {{- with .Values.defaultLabels }}

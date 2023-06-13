@@ -769,10 +769,6 @@ spec:
           defaultMode: 420
           name: "extra-config"
         name: "extra-config"
-      - configMap:
-          defaultMode: 420
-          name: "backup-config"
-        name: "backup-config"
       - name: "blobstore"
         persistentVolumeClaim:
           claimName: "blobstore"

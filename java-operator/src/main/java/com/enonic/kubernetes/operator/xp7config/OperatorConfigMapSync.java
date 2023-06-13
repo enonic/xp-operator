@@ -28,7 +28,6 @@ import static com.enonic.kubernetes.kubernetes.Predicates.hasLabel;
 import static com.enonic.kubernetes.kubernetes.Predicates.inNamespace;
 import static com.enonic.kubernetes.kubernetes.Predicates.inNodeGroupAllOr;
 import static com.enonic.kubernetes.kubernetes.Predicates.inSameNamespaceAs;
-import static com.enonic.kubernetes.kubernetes.Predicates.isBeingBackupRestored;
 import static com.enonic.kubernetes.kubernetes.Predicates.isDeleted;
 import static java.util.stream.Collectors.groupingBy;
 
@@ -74,7 +73,6 @@ public class OperatorConfigMapSync
             filter( inNamespace( namespace ) ).
             filter( isDeleted().negate() ).
             filter( hasLabel( cfgStr( "operator.charts.values.labelKeys.nodeGroup" ) ) ).
-            filter( isBeingBackupRestored().negate() ).
             forEach( this::handle ) );
     }
 
