@@ -26,6 +26,7 @@ release: ## Setup repo for release. Provide VERSION as env var i.e. 'VERSION=0.1
 	# Creating and pushing release commit
 	@git add gradle.properties
 	@git commit -m "Set version to ${VERSION}"
+	@git tag v${VERSION} HEAD
 	@git push origin master
 
 	@echo
