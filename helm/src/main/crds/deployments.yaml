@@ -193,6 +193,58 @@ spec:
                       replicas:
                         type: integer
                         format: int32
+                      initContainers:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            image:
+                              type: string
+                            name:
+                              type: string
+                            command:
+                              type: array
+                              items:
+                                type: string
+                            args:
+                              type: array
+                              items:
+                                type: string
+                            mounts:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  name:
+                                    type: string
+                                  mountPath:
+                                    type: string
+                      sidecars:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            image:
+                              type: string
+                            name:
+                              type: string
+                            command:
+                              type: array
+                              items:
+                                type: string
+                            args:
+                              type: array
+                              items:
+                                type: string
+                            mounts:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  name:
+                                    type: string
+                                  mountPath:
+                                    type: string
                       env:
                         type: array
                         items:
@@ -209,6 +261,15 @@ spec:
                             type: string
                           memory:
                             type: string
+                          dirs:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                                size:
+                                  type: string
                           volumes:
                             type: array
                             items:

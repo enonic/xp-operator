@@ -68,7 +68,7 @@ public class MutationApi
     @Path("/mutations")
     @Consumes("application/json")
     @Produces("application/json")
-    public AdmissionReview validate( AdmissionReview admissionReview )
+    public AdmissionReview mutate( AdmissionReview admissionReview )
         throws JsonProcessingException
     {
         return handle( admissionReview );
@@ -191,14 +191,14 @@ public class MutationApi
         }
     }
 
-    private void xp7deployment( MutationRequest mt )
+    private void xp7deployment( final MutationRequest mt )
     {
         // Collect old and new object
-        Xp7Deployment oldR = (Xp7Deployment) mt.getAdmissionReview().getRequest().getOldObject();
-        Xp7Deployment newR = (Xp7Deployment) mt.getAdmissionReview().getRequest().getObject();
+        final Xp7Deployment oldR = (Xp7Deployment) mt.getAdmissionReview().getRequest().getOldObject();
+        final Xp7Deployment newR = (Xp7Deployment) mt.getAdmissionReview().getRequest().getObject();
 
         // Create default status
-        Xp7DeploymentStatus defStatus = new Xp7DeploymentStatus().
+        final Xp7DeploymentStatus defStatus = new Xp7DeploymentStatus().
             withMessage( "Waiting for pods" ).
             withState( Xp7DeploymentStatus.State.PENDING ).
             withXp7DeploymentStatusFields( new Xp7DeploymentStatusFields().
@@ -210,7 +210,7 @@ public class MutationApi
         }
 
         // Get OP
-        AdmissionOperation op = getOperation( mt.getAdmissionReview() );
+        final AdmissionOperation op = getOperation( mt.getAdmissionReview() );
 
         // Ensure status
         switch (op) {
@@ -219,7 +219,7 @@ public class MutationApi
                 break;
             case UPDATE:
                 if (newR.getSpec() != null && !newR.getSpec().equals( oldR.getSpec() )) {
-                    // On any change change, set default status
+                    // On any change, set default status
                     patch( mt, true, "/status", newR.getStatus(), defStatus );
                 } else {
                     // Else make sure the old status is not removed

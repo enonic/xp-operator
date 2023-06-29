@@ -41,6 +41,8 @@ deployment:
       data: false
       master: true
       replicas: 3
+      initContainers: []
+      sidecars: []
       env:
       - name: "XP_OPTS"
         value: " -Xms512m -Xmx512m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof\
@@ -48,12 +50,15 @@ deployment:
       resources:
         cpu: "1"
         memory: "1Gi"
+        dirs: []
         volumes: []
         disks: []
     - name: "data"
       data: true
       master: false
       replicas: 2
+      initContainers: []
+      sidecars: []
       env:
       - name: "XP_OPTS"
         value: " -Xms614m -Xmx614m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof\
@@ -61,6 +66,7 @@ deployment:
       resources:
         cpu: "2"
         memory: "2Gi"
+        dirs: []
         volumes:
         - name: inner
           size: "1Gi"
@@ -76,6 +82,8 @@ deployment:
       data: false
       master: false
       replicas: 3
+      initContainers: []
+      sidecars: []
       env:
       - name: "CUSTOM_ENV"
         value: "myenvvar"
@@ -85,6 +93,7 @@ deployment:
       resources:
         cpu: "3"
         memory: "3Gi"
+        dirs: []
         volumes: []
         disks:
         - name: "work"

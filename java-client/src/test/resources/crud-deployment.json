@@ -20,6 +20,8 @@
       "data" : true,
       "master" : true,
       "replicas" : 1,
+      "initContainers" : [ ],
+      "sidecars" : [ ],
       "env" : [ {
         "name" : "test",
         "value" : "test"
@@ -27,6 +29,7 @@
       "resources" : {
         "cpu" : "1",
         "memory" : "512Mi",
+        "dirs" : [ ],
         "volumes" : [ ],
         "disks" : [ {
           "name" : "index",

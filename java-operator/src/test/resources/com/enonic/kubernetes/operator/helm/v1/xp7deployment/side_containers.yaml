@@ -1,0 +1,59 @@
+apiVersion: enonic.cloud/v1
+kind: Xp7Deployment
+metadata:
+  name: mycloud-mysolution-myenv-myservice
+  namespace: mycloud-mysolution-myenv-myservice
+  labels:
+    cloud: mycloud
+    solution: mysolution
+    environment: myenv
+    service: myservice
+spec:
+  enabled: true
+  xpVersion: 7.13.0
+
+  nodesPreinstalledApps:
+    - name: snapshotter
+      url: https://repo.enonic.com/public/com/enonic/app/snapshotter/3.0.2/snapshotter-3.0.2.jar
+
+  nodesSharedDisks:
+    - name: blobstore
+      size: 2Gi
+    - name: snapshots
+      size: 3Gi
+
+  nodeGroups:
+    - name: fisk
+      data: true
+      master: true
+      replicas: 1
+      initContainers:
+        - image: busybox
+          name: my-sidecar-1
+          command:
+            - "/bin/sh"
+          args:
+            - "-c"
+            - "cp -r /export/* /deploy"
+          mounts:
+            - name: deploy
+              mountPath: /deploy
+      sidecars:
+        - image: otherbox
+          name: my-sidecar-2
+          mounts:
+            - name: deploy
+              mountPath: /deploy
+      resources:
+        cpu: "1"
+        memory: 512Mi
+        dirs:
+          - name: deploy
+            size: 100Mi
+        disks:
+          - name: export
+            size: 234Mi
+          - name: index
+            size: 200Mi
+          - name: work
+            size: 400Mi
