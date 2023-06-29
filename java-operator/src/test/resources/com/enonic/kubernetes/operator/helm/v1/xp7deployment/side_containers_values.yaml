@@ -20,7 +20,7 @@ deployment:
   preInstalledAppHash: "957ee10a49f2be0d0e2b1272ef611a5a93fe59c95c4044d792118aec0221021e6eb3685822a057b80343f8bcd14d7c37140eb2967042a1486bdedc5456f3fde4"
   spec:
     enabled: true
-    xpVersion: "7.13.2"
+    xpVersion: "7.13.0"
     nodesPreinstalledApps:
     - name: "snapshotter"
       url: "https://repo.enonic.com/public/com/enonic/app/snapshotter/3.0.2/snapshotter-3.0.2.jar"
@@ -35,8 +35,25 @@ deployment:
       data: true
       master: true
       replicas: 1
-      initContainers: [ ]
-      sidecars: [ ]
+      initContainers:
+        - image: busybox
+          name: my-sidecar-1
+          command:
+            - "/bin/sh"
+          args:
+            - "-c"
+            - "cp -r /export/* /deploy"
+          mounts:
+            - name: deploy
+              mountPath: /deploy
+      sidecars:
+        - image: otherbox
+          name: my-sidecar-2
+          command: []
+          args: []
+          mounts:
+            - name: deploy
+              mountPath: /deploy
       env:
       - name: "XP_OPTS"
         value: " -Xms154m -Xmx154m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof\
@@ -44,7 +61,9 @@ deployment:
       resources:
         cpu: "1"
         memory: "512Mi"
-        dirs: []
+        dirs:
+        - name: "deploy"
+          size: "100Mi"
         volumes: []
         disks:
         - name: "export"

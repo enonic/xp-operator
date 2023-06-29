@@ -92,6 +92,98 @@
                 "type": "integer",
                 "format": "int32"
               },
+              "initContainers" : {
+                "javaName" : "Xp7DeploymentSpecNodeGroupInitContainers",
+                "type" : "array",
+                "items" : {
+                  "javaName" : "Xp7DeploymentSpecNodeGroupInitContainer",
+                  "type" : "object",
+                  "properties" : {
+                    "image" : {
+                      "type" : "string"
+                    },
+                    "name" : {
+                      "type" : "string"
+                    },
+                    "command": {
+                      "javaName": "Xp7DeploymentSpecNodeGroupInitContainerCommand",
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "args": {
+                      "javaName": "Xp7DeploymentSpecNodeGroupInitContainerArgs",
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "mounts" : {
+                      "javaName" : "Xp7DeploymentSpecNodeGroupInitContainerMounts",
+                      "type" : "array",
+                      "items" : {
+                        "javaName" : "Xp7DeploymentSpecNodeGroupInitContainerMount",
+                        "type" : "object",
+                        "properties" : {
+                          "name" : {
+                            "type" : "string"
+                          },
+                          "mountPath" : {
+                            "type" : "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "sidecars" : {
+                "javaName" : "Xp7DeploymentSpecNodeGroupSidecars",
+                "type" : "array",
+                "items" : {
+                  "javaName" : "Xp7DeploymentSpecNodeGroupSidecar",
+                  "type" : "object",
+                  "properties" : {
+                    "image" : {
+                      "type" : "string"
+                    },
+                    "name" : {
+                      "type" : "string"
+                    },
+                    "command": {
+                      "javaName": "Xp7DeploymentSpecNodeGroupSidecarCommand",
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "args": {
+                      "javaName": "Xp7DeploymentSpecNodeGroupSidecarArgs",
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "mounts" : {
+                      "javaName" : "Xp7DeploymentSpecNodeGroupSidecarMounts",
+                      "type" : "array",
+                      "items" : {
+                        "javaName" : "Xp7DeploymentSpecNodeGroupSidecarMount",
+                        "type" : "object",
+                        "properties" : {
+                          "name" : {
+                            "type" : "string"
+                          },
+                          "mountPath" : {
+                            "type" : "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
               "env": {
                 "javaName": "Xp7DeploymentSpecNodeGroupEnvironment",
                 "type": "array",
@@ -117,6 +209,22 @@
                   },
                   "memory": {
                     "type": "string"
+                  },
+                  "dirs": {
+                    "javaName": "Xp7DeploymentSpecNodeGroupDirs",
+                    "type": "array",
+                    "items": {
+                      "javaName": "Xp7DeploymentSpecNodeGroupDir",
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "size": {
+                          "type": "string"
+                        }
+                      }
+                    }
                   },
                   "volumes": {
                     "javaName": "Xp7DeploymentSpecNodeGroupVolumes",

@@ -93,7 +93,7 @@ class TestApi
                 return;
             }
 
-            AdmissionReview review = mutationApi.validate( test.admissionRequest() );
+            AdmissionReview review = mutationApi.mutate( test.admissionRequest() );
 
             List<Patch> patch = null;
             if ( review.getResponse().getPatch() != null )
