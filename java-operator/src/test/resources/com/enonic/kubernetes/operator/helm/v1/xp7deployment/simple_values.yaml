@@ -35,6 +35,8 @@ deployment:
       data: true
       master: true
       replicas: 1
+      initContainers: [ ]
+      sidecars: [ ]
       env:
       - name: "XP_OPTS"
         value: " -Xms154m -Xmx154m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof\
@@ -42,6 +44,7 @@ deployment:
       resources:
         cpu: "1"
         memory: "512Mi"
+        dirs: []
         volumes: []
         disks:
         - name: "export"

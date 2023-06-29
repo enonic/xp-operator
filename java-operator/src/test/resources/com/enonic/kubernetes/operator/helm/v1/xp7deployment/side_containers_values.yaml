@@ -13,85 +13,65 @@ defaultLabels:
   service: "myservice"
   solution: "mysolution"
 deployment:
-  clusterMajority: 5
-  clustered: true
-  hasDedicatedFrontendNodes: true
-  minimumDataNodes: 2
-  minimumMasterNodes: 2
+  clustered: false
+  hasDedicatedFrontendNodes: false
   name: "mycloud-mysolution-myenv-myservice"
   namespace: "mycloud-mysolution-myenv-myservice"
-  preInstalledAppHash: "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e"
+  preInstalledAppHash: "957ee10a49f2be0d0e2b1272ef611a5a93fe59c95c4044d792118aec0221021e6eb3685822a057b80343f8bcd14d7c37140eb2967042a1486bdedc5456f3fde4"
   spec:
     enabled: true
-    xpVersion: "7.12.2"
-    nodesPreinstalledApps: []
+    xpVersion: "7.13.0"
+    nodesPreinstalledApps:
+    - name: "snapshotter"
+      url: "https://repo.enonic.com/public/com/enonic/app/snapshotter/3.0.2/snapshotter-3.0.2.jar"
     nodesSharedVolumes: []
     nodesSharedDisks:
     - name: "blobstore"
-      size: "1Gi"
-    - name: "snapshots"
       size: "2Gi"
+    - name: "snapshots"
+      size: "3Gi"
     nodeGroups:
-    - name: "master"
-      data: false
+    - name: "fisk"
+      data: true
       master: true
-      replicas: 3
-      initContainers: []
-      sidecars: []
+      replicas: 1
+      initContainers:
+        - image: busybox
+          name: my-sidecar-1
+          command:
+            - "/bin/sh"
+          args:
+            - "-c"
+            - "cp -r /export/* /deploy"
+          mounts:
+            - name: deploy
+              mountPath: /deploy
+      sidecars:
+        - image: otherbox
+          name: my-sidecar-2
+          command: []
+          args: []
+          mounts:
+            - name: deploy
+              mountPath: /deploy
       env:
       - name: "XP_OPTS"
-        value: " -Xms512m -Xmx512m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof\
+        value: " -Xms154m -Xmx154m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof\
           \ -Dhazelcast.shutdownhook.policy=GRACEFUL -Dhazelcast.graceful.shutdown.max.wait=600"
       resources:
         cpu: "1"
-        memory: "1Gi"
-        dirs: []
+        memory: "512Mi"
+        dirs:
+        - name: "deploy"
+          size: "100Mi"
         volumes: []
         disks:
         - name: "export"
-          size: "3Gi"
-    - name: "data"
-      data: true
-      master: false
-      replicas: 2
-      initContainers: []
-      sidecars: []
-      env:
-      - name: "XP_OPTS"
-        value: " -Xms614m -Xmx614m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof\
-          \ -Dhazelcast.shutdownhook.policy=GRACEFUL -Dhazelcast.graceful.shutdown.max.wait=600"
-      resources:
-        cpu: "2"
-        memory: "2Gi"
-        dirs: []
-        volumes: []
-        disks:
-        - name: "export"
-          size: "4Gi"
+          size: "234Mi"
         - name: "index"
-          size: "5Gi"
-    - name: "frontend"
-      data: false
-      master: false
-      replicas: 3
-      initContainers: []
-      sidecars: []
-      env:
-      - name: "CUSTOM_ENV"
-        value: "myenvvar"
-      - name: "XP_OPTS"
-        value: "-bla -Xms1536m -Xmx1536m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof\
-          \ -Dhazelcast.shutdownhook.policy=GRACEFUL -Dhazelcast.graceful.shutdown.max.wait=600"
-      resources:
-        cpu: "3"
-        memory: "3Gi"
-        volumes: []
-        dirs: []
-        disks:
-        - name: "export"
-          value: "6Gi"
+          size: "200Mi"
         - name: "work"
-          value: "7Gi"
+          size: "400Mi"
   suPass: "password"
   suPassHash: "b109f3bbbc244eb82441917ed06d618b9008dd09b3befd1b5e07394c706a8bb980b1d7785e5976ec049b46df5f1326af5a2ea6d103fd07c95385ffab0cacbc86"
 dirs:
