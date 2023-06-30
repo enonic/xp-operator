@@ -23,11 +23,6 @@ spec:
   enabled: true     # Should the pods be running
   xpVersion: 7.13.2  # XP version, has to be >=7.13.2
 
-  # List of preinstalled apps
-  nodesPreinstalledApps:
-   - name: snapshotter
-     url: https://repo.enonic.com/public/com/enonic/app/snapshotter/3.0.2/snapshotter-3.0.2.jar
-
   # List of disks shared by all nodes (see description of disks below)
   nodesSharedDisks:
     - name: blobstore
@@ -350,11 +345,6 @@ spec:
   enabled: true
   xpVersion: 7.20.2
 
-  # Preinstall snapshotter on all nodes
-  nodesPreinstalledApps:
-   - name: snapshotter
-     url: https://repo.enonic.com/public/com/enonic/app/snapshotter/3.0.2/snapshotter-3.0.2.jar
-
   # Create one node
   nodeGroups:
     - name: main
@@ -481,11 +471,6 @@ metadata:
 spec:
   enabled: true
   xpVersion: 7.13.2
-
-  # Preinstall snapshotter on all nodes
-  nodesPreinstalledApps:
-   - name: snapshotter
-     url: https://repo.enonic.com/public/com/enonic/app/snapshotter/3.0.2/snapshotter-3.0.2.jar
 
   # Create volumes shared by all nodes in this deployment
   nodesSharedDisks:
