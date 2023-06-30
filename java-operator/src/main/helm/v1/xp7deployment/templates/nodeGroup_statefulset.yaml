@@ -163,8 +163,6 @@ spec:
                   name: su
                   key: passHash
                   optional: false
-            - name: PRE_APP_HASH
-              value: {{ $.Values.deployment.preInstalledAppHash }}
           {{- range $env := $nodeGroup.env }}
             - name: {{ $env.name }}
               value: {{ $env.value }}
