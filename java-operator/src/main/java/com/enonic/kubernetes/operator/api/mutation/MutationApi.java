@@ -9,7 +9,6 @@ import com.enonic.kubernetes.client.v1.xp7deployment.Xp7Deployment;
 import com.enonic.kubernetes.client.v1.domain.DomainStatus;
 import com.enonic.kubernetes.client.v1.domain.DomainStatusFields;
 import com.enonic.kubernetes.client.v1.xp7config.Xp7ConfigStatus;
-import com.enonic.kubernetes.client.v1.xp7deployment.Xp7DeploymentSpecNodesPreinstalledApps;
 import com.enonic.kubernetes.client.v1.xp7deployment.Xp7DeploymentStatus;
 import com.enonic.kubernetes.client.v1.xp7deployment.Xp7DeploymentStatusFields;
 import com.enonic.kubernetes.operator.api.AdmissionOperation;
@@ -45,8 +44,6 @@ public class MutationApi
     @Inject
     LbServiceIpProducer lbServiceIpProducer;
 
-    List<Xp7DeploymentSpecNodesPreinstalledApps> preInstalledApps;
-
     public MutationApi()
     {
         super();
@@ -56,12 +53,6 @@ public class MutationApi
         addFunction( Domain.class, this::domain );
         addFunction( Ingress.class, this::ingress );
 
-        preInstalledApps = new LinkedList<>();
-        cfgStrChild( "operator.preInstalledApps" ).
-            entrySet().
-            forEach( ( e ) -> preInstalledApps.add( new Xp7DeploymentSpecNodesPreinstalledApps().
-                withName( e.getKey() ).
-                withUrl( e.getValue() ) ) );
     }
 
     @POST
@@ -229,16 +220,6 @@ public class MutationApi
             case DELETE:
                 // Do nothing
                 break;
-        }
-
-        List<Xp7DeploymentSpecNodesPreinstalledApps> preInstall = newR.getSpec().getNodesPreinstalledApps();
-        if (preInstall == null || preInstall.isEmpty()) {
-            patch( mt, true, "/spec/nodesPreinstalledApps", newR.getSpec().getNodesPreinstalledApps(), preInstalledApps );
-        } else {
-            List<String> names = preInstall.stream().map(Xp7DeploymentSpecNodesPreinstalledApps::getName).collect(Collectors.toList());
-            List<Xp7DeploymentSpecNodesPreinstalledApps> newList = new LinkedList<>(preInstall);
-            preInstalledApps.stream().filter(a -> !names.contains(a.getName())).forEach(newList::add);
-            patch( mt, true, "/spec/nodesPreinstalledApps", newR.getSpec().getNodesPreinstalledApps(), newList );
         }
     }
 
