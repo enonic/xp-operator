@@ -17,11 +17,6 @@ spec:
   enabled: true
   xpVersion: 7.12.2
 
-  # Preinstall snapshotter on all nodes
-  nodesPreinstalledApps:
-    - name: snapshotter
-      url: https://repo.enonic.com/public/com/enonic/app/snapshotter/3.0.2/snapshotter-3.0.2.jar
-
   # Create volumes shared by all nodes in this deployment
   nodesSharedDisks:
     - name: blobstore
