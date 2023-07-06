@@ -13,6 +13,12 @@ kind: Xp7Deployment
 metadata:
   name: my-deployment
   namespace: my-namespace
+  annotations:
+    io.enonic.backup.volumes: blobstore,snapshots
+    io.enonic.backup.prescripts: '["/usr/local/bin/backup.sh"]'
+    io.enonic.backup.prescriptsContainer: exp
+    io.enonic.backup.postscripts: '["echo", "postscript"]'
+    io.enonic.backup.postscriptsContainer: exp
 spec:
   enabled: true
   xpVersion: 7.12.2
