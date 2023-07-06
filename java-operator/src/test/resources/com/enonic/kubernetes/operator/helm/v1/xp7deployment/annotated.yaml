@@ -1,0 +1,39 @@
+apiVersion: enonic.cloud/v1
+kind: Xp7Deployment
+metadata:
+  name: mycloud-mysolution-myenv-myservice
+  namespace: mycloud-mysolution-myenv-myservice
+  labels:
+    cloud: mycloud
+    solution: mysolution
+    environment: myenv
+    service: myservice
+  annotations:
+    io.enonic.backup.volumes: blobstore,snapshots
+    io.enonic.backup.prescripts: '["/usr/local/bin/backup.sh"]'
+    io.enonic.backup.prescriptsContainer: exp
+spec:
+  enabled: true
+  xpVersion: 7.13.0
+
+  nodesSharedDisks:
+    - name: blobstore
+      size: 2Gi
+    - name: snapshots
+      size: 3Gi
+
+  nodeGroups:
+    - name: fisk
+      data: true
+      master: true
+      replicas: 1
+      resources:
+        cpu: "1"
+        memory: 512Mi
+        disks:
+          - name: export
+            size: 234Mi
+          - name: index
+            size: 200Mi
+          - name: work
+            size: 400Mi

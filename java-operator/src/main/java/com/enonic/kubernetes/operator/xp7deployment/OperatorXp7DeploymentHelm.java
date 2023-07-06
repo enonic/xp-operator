@@ -174,6 +174,17 @@ public class OperatorXp7DeploymentHelm
             deployment.put( "spec", resource.getSpec() );
 
             values.put( "defaultLabels", defaultLabels( resource ) );
+
+            final Map<String, Object> metadata = new HashMap<>();
+
+            final Map<String, String> annotations = annatations( resource );
+            if(!annotations.isEmpty())
+            {
+                metadata.put( "annotations", annotations );
+                deployment.put( "metadata", metadata );
+            }
+
+
             values.put( "deployment", deployment );
 
             values.put( "ownerReferences", Collections.singletonList( createOwnerReference( resource ) ) );
@@ -252,9 +263,14 @@ public class OperatorXp7DeploymentHelm
             return Hashing.sha512().hashString( s, Charsets.UTF_8 ).toString();
         }
 
-        private Object defaultLabels( final Xp7Deployment resource )
+        private Map<String, String> defaultLabels( final Xp7Deployment resource )
         {
             return resource.getMetadata().getLabels();
+        }
+
+        private Map<String, String> annatations( final Xp7Deployment resource )
+        {
+            return resource.getMetadata().getAnnotations();
         }
 
         private boolean isClustered( Xp7Deployment resource )

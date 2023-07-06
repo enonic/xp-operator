@@ -37,6 +37,11 @@ spec:
       annotations:
         enonic.cloud/metrics.xp7: "true"
         enonic.cloud/logs.xp7: "true"
+        {{- if and $.Values.deployment.metadata $.Values.deployment.metadata.annotations }}
+        {{- with $.Values.deployment.metadata.annotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- end }}
         {{- if index $.Values "settings.linkerd" }}
         linkerd.io/inject: enabled
         {{- end }}
