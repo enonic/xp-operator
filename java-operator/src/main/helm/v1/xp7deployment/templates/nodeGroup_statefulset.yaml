@@ -37,6 +37,11 @@ spec:
       annotations:
         enonic.cloud/metrics.xp7: "true"
         enonic.cloud/logs.xp7: "true"
+        {{- if and $.Values.deployment.metadata $.Values.deployment.metadata.annotations }}
+        {{- with $.Values.deployment.metadata.annotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- end }}
         {{- if index $.Values "settings.linkerd" }}
         linkerd.io/inject: enabled
         {{- end }}
@@ -358,6 +363,20 @@ spec:
         - ALL
     runAsNonRoot: true
     runAsUser: {{ $.Values.pods.securityContext.user }}
+
+  {{- if and $.container.ports }}
+  ports:
+    {{- with $.container.ports }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- end }}
+
+  {{- if and $.container.env }}
+  env:
+    {{- with $.container.env }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- end }}
 
   volumeMounts:
 {{- range $mount := .container.mounts }}

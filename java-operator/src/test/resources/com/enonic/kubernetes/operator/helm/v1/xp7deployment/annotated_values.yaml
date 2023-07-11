@@ -17,6 +17,11 @@ deployment:
   hasDedicatedFrontendNodes: false
   name: "mycloud-mysolution-myenv-myservice"
   namespace: "mycloud-mysolution-myenv-myservice"
+  metadata:
+    annotations:
+      io.enonic.backup.volumes: blobstore,snapshots
+      io.enonic.backup.prescripts: '["/usr/local/bin/backup.sh"]'
+      io.enonic.backup.prescriptsContainer: exp
   spec:
     enabled: true
     xpVersion: "7.13.0"
@@ -31,29 +36,8 @@ deployment:
       data: true
       master: true
       replicas: 1
-      initContainers:
-        - image: busybox
-          name: my-sidecar-1
-          command:
-            - "/bin/sh"
-          args:
-            - "-c"
-            - "cp -r /export/* /deploy"
-          ports: []
-          env: []
-          mounts:
-            - name: deploy
-              mountPath: /deploy
-      sidecars:
-        - image: otherbox
-          name: my-sidecar-2
-          command: []
-          args: []
-          ports: []
-          env: []
-          mounts:
-            - name: deploy
-              mountPath: /deploy
+      initContainers: [ ]
+      sidecars: [ ]
       env:
       - name: "XP_OPTS"
         value: " -Xms154m -Xmx154m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof\
@@ -61,9 +45,7 @@ deployment:
       resources:
         cpu: "1"
         memory: "512Mi"
-        dirs:
-        - name: "deploy"
-          size: "100Mi"
+        dirs: []
         volumes: []
         disks:
         - name: "export"
