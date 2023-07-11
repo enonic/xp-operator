@@ -190,6 +190,64 @@ spec:
                               type: array
                               items:
                                 type: string
+                            ports:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  name:
+                                    type: string
+                                  containerPort:
+                                    type: integer
+                                    format: int32
+                                  protocol:
+                                    type: string
+                            env:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  name:
+                                    type: string
+                                  value:
+                                    type: string
+                                  valueFrom:
+                                    type: object
+                                    properties:
+                                      configMapKeyRef:
+                                        type: object
+                                        properties:
+                                          name:
+                                            type: string
+                                          key:
+                                            type: string
+                                          optional:
+                                            type: boolean
+                                      fieldRef:
+                                        type: object
+                                        properties:
+                                          fieldPath:
+                                            type: string
+                                          apiVersion:
+                                            type: string
+                                      resourceFieldRef:
+                                        type: object
+                                        properties:
+                                          containerName:
+                                            type: string
+                                          resource:
+                                            type: string
+                                          divisor:
+                                            type: string
+                                      secretKeyRef:
+                                        type: object
+                                        properties:
+                                          name:
+                                            type: string
+                                          key:
+                                            type: string
+                                          optional:
+                                            type: boolean
                             mounts:
                               type: array
                               items:
@@ -198,6 +256,8 @@ spec:
                                   name:
                                     type: string
                                   mountPath:
+                                    type: string
+                                  subPath:
                                     type: string
                       sidecars:
                         type: array
@@ -216,6 +276,64 @@ spec:
                               type: array
                               items:
                                 type: string
+                            ports:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  name:
+                                    type: string
+                                  containerPort:
+                                    type: integer
+                                    format: int32
+                                  protocol:
+                                    type: string
+                            env:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  name:
+                                    type: string
+                                  value:
+                                    type: string
+                                  valueFrom:
+                                    type: object
+                                    properties:
+                                      configMapKeyRef:
+                                        type: object
+                                        properties:
+                                          name:
+                                            type: string
+                                          key:
+                                            type: string
+                                          optional:
+                                            type: boolean
+                                      fieldRef:
+                                        type: object
+                                        properties:
+                                          fieldPath:
+                                            type: string
+                                          apiVersion:
+                                            type: string
+                                      resourceFieldRef:
+                                        type: object
+                                        properties:
+                                          containerName:
+                                            type: string
+                                          resource:
+                                            type: string
+                                          divisor:
+                                            type: string
+                                      secretKeyRef:
+                                        type: object
+                                        properties:
+                                          name:
+                                            type: string
+                                          key:
+                                            type: string
+                                          optional:
+                                            type: boolean
                             mounts:
                               type: array
                               items:
@@ -224,6 +342,8 @@ spec:
                                   name:
                                     type: string
                                   mountPath:
+                                    type: string
+                                  subPath:
                                     type: string
                       env:
                         type: array
