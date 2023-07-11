@@ -39,6 +39,8 @@ deployment:
           args:
             - "-c"
             - "cp -r /export/* /deploy"
+          ports: []
+          env: []
           mounts:
             - name: deploy
               mountPath: /deploy
@@ -47,6 +49,8 @@ deployment:
           name: my-sidecar-2
           command: []
           args: []
+          ports: []
+          env: []
           mounts:
             - name: deploy
               mountPath: /deploy

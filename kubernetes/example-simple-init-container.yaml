@@ -15,7 +15,7 @@ metadata:
   namespace: my-namespace
 spec:
   enabled: true
-  xpVersion: 7.13.2
+  xpVersion: 7.12.2
 
   nodesSharedVolumes:
     - name: shared
@@ -46,6 +46,17 @@ spec:
       data: true
       master: true
 
+      initContainers:
+        - image: vbonik/image:tag8
+          name: my-sidecar-1
+          command:
+            - "/bin/sh"
+          args:
+            - "-c"
+            - "cp -r /export/* /deploy"
+          mounts:
+            - name: deploy
+              mountPath: /deploy
       resources:
         cpu: "1"
         memory: 1Gi

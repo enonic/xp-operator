@@ -103,6 +103,105 @@
                         "type": "string"
                       }
                     },
+                    "ports": {
+                      "javaName": "Xp7DeploymentSpecNodeGroupSidecarPorts",
+                      "type": "array",
+                      "items": {
+                        "javaName": "Xp7DeploymentSpecNodeGroupSidecarPort",
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "containerPort": {
+                            "type": "integer",
+                            "format": "int32"
+                          },
+                          "protocol": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "env": {
+                      "javaName": "Xp7DeploymentSpecNodeGroupInitContainerEnvironment",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "javaName": "Xp7DeploymentSpecNodeGroupInitContainerEnvVar",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "value": {
+                            "type": "string"
+                          },
+                          "valueFrom": {
+                            "javaName": "Xp7DeploymentSpecNodeGroupInitContainerEnvVarValueFrom",
+                            "type": "object",
+                            "properties": {
+                              "configMapKeyRef": {
+                                "javaName": "Xp7DeploymentSpecNodeGroupInitContainerEnvVarValueFromConfigMapKeyRef",
+                                "type": "object",
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "key": {
+                                    "type": "string"
+                                  },
+                                  "optional": {
+                                    "type": "boolean"
+                                  }
+                                }
+                              },
+                              "fieldRef": {
+                                "javaName": "Xp7DeploymentSpecNodeGroupInitContainerEnvVarValueFromFieldRef",
+                                "type": "object",
+                                "properties": {
+                                  "fieldPath": {
+                                    "type": "string"
+                                  },
+                                  "apiVersion": {
+                                    "type": "string"
+                                  }
+                                }
+                              },
+                              "resourceFieldRef": {
+                                "javaName": "Xp7DeploymentSpecNodeGroupInitContainerEnvVarValueFromResourceFieldRef",
+                                "type": "object",
+                                "properties": {
+                                  "containerName": {
+                                    "type": "string"
+                                  },
+                                  "resource": {
+                                    "type": "string"
+                                  },
+                                  "divisor": {
+                                    "type": "string"
+                                  }
+                                }
+                              },
+                              "secretKeyRef": {
+                                "javaName": "Xp7DeploymentSpecNodeGroupInitContainerEnvVarValueFromSecretKeyRef",
+                                "type": "object",
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "key": {
+                                    "type": "string"
+                                  },
+                                  "optional": {
+                                    "type": "boolean"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
                     "mounts" : {
                       "javaName" : "Xp7DeploymentSpecNodeGroupInitContainerMounts",
                       "type" : "array",
@@ -114,6 +213,9 @@
                             "type" : "string"
                           },
                           "mountPath" : {
+                            "type" : "string"
+                          },
+                          "subPath" : {
                             "type" : "string"
                           }
                         }
@@ -149,6 +251,105 @@
                         "type": "string"
                       }
                     },
+                    "ports": {
+                      "javaName": "Xp7DeploymentSpecNodeGroupSidecarPorts",
+                      "type": "array",
+                      "items": {
+                        "javaName": "Xp7DeploymentSpecNodeGroupSidecarPort",
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "containerPort": {
+                            "type": "integer",
+                            "format": "int32"
+                          },
+                          "protocol": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "env": {
+                      "javaName": "Xp7DeploymentSpecNodeGroupInitContainerEnvironment",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "javaName": "Xp7DeploymentSpecNodeGroupInitContainerEnvVar",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "value": {
+                            "type": "string"
+                          },
+                          "valueFrom": {
+                            "javaName": "Xp7DeploymentSpecNodeGroupInitContainerEnvVarValueFrom",
+                            "type": "object",
+                            "properties": {
+                              "configMapKeyRef": {
+                                "javaName": "Xp7DeploymentSpecNodeGroupInitContainerEnvVarValueFromConfigMapKeyRef",
+                                "type": "object",
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "key": {
+                                    "type": "string"
+                                  },
+                                  "optional": {
+                                    "type": "boolean"
+                                  }
+                                }
+                              },
+                              "fieldRef": {
+                                "javaName": "Xp7DeploymentSpecNodeGroupInitContainerEnvVarValueFromFieldRef",
+                                "type": "object",
+                                "properties": {
+                                  "fieldPath": {
+                                    "type": "string"
+                                  },
+                                  "apiVersion": {
+                                    "type": "string"
+                                  }
+                                }
+                              },
+                              "resourceFieldRef": {
+                                "javaName": "Xp7DeploymentSpecNodeGroupInitContainerEnvVarValueFromResourceFieldRef",
+                                "type": "object",
+                                "properties": {
+                                  "containerName": {
+                                    "type": "string"
+                                  },
+                                  "resource": {
+                                    "type": "string"
+                                  },
+                                  "divisor": {
+                                    "type": "string"
+                                  }
+                                }
+                              },
+                              "secretKeyRef": {
+                                "javaName": "Xp7DeploymentSpecNodeGroupInitContainerEnvVarValueFromSecretKeyRef",
+                                "type": "object",
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "key": {
+                                    "type": "string"
+                                  },
+                                  "optional": {
+                                    "type": "boolean"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
                     "mounts" : {
                       "javaName" : "Xp7DeploymentSpecNodeGroupSidecarMounts",
                       "type" : "array",
@@ -160,6 +361,9 @@
                             "type" : "string"
                           },
                           "mountPath" : {
+                            "type" : "string"
+                          },
+                          "subPath" : {
                             "type" : "string"
                           }
                         }
