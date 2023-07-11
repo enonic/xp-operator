@@ -1,0 +1,227 @@
+## Create a namespace
+#apiVersion: v1
+#kind: Namespace
+#metadata:
+#  name: my-namespace
+#  annotations:
+#    # Delete this namespace it the deployment is deleted
+#    enonic.cloud/remove.with.xp7deployment: my-deployment
+#---
+## The backup agent needs some permissions to be able
+## to discover files and run pre/post scripts.
+#apiVersion: v1
+#kind: ServiceAccount
+#metadata:
+#  name: backup-agent-sa
+#  namespace: my-namespace
+#---
+#apiVersion: rbac.authorization.k8s.io/v1
+#kind: Role
+#metadata:
+#  name: backup-role
+#  namespace: my-namespace
+#rules:
+#  # To find what to backup
+#  - apiGroups: [ "*" ]
+#    resources: [ "pods" ]
+#    verbs: [ "get", "list" ]
+#  # To run pre/post scripts
+#  - apiGroups: [ "*" ]
+#    resources: [ "pods/exec" ]
+#    verbs: [ "create" ]
+#---
+#apiVersion: rbac.authorization.k8s.io/v1
+#kind: RoleBinding
+#metadata:
+#  name: backup-role-bindings
+#  namespace: my-namespace
+#roleRef:
+#  apiGroup: rbac.authorization.k8s.io
+#  kind: Role
+#  name: backup-role
+#subjects:
+#  - kind: ServiceAccount
+#    name: backup-agent-sa
+#    namespace: my-namespace
+#---
+## Create secret for service account token so that we can mount it
+## in the backup container
+#apiVersion: v1
+#kind: Secret
+#metadata:
+#  name: xp-backup-sa-secret
+#  namespace: my-namespace
+#  annotations:
+#    kubernetes.io/service-account.name: backup-agent-sa
+#type: kubernetes.io/service-account-token
+#---
+## Create deployment in the namespace
+#apiVersion: enonic.cloud/v1
+#kind: Xp7Deployment
+#metadata:
+#  name: my-deployment
+#  namespace: my-namespace
+#  annotations:
+#    io.enonic.backup.volumes: shared,export
+#    io.enonic.backup.prescripts: '["/usr/local/bin/backup.sh"]'
+#    io.enonic.backup.prescriptsContainer: exp
+#spec:
+#  enabled: true
+#  xpVersion: 7.12.2
+#
+#  nodesSharedVolumes:
+#    - name: shared
+#      size: 1Gi
+#      class: nfs
+#
+#  # Create volumes shared by all nodes in this deployment
+#  nodesSharedDisks:
+#    - name: blobstore
+#      volume: shared
+##      size: 1Gi
+#
+#    - name: snapshots
+#      volume: shared
+##      size: 1Gi
+#
+#    - name: export # Dumps and other data
+#      size: 1Gi
+#      class: nfs
+#
+#  # Create one node
+#  nodeGroups:
+#    - name: main
+#      replicas: 1
+#
+#      env:
+#        - name: XP_OPTS
+#          value: "-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"
+#
+#      data: true
+#      master: true
+#
+#      sidecars:
+#        - image: ghcr.io/enonic-cloud/ec-backup-agent
+#          name: backup-agent
+#          command: []
+#          args: []
+#          mounts:
+#            - name: restic
+#              mountPath: /restic
+#            - name: export
+#              mountPath: /enonic-xp/home/data
+#            - name: shared
+#              subPath: blobstore
+#              mountPath: /enonic-xp/home/repo/blob
+#            - name: shared
+#              subPath: snapshots
+#              mountPath: /enonic-xp/home/snapshots
+#          ports:
+#            - name: backup
+#              containerPort: 8000
+#              protocol: TCP
+#          env:
+#            # Basic k8s configuration
+#            - name: AGENT_MODE
+#              value: k8s
+#            - name: AGENT_K8S_TOKEN
+#              valueFrom:
+#                secretKeyRef:
+#                  name: xp-backup-sa-secret
+#                  key: token
+#            - name: AGENT_K8S_NAMESPACE
+#              valueFrom:
+#                fieldRef:
+#                  apiVersion: v1
+#                  fieldPath: metadata.namespace
+#            - name: AGENT_K8S_POD
+#              valueFrom:
+#                fieldRef:
+#                  apiVersion: v1
+#                  fieldPath: metadata.name
+#            - name: AGENT_K8S_CONTAINER
+#              value: backup-agent
+#            # Setup schedule and restic repository
+#            - name: RESTIC_CACHE_DIR
+#              value: /restic/cache
+#            - name: AGENT_BACKUP_SCHEDULE
+#              value: "0 0 * * *"
+#            - name: RESTIC_REPOSITORY
+#              value: /restic/repo
+#            - name: RESTIC_PASSWORD
+#              value: secret
+#
+#      resources:
+#        cpu: "1"
+#        memory: 1Gi
+#        dirs:
+#          - name: deploy
+#            size: 100Mi
+#        volumes:
+#          - name: inner
+#            size: 1Gi
+#          - name: restic
+#            size: 1Gi
+#
+#        # Volumes private to the node
+#        disks:
+#          - name: index # Node ES index
+#            volume: inner
+#          - name: work # Node cache
+#            volume: inner
+#---
+## Install content studio
+#apiVersion: enonic.cloud/v1
+#kind: Xp7App
+#metadata:
+#  name: contentstudio
+#  namespace: my-namespace
+#spec:
+#  url: https://repo.enonic.com/public/com/enonic/app/contentstudio/4.5.2/contentstudio-4.5.2.jar
+#  sha512: e5662edb8757ceb6f085d1a8d85abf965c0f45a98acbc767ef31f4e8d860fc88cc995aa7cfcb1167f356c3e261129524f3c38de93cdc08baca95e51943a99365
+#---
+## Disable management of apps through XP admin
+#apiVersion: enonic.cloud/v1
+#kind: Xp7Config
+#metadata:
+#  name: my-config
+#  namespace: my-namespace
+#spec:
+#  nodeGroup: all
+#  file: com.my-app.cfg
+#  data: |
+#    my = config
+#---
+## Expose XP through an ingress
+#apiVersion: networking.k8s.io/v1
+#kind: Ingress
+#metadata:
+#  name: my-domain-com
+#  namespace: my-namespace
+#  annotations:
+#    enonic.cloud/xp7.vhost.mapping.my-mapping-site.source: /
+#    enonic.cloud/xp7.vhost.mapping.my-mapping-site.target: /site/default/master/homepage
+#
+#    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.source: /admin
+#    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.target: /admin
+#    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.idproviders: system
+#spec:
+#  rules:
+#    - host: my-domain.com
+#      http:
+#        paths:
+#          - path: /
+#            pathType: ImplementationSpecific
+#            backend:
+#              service:
+#                name: main
+#                port:
+#                  number: 8080
+#
+#          - path: /admin
+#            pathType: ImplementationSpecific
+#            backend:
+#              service:
+#                name: main
+#                port:
+#                  number: 8080

@@ -361,6 +361,20 @@ spec:
     runAsNonRoot: true
     runAsUser: {{ $.Values.pods.securityContext.user }}
 
+  {{- if and $.container.ports }}
+  ports:
+    {{- with $.container.ports }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- end }}
+
+  {{- if and $.container.env }}
+  env:
+    {{- with $.container.env }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- end }}
+
   volumeMounts:
 {{- range $mount := .container.mounts }}
     - name: {{ $mount.name }}
