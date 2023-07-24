@@ -1,5 +1,5 @@
 [libraries]
-junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version = "5.9.3" }
+junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version = "5.10.0" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version = "5.9.3" }
 
 fabric8-kubernetes-clientapi = { module = "io.fabric8:kubernetes-client-api", version = "6.6.2" }
