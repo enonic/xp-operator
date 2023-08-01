@@ -1,26 +1,6 @@
-image:
-  repository: enonic/xp-operator
-  tag: "${version}"
-  pullPolicy: IfNotPresent
-resources:
-  requests: {}
-  limits: {}
-annotations: {}
-labels: {}
-secrets: {}
-env: {}
-onlyDeployCrds: false
-# For a full list of configuration options see operator properties file:
-# https://github.com/enonic/xp-operator/blob/master/java-operator/src/main/resources/application.properties
 config: |-
-  # Logging
-  # quarkus.log.console.level=DEBUG
-  # quarkus.log.min-level=DEBUG
+  #operator.charts.values.storage.shared.storageClassName=nfs
+  #operator.charts.values.storage.default.storageClassName=standard
 
-  # Permissions for OpenShift
-  # operator.charts.values.pods.securityContext.user=1337
-  # operator.charts.values.pods.securityContext.fsGroup=5555
-
-  # Storage classes
-  # operator.charts.values.storage.default.storageClassName=standard
-  # operator.charts.values.storage.shared.storageClassName=nfs
+  #operator.charts.values.resources.cpu.defaultRequests=0.2
+  #operator.charts.values.resources.memory.defaultRequests=512Mi
