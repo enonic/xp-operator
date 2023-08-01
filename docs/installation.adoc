@@ -42,14 +42,14 @@ For instance, the standard storage class in `minikube` supports all modes and ca
 |Any storage class with RWO
 
 |Cluster
-|Filestore CSI driver*
-|Azurefile CSI NFS*
+|Filestore CSI driver based storage class with RWM*
+|Azurefile CSI driver based storage class with RWM*
 |EFS
 |===
 
-`* NFS based storage classes in AKS and GKE have minimum size requirements which can be very high depending on your storage requirement. Please refer to the respective cloud provider's site for more information.`
+`* NFS based CSI driver storage classes in AKS and GKE have minimum size requirements which can be very high depending on your storage requirement. Please refer to the respective cloud provider's site for more information.`
 
-Note: The ´Filestore CSI driver´ and ´Azurefile CSI NFS´ storage classes are native to the managed k8s clusters GKE and AKS respectively and are available on k8s clusters without additional setup. However, for Amazon EKS, you need to create the ´EFS´ storage class. See our <<efs#,EFS storage class>> guide for more information. 
+Note: In GKE and AKS, you can get managed storage classes that are NFS based CSI driver storage backends. However, for Amazon EKS you need to create the ´EFS´ storage class. See our <<efs#,EFS storage class>> guide for more information. 
 
 === Provisioning NFS based storage class
 
