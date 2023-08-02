@@ -3,6 +3,7 @@
 :imagesdir: images
 
 In this section we show how you can setup a storage class that supports `ReadWriteMany` using NFS.
+NOTE: Running an NFS server on GKE k8s cluster with autopilot mode is not possible due to security restrictions. The NFS server provisioner requires two capabilities 'DAC_READ_SEARCH' and 'SYS_RESOURCE', which are disabled by Autopilot.
 
 == Prerequisites
 
