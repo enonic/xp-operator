@@ -7,4 +7,4 @@ description: Enonic XP Kubernetes operator
 sources:
   - https://github.com/enonic/xp-operator
 maintainers:
-  - name: Guðmundur Björn Birkisson (gbi@enonic.com)
+  - name: Slava Bradnitski (vbr@enonic.com)
