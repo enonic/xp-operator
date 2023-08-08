@@ -442,7 +442,12 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <ul class="sectlevel1">
 <li><a href="#prerequisites">Prerequisites</a></li>
 <li><a href="#namespaces">Namespaces</a></li>
-<li><a href="#storage_classes">Storage classes</a></li>
+<li><a href="#storage_classes">Storage classes</a>
+<ul class="sectlevel2">
+<li><a href="#compatible_storage_classes_for_running_xp_in_single_and_cluster_mode">Compatible Storage classes for running XP in single and cluster mode</a></li>
+<li><a href="#provisioning_nfs_based_storage_class">Provisioning NFS based storage class</a></li>
+</ul>
+</li>
 <li><a href="#installation">Installation</a>
 <ul class="sectlevel2">
 <li><a href="#create_chart_values_file">Create chart values file</a></li>
@@ -468,7 +473,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dl>
 <dt class="hdlist1">Kubernetes</dt>
 <dd>
-<p>A running Kubernetes cluster version <code>1.19+</code>.</p>
+<p>A running Kubernetes cluster version <code>1.19+</code>. The k8s cluster can be on-premise or any cloud service provider. The only thing that differs depending on the type of k8s clusters is which storage class to use. And more information about that is shown in the "Storage classes" section below.</p>
 </dd>
 <dt class="hdlist1">Kubectl</dt>
 <dd>
@@ -486,7 +491,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="namespaces"><a class="link" href="#namespaces">Namespaces</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>This guide instructs you to install the operator (and potentially the NFS provisioner) into the <code>kube-system</code> namespace. Although this is not a strict requirement, it is best practices to install kubernetes extentions into a namespace that clearly indicates that it has components vital to the system. Since <code>kube-system</code> is present in all clusters and should never be deleted, it is recommended to use that. You can create you own <code>my-system</code> namespace and install the operator there. Do not, for example, install the operator and a XP7 deployment into the same namespace.</p>
+<p>This guide instructs you to install the operator (and potentially the NFS provisioner) into the <code>kube-system</code> namespace. Although this is not a strict requirement, it is best practice to install kubernetes extensions into a namespace that clearly indicates that it has components vital to the system. Since <code>kube-system</code> is present in all clusters and should never be deleted, it is recommended to use that. You can create your own <code>my-system</code> namespace and install the operator there. Do not, for example, install the operator and an XP7 deployment into the same namespace.</p>
 </div>
 </div>
 </div>
@@ -494,30 +499,74 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="storage_classes"><a class="link" href="#storage_classes">Storage classes</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Before we deploy the operator, we need to talk about storage classes. That should be a familiar concept to people that have managed Kubernetes clusters before. If you do not know what they are, you can basically think of them as different aproaches to store your data (floppy, HDD, SSD, etc). Each storage class can create volumes that have one of these three access modes:</p>
+<p>Before we deploy the operator, we need to talk about storage classes. That should be a familiar concept to people that have worked on kubernetes clusters before. If you do not know what they are, you can basically think of them as different approaches to store your data. Each storage class can create volumes that have one of these four access modes:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p><code>ReadWriteOnce</code>: Can be mounted as read-write by a single node</p>
+<p><code>ReadWriteOnce</code>: Can be mounted as read-write by a single node. Multiple pods can access the volume when the pods are running on the same node.</p>
 </li>
 <li>
-<p><code>ReadOnlyMany</code>:  Can be mounted read-only by many nodes</p>
+<p><code>ReadOnlyMany</code>:  Can be mounted read-only by many nodes.</p>
 </li>
 <li>
-<p><code>ReadWriteMany</code>: Can be mounted as read-write by many nodes</p>
+<p><code>ReadWriteMany</code>: Can be mounted as read-write by many nodes.</p>
+</li>
+<li>
+<p><code>ReadWriteOncePod</code>: Can be mounted as read-write by a single pod.</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>The reason why we bring this up is because XP, when running in clustered mode, needs shared volumes for some data. If you do not plan on running any XP clusters in your Kubernetes cluster, you are fine and you do not need to worry about storage classes.</p>
+<p>ReadWriteOnce mode is supported by the default storage classes in any k8s cluster; that satisfies the requirement of XP deployment in single mode. However, to deploy XP in cluster mode, an NFS based storage class with "ReadWriteMany" access mode is required.</p>
 </div>
 <div class="paragraph">
-<p>However, for XP clusters to work, you need to have a storage class in your cluster that supports creation of <code>ReadWriteMany</code> volumes. For example, the standard storage class in <code>minikube</code> supports all modes, but the standard storage class in <code>GKE</code> does not support <code>ReadWriteMany</code>. Like GKE the standard storage class on Amazon EKS (gp2) does not support <code>ReadWriteMany</code> but you can use Amazon EFS storage class with dynamic provisioning. See our <a href="efs.ahtml">EFS storage class</a> guide for more information. You can find a matrix <a href="https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes">here</a> that shows you different options.</p>
+<p>For instance, the standard storage class in <code>minikube</code> supports all modes and can be used to deploy XP in single as well as in cluster mode. However, the standard storage classes in the major managed k8s providers like <code>GKE</code>, <code>AKS</code> and <code>EKS</code> do not support <code>ReadWriteMany</code> mode. Most storage classes that support <code>ReadWriteMany</code> access mode have also a restriction in changing the modified time of files that XP requires. At the time of this writing, the only storage classes that can be used to deploy XP in cluster mode are NFS based storage classes with <code>ReadWriteMany</code> access mode. Refer to the table below to see which storage class you can use on the major cloud service providers.</p>
+</div>
+<div class="sect2">
+<h3 id="compatible_storage_classes_for_running_xp_in_single_and_cluster_mode"><a class="link" href="#compatible_storage_classes_for_running_xp_in_single_and_cluster_mode">Compatible Storage classes for running XP in single and cluster mode</a></h3>
+<table class="tableblock frame-ends grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">XP deployment mode</th>
+<th class="tableblock halign-left valign-top">Google</th>
+<th class="tableblock halign-left valign-top">Azure</th>
+<th class="tableblock halign-left valign-top">Amazon</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Single</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Any storage class with RWO</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Any storage class with RWO</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Any storage class with RWO</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Cluster</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Filestore CSI driver based storage class with RWM*</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Azurefile CSI driver based storage class with RWM*</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">EFS</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p><code>* NFS based CSI driver storage classes in AKS and GKE have minimum size requirements which can be very high depending on your storage requirement. Please refer to the respective cloud provider&#8217;s site for more information.</code></p>
 </div>
 <div class="paragraph">
-<p>You can create your own storage class with NFS that supports <code>ReadWriteMany</code> access mode. See our <a href="nfs.ahtml">NFS storage class</a> guide for more information.
-NOTE: The azurefile storageclass on AKS supports RWM access mode, but using that in conjunction with the xp-operator has proven unstable. We recommend usage of NFS on AKS.</p>
+<p>Note: In GKE and AKS, you can get managed storage classes that are NFS based CSI driver storage backends. However, for Amazon EKS you need to create the ´EFS´ storage class. See our <a href="efs.ahtml">EFS storage class</a> guide for more information.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="provisioning_nfs_based_storage_class"><a class="link" href="#provisioning_nfs_based_storage_class">Provisioning NFS based storage class</a></h3>
+<div class="paragraph">
+<p>If you are running an ´on-premiser´ k8s cluster or you don&#8217;t want to use the available NFS based storage classes in managed k8s clusters, you have the possibility to self provision NFS based storage classes. See our <a href="nfs.ahtml">NFS storage class</a> guide for more information.</p>
+</div>
 </div>
 </div>
 </div>
@@ -648,7 +697,7 @@ __  ____  __  _____   ___  __ ____  ______
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-08-04 13:04:00 UTC
+Last updated 2023-08-08 09:53:15 UTC
 </div>
 </div>
 </body>
