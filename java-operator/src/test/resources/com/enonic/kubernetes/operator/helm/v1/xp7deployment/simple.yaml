@@ -12,6 +12,10 @@ spec:
   enabled: true
   xpVersion: 7.13.2
 
+  nodesPreinstalledApps:
+    - name: snapshotter
+      url: https://repo.enonic.com/public/com/enonic/app/snapshotter/3.0.2/snapshotter-3.0.2.jar
+
   nodesSharedDisks:
     - name: blobstore
       size: 2Gi
