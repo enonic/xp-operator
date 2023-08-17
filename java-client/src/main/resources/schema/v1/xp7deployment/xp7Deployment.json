@@ -12,6 +12,22 @@
         "xpVersion": {
           "type": "string"
         },
+        "nodesPreinstalledApps": {
+          "type": "array",
+          "nullable": true,
+          "items": {
+            "javaName": "Xp7DeploymentSpecNodesPreinstalledApps",
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              }
+            }
+          }
+        },
         "nodesSharedVolumes": {
           "javaName": "Xp7DeploymentSpecNodesSharedVolumes",
           "type": "array",

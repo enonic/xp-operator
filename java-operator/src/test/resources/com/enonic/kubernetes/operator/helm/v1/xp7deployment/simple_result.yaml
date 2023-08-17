@@ -183,7 +183,11 @@ data:
     \ != \"${OLD_HASHCODE}\" ]]; then\n    cmEvent\n  fi\n  OLD_HASHCODE=${NEW_HASHCODE}\n\
     \  sleep 2\ndone\n"
   preStart.sh: "#!/usr/bin/env bash\n\necho \"Running prescript for node ${XP_NODE_NAME}\
-    \ (${XP_NODE_IP})\"\n"
+    \ (${XP_NODE_IP})\"\n\necho \"Bootstrap deploy folder apps\"\n\n# Delete apps\n\
+    for f in $(find $XP_HOME/deploy -name '*.jar'); do\n  name=$(basename $f)\n  if\
+    \ [ \"$(echo 'snapshotter-c5e507a506.jar' | grep $name)\" == \"\" ]; then\n  \
+    \  app.sh remove $name\n  fi\ndone\n\n# Add apps\napp.sh add https://repo.enonic.com/public/com/enonic/app/snapshotter/3.0.2/snapshotter-3.0.2.jar\
+    \ --name=snapshotter-c5e507a506.jar\n"
   preStop.sh: "#!/usr/bin/env bash\n\necho \"Wait for endpoints to be deleted\"\n\
     bash /enonic-xp/home/extra-config/endpoints.sh -r -s all -i ${XP_NODE_IP} -t 10\n\
     bash /enonic-xp/home/extra-config/endpoints.sh -r -s ${XP_NODE_GROUP} -i ${XP_NODE_IP}\
@@ -614,6 +618,8 @@ spec:
               key: "passHash"
               name: "su"
               optional: false
+        - name: "PRE_APP_HASH"
+          value: "957ee10a49f2be0d0e2b1272ef611a5a93fe59c95c4044d792118aec0221021e6eb3685822a057b80343f8bcd14d7c37140eb2967042a1486bdedc5456f3fde4"
         - name: "XP_OPTS"
           value: "-Xms154m -Xmx154m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof\
             \ -Dhazelcast.shutdownhook.policy=GRACEFUL -Dhazelcast.graceful.shutdown.max.wait=600"

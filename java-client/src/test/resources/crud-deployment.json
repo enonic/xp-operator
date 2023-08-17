@@ -8,6 +8,7 @@
   "spec" : {
     "enabled" : true,
     "xpVersion" : "unstable",
+    "nodesPreinstalledApps" : [ ],
     "nodesSharedVolumes" : [ ],
     "nodesSharedDisks" : [ {
       "name" : "blobstore",

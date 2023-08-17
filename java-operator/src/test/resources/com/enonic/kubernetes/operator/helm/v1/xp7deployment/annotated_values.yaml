@@ -15,16 +15,18 @@ defaultLabels:
 deployment:
   clustered: false
   hasDedicatedFrontendNodes: false
-  name: "mycloud-mysolution-myenv-myservice"
-  namespace: "mycloud-mysolution-myenv-myservice"
   metadata:
     annotations:
-      io.enonic.backup.volumes: blobstore,snapshots
       io.enonic.backup.prescripts: '["/usr/local/bin/backup.sh"]'
       io.enonic.backup.prescriptsContainer: exp
+      io.enonic.backup.volumes: blobstore,snapshots
+  name: mycloud-mysolution-myenv-myservice
+  namespace: mycloud-mysolution-myenv-myservice
+  preInstalledAppHash: cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e
   spec:
     enabled: true
     xpVersion: "7.13.0"
+    nodesPreinstalledApps: []
     nodesSharedVolumes: []
     nodesSharedDisks:
     - name: "blobstore"
