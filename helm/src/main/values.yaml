@@ -1,3 +1,17 @@
+image:
+  repository: enonic/xp-operator
+  tag: "${version}"
+  pullPolicy: IfNotPresent
+resources:
+  requests: {}
+  limits: {}
+annotations: {}
+labels: {}
+secrets: {}
+env: {}
+onlyDeployCrds: false
+# For a full list of configuration options see operator properties file:
+# https://github.com/enonic/xp-operator/blob/master/java-operator/src/main/resources/application.properties
 config: |-
   #operator.charts.values.storage.shared.storageClassName=nfs
   #operator.charts.values.storage.default.storageClassName=standard
