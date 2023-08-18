@@ -107,7 +107,7 @@ jobs:
           platforms: linux/amd64,linux/arm64,linux/ppc64le,linux/s390x,linux/arm/v7
 
       - name: Publish helm chart
-        run: curl -u "${{ secrets.ARTIFACTORY_USERNAME }}:${{ secrets.ARTIFACTORY_PASSWORD }}" https://repo.enonic.com/repository/helm/xp-operator --upload-file helm/build/libs/xp-operator-$(./get-version.sh).tgz -v
+        run: curl -u "${{ secrets.ARTIFACTORY_USERNAME }}:${{ secrets.ARTIFACTORY_PASSWORD }}" https://repo.enonic.com/repository/helm/xp-operator/ --upload-file helm/build/libs/xp-operator-$(./get-version.sh).tgz -v
 
       - name: Publish java-client
         run: ./gradlew publish -PrepoUser=${{ secrets.ARTIFACTORY_USERNAME }} -PrepoPassword=${{ secrets.ARTIFACTORY_PASSWORD }}
