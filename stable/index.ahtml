@@ -499,7 +499,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-The operator only supports Enonic XP <code>v7.13.0</code> and newer.
+The operator only supports Enonic XP <code>v7.13.2</code> and newer.
 </td>
 </tr>
 </table>
@@ -509,7 +509,7 @@ The operator only supports Enonic XP <code>v7.13.0</code> and newer.
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-08-08 09:53:15 UTC
+Last updated 2023-08-21 14:14:47 UTC
 </div>
 </div>
 </body>
