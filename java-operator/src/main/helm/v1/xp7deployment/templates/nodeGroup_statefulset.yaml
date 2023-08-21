@@ -165,8 +165,6 @@ spec:
               value: {{ $env.value }}
           {{- end }}
 
-
-          {{- if semverCompare ">= 7.13.0" $.Values.deployment.spec.xpVersion }}
           startupProbe:
             httpGet:
               path: "/health"
@@ -190,7 +188,6 @@ spec:
               scheme: HTTP
             failureThreshold: 2
             timeoutSeconds: 2
-          {{- end }}
 
           {{- if $.Values.deployment.clustered }}
           lifecycle:

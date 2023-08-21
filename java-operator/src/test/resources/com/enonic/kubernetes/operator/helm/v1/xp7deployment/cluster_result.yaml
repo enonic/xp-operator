@@ -800,7 +800,7 @@ spec:
         - name: "XP_OPTS"
           value: "-Xms512m -Xmx512m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof\
             \ -Dhazelcast.shutdownhook.policy=GRACEFUL -Dhazelcast.graceful.shutdown.max.wait=600"
-        image: "enonic/xp:7.12.2-ubuntu"
+        image: "enonic/xp:7.13.0-ubuntu"
         imagePullPolicy: "IfNotPresent"
         lifecycle:
           preStop:
@@ -808,6 +808,13 @@ spec:
               command:
               - "/bin/bash"
               - "/enonic-xp/home/extra-config/preStop.sh"
+        livenessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: "/health"
+            port: 2609
+            scheme: "HTTP"
+          timeoutSeconds: 2
         name: "exp"
         ports:
         - containerPort: 2609
@@ -822,6 +829,13 @@ spec:
         - containerPort: 9300
           name: "es-transport"
           protocol: "TCP"
+        readinessProbe:
+          failureThreshold: 2
+          httpGet:
+            path: "/ready"
+            port: 2609
+            scheme: "HTTP"
+          timeoutSeconds: 2
         resources:
           limits:
             cpu: "1"
@@ -835,6 +849,15 @@ spec:
             - "ALL"
           runAsNonRoot: true
           runAsUser: 1337
+        startupProbe:
+          failureThreshold: 20
+          httpGet:
+            path: "/health"
+            port: 2609
+            scheme: "HTTP"
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          timeoutSeconds: 2
         terminationMessagePath: "/dev/termination-log"
         terminationMessagePolicy: "File"
         volumeMounts:
@@ -878,7 +901,7 @@ spec:
             secretKeyRef:
               key: "token"
               name: "xp-events-sa-secret"
-        image: "enonic/xp:7.12.2-ubuntu"
+        image: "enonic/xp:7.13.0-ubuntu"
         imagePullPolicy: "IfNotPresent"
         name: "events"
         securityContext:
@@ -1046,7 +1069,7 @@ spec:
         - name: "XP_OPTS"
           value: "-Xms614m -Xmx614m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof\
             \ -Dhazelcast.shutdownhook.policy=GRACEFUL -Dhazelcast.graceful.shutdown.max.wait=600"
-        image: "enonic/xp:7.12.2-ubuntu"
+        image: "enonic/xp:7.13.0-ubuntu"
         imagePullPolicy: "IfNotPresent"
         lifecycle:
           preStop:
@@ -1054,6 +1077,13 @@ spec:
               command:
               - "/bin/bash"
               - "/enonic-xp/home/extra-config/preStop.sh"
+        livenessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: "/health"
+            port: 2609
+            scheme: "HTTP"
+          timeoutSeconds: 2
         name: "exp"
         ports:
         - containerPort: 2609
@@ -1068,6 +1098,13 @@ spec:
         - containerPort: 9300
           name: "es-transport"
           protocol: "TCP"
+        readinessProbe:
+          failureThreshold: 2
+          httpGet:
+            path: "/ready"
+            port: 2609
+            scheme: "HTTP"
+          timeoutSeconds: 2
         resources:
           limits:
             cpu: "2"
@@ -1081,6 +1118,15 @@ spec:
             - "ALL"
           runAsNonRoot: true
           runAsUser: 1337
+        startupProbe:
+          failureThreshold: 20
+          httpGet:
+            path: "/health"
+            port: 2609
+            scheme: "HTTP"
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          timeoutSeconds: 2
         terminationMessagePath: "/dev/termination-log"
         terminationMessagePolicy: "File"
         volumeMounts:
@@ -1126,7 +1172,7 @@ spec:
             secretKeyRef:
               key: "token"
               name: "xp-events-sa-secret"
-        image: "enonic/xp:7.12.2-ubuntu"
+        image: "enonic/xp:7.13.0-ubuntu"
         imagePullPolicy: "IfNotPresent"
         name: "events"
         securityContext:
@@ -1315,7 +1361,7 @@ spec:
         - name: "XP_OPTS"
           value: "-bla -Xms1536m -Xmx1536m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof\
             \ -Dhazelcast.shutdownhook.policy=GRACEFUL -Dhazelcast.graceful.shutdown.max.wait=600"
-        image: "enonic/xp:7.12.2-ubuntu"
+        image: "enonic/xp:7.13.0-ubuntu"
         imagePullPolicy: "IfNotPresent"
         lifecycle:
           preStop:
@@ -1323,6 +1369,13 @@ spec:
               command:
               - "/bin/bash"
               - "/enonic-xp/home/extra-config/preStop.sh"
+        livenessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: "/health"
+            port: 2609
+            scheme: "HTTP"
+          timeoutSeconds: 2
         name: "exp"
         ports:
         - containerPort: 2609
@@ -1337,6 +1390,13 @@ spec:
         - containerPort: 9300
           name: "es-transport"
           protocol: "TCP"
+        readinessProbe:
+          failureThreshold: 2
+          httpGet:
+            path: "/ready"
+            port: 2609
+            scheme: "HTTP"
+          timeoutSeconds: 2
         resources:
           limits:
             cpu: "3"
@@ -1350,6 +1410,15 @@ spec:
             - "ALL"
           runAsNonRoot: true
           runAsUser: 1337
+        startupProbe:
+          failureThreshold: 20
+          httpGet:
+            path: "/health"
+            port: 2609
+            scheme: "HTTP"
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          timeoutSeconds: 2
         terminationMessagePath: "/dev/termination-log"
         terminationMessagePolicy: "File"
         volumeMounts:
@@ -1395,7 +1464,7 @@ spec:
             secretKeyRef:
               key: "token"
               name: "xp-events-sa-secret"
-        image: "enonic/xp:7.12.2-ubuntu"
+        image: "enonic/xp:7.13.0-ubuntu"
         imagePullPolicy: "IfNotPresent"
         name: "events"
         securityContext:
