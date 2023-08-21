@@ -10,7 +10,7 @@ metadata:
     service: myservice
 spec:
   enabled: true
-  xpVersion: 7.13.0
+  xpVersion: 7.13.2
 
   nodesSharedDisks:
     blobstore: 2Gi

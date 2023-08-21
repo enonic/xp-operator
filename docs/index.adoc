@@ -21,4 +21,4 @@ Before you can start using the operator you have to:
 
 == Supported XP versions
 
-NOTE: The operator only supports Enonic XP `v7.13.0` and newer.
+NOTE: The operator only supports Enonic XP `v7.13.2` and newer.
