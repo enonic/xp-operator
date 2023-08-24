@@ -22,7 +22,7 @@ jobs:
       - name: Setup Helm
         uses: azure/setup-helm@v3
         with:
-          version: '3.7.0'
+          version: '3.12.3'
 
       - name: Build and Publish
         run: |
