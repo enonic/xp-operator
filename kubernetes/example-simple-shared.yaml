@@ -75,8 +75,8 @@ metadata:
   name: contentstudio
   namespace: my-namespace
 spec:
-  url: https://repo.enonic.com/public/com/enonic/app/contentstudio/4.5.2/contentstudio-4.5.2.jar
-  sha512: e5662edb8757ceb6f085d1a8d85abf965c0f45a98acbc767ef31f4e8d860fc88cc995aa7cfcb1167f356c3e261129524f3c38de93cdc08baca95e51943a99365
+  url: https://repo.enonic.com/public/com/enonic/app/contentstudio/5.0.3/contentstudio-5.0.3.jar
+  sha512: ba6b40ebf0808c6fa619ba2a05d07ce3e566eada7e9f3f34c1d280e9d1dcbd1e3c25eff9896d1057c4578ff3f516afa7a905c9e42ddc5e08f1cdf06f7e89774c
 ---
 # Disable management of apps through XP admin
 apiVersion: enonic.cloud/v1
