@@ -19,7 +19,7 @@ Clone this repository and add the `kubectl-plugin` to your `PATH`, i.e:
 
 ```console
 $ git clone https://github.com/enonic/xp-operator.git
-$ cd `xp-operator/kubectl-plugin`
+$ cd xp-operator/kubectl-plugin
 $ export PATH="$PATH:$PWD"
 ```
 

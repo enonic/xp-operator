@@ -1,6 +1,6 @@
 # Inspired by https://github.com/fabric8io-images/java/blob/master/images/alpine/openjdk11/jre/Dockerfile
 
-FROM adoptopenjdk:11-jre-hotspot
+FROM eclipse-temurin:11-jre
 
 # JAVA_APP_DIR is used by run-java.sh for finding the binaries
 ENV JAVA_APP_DIR=/deployments \
