@@ -924,18 +924,6 @@ spec:
           image: "busybox"
           imagePullPolicy: "IfNotPresent"
           name: "wait-for-dns-discovery"
-        - command:
-            - "sh"
-            - "/extra-config/deployApps.sh"
-            - "/deploy"
-          image: "busybox"
-          imagePullPolicy: "IfNotPresent"
-          name: "deploy-preinstalled-apps"
-          volumeMounts:
-            - mountPath: "/extra-config"
-              name: "extra-config"
-            - mountPath: "/deploy"
-              name: "deploy"
       restartPolicy: "Always"
       schedulerName: "default-scheduler"
       securityContext:
@@ -1223,18 +1211,6 @@ spec:
           image: "busybox"
           imagePullPolicy: "IfNotPresent"
           name: "wait-for-dns-discovery"
-        - command:
-            - "sh"
-            - "/extra-config/deployApps.sh"
-            - "/deploy"
-          image: "busybox"
-          imagePullPolicy: "IfNotPresent"
-          name: "deploy-preinstalled-apps"
-          volumeMounts:
-            - mountPath: "/extra-config"
-              name: "extra-config"
-            - mountPath: "/deploy"
-              name: "deploy"
       restartPolicy: "Always"
       schedulerName: "default-scheduler"
       securityContext:
@@ -1543,18 +1519,6 @@ spec:
           image: "busybox"
           imagePullPolicy: "IfNotPresent"
           name: "wait-for-dns-discovery"
-        - command:
-            - "sh"
-            - "/extra-config/deployApps.sh"
-            - "/deploy"
-          image: "busybox"
-          imagePullPolicy: "IfNotPresent"
-          name: "deploy-preinstalled-apps"
-          volumeMounts:
-            - mountPath: "/extra-config"
-              name: "extra-config"
-            - mountPath: "/deploy"
-              name: "deploy"
       restartPolicy: "Always"
       schedulerName: "default-scheduler"
       securityContext:

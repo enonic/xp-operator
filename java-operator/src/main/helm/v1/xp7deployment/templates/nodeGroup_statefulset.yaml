@@ -77,7 +77,7 @@ spec:
       securityContext:
         fsGroup: {{ $.Values.pods.securityContext.fsGroup }}
 
-      {{- if or $.Values.pods.sysctlInitContainer $.Values.deployment.clustered (hasKey $.Values.deployment.spec "nodesPreinstalledApps") $nodeGroup.initContainers }}
+      {{- if or $.Values.pods.sysctlInitContainer $.Values.deployment.clustered $.Values.deployment.spec.nodesPreinstalledApps $nodeGroup.initContainers }}
       initContainers:
       {{- if $.Values.pods.sysctlInitContainer }}
         - name: configure-sysctl
@@ -108,7 +108,7 @@ spec:
                   apiVersion: v1
                   fieldPath: metadata.name
       {{- end }}
-      {{- if hasKey $.Values.deployment.spec "nodesPreinstalledApps" }}
+      {{- if $.Values.deployment.spec.nodesPreinstalledApps }}
         - name: deploy-preinstalled-apps
           image: busybox
           imagePullPolicy: {{ $.Values.image.pullPolicy }}
