@@ -22,7 +22,7 @@ public class DnsRecordServiceWrapper
 {
     private static final Logger log = LoggerFactory.getLogger( DnsRecordServiceWrapper.class );
 
-    private DnsRecordService service;
+    private final DnsRecordService service;
 
     @Inject
     public DnsRecordServiceWrapper( @RestClient final DnsRecordService service )

@@ -302,11 +302,11 @@ spec:
       volumes:
         - name: config
           configMap:
-            defaultMode: "420"
+            defaultMode: 0644
             name: {{ $nodeGroup.name }}
         - name: extra-config
           configMap:
-            defaultMode: "420"
+            defaultMode: 0644
             name: extra-config
 
         {{- range $dir := $nodeGroup.resources.dirs }}
