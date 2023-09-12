@@ -1,4 +1,4 @@
-K8S_VERSION:=v1.24.12
+K8S_VERSION:=v1.27.3
 KIND_MTU:=$(shell docker network inspect bridge -f '{{ index .Options "com.docker.network.driver.mtu" }}')
 KIND_CTX:=kind-kind
 NFS_SERVER_NAME:=kind-nfs-server
@@ -43,7 +43,7 @@ kind-bootstrap:
 		--set storageClass.archiveOnDelete=false \
 		--set storageClass.allowVolumeExpansion=true \
 		nfs-client \
-		https://github.com/kubernetes-sigs/nfs-subdir-external-provisioner/releases/download/nfs-subdir-external-provisioner-4.0.17/nfs-subdir-external-provisioner-4.0.17.tgz
+		https://github.com/kubernetes-sigs/nfs-subdir-external-provisioner/releases/download/nfs-subdir-external-provisioner-4.0.18/nfs-subdir-external-provisioner-4.0.18.tgz
 
 kind-dev: ## Setup cluster for development mode (env var MY_IP required)
 	# Ensure MY_IP is set

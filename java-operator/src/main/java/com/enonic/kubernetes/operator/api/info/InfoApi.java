@@ -32,7 +32,7 @@ public class InfoApi {
         admissionResource.put("namespaced", false);
         admissionResource.put("singularName", "");
         admissionResource.put("verbs", Collections.singletonList("create"));
-        admissionResource.put("version", "v1beta1");
+        admissionResource.put("version", "v1");
 
         Map<String, Object> mutationResource = new HashMap<>();
         mutationResource.put("group", "admission.k8s.io");
@@ -41,7 +41,7 @@ public class InfoApi {
         mutationResource.put("namespaced", false);
         mutationResource.put("singularName", "");
         mutationResource.put("verbs", Collections.singletonList("create"));
-        mutationResource.put("version", "v1beta1");
+        mutationResource.put("version", "v1");
 
         Map<String, Object> res = new HashMap<>();
         res.put("apiVersion", "v1");

@@ -266,7 +266,7 @@ public class MutationApi
                 break;
             case UPDATE:
                 if (newR.getSpec() != null && !newR.getSpec().equals( oldR.getSpec() )) {
-                    // On any change change, set default status
+                    // On any change, set default status
                     patch( mt, true, "/status", newR.getStatus(), defStatus );
                 } else {
                     // Else make sure the old status is not removed
