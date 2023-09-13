@@ -2,17 +2,14 @@ package com.enonic.kubernetes.operator.helm;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
@@ -24,7 +21,7 @@ import com.enonic.kubernetes.helm.charts.LocalRepository;
 import com.enonic.kubernetes.testutils.TestFileSupplier;
 
 import static com.enonic.kubernetes.common.Configuration.cfgStr;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static com.enonic.kubernetes.testutils.YamlAssert.assertYamlEquals;
 
 public abstract class HelmTest
     extends TestFileSupplier
@@ -46,29 +43,17 @@ public abstract class HelmTest
     void test( String chartName, Object values, String expectedValuesFile, String expectedResultFile )
         throws IOException
     {
-        assertEquals(mapper.readTree(new File(expectedValuesFile)), mapper.valueToTree(values),
-                "Values do not match (" + new File(expectedValuesFile).getName() + ":0)");
+        assertYamlEquals(Files.readString( Path.of( expectedValuesFile ) ), mapper.writeValueAsString(values),
+                "Values do not match (" + Path.of(expectedValuesFile).getFileName() + ":0)");
 
         StringBuilder sb = new StringBuilder();
         for ( HasMetadata r : helm.templateObjects( chartRepository.get( chartName ), values ) )
         {
             sb.append( mapper.writeValueAsString( r ) );
         }
-        final ObjectReader reader = mapper.reader();
 
-        final JsonParser expectedParser = reader.createParser( new File( expectedResultFile ) );
-        final JsonParser actualParser = reader.createParser( sb.toString() );
-
-        JsonNode expected;
-        JsonNode actual;
-
-        do
-        {
-            expected = expectedParser.readValueAsTree();
-            actual = actualParser.readValueAsTree();
-
-            assertEquals( expected, actual, "Result does not match: (" + new File( expectedResultFile ).getName() + ":0)" );
-        } while ( expected != null || actual != null );
+        assertYamlEquals( Files.readString( Path.of( expectedResultFile ) ), sb.toString(),
+                          "Result does not match: (" + Path.of( expectedResultFile ).getFileName() + ":0)" );
     }
 
     @SuppressWarnings("SameReturnValue")
@@ -82,8 +67,8 @@ public abstract class HelmTest
     {
         String classResourcePath = getClassFilePath( this.getClass() );
         return getFiles( this.getClass() ).stream().
-            filter( f -> !f.getAbsolutePath().endsWith( "result.yaml" ) ).
-            filter( f -> !f.getAbsolutePath().endsWith( "values.yaml" ) ).
+            filter( f -> !f.getAbsolutePath().endsWith( "_result.yaml" ) ).
+            filter( f -> !f.getAbsolutePath().endsWith( "_values.yaml" ) ).
             map( f -> DynamicTest.dynamicTest( testName( classResourcePath, f ), f.toURI(),
                                                () -> test( chartToTest(), createValues( mapper, f ),
                                                            f.getAbsolutePath().replace( ".yaml", "_values.yaml" ),

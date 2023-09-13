@@ -27,8 +27,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.enonic.kubernetes.common.Configuration.*;
 import static com.enonic.kubernetes.common.Utils.createOwnerReference;
@@ -136,20 +140,24 @@ public class OperatorXp7DeploymentHelm
 
                 String opts = xpOpts.getValue();
 
-                if (!(opts.contains( "-Xms" ) || opts.contains( "-Xmx" ))) {
-                    opts = opts + getMemoryOpts( ng );
+                if ( !( opts.contains( "-Xms" ) || opts.contains( "-Xmx" ) ) )
+                {
+                    opts = joinOpts( opts, getMemoryOpts( ng ) );
                 }
 
-                if (!(opts.contains( "-XX:-HeapDumpOnOutOfMemoryError" ) || opts.contains( "-XX:HeapDumpPath" ))) {
-                    opts = opts + " -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof";
+                if ( !( opts.contains( "-XX:-HeapDumpOnOutOfMemoryError" ) || opts.contains( "-XX:HeapDumpPath" ) ) )
+                {
+                    opts = joinOpts( opts, "-XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof" );
                 }
 
-                if (!(opts.contains( "-Dhazelcast.shutdownhook.policy" ))) {
-                    opts = opts + " -Dhazelcast.shutdownhook.policy=GRACEFUL";
+                if ( !( opts.contains( "-Dhazelcast.shutdownhook.policy" ) ) )
+                {
+                    opts = joinOpts( opts, "-Dhazelcast.shutdownhook.policy=GRACEFUL" );
                 }
 
                 if (!(opts.contains( "-Dhazelcast.graceful.shutdown.max.wait" ))) {
-                    opts = opts + " -Dhazelcast.graceful.shutdown.max.wait=" + cfgStr( "operator.charts.values.pods.terminationGracePeriodSeconds" );
+                    opts = joinOpts( opts, "-Dhazelcast.graceful.shutdown.max.wait=" +
+                        cfgStr( "operator.charts.values.pods.terminationGracePeriodSeconds" ) );
                 }
 
                 xpOpts.setValue( opts );
@@ -242,25 +250,25 @@ public class OperatorXp7DeploymentHelm
 
         private String getMemoryOpts( final Xp7DeploymentSpecNodeGroup ng )
         {
-            float memoryInMb = getMemory( ng.getXp7DeploymentSpecNodeGroupResources().getMemory() );
+            double memoryInMb = getMemory( ng.getXp7DeploymentSpecNodeGroupResources().getMemory() );
 
-            Float heapMemory;
+            double heapMemory;
             if (ng.getData()) {
                 heapMemory = memoryInMb * cfgFloat( "operator.deployment.xp.heap.data" );
             } else {
                 heapMemory = memoryInMb * cfgFloat( "operator.deployment.xp.heap.other" );
             }
-            int heap = Math.min( Math.round( heapMemory ), cfgInt( "operator.deployment.xp.heap.max" ) );
+            int heap = Math.toIntExact( Math.min( Math.round( heapMemory ), cfgInt( "operator.deployment.xp.heap.max" ) ) );
 
-            return String.format( " -Xms%sm -Xmx%sm", heap, heap );
+            return String.format( "-Xms%sm -Xmx%sm", heap, heap );
         }
 
-        private float getMemory( final String memory )
+        private double getMemory( final String memory )
         {
             if (memory.contains( "Gi" )) {
-                return Float.parseFloat( memory.replace( "Gi", "" ) ) * 1024F;
+                return Double.parseDouble( memory.replace( "Gi", "" ) ) * 1024;
             } else if (memory.contains( "Mi" )) {
-                return Float.parseFloat( memory.replace( "Mi", "" ) );
+                return Double.parseDouble( memory.replace( "Mi", "" ) );
             } else {
                 throw new RuntimeException( "Invalid memory mappings" );
             }
@@ -288,6 +296,14 @@ public class OperatorXp7DeploymentHelm
                 getXp7DeploymentSpecNodeGroups().
                 stream().
                 mapToInt( Xp7DeploymentSpecNodeGroup::getReplicas ).sum() > 1;
+        }
+
+        private static String joinOpts( String... opts )
+        {
+            return Stream.of( opts )
+                .filter( Objects::nonNull )
+                .filter( Predicate.not( String::isEmpty ) )
+                .collect( Collectors.joining( " " ) );
         }
     }
 }
