@@ -597,6 +597,13 @@ spec:
                   optional: false
             - name: "PRE_APP_HASH"
               value: "957ee10a49f2be0d0e2b1272ef611a5a93fe59c95c4044d792118aec0221021e6eb3685822a057b80343f8bcd14d7c37140eb2967042a1486bdedc5456f3fde4"
+            - name: "JUST_ENV"
+              value: "some value"
+            - name: "SECRET"
+              valueFrom:
+                secretKeyRef:
+                  key: "mykey"
+                  name: "mysecret"
             - name: "XP_OPTS"
               value: "-Xms154m -Xmx154m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof\
             \ -Dhazelcast.shutdownhook.policy=GRACEFUL -Dhazelcast.graceful.shutdown.max.wait=600"

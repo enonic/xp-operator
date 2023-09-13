@@ -400,6 +400,69 @@
                     },
                     "value": {
                       "type": "string"
+                    },
+                    "valueFrom": {
+                      "javaName": "Xp7DeploymentSpecNodeGroupEnvVarValueFrom",
+                      "type": "object",
+                      "properties": {
+                        "configMapKeyRef": {
+                          "javaName": "Xp7DeploymentSpecNodeGroupEnvVarValueFromConfigMapKeyRef",
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string"
+                            },
+                            "key": {
+                              "type": "string"
+                            },
+                            "optional": {
+                              "type": "boolean"
+                            }
+                          }
+                        },
+                        "fieldRef": {
+                          "javaName": "Xp7DeploymentSpecNodeGroupEnvVarValueFromFieldRef",
+                          "type": "object",
+                          "properties": {
+                            "fieldPath": {
+                              "type": "string"
+                            },
+                            "apiVersion": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "resourceFieldRef": {
+                          "javaName": "Xp7DeploymentSpecNodeGroupEnvVarValueFromResourceFieldRef",
+                          "type": "object",
+                          "properties": {
+                            "containerName": {
+                              "type": "string"
+                            },
+                            "resource": {
+                              "type": "string"
+                            },
+                            "divisor": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "secretKeyRef": {
+                          "javaName": "Xp7DeploymentSpecNodeGroupEnvVarValueFromSecretKeyRef",
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string"
+                            },
+                            "key": {
+                              "type": "string"
+                            },
+                            "optional": {
+                              "type": "boolean"
+                            }
+                          }
+                        }
+                      }
                     }
                   }
                 }

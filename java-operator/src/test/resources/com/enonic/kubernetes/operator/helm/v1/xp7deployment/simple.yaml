@@ -37,3 +37,11 @@ spec:
             size: 200Mi
           - name: work
             size: 400Mi
+      env:
+        - name: JUST_ENV
+          value: "some value"
+        - name: SECRET
+          valueFrom:
+            secretKeyRef:
+              name: mysecret
+              key: mykey
