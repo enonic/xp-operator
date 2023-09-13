@@ -26,21 +26,15 @@ public class LbServiceIpProducer
 {
     private final Logger log = LoggerFactory.getLogger( LbServiceIpProducer.class );
 
-    private List<String> ips;
-
-    protected LbServiceIpProducer()
-    {
-        // For testing
-    }
+    @Inject
+    Clients clients;
 
     @ConfigProperty(name = "dns.enabled")
-    Boolean dnsEnabled = false;
+    boolean dnsEnabled;
 
-    @Inject
-    public LbServiceIpProducer( final Clients clients )
+    public LbServiceIpProducer()
     {
         singletonAssert(this, "constructor");
-        ips = getLbIp( clients );
     }
 
     private List<String> getLbIp( final Clients clients )
@@ -89,6 +83,6 @@ public class LbServiceIpProducer
     @Override
     public List<String> get()
     {
-        return ips;
+        return getLbIp( clients );
     }
 }
