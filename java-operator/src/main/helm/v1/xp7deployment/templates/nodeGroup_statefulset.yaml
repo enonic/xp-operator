@@ -342,12 +342,14 @@ spec:
 {{- define "volumeMount" -}}
 {{- if .disk.volume }}
 - name: {{ .disk.volume }}
-  mountPath: {{ index .Values.volumes.mounts .disk.name }}
   subPath: {{ .disk.name }}
 {{- else }}
 - name: {{ .disk.name }}
-  mountPath: {{ index .Values.volumes.mounts .disk.name }}
 {{- end }}
+  mountPath: {{ index .Values.volumes.mounts .disk.name }}
+  {{- if .disk.mountReadOnly }}
+  readOnly: {{ .disk.mountReadOnly }}
+  {{- end }}
 {{- end }}
 
 {{ define "volumeClaimTemplate" }}

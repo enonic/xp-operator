@@ -60,6 +60,9 @@
               "size": {
                 "type": "string"
               },
+              "mountReadOnly" : {
+                "type" : "boolean"
+              },
               "volume": {
                 "type": "string"
               },
@@ -489,6 +492,9 @@
                         },
                         "size": {
                           "type": "string"
+                        },
+                        "mountReadOnly" : {
+                          "type" : "boolean"
                         }
                       }
                     }
@@ -524,6 +530,9 @@
                         },
                         "size": {
                           "type": "string"
+                        },
+                        "mountReadOnly" : {
+                          "type" : "boolean"
                         },
                         "volume": {
                           "type": "string"
