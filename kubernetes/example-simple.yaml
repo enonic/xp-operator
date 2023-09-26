@@ -17,11 +17,6 @@ spec:
   enabled: true
   xpVersion: 7.13.2
 
-  # Preinstall snapshotter on all nodes
-  nodesPreinstalledApps:
-    - name: snapshotter
-      url: https://repo.enonic.com/public/com/enonic/app/snapshotter/3.1.0/snapshotter-3.1.0.jar
-
   # Create one node
   nodeGroups:
     - name: main
@@ -30,10 +25,22 @@ spec:
       data: true
       master: true
 
+      initContainers:
+        # Preinstall Snapshotter app
+        - image: enonic/snapshotter:3.1.0
+          name: snapshotter-deploy
+          mounts:
+            - name: deploy
+              mountPath: /deploy
+
       resources:
         cpu: "1"
-        memory: 1Gi
-
+        memory: 512Mi
+        dirs:
+          # Snapshotter app copied to deploy folder
+          - name: deploy
+            size: 100Mi
+            mountReadOnly: true
         # Volumes private to the node
         disks:
           - name: blobstore
@@ -41,8 +48,6 @@ spec:
           - name: snapshots
             size: 1Gi
           - name: export # Dumps and other data
-            size: 1Gi
-          - name: deploy # Apps installed in the deploy folder
             size: 1Gi
           - name: index # Node ES index
             size: 1Gi
@@ -59,7 +64,7 @@ spec:
   url: https://repo.enonic.com/public/com/enonic/app/contentstudio/5.0.3/contentstudio-5.0.3.jar
   sha512: ba6b40ebf0808c6fa619ba2a05d07ce3e566eada7e9f3f34c1d280e9d1dcbd1e3c25eff9896d1057c4578ff3f516afa7a905c9e42ddc5e08f1cdf06f7e89774c
 ---
-# Disable management of apps through XP admin
+# Add your own custom config
 apiVersion: enonic.cloud/v1
 kind: Xp7Config
 metadata:

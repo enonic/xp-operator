@@ -10,7 +10,7 @@ The operator introduces a couple of new resources into your Kubernetes cluster.
 
 === Xp7Deployment
 
-This is the main custom resource that defines your deployment. It is namespaced so you have to create a namespace for it. Only 1 Xp7Deployment can reside in each namespace.
+This is the main custom resource that defines your deployment. It is namespaced, so you have to create a namespace for it. Only 1 Xp7Deployment can reside in each namespace.
 
 [source,yaml]
 ----
@@ -21,12 +21,7 @@ metadata:
   namespace: my-namespace
 spec:
   enabled: true     # Should the pods be running
-  xpVersion: 7.13.2  # XP version, has to be >=7.13.2
-
-  # List of preinstalled apps
-  nodesPreinstalledApps:
-   - name: snapshotter
-     url: https://repo.enonic.com/public/com/enonic/app/snapshotter/3.0.2/snapshotter-3.0.2.jar
+  xpVersion: 7.13.2  # XP version, must be >=7.13.2
 
   # List of disks shared by all nodes (see description of disks below)
   nodesSharedDisks:
@@ -47,6 +42,14 @@ spec:
       data: true
       master: true
 
+      initContainers:
+        # Preinstall Snapshotter app
+        - image: enonic/snapshotter:3.1.0
+          name: snapshotter-deploy
+          mounts:
+            - name: deploy
+              mountPath: /deploy
+
       # Environment variables
       env:
         - name: MY_ENV_VAR
@@ -56,7 +59,11 @@ spec:
         # Cpu and memory allocation
         cpu: "1.5"
         memory: 512Mi
-
+        dirs:
+          # Snapshotter app copied to deploy folder
+          - name: deploy
+            size: 100Mi
+            mountReadOnly: true
         # List of disks private to each and every node
         disks:
           - name: deploy
@@ -326,117 +333,12 @@ my-config            all         com.my-app.cfg                       PENDING   
 
 == Simple example
 
-Lets deploy a simple example. Create a file called `simple.yaml` and paste these contents to it:
+Let's deploy a simple example. Create a file called `simple.yaml` and paste these contents to it:
 
 .simple.yaml
 [source,yaml]
 ----
-# Create a namespace
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: my-namespace
-  annotations:
-    # Delete this namespace it the deployment is deleted
-    enonic.cloud/remove.with.xp7deployment: my-deployment
----
-# Create deployment in the namespace
-apiVersion: enonic.cloud/v1
-kind: Xp7Deployment
-metadata:
-  name: my-deployment
-  namespace: my-namespace
-spec:
-  enabled: true
-  xpVersion: 7.20.2
-
-  # Preinstall snapshotter on all nodes
-  nodesPreinstalledApps:
-   - name: snapshotter
-     url: https://repo.enonic.com/public/com/enonic/app/snapshotter/3.0.2/snapshotter-3.0.2.jar
-
-  # Create one node
-  nodeGroups:
-    - name: main
-      replicas: 1
-
-      data: true
-      master: true
-
-      resources:
-        cpu: "1"
-        memory: 512Mi
-
-        # Volumes private to the node
-        disks:
-          - name: blobstore
-            size: 1Gi
-          - name: snapshots
-            size: 1Gi
-          - name: export  # Dumps and other data
-            size: 1Gi
-          - name: deploy  # Apps installed in the deploy folder
-            size: 1Gi
-          - name: index   # Node ES index
-            size: 1Gi
-          - name: work    # Node cache
-            size: 1Gi
----
-# Install content studio
-apiVersion: enonic.cloud/v1
-kind: Xp7App
-metadata:
-  name: contentstudio
-  namespace: my-namespace
-spec:
-  url: https://repo.enonic.com/public/com/enonic/app/contentstudio/5.0.3/contentstudio-5.0.3.jar
-  sha512: ba6b40ebf0808c6fa619ba2a05d07ce3e566eada7e9f3f34c1d280e9d1dcbd1e3c25eff9896d1057c4578ff3f516afa7a905c9e42ddc5e08f1cdf06f7e89774c
----
-# Add your own custom config
-apiVersion: enonic.cloud/v1
-kind: Xp7Config
-metadata:
-  name: my-config
-  namespace: my-namespace
-spec:
-  nodeGroup: all
-  file: com.my-app.cfg
-  data: |
-    my = config
----
-# Expose XP through an ingress
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: my-domain-com
-  namespace: my-namespace
-  annotations:
-    enonic.cloud/xp7.vhost.mapping.my-mapping-site.source: /
-    enonic.cloud/xp7.vhost.mapping.my-mapping-site.target: /site/default/master/homepage
-
-    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.source: /admin
-    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.target: /admin
-    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.idproviders: system
-spec:
-  rules:
-    - host: my-domain.com
-      http:
-        paths:
-          - path: /
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: main
-                port:
-                  number: 8080
-
-          - path: /admin
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: main
-                port:
-                  number: 8080
+include::../kubernetes/example-simple.yaml[]
 ----
 
 Deploy this by running:
@@ -456,160 +358,14 @@ Once the XP pods have started you can open up the admin by following the <<acces
 
 == Cluster example
 
-WARNING: The values cpu and memory setting in this example are to low for a good cluster setup. They are set this way so you can try it out on a low resource Kubernetes cluster.
+WARNING: The values cpu and memory setting in this example are too low for a good cluster setup. They are set this way, so you can try it out on a low resource Kubernetes cluster.
 
-Lets deploy a cluster example. Create a file called `cluster.yaml` and paste these contents to it:
+Let's deploy a cluster example. Create a file called `cluster.yaml` and paste these contents to it:
 
 .cluster.yaml
 [source,yaml]
 ----
-# Create a namespace
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: my-namespace
-  annotations:
-    # Delete this namespace it the deployment is deleted
-    enonic.cloud/remove.with.xp7deployment: my-deployment
----
-# Create deployment in the namespace
-apiVersion: enonic.cloud/v1
-kind: Xp7Deployment
-metadata:
-  name: my-deployment
-  namespace: my-namespace
-spec:
-  enabled: true
-  xpVersion: 7.13.2
-
-  # Preinstall snapshotter on all nodes
-  nodesPreinstalledApps:
-   - name: snapshotter
-     url: https://repo.enonic.com/public/com/enonic/app/snapshotter/3.0.2/snapshotter-3.0.2.jar
-
-  # Create volumes shared by all nodes in this deployment
-  nodesSharedDisks:
-    - name: blobstore
-      size: 1Gi
-
-    - name: snapshots
-      size: 1Gi
-
-    - name: export # Dumps and other data
-      size: 1Gi
-
-  # Create nodes
-  nodeGroups:
-    # 3 master nodes
-    - name: master
-      replicas: 3
-
-      data: false
-      master: true
-
-      resources:
-        cpu: "0.5"
-        memory: 1Gi
-
-        # Volumes private to the node
-        disks:
-          - name: deploy  # Apps installed in the deploy folder
-            size: 1Gi
-          - name: index   # Node ES index
-            size: 1Gi
-
-    # 2 data nodes
-    - name: worker
-      replicas: 2
-
-      data: true
-      master: false
-
-      resources:
-        cpu: "1"
-        memory: 1Gi
-
-        # Volumes private to the node
-        disks:
-          - name: deploy  # Apps installed in the deploy folder
-            size: 1Gi
-          - name: index   # Node ES index
-            size: 1Gi
----
-# Install content studio
-apiVersion: enonic.cloud/v1
-kind: Xp7App
-metadata:
-  name: contentstudio
-  namespace: my-namespace
-spec:
-  url: https://repo.enonic.com/public/com/enonic/app/contentstudio/5.0.3/contentstudio-5.0.3.jar
-  sha512: ba6b40ebf0808c6fa619ba2a05d07ce3e566eada7e9f3f34c1d280e9d1dcbd1e3c25eff9896d1057c4578ff3f516afa7a905c9e42ddc5e08f1cdf06f7e89774c
----
-# Add your own custom config
-apiVersion: enonic.cloud/v1
-kind: Xp7Config
-metadata:
-  name: my-config
-  namespace: my-namespace
-spec:
-  nodeGroup: all
-  file: com.my-app.cfg
-  data: |
-    my = config
----
-# Expose XP site on frontend nodes through an ingress
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: my-domain-com-site
-  namespace: my-namespace
-  annotations:
-    enonic.cloud/xp7.vhost.mapping.my-mapping-site.source: /
-    enonic.cloud/xp7.vhost.mapping.my-mapping-site.target: /site/default/master/homepage
-spec:
-  rules:
-    - host: my-domain.com
-      http:
-        paths:
-          - path: /
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: worker
-                port:
-                  number: 8080
----
-# Expose XP admin on admin nodes through an ingress
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: my-domain-com-admin
-  namespace: my-namespace
-  annotations:
-    # Enable sticy sessions with nginx
-    kubernetes.io/ingress.class: "nginx"
-    nginx.ingress.kubernetes.io/affinity: "cookie"
-    nginx.ingress.kubernetes.io/session-cookie-name: "stickyXpAdmin"
-    nginx.ingress.kubernetes.io/session-cookie-expires: "129600" # 36 hours
-    nginx.ingress.kubernetes.io/session-cookie-max-age: "129600" # 36 hours
-    nginx.ingress.kubernetes.io/session-cookie-change-on-failure: "true"
-
-    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.source: /admin
-    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.target: /admin
-    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.idproviders: system
-spec:
-  rules:
-    - host: my-domain.com
-      http:
-        paths:
-          - path: /admin
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: worker
-                port:
-                  number: 8080
+include::../kubernetes/example-cluster.yaml[]
 ----
 
 Deploy this by running:

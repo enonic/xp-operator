@@ -92,10 +92,8 @@ data:
     \ ]; then\n        echo \"skipped! Not found!\"\n        exit\n    fi\n    fail=$(rm\
     \ \"$DEPLOY_DIR/$NAME\" 2>&1) || { echo \"failed! \"; echo \"$fail\"; exit 1;\
     \ }\n    echo \"success!\"\n}\n\n# Delete apps\nfor f in $(find \"$DEPLOY_DIR\"\
-    \ -name '*.jar'); do\n  name=$(basename \"$f\")\n  if [ \"$(echo 'snapshotter-c5e507a506.jar'\
-    \ | grep \"$name\")\" = \"\" ]; then\n    remove \"$name\"\n  fi\ndone\n\n# Add\
-    \ apps\nadd https://repo.enonic.com/public/com/enonic/app/snapshotter/3.0.2/snapshotter-3.0.2.jar\
-    \ snapshotter-c5e507a506.jar\n"
+    \ -name '*.jar'); do\n  name=$(basename \"$f\")\n  if [ \"$(echo '' | grep \"\
+    $name\")\" = \"\" ]; then\n    remove \"$name\"\n  fi\ndone\n\n# Add apps\n"
   endpoints.sh: "#!/usr/bin/env bash\n\nset -e\n\nusage () {\n    echo \"Usage: $SCRIPT_NAME\
     \ [OPTIONS]\"\n    echo \"Wait until IP has been added to endpoints\"\n    echo\
     \ \"\"\n    echo \"Options:\"\n    echo \"  -s, --service=     Service name\"\n\
@@ -596,7 +594,7 @@ spec:
                   name: "su"
                   optional: false
             - name: "PRE_APP_HASH"
-              value: "957ee10a49f2be0d0e2b1272ef611a5a93fe59c95c4044d792118aec0221021e6eb3685822a057b80343f8bcd14d7c37140eb2967042a1486bdedc5456f3fde4"
+              value: "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e"
             - name: "XP_OPTS"
               value: "-Xms154m -Xmx154m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof\
             \ -Dhazelcast.shutdownhook.policy=GRACEFUL -Dhazelcast.graceful.shutdown.max.wait=600"
@@ -743,18 +741,6 @@ spec:
             runAsUser: 0
           terminationMessagePath: "/dev/termination-log"
           terminationMessagePolicy: "File"
-        - command:
-            - "sh"
-            - "/extra-config/deployApps.sh"
-            - "/deploy"
-          image: "busybox"
-          imagePullPolicy: "IfNotPresent"
-          name: "deploy-preinstalled-apps"
-          volumeMounts:
-            - mountPath: "/extra-config"
-              name: "extra-config"
-            - mountPath: "/deploy"
-              name: "deploy"
         - args:
             - "-c"
             - "cp -r /export/* /deploy"
