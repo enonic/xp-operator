@@ -487,7 +487,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect2">
 <h3 id="xp7deployment"><a class="link" href="#xp7deployment">Xp7Deployment</a></h3>
 <div class="paragraph">
-<p>This is the main custom resource that defines your deployment. It is namespaced so you have to create a namespace for it. Only 1 Xp7Deployment can reside in each namespace.</p>
+<p>This is the main custom resource that defines your deployment. It is namespaced, so you have to create a namespace for it. Only 1 Xp7Deployment can reside in each namespace.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -498,12 +498,7 @@ metadata:
   namespace: my-namespace
 spec:
   enabled: true     # Should the pods be running
-  xpVersion: 7.13.2  # XP version, has to be &gt;=7.13.2
-
-  # List of preinstalled apps
-  nodesPreinstalledApps:
-   - name: snapshotter
-     url: https://repo.enonic.com/public/com/enonic/app/snapshotter/3.0.2/snapshotter-3.0.2.jar
+  xpVersion: 7.13.2  # XP version, must be &gt;=7.13.2
 
   # List of disks shared by all nodes (see description of disks below)
   nodesSharedDisks:
@@ -524,6 +519,14 @@ spec:
       data: true
       master: true
 
+      initContainers:
+        # Preinstall Snapshotter app
+        - image: enonic/snapshotter:3.1.0
+          name: snapshotter-deploy
+          mounts:
+            - name: deploy
+              mountPath: /deploy
+
       # Environment variables
       env:
         - name: MY_ENV_VAR
@@ -533,7 +536,11 @@ spec:
         # Cpu and memory allocation
         cpu: "1.5"
         memory: 512Mi
-
+        dirs:
+          # Snapshotter app copied to deploy folder
+          - name: deploy
+            size: 100Mi
+            mountReadOnly: true
         # List of disks private to each and every node
         disks:
           - name: deploy
@@ -902,7 +909,7 @@ my-config            all         com.my-app.cfg                       PENDING   
 <h2 id="simple_example"><a class="link" href="#simple_example">Simple example</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Lets deploy a simple example. Create a file called <code>simple.yaml</code> and paste these contents to it:</p>
+<p>Let&#8217;s deploy a simple example. Create a file called <code>simple.yaml</code> and paste these contents to it:</p>
 </div>
 <div class="listingblock">
 <div class="title">simple.yaml</div>
@@ -913,7 +920,7 @@ kind: Namespace
 metadata:
   name: my-namespace
   annotations:
-    # Delete this namespace it the deployment is deleted
+    # Delete this namespace if the deployment is deleted
     enonic.cloud/remove.with.xp7deployment: my-deployment
 ---
 # Create deployment in the namespace
@@ -924,12 +931,7 @@ metadata:
   namespace: my-namespace
 spec:
   enabled: true
-  xpVersion: 7.20.2
-
-  # Preinstall snapshotter on all nodes
-  nodesPreinstalledApps:
-   - name: snapshotter
-     url: https://repo.enonic.com/public/com/enonic/app/snapshotter/3.0.2/snapshotter-3.0.2.jar
+  xpVersion: 7.13.2
 
   # Create one node
   nodeGroups:
@@ -939,23 +941,33 @@ spec:
       data: true
       master: true
 
+      initContainers:
+        # Preinstall Snapshotter app
+        - image: enonic/snapshotter:3.1.0
+          name: snapshotter-deploy
+          mounts:
+            - name: deploy
+              mountPath: /deploy
+
       resources:
         cpu: "1"
         memory: 512Mi
-
+        dirs:
+          # Snapshotter app copied to deploy folder
+          - name: deploy
+            size: 100Mi
+            mountReadOnly: true
         # Volumes private to the node
         disks:
           - name: blobstore
             size: 1Gi
           - name: snapshots
             size: 1Gi
-          - name: export  # Dumps and other data
+          - name: export # Dumps and other data
             size: 1Gi
-          - name: deploy  # Apps installed in the deploy folder
+          - name: index # Node ES index
             size: 1Gi
-          - name: index   # Node ES index
-            size: 1Gi
-          - name: work    # Node cache
+          - name: work # Node cache
             size: 1Gi
 ---
 # Install content studio
@@ -1044,13 +1056,13 @@ ingress.networking.k8s.io/my-domain-com created</code></pre>
 <i class="fa icon-warning" title="Warning"></i>
 </td>
 <td class="content">
-The values cpu and memory setting in this example are to low for a good cluster setup. They are set this way so you can try it out on a low resource Kubernetes cluster.
+The values cpu and memory setting in this example are too low for a good cluster setup. They are set this way, so you can try it out on a low resource Kubernetes cluster.
 </td>
 </tr>
 </table>
 </div>
 <div class="paragraph">
-<p>Lets deploy a cluster example. Create a file called <code>cluster.yaml</code> and paste these contents to it:</p>
+<p>Let&#8217;s deploy a cluster example. Create a file called <code>cluster.yaml</code> and paste these contents to it:</p>
 </div>
 <div class="listingblock">
 <div class="title">cluster.yaml</div>
@@ -1073,11 +1085,6 @@ metadata:
 spec:
   enabled: true
   xpVersion: 7.13.2
-
-  # Preinstall snapshotter on all nodes
-  nodesPreinstalledApps:
-   - name: snapshotter
-     url: https://repo.enonic.com/public/com/enonic/app/snapshotter/3.0.2/snapshotter-3.0.2.jar
 
   # Create volumes shared by all nodes in this deployment
   nodesSharedDisks:
@@ -1105,9 +1112,7 @@ spec:
 
         # Volumes private to the node
         disks:
-          - name: deploy  # Apps installed in the deploy folder
-            size: 1Gi
-          - name: index   # Node ES index
+          - name: index # Node ES index
             size: 1Gi
 
     # 2 data nodes
@@ -1117,15 +1122,26 @@ spec:
       data: true
       master: false
 
+      initContainers:
+        # Preinstall Snapshotter app on worker nodes
+        - image: enonic/snapshotter:3.1.0
+          name: snapshotter-deploy
+          mounts:
+            - name: deploy
+              mountPath: /deploy
+
       resources:
         cpu: "1"
         memory: 1Gi
 
+        dirs:
+          # Snapshotter app copied to deploy folder
+          - name: deploy
+            size: 100Mi
+            mountReadOnly: true
         # Volumes private to the node
         disks:
-          - name: deploy  # Apps installed in the deploy folder
-            size: 1Gi
-          - name: index   # Node ES index
+          - name: index # Node ES index
             size: 1Gi
 ---
 # Install content studio
@@ -1227,7 +1243,7 @@ ingress.networking.k8s.io/my-domain-com-admin created</code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-08-30 15:22:02 UTC
+Last updated 2023-09-26 10:44:37 UTC
 </div>
 </div>
 </body>
