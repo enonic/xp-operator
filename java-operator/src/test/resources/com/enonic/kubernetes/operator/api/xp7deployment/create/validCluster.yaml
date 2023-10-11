@@ -14,7 +14,7 @@ admissionRequest:
           service: myservice2
       spec:
         enabled: true
-        xpVersion: 7.7.2
+        xpVersion: 7.13.2
         nodesSharedDisks:
           - name: blobstore
             size: 1Gi
@@ -59,7 +59,7 @@ assertResult:
     namespace: "mycloud-mysolution-myenv-myservice2"
   spec:
     enabled: true
-    xpVersion: "7.7.2"
+    xpVersion: "7.13.2"
     nodesSharedDisks:
       - name: "blobstore"
         size: "1Gi"

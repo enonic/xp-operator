@@ -298,10 +298,6 @@ public class AdmissionApi
                                                                           cfgStr( "operator.deployment.xp.labels.environment" ) ) );
             Preconditions.checkState( service != null, String.format( "'metadata.labels.%s' cannot be null",
                                                                       cfgStr( "operator.deployment.xp.labels.service" ) ) );
-
-            final String name = String.format( "%s-%s-%s-%s", cloud, solution, environment, service );
-            Preconditions.checkState( newDeployment.getMetadata().getName().equals( name ), String.format(
-                "Xp7Deployment name must be equal to <Cloud>-<Solution>-<Environment>-<Service> according to labels, i.e: '%s'", name ) );
         } );
 
         if ( op == AdmissionOperation.CREATE )
@@ -311,7 +307,7 @@ public class AdmissionApi
                                       newDeployment.getMetadata().getNamespace() );
 
             // Assert version is > 7.7.X, if we cant parse version, just let it go
-            ComparableVersion currentVersion = new ComparableVersion( "7.7.0" );
+            ComparableVersion currentVersion = new ComparableVersion( "7.13.0" );
             try
             {
                 if ( newDeployment.getSpec().getXpVersion().startsWith( "7." ) )
@@ -333,8 +329,8 @@ public class AdmissionApi
                 // Just ignore
             }
 
-            Preconditions.checkState( currentVersion.compareTo( new ComparableVersion( "7.6.100" ) ) > 0,
-                                      "Operator only supports XP version 7.7 and higher" );
+            Preconditions.checkState( currentVersion.compareTo( new ComparableVersion( "7.12.100" ) ) > 0,
+                                      "Operator only supports XP version 7.13 and higher" );
         }
     }
 
