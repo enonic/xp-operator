@@ -23,12 +23,17 @@ spec:
   enabled: true     # Should the pods be running
   xpVersion: 7.13.2  # XP version, must be >=7.13.2
 
+  # List of volumes shared by all nodes (see description of volumes below)
+  nodesSharedVolumes:
+    - name: sharedVolume
+      size: 1Gi
+
   # List of disks shared by all nodes (see description of disks below)
   nodesSharedDisks:
     - name: blobstore
-      size: 1Gi
+      volume: sharedVolume
     - name: snapshots
-      size: 1Gi
+      volume: sharedVolume
     - name: export
       size: 1Gi
 
@@ -64,14 +69,19 @@ spec:
           - name: deploy
             size: 100Mi
             mountReadOnly: true
+        # List of volumes private to each and every node
+        volumes:
+        - name: privateVolume
+          size: 1Gi
+          class: standard
+
         # List of disks private to each and every node
         disks:
-          - name: deploy
-            size: 1Gi
           - name: index
-            size: 1Gi
+            volume: privateVolume
           - name: work
-            size: 1Gi
+            volume: privateVolume
+
 ----
 
 ==== Disks
@@ -89,6 +99,24 @@ index:: Private node index. This should never be shared.
 work:: Private node cache. This should never be shared.
 
 deploy:: Locally installed apps on this single node. This should never be shared.
+
+If you define a `volume` property, then the disk will be mounted in specified volume by subpath equals to the disk name. If you dont define a volume property, then the implicit volume will be created and the disk will be mounted in it to the root path.
+
+For customization, two key attributes can be adjusted: size and storageClass. These attributes pertain to the implicit volume. To specify default values use the <<installation#values,`values.yaml`>> file during the installation stage.
+
+The distinction between shared and private disks is that shared disks are mounted in all nodes, while private disks are mounted only in the node where they are defined.
+
+==== Volumes
+
+Sometimes, you don't want to have a separate implicit volume for every disk on the node. In this case, you can define a volume and mount some or all disks in it as subfolders. This could be useful when you have limitations on the minimum size of the volume from your cloud provider, for example.
+
+Similar to disks, volumes can also be private or shared among nodes. Private volumes are used by private disks, while shared volumes are used by shared disks, respectively.
+
+A `size` and `class` params can be specified for every volume. If you don't specify them, the default values will be used. To specify default values use the <<installation#values,`values.yaml`>> file during the installation stage.
+
+==== sidecars & initContainers
+https://kubernetes.io/docs/concepts/workloads/pods/init-containers/[Init containers]
+  and sidecars can be added to the cluster.
 
 === Xp7Config
 

@@ -64,6 +64,7 @@ The chart `values.yaml` file is how you generally configure a deployment with He
 NOTE: Here you might have to change the storage classes depending on your cluster setup.
 
 .values.yaml
+[[values]]
 [source,yaml]
 ----
 config: |-
