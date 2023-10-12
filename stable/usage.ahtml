@@ -500,12 +500,17 @@ spec:
   enabled: true     # Should the pods be running
   xpVersion: 7.13.2  # XP version, must be &gt;=7.13.2
 
+  # List of volumes shared by all nodes (see description of volumes below)
+  nodesSharedVolumes:
+    - name: sharedVolume
+      size: 1Gi
+
   # List of disks shared by all nodes (see description of disks below)
   nodesSharedDisks:
     - name: blobstore
-      size: 1Gi
+      volume: sharedVolume
     - name: snapshots
-      size: 1Gi
+      volume: sharedVolume
     - name: export
       size: 1Gi
 
@@ -541,14 +546,18 @@ spec:
           - name: deploy
             size: 100Mi
             mountReadOnly: true
+        # List of volumes private to each and every node
+        volumes:
+        - name: privateVolume
+          size: 1Gi
+          class: standard
+
         # List of disks private to each and every node
         disks:
-          - name: deploy
-            size: 1Gi
           - name: index
-            size: 1Gi
+            volume: privateVolume
           - name: work
-            size: 1Gi</code></pre>
+            volume: privateVolume</code></pre>
 </div>
 </div>
 <div class="sect3">
@@ -583,6 +592,34 @@ spec:
 <p>Locally installed apps on this single node. This should never be shared.</p>
 </dd>
 </dl>
+</div>
+<div class="paragraph">
+<p>If you define a <code>volume</code> property, then the disk will be mounted in specified volume by subpath equals to the disk name. If you dont define a volume property, then the implicit volume will be created and the disk will be mounted in it to the root path.</p>
+</div>
+<div class="paragraph">
+<p>For customization, two key attributes can be adjusted: size and storageClass. These attributes pertain to the implicit volume. To specify default values use the <a href="installation.ahtml#values"><code>values.yaml</code></a> file during the installation stage.</p>
+</div>
+<div class="paragraph">
+<p>The distinction between shared and private disks is that shared disks are mounted in all nodes, while private disks are mounted only in the node where they are defined.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="volumes"><a class="link" href="#volumes">Volumes</a></h4>
+<div class="paragraph">
+<p>Sometimes, you don&#8217;t want to have a separate implicit volume for every disk on the node. In this case, you can define a volume and mount some or all disks in it as subfolders. This could be useful when you have limitations on the minimum size of the volume from your cloud provider, for example.</p>
+</div>
+<div class="paragraph">
+<p>Similar to disks, volumes can also be private or shared among nodes. Private volumes are used by private disks, while shared volumes are used by shared disks, respectively.</p>
+</div>
+<div class="paragraph">
+<p>A <code>size</code> and <code>class</code> params can be specified for every volume. If you don&#8217;t specify them, the default values will be used. To specify default values use the <a href="installation.ahtml#values"><code>values.yaml</code></a> file during the installation stage.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="sidecars_initcontainers"><a class="link" href="#sidecars_initcontainers">sidecars &amp; initContainers</a></h4>
+<div class="paragraph">
+<p><a href="https://kubernetes.io/docs/concepts/workloads/pods/init-containers/">Init containers</a>
+  and sidecars can be added to the cluster.</p>
 </div>
 </div>
 </div>
@@ -1243,7 +1280,7 @@ ingress.networking.k8s.io/my-domain-com-admin created</code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-09-26 10:44:37 UTC
+Last updated 2023-10-12 13:10:57 UTC
 </div>
 </div>
 </body>

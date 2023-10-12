@@ -590,7 +590,7 @@ Here you might have to change the storage classes depending on your cluster setu
 </tr>
 </table>
 </div>
-<div class="listingblock">
+<div id="values" class="listingblock">
 <div class="title">values.yaml</div>
 <div class="content">
 <pre class="highlight"><code class="language-yaml" data-lang="yaml">config: |-
@@ -697,7 +697,7 @@ __  ____  __  _____   ___  __ ____  ______
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-09-26 10:44:37 UTC
+Last updated 2023-10-12 13:10:57 UTC
 </div>
 </div>
 </body>
