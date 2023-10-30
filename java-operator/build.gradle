@@ -1,6 +1,5 @@
 plugins {
     id 'java-library'
-    id 'jacoco'
     alias(libs.plugins.quarkus)
     alias(libs.plugins.gitProperties)
 }
@@ -31,8 +30,11 @@ dependencies {
     implementation 'io.quarkus:quarkus-rest-client'
 
     testImplementation "io.quarkus:quarkus-junit5"
-    testImplementation "io.rest-assured:rest-assured"
-    testImplementation "io.quarkus:quarkus-jacoco"
+//    testImplementation "io.rest-assured:rest-assured"
+//    testImplementation "io.quarkus:quarkus-jacoco"
+    testImplementation libs.mockito.inline
+    testImplementation libs.mockito.junitjupiter
+
     testCompileOnly libs.immutables.valueannotations
     testAnnotationProcessor libs.immutables.value
 }
