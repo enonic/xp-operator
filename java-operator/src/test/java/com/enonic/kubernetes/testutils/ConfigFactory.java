@@ -11,8 +11,13 @@ public class ConfigFactory
     @Override
     public SmallRyeConfig getConfigFor( final SmallRyeConfigProviderResolver configProviderResolver, final ClassLoader classLoader )
     {
-        SmallRyeConfigBuilder builder = new SmallRyeConfigBuilder();
+        final SmallRyeConfigBuilder builder = new SmallRyeConfigBuilder();
+
         builder.addDiscoveredSources();
+        builder.addDiscoveredConverters();
+        builder.addDiscoveredValidator();
+        builder.addDiscoveredInterceptors();
+
         return builder.build();
     }
 }
