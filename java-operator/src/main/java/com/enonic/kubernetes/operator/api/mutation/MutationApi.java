@@ -251,10 +251,24 @@ public class MutationApi
         Domain newR = (Domain) mt.getAdmissionReview().getRequest().getObject();
 
         // Create default status
-        DomainStatus defStatus = new DomainStatus().
-            withState( DomainStatus.State.PENDING ).
-            withMessage( "Waiting for DNS records" ).
-            withDomainStatusFields( new DomainStatusFields( lbServiceIpProducer.get(), false ) );
+        DomainStatus defStatus;
+        try
+        {
+        final DomainStatusFields domainStatusFields;
+            domainStatusFields = new DomainStatusFields( lbServiceIpProducer.get(), false );
+
+            defStatus = new DomainStatus().
+                withState( DomainStatus.State.PENDING ).
+                withMessage( "Waiting for DNS records" ).
+                withDomainStatusFields( domainStatusFields );
+        }
+        catch ( Exception e )
+        {
+            defStatus = new DomainStatus().
+                withState( DomainStatus.State.ERROR ).
+                withMessage( e.getMessage() ).
+                withDomainStatusFields( new DomainStatusFields(List.of(), false) );
+        }
 
         // Get OP
         AdmissionOperation op = getOperation( mt.getAdmissionReview() );
