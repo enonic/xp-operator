@@ -1,11 +1,13 @@
 package com.enonic.kubernetes.operator.domain;
 
 import com.enonic.kubernetes.client.v1.domain.Domain;
+import com.enonic.kubernetes.client.v1.domain.DomainStatus;
 import com.enonic.kubernetes.kubernetes.Clients;
 import com.enonic.kubernetes.kubernetes.Informers;
 import com.enonic.kubernetes.kubernetes.Searchers;
 import com.enonic.kubernetes.kubernetes.commands.K8sLogHelper;
 import com.enonic.kubernetes.operator.helpers.InformerEventHandler;
+
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
 import io.fabric8.kubernetes.api.model.networking.v1.IngressRule;
 import io.fabric8.kubernetes.api.model.networking.v1.IngressTLS;
@@ -14,6 +16,7 @@ import io.quarkus.runtime.StartupEvent;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -23,6 +26,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.enonic.kubernetes.common.Configuration.cfgHasKey;
 import static com.enonic.kubernetes.common.Configuration.cfgStr;
 
 /**
@@ -67,7 +71,8 @@ public class OperatorIngressCertSync
     public void handle( final Ingress ingress )
     {
         // Ignore if ingress is not relevant
-        if (!ingressRelevant( ingress )) {
+        if ( !ingressRelevant( ingress ) )
+        {
             return;
         }
 
@@ -75,9 +80,7 @@ public class OperatorIngressCertSync
         Set<String> hosts = ingressHosts( ingress );
 
         // Sync ingress with relevant domains
-        searchers.domain().stream().
-            filter( d -> hosts.contains( d.getSpec().getHost() ) ).
-            forEach( d -> syncIngress( d, ingress ) );
+        searchers.domain().stream().filter( d -> hosts.contains( d.getSpec().getHost() ) ).forEach( d -> syncIngress( d, ingress ) );
     }
 
     public void syncIngress( final Domain domain, final Ingress ingress )
@@ -96,15 +99,19 @@ public class OperatorIngressCertSync
         List<IngressTLS> newTLS = new LinkedList<>();
 
         // Add all TLS definitions that do not relate to this domain
-        for (IngressTLS tls : oldTLS) {
-            if (!tls.getHosts().contains( host )) {
+        for ( IngressTLS tls : oldTLS )
+        {
+            if ( !tls.getHosts().contains( host ) )
+            {
                 newTLS.add( tls );
             }
         }
 
         // If domain has certificate, set that up on the ingress
-        if (domain.getSpec().getDomainSpecCertificate() != null) {
-            switch (domain.getSpec().getDomainSpecCertificate().getAuthority()) {
+        if ( domain.getSpec().getDomainSpecCertificate() != null )
+        {
+            switch ( domain.getSpec().getDomainSpecCertificate().getAuthority() )
+            {
                 case SELF_SIGNED:
                 case LETS_ENCRYPT_STAGING:
                 case LETS_ENCRYPT:
@@ -112,6 +119,18 @@ public class OperatorIngressCertSync
                     newAnnotations.put( "cert-manager.io/cluster-issuer", getClusterIssuer( domain ) );
                     newTLS.add( new IngressTLS( Arrays.asList( host ), domain.getMetadata().getName() + "-cert" ) );
                     break;
+                case DOMAIN_WILDCARD:
+                    if ( cfgHasKey( "dns.lb.domain.wildcardCertificate" ) )
+                    {
+                        newAnnotations.put( "cert-manager.io/cluster-issuer", getClusterIssuer( domain ) );
+                        newTLS.add( new IngressTLS( Arrays.asList( host ), cfgStr( "dns.lb.domain.wildcardCertificate" ) ) );
+                    }
+                    else
+                    {
+                        domain.getStatus()
+                            .withState( DomainStatus.State.ERROR )
+                            .withMessage( "wildcard certificate name has not been set." );
+                    }
                 case CUSTOM:
                     newTLS.add( new IngressTLS( Arrays.asList( host ), domain.getSpec().getDomainSpecCertificate().getIdentifier() ) );
                     break;
@@ -119,10 +138,14 @@ public class OperatorIngressCertSync
         }
 
         // If changes are detected, update ingress
-        if (!Objects.equals( oldAnnotations, newAnnotations ) || !Objects.equals( oldTLS, newTLS )) {
-            K8sLogHelper.logEdit( clients.k8s().network().v1().ingresses().
-                inNamespace( ingress.getMetadata().getNamespace() ).
-                withName( ingress.getMetadata().getName() ), i -> {
+        if ( !Objects.equals( oldAnnotations, newAnnotations ) || !Objects.equals( oldTLS, newTLS ) )
+        {
+            K8sLogHelper.logEdit( clients.k8s()
+                                      .network()
+                                      .v1()
+                                      .ingresses()
+                                      .inNamespace( ingress.getMetadata().getNamespace() )
+                                      .withName( ingress.getMetadata().getName() ), i -> {
                 i.getMetadata().setAnnotations( newAnnotations );
                 i.getSpec().setTls( newTLS );
                 return i;
@@ -133,13 +156,16 @@ public class OperatorIngressCertSync
 
     private String getClusterIssuer( Domain resource )
     {
-        switch (resource.getSpec().getDomainSpecCertificate().getAuthority()) {
+        switch ( resource.getSpec().getDomainSpecCertificate().getAuthority() )
+        {
             case SELF_SIGNED:
                 return cfgStr( "operator.certIssuer.selfSigned" );
             case LETS_ENCRYPT_STAGING:
                 return cfgStr( "operator.certIssuer.letsEncrypt.staging" );
             case LETS_ENCRYPT:
                 return cfgStr( "operator.certIssuer.letsEncrypt.prod" );
+            case DOMAIN_WILDCARD:
+                return cfgStr( "operator.certIssuer.domainWildcard" );
             case CLUSTER_ISSUER:
                 return resource.getSpec().getDomainSpecCertificate().getIdentifier();
             default:
@@ -154,18 +180,19 @@ public class OperatorIngressCertSync
 
     public boolean ingressRelevant( final Ingress ingress )
     {
-        if (ingress.getSpec().getRules() == null) {
+        if ( ingress.getSpec().getRules() == null )
+        {
             return false;
         }
 
-        if (ingress.getMetadata().getAnnotations() == null) {
+        if ( ingress.getMetadata().getAnnotations() == null )
+        {
             return false;
         }
 
-        return ingress.
-            getMetadata().
-            getAnnotations().
-            getOrDefault( cfgStr( "operator.charts.values.annotationKeys.ingressCertManage" ), "false" ).
-            equals( "true" );
+        return ingress.getMetadata()
+            .getAnnotations()
+            .getOrDefault( cfgStr( "operator.charts.values.annotationKeys.ingressCertManage" ), "false" )
+            .equals( "true" );
     }
 }
