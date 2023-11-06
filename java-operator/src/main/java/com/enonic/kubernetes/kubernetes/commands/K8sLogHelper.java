@@ -12,12 +12,6 @@ public class K8sLogHelper
 {
     private static final Logger log = LoggerFactory.getLogger( K8sLogHelper.class );
 
-    public static String log( final K8sCommandAction action, final HasMetadata resource )
-    {
-        return String.format( "K8s: %s %s '%s' in NS '%s'", action, resource.getKind(), resource.getMetadata().getName(),
-                              resource.getMetadata().getNamespace() );
-    }
-
     public static <T extends HasMetadata> void logEdit( final Resource<T> editable, UnaryOperator<T> op ) {
         T res = editable.edit( op );
         log.info( log( K8sCommandAction.UPDATE, res ) );
@@ -28,5 +22,16 @@ public class K8sLogHelper
         T res = r.get();
         log.info( log( K8sCommandAction.DELETE, res ) );
         r.delete();
+    }
+
+    public static <T extends HasMetadata> void log( final String message )
+    {
+        log.info( message );
+    }
+
+    private static String log( final K8sCommandAction action, final HasMetadata resource )
+    {
+        return String.format( "K8s: %s %s '%s' in NS '%s'", action, resource.getKind(), resource.getMetadata().getName(),
+                              resource.getMetadata().getNamespace() );
     }
 }
