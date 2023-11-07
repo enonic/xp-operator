@@ -39,7 +39,7 @@ spec:
                   properties:
                     authority:
                       type: string
-                      enum: ["selfSigned", "letsEncrypt", "letsEncryptStaging", "clusterIssuer", "custom"]
+                      enum: ["selfSigned", "letsEncrypt", "letsEncryptStaging", "clusterIssuer", "domainWildcard", "custom"]
                     identifier:
                       type: string
                       nullable: true
