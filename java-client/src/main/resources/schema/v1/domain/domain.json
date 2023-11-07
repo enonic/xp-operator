@@ -32,6 +32,7 @@
                 "letsEncrypt",
                 "letsEncryptStaging",
                 "clusterIssuer",
+                "domainWildcard",
                 "custom"
               ]
             },
