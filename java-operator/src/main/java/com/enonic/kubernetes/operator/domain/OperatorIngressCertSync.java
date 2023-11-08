@@ -122,7 +122,7 @@ public class OperatorIngressCertSync
                 case DOMAIN_WILDCARD:
                     if ( cfgHasKey( "dns.lb.domain.wildcardCertificate" ) )
                     {
-                        newAnnotations.put( "cert-manager.io/cluster-issuer", getClusterIssuer( domain ) );
+//                        newAnnotations.put( "cert-manager.io/cluster-issuer", getClusterIssuer( domain ) );
                         newTLS.add( new IngressTLS( Arrays.asList( host ), cfgStr( "dns.lb.domain.wildcardCertificate" ) ) );
                     }
                     else
