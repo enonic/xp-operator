@@ -33,6 +33,10 @@ dependencies {
     testImplementation "io.quarkus:quarkus-junit5"
     testImplementation "io.rest-assured:rest-assured"
     testImplementation "io.quarkus:quarkus-jacoco"
+    testImplementation libs.fabric8.kubernetes.servermock
+    testImplementation libs.mockito.inline
+    testImplementation libs.mockito.junitjupiter
+
     testCompileOnly libs.immutables.valueannotations
     testAnnotationProcessor libs.immutables.value
 }
