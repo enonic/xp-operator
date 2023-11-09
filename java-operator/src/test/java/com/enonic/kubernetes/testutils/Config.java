@@ -13,16 +13,15 @@ import org.eclipse.microprofile.config.spi.ConfigSource;
 public class Config
     implements ConfigSource
 {
-    private final Map<String, String> map;
+    private static final Map<String, String> MAP;
 
-    public Config()
-    {
-        map = new HashMap<>();
-        try (InputStream input = new FileInputStream( "./src/main/resources/application.properties" ))
+    static {
+        MAP = new HashMap<>();
+        try (InputStream input = new FileInputStream( "./src/test/resources/application.properties" ))
         {
             Properties prop = new Properties();
             prop.load( input );
-            prop.forEach( ( k, v ) -> map.put( (String) k, (String) v ) );
+            prop.forEach( ( k, v ) -> MAP.put( (String) k, (String) v ) );
         }
         catch ( IOException ex )
         {
@@ -30,22 +29,27 @@ public class Config
         }
     }
 
+    public Config()
+    {
+        int i = 0;
+    }
+
     @Override
     public Map<String, String> getProperties()
     {
-        return map;
+        return MAP;
     }
 
     @Override
     public Set<String> getPropertyNames()
     {
-        return map.keySet();
+        return MAP.keySet();
     }
 
     @Override
     public String getValue( final String s )
     {
-        return map.get( s );
+        return MAP.get( s );
     }
 
     @Override

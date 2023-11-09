@@ -32,7 +32,7 @@ jobs:
             ./gradlew ci publish -PrepoUser=${{ secrets.ARTIFACTORY_USERNAME }} -PrepoPassword=${{ secrets.ARTIFACTORY_PASSWORD }}
           else
             echo "Building release version"
-            ./gradlew ci 
+            ./gradlew build 
           fi
 
       - name: Codecov
