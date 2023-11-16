@@ -385,7 +385,7 @@ ingress.networking.k8s.io/my-domain-com created
 Once the XP pods have started you can open up the admin by following the <<access-admin>> section or call the ingress controller, if you have one set up.
 
 === Simple shared volume example
-In case you want to map all your disks to a single volume, you can change the `Xp7Deployment` resource to look like this:
+In case you want to map all your disks to a single volume, you can change the `Xp7Deployment` resource from the previous example to look like this:
 
 .simple-shared-volume.yaml
 [source,yaml]
