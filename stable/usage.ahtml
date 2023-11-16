@@ -465,7 +465,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#watch_configuration">Watch configuration</a></li>
 </ul>
 </li>
-<li><a href="#simple_example">Simple example</a></li>
+<li><a href="#simple_example">Simple example</a>
+<ul class="sectlevel2">
+<li><a href="#simple_shared_volume_example">Simple shared volume example</a></li>
+</ul>
+</li>
 <li><a href="#cluster_example">Cluster example</a></li>
 </ul>
 </div>
@@ -968,7 +972,7 @@ metadata:
   namespace: my-namespace
 spec:
   enabled: true
-  xpVersion: 7.13.2
+  xpVersion: 7.13.4
 
   # Create one node
   nodeGroups:
@@ -994,7 +998,7 @@ spec:
           - name: deploy
             size: 100Mi
             mountReadOnly: true
-        # Volumes private to the node
+        # Disks private to the node
         disks:
           - name: blobstore
             size: 1Gi
@@ -1081,6 +1085,48 @@ ingress.networking.k8s.io/my-domain-com created</code></pre>
 <div class="paragraph">
 <p>Once the XP pods have started you can open up the admin by following the <a href="#access-admin">Access admin (bypassing ingress)</a> section or call the ingress controller, if you have one set up.</p>
 </div>
+<div class="sect2">
+<h3 id="simple_shared_volume_example"><a class="link" href="#simple_shared_volume_example">Simple shared volume example</a></h3>
+<div class="paragraph">
+<p>In case you want to map all your disks to a single volume, you can change the <code>Xp7Deployment</code> resource to look like this:</p>
+</div>
+<div class="listingblock">
+<div class="title">simple-shared-volume.yaml</div>
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml"># Create deployment in the namespace
+apiVersion: enonic.cloud/v1
+kind: Xp7Deployment
+
+...
+
+      resources:
+        cpu: "1"
+        memory: 1Gi
+        dirs:
+          # Snapshotter app copied to deploy folder
+          - name: deploy
+            size: 100Mi
+            mountReadOnly: true
+        # Single inner volume for all disks
+        volumes:
+          - name: inner
+            size: 1Gi
+
+        # Private disks to use the shared private volume
+        disks:
+          - name: index
+            volume: inner
+          - name: work
+            volume: inner
+          - name: export
+            volume: inner
+          - name: snapshots
+            volume: inner
+          - name: blobstore
+            volume: inner</code></pre>
+</div>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -1121,7 +1167,7 @@ metadata:
   namespace: my-namespace
 spec:
   enabled: true
-  xpVersion: 7.13.2
+  xpVersion: 7.13.4
 
   # Create volumes shared by all nodes in this deployment
   nodesSharedDisks:
@@ -1280,7 +1326,7 @@ ingress.networking.k8s.io/my-domain-com-admin created</code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-10-12 13:10:57 UTC
+Last updated 2023-11-16 11:38:32 UTC
 </div>
 </div>
 </body>
