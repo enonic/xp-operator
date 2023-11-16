@@ -37,9 +37,5 @@ spec:
       port: 8080
       targetPort: 8080
       protocol: TCP
-    - name: es-api
-      port: 9200
-      targetPort: 9200
-      protocol: TCP
 ---
 {{- end }}
