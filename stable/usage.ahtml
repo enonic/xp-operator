@@ -1088,7 +1088,7 @@ ingress.networking.k8s.io/my-domain-com created</code></pre>
 <div class="sect2">
 <h3 id="simple_shared_volume_example"><a class="link" href="#simple_shared_volume_example">Simple shared volume example</a></h3>
 <div class="paragraph">
-<p>In case you want to map all your disks to a single volume, you can change the <code>Xp7Deployment</code> resource to look like this:</p>
+<p>In case you want to map all your disks to a single volume, you can change the <code>Xp7Deployment</code> resource from the previous example to look like this:</p>
 </div>
 <div class="listingblock">
 <div class="title">simple-shared-volume.yaml</div>
@@ -1326,7 +1326,7 @@ ingress.networking.k8s.io/my-domain-com-admin created</code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-11-16 11:38:32 UTC
+Last updated 2023-11-16 11:58:50 UTC
 </div>
 </div>
 </body>
