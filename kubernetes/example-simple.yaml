@@ -41,7 +41,7 @@ spec:
           - name: deploy
             size: 100Mi
             mountReadOnly: true
-        # Volumes private to the node
+        # Disks private to the node
         disks:
           - name: blobstore
             size: 1Gi

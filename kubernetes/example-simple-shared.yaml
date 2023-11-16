@@ -17,23 +17,6 @@ spec:
   enabled: true
   xpVersion: 7.13.4
 
-  nodesSharedVolumes:
-    - name: shared
-      size: 1Gi
-      class: nfs
-
-  # Create volumes shared by all nodes in this deployment
-  nodesSharedDisks:
-    - name: blobstore
-      volume: shared
-
-    - name: snapshots
-      volume: shared
-
-    - name: export # Dumps and other data
-      size: 1Gi
-      class: nfs
-
   # Create one node
   nodeGroups:
     - name: main
@@ -50,17 +33,26 @@ spec:
         cpu: "1"
         memory: 1Gi
         dirs:
+          # Snapshotter app copied to deploy folder
           - name: deploy
             size: 100Mi
+            mountReadOnly: true
+        # Single inner volume for all disks
         volumes:
           - name: inner
             size: 1Gi
 
-        # Volumes private to the node
+        # Private disks to use the shared private volume
         disks:
-          - name: index # Node ES index
+          - name: index
             volume: inner
-          - name: work # Node cache
+          - name: work
+            volume: inner
+          - name: export
+            volume: inner
+          - name: snapshots
+            volume: inner
+          - name: blobstore
             volume: inner
 ---
 # Install content studio

@@ -384,6 +384,45 @@ ingress.networking.k8s.io/my-domain-com created
 
 Once the XP pods have started you can open up the admin by following the <<access-admin>> section or call the ingress controller, if you have one set up.
 
+=== Simple shared volume example
+In case you want to map all your disks to a single volume, you can change the `Xp7Deployment` resource to look like this:
+
+.simple-shared-volume.yaml
+[source,yaml]
+----
+# Create deployment in the namespace
+apiVersion: enonic.cloud/v1
+kind: Xp7Deployment
+
+...
+
+      resources:
+        cpu: "1"
+        memory: 1Gi
+        dirs:
+          # Snapshotter app copied to deploy folder
+          - name: deploy
+            size: 100Mi
+            mountReadOnly: true
+        # Single inner volume for all disks
+        volumes:
+          - name: inner
+            size: 1Gi
+
+        # Private disks to use the shared private volume
+        disks:
+          - name: index
+            volume: inner
+          - name: work
+            volume: inner
+          - name: export
+            volume: inner
+          - name: snapshots
+            volume: inner
+          - name: blobstore
+            volume: inner
+----
+
 == Cluster example
 
 WARNING: The values cpu and memory setting in this example are too low for a good cluster setup. They are set this way, so you can try it out on a low resource Kubernetes cluster.
