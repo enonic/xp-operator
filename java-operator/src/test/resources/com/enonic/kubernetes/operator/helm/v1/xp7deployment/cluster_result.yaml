@@ -540,10 +540,6 @@ spec:
       port: 8080
       protocol: "TCP"
       targetPort: 8080
-    - name: "es-api"
-      port: 9200
-      protocol: "TCP"
-      targetPort: 9200
   selector:
     enonic.deployment: "mycloud-mysolution-myenv-myservice"
   sessionAffinity: "None"
@@ -584,10 +580,6 @@ spec:
       port: 8080
       protocol: "TCP"
       targetPort: 8080
-    - name: "es-api"
-      port: 9200
-      protocol: "TCP"
-      targetPort: 9200
   selector:
     enonic.deployment: "mycloud-mysolution-myenv-myservice"
     enonic.nodeGroup: "master"
@@ -629,10 +621,6 @@ spec:
       port: 8080
       protocol: "TCP"
       targetPort: 8080
-    - name: "es-api"
-      port: 9200
-      protocol: "TCP"
-      targetPort: 9200
   selector:
     enonic.deployment: "mycloud-mysolution-myenv-myservice"
     enonic.nodeGroup: "data"
@@ -674,10 +662,6 @@ spec:
       port: 8080
       protocol: "TCP"
       targetPort: 8080
-    - name: "es-api"
-      port: 9200
-      protocol: "TCP"
-      targetPort: 9200
   selector:
     enonic.deployment: "mycloud-mysolution-myenv-myservice"
     enonic.nodeGroup: "frontend"
@@ -798,9 +782,6 @@ spec:
               protocol: "TCP"
             - containerPort: 8080
               name: "xp-main"
-              protocol: "TCP"
-            - containerPort: 9200
-              name: "es-http"
               protocol: "TCP"
             - containerPort: 9300
               name: "es-transport"
@@ -1083,9 +1064,6 @@ spec:
               protocol: "TCP"
             - containerPort: 8080
               name: "xp-main"
-              protocol: "TCP"
-            - containerPort: 9200
-              name: "es-http"
               protocol: "TCP"
             - containerPort: 9300
               name: "es-transport"
@@ -1391,9 +1369,6 @@ spec:
               protocol: "TCP"
             - containerPort: 8080
               name: "xp-main"
-              protocol: "TCP"
-            - containerPort: 9200
-              name: "es-http"
               protocol: "TCP"
             - containerPort: 9300
               name: "es-transport"

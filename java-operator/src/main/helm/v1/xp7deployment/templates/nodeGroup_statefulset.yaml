@@ -153,9 +153,6 @@ spec:
             - name: xp-main
               containerPort: 8080
               protocol: TCP
-            - name: es-http
-              containerPort: 9200
-              protocol: TCP
             - name: es-transport
               containerPort: 9300
               protocol: TCP
