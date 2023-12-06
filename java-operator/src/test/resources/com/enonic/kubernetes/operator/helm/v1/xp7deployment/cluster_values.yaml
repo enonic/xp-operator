@@ -137,6 +137,7 @@ settings:
   cloudApiServiceAccount:
     name: "cloudApi"
     namespace: "ec-system"
+  enableDefaultVhost: true
   hzApiDiscovery: true
   linkerd: false
 storage:

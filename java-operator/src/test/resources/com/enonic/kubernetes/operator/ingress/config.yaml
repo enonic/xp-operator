@@ -1,0 +1,12 @@
+apiVersion: enonic.cloud/v1
+kind: Xp7Config
+metadata:
+  name: extra-config
+  namespace: mycloud-mysolution-myenv-myservice
+spec:
+  #file: mytest.cfg
+  nodeGroup: main
+  file: com.enonic.xp.web.vhost.cfg
+  data: |
+    my = custom
+    config = file

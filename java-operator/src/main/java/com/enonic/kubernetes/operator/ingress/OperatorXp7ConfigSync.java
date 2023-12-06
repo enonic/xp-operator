@@ -5,18 +5,22 @@ import com.enonic.kubernetes.kubernetes.Clients;
 import com.enonic.kubernetes.kubernetes.Searchers;
 import com.enonic.kubernetes.kubernetes.commands.K8sLogHelper;
 import com.enonic.kubernetes.operator.Operator;
+
 import com.google.common.base.Function;
+
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.networking.v1.HTTPIngressPath;
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
 import io.fabric8.kubernetes.api.model.networking.v1.IngressRule;
 import io.quarkus.runtime.StartupEvent;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -26,6 +30,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.enonic.kubernetes.common.Configuration.cfgBool;
 import static com.enonic.kubernetes.common.Configuration.cfgLong;
 import static com.enonic.kubernetes.common.Configuration.cfgStr;
 import static com.enonic.kubernetes.kubernetes.Predicates.inNamespace;
@@ -60,9 +65,7 @@ public class OperatorXp7ConfigSync
     @Override
     public void run()
     {
-        searchers.xp7Config().stream().collect( groupingBy( r -> r.getMetadata().getNamespace() ) ).
-            keySet().
-            forEach( this::handle );
+        searchers.xp7Config().stream().collect( groupingBy( r -> r.getMetadata().getNamespace() ) ).keySet().forEach( this::handle );
     }
 
     public static Set<Mapping> getAnnotationMappings( final Ingress ingress )
@@ -73,19 +76,25 @@ public class OperatorXp7ConfigSync
 
         // Collect all mapping prefixes
         Set<String> mPrefix = new HashSet<>();
-        for (Map.Entry<String, String> e : annotations.entrySet()) {
-            if (e.getKey().startsWith( prefix ) && e.getKey().endsWith( ".source" )) {
+        for ( Map.Entry<String, String> e : annotations.entrySet() )
+        {
+            if ( e.getKey().startsWith( prefix ) && e.getKey().endsWith( ".source" ) )
+            {
                 mPrefix.add( e.getKey().replace( ".source", "" ) );
             }
         }
 
         // Create mappings
-        for (String m : mPrefix) {
+        for ( String m : mPrefix )
+        {
             Function<String, String> g = ( k ) -> annotations.get( m + "." + k );
-            try {
+            try
+            {
                 String name = m.replace( prefix, ingress.getMetadata().getName() + "-" );
                 result.add( MappingImpl.of( name, g.apply( "host" ), g.apply( "source" ), g.apply( "target" ), g.apply( "idproviders" ) ) );
-            } catch (Exception e) {
+            }
+            catch ( Exception e )
+            {
                 log.warn( String.format( "Invalid vhost mappings on ingress '%s'", ingress.getMetadata().getName() ) );
             }
         }
@@ -97,36 +106,39 @@ public class OperatorXp7ConfigSync
     {
         // Trigger update on each vHost config in the namespace
         final String file = cfgStr( "operator.charts.values.files.vhosts" );
-        searchers.xp7Config().stream().
-            filter( inNamespace( namespace ) ).
-            filter( isDeleted().negate() ).
-            filter( xp7config -> Objects.equals( xp7config.getSpec().getFile(), file ) ).
-            forEach( xp7Config -> handle( namespace, xp7Config ) );
+        searchers.xp7Config()
+            .stream()
+            .filter( inNamespace( namespace ) )
+            .filter( isDeleted().negate() )
+            .filter( xp7config -> Objects.equals( xp7config.getSpec().getFile(), file ) )
+            .forEach( xp7Config -> handle( namespace, xp7Config ) );
     }
 
     private void handle( final String namespace, final Xp7Config xp7Config )
     {
         // Create a list ['all', '<nodeGroup>']
-        List<String> nodeGroups = Arrays.asList( cfgStr( "operator.charts.values.allNodesKey" ), xp7Config.getSpec().getNodeGroup() );
+        final List<String> nodeGroups = Arrays.asList( cfgStr( "operator.charts.values.allNodesKey" ), xp7Config.getSpec().getNodeGroup() );
 
         // Collect all relevant ingresses
-        List<Ingress> ingresses = searchers.ingress().stream().
-            filter( inSameNamespaceAs( xp7Config ) ).
-            filter( isDeleted().negate() ).
-            filter( ingress -> hasMappingsWithNodeGroups( ingress, nodeGroups ) ).
-            collect( Collectors.toList() );
+        final List<Ingress> ingresses = searchers.ingress()
+            .stream()
+            .filter( inSameNamespaceAs( xp7Config ) )
+            .filter( isDeleted().negate() )
+            .filter( ingress -> hasMappingsWithNodeGroups( ingress, nodeGroups ) )
+            .collect( Collectors.toList() );
 
         // Create new data
-        String data = createVHostData( namespace, ingresses, nodeGroups );
+        final String data = createVHostData( namespace, ingresses, nodeGroups );
 
         // Update if needed
-        if (!Objects.equals( xp7Config.getSpec().getData(), data )) {
-            K8sLogHelper.logEdit( clients.xp7Configs().
-                inNamespace( xp7Config.getMetadata().getNamespace() ).
-                withName( xp7Config.getMetadata().getName() ), c -> {
-                c.getSpec().withData( data );
-                return c;
-            } );
+        if ( !Objects.equals( xp7Config.getSpec().getData(), data ) )
+        {
+            K8sLogHelper.logEdit(
+                clients.xp7Configs().inNamespace( xp7Config.getMetadata().getNamespace() ).withName( xp7Config.getMetadata().getName() ),
+                c -> {
+                    c.getSpec().withData( data );
+                    return c;
+                } );
         }
     }
 
@@ -135,24 +147,31 @@ public class OperatorXp7ConfigSync
         Set<Mapping> targetMappings = getAnnotationMappings( ingress );
 
         // No mappings
-        if (targetMappings.size() == 0) {
+        if ( targetMappings.size() == 0 )
+        {
             return false;
         }
 
         // No rules
-        if (ingress.getSpec().getRules() == null) {
+        if ( ingress.getSpec().getRules() == null )
+        {
             return false;
         }
 
-        for (IngressRule rule : ingress.getSpec().getRules()) {
+        for ( IngressRule rule : ingress.getSpec().getRules() )
+        {
             // No paths
-            if (rule.getHttp() == null || rule.getHttp().getPaths() == null) {
+            if ( rule.getHttp() == null || rule.getHttp().getPaths() == null )
+            {
                 return false;
             }
 
-            for (HTTPIngressPath path : rule.getHttp().getPaths()) {
+            for ( HTTPIngressPath path : rule.getHttp().getPaths() )
+            {
                 // No backend
-                if (path.getBackend() == null || path.getBackend().getService().getName() == null || path.getBackend().getService().getPort() == null) {
+                if ( path.getBackend() == null || path.getBackend().getService().getName() == null ||
+                    path.getBackend().getService().getPort() == null )
+                {
                     return false;
                 }
 
@@ -161,7 +180,8 @@ public class OperatorXp7ConfigSync
                 Integer port = path.getBackend().getService().getPort().getNumber();
 
                 // Only if service is the same as a nodegroup and port is 8080
-                if (nodeGroups.contains( service ) && port == 8080) {
+                if ( nodeGroups.contains( service ) && port == 8080 )
+                {
                     return true;
                 }
             }
@@ -175,25 +195,27 @@ public class OperatorXp7ConfigSync
     {
         // Create config string builder
         StringBuilder sb;
-        Optional<ConfigMap> cm = searchers.configMap().stream().
-            filter( inNamespace( namespace ) ).
-            filter( withName( "extra-config" ) ).
-            findFirst();
+        Optional<ConfigMap> cm =
+            searchers.configMap().stream().filter( inNamespace( namespace ) ).filter( withName( "extra-config" ) ).findFirst();
 
         // Try to use vhost defaults
-        if (cm.isPresent() && cm.get().getData().containsKey( "vhost-defaults.cfg" )) {
-            sb = new StringBuilder( cm.get().getData().get( "vhost-defaults.cfg" ) );
-        } else {
+        if ( cfgBool( "operator.charts.values.settings.enableDefaultVhost" ) )
+        {
+            if ( cm.isPresent() && cm.get().getData().containsKey( "vhost-defaults.cfg" ) )
+            {
+                sb = new StringBuilder( cm.get().getData().get( "vhost-defaults.cfg" ) );
+                // Iterate over all ingresses
+                for ( Ingress ingress : ingresses )
+                {
+                    addVHostMappings( sb, ingress, nodeGroups );
+                }
+                return sb.toString();
+            }
+
             log.warn( String.format( "Could not find default vhost configuration in NS '%s'", namespace ) );
-            sb = new StringBuilder( "enabled = true" );
         }
 
-        // Iterate over all ingresses
-        for (Ingress ingress : ingresses) {
-            addVHostMappings( sb, ingress, nodeGroups );
-        }
-
-        return sb.toString();
+        return "";
     }
 
     private void addVHostMappings( final StringBuilder sb, final Ingress ingress, final List<String> nodeGroups )
@@ -201,20 +223,26 @@ public class OperatorXp7ConfigSync
         Set<Mapping> mappings = getAnnotationMappings( ingress );
 
         // Iterate over rules
-        for (IngressRule rule : ingress.getSpec().getRules()) {
+        for ( IngressRule rule : ingress.getSpec().getRules() )
+        {
             // Iterate over mappings
-            for (Mapping mapping : mappings) {
+            for ( Mapping mapping : mappings )
+            {
                 // Set rule host if missing
-                if (mapping.host() == null) {
+                if ( mapping.host() == null )
+                {
                     mapping = MappingImpl.copyOf( mapping ).withHost( rule.getHost() );
                 }
 
                 // If host matches
-                if (mapping.host().equals( rule.getHost() )) {
+                if ( mapping.host().equals( rule.getHost() ) )
+                {
                     // Iterate over paths
-                    for (HTTPIngressPath path : rule.getHttp().getPaths()) {
+                    for ( HTTPIngressPath path : rule.getHttp().getPaths() )
+                    {
                         // Path matches mapping
-                        if (nodeGroups.contains( path.getBackend().getService().getName() ) && mapping.source().equals( path.getPath() )) {
+                        if ( nodeGroups.contains( path.getBackend().getService().getName() ) && mapping.source().equals( path.getPath() ) )
+                        {
                             addVHostMappings( sb, mapping );
                         }
                     }
@@ -229,9 +257,11 @@ public class OperatorXp7ConfigSync
         sb.append( String.format( "mapping.%s.host=%s\n", m.name(), m.host() ) );
         sb.append( String.format( "mapping.%s.source=%s\n", m.name(), m.source() ) );
         sb.append( String.format( "mapping.%s.target=%s", m.name(), m.target() ) );
-        if (m.idProviders() != null) {
+        if ( m.idProviders() != null )
+        {
             String postFix = "default";
-            for (String idProvider : m.idProviders().split( "," )) {
+            for ( String idProvider : m.idProviders().split( "," ) )
+            {
                 sb.append( "\n" );
                 sb.append( String.format( "mapping.%s.idProvider.%s=%s", m.name(), idProvider, postFix ) );
                 postFix = "enabled";
