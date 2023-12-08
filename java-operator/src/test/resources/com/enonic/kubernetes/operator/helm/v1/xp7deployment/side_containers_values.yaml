@@ -107,7 +107,6 @@ pods:
   securityContext:
     fsGroup: "0"
     user: "1337"
-  sysctlInitContainer: true
   terminationGracePeriodSeconds: "600"
   updateStrategy: "RollingUpdate"
 resources:
