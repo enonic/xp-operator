@@ -100,11 +100,12 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: max-map-count-setter
-  namespace: {{ .Release.Namespace }}
+  labels:
+    k8s-app: max-map-count-setter
 spec:
   selector:
     matchLabels:
-     name: max-map-count-setter
+      name: max-map-count-setter
   template:
     metadata:
       labels:
@@ -112,21 +113,17 @@ spec:
     spec:
       initContainers:
         - name: max-map-count-setter
-          image: docker.io/bash:5.2.21
+          image: docker.io/bash:5.2.15
           resources:
-            requests:
-              cpu: 10m
-              memory: 16Mi
             limits:
-              cpu: 10m
-              memory: 16Mi
+              cpu: 100m
+              memory: 32Mi
           securityContext:
             privileged: true
             runAsUser: 0
-          command: ['/usr/local/bin/bash', '-e', '-c', 'echo 262664 > /proc/sys/vm/max_map_count']
+          command: ['/usr/local/bin/bash', '-e', '-c', 'echo 262144 > /proc/sys/vm/max_map_count']
       containers:
         - name: sleep
-          image: docker.io/bash:5.2.21
-          command: ['sleep', 'infinity']
+          image: gcr.io/google-containers/pause-amd64:3.2
 ---
 {{- end }}
