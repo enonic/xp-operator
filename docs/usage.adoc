@@ -104,6 +104,8 @@ If you define a `volume` property, then the disk will be mounted in specified vo
 
 For customization, two key attributes can be adjusted: size and storageClass. These attributes pertain to the implicit volume. To specify default values use the <<installation#values,`values.yaml`>> file during the installation stage.
 
+For custom disks, specify a folder where the disk will be mounted inside the container, specify `operator.charts.values.volumes.mounts.<disk_name>` property in the <<installation#values,`values.yaml`>> file during the installation stage. There is no need to specify default disk locations and it's not recommended to override them without a good reason.
+
 The distinction between shared and private disks is that shared disks are mounted in all nodes, while private disks are mounted only in the node where they are defined.
 
 ==== Volumes
@@ -114,9 +116,171 @@ Similar to disks, volumes can also be private or shared among nodes. Private vol
 
 A `size` and `class` params can be specified for every volume. If you don't specify them, the default values will be used. To specify default values use the <<installation#values,`values.yaml`>> file during the installation stage.
 
-==== sidecars & initContainers
-https://kubernetes.io/docs/concepts/workloads/pods/init-containers/[Init containers]
-  and sidecars can be added to the cluster.
+==== initContainers
+
+In the context of Xp7Deployment, `initContainers` are containers launched before the XP container itself, as part of the deployment lifecycle. This mechanism is particularly useful to set up the environment or parameters for the main application or to ensure all prerequisites are in place before the actual application starts.
+
+One important thing to remember is that, if there are several initContainers defined, they will be launched sequentially, following the order in the configuration. If any of the `initContainers` fail, Kubernetes will keep retrying until it succeeds.
+
+[source,yaml]
+----
+  ...
+      initContainers:
+        - name: init-db
+          image: db-init-image:latest
+          command: ["sh", "-c"]
+          args: ["until nslookup mydatabase; do echo waiting for mydatabase; sleep 2; done"]
+          env:
+            - name: CHECK_INTERVAL
+              value: "2"
+          mounts:
+            - name: init-scripts
+              mountPath: /scripts
+  ...
+----
+
+An `initContainer` block in `Xp7Deployment` has several possible fields:
+
+- `name`:The name of the `initContainer`
+- `image`: The image to use for the `initContainer`
+- `command`: The command to run in the `initContainer`
+- `args`: The arguments for the command in `initContainer`
+- `env`: Specify environment variables here. See <<env>> for more information.
+- `ports`: A list of port objects with properties `name`, `containerPort`, and `protocol`. This can be used to expose ports
+- `mounts`: A list of mount dirs, disks or volumes with properties `name`, `mountPath`, `subPath`.
+
+
+[cols="1,4"]
+|===
+| Property | Description
+
+|name
+|name of an actual `dir`, `disk` or `volume` name, defined in `Xp7Deployment` resource.
+
+|mountPath
+|It is the path to mount the `dir`, `disk` or `volume` in the container.
+
+|subPath
+|It is the path inside the `dir`, `disk` or `volume` to mount in the container. If not specified, the root path will be used.
+|===
+
+Read https://kubernetes.io/docs/concepts/workloads/pods/init-containers/[more] about the init containers.
+
+
+==== sidecars
+A sidecar is a utility container that is designed to support and enhance the functionality of the main XP application container. All containers within a pod share the same network stack, so sidecar containers can provide additional functionality without modifying the main container.
+
+For instance, a sidecar can be conceived to perform logging, monitoring, synchronization, and background data processing tasks.
+
+Here is how you can define a sidecar within the container structure:
+
+[source, yaml]
+----
+  ...
+      sidecars:
+        - image: my-backup-agent
+          name: my-backup-agent
+          command: []
+          args: []
+          mounts:
+            - name: restic
+              mountPath: /restic
+            - name: export
+              mountPath: /enonic-xp/home/data
+            - name: shared
+              subPath: blobstore
+              mountPath: /enonic-xp/home/repo/blob
+            - name: shared
+              subPath: snapshots
+              mountPath: /enonic-xp/home/snapshots
+          ports:
+            - name: backup
+              containerPort: 8000
+              protocol: TCP
+          env:
+            - name: AGENT_K8S_CONTAINER
+              value: my-backup-agent
+
+----
+- `name`:The name of the `sidecar`
+- `image`: The image to use for the `sidecar`
+- `command`: The command to run in the `sidecar`
+- `args`: The arguments for the command in `sidecar`
+- `env`: Specify environment variables here. See <<env>> for more information.
+- `ports`: A list of port objects with properties `name`, `containerPort`, and `protocol`. This can be used to expose ports
+- `mounts`: A list of mount dirs, disks or volumes with properties `name`, `mountPath`, `subPath`.
+
+[cols="1,4"]
+|===
+| Property | Description
+
+|name
+|name of an actual `dir`, `disk` or `volume` name, defined in `Xp7Deployment` resource.
+
+|mountPath
+|It is the path to mount the `dir`, `disk` or `volume` in the container.
+
+|subPath
+|It is the path inside the `dir`, `disk` or `volume` to mount in the container. If not specified, the root path will be use
+|===
+
+[#env]
+==== env
+As for initContainers and sidecars, you can specify environment variables for the XP containers. This can be done by adding an `env` block to the particular `nodeGroup` of the `Xp7Deployment` resource.
+
+Every environment variable in the env array is an object with properties:
+
+- `name`: A string containing the name of the environment variable.
+- `value`: A string containing the value of the environment variable. This field is optional.
+- `valueFrom`: An object that allows setting the value of the environment variable from various sources such as field references (fieldRef), secrets (secretKeyRef) and configMaps (configMapKeyRef). This field is optional.
+
+Simple single environment variable:
+
+[source,yaml]
+----
+      env:
+        - name: MY_ENV_VAR
+          value: my-value
+----
+
+Secret key reference example:
+[source,yaml]
+----
+    env:
+      - name: SECRET_USERNAME
+        valueFrom:
+          secretKeyRef:
+            name: mysecret
+            key: username
+            optional: true
+
+----
+
+An environment variable SECRET_USERNAME is defined whose value is sourced from a Secret named mysecret and the key username. The secretKeyRef object allows this kind of Secret reference providing a secure way to store sensitive information like usernames, passwords, or keys in Kubernetes, which can then be consumed by your containers.
+
+Field reference example:
+[source,yaml]
+----
+      env:
+        - name: AGENT_K8S_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+----
+This configuration means the AGENT_K8S_NAMESPACE environment variable will be set to the namespace in which the XP deployment is running.
+
+ConfigMap key reference example:
+[source,yaml]
+----
+      env:
+        - name: APP_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: log_level
+----
+This configuration means the APP_CONFIG environment variable will be set to the value of the `log_level` key in the `app-config` ConfigMap.
 
 === Xp7Config
 
