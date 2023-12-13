@@ -118,8 +118,7 @@ A `size` and `class` params can be specified for every volume. If you don't spec
 
 ==== initContainers
 
-In the context of Xp7Deployment, `initContainers` are containers launched before the XP container itself, as part of the deployment lifecycle. This mechanism is particularly useful to set up the environment or parameters for the main application or to ensure all prerequisites are in place before the actual application starts.
-
+In the context of Xp7Deployment, `initContainers` are containers launched before the XP container itself, as part of the deployment lifecycle. This mechanism can be useful to install applications (add applications to `deploy` folder of the main container), preinstall custom workloads or set up the settings of the XP container or perform other tasks.
 One important thing to remember is that, if there are several initContainers defined, they will be launched sequentially, following the order in the configuration. If any of the `initContainers` fail, Kubernetes will keep retrying until it succeeds.
 
 [source,yaml]
@@ -170,7 +169,7 @@ Read https://kubernetes.io/docs/concepts/workloads/pods/init-containers/[more] a
 ==== sidecars
 A sidecar is a utility container that is designed to support and enhance the functionality of the main XP application container. All containers within a pod share the same network stack, so sidecar containers can provide additional functionality without modifying the main container.
 
-For instance, a sidecar can be conceived to perform logging, monitoring, synchronization, and background data processing tasks.
+For instance, a sidecar can be conceived to collecting logs from the main container,collect prometheus metrics or to provide a backup agent for `blobstore` and `snapshots` disks.
 
 Here is how you can define a sidecar within the container structure:
 
@@ -226,7 +225,7 @@ Here is how you can define a sidecar within the container structure:
 
 [#env]
 ==== env
-As for initContainers and sidecars, you can specify environment variables for the XP containers. This can be done by adding an `env` block to the particular `nodeGroup` of the `Xp7Deployment` resource.
+In the same way as for initContainers and sidecars, you can specify environment variables for the XP containers. This can be done by adding an env block to the particular nodeGroup of the Xp7Deployment resource.
 
 Every environment variable in the env array is an object with properties:
 
