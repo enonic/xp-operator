@@ -1,0 +1,13 @@
+{
+  "versions": [
+    {
+      "label": "stable",
+      "checkout": "master",
+      "latest": true
+    },
+	{
+	  "label": "next",
+	  "checkout": "issue-502"
+	}
+  ]
+}
