@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.20">
-<title>Uninstalling</title>
+<title>Kubernetes Operator for Enonic XP</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -434,30 +434,82 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
-<body class="article">
+<body class="article toc2 toc-right">
 <div id="header">
-<h1>Uninstalling</h1>
+<h1>Kubernetes Operator for Enonic XP</h1>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#motivation">Motivation</a></li>
+<li><a href="#usage">Usage</a></li>
+<li><a href="#installation">Installation</a></li>
+<li><a href="#supported_xp_versions">Supported XP versions</a></li>
+</ul>
+</div>
 </div>
 <div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>The Enonic XP Kubernetes Operator is a piece of software runs on top of Kubernetes to help you manage your XP deployments. It builds on the <a href="https://kubernetes.io/docs/concepts/extend-kubernetes/operator/">operator pattern</a> provided by Kubernetes.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="motivation"><a class="link" href="#motivation">Motivation</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Creating a simple XP deployment is quite easy, but it quickly gets more complicated when you try to create production grade clusters. Add on top the complexity of how Kubernetes works and you quickly can get into trouble. The operator removes that complexity for you, and makes it easy to create and manage complex deployments with ease.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="usage"><a class="link" href="#usage">Usage</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Take a look at the <a href="usage.ahtml">usage</a> section see how to use the operator.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="installation"><a class="link" href="#installation">Installation</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Before you can start using the operator you have to:</p>
+</div>
 <div class="ulist">
 <ul>
 <li>
-<p>helm uninstall xp-operator</p>
+<p>Have a running Kubernetes cluster, version <code>1.19+</code>. If you need to setup a local test environment, you can look at our <a href="minikube.ahtml">minikube</a> guide.</p>
+</li>
+<li>
+<p>Install the operator according to the <a href="installation.ahtml">installation</a> guide.</p>
 </li>
 </ul>
 </div>
-<div class="paragraph">
-<p>WARN: Don´t uninstall the xp-operator while there is an xp7deployment on your cluster</p>
 </div>
-<div class="listingblock">
-<div class="content">
-<pre></pre>
+</div>
+<div class="sect1">
+<h2 id="supported_xp_versions"><a class="link" href="#supported_xp_versions">Supported XP versions</a></h2>
+<div class="sectionbody">
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The operator only supports Enonic XP <code>v7.13.2</code> and newer.
+</td>
+</tr>
+</table>
+</div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-12-18 10:33:29 UTC
+Last updated 2023-12-18 10:33:42 UTC
 </div>
 </div>
 </body>

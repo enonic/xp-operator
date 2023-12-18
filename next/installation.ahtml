@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.20">
-<title>Uninstalling</title>
+<title>Installation</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -434,30 +434,270 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
-<body class="article">
+<body class="article toc2 toc-right">
 <div id="header">
-<h1>Uninstalling</h1>
+<h1>Installation</h1>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#prerequisites">Prerequisites</a></li>
+<li><a href="#namespaces">Namespaces</a></li>
+<li><a href="#storage_classes">Storage classes</a>
+<ul class="sectlevel2">
+<li><a href="#compatible_storage_classes_for_running_xp_in_single_and_cluster_mode">Compatible Storage classes for running XP in single and cluster mode</a></li>
+<li><a href="#provisioning_nfs_based_storage_class">Provisioning NFS based storage class</a></li>
+</ul>
+</li>
+<li><a href="#installation">Installation</a>
+<ul class="sectlevel2">
+<li><a href="#create_chart_values_file">Create chart values file</a></li>
+<li><a href="#installing_chart">Installing chart</a></li>
+<li><a href="#verify_installation">Verify installation</a></li>
+</ul>
+</li>
+</ul>
+</div>
 </div>
 <div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>This section covers the installation of the Enonic XP Kubernetes Operator.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="prerequisites"><a class="link" href="#prerequisites">Prerequisites</a></h2>
+<div class="sectionbody">
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Kubernetes</dt>
+<dd>
+<p>A running Kubernetes cluster version <code>1.19+</code>. The k8s cluster can be on-premise or any cloud service provider. The only thing that differs depending on the type of k8s clusters is which storage class to use. And more information about that is shown in the "Storage classes" section below.</p>
+</dd>
+<dt class="hdlist1">Kubectl</dt>
+<dd>
+<p>Is the Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">here</a>.</p>
+</dd>
+<dt class="hdlist1">Helm</dt>
+<dd>
+<p>Is a package manager for Kubernetes. Download it <a href="https://helm.sh/docs/intro/install/">here</a>.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="namespaces"><a class="link" href="#namespaces">Namespaces</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This guide instructs you to install the operator (and potentially the NFS provisioner) into the <code>kube-system</code> namespace. Although this is not a strict requirement, it is best practice to install kubernetes extensions into a namespace that clearly indicates that it has components vital to the system. Since <code>kube-system</code> is present in all clusters and should never be deleted, it is recommended to use that. You can create your own <code>my-system</code> namespace and install the operator there. Do not, for example, install the operator and an XP7 deployment into the same namespace.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="storage_classes"><a class="link" href="#storage_classes">Storage classes</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Before we deploy the operator, we need to talk about storage classes. That should be a familiar concept to people that have worked on kubernetes clusters before. If you do not know what they are, you can basically think of them as different approaches to store your data. Each storage class can create volumes that have one of these four access modes:</p>
+</div>
 <div class="ulist">
 <ul>
 <li>
-<p>helm uninstall xp-operator</p>
+<p><code>ReadWriteOnce</code>: Can be mounted as read-write by a single node. Multiple pods can access the volume when the pods are running on the same node.</p>
+</li>
+<li>
+<p><code>ReadOnlyMany</code>:  Can be mounted read-only by many nodes.</p>
+</li>
+<li>
+<p><code>ReadWriteMany</code>: Can be mounted as read-write by many nodes.</p>
+</li>
+<li>
+<p><code>ReadWriteOncePod</code>: Can be mounted as read-write by a single pod.</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>WARN: Don´t uninstall the xp-operator while there is an xp7deployment on your cluster</p>
+<p>ReadWriteOnce mode is supported by the default storage classes in any k8s cluster; that satisfies the requirement of XP deployment in single mode. However, to deploy XP in cluster mode, an NFS based storage class with "ReadWriteMany" access mode is required.</p>
+</div>
+<div class="paragraph">
+<p>For instance, the standard storage class in <code>minikube</code> supports all modes and can be used to deploy XP in single as well as in cluster mode. However, the standard storage classes in the major managed k8s providers like <code>GKE</code>, <code>AKS</code> and <code>EKS</code> do not support <code>ReadWriteMany</code> mode. Most storage classes that support <code>ReadWriteMany</code> access mode have also a restriction in changing the modified time of files that XP requires. At the time of this writing, the only storage classes that can be used to deploy XP in cluster mode are NFS based storage classes with <code>ReadWriteMany</code> access mode. Refer to the table below to see which storage class you can use on the major cloud service providers.</p>
+</div>
+<div class="sect2">
+<h3 id="compatible_storage_classes_for_running_xp_in_single_and_cluster_mode"><a class="link" href="#compatible_storage_classes_for_running_xp_in_single_and_cluster_mode">Compatible Storage classes for running XP in single and cluster mode</a></h3>
+<table class="tableblock frame-ends grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">XP deployment mode</th>
+<th class="tableblock halign-left valign-top">Google</th>
+<th class="tableblock halign-left valign-top">Azure</th>
+<th class="tableblock halign-left valign-top">Amazon</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Single</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Any storage class with RWO</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Any storage class with RWO</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Any storage class with RWO</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Cluster</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Filestore CSI driver based storage class with RWM*</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Azurefile CSI driver based storage class with RWM*</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">EFS</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p><code>* NFS based CSI driver storage classes in AKS and GKE have minimum size requirements which can be very high depending on your storage requirement. Please refer to the respective cloud provider&#8217;s site for more information.</code></p>
+</div>
+<div class="paragraph">
+<p>Note: In GKE and AKS, you can get managed storage classes that are NFS based CSI driver storage backends. However, for Amazon EKS you need to create the ´EFS´ storage class. See our <a href="efs.ahtml">EFS storage class</a> guide for more information.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="provisioning_nfs_based_storage_class"><a class="link" href="#provisioning_nfs_based_storage_class">Provisioning NFS based storage class</a></h3>
+<div class="paragraph">
+<p>If you are running an ´on-premiser´ k8s cluster or you don&#8217;t want to use the available NFS based storage classes in managed k8s clusters, you have the possibility to self provision NFS based storage classes. See our <a href="nfs.ahtml">NFS storage class</a> guide for more information.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="installation"><a class="link" href="#installation">Installation</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="create_chart_values_file"><a class="link" href="#create_chart_values_file">Create chart values file</a></h3>
+<div class="paragraph">
+<p>The chart <code>values.yaml</code> file is how you generally configure a deployment with Helm (to learn more about how Helm uses values files, visit the <a href="https://helm.sh/docs/chart_template_guide/values_files/#helm">Helm developer docs</a>). You can read more about available values you can configure for the operator in the <a href="https://github.com/enonic/xp-operator/tree/master/helm">Helm chart readme</a>. Lets create a Helm values file to configure the operator:</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Here you might have to change the storage classes depending on your cluster setup.
+</td>
+</tr>
+</table>
+</div>
+<div id="values" class="listingblock">
+<div class="title">values.yaml</div>
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">config: |-
+  # Set storage classes for XP deployments. Note that these two do not have to be the same.
+  # The shared storage class has to support ReadWriteMany!
+  operator.charts.values.storage.shared.storageClassName=nfs
+  operator.charts.values.storage.default.storageClassName=standard
+
+  # Lower default requests: This is useful when trying out XP clusters when
+  #   the K8s cluster does not have enough memory and ram!
+  operator.charts.values.resources.cpu.defaultRequests=0.2
+  operator.charts.values.resources.memory.defaultRequests=512Mi</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="installing_chart"><a class="link" href="#installing_chart">Installing chart</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ helm upgrade --install \
+	--namespace kube-system \
+	--values values.yaml \
+	xp-operator \
+	https://repo.enonic.com/helm/xp-operator/xp-operator-0.17.16.tgz
+
+Release "xp-operator" does not exist. Installing it now.
+NAME: xp-operator
+LAST DEPLOYED: Wed Apr 27 17:18:38 2022
+NAMESPACE: kube-system
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="verify_installation"><a class="link" href="#verify_installation">Verify installation</a></h3>
+<div class="paragraph">
+<p>First find out the name of the operator pod:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre></pre>
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ kubectl -n kube-system get pods
+
+NAME                                        READY   STATUS              RESTARTS   AGE
+coredns-6955765f44-ksgmf                    1/1     Running             0          6m36s
+xp-operator-5869fcf9f4-xrzll                0/1     ContainerCreating   0          10s
+etcd-minikube                               1/1     Running             0          6m30s
+ingress-nginx-admission-create-zl98b        0/1     Completed           0          6m21s
+ingress-nginx-admission-patch-7xqtf         0/1     Completed           2          6m20s
+ingress-nginx-controller-7f9bbb757f-nxqz6   1/1     Running             0          6m21s
+kube-apiserver-minikube                     1/1     Running             0          6m30s
+kube-controller-manager-minikube            1/1     Running             0          6m30s
+kube-proxy-f4v7v                            1/1     Running             0          6m36s
+kube-scheduler-minikube                     1/1     Running             0          6m30s
+nfs-server-nfs-server-provisioner-0         1/1     Running             0          3m40s
+storage-provisioner                         1/1     Running             0          6m50s</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then look at the operator logs to see if there are any errors:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ kubectl -n kube-system logs -f xp-operator-5869fcf9f4-xrzll
+
+exec java -Doperator.charts.path=helm -Djava.util.logging.manager=org.jboss.logmanager.LogManager -javaagent:/opt/agent-bond/agent-bond.jar=jmx_exporter{{9779:/opt/agent-bond/jmx_exporter_config.yml}} -XX:+ExitOnOutOfMemoryError -cp . -jar /deployments/quarkus-run.jar
+__  ____  __  _____   ___  __ ____  ______
+ --/ __ \/ / / / _ | / _ \/ //_/ / / / __/
+ -/ /_/ / /_/ / __ |/ , _/ ,&lt; / /_/ /\ \
+--\___\_\____/_/ |_/_/|_/_/|_|\____/___/
+2022-04-27 15:18:45,068 INFO  io.quarkus - operator 0.17.13 on JVM (powered by Quarkus 2.8.1.Final) started in 1.572s. Listening on: https://0.0.0.0:8443
+2022-04-27 15:18:45,070 INFO  io.quarkus - Profile prod activated.
+2022-04-27 15:18:45,070 INFO  io.quarkus - Installed features: [cdi, kubernetes-client, micrometer, rest-client, resteasy, resteasy-jackson, smallrye-context-propagation, vertx]
+2022-04-27 15:18:48,480 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppInstaller'
+2022-04-27 15:18:48,481 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7AppStatus' [delay: 19241, period: 60000]
+2022-04-27 15:18:48,481 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7AppInstaller' [delay: 4497, period: 60000]
+2022-04-27 15:18:48,480 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorIngressCertSync'
+2022-04-27 15:18:48,484 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7DeploymentStatus'
+2022-04-27 15:18:48,484 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7DeploymentStatus' [delay: 6627, period: 60000]
+2022-04-27 15:18:48,485 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXpClientCacheInvalidate'
+2022-04-27 15:18:48,488 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppStatusOnDeployments'
+2022-04-27 15:18:48,488 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorIngress'
+2022-04-27 15:18:48,488 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7ConfigSync' [delay: 13876, period: 60000]
+2022-04-27 15:18:48,488 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorDomainCertSync'
+2022-04-27 15:18:48,727 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7DeploymentHelm'
+2022-04-27 15:18:48,727 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppStartStopper'
+2022-04-27 15:18:48,728 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7AppStartStopper' [delay: 4061, period: 60000]
+2022-04-27 15:18:48,728 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7ConfigStatus'
+2022-04-27 15:18:48,728 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorIngressLabel'
+2022-04-27 15:18:48,729 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorIngressLabel' [delay: 3996, period: 60000]
+2022-04-27 15:18:48,729 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorInformers' [delay: 10390, period: 30000]
+2022-04-27 15:18:48,729 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorDeleteAnnotation'
+2022-04-27 15:18:48,729 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorConfigMapEvent'
+2022-04-27 15:18:48,730 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7Config'
+2022-04-27 15:18:48,730 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorConfigMapSync' [delay: 18077, period: 60000]
+2022-04-27 15:18:48,831 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppInstallerOnDeployments'
+2022-04-27 15:18:53,830 INFO  com.eno.kub.ope.Operator - Starting informers</code></pre>
+</div>
+</div>
+</div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-12-18 10:33:29 UTC
+Last updated 2023-12-18 10:33:42 UTC
 </div>
 </div>
 </body>

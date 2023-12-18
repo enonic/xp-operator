@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.20">
-<title>Uninstalling</title>
+<title>NFS storage class</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -434,30 +434,201 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
-<body class="article">
+<body class="article toc2 toc-right">
 <div id="header">
-<h1>Uninstalling</h1>
-</div>
-<div id="content">
-<div class="ulist">
-<ul>
-<li>
-<p>helm uninstall xp-operator</p>
+<h1>NFS storage class</h1>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#prerequisites">Prerequisites</a></li>
+<li><a href="#using_an_existing_nfs_server">Using an existing NFS server</a>
+<ul class="sectlevel2">
+<li><a href="#add_helm_repository">Add helm repository</a></li>
+<li><a href="#install_client_provisioner">Install client provisioner</a></li>
+</ul>
+</li>
+<li><a href="#create_nfs_server_in_k8s_cluster">Create NFS server in K8s cluster</a>
+<ul class="sectlevel2">
+<li><a href="#add_helm_repository_2">Add helm repository</a></li>
+<li><a href="#install_server_provisioner">Install server provisioner</a></li>
+</ul>
 </li>
 </ul>
 </div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
 <div class="paragraph">
-<p>WARN: Don´t uninstall the xp-operator while there is an xp7deployment on your cluster</p>
+<p>In this section we show how you can setup a storage class that supports <code>ReadWriteMany</code> using NFS.
+NOTE: Running an NFS server on GKE k8s cluster with autopilot mode is not possible due to security restrictions. The NFS server provisioner requires two capabilities 'DAC_READ_SEARCH' and 'SYS_RESOURCE', which are disabled by Autopilot.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="prerequisites"><a class="link" href="#prerequisites">Prerequisites</a></h2>
+<div class="sectionbody">
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Kubernetes</dt>
+<dd>
+<p>A running Kubernetes cluster.</p>
+</dd>
+<dt class="hdlist1">Kubectl</dt>
+<dd>
+<p>Is the Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">here</a>.</p>
+</dd>
+<dt class="hdlist1">Helm</dt>
+<dd>
+<p>Is a package manager for Kubernetes. Download it <a href="https://helm.sh/docs/intro/install/">here</a>.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="using_an_existing_nfs_server"><a class="link" href="#using_an_existing_nfs_server">Using an existing NFS server</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If you have a NFS server, we will just create a client that uses that. Read more about this provisioner on <a href="https://github.com/kubernetes-sigs/nfs-subdir-external-provisioner">github</a>.</p>
+</div>
+<div class="sect2">
+<h3 id="add_helm_repository"><a class="link" href="#add_helm_repository">Add helm repository</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ helm repo add nfs https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
+
+"nfs" has been added to your repositories</code></pre>
+</div>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre></pre>
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ helm repo update
+
+Hang tight while we grab the latest from your chart repositories...
+...Successfully got an update from the "nfs" chart repository
+Update Complete. ⎈Happy Helming!⎈</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="install_client_provisioner"><a class="link" href="#install_client_provisioner">Install client provisioner</a></h3>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Change <code>nfs.server</code> and <code>nfs.path</code> to reflect your setup.
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ helm upgrade --install \
+    --namespace kube-system \
+    --set nfs.server=?.?.?.? \
+    --set nfs.path=/some/exported/path \
+    --set storageClass.name=nfs \
+    --set storageClass.archiveOnDelete=false \
+    --set storageClass.allowVolumeExpansion=true \
+    --version 3.0.0 \
+    nfs-client \
+    nfs/nfs-subdir-external-provisioner
+
+Release "nfs-client" does not exist. Installing it now.
+NAME: nfs-client
+LAST DEPLOYED: Thu Feb 18 16:37:40 2021
+NAMESPACE: kube-system
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="create_nfs_server_in_k8s_cluster"><a class="link" href="#create_nfs_server_in_k8s_cluster">Create NFS server in K8s cluster</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="add_helm_repository_2"><a class="link" href="#add_helm_repository_2">Add helm repository</a></h3>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+As of this writing, the helm community is slowly phasing out the stable channel. The new version of <a href="https://github.com/kubernetes-sigs/nfs-ganesha-server-and-external-provisioner">this provisioner</a> does not have its own helm repo yet.
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ helm repo add stable https://charts.helm.sh/stable
+
+"stable" has been added to your repositories</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ helm repo update
+
+Hang tight while we grab the latest from your chart repositories...
+...Successfully got an update from the "stable" chart repository
+Update Complete. ⎈Happy Helming!⎈</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="install_server_provisioner"><a class="link" href="#install_server_provisioner">Install server provisioner</a></h3>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+You might want to update <code>persistence.size</code> for more capacity.
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ helm upgrade --install \
+    --namespace kube-system \
+    --set persistence.enabled=true \
+    --set persistence.size=1Gi \
+    --set storageClass.name=nfs \
+    --set storageClass.allowVolumeExpansion=true \
+    --version 1.1.3 \
+    nfs-server \
+    stable/nfs-server-provisioner
+
+Release "nfs-server" does not exist. Installing it now.
+WARNING: This chart is deprecated
+NAME: nfs-server
+LAST DEPLOYED: Thu Feb 18 16:41:20 2021
+NAMESPACE: kube-system
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+The NFS Provisioner service has now been installed.</code></pre>
+</div>
+</div>
+</div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-12-18 10:33:29 UTC
+Last updated 2023-12-18 10:33:42 UTC
 </div>
 </div>
 </body>

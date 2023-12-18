@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.20">
-<title>Uninstalling</title>
+<title>EFS storage class on Amazon EKS</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -434,30 +434,58 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
-<body class="article">
+<body class="article toc2 toc-right">
 <div id="header">
-<h1>Uninstalling</h1>
-</div>
-<div id="content">
-<div class="ulist">
-<ul>
-<li>
-<p>helm uninstall xp-operator</p>
-</li>
+<h1>EFS storage class on Amazon EKS</h1>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#prerequisites">Prerequisites</a></li>
 </ul>
 </div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
 <div class="paragraph">
-<p>WARN: Don´t uninstall the xp-operator while there is an xp7deployment on your cluster</p>
+<p>In this section we show how you can setup an EFS storage class that supports <code>ReadWriteMany</code> access mode.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="prerequisites"><a class="link" href="#prerequisites">Prerequisites</a></h2>
+<div class="sectionbody">
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Kubernetes</dt>
+<dd>
+<p>A running Kubernetes cluster on Amazon EKS.</p>
+</dd>
+<dt class="hdlist1">Kubectl</dt>
+<dd>
+<p>Is the Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">here</a>.</p>
+</dd>
+<dt class="hdlist1">aws cli and eksctl </dt>
+<dd>
+<p>These tools are required to create storage class on EKS cluster that uses an EFS filesystem.</p>
+</dd>
+</dl>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre></pre>
+<pre>=== Instruction to create EFS
+https://docs.aws.amazon.com/efs/latest/ug/gs-step-two-create-efs-resources.html
+
+=== Instruction to create a storage class with dynamic provisionin
+https://aws.amazon.com/blogs/containers/introducing-efs-csi-dynamic-provisioning/</pre>
+</div>
+</div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-12-18 10:33:29 UTC
+Last updated 2023-12-18 10:33:42 UTC
 </div>
 </div>
 </body>

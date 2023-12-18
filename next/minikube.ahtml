@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.20">
-<title>Uninstalling</title>
+<title>Minikube</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -434,30 +434,153 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
-<body class="article">
+<body class="article toc2 toc-right">
 <div id="header">
-<h1>Uninstalling</h1>
-</div>
-<div id="content">
-<div class="ulist">
-<ul>
-<li>
-<p>helm uninstall xp-operator</p>
-</li>
+<h1>Minikube</h1>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#prerequisites">Prerequisites</a></li>
+<li><a href="#setup">Setup</a></li>
+<li><a href="#verify">Verify</a></li>
+<li><a href="#teardown">Teardown</a></li>
 </ul>
 </div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
 <div class="paragraph">
-<p>WARN: Don´t uninstall the xp-operator while there is an xp7deployment on your cluster</p>
+<p>This section briefly describes how to install and set up minikube for testing the operator.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="prerequisites"><a class="link" href="#prerequisites">Prerequisites</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You need to have installed these programs on your computer:</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Minikube</dt>
+<dd>
+<p>Is local Kubernetes, focusing on making it easy to learn and develop for Kubernetes. Download it <a href="https://minikube.sigs.k8s.io/docs/start/">here</a>.</p>
+</dd>
+<dt class="hdlist1">VirtualBox</dt>
+<dd>
+<p>Is a virtualization software. You can use other virtual machine or container manager with Minikube but VirtualBox has proven most stable for minikube. Download it <a href="https://www.virtualbox.org/wiki/Downloads">here</a>.</p>
+</dd>
+<dt class="hdlist1">Kubectl</dt>
+<dd>
+<p>Is the Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">here</a>.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="setup"><a class="link" href="#setup">Setup</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Once you have minikube working, it is quite easy to start a local cluster.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+You can run a cluster with less resources, but it won&#8217;t be able to run any workloads. The amount of resources in this example won&#8217;t let you run XP clusters. Feel free to add more juice if your machine can handle it.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+On Macbook clients with m1 chip, the virtualbox vm-driver is not supported and use "docker" instead of "virtualbox" as a vm-driver option.
+</td>
+</tr>
+</table>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre></pre>
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ minikube start \
+	--cpus=2 \
+	--memory=4gb \
+	--disk-size=10gb \
+	--vm-driver=virtualbox \
+	--kubernetes-version=v1.19.11
+
+* Using the virtualbox driver based on user configuration
+* Starting control plane node minikube in cluster minikube
+* Creating virtualbox VM (CPUs=2, Memory=4096MB, Disk=10240MB) ...
+* Preparing Kubernetes v1.19.11 on Docker 20.10.4 ...
+  - Generating certificates and keys ...
+  - Booting up control plane ...
+  - Configuring RBAC rules ...
+* Verifying Kubernetes components...
+* Enabled addons: storage-provisioner, default-storageclass
+* Done! kubectl is now configured to use "minikube" cluster and "default" namespace by default</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When your cluster is up, it is good to add the ingress controller to it to test load balancing:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ minikube addons enable ingress
+
+* Verifying ingress addon...
+* The 'ingress' addon is enabled</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="verify"><a class="link" href="#verify">Verify</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Verify your setup by running:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ kubectl cluster-info
+
+Kubernetes control plane is running at https://192.168.99.252:8443
+KubeDNS is running at https://192.168.99.252:8443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+
+To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="teardown"><a class="link" href="#teardown">Teardown</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Once you are done with your cluster, you can delete the machine and all the data by running:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ minikube delete
+
+* Deleting "minikube" in virtualbox ...
+* Removed all traces of the "minikube" cluster.</code></pre>
+</div>
+</div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-12-18 10:33:29 UTC
+Last updated 2023-12-18 10:33:42 UTC
 </div>
 </div>
 </body>
