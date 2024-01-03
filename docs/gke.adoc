@@ -18,14 +18,14 @@ Gcloud CLI:: Command-line tool to manage resources in GCP. Download it https://c
 === Create a GKE Cluster
 
 1. Enable Kubernetes Engine API: if the kubernetes engine API is not enabled on your GCP project, you need to enable it. 
-
++
 image::../images/gkeEnablek8sapi.png[Enable API]
 
 2. After enabling Kubernetes Enging API, it will show you an option to create a k8s cluster. 
-
++
 image::../images/gkeCreateClusterPage.png[Create GKE Cluster]
-If you don't see this window, click on the hamburger menu and chose "Kubernetes Engine" -> "clusters"
-
+If you don't get this window, click on the hamburger menu and chose "Kubernetes Engine" -> "clusters" as shown in the image below.
++
 image::../images/gkeGetClusterslist.png[GKE Clusters]
 
 3. Click on "Create" button. This will take you the k8s clsuster creation wizard. By default it starts the creation process for "autopilot" k8s cluster. Click on the "Switch to standard cluster" button.  (Note: Current xp operator version works only on "standard" cluster type)
