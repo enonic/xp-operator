@@ -1,0 +1,115 @@
+# Create a namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: <namespace-name>
+  annotations:
+    enonic.cloud/remove.with.xp7deployment: my-deployment     # Delete this namespace it the deployment is deleted
+---
+# Create deployment in the namespace
+apiVersion: enonic.cloud/v1
+kind: Xp7Deployment
+metadata:
+  name: my-deployment
+  namespace: <namespace-name>
+spec:
+  enabled: true     # Should the pods be running
+  xpVersion: 7.13.5  # XP version, has to be >=7.13.0
+
+  # List of preinstalled apps
+  nodesPreinstalledApps:
+   - name: snapshotter
+     url: https://repo.enonic.com/public/com/enonic/app/snapshotter/3.1.0/snapshotter-3.1.0.jar
+
+  # List of disks shared by all nodes (see description of disks below)
+  nodesSharedDisks:
+    - name: blobstore
+      size: 1Gi
+    - name: snapshots
+      size: 1Gi
+    - name: export
+      size: 1Gi
+
+  # List of nodegroups
+  nodeGroups:
+      # Name and number of replicas
+    - name: main
+      replicas: 1
+
+      # Role of the node
+      data: true
+      master: true
+
+      # Environment variables
+      env:
+        - name: MY_ENV_VAR
+          value: hey
+
+      resources:
+        # Cpu and memory allocation
+        cpu: "1.5"
+        memory: 512Mi
+
+        # List of disks private to each and every node
+        disks:
+          - name: deploy
+            size: 1Gi
+          - name: index
+            size: 1Gi
+          - name: work
+            size: 1Gi
+---
+# Install content studio
+apiVersion: enonic.cloud/v1alpha1
+kind: Xp7App
+metadata:
+  name: contentstudio
+  namespace: <namespace-name>
+spec:
+  url: https://repo.enonic.com/public/com/enonic/app/contentstudio/5.1.3/contentstudio-5.1.3.jar
+  sha512: 88919bcd99ebd658e218402a548d6fabd08b4b7467a9e57f98c23357936a2c163b28207c3c1db25809ec70f56a294d1b40a3e07a5fa45cfec4224f7bf2833df3
+---
+# Add your own custom config
+apiVersion: enonic.cloud/v1
+kind: Xp7Config
+metadata:
+  name: my-config
+  namespace: <namespace-name>
+spec:
+  nodeGroup: all
+  file: com.my-app.cfg
+  data: |
+    my = custom
+    config = file
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: xp-ingress
+  namespace: <namespace-name>
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    enonic.cloud/xp7.vhost.mapping.my-mapping-site.source: /
+    enonic.cloud/xp7.vhost.mapping.my-mapping-site.target: /site/default/master/homepage
+    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.source: /admin
+    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.target: /admin
+    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.idproviders: system
+spec:
+  rules:
+  - host: singlexptest
+    http:
+      paths:
+      - path: /
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: main
+            port:
+              number: 8080
+      - path: /admin
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: main
+            port:
+              number: 8080
