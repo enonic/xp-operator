@@ -203,6 +203,14 @@ Then open up http://localhost:8080[localhost:8080] in your browser.
 If you have setup ingress controller, you can access xp-admin through the admin end point you configured.
 
 
+=== Run XP in Cluster Mode
+
+XP can run in cluster mode in a GKE cluster. The main differecnce from running a single XP instance is that, xp cluster requires an NFS based shared volume that can be mounted as Read-Write by multiple nodes at a time. 
+
+
+The standard storage class in `GKE` does not support `ReadWriteMany` mode. Most storage classes that support `ReadWriteMany` access mode have also a restriction in changing the modified time of files that XP requires. At the time of this writing, the only storage classes that can be used to deploy XP in cluster mode are NFS based storage classes with `ReadWriteMany` access mode. 
+In GKE Filestore CSI driver based storage class with RWM* mode can be used to deploy XP in cluster mode. But due to very high minimum available size and higher cost per GB, this option becomes quite expensive. Another alternative is to use an NFS provisioner in your GKE cluster and create an NFS based storage class. See our <<nfs#,NFS storage class>> guide for more information.
+
 == Teardown
 
 Once you are done with your cluster, you can delete the k8s cluster from the GCP console or using gcloud cli:
