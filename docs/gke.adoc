@@ -14,8 +14,7 @@ Kubectl:: Is the Kubernetes command-line tool, kubectl, allows you to run comman
 
 Gcloud CLI:: Command-line tool to manage resources in GCP. Download it https://cloud.google.com/sdk/docs/install[here]
 
-== Setup
-=== Create a GKE Cluster
+== Create a GKE Cluster
 
 1. Enable Kubernetes Engine API: if the kubernetes engine API is not enabled on your GCP project, you need to enable it. 
 +
@@ -53,13 +52,14 @@ $ kubectl get storageclasses
 This should display the list of storage classes provisioned by GKE cluster. 
 
 
-=== Deploy XP Operator in the GKE cluster
+== Deploy XP Operator in k8s
 
-==== Create chart values file
+=== Create chart values file
 
 The chart `values.yaml` file is how you generally configure a deployment with Helm (to learn more about how Helm uses values files, visit the https://helm.sh/docs/chart_template_guide/values_files/#helm[Helm developer docs]). You can read more about available values you can configure for the operator in the https://github.com/enonic/xp-operator/tree/master/helm[Helm chart readme]. Lets create a Helm values file to configure the operator:
 
-NOTE: Here is an example values file; you may need to change the default storage class name to the one you get in your GKE cluster.
+NOTE: Here is an example values file; you may need to change the default storage class name to the one you get in your GKE cluster. The shared storage class name is required to run XP in cluster mode. Refer to the section [Run XP in Cluster Mode] for more information about the requirement. Depending on your choice of shared storage class name, you may need to update the values.yaml file. 
+If you prefer to run XP only in single mode comment out the shared storage class specification line. The operator can be updated anytime by changing the values.yaml file and running "helm upgrade"
 
 .values.yaml
 [[values]]
@@ -70,7 +70,7 @@ config: |-
   # The default storage class can be any storage class from your k8s cluster.
   # The shared storage class is used to run XP in cluster mode and it has to support ReadWriteMany!
   operator.charts.values.storage.default.storageClassName=standard
-  # operator.charts.values.storage.shared.storageClassName=<NFS-based-storage-class>
+  operator.charts.values.storage.shared.storageClassName=nfs
 
   # Default CPU and RAM requests
   operator.charts.values.resources.cpu.defaultRequests=1
@@ -78,7 +78,7 @@ config: |-
 ----
 
 
-==== Installing chart
+=== Installing chart
 
 [source,bash]
 ----
@@ -97,7 +97,7 @@ REVISION: 1
 TEST SUITE: None
 ----
 
-==== Verify installation
+=== Verify installation
 
 First find out the name of the operator pod:
 
@@ -154,8 +154,10 @@ __  ____  __  _____   ___  __ ____  ______
 ----
 
 
-=== Run XP in Single Mode
+== Run XP in Single Mode
+When running XP in single mode, there will be a single pod running XP.
 
+=== XP deployment for single Mode
 
 You can get example deployment file to deploy XP in Single mode from
 link:/https://github.com/enonic/xp-operator/kubernetes[Example Codes]. Copy single-xp7deployment-with-other-resources.yaml deployment file
@@ -203,13 +205,63 @@ Then open up http://localhost:8080[localhost:8080] in your browser.
 If you have setup ingress controller, you can access xp-admin through the admin end point you configured.
 
 
-=== Run XP in Cluster Mode
+== Run XP in Cluster Mode
 
-XP can run in cluster mode in a GKE cluster. The main differecnce from running a single XP instance is that, xp cluster requires an NFS based shared volume that can be mounted as Read-Write by multiple nodes at a time. 
+XP can run in a cluster mode in a GKE cluster. The requirment for clusters tha differs from running a single XP instance is that, xp cluster requires an NFS based shared volume that can be mounted as Read-Write by multiple nodes at a time. 
 
 
-The standard storage class in `GKE` does not support `ReadWriteMany` mode. Most storage classes that support `ReadWriteMany` access mode have also a restriction in changing the modified time of files that XP requires. At the time of this writing, the only storage classes that can be used to deploy XP in cluster mode are NFS based storage classes with `ReadWriteMany` access mode. 
+The standard storage class in `GKE` does not support `ReadWriteMany` mode. Most storage classes that support `ReadWriteMany` access mode have also a restriction in changing the modified time of files that XP requires. This is allowed only on NFS based storage classes with `ReadWriteMany` access mode.
 In GKE Filestore CSI driver based storage class with RWM* mode can be used to deploy XP in cluster mode. But due to very high minimum available size and higher cost per GB, this option becomes quite expensive. Another alternative is to use an NFS provisioner in your GKE cluster and create an NFS based storage class. See our <<nfs#,NFS storage class>> guide for more information.
+If you have already deployed XP operator with NFS based shared storage class, you can continue to the next step. If not update the values.yaml file from above and follow the steps in section [Deploy XP Operator in k8s]
+
+=== XP deployment for cluster Mode
+
+You can get example deployment file to deploy XP in cluster mode from
+link:/https://github.com/enonic/xp-operator/kubernetes[Example Codes]. Copy cluster-xp7deployment-with-other-resources.yaml deployment file
+and make changes to it as per your requirement. For instance parameters like namespace in which XP is going to be deployed, RAM and CPU size, types and number of cluster nodes can be changed in the deployment file. Once you finished editting the file, run the command below.
+
+
+[source,bash]
+----
+$ kubectl apply -f cluster-xp7deployment-with-other-resources.yaml
+
+namespace/my-namespace created
+xp7deployment.enonic.cloud/my-deployment created
+xp7app.enonic.cloud/contentstudio created
+xp7config.enonic.cloud/my-config created
+ingress.networking.k8s.io/my-domain-com created
+----
+
+=== Access XP Admin page
+Once the XP pods have started you can open up admin page through the ingress controller, if you have one set up or using port-forwarding. First fetch the 'su' password from the secret resource as shown below.
+
+==== Fetching SU password
+
+[source,bash]
+----
+$ kubectl -n my-namespace get secret su -o go-template="{{ .data.pass | base64decode }}"
+
+NGDDlGdFX6#3Rw
+----
+
+==== Access admin (bypassing ingress)
+In this method, XP admin is accessible directly on the pod over port 8080 bypassing ingress:
+
+[source,bash]
+----
+$ kubectl -n my-namespace port-forward master-0 8080
+
+Forwarding from 127.0.0.1:8080 -> 8080
+Forwarding from [::1]:8080 -> 8080
+----
+
+Then open up http://localhost:8080[localhost:8080] in your browser.
+
+Note: In a cluster mode there will be more than one pod and login with port-forwarding can be done through any of those pods. In the example, we used master-0, but any of the other pods can also be used.
+
+==== Access admin (through ingress)
+
+If you have setup ingress controller, you can access xp-admin through the admin end point you configured.
 
 == Teardown
 
