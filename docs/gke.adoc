@@ -24,17 +24,17 @@ image::../images/gkeEnablek8sapi.png[Enable API]
 +
 image::../images/gkeCreateClusterPage.png[Create GKE Cluster]
 +
-If you don't get this window, click on the hamburger menu and chose "Kubernetes Engine" -> "clusters" as shown in the image below.
+If you don't get this window, click on the hamburger menu and chose `Kubernetes Engine` -> `clusters` as shown in the image below.
 +
 image::../images/gkeGetClusterslist.png[GKE Clusters]
 
-3. Click on "Create" button. This will take you the k8s cluster creation wizard. By default it starts the creation process for "autopilot" k8s cluster. Click on the "Switch to standard cluster" button.  (Note: Current xp operator version works only on "standard" cluster type)
+3. Click on `Create` button. This will take you to the k8s cluster creation wizard. By default it starts the creation process for `autopilot` k8s cluster. Click on the `Switch to standard cluster` button.  (Note: Current xp operator version works only on `standard` cluster type)
 
 4. Follow the cluster creation steps by setting the values based on your cluster needs. Make sure to chose kubernetes version >= 1.27 which is requried by XP operator.
 
-5. Once the k8s cluster is created, click on the name of the cluster and you will get a "Connect" button on the top middle section of the page. This shows you the gcloud command you can use to connect to the k8s cluster from your computer.
+5. Once the k8s cluster is created, click on the name of the cluster and you will get a `Connect` button on the top middle section of the page. This shows you the gcloud command you can use to connect to the k8s cluster from your computer.
 
-6. Copy and run the "gcloud" command. If the command outputs "kubeconfig entry generated for <newly-created-k8s-cluster-name>.", it means proper kubectl config is generated on your computer and you are successfully authenticated to the k8s cluster. 
+6. Copy and run the "gcloud" command. If the command outputs `kubeconfig entry generated for <newly-created-k8s-cluster-name>`, it means proper kubectl config is generated on your computer and you are successfully authenticated to the k8s cluster. 
 
 7. To test your access to the k8s cluster run the command
 [source,bash]
@@ -58,8 +58,8 @@ This should display the list of storage classes provisioned by GKE cluster.
 
 The chart `values.yaml` file is how you generally configure a deployment with Helm (to learn more about how Helm uses values files, visit the https://helm.sh/docs/chart_template_guide/values_files/#helm[Helm developer docs]). You can read more about available values you can configure for the operator in the https://github.com/enonic/xp-operator/tree/master/helm[Helm chart readme]. Lets create a Helm values file to configure the operator:
 
-NOTE: Here is an example values file; you may need to change the default storage class name to the one you get in your GKE cluster. The shared storage class name is required to run XP in cluster mode. Refer to the section [Run XP in Cluster Mode] for more information about the requirement. Depending on your choice of shared storage class name, you may need to update the values.yaml file. 
-If you prefer to run XP only in single mode comment out the shared storage class specification line. The operator can be updated anytime by changing the values.yaml file and running "helm upgrade"
+NOTE: Here is an example values file; you may need to change the default storage class name to the one you get in your GKE cluster. The shared storage class name is required to run XP in cluster mode. Refer to the section <<Run XP in Cluster Mode>> for more information about the requirement. Depending on your choice of shared storage class name, you may need to update the values.yaml file. 
+If you prefer to run XP only in single mode, comment out the shared storage class specification line. The operator can be updated anytime by changing the values.yaml file and running `helm upgrade`.
 
 .values.yaml
 [[values]]
