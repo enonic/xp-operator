@@ -23,6 +23,7 @@ If you have a NFS server, we will just create a client that uses that. Read more
 ----
 $ helm repo add nfs https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
 
+
 "nfs" has been added to your repositories
 ----
 
@@ -92,7 +93,7 @@ NOTE: You might want to update `persistence.size` for more capacity.
 $ helm upgrade --install \
     --namespace kube-system \
     --set persistence.enabled=true \
-    --set persistence.size=1Gi \
+    --set persistence.size=10Gi \
     --set storageClass.name=nfs \
     --set storageClass.allowVolumeExpansion=true \
     --version 1.1.3 \
