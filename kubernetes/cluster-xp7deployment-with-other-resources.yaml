@@ -1,0 +1,159 @@
+# Create a namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: my-namespace
+  annotations:
+    # Delete this namespace if the deployment is deleted
+    enonic.cloud/remove.with.xp7deployment: my-deployment
+---
+# Create deployment in the namespace
+apiVersion: enonic.cloud/v1
+kind: Xp7Deployment
+metadata:
+  name: my-deployment
+  namespace: my-namespace
+spec:
+  enabled: true     # Should the pods be running
+  xpVersion: 7.13.5  # XP version, has to be >=7.13.0
+
+  # List of preinstalled apps
+  nodesPreinstalledApps:
+   - name: snapshotter
+     url: https://repo.enonic.com/public/com/enonic/app/snapshotter/3.1.0/snapshotter-3.1.0.jar
+
+  nodesSharedVolumes:
+    - name: shared
+      size: 1Gi
+      class: nfs
+
+  # Create volumes shared by all nodes in this deployment
+  nodesSharedDisks:
+    - name: blobstore
+      volume: shared
+
+    - name: snapshots
+      volume: shared
+
+    - name: export # Dumps and other data
+      size: 1Gi
+      class: nfs
+
+  # Create nodes
+  nodeGroups:
+    # 3 master nodes
+    - name: master
+      replicas: 3
+
+      data: false
+      master: true
+
+      resources:
+        cpu: "0.5"
+        memory: 1Gi
+
+        volumes:
+          - name: inner
+            size: 1Gi
+            class: nfs
+
+        # Volumes private to the node
+        disks:
+          - name: deploy # Apps installed in the deploy folder
+            volume: inner
+          - name: index # Node ES index
+            volume: inner
+
+    # 2 data nodes
+    - name: worker
+      replicas: 2
+
+      data: true
+      master: false
+
+      resources:
+        cpu: "1"
+        memory: 1Gi
+
+        # Volumes private to the node
+        disks:
+          - name: deploy # Apps installed in the deploy folder
+            size: 1Gi
+          - name: index # Node ES index
+            size: 1Gi
+            class: nfs
+---
+# Install content studio
+apiVersion: enonic.cloud/v1
+kind: Xp7App
+metadata:
+  name: contentstudio
+  namespace: my-namespace
+spec:
+  url: https://repo.enonic.com/public/com/enonic/app/contentstudio/5.1.3/contentstudio-5.1.3.jar
+  sha512: 88919bcd99ebd658e218402a548d6fabd08b4b7467a9e57f98c23357936a2c163b28207c3c1db25809ec70f56a294d1b40a3e07a5fa45cfec4224f7bf2833df3
+---
+# Add your own custom config
+apiVersion: enonic.cloud/v1
+kind: Xp7Config
+metadata:
+  name: my-config
+  namespace: my-namespace
+spec:
+  nodeGroup: all
+  file: com.my-app.cfg
+  data: |
+    my = config
+---
+# Expose XP site on frontend nodes through an ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-domain-com-site
+  namespace: my-namespace
+  annotations:
+    enonic.cloud/xp7.vhost.mapping.my-mapping-site.source: /
+    enonic.cloud/xp7.vhost.mapping.my-mapping-site.target: /site/default/master/homepage
+spec:
+  rules:
+    - host: my-domain.com
+      http:
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: worker
+                port:
+                  number: 8080
+---
+# Expose XP admin on admin nodes through an ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-domain-com-admin
+  namespace: my-namespace
+  annotations:
+    # Enable sticy sessions with nginx
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/affinity: "cookie"
+    nginx.ingress.kubernetes.io/session-cookie-name: "stickyXpAdmin"
+    nginx.ingress.kubernetes.io/session-cookie-expires: "129600" # 36 hours
+    nginx.ingress.kubernetes.io/session-cookie-max-age: "129600" # 36 hours
+    nginx.ingress.kubernetes.io/session-cookie-change-on-failure: "true"
+
+    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.source: /admin
+    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.target: /admin
+    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.idproviders: system
+spec:
+  rules:
+    - host: my-domain.com
+      http:
+        paths:
+          - path: /admin
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: worker
+                port:
+                  number: 8080
