@@ -4,7 +4,7 @@ kind: Namespace
 metadata:
   name: my-namespace
   annotations:
-    # Delete this namespace it the deployment is deleted
+    # Delete this namespace if the deployment is deleted
     enonic.cloud/remove.with.xp7deployment: my-deployment
 ---
 # Create deployment in the namespace
