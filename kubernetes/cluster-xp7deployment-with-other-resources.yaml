@@ -17,27 +17,16 @@ spec:
   enabled: true     # Should the pods be running
   xpVersion: 7.13.5  # XP version, has to be >=7.13.0
 
-  # List of preinstalled apps
-  nodesPreinstalledApps:
-   - name: snapshotter
-     url: https://repo.enonic.com/public/com/enonic/app/snapshotter/3.1.0/snapshotter-3.1.0.jar
-
-  nodesSharedVolumes:
-    - name: shared
-      size: 1Gi
-      class: nfs
-
   # Create volumes shared by all nodes in this deployment
   nodesSharedDisks:
     - name: blobstore
-      volume: shared
+      size: 1Gi
 
     - name: snapshots
-      volume: shared
+      size: 1Gi
 
     - name: export # Dumps and other data
       size: 1Gi
-      class: nfs
 
   # Create nodes
   nodeGroups:
@@ -49,20 +38,13 @@ spec:
       master: true
 
       resources:
-        cpu: "0.5"
-        memory: 1Gi
-
-        volumes:
-          - name: inner
-            size: 1Gi
-            class: nfs
+        cpu: "1"
+        memory: 2Gi
 
         # Volumes private to the node
         disks:
-          - name: deploy # Apps installed in the deploy folder
-            volume: inner
           - name: index # Node ES index
-            volume: inner
+            size: 1Gi
 
     # 2 data nodes
     - name: worker
@@ -71,17 +53,27 @@ spec:
       data: true
       master: false
 
+      initContainers:
+        # Preinstall Snapshotter app on worker nodes
+        - image: enonic/snapshotter:3.1.0
+          name: snapshotter-deploy
+          mounts:
+            - name: deploy
+              mountPath: /deploy
+
       resources:
         cpu: "1"
-        memory: 1Gi
+        memory: 2Gi
 
+        dirs:
+          # Snapshotter app copied to deploy folder
+          - name: deploy
+            size: 100Mi
+            mountReadOnly: true
         # Volumes private to the node
         disks:
-          - name: deploy # Apps installed in the deploy folder
-            size: 1Gi
           - name: index # Node ES index
             size: 1Gi
-            class: nfs
 ---
 # Install content studio
 apiVersion: enonic.cloud/v1
@@ -135,7 +127,7 @@ metadata:
   namespace: my-namespace
   annotations:
     # Enable sticy sessions with nginx
-    kubernetes.io/ingress.class: "nginx"
+    kubernetes.io/spec.ingressClassName: "nginx"
     nginx.ingress.kubernetes.io/affinity: "cookie"
     nginx.ingress.kubernetes.io/session-cookie-name: "stickyXpAdmin"
     nginx.ingress.kubernetes.io/session-cookie-expires: "129600" # 36 hours
