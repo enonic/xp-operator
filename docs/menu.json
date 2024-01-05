@@ -17,6 +17,10 @@
         "document": "minikube"
       },
       {
+        "title": "Guide on how to Run XP in GKE",
+        "document": "gke"
+      },
+      {
         "title": "NFS storage",
         "document" : "nfs"
       },
