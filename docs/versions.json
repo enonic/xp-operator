@@ -7,7 +7,7 @@
     },
 	{
 	  "label": "next",
-	  "checkout": "issue-502"
+	  "checkout": "end-user-doc"
 	}
   ]
 }
