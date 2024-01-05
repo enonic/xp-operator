@@ -157,7 +157,7 @@ __  ____  __  _____   ___  __ ____  ______
 == Run XP in Single Mode
 When running XP in single mode, there will be a single pod running XP.
 
-=== XP deployment for single Mode
+=== XP deployment in single Mode
 
 You can get example deployment file to deploy XP in Single mode from
 link:/https://github.com/enonic/xp-operator/kubernetes[Example Codes]. Copy single-xp7deployment-with-other-resources.yaml deployment file
@@ -217,7 +217,7 @@ Another alternative is to mount a disk from an existing external NFS server or u
 
 Note: If you have already deployed XP operator with NFS based shared storage class, you can continue to the next step. If not update the values.yaml file from above and follow the steps in section [Deploy XP Operator in k8s]. After deploying the XP operator with shared storage support, you can continue to the next steps.
 
-=== XP deployment for cluster Mode
+=== XP deployment in cluster Mode
 
 You can get example deployment file to deploy XP in cluster mode from
 link:/https://github.com/enonic/xp-operator/kubernetes[Example Codes]. Copy cluster-xp7deployment-with-other-resources.yaml deployment file
