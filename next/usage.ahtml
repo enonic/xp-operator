@@ -604,9 +604,6 @@ spec:
 <p>For customization, two key attributes can be adjusted: size and storageClass. These attributes pertain to the implicit volume. To specify default values use the <a href="installation.ahtml#values"><code>values.yaml</code></a> file during the installation stage.</p>
 </div>
 <div class="paragraph">
-<p>For custom disks, specify a folder where the disk will be mounted inside the container, specify <code>operator.charts.values.volumes.mounts.&lt;disk_name&gt;</code> property in the <a href="installation.ahtml#values"><code>values.yaml</code></a> file during the installation stage. There is no need to specify default disk locations and it&#8217;s not recommended to override them without a good reason.</p>
-</div>
-<div class="paragraph">
 <p>The distinction between shared and private disks is that shared disks are mounted in all nodes, while private disks are mounted only in the node where they are defined.</p>
 </div>
 </div>
@@ -623,256 +620,10 @@ spec:
 </div>
 </div>
 <div class="sect3">
-<h4 id="initcontainers"><a class="link" href="#initcontainers">initContainers</a></h4>
+<h4 id="sidecars_initcontainers"><a class="link" href="#sidecars_initcontainers">sidecars &amp; initContainers</a></h4>
 <div class="paragraph">
-<p>In the context of Xp7Deployment, <code>initContainers</code> are containers launched before the XP container itself, as part of the deployment lifecycle. This mechanism can be useful to install applications (add applications to <code>deploy</code> folder of the main container), preinstall custom workloads or set up the settings of the XP container or perform other tasks.
-One important thing to remember is that, if there are several initContainers defined, they will be launched sequentially, following the order in the configuration. If any of the <code>initContainers</code> fail, Kubernetes will keep retrying until it succeeds.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">  ...
-      initContainers:
-        - name: init-db
-          image: db-init-image:latest
-          command: ["sh", "-c"]
-          args: ["until nslookup mydatabase; do echo waiting for mydatabase; sleep 2; done"]
-          env:
-            - name: CHECK_INTERVAL
-              value: "2"
-          mounts:
-            - name: init-scripts
-              mountPath: /scripts
-  ...</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>An <code>initContainer</code> block in <code>Xp7Deployment</code> has several possible fields:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p><code>name</code>:The name of the <code>initContainer</code></p>
-</li>
-<li>
-<p><code>image</code>: The image to use for the <code>initContainer</code></p>
-</li>
-<li>
-<p><code>command</code>: The command to run in the <code>initContainer</code></p>
-</li>
-<li>
-<p><code>args</code>: The arguments for the command in <code>initContainer</code></p>
-</li>
-<li>
-<p><code>env</code>: Specify environment variables here. See <a href="#env">env</a> for more information.</p>
-</li>
-<li>
-<p><code>ports</code>: A list of port objects with properties <code>name</code>, <code>containerPort</code>, and <code>protocol</code>. This can be used to expose ports</p>
-</li>
-<li>
-<p><code>mounts</code>: A list of mount dirs, disks or volumes with properties <code>name</code>, <code>mountPath</code>, <code>subPath</code>.</p>
-</li>
-</ul>
-</div>
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 20%;">
-<col style="width: 80%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">Property</th>
-<th class="tableblock halign-left valign-top">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">name</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">name of an actual <code>dir</code>, <code>disk</code> or <code>volume</code> name, defined in <code>Xp7Deployment</code> resource.</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">mountPath</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">It is the path to mount the <code>dir</code>, <code>disk</code> or <code>volume</code> in the container.</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">subPath</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">It is the path inside the <code>dir</code>, <code>disk</code> or <code>volume</code> to mount in the container. If not specified, the root path will be used.</p></td>
-</tr>
-</tbody>
-</table>
-<div class="paragraph">
-<p>Read <a href="https://kubernetes.io/docs/concepts/workloads/pods/init-containers/">more</a> about the init containers.</p>
-</div>
-</div>
-<div class="sect3">
-<h4 id="sidecars"><a class="link" href="#sidecars">sidecars</a></h4>
-<div class="paragraph">
-<p>A sidecar is a utility container that is designed to support and enhance the functionality of the main XP application container. All containers within a pod share the same network stack, so sidecar containers can provide additional functionality without modifying the main container.</p>
-</div>
-<div class="paragraph">
-<p>For instance, a sidecar can be conceived to collecting logs from the main container,collect prometheus metrics or to provide a backup agent for <code>blobstore</code> and <code>snapshots</code> disks.</p>
-</div>
-<div class="paragraph">
-<p>Here is how you can define a sidecar within the container structure:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">  ...
-      sidecars:
-        - image: my-backup-agent
-          name: my-backup-agent
-          command: []
-          args: []
-          mounts:
-            - name: restic
-              mountPath: /restic
-            - name: export
-              mountPath: /enonic-xp/home/data
-            - name: shared
-              subPath: blobstore
-              mountPath: /enonic-xp/home/repo/blob
-            - name: shared
-              subPath: snapshots
-              mountPath: /enonic-xp/home/snapshots
-          ports:
-            - name: backup
-              containerPort: 8000
-              protocol: TCP
-          env:
-            - name: AGENT_K8S_CONTAINER
-              value: my-backup-agent</code></pre>
-</div>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p><code>name</code>:The name of the <code>sidecar</code></p>
-</li>
-<li>
-<p><code>image</code>: The image to use for the <code>sidecar</code></p>
-</li>
-<li>
-<p><code>command</code>: The command to run in the <code>sidecar</code></p>
-</li>
-<li>
-<p><code>args</code>: The arguments for the command in <code>sidecar</code></p>
-</li>
-<li>
-<p><code>env</code>: Specify environment variables here. See <a href="#env">env</a> for more information.</p>
-</li>
-<li>
-<p><code>ports</code>: A list of port objects with properties <code>name</code>, <code>containerPort</code>, and <code>protocol</code>. This can be used to expose ports</p>
-</li>
-<li>
-<p><code>mounts</code>: A list of mount dirs, disks or volumes with properties <code>name</code>, <code>mountPath</code>, <code>subPath</code>.</p>
-</li>
-</ul>
-</div>
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 20%;">
-<col style="width: 80%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">Property</th>
-<th class="tableblock halign-left valign-top">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">name</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">name of an actual <code>dir</code>, <code>disk</code> or <code>volume</code> name, defined in <code>Xp7Deployment</code> resource.</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">mountPath</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">It is the path to mount the <code>dir</code>, <code>disk</code> or <code>volume</code> in the container.</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">subPath</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">It is the path inside the <code>dir</code>, <code>disk</code> or <code>volume</code> to mount in the container. If not specified, the root path will be use</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="sect3">
-<h4 id="env"><a class="link" href="#env">env</a></h4>
-<div class="paragraph">
-<p>In the same way as for initContainers and sidecars, you can specify environment variables for the XP containers. This can be done by adding an env block to the particular nodeGroup of the Xp7Deployment resource.</p>
-</div>
-<div class="paragraph">
-<p>Every environment variable in the env array is an object with properties:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p><code>name</code>: A string containing the name of the environment variable.</p>
-</li>
-<li>
-<p><code>value</code>: A string containing the value of the environment variable. This field is optional.</p>
-</li>
-<li>
-<p><code>valueFrom</code>: An object that allows setting the value of the environment variable from various sources such as field references (fieldRef), secrets (secretKeyRef) and configMaps (configMapKeyRef). This field is optional.</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>Simple single environment variable:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">      env:
-        - name: MY_ENV_VAR
-          value: my-value</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Secret key reference example:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">    env:
-      - name: SECRET_USERNAME
-        valueFrom:
-          secretKeyRef:
-            name: mysecret
-            key: username
-            optional: true</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>An environment variable SECRET_USERNAME is defined whose value is sourced from a Secret named mysecret and the key username. The secretKeyRef object allows this kind of Secret reference providing a secure way to store sensitive information like usernames, passwords, or keys in Kubernetes, which can then be consumed by your containers.</p>
-</div>
-<div class="paragraph">
-<p>Field reference example:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">      env:
-        - name: AGENT_K8S_NAMESPACE
-          valueFrom:
-            fieldRef:
-              apiVersion: v1
-              fieldPath: metadata.namespace</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>This configuration means the AGENT_K8S_NAMESPACE environment variable will be set to the namespace in which the XP deployment is running.</p>
-</div>
-<div class="paragraph">
-<p>ConfigMap key reference example:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">      env:
-        - name: APP_CONFIG
-          valueFrom:
-            configMapKeyRef:
-              name: app-config
-              key: log_level</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>This configuration means the APP_CONFIG environment variable will be set to the value of the <code>log_level</code> key in the <code>app-config</code> ConfigMap.</p>
+<p><a href="https://kubernetes.io/docs/concepts/workloads/pods/init-containers/">Init containers</a>
+  and sidecars can be added to the cluster.</p>
 </div>
 </div>
 </div>
@@ -1405,7 +1156,7 @@ kind: Namespace
 metadata:
   name: my-namespace
   annotations:
-    # Delete this namespace it the deployment is deleted
+    # Delete this namespace if the deployment is deleted
     enonic.cloud/remove.with.xp7deployment: my-deployment
 ---
 # Create deployment in the namespace
@@ -1575,7 +1326,7 @@ ingress.networking.k8s.io/my-domain-com-admin created</code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-12-18 10:33:42 UTC
+Last updated 2024-01-05 15:12:00 UTC
 </div>
 </div>
 </body>

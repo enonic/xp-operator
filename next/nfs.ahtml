@@ -498,6 +498,7 @@ NOTE: Running an NFS server on GKE k8s cluster with autopilot mode is not possib
 <div class="content">
 <pre class="highlight"><code class="language-bash" data-lang="bash">$ helm repo add nfs https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
 
+
 "nfs" has been added to your repositories</code></pre>
 </div>
 </div>
@@ -603,7 +604,7 @@ You might want to update <code>persistence.size</code> for more capacity.
 <pre class="highlight"><code class="language-bash" data-lang="bash">$ helm upgrade --install \
     --namespace kube-system \
     --set persistence.enabled=true \
-    --set persistence.size=1Gi \
+    --set persistence.size=10Gi \
     --set storageClass.name=nfs \
     --set storageClass.allowVolumeExpansion=true \
     --version 1.1.3 \
@@ -628,7 +629,7 @@ The NFS Provisioner service has now been installed.</code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-12-18 10:33:42 UTC
+Last updated 2024-01-05 15:12:00 UTC
 </div>
 </div>
 </body>
