@@ -207,12 +207,15 @@ If you have setup ingress controller, you can access xp-admin through the admin 
 
 == Run XP in Cluster Mode
 
-XP can run in a cluster mode in a GKE cluster. The requirment for clusters tha differs from running a single XP instance is that, xp cluster requires an NFS based shared volume that can be mounted as Read-Write by multiple nodes at a time. 
+To run xp in cluster mode it is required to have an NFS based shared volume that can be mounted as Read-Write by multiple nodes at a time. The standard storage class in `GKE` does not support `ReadWriteMany` mode. Most storage classes that support `ReadWriteMany` access mode have also a restriction in changing the modified time of files that XP requires. 
 
+In GKE, Filestore CSI driver based storage class with RWM* mode can be used to deploy XP in cluster mode. However it is an expensive option due to :
+1. Very high minimum allowed size 
+2. higher cost per GB
 
-The standard storage class in `GKE` does not support `ReadWriteMany` mode. Most storage classes that support `ReadWriteMany` access mode have also a restriction in changing the modified time of files that XP requires. This is allowed only on NFS based storage classes with `ReadWriteMany` access mode.
-In GKE Filestore CSI driver based storage class with RWM* mode can be used to deploy XP in cluster mode. But due to very high minimum available size and higher cost per GB, this option becomes quite expensive. Another alternative is to mount a disk from an existing external NFS server  or use a provisoner to create NFS server in your GKE cluster and create an NFS based storage class from it. See our <<nfs#,NFS storage class>> guide for more information.
-If you have already deployed XP operator with NFS based shared storage class, you can continue to the next step. If not update the values.yaml file from above and follow the steps in section [Deploy XP Operator in k8s]. After deploying the XP operator with shared storage support, you can continue to the next steps.
+Another alternative is to mount a disk from an existing external NFS server or use a provisoner to create NFS server in your GKE cluster and create an NFS based storage class from it. See our <<nfs#,NFS storage class>> guide for more information.
+
+Note: If you have already deployed XP operator with NFS based shared storage class, you can continue to the next step. If not update the values.yaml file from above and follow the steps in section [Deploy XP Operator in k8s]. After deploying the XP operator with shared storage support, you can continue to the next steps.
 
 === XP deployment for cluster Mode
 
