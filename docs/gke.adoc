@@ -272,6 +272,6 @@ Once you are done with your cluster, you can delete the k8s cluster from the GCP
 
 [source,bash]
 ----
-$ gcloud container clusters delete <CLUSTER_NAME>
+$ gcloud container clusters delete <CLUSTER_NAME> --region <REGION_NAME>
 
 ----
