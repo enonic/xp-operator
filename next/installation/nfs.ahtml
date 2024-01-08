@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.20">
-<title>Kubernetes Operator for Enonic XP</title>
+<title>NFS storage class</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -436,14 +436,23 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article toc2 toc-right">
 <div id="header">
-<h1>Kubernetes Operator for Enonic XP</h1>
+<h1>NFS storage class</h1>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
-<li><a href="#motivation">Motivation</a></li>
-<li><a href="#usage">Usage</a></li>
-<li><a href="#installation">Installation</a></li>
-<li><a href="#supported_xp_versions">Supported XP versions</a></li>
+<li><a href="#prerequisites">Prerequisites</a></li>
+<li><a href="#alt_a_create_nfs_server_in_your_k8s_cluster">Alt A) Create NFS server in your K8s cluster</a>
+<ul class="sectlevel2">
+<li><a href="#add_helm_repository">Add helm repository</a></li>
+<li><a href="#install_server_provisioner">Install server provisioner</a></li>
+</ul>
+</li>
+<li><a href="#alt_b_using_an_existing_nfs_server">Alt. B) Using an existing NFS server</a>
+<ul class="sectlevel2">
+<li><a href="#add_helm_repository_2">Add helm repository</a></li>
+<li><a href="#install_client_provisioner">Install client provisioner</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -451,47 +460,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>The Enonic XP Kubernetes Operator is a piece of software runs on top of Kubernetes to help you manage your XP deployments. It builds on the <a href="https://kubernetes.io/docs/concepts/extend-kubernetes/operator/">operator pattern</a> provided by Kubernetes.</p>
+<p>In this section we show how you can setup a <code>ReadWriteMany</code> storage class using NFS.</p>
 </div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="motivation"><a class="link" href="#motivation">Motivation</a></h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Creating a simple XP deployment is quite easy, but it quickly gets more complicated when you try to create production grade clusters. Add on top the complexity of how Kubernetes works and you quickly can get into trouble. The operator removes that complexity for you, and makes it easy to create and manage complex deployments with ease.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="usage"><a class="link" href="#usage">Usage</a></h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Take a look at the <a href="usage.ahtml">usage</a> section see how to use the operator.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="installation"><a class="link" href="#installation">Installation</a></h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Before you can start using the operator you have to:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>Have a running Kubernetes cluster, version <code>1.19+</code>. If you need to setup a local test environment, you can look at our <a href="minikube.ahtml">minikube</a> guide.</p>
-</li>
-<li>
-<p>Install the operator according to the <a href="installation.ahtml">installation</a> guide.</p>
-</li>
-</ul>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="supported_xp_versions"><a class="link" href="#supported_xp_versions">Supported XP versions</a></h2>
-<div class="sectionbody">
 <div class="admonitionblock note">
 <table>
 <tr>
@@ -499,10 +469,171 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-The operator only supports Enonic XP <code>v7.13.2</code> and newer.
+GKE (Google) Autopilot clusters do not support running NFS due to security restrictions. The NFS server provisioner requires two capabilities 'DAC_READ_SEARCH' and 'SYS_RESOURCE', which are disabled by Autopilot.
 </td>
 </tr>
 </table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="prerequisites"><a class="link" href="#prerequisites">Prerequisites</a></h2>
+<div class="sectionbody">
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Kubernetes</dt>
+<dd>
+<p>A running Kubernetes cluster.</p>
+</dd>
+<dt class="hdlist1">Kubectl</dt>
+<dd>
+<p>Is the Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters.</p>
+</dd>
+<dt class="hdlist1">Helm</dt>
+<dd>
+<p>Is a package manager for Kubernetes.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="alt_a_create_nfs_server_in_your_k8s_cluster"><a class="link" href="#alt_a_create_nfs_server_in_your_k8s_cluster">Alt A) Create NFS server in your K8s cluster</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="add_helm_repository"><a class="link" href="#add_helm_repository">Add helm repository</a></h3>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+As of this writing, the helm community is slowly phasing out the stable channel. The new version of <a href="https://github.com/kubernetes-sigs/nfs-ganesha-server-and-external-provisioner">this provisioner</a> does not have its own helm repo yet.
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ helm repo add stable https://charts.helm.sh/stable
+
+"stable" has been added to your repositories</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ helm repo update
+
+Hang tight while we grab the latest from your chart repositories...
+...Successfully got an update from the "stable" chart repository
+Update Complete. ⎈Happy Helming!⎈</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="install_server_provisioner"><a class="link" href="#install_server_provisioner">Install server provisioner</a></h3>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+You might want to update <code>persistence.size</code> for more capacity.
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ helm upgrade --install \
+    --namespace kube-system \
+    --set persistence.enabled=true \
+    --set persistence.size=10Gi \
+    --set storageClass.name=nfs \
+    --set storageClass.allowVolumeExpansion=true \
+    --version 1.1.3 \
+    nfs-server \
+    stable/nfs-server-provisioner
+
+Release "nfs-server" does not exist. Installing it now.
+WARNING: This chart is deprecated
+NAME: nfs-server
+LAST DEPLOYED: Thu Feb 18 16:41:20 2021
+NAMESPACE: kube-system
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+The NFS Provisioner service has now been installed.</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="alt_b_using_an_existing_nfs_server"><a class="link" href="#alt_b_using_an_existing_nfs_server">Alt. B) Using an existing NFS server</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If you already have an NFS server, we can create a client that uses that. Read more about this provisioner on <a href="https://github.com/kubernetes-sigs/nfs-subdir-external-provisioner">github</a>.</p>
+</div>
+<div class="sect2">
+<h3 id="add_helm_repository_2"><a class="link" href="#add_helm_repository_2">Add helm repository</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ helm repo add nfs https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
+
+
+"nfs" has been added to your repositories</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ helm repo update
+
+Hang tight while we grab the latest from your chart repositories...
+...Successfully got an update from the "nfs" chart repository
+Update Complete. ⎈Happy Helming!⎈</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="install_client_provisioner"><a class="link" href="#install_client_provisioner">Install client provisioner</a></h3>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Change <code>nfs.server</code> and <code>nfs.path</code> to reflect your setup.
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ helm upgrade --install \
+    --namespace kube-system \
+    --set nfs.server=?.?.?.? \
+    --set nfs.path=/some/exported/path \
+    --set storageClass.name=nfs \
+    --set storageClass.archiveOnDelete=false \
+    --set storageClass.allowVolumeExpansion=true \
+    --version 3.0.0 \
+    nfs-client \
+    nfs/nfs-subdir-external-provisioner
+
+Release "nfs-client" does not exist. Installing it now.
+NAME: nfs-client
+LAST DEPLOYED: Thu Feb 18 16:37:40 2021
+NAMESPACE: kube-system
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None</code></pre>
+</div>
+</div>
 </div>
 </div>
 </div>

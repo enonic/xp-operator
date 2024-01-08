@@ -442,10 +442,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <ul class="sectlevel1">
 <li><a href="#prerequisites">Prerequisites</a></li>
 <li><a href="#namespaces">Namespaces</a></li>
-<li><a href="#storage_classes">Storage classes</a>
+<li><a href="#nfs_storage_class">NFS storage class</a>
 <ul class="sectlevel2">
-<li><a href="#compatible_storage_classes_for_running_xp_in_single_and_cluster_mode">Compatible Storage classes for running XP in single and cluster mode</a></li>
-<li><a href="#provisioning_nfs_based_storage_class">Provisioning NFS based storage class</a></li>
+<li><a href="#run_your_own">Run your own</a></li>
 </ul>
 </li>
 <li><a href="#installation">Installation</a>
@@ -455,6 +454,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#verify_installation">Verify installation</a></li>
 </ul>
 </li>
+<li><a href="#uninstall">Uninstall</a></li>
 </ul>
 </div>
 </div>
@@ -473,15 +473,18 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dl>
 <dt class="hdlist1">Kubernetes</dt>
 <dd>
-<p>A running Kubernetes cluster version <code>1.19+</code>. The k8s cluster can be on-premise or any cloud service provider. The only thing that differs depending on the type of k8s clusters is which storage class to use. And more information about that is shown in the "Storage classes" section below.</p>
+<p>A running Kubernetes cluster version <code>1.27+</code>. The k8s cluster can be on-premise or any cloud service provider. The only thing that differs depending on the type of k8s clusters is which storage class to use.</p>
+<div class="paragraph">
+<p>We have prepared documentation for setting up managed clusters using <a href="google.ahtml">Google</a>, <a href="#azure">Azure</a> and <a href="amazon.ahtml">Amazon</a>.</p>
+</div>
 </dd>
 <dt class="hdlist1">Kubectl</dt>
 <dd>
-<p>Is the Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">here</a>.</p>
+<p>Is the Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it from <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">kubernetes.io</a>.</p>
 </dd>
 <dt class="hdlist1">Helm</dt>
 <dd>
-<p>Is a package manager for Kubernetes. Download it <a href="https://helm.sh/docs/intro/install/">here</a>.</p>
+<p>Is a package manager for Kubernetes. Download it from <a href="https://helm.sh/docs/intro/install/">helm.sh</a>.</p>
 </dd>
 </dl>
 </div>
@@ -491,81 +494,50 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="namespaces"><a class="link" href="#namespaces">Namespaces</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>This guide instructs you to install the operator (and potentially the NFS provisioner) into the <code>kube-system</code> namespace. Although this is not a strict requirement, it is best practice to install kubernetes extensions into a namespace that clearly indicates that it has components vital to the system. Since <code>kube-system</code> is present in all clusters and should never be deleted, it is recommended to use that. You can create your own <code>my-system</code> namespace and install the operator there. Do not, for example, install the operator and an XP7 deployment into the same namespace.</p>
+<p>We will be installing the XP operator in the default <code>kube-system</code> namespace, indicating that it is a vital system component.</p>
+</div>
+<div class="paragraph">
+<p>The operator will create unique namespaces per XP deploymen.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+You can also use a custom namespace i.e. <code>my-system</code>, and install the operator there. Never install the operator and an XP7 deployment into the same namespace.
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="storage_classes"><a class="link" href="#storage_classes">Storage classes</a></h2>
+<h2 id="nfs_storage_class"><a class="link" href="#nfs_storage_class">NFS storage class</a></h2>
 <div class="sectionbody">
-<div class="paragraph">
-<p>Before we deploy the operator, we need to talk about storage classes. That should be a familiar concept to people that have worked on kubernetes clusters before. If you do not know what they are, you can basically think of them as different approaches to store your data. Each storage class can create volumes that have one of these four access modes:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p><code>ReadWriteOnce</code>: Can be mounted as read-write by a single node. Multiple pods can access the volume when the pods are running on the same node.</p>
-</li>
-<li>
-<p><code>ReadOnlyMany</code>:  Can be mounted read-only by many nodes.</p>
-</li>
-<li>
-<p><code>ReadWriteMany</code>: Can be mounted as read-write by many nodes.</p>
-</li>
-<li>
-<p><code>ReadWriteOncePod</code>: Can be mounted as read-write by a single pod.</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>ReadWriteOnce mode is supported by the default storage classes in any k8s cluster; that satisfies the requirement of XP deployment in single mode. However, to deploy XP in cluster mode, an NFS based storage class with "ReadWriteMany" access mode is required.</p>
-</div>
-<div class="paragraph">
-<p>For instance, the standard storage class in <code>minikube</code> supports all modes and can be used to deploy XP in single as well as in cluster mode. However, the standard storage classes in the major managed k8s providers like <code>GKE</code>, <code>AKS</code> and <code>EKS</code> do not support <code>ReadWriteMany</code> mode. Most storage classes that support <code>ReadWriteMany</code> access mode have also a restriction in changing the modified time of files that XP requires. At the time of this writing, the only storage classes that can be used to deploy XP in cluster mode are NFS based storage classes with <code>ReadWriteMany</code> access mode. Refer to the table below to see which storage class you can use on the major cloud service providers.</p>
-</div>
-<div class="sect2">
-<h3 id="compatible_storage_classes_for_running_xp_in_single_and_cluster_mode"><a class="link" href="#compatible_storage_classes_for_running_xp_in_single_and_cluster_mode">Compatible Storage classes for running XP in single and cluster mode</a></h3>
-<table class="tableblock frame-ends grid-all stretch">
-<colgroup>
-<col style="width: 25%;">
-<col style="width: 25%;">
-<col style="width: 25%;">
-<col style="width: 25%;">
-</colgroup>
-<thead>
+<div class="admonitionblock warning">
+<table>
 <tr>
-<th class="tableblock halign-left valign-top">XP deployment mode</th>
-<th class="tableblock halign-left valign-top">Google</th>
-<th class="tableblock halign-left valign-top">Azure</th>
-<th class="tableblock halign-left valign-top">Amazon</th>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+Running XP7 clusters require the availability of a shared filesystem - NFS style.
+</td>
 </tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Single</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Any storage class with RWO</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Any storage class with RWO</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Any storage class with RWO</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Cluster</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Filestore CSI driver based storage class with RWM*</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Azurefile CSI driver based storage class with RWM*</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">EFS</p></td>
-</tr>
-</tbody>
 </table>
-<div class="paragraph">
-<p><code>* NFS based CSI driver storage classes in AKS and GKE have minimum size requirements which can be very high depending on your storage requirement. Please refer to the respective cloud provider&#8217;s site for more information.</code></p>
 </div>
 <div class="paragraph">
-<p>Note: In GKE and AKS, you can get managed storage classes that are NFS based CSI driver storage backends. However, for Amazon EKS you need to create the ´EFS´ storage class. See our <a href="efs.ahtml">EFS storage class</a> guide for more information.</p>
+<p>Most cloud providers offer out-of-the-box NFS storage classes.</p>
 </div>
+<div class="paragraph">
+<p>TODO: REF</p>
 </div>
 <div class="sect2">
-<h3 id="provisioning_nfs_based_storage_class"><a class="link" href="#provisioning_nfs_based_storage_class">Provisioning NFS based storage class</a></h3>
+<h3 id="run_your_own"><a class="link" href="#run_your_own">Run your own</a></h3>
 <div class="paragraph">
-<p>If you are running an ´on-premiser´ k8s cluster or you don&#8217;t want to use the available NFS based storage classes in managed k8s clusters, you have the possibility to self provision NFS based storage classes. See our <a href="nfs.ahtml">NFS storage class</a> guide for more information.</p>
+<p>If you are running an ´on-premiser´ k8s cluster, or for other reasons don&#8217;t like the standard NFS storage classes, we recommend setting up your own <a href="nfs.ahtml">provision your own NFS storage</a>.</p>
 </div>
 </div>
 </div>
@@ -694,10 +666,35 @@ __  ____  __  _____   ___  __ ____  ______
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="uninstall"><a class="link" href="#uninstall">Uninstall</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To remove the XP operator from your k8s cluster, run the following command:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">helm uninstall xp-operator</code></pre>
+</div>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+Don´t uninstall the xp-operator while there are remaining xp7Deployments on your cluster
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-01-05 15:37:21 UTC
+Last updated 2024-01-08 16:17:32 UTC
 </div>
 </div>
 </body>

@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.20">
-<title>NFS storage class</title>
+<title>Google Kubernetes Engine - GKE</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -436,21 +436,31 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article toc2 toc-right">
 <div id="header">
-<h1>NFS storage class</h1>
+<h1>Google Kubernetes Engine - GKE</h1>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
 <li><a href="#prerequisites">Prerequisites</a></li>
-<li><a href="#using_an_existing_nfs_server">Using an existing NFS server</a>
+<li><a href="#create_a_gke_cluster">Create a GKE Cluster</a></li>
+<li><a href="#connect_to_the_cluster">Connect to the cluster</a></li>
+<li><a href="#storage_classes">Storage classes</a></li>
+<li><a href="#teardown">Teardown</a>
 <ul class="sectlevel2">
-<li><a href="#add_helm_repository">Add helm repository</a></li>
-<li><a href="#install_client_provisioner">Install client provisioner</a></li>
+<li><a href="#create_chart_values_file">Create chart values file</a></li>
+<li><a href="#installing_chart">Installing chart</a></li>
+<li><a href="#verify_installation">Verify installation</a></li>
 </ul>
 </li>
-<li><a href="#create_nfs_server_in_k8s_cluster">Create NFS server in K8s cluster</a>
+<li><a href="#run_xp_in_single_mode">Run XP in Single Mode</a>
 <ul class="sectlevel2">
-<li><a href="#add_helm_repository_2">Add helm repository</a></li>
-<li><a href="#install_server_provisioner">Install server provisioner</a></li>
+<li><a href="#xp_deployment_in_single_mode">XP deployment in single Mode</a></li>
+<li><a href="#access_xp_admin_page">Access XP Admin page</a></li>
+</ul>
+</li>
+<li><a href="#run_xp_in_cluster_mode">Run XP in Cluster Mode</a>
+<ul class="sectlevel2">
+<li><a href="#xp_deployment_in_cluster_mode">XP deployment in cluster Mode</a></li>
+<li><a href="#access_xp_admin_page_2">Access XP Admin page</a></li>
 </ul>
 </li>
 </ul>
@@ -460,60 +470,156 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>In this section we show how you can setup a storage class that supports <code>ReadWriteMany</code> using NFS.
-NOTE: Running an NFS server on GKE k8s cluster with autopilot mode is not possible due to security restrictions. The NFS server provisioner requires two capabilities 'DAC_READ_SEARCH' and 'SYS_RESOURCE', which are disabled by Autopilot.</p>
+<p>Instructions on setting up a managed k8s cluster on Google Cloud Platform - GCP</p>
 </div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="prerequisites"><a class="link" href="#prerequisites">Prerequisites</a></h2>
 <div class="sectionbody">
+<div class="paragraph">
+<p>You will need the following:</p>
+</div>
 <div class="dlist">
 <dl>
-<dt class="hdlist1">Kubernetes</dt>
+<dt class="hdlist1">A Google account and project</dt>
 <dd>
-<p>A running Kubernetes cluster.</p>
+<p>Log in to <a href="https://cloud.google.com">GCP</a>, and select or create a <code>Project</code> where you will create the k8s cluster.</p>
+</dd>
+<dt class="hdlist1">Gcloud CLI</dt>
+<dd>
+<p>Command-line tool to manage resources in GCP. Download it <a href="https://cloud.google.com/sdk/docs/install">here</a></p>
 </dd>
 <dt class="hdlist1">Kubectl</dt>
 <dd>
-<p>Is the Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">here</a>.</p>
-</dd>
-<dt class="hdlist1">Helm</dt>
-<dd>
-<p>Is a package manager for Kubernetes. Download it <a href="https://helm.sh/docs/intro/install/">here</a>.</p>
+<p>The Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">here</a>.</p>
 </dd>
 </dl>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="using_an_existing_nfs_server"><a class="link" href="#using_an_existing_nfs_server">Using an existing NFS server</a></h2>
+<h2 id="create_a_gke_cluster"><a class="link" href="#create_a_gke_cluster">Create a GKE Cluster</a></h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Enable the Kubernetes Engine API</strong>. If the kubernetes engine API is not enabled for your GCP project, you need to enable it.</p>
+<div class="imageblock">
+<div class="content">
+<img src="images/gkeEnablek8sapi.png" alt="Enable API">
+</div>
+</div>
+</li>
+<li>
+<p>Click <b class="button">Create</b> to launch the k8s cluster wizard.</p>
+<div class="imageblock">
+<div class="content">
+<img src="images/gkeCreateClusterPage.png" alt="Create GKE Cluster">
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+If you don&#8217;t get see this page, Choose <code>Kubernetes Engine</code> &#8594; <code>clusters</code> from the main menu.
+</td>
+</tr>
+</table>
+</div>
+</li>
+<li>
+<p>The XP Operator <strong>does not support Autopilot clusters</strong>, choose the <code>Standard</code> clusters instead.</p>
+</li>
+<li>
+<p>Follow the cluster creation steps by setting the values based on your cluster needs.</p>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+Make sure to chose kubernetes version &gt;= 1.27 which is requried by XP operator.
+</td>
+</tr>
+</table>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="connect_to_the_cluster"><a class="link" href="#connect_to_the_cluster">Connect to the cluster</a></h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Once the k8s cluster is created, click the cluster name</p>
+</li>
+<li>
+<p>Then click <b class="button">Connect</b> on the top middle section of the page. This shows you the gcloud command you can use to connect to the k8s cluster from your computer.</p>
+</li>
+<li>
+<p>Copy and run the gcloud command. If the command outputs <code>kubeconfig entry generated for &lt;newly-created-k8s-cluster-name&gt;</code>, it means proper kubectl config is generated on your computer and you are successfully authenticated to the k8s cluster.</p>
+</li>
+<li>
+<p>To verify your access to the k8s cluster run the command</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-terminal" data-lang="terminal">kubectl get namespaces</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This should display the list of namespaces in the newly created k8s cluster. The "Age" column in the output shows how long has it been since the namespaces are created.</p>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="storage_classes"><a class="link" href="#storage_classes">Storage classes</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>If you have a NFS server, we will just create a client that uses that. Read more about this provisioner on <a href="https://github.com/kubernetes-sigs/nfs-subdir-external-provisioner">github</a>.</p>
-</div>
-<div class="sect2">
-<h3 id="add_helm_repository"><a class="link" href="#add_helm_repository">Add helm repository</a></h3>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ helm repo add nfs https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
-
-
-"nfs" has been added to your repositories</code></pre>
-</div>
+<p>XP will require specific storage classes in order to work properly. List the available storage classes using the following command:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ helm repo update
-
-Hang tight while we grab the latest from your chart repositories...
-...Successfully got an update from the "nfs" chart repository
-Update Complete. ⎈Happy Helming!⎈</code></pre>
+<pre class="highlight"><code class="language-terminal" data-lang="terminal">kubectl get storageclasses</code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>TODO: Example</p>
+</div>
+<div class="paragraph">
+<p>This should display the list of storage classes provisioned by GKE cluster.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="teardown"><a class="link" href="#teardown">Teardown</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Once you are done with your cluster, you can delete the k8s cluster from the GCP console or using gcloud cli:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">gcloud container clusters delete &lt;CLUSTER_NAME&gt; --region &lt;REGION_NAME&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>TODO: Merge below into "installation page"</p>
 </div>
 <div class="sect2">
-<h3 id="install_client_provisioner"><a class="link" href="#install_client_provisioner">Install client provisioner</a></h3>
+<h3 id="create_chart_values_file"><a class="link" href="#create_chart_values_file">Create chart values file</a></h3>
+<div class="paragraph">
+<p>The chart <code>values.yaml</code> file is how you generally configure a deployment with Helm (to learn more about how Helm uses values files, visit the <a href="https://helm.sh/docs/chart_template_guide/values_files/#helm">Helm developer docs</a>). You can read more about available values you can configure for the operator in the <a href="https://github.com/enonic/xp-operator/tree/master/helm">Helm chart readme</a>. Lets create a Helm values file to configure the operator:</p>
+</div>
 <div class="admonitionblock note">
 <table>
 <tr>
@@ -521,27 +627,41 @@ Update Complete. ⎈Happy Helming!⎈</code></pre>
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-Change <code>nfs.server</code> and <code>nfs.path</code> to reflect your setup.
+Here is an example values file; you may need to change the default storage class name to the one you get in your GKE cluster. The shared storage class name is required to run XP in cluster mode. Refer to the section <a href="#run_xp_in_cluster_mode">Run XP in Cluster Mode</a> for more information about the requirement. Depending on your choice of shared storage class name, you may need to update the values.yaml file.
+If you prefer to run XP only in single mode, comment out the shared storage class specification line. When you want to run XP in cluster mode, the operator can easily be updated by changing the values.yaml file and running <code>helm upgrade</code>.
 </td>
 </tr>
 </table>
 </div>
+<div id="values" class="listingblock">
+<div class="title">values.yaml</div>
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">config: |-
+  # Set storage class names for volumes to be used by XP deployments.
+  # The default storage class can be any storage class from your k8s cluster.
+  # The shared storage class is used to run XP in cluster mode and it has to support ReadWriteMany!
+  operator.charts.values.storage.default.storageClassName=standard
+  operator.charts.values.storage.shared.storageClassName=nfs
+
+  # Default CPU and RAM requests
+  operator.charts.values.resources.cpu.defaultRequests=1
+  operator.charts.values.resources.memory.defaultRequests=4G</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="installing_chart"><a class="link" href="#installing_chart">Installing chart</a></h3>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-bash" data-lang="bash">$ helm upgrade --install \
-    --namespace kube-system \
-    --set nfs.server=?.?.?.? \
-    --set nfs.path=/some/exported/path \
-    --set storageClass.name=nfs \
-    --set storageClass.archiveOnDelete=false \
-    --set storageClass.allowVolumeExpansion=true \
-    --version 3.0.0 \
-    nfs-client \
-    nfs/nfs-subdir-external-provisioner
+	--namespace kube-system \
+	--values values.yaml \
+	xp-operator \
+	https://repo.enonic.com/repository/helm/xp-operator-0.22.2.tgz
 
-Release "nfs-client" does not exist. Installing it now.
-NAME: nfs-client
-LAST DEPLOYED: Thu Feb 18 16:37:40 2021
+Release "xp-operator" does not exist. Installing it now.
+NAME: xp-operator
+LAST DEPLOYED: Wed Jan  3 00:11:57 2024
 NAMESPACE: kube-system
 STATUS: deployed
 REVISION: 1
@@ -549,78 +669,208 @@ TEST SUITE: None</code></pre>
 </div>
 </div>
 </div>
+<div class="sect2">
+<h3 id="verify_installation"><a class="link" href="#verify_installation">Verify installation</a></h3>
+<div class="paragraph">
+<p>First find out the name of the operator pod:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ kubectl -n kube-system get pods
+
+NAME                                                                READY   STATUS              RESTARTS   AGE
+pod/event-exporter-gke-7bf6c99dcb-7dl56                             2/2     Running             0          16d
+pod/kube-dns-5bfd847c64-2562d                                       4/4     Running             0          16d
+pod/kube-proxy-gke-xp-test-gke-cluster-default-pool-d0fdd01c-jnfl   1/1     Running             0          16d
+pod/l7-default-backend-d86c96845-j6m9b                              1/1     Running             0          16d
+pod/xp-operator-684bb48cc5-bqjqc                                    0/1     ContainerCreating   0          9s</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then look at the operator logs to see if there are any errors:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ kubectl -n kube-system logs -f xp-operator-684bb48cc5-bqjqc
+
+exec java -Doperator.charts.path=helm -Djava.util.logging.manager=org.jboss.logmanager.LogManager -javaagent:/opt/agent-bond/agent-bond.jar=jmx_exporter{{9779:/opt/agent-bond/jmx_exporter_config.yml}} -XX:+ExitOnOutOfMemoryError -cp . -jar /deployments/quarkus-run.jar
+__  ____  __  _____   ___  __ ____  ______
+ --/ __ \/ / / / _ | / _ \/ //_/ / / / __/
+ -/ /_/ / /_/ / __ |/ , _/ ,&lt; / /_/ /\ \
+--\___\_\____/_/ |_/_/|_/_/|_|\____/___/
+2024-01-02 23:12:24,760 INFO  io.quarkus - java-operator 0.22.1 on JVM (powered by Quarkus 2.16.6.Final) started in 6.579s. Listening on: https://0.0.0.0:8443
+2024-01-02 23:12:24,762 INFO  io.quarkus - Profile prod activated.
+2024-01-02 23:12:24,764 INFO  io.quarkus - Installed features: [cdi, micrometer, rest-client, resteasy, resteasy-jackson, smallrye-context-propagation, vertx]
+2024-01-02 23:12:25,808 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorIngress'
+2024-01-02 23:12:25,889 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXpClientCacheInvalidate'
+2024-01-02 23:12:27,738 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7DeploymentHelm'
+2024-01-02 23:12:27,787 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppStatusOnDeployments'
+2024-01-02 23:12:27,799 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorDeleteAnnotation'
+2024-01-02 23:12:27,803 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorInformers' [delay: 16337, period: 30000]
+2024-01-02 23:12:27,803 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7ConfigStatus'
+2024-01-02 23:12:27,804 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorIngressLabel'
+2024-01-02 23:12:27,804 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppInstaller'
+2024-01-02 23:12:27,805 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7AppInstaller' [delay: 15212, period: 60000]
+2024-01-02 23:12:27,805 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppInstallerOnDeployments'
+2024-01-02 23:12:27,806 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorConfigMapEvent'
+2024-01-02 23:12:27,803 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorConfigMapSync' [delay: 13252, period: 60000]
+2024-01-02 23:12:27,804 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorIngressLabel' [delay: 6622, period: 60000]
+2024-01-02 23:12:27,806 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7Config'
+2024-01-02 23:12:27,807 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorIngressCertSync'
+2024-01-02 23:12:27,807 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7ConfigSync' [delay: 10124, period: 60000]
+2024-01-02 23:12:27,808 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorDomainCertSync'
+2024-01-02 23:12:27,809 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppStartStopper'
+2024-01-02 23:12:27,809 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7AppStartStopper' [delay: 14806, period: 60000]
+2024-01-02 23:12:27,809 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7DeploymentStatus'
+2024-01-02 23:12:27,810 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7DeploymentStatus' [delay: 4146, period: 60000]
+2024-01-02 23:12:27,810 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7AppStatus' [delay: 19524, period: 60000]
+2024-01-02 23:12:32,807 INFO  com.eno.kub.ope.Operator - Starting informers</code></pre>
+</div>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="create_nfs_server_in_k8s_cluster"><a class="link" href="#create_nfs_server_in_k8s_cluster">Create NFS server in K8s cluster</a></h2>
+<h2 id="run_xp_in_single_mode"><a class="link" href="#run_xp_in_single_mode">Run XP in Single Mode</a></h2>
 <div class="sectionbody">
+<div class="paragraph">
+<p>When running XP in single mode, there will be a single pod running XP.</p>
+</div>
 <div class="sect2">
-<h3 id="add_helm_repository_2"><a class="link" href="#add_helm_repository_2">Add helm repository</a></h3>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-As of this writing, the helm community is slowly phasing out the stable channel. The new version of <a href="https://github.com/kubernetes-sigs/nfs-ganesha-server-and-external-provisioner">this provisioner</a> does not have its own helm repo yet.
-</td>
-</tr>
-</table>
+<h3 id="xp_deployment_in_single_mode"><a class="link" href="#xp_deployment_in_single_mode">XP deployment in single Mode</a></h3>
+<div class="paragraph">
+<p>You can get example deployment file to deploy XP in Single mode from
+<a href="/https://github.com/enonic/xp-operator/kubernetes">Example Codes</a>. Copy single-xp7deployment-with-other-resources.yaml deployment file
+and make changes to it as per your requirement. For instance parameters like namespace to which XP is going to be deployed, RAM and CPU size. Once you finished editting the file, run the command below.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ helm repo add stable https://charts.helm.sh/stable
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ kubectl apply -f single-xp7deployment-with-other-resources.yaml
 
-"stable" has been added to your repositories</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ helm repo update
-
-Hang tight while we grab the latest from your chart repositories...
-...Successfully got an update from the "stable" chart repository
-Update Complete. ⎈Happy Helming!⎈</code></pre>
+namespace/my-namespace created
+xp7deployment.enonic.cloud/my-deployment created
+xp7app.enonic.cloud/contentstudio created
+xp7config.enonic.cloud/my-config created
+ingress.networking.k8s.io/my-domain-com created</code></pre>
 </div>
 </div>
 </div>
 <div class="sect2">
-<h3 id="install_server_provisioner"><a class="link" href="#install_server_provisioner">Install server provisioner</a></h3>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-You might want to update <code>persistence.size</code> for more capacity.
-</td>
-</tr>
-</table>
+<h3 id="access_xp_admin_page"><a class="link" href="#access_xp_admin_page">Access XP Admin page</a></h3>
+<div class="paragraph">
+<p>Once the XP pods have started you can open up admin page through the ingress controller, if you have one set up or using port-forwarding. To login using the 'su' user you need to first fetch the su password from the secret resource as shown below.</p>
+</div>
+<div class="sect3">
+<h4 id="fetching_su_password"><a class="link" href="#fetching_su_password">Fetching SU password</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ kubectl -n my-namespace get secret su -o go-template="{{ .data.pass | base64decode }}"
+
+NGDDlGdFX6#3Rw</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="access_admin_bypassing_ingress"><a class="link" href="#access_admin_bypassing_ingress">Access admin (bypassing ingress)</a></h4>
+<div class="paragraph">
+<p>In this method, XP admin is accessible directly on the pod over port 8080 bypassing ingress:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ helm upgrade --install \
-    --namespace kube-system \
-    --set persistence.enabled=true \
-    --set persistence.size=10Gi \
-    --set storageClass.name=nfs \
-    --set storageClass.allowVolumeExpansion=true \
-    --version 1.1.3 \
-    nfs-server \
-    stable/nfs-server-provisioner
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ kubectl -n my-namespace port-forward main-0 8080
 
-Release "nfs-server" does not exist. Installing it now.
-WARNING: This chart is deprecated
-NAME: nfs-server
-LAST DEPLOYED: Thu Feb 18 16:41:20 2021
-NAMESPACE: kube-system
-STATUS: deployed
-REVISION: 1
-TEST SUITE: None
-NOTES:
-The NFS Provisioner service has now been installed.</code></pre>
+Forwarding from 127.0.0.1:8080 -&gt; 8080
+Forwarding from [::1]:8080 -&gt; 8080</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then open up <a href="http://localhost:8080">localhost:8080</a> in your browser.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="access_admin_through_ingress"><a class="link" href="#access_admin_through_ingress">Access admin (through ingress)</a></h4>
+<div class="paragraph">
+<p>If you have setup ingress controller, you can access xp-admin through the admin end point you configured.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="run_xp_in_cluster_mode"><a class="link" href="#run_xp_in_cluster_mode">Run XP in Cluster Mode</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To run xp in cluster mode it is required to have an NFS based shared volume that can be mounted as Read-Write by multiple nodes at a time. The standard storage class in <code>GKE</code> does not support <code>ReadWriteMany</code> mode. Most storage classes that support <code>ReadWriteMany</code> access mode have also a restriction in changing the modified time of files that XP requires.</p>
+</div>
+<div class="paragraph">
+<p>In GKE, Filestore CSI driver based storage class with RWM* mode can be used to deploy XP in cluster mode. However it is an expensive option due to :
+1. Very high minimum allowed size
+2. higher cost per GB</p>
+</div>
+<div class="paragraph">
+<p>Another alternative is to mount a disk from an existing external NFS server or use a provisoner to create NFS server in your GKE cluster and create an NFS based storage class from it. See our <a href="nfs.ahtml">NFS storage class</a> guide for more information.</p>
+</div>
+<div class="paragraph">
+<p>Note: If you have already deployed XP operator with NFS based shared storage class, you can continue to the next step. If not update the values.yaml file from above and follow the steps in section [Deploy XP Operator in k8s]. After deploying the XP operator with shared storage support, you can continue to the next steps.</p>
+</div>
+<div class="sect2">
+<h3 id="xp_deployment_in_cluster_mode"><a class="link" href="#xp_deployment_in_cluster_mode">XP deployment in cluster Mode</a></h3>
+<div class="paragraph">
+<p>You can get example deployment file to deploy XP in cluster mode from
+<a href="/https://github.com/enonic/xp-operator/kubernetes">Example Codes</a>. Copy cluster-xp7deployment-with-other-resources.yaml deployment file
+and make changes to it as per your requirement. For instance parameters like namespace in which XP is going to be deployed, RAM and CPU size, types and number of cluster nodes can be changed in the deployment file. Once you finished editting the file, run the command below.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ kubectl apply -f cluster-xp7deployment-with-other-resources.yaml
+
+namespace/my-namespace created
+xp7deployment.enonic.cloud/my-deployment created
+xp7app.enonic.cloud/contentstudio created
+xp7config.enonic.cloud/my-config created
+ingress.networking.k8s.io/my-domain-com created</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="access_xp_admin_page_2"><a class="link" href="#access_xp_admin_page_2">Access XP Admin page</a></h3>
+<div class="paragraph">
+<p>Once the XP pods have started you can open up admin page through the ingress controller, if you have one set up or using port-forwarding. First fetch the 'su' password from the secret resource as shown below.</p>
+</div>
+<div class="sect3">
+<h4 id="fetching_su_password_2"><a class="link" href="#fetching_su_password_2">Fetching SU password</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ kubectl -n my-namespace get secret su -o go-template="{{ .data.pass | base64decode }}"
+
+NGDDlGdFX6#3Rw</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="access_admin_bypassing_ingress_2"><a class="link" href="#access_admin_bypassing_ingress_2">Access admin (bypassing ingress)</a></h4>
+<div class="paragraph">
+<p>In this method, XP admin is accessible directly on the pod over port 8080 bypassing ingress:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ kubectl -n my-namespace port-forward master-0 8080
+
+Forwarding from 127.0.0.1:8080 -&gt; 8080
+Forwarding from [::1]:8080 -&gt; 8080</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then open up <a href="http://localhost:8080">localhost:8080</a> in your browser.</p>
+</div>
+<div class="paragraph">
+<p>Note: In a cluster mode there will be more than one pod and login with port-forwarding can be done through any of those pods. In the example, we used master-0, but any of the other pods can also be used.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="access_admin_through_ingress_2"><a class="link" href="#access_admin_through_ingress_2">Access admin (through ingress)</a></h4>
+<div class="paragraph">
+<p>If you have setup ingress controller, you can access xp-admin through the admin end point you configured.</p>
 </div>
 </div>
 </div>
@@ -629,7 +879,7 @@ The NFS Provisioner service has now been installed.</code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-01-05 15:37:21 UTC
+Last updated 2024-01-08 16:17:32 UTC
 </div>
 </div>
 </body>

@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.20">
-<title>Kubernetes Operator for Enonic XP</title>
+<title>Amazon Kubernetes Engine - EKS</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -436,14 +436,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article toc2 toc-right">
 <div id="header">
-<h1>Kubernetes Operator for Enonic XP</h1>
+<h1>Amazon Kubernetes Engine - EKS</h1>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
-<li><a href="#motivation">Motivation</a></li>
-<li><a href="#usage">Usage</a></li>
-<li><a href="#installation">Installation</a></li>
-<li><a href="#supported_xp_versions">Supported XP versions</a></li>
+<li><a href="#prerequisites">Prerequisites</a></li>
+<li><a href="#create_an_aks_cluster">Create an AKS cluster</a></li>
+<li><a href="#connect_to_the_cluster">Connect to the cluster</a></li>
+<li><a href="#storage_classes">Storage classes</a></li>
 </ul>
 </div>
 </div>
@@ -451,58 +451,140 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>The Enonic XP Kubernetes Operator is a piece of software runs on top of Kubernetes to help you manage your XP deployments. It builds on the <a href="https://kubernetes.io/docs/concepts/extend-kubernetes/operator/">operator pattern</a> provided by Kubernetes.</p>
+<p>Instructions on setting up a managed k8s cluster on Amazon</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="motivation"><a class="link" href="#motivation">Motivation</a></h2>
+<h2 id="prerequisites"><a class="link" href="#prerequisites">Prerequisites</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Creating a simple XP deployment is quite easy, but it quickly gets more complicated when you try to create production grade clusters. Add on top the complexity of how Kubernetes works and you quickly can get into trouble. The operator removes that complexity for you, and makes it easy to create and manage complex deployments with ease.</p>
+<p>You will need the following:</p>
+</div>
+<div class="paragraph">
+<p>TODO</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">A Google account and project</dt>
+<dd>
+<p>Log in to <a href="https://cloud.google.com">GCP</a>, and select or create a <code>Project</code> where you will create the k8s cluster.</p>
+</dd>
+<dt class="hdlist1">Gcloud CLI</dt>
+<dd>
+<p>Command-line tool to manage resources in GCP. Download it <a href="https://cloud.google.com/sdk/docs/install">here</a></p>
+</dd>
+<dt class="hdlist1">Kubectl</dt>
+<dd>
+<p>The Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">here</a>.</p>
+</dd>
+</dl>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="usage"><a class="link" href="#usage">Usage</a></h2>
+<h2 id="create_an_aks_cluster"><a class="link" href="#create_an_aks_cluster">Create an AKS cluster</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Take a look at the <a href="usage.ahtml">usage</a> section see how to use the operator.</p>
+<p>TODO</p>
 </div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="installation"><a class="link" href="#installation">Installation</a></h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Before you can start using the operator you have to:</p>
-</div>
-<div class="ulist">
-<ul>
+<div class="olist arabic">
+<ol class="arabic">
 <li>
-<p>Have a running Kubernetes cluster, version <code>1.19+</code>. If you need to setup a local test environment, you can look at our <a href="minikube.ahtml">minikube</a> guide.</p>
+<p><strong>Enable the Kubernetes Engine API</strong>. If the kubernetes engine API is not enabled for your GCP project, you need to enable it.</p>
+<div class="imageblock">
+<div class="content">
+<img src="images/gkeEnablek8sapi.png" alt="Enable API">
+</div>
+</div>
 </li>
 <li>
-<p>Install the operator according to the <a href="installation.ahtml">installation</a> guide.</p>
-</li>
-</ul>
+<p>Click <b class="button">Create</b> to launch the k8s cluster wizard.</p>
+<div class="imageblock">
+<div class="content">
+<img src="images/gkeCreateClusterPage.png" alt="Create GKE Cluster">
 </div>
 </div>
-</div>
-<div class="sect1">
-<h2 id="supported_xp_versions"><a class="link" href="#supported_xp_versions">Supported XP versions</a></h2>
-<div class="sectionbody">
-<div class="admonitionblock note">
+<div class="admonitionblock tip">
 <table>
 <tr>
 <td class="icon">
-<i class="fa icon-note" title="Note"></i>
+<i class="fa icon-tip" title="Tip"></i>
 </td>
 <td class="content">
-The operator only supports Enonic XP <code>v7.13.2</code> and newer.
+If you don&#8217;t get see this page, Choose <code>Kubernetes Engine</code> &#8594; <code>clusters</code> from the main menu.
 </td>
 </tr>
 </table>
+</div>
+</li>
+<li>
+<p>The XP Operator <strong>does not support Autopilot clusters</strong>, choose the <code>Standard</code> clusters instead.</p>
+</li>
+<li>
+<p>Follow the cluster creation steps by setting the values based on your cluster needs.</p>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+Make sure to chose kubernetes version &gt;= 1.27 which is requried by XP operator.
+</td>
+</tr>
+</table>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="connect_to_the_cluster"><a class="link" href="#connect_to_the_cluster">Connect to the cluster</a></h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Once the k8s cluster is created, click the cluster name</p>
+</li>
+<li>
+<p>Then click <b class="button">Connect</b> on the top middle section of the page. This shows you the gcloud command you can use to connect to the k8s cluster from your computer.</p>
+</li>
+<li>
+<p>Copy and run the gcloud command. If the command outputs <code>kubeconfig entry generated for &lt;newly-created-k8s-cluster-name&gt;</code>, it means proper kubectl config is generated on your computer and you are successfully authenticated to the k8s cluster.</p>
+</li>
+<li>
+<p>To verify your access to the k8s cluster run the command</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-terminal" data-lang="terminal">kubectl get namespaces</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This should display the list of namespaces in the newly created k8s cluster. The "Age" column in the output shows how long has it been since the namespaces are created.</p>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="storage_classes"><a class="link" href="#storage_classes">Storage classes</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When connected to your cluster, list the available storage classes. They may be useful for the rest of the installation.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-terminal" data-lang="terminal">kubectl get storageclasses</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>TODO: Example</p>
+</div>
+<div class="paragraph">
+<p>This should display the list of storage classes provisioned by GKE cluster.</p>
 </div>
 </div>
 </div>

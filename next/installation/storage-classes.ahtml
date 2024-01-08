@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.20">
-<title>EFS storage class on Amazon EKS</title>
+<title>K8s storage classes</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -436,11 +436,13 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article toc2 toc-right">
 <div id="header">
-<h1>EFS storage class on Amazon EKS</h1>
+<h1>K8s storage classes</h1>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
-<li><a href="#prerequisites">Prerequisites</a></li>
+<li><a href="#introduuction">Introduuction</a></li>
+<li><a href="#access_modes">Access modes</a></li>
+<li><a href="#compatible_storage_classes_for_running_xp_in_single_and_cluster_mode">Compatible Storage classes for running XP in single and cluster mode</a></li>
 </ul>
 </div>
 </div>
@@ -448,44 +450,100 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>In this section we show how you can setup an EFS storage class that supports <code>ReadWriteMany</code> access mode.</p>
+<p>This section discusses the various storage classes and requirements for the XP operator.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="prerequisites"><a class="link" href="#prerequisites">Prerequisites</a></h2>
+<h2 id="introduuction"><a class="link" href="#introduuction">Introduuction</a></h2>
 <div class="sectionbody">
+<div class="paragraph">
+<p>Before we deploy the operator, we need to talk about storage classes. That should be a familiar concept to people that have worked on kubernetes clusters before. If you do not know what they are, you can basically think of them as different approaches to store your data.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="access_modes"><a class="link" href="#access_modes">Access modes</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Each storage class can create volumes that have one of these four access modes:</p>
+</div>
 <div class="dlist">
 <dl>
-<dt class="hdlist1">Kubernetes</dt>
+<dt class="hdlist1">ReadWriteOnce</dt>
 <dd>
-<p>A running Kubernetes cluster on Amazon EKS.</p>
+<p>Can be mounted as read-write by a single node. Multiple pods can access the volume when the pods are running on the same node.</p>
 </dd>
-<dt class="hdlist1">Kubectl</dt>
+<dt class="hdlist1">ReadOnlyMany</dt>
 <dd>
-<p>Is the Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">here</a>.</p>
+<p>Can be mounted read-only by many nodes.</p>
 </dd>
-<dt class="hdlist1">aws cli and eksctl </dt>
+<dt class="hdlist1">ReadWriteMany</dt>
 <dd>
-<p>These tools are required to create storage class on EKS cluster that uses an EFS filesystem.</p>
+<p>Can be mounted as read-write by many nodes.</p>
+</dd>
+<dt class="hdlist1">ReadWriteOncePod</dt>
+<dd>
+<p>Can be mounted as read-write by a single pod.</p>
 </dd>
 </dl>
 </div>
-<div class="listingblock">
-<div class="content">
-<pre>=== Instruction to create EFS
-https://docs.aws.amazon.com/efs/latest/ug/gs-step-two-create-efs-resources.html
-
-=== Instruction to create a storage class with dynamic provisionin
-https://aws.amazon.com/blogs/containers/introducing-efs-csi-dynamic-provisioning/</pre>
+<div class="paragraph">
+<p><code>ReadWriteOnce</code> is supported by the default storage classes in any k8s cluster; that satisfies the requirement of XP deployment in single mode. However, to deploy XP in cluster mode, an NFS-style storage class with "ReadWriteMany" access mode is required.</p>
 </div>
+<div class="paragraph">
+<p>For instance, the standard storage class in <code>minikube</code> supports all modes and can be used to deploy XP in single as well as in cluster mode. However, the standard storage classes in the major managed k8s providers like <code>GKE</code>, <code>AKS</code> and <code>EKS</code> do not support <code>ReadWriteMany</code> mode. Most storage classes that support <code>ReadWriteMany</code> access mode have also a restriction in changing the modified time of files that XP requires. At the time of this writing, the only storage classes that can be used to deploy XP in cluster mode are NFS based storage classes with <code>ReadWriteMany</code> access mode. Refer to the table below to see which storage class you can use on the major cloud service providers.</p>
+</div>
+<div class="paragraph">
+<p>TODO below:</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="compatible_storage_classes_for_running_xp_in_single_and_cluster_mode"><a class="link" href="#compatible_storage_classes_for_running_xp_in_single_and_cluster_mode">Compatible Storage classes for running XP in single and cluster mode</a></h2>
+<div class="sectionbody">
+<table class="tableblock frame-ends grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">XP deployment mode</th>
+<th class="tableblock halign-left valign-top">Google</th>
+<th class="tableblock halign-left valign-top">Azure</th>
+<th class="tableblock halign-left valign-top">Amazon</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Single</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Any storage class with RWO</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Any storage class with RWO</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Any storage class with RWO</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Cluster</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Filestore CSI driver based storage class with RWM*</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Azurefile CSI driver based storage class with RWM*</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">EFS</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p><code>* NFS based CSI driver storage classes in AKS and GKE have minimum size requirements which can be very high depending on your storage requirement. Please refer to the respective cloud provider&#8217;s site for more information.</code></p>
+</div>
+<div class="paragraph">
+<p>Note: In GKE and AKS, you can get managed storage classes that are NFS based CSI driver storage backends. However, for Amazon EKS you need to create the ´EFS´ storage class. See our <a href="efs.ahtml">EFS storage class</a> guide for more information.</p>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-01-05 15:37:21 UTC
+Last updated 2024-01-08 16:17:32 UTC
 </div>
 </div>
 </body>
