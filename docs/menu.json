@@ -6,27 +6,33 @@
       },
       {
         "title": "Installation",
-        "document": "installation"
+        "document": "installation",
+        "menuItems": [
+          {
+            "title": "Amazon - EKS",
+            "document": "aws"
+          },
+          {
+            "title": "Azure - AKS",
+            "document": "azure"
+          },
+          {
+            "title": "Google - GKE",
+            "document": "gcp"
+          },
+          {
+            "title": "NFS storage",
+            "document" : "nfs"
+          }            
+        ]
       },
       {
-        "title": "Uninstall",
-        "document": "uninstall"
+        "title": "Storage classes",
+        "document" : "storage-classes"
       },
       {
         "title": "Minikube",
         "document": "minikube"
-      },
-      {
-        "title": "Step-by-step Guide to Run XP on GKE",
-        "document": "gke"
-      },
-      {
-        "title": "NFS storage",
-        "document" : "nfs"
-      },
-      {
-        "title": "EFS storage",
-        "document" : "efs"
       }
     ]
 }
