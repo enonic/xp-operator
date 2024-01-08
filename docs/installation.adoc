@@ -6,54 +6,34 @@ This section covers the installation of the Enonic XP Kubernetes Operator.
 
 == Prerequisites
 
-Kubernetes:: A running Kubernetes cluster version `1.22+`. The k8s cluster can be on-premise or any cloud service provider. The only thing that differs depending on the type of k8s clusters is which storage class to use. And more information about that is shown in the "Storage classes" section below.
+Kubernetes:: A running Kubernetes cluster version `1.27+`. The k8s cluster can be on-premise or any cloud service provider. The only thing that differs depending on the type of k8s clusters is which storage class to use.
++
+We have prepared documentation for setting up managed clusters using <<google#, Google>>, <<azure, Azure>> and <<amazon#, Amazon>>.
 
+Kubectl:: Is the Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it from https://kubernetes.io/docs/tasks/tools/install-kubectl/[kubernetes.io].
 
-Kubectl:: Is the Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it https://kubernetes.io/docs/tasks/tools/install-kubectl/[here].
-
-Helm:: Is a package manager for Kubernetes. Download it https://helm.sh/docs/intro/install/[here].
+Helm:: Is a package manager for Kubernetes. Download it from https://helm.sh/docs/intro/install/[helm.sh].
 
 == Namespaces
 
-This guide instructs you to install the operator (and potentially the NFS provisioner) into the `kube-system` namespace. Although this is not a strict requirement, it is best practice to install kubernetes extensions into a namespace that clearly indicates that it has components vital to the system. Since `kube-system` is present in all clusters and should never be deleted, it is recommended to use that. You can create your own `my-system` namespace and install the operator there. Do not, for example, install the operator and an XP7 deployment into the same namespace.
+We will be installing the XP operator in the default `kube-system` namespace, indicating that it is a vital system component.
 
-== Storage classes
+The operator will create unique namespaces per XP deploymen.
 
-Before we deploy the operator, we need to talk about storage classes. That should be a familiar concept to people that have worked on kubernetes clusters before. If you do not know what they are, you can basically think of them as different approaches to store your data. Each storage class can create volumes that have one of these four access modes:
-
-* `ReadWriteOnce`: Can be mounted as read-write by a single node. Multiple pods can access the volume when the pods are running on the same node.
-* `ReadOnlyMany`:  Can be mounted read-only by many nodes.
-* `ReadWriteMany`: Can be mounted as read-write by many nodes.
-* `ReadWriteOncePod`: Can be mounted as read-write by a single pod.
-
-ReadWriteOnce mode is supported by the default storage classes in any k8s cluster; that satisfies the requirement of XP deployment in single mode. However, to deploy XP in cluster mode, an NFS based storage class with "ReadWriteMany" access mode is required. 
-
-For instance, the standard storage class in `minikube` supports all modes and can be used to deploy XP in single as well as in cluster mode. However, the standard storage classes in the major managed k8s providers like `GKE`, `AKS` and `EKS` do not support `ReadWriteMany` mode. Most storage classes that support `ReadWriteMany` access mode have also a restriction in changing the modified time of files that XP requires. At the time of this writing, the only storage classes that can be used to deploy XP in cluster mode are NFS based storage classes with `ReadWriteMany` access mode. Refer to the table below to see which storage class you can use on the major cloud service providers. 
+NOTE: You can also use a custom namespace i.e. `my-system`, and install the operator there. Never install the operator and an XP7 deployment into the same namespace.
 
 
-=== Compatible Storage classes for running XP in single and cluster mode
-[frame=ends]
-|===
-|XP deployment mode |Google |Azure |Amazon
+== NFS storage class
 
-|Single
-|Any storage class with RWO
-|Any storage class with RWO
-|Any storage class with RWO
+WARNING: Running XP7 clusters require the availability of a shared filesystem - NFS style.
 
-|Cluster
-|Filestore CSI driver based storage class with RWM*
-|Azurefile CSI driver based storage class with RWM*
-|EFS
-|===
+Most cloud providers offer out-of-the-box NFS storage classes.
 
-`* NFS based CSI driver storage classes in AKS and GKE have minimum size requirements which can be very high depending on your storage requirement. Please refer to the respective cloud provider's site for more information.`
+TODO: REF
 
-Note: In GKE and AKS, you can get managed storage classes that are NFS based CSI driver storage backends. However, for Amazon EKS you need to create the ´EFS´ storage class. See our <<efs#,EFS storage class>> guide for more information. 
+=== Run your own
 
-=== Provisioning NFS based storage class
-
-If you are running an ´on-premiser´ k8s cluster or you don't want to use the available NFS based storage classes in managed k8s clusters, you have the possibility to self provision NFS based storage classes. See our <<nfs#,NFS storage class>> guide for more information. 
+If you are running an ´on-premiser´ k8s cluster, or for other reasons don't like the standard NFS storage classes, we recommend setting up your own <<nfs#,provision your own NFS storage>>.
 
 == Installation
 
@@ -159,3 +139,16 @@ __  ____  __  _____   ___  __ ____  ______
 2022-04-27 15:18:48,831 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppInstallerOnDeployments'
 2022-04-27 15:18:53,830 INFO  com.eno.kub.ope.Operator - Starting informers
 ----
+
+
+
+== Uninstall
+
+To remove the XP operator from your k8s cluster, run the following command:
+
+[source,yaml]
+----
+helm uninstall xp-operator
+----
+
+WARNING: Don´t uninstall the xp-operator while there are remaining xp7Deployments on your cluster

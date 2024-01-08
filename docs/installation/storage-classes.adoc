@@ -1,0 +1,49 @@
+= K8s storage classes
+:toc: right
+:imagesdir: images
+
+This section discusses the various storage classes and requirements for the XP operator.
+
+
+== Introduuction
+
+Before we deploy the operator, we need to talk about storage classes. That should be a familiar concept to people that have worked on kubernetes clusters before. If you do not know what they are, you can basically think of them as different approaches to store your data. 
+
+== Access modes
+
+Each storage class can create volumes that have one of these four access modes:
+
+ReadWriteOnce:: Can be mounted as read-write by a single node. Multiple pods can access the volume when the pods are running on the same node.
+
+ReadOnlyMany::  Can be mounted read-only by many nodes.
+
+ReadWriteMany:: Can be mounted as read-write by many nodes.
+
+ReadWriteOncePod:: Can be mounted as read-write by a single pod.
+
+`ReadWriteOnce` is supported by the default storage classes in any k8s cluster; that satisfies the requirement of XP deployment in single mode. However, to deploy XP in cluster mode, an NFS-style storage class with "ReadWriteMany" access mode is required. 
+
+For instance, the standard storage class in `minikube` supports all modes and can be used to deploy XP in single as well as in cluster mode. However, the standard storage classes in the major managed k8s providers like `GKE`, `AKS` and `EKS` do not support `ReadWriteMany` mode. Most storage classes that support `ReadWriteMany` access mode have also a restriction in changing the modified time of files that XP requires. At the time of this writing, the only storage classes that can be used to deploy XP in cluster mode are NFS based storage classes with `ReadWriteMany` access mode. Refer to the table below to see which storage class you can use on the major cloud service providers. 
+
+
+TODO below:
+
+== Compatible Storage classes for running XP in single and cluster mode
+[frame=ends]
+|===
+|XP deployment mode |Google |Azure |Amazon
+
+|Single
+|Any storage class with RWO
+|Any storage class with RWO
+|Any storage class with RWO
+
+|Cluster
+|Filestore CSI driver based storage class with RWM*
+|Azurefile CSI driver based storage class with RWM*
+|EFS
+|===
+
+`* NFS based CSI driver storage classes in AKS and GKE have minimum size requirements which can be very high depending on your storage requirement. Please refer to the respective cloud provider's site for more information.`
+
+Note: In GKE and AKS, you can get managed storage classes that are NFS based CSI driver storage backends. However, for Amazon EKS you need to create the ´EFS´ storage class. See our <<efs#,EFS storage class>> guide for more information. 

@@ -1,58 +1,87 @@
-= Step-by-step Guide to Run XP on GKE
+= Google Kubernetes Engine - GKE
 :toc: right
 :imagesdir: images
+:experimental:
 
-This section contains a step-by-step guide on how to create a managed k8s cluster in GCP and install XP operator.
+Instructions on setting up a managed k8s cluster on Google Cloud Platform - GCP
 
 == Prerequisites
 
-You need an account to create resources in GCP. Then create a GCP project in which the k8s cluster will run on. 
-On your client machine install these programs:
+You will need the following:
 
-
-Kubectl:: Is the Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it https://kubernetes.io/docs/tasks/tools/install-kubectl/[here].
+A Google account and project:: Log in to https://cloud.google.com[GCP], and select or create a `Project` where you will create the k8s cluster. 
 
 Gcloud CLI:: Command-line tool to manage resources in GCP. Download it https://cloud.google.com/sdk/docs/install[here]
 
+Kubectl:: The Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it https://kubernetes.io/docs/tasks/tools/install-kubectl/[here].
+
+
+
+
 == Create a GKE Cluster
 
-1. Enable Kubernetes Engine API: if the kubernetes engine API is not enabled on your GCP project, you need to enable it. 
+. *Enable the Kubernetes Engine API*. If the kubernetes engine API is not enabled for your GCP project, you need to enable it. 
 +
 image::../images/gkeEnablek8sapi.png[Enable API]
-
-2. After enabling Kubernetes Enging API, it will show you an option to create a k8s cluster. 
++
+. Click btn:[Create] to launch the k8s cluster wizard. 
 +
 image::../images/gkeCreateClusterPage.png[Create GKE Cluster]
 +
-If you don't get this window, click on the hamburger menu and chose `Kubernetes Engine` -> `clusters` as shown in the image below.
+TIP: If you don't get see this page, Choose `Kubernetes Engine` -> `clusters` from the main menu.
 +
-image::../images/gkeGetClusterslist.png[GKE Clusters]
+. The XP Operator *does not support Autopilot clusters*, choose the `Standard` clusters instead.
++
+. Follow the cluster creation steps by setting the values based on your cluster needs. 
++
+WARNING: Make sure to chose kubernetes version >= 1.27 which is requried by XP operator.
 
-3. Click on `Create` button. This will take you to the k8s cluster creation wizard. By default it starts the creation process for `autopilot` k8s cluster. Click on the `Switch to standard cluster` button.  (Note: Current xp operator version works only on `standard` cluster type)
 
-4. Follow the cluster creation steps by setting the values based on your cluster needs. Make sure to chose kubernetes version >= 1.27 which is requried by XP operator.
+== Connect to the cluster
 
-5. Once the k8s cluster is created, click on the name of the cluster and you will get a `Connect` button on the top middle section of the page. This shows you the gcloud command you can use to connect to the k8s cluster from your computer.
-
-6. Copy and run the "gcloud" command. If the command outputs `kubeconfig entry generated for <newly-created-k8s-cluster-name>`, it means proper kubectl config is generated on your computer and you are successfully authenticated to the k8s cluster. 
-
-7. To test your access to the k8s cluster run the command
-[source,bash]
+. Once the k8s cluster is created, click the cluster name
+. Then click btn:[Connect] on the top middle section of the page. This shows you the gcloud command you can use to connect to the k8s cluster from your computer.
+. Copy and run the gcloud command. If the command outputs `kubeconfig entry generated for <newly-created-k8s-cluster-name>`, it means proper kubectl config is generated on your computer and you are successfully authenticated to the k8s cluster. 
+. To verify your access to the k8s cluster run the command
++
+[source,terminal]
 ----
-$ kubectl get namespaces
+kubectl get namespaces
 ----
-
++
 This should display the list of namespaces in the newly created k8s cluster. The "Age" column in the output shows how long has it been since the namespaces are created. 
 
+
+== Storage classes
+
+XP will require specific storage classes in order to work properly. List the available storage classes using the following command:
+
+[source,terminal]
+----
+kubectl get storageclasses
+----
+
+TODO: Example
+
+This should display the list of storage classes provisioned by GKE cluster.
+
+
+== Teardown
+
+Once you are done with your cluster, you can delete the k8s cluster from the GCP console or using gcloud cli:
+
 [source,bash]
 ----
-$ kubectl get storageclasses
+gcloud container clusters delete <CLUSTER_NAME> --region <REGION_NAME>
 ----
 
-This should display the list of storage classes provisioned by GKE cluster. 
 
 
-== Deploy XP Operator in k8s
+
+
+
+
+TODO: Merge below into "installation page"
 
 === Create chart values file
 
@@ -266,12 +295,3 @@ Note: In a cluster mode there will be more than one pod and login with port-forw
 
 If you have setup ingress controller, you can access xp-admin through the admin end point you configured.
 
-== Teardown
-
-Once you are done with your cluster, you can delete the k8s cluster from the GCP console or using gcloud cli:
-
-[source,bash]
-----
-$ gcloud container clusters delete <CLUSTER_NAME> --region <REGION_NAME>
-
-----
