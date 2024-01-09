@@ -441,17 +441,13 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
 <li><a href="#prerequisites">Prerequisites</a></li>
-<li><a href="#namespaces">Namespaces</a></li>
-<li><a href="#nfs_storage_class">NFS storage class</a>
-<ul class="sectlevel2">
-<li><a href="#run_your_own">Run your own</a></li>
-</ul>
-</li>
-<li><a href="#installation">Installation</a>
-<ul class="sectlevel2">
+<li><a href="#shared_storage_class">Shared storage class</a></li>
 <li><a href="#create_chart_values_file">Create chart values file</a></li>
-<li><a href="#installing_chart">Installing chart</a></li>
+<li><a href="#installing_the_operator">Installing the operator</a></li>
 <li><a href="#verify_installation">Verify installation</a></li>
+<li><a href="#test_the_operator">Test the operator</a>
+<ul class="sectlevel2">
+<li><a href="#log_in_to_xp_admin">Log in to XP Admin</a></li>
 </ul>
 </li>
 <li><a href="#uninstall">Uninstall</a></li>
@@ -488,17 +484,6 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 </dl>
 </div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="namespaces"><a class="link" href="#namespaces">Namespaces</a></h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>We will be installing the XP operator in the default <code>kube-system</code> namespace, indicating that it is a vital system component.</p>
-</div>
-<div class="paragraph">
-<p>The operator will create unique namespaces per XP deploymen.</p>
-</div>
 <div class="admonitionblock note">
 <table>
 <tr>
@@ -506,16 +491,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-You can also use a custom namespace i.e. <code>my-system</code>, and install the operator there. Never install the operator and an XP7 deployment into the same namespace.
+<strong>Namespaces</strong> - We will be installing the XP operator in the default <code>kube-system</code> namespace, indicating that it is a vital system component, but you can also create your own if desired.
 </td>
 </tr>
 </table>
 </div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="nfs_storage_class"><a class="link" href="#nfs_storage_class">NFS storage class</a></h2>
-<div class="sectionbody">
 <div class="admonitionblock warning">
 <table>
 <tr>
@@ -523,66 +503,74 @@ You can also use a custom namespace i.e. <code>my-system</code>, and install the
 <i class="fa icon-warning" title="Warning"></i>
 </td>
 <td class="content">
-Running XP7 clusters require the availability of a shared filesystem - NFS style.
+The operator will create a unique namespace per XP deployment. Never install the operator and an XP7 deployment into the same namespace.
 </td>
 </tr>
 </table>
-</div>
-<div class="paragraph">
-<p>Most cloud providers offer out-of-the-box NFS storage classes.</p>
-</div>
-<div class="paragraph">
-<p>TODO: REF</p>
-</div>
-<div class="sect2">
-<h3 id="run_your_own"><a class="link" href="#run_your_own">Run your own</a></h3>
-<div class="paragraph">
-<p>If you are running an ´on-premiser´ k8s cluster, or for other reasons don&#8217;t like the standard NFS storage classes, we recommend setting up your own <a href="nfs.ahtml">provision your own NFS storage</a>.</p>
-</div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="installation"><a class="link" href="#installation">Installation</a></h2>
+<h2 id="shared_storage_class"><a class="link" href="#shared_storage_class">Shared storage class</a></h2>
 <div class="sectionbody">
-<div class="sect2">
-<h3 id="create_chart_values_file"><a class="link" href="#create_chart_values_file">Create chart values file</a></h3>
 <div class="paragraph">
-<p>The chart <code>values.yaml</code> file is how you generally configure a deployment with Helm (to learn more about how Helm uses values files, visit the <a href="https://helm.sh/docs/chart_template_guide/values_files/#helm">Helm developer docs</a>). You can read more about available values you can configure for the operator in the <a href="https://github.com/enonic/xp-operator/tree/master/helm">Helm chart readme</a>. Lets create a Helm values file to configure the operator:</p>
+<p>XP7 clusters require the availability of a shared filesystem - NFS style. Most cloud providers offer out-of-the-box storage classes for this purpose. When setting up your cluster, you should already have identified the available storage classes.</p>
 </div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-Here you might have to change the storage classes depending on your cluster setup.
-</td>
-</tr>
-</table>
+<div class="paragraph">
+<p>If you are running an ´on-premiser´ k8s cluster, or for other reasons don&#8217;t want to use the standard NFS storage classes, we recommend setting up your own <a href="nfs.ahtml">provision your own NFS storage</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="create_chart_values_file"><a class="link" href="#create_chart_values_file">Create chart values file</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Helm supports the use of chart files to customise the setup.</p>
+</div>
+<div class="paragraph">
+<p><strong>Create a chart file</strong> in a suitable location on your computer:</p>
 </div>
 <div id="values" class="listingblock">
 <div class="title">values.yaml</div>
 <div class="content">
 <pre class="highlight"><code class="language-yaml" data-lang="yaml">config: |-
-  # Set storage classes for XP deployments. Note that these two do not have to be the same.
-  # The shared storage class has to support ReadWriteMany!
-  operator.charts.values.storage.shared.storageClassName=nfs
+  # Set storage class names for volumes to be used by XP deployments.
+  # The default storage class can be any storage class from your k8s cluster.
+  # The shared storage class is used to run XP in cluster mode and it has to support ReadWriteMany!
   operator.charts.values.storage.default.storageClassName=standard
+  operator.charts.values.storage.shared.storageClassName=nfs
 
-  # Lower default requests: This is useful when trying out XP clusters when
-  #   the K8s cluster does not have enough memory and ram!
-  operator.charts.values.resources.cpu.defaultRequests=0.2
-  operator.charts.values.resources.memory.defaultRequests=512Mi</code></pre>
+  # Default CPU and RAM requests
+  operator.charts.values.resources.cpu.defaultRequests=1
+  operator.charts.values.resources.memory.defaultRequests=4G</code></pre>
+</div>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+Make sure your the storage classes are compatible with your Kubernetes cluster and cloud provider.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>More configuration options for the <a href="https://github.com/enonic/xp-operator/tree/master/helm">operator Helm chart</a></p>
 </div>
 </div>
 </div>
-<div class="sect2">
-<h3 id="installing_chart"><a class="link" href="#installing_chart">Installing chart</a></h3>
+<div class="sect1">
+<h2 id="installing_the_operator"><a class="link" href="#installing_the_operator">Installing the operator</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Run the following command to install the operator on your cluster:</p>
+</div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ helm upgrade --install \
+<pre class="highlight"><code class="language-terminal" data-lang="terminal">$ helm upgrade --install \
 	--namespace kube-system \
 	--values values.yaml \
 	xp-operator \
@@ -598,70 +586,284 @@ TEST SUITE: None</code></pre>
 </div>
 </div>
 </div>
-<div class="sect2">
-<h3 id="verify_installation"><a class="link" href="#verify_installation">Verify installation</a></h3>
-<div class="paragraph">
-<p>First find out the name of the operator pod:</p>
 </div>
+<div class="sect1">
+<h2 id="verify_installation"><a class="link" href="#verify_installation">Verify installation</a></h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Find the name of the operator pod. The name of the pod will start with <code>xp-operator</code>:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-bash" data-lang="bash">$ kubectl -n kube-system get pods
 
-NAME                                        READY   STATUS              RESTARTS   AGE
-coredns-6955765f44-ksgmf                    1/1     Running             0          6m36s
-xp-operator-5869fcf9f4-xrzll                0/1     ContainerCreating   0          10s
-etcd-minikube                               1/1     Running             0          6m30s
-ingress-nginx-admission-create-zl98b        0/1     Completed           0          6m21s
-ingress-nginx-admission-patch-7xqtf         0/1     Completed           2          6m20s
-ingress-nginx-controller-7f9bbb757f-nxqz6   1/1     Running             0          6m21s
-kube-apiserver-minikube                     1/1     Running             0          6m30s
-kube-controller-manager-minikube            1/1     Running             0          6m30s
-kube-proxy-f4v7v                            1/1     Running             0          6m36s
-kube-scheduler-minikube                     1/1     Running             0          6m30s
-nfs-server-nfs-server-provisioner-0         1/1     Running             0          3m40s
-storage-provisioner                         1/1     Running             0          6m50s</code></pre>
+NAME                                                                READY   STATUS              RESTARTS   AGE
+pod/event-exporter-gke-7bf6c99dcb-7dl56                             2/2     Running             0          16d
+pod/kube-dns-5bfd847c64-2562d                                       4/4     Running             0          16d
+pod/kube-proxy-gke-xp-test-gke-cluster-default-pool-d0fdd01c-jnfl   1/1     Running             0          16d
+pod/l7-default-backend-d86c96845-j6m9b                              1/1     Running             0          16d
+pod/xp-operator-684bb48cc5-bqjqc                                    0/1     ContainerCreating   0          9s</code></pre>
 </div>
 </div>
-<div class="paragraph">
-<p>Then look at the operator logs to see if there are any errors:</p>
+</li>
+<li>
+<p>Check the operator logs for errors. Logs for a working operator should look something like this:</p>
+</li>
+</ol>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ kubectl -n kube-system logs -f xp-operator-5869fcf9f4-xrzll
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ kubectl -n kube-system logs -f xp-operator-684bb48cc5-bqjqc
 
 exec java -Doperator.charts.path=helm -Djava.util.logging.manager=org.jboss.logmanager.LogManager -javaagent:/opt/agent-bond/agent-bond.jar=jmx_exporter{{9779:/opt/agent-bond/jmx_exporter_config.yml}} -XX:+ExitOnOutOfMemoryError -cp . -jar /deployments/quarkus-run.jar
 __  ____  __  _____   ___  __ ____  ______
  --/ __ \/ / / / _ | / _ \/ //_/ / / / __/
  -/ /_/ / /_/ / __ |/ , _/ ,&lt; / /_/ /\ \
 --\___\_\____/_/ |_/_/|_/_/|_|\____/___/
-2022-04-27 15:18:45,068 INFO  io.quarkus - operator 0.17.13 on JVM (powered by Quarkus 2.8.1.Final) started in 1.572s. Listening on: https://0.0.0.0:8443
-2022-04-27 15:18:45,070 INFO  io.quarkus - Profile prod activated.
-2022-04-27 15:18:45,070 INFO  io.quarkus - Installed features: [cdi, kubernetes-client, micrometer, rest-client, resteasy, resteasy-jackson, smallrye-context-propagation, vertx]
-2022-04-27 15:18:48,480 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppInstaller'
-2022-04-27 15:18:48,481 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7AppStatus' [delay: 19241, period: 60000]
-2022-04-27 15:18:48,481 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7AppInstaller' [delay: 4497, period: 60000]
-2022-04-27 15:18:48,480 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorIngressCertSync'
-2022-04-27 15:18:48,484 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7DeploymentStatus'
-2022-04-27 15:18:48,484 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7DeploymentStatus' [delay: 6627, period: 60000]
-2022-04-27 15:18:48,485 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXpClientCacheInvalidate'
-2022-04-27 15:18:48,488 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppStatusOnDeployments'
-2022-04-27 15:18:48,488 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorIngress'
-2022-04-27 15:18:48,488 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7ConfigSync' [delay: 13876, period: 60000]
-2022-04-27 15:18:48,488 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorDomainCertSync'
-2022-04-27 15:18:48,727 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7DeploymentHelm'
-2022-04-27 15:18:48,727 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppStartStopper'
-2022-04-27 15:18:48,728 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7AppStartStopper' [delay: 4061, period: 60000]
-2022-04-27 15:18:48,728 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7ConfigStatus'
-2022-04-27 15:18:48,728 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorIngressLabel'
-2022-04-27 15:18:48,729 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorIngressLabel' [delay: 3996, period: 60000]
-2022-04-27 15:18:48,729 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorInformers' [delay: 10390, period: 30000]
-2022-04-27 15:18:48,729 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorDeleteAnnotation'
-2022-04-27 15:18:48,729 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorConfigMapEvent'
-2022-04-27 15:18:48,730 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7Config'
-2022-04-27 15:18:48,730 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorConfigMapSync' [delay: 18077, period: 60000]
-2022-04-27 15:18:48,831 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppInstallerOnDeployments'
-2022-04-27 15:18:53,830 INFO  com.eno.kub.ope.Operator - Starting informers</code></pre>
+2024-01-02 23:12:24,760 INFO  io.quarkus - java-operator 0.22.1 on JVM (powered by Quarkus 2.16.6.Final) started in 6.579s. Listening on: https://0.0.0.0:8443
+2024-01-02 23:12:24,762 INFO  io.quarkus - Profile prod activated.
+2024-01-02 23:12:24,764 INFO  io.quarkus - Installed features: [cdi, micrometer, rest-client, resteasy, resteasy-jackson, smallrye-context-propagation, vertx]
+2024-01-02 23:12:25,808 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorIngress'
+2024-01-02 23:12:25,889 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXpClientCacheInvalidate'
+2024-01-02 23:12:27,738 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7DeploymentHelm'
+2024-01-02 23:12:27,787 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppStatusOnDeployments'
+2024-01-02 23:12:27,799 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorDeleteAnnotation'
+2024-01-02 23:12:27,803 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorInformers' [delay: 16337, period: 30000]
+2024-01-02 23:12:27,803 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7ConfigStatus'
+2024-01-02 23:12:27,804 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorIngressLabel'
+2024-01-02 23:12:27,804 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppInstaller'
+2024-01-02 23:12:27,805 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7AppInstaller' [delay: 15212, period: 60000]
+2024-01-02 23:12:27,805 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppInstallerOnDeployments'
+2024-01-02 23:12:27,806 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorConfigMapEvent'
+2024-01-02 23:12:27,803 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorConfigMapSync' [delay: 13252, period: 60000]
+2024-01-02 23:12:27,804 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorIngressLabel' [delay: 6622, period: 60000]
+2024-01-02 23:12:27,806 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7Config'
+2024-01-02 23:12:27,807 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorIngressCertSync'
+2024-01-02 23:12:27,807 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7ConfigSync' [delay: 10124, period: 60000]
+2024-01-02 23:12:27,808 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorDomainCertSync'
+2024-01-02 23:12:27,809 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppStartStopper'
+2024-01-02 23:12:27,809 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7AppStartStopper' [delay: 14806, period: 60000]
+2024-01-02 23:12:27,809 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7DeploymentStatus'
+2024-01-02 23:12:27,810 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7DeploymentStatus' [delay: 4146, period: 60000]
+2024-01-02 23:12:27,810 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7AppStatus' [delay: 19524, period: 60000]
+2024-01-02 23:12:32,807 INFO  com.eno.kub.ope.Operator - Starting informers</code></pre>
 </div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="test_the_operator"><a class="link" href="#test_the_operator">Test the operator</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The best way of verifying that everything is working, is by creating a basic xp7deployment.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The example below will create a namespace, a single-node XP7 server, pre-install selected applications, and configure an ingress.
+</td>
+</tr>
+</table>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Place this yaml file in a suitable location on your computer:</p>
+<div class="listingblock">
+<div class="title">simple.yaml</div>
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml"># Create a namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: my-namespace
+  annotations:
+    # Delete this namespace if the deployment is deleted
+    enonic.cloud/remove.with.xp7deployment: my-deployment
+---
+# Create deployment in the namespace
+apiVersion: enonic.cloud/v1
+kind: Xp7Deployment
+metadata:
+  name: my-deployment
+  namespace: my-namespace
+spec:
+  enabled: true
+  xpVersion: 7.13.5
+
+  # Create one node
+  nodeGroups:
+    - name: main
+      replicas: 1
+
+      data: true
+      master: true
+
+      initContainers:
+        # Preinstall Snapshotter app
+        - image: enonic/snapshotter:3.1.0
+          name: snapshotter-deploy
+          mounts:
+            - name: deploy
+              mountPath: /deploy
+
+      resources:
+        cpu: "2"
+        memory: 4Gi
+        dirs:
+          # Snapshotter app copied to deploy folder
+          - name: deploy
+            size: 100Mi
+            mountReadOnly: true
+        # Disks private to the node
+        disks:
+          - name: blobstore
+            size: 1Gi
+          - name: snapshots
+            size: 1Gi
+          - name: export # Dumps and other data
+            size: 1Gi
+          - name: index # Node ES index
+            size: 1Gi
+          - name: work # Node cache
+            size: 1Gi
+---
+# Install content studio
+apiVersion: enonic.cloud/v1
+kind: Xp7App
+metadata:
+  name: contentstudio
+  namespace: my-namespace
+spec:
+  url: https://repo.enonic.com/public/com/enonic/app/contentstudio/5.0.3/contentstudio-5.0.3.jar
+  sha512: ba6b40ebf0808c6fa619ba2a05d07ce3e566eada7e9f3f34c1d280e9d1dcbd1e3c25eff9896d1057c4578ff3f516afa7a905c9e42ddc5e08f1cdf06f7e89774c
+---
+# Add your own custom config
+apiVersion: enonic.cloud/v1
+kind: Xp7Config
+metadata:
+  name: my-config
+  namespace: my-namespace
+spec:
+  nodeGroup: all
+  file: com.my-app.cfg
+  data: |
+    my = config
+---
+# Expose XP through an ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-domain-com
+  namespace: my-namespace
+  annotations:
+    enonic.cloud/xp7.vhost.mapping.my-mapping-site.source: /
+    enonic.cloud/xp7.vhost.mapping.my-mapping-site.target: /site/default/master/homepage
+
+    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.source: /admin
+    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.target: /admin
+    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.idproviders: system
+spec:
+  rules:
+    - host: my-domain.com
+      http:
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: main
+                port:
+                  number: 8080
+
+          - path: /admin
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: main
+                port:
+                  number: 8080</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Then run the following command to create the xp7deployment:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">kubectl apply -f single-xp7deployment-with-other-resources.yaml</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Output from a successful command</div>
+<div class="content">
+<pre class="highlight"><code class="language-terminal" data-lang="terminal">namespace/my-namespace created
+xp7deployment.enonic.cloud/my-deployment created
+xp7app.enonic.cloud/contentstudio created
+xp7config.enonic.cloud/my-config created
+ingress.networking.k8s.io/my-domain-com created</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Verify that the namespace exists, and that the pods have started:</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">kubectl -n my-namespace get pods</code></pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="log_in_to_xp_admin"><a class="link" href="#log_in_to_xp_admin">Log in to XP Admin</a></h3>
+<div class="paragraph">
+<p>With the XP running, we can try accessing the Admin - even without setting up an ingress.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Get the <code>su</code> password by running this command:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ kubectl -n my-namespace get secret su -o go-template="{{ .data.pass | base64decode }}"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This will output the password string.</p>
+</div>
+</li>
+<li>
+<p>Activate port forwarding</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ kubectl -n my-namespace port-forward main-0 8080
+
+Forwarding from 127.0.0.1:8080 -&gt; 8080
+Forwarding from [::1]:8080 -&gt; 8080</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Open <a href="http://localhost:8080" target="_blank" rel="noopener">http://localhost:8080</a> in your browser, and login with <code>su</code> and the password you obtained earlier.</p>
+</li>
+</ol>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+Visit the <a href="usage.ahtml">operator usage section</a> for more details.
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
@@ -670,11 +872,11 @@ __  ____  __  _____   ___  __ ____  ______
 <h2 id="uninstall"><a class="link" href="#uninstall">Uninstall</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>To remove the XP operator from your k8s cluster, run the following command:</p>
+<p>To remove the XP operator from your Kubernetes cluster, run the following command:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">helm uninstall xp-operator</code></pre>
+<pre class="highlight"><code class="language-bash" data-lang="bash">helm uninstall xp-operator</code></pre>
 </div>
 </div>
 <div class="admonitionblock warning">
@@ -694,7 +896,7 @@ Don´t uninstall the xp-operator while there are remaining xp7Deployments on you
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-01-08 16:17:32 UTC
+Last updated 2024-01-09 12:01:07 UTC
 </div>
 </div>
 </body>
