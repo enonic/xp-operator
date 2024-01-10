@@ -2,7 +2,7 @@
 :toc: right
 :imagesdir: images
 
-This section covers the installation of the Enonic XP Kubernetes Operator.
+This section covers the installation and testing of the Enonic XP Kubernetes Operator.
 
 == Prerequisites
 
@@ -14,14 +14,6 @@ Kubectl:: Is the Kubernetes command-line tool, kubectl, allows you to run comman
 
 Helm:: Is a package manager for Kubernetes. Download it from https://helm.sh/docs/intro/install/[helm.sh].
 
-
-
-== Shared storage
-
-XP7 clusters require the availability of a shared storage - NFS style. Most cloud providers offer out-of-the-box storage classes for this purpose.
-When you created your cluster, you should already have identified or configured this.
-
-If you are running an ´on-premiser´ k8s cluster, or for other reasons don't want to use the standard NFS storage classes, we recommend setting up your own <<nfs#,provision your own NFS storage>>.
 
 == Create chart values file
 
@@ -41,11 +33,20 @@ config: |-
   operator.charts.values.storage.shared.storageClassName=nfs
 
   # Default CPU and RAM requests
-  operator.charts.values.resources.cpu.defaultRequests=1
-  operator.charts.values.resources.memory.defaultRequests=4G
+  operator.charts.values.resources.cpu.defaultRequests=0.2
+  operator.charts.values.resources.memory.defaultRequests=512Mi
 ----
 
-WARNING: Make sure your the storage classes are compatible with your Kubernetes cluster and cloud provider.
+[WARNING]
+====
+*Shared storage:* Make sure the `storage classes` are compatible with your Kubernetes cluster and cloud provider.
+
+TIP: Amazon customers may use the `efs` storage class.
+
+For `on-premises` k8s, or less expensive storage options we recommend <<nfs#,provision your own NFS storage>>.
+
+For more details on compatibility, visit the <<storage-classes#, storage classes section>>.
+====
 
 More configuration options for the https://github.com/enonic/xp-operator/tree/master/helm[operator Helm chart]
 
