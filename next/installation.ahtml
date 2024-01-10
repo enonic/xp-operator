@@ -441,16 +441,18 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
 <li><a href="#prerequisites">Prerequisites</a></li>
-<li><a href="#shared_storage_class">Shared storage class</a></li>
+<li><a href="#shared_storage">Shared storage</a></li>
 <li><a href="#create_chart_values_file">Create chart values file</a></li>
 <li><a href="#installing_the_operator">Installing the operator</a></li>
 <li><a href="#verify_installation">Verify installation</a></li>
-<li><a href="#test_the_operator">Test the operator</a>
+<li><a href="#test_deployment">Test deployment</a></li>
+<li><a href="#create_xp7deployment">Create xp7deployment</a>
 <ul class="sectlevel2">
-<li><a href="#log_in_to_xp_admin">Log in to XP Admin</a></li>
+<li><a href="#xp_admin">XP Admin</a></li>
+<li><a href="#remove_deployment">Remove deployment</a></li>
 </ul>
 </li>
-<li><a href="#uninstall">Uninstall</a></li>
+<li><a href="#uninstall_operator">Uninstall operator</a></li>
 </ul>
 </div>
 </div>
@@ -484,37 +486,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 </dl>
 </div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-<strong>Namespaces</strong> - We will be installing the XP operator in the default <code>kube-system</code> namespace, indicating that it is a vital system component, but you can also create your own if desired.
-</td>
-</tr>
-</table>
-</div>
-<div class="admonitionblock warning">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-warning" title="Warning"></i>
-</td>
-<td class="content">
-The operator will create a unique namespace per XP deployment. Never install the operator and an XP7 deployment into the same namespace.
-</td>
-</tr>
-</table>
-</div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="shared_storage_class"><a class="link" href="#shared_storage_class">Shared storage class</a></h2>
+<h2 id="shared_storage"><a class="link" href="#shared_storage">Shared storage</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>XP7 clusters require the availability of a shared filesystem - NFS style. Most cloud providers offer out-of-the-box storage classes for this purpose. When setting up your cluster, you should already have identified the available storage classes.</p>
+<p>XP7 clusters require the availability of a shared storage - NFS style. Most cloud providers offer out-of-the-box storage classes for this purpose.
+When you created your cluster, you should already have identified or configured this.</p>
 </div>
 <div class="paragraph">
 <p>If you are running an ´on-premiser´ k8s cluster, or for other reasons don&#8217;t want to use the standard NFS storage classes, we recommend setting up your own <a href="nfs.ahtml">provision your own NFS storage</a>.</p>
@@ -567,6 +546,18 @@ Make sure your the storage classes are compatible with your Kubernetes cluster a
 <div class="sectionbody">
 <div class="paragraph">
 <p>Run the following command to install the operator on your cluster:</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<strong>Namespaces</strong> - We will be installing the XP operator in the default <code>kube-system</code> namespace, indicating that it is a vital system component, but you can also create your own if desired.
+</td>
+</tr>
+</table>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -653,23 +644,29 @@ __  ____  __  _____   ___  __ ____  ______
 </div>
 </div>
 <div class="sect1">
-<h2 id="test_the_operator"><a class="link" href="#test_the_operator">Test the operator</a></h2>
+<h2 id="test_deployment"><a class="link" href="#test_deployment">Test deployment</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The best way of verifying that everything is working, is by creating a basic xp7deployment.</p>
+<p>The best way of verifying that thangs are working, is by creating a basic xp7deployment.
+The example below will create a namespace, a single-node XP7 server, pre-install selected applications, and configure an ingress.</p>
 </div>
-<div class="admonitionblock note">
+<div class="admonitionblock warning">
 <table>
 <tr>
 <td class="icon">
-<i class="fa icon-note" title="Note"></i>
+<i class="fa icon-warning" title="Warning"></i>
 </td>
 <td class="content">
-The example below will create a namespace, a single-node XP7 server, pre-install selected applications, and configure an ingress.
+Remember to use a unique namespace per XP deployment. Never use the same namespace as the operator.
 </td>
 </tr>
 </table>
 </div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="create_xp7deployment"><a class="link" href="#create_xp7deployment">Create xp7deployment</a></h2>
+<div class="sectionbody">
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -820,9 +817,9 @@ ingress.networking.k8s.io/my-domain-com created</code></pre>
 </div>
 </div>
 <div class="sect2">
-<h3 id="log_in_to_xp_admin"><a class="link" href="#log_in_to_xp_admin">Log in to XP Admin</a></h3>
+<h3 id="xp_admin"><a class="link" href="#xp_admin">XP Admin</a></h3>
 <div class="paragraph">
-<p>With the XP running, we can try accessing the Admin - even without setting up an ingress.</p>
+<p>With the XP running, we can try accessing the Admin - even without using the ingress.</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
@@ -866,17 +863,15 @@ Visit the <a href="usage.ahtml">operator usage section</a> for more details.
 </table>
 </div>
 </div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="uninstall"><a class="link" href="#uninstall">Uninstall</a></h2>
-<div class="sectionbody">
+<div class="sect2">
+<h3 id="remove_deployment"><a class="link" href="#remove_deployment">Remove deployment</a></h3>
 <div class="paragraph">
-<p>To remove the XP operator from your Kubernetes cluster, run the following command:</p>
+<p>To remove the test deployment, run the following command:</p>
 </div>
 <div class="listingblock">
+<div class="title">Use the same yaml as when creating the deployment</div>
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">helm uninstall xp-operator</code></pre>
+<pre class="highlight"><code class="language-bash" data-lang="bash">kubectl delete -f simple.yaml</code></pre>
 </div>
 </div>
 <div class="admonitionblock warning">
@@ -886,7 +881,7 @@ Visit the <a href="usage.ahtml">operator usage section</a> for more details.
 <i class="fa icon-warning" title="Warning"></i>
 </td>
 <td class="content">
-Don´t uninstall the xp-operator while there are remaining xp7Deployments on your cluster
+Volumes are typically not deleted when you remove the deployment, so take care to remove them afterwards.
 </td>
 </tr>
 </table>
@@ -894,9 +889,35 @@ Don´t uninstall the xp-operator while there are remaining xp7Deployments on you
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="uninstall_operator"><a class="link" href="#uninstall_operator">Uninstall operator</a></h2>
+<div class="sectionbody">
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Don´t uninstall the xp-operator while there are remaining xp7Deployments on your cluster
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>To remove the XP operator from your Kubernetes cluster, run the following command:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">helm uninstall xp-operator</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-01-09 14:19:58 UTC
+Last updated 2024-01-10 12:29:14 UTC
 </div>
 </div>
 </body>

@@ -451,7 +451,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>The Enonic XP Kubernetes Operator is a piece of software runs on top of Kubernetes to help you manage your XP deployments. It builds on the <a href="https://kubernetes.io/docs/concepts/extend-kubernetes/operator/">operator pattern</a> provided by Kubernetes.</p>
+<p>The Enonic XP Operator lets you deploy XP instances on Kubernetes (k8s) with ease. It builds on the <a href="https://kubernetes.io/docs/concepts/extend-kubernetes/operator/">operator pattern</a> provided by Kubernetes.</p>
 </div>
 </div>
 </div>
@@ -459,7 +459,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="motivation"><a class="link" href="#motivation">Motivation</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Creating a simple XP deployment is quite easy, but it quickly gets more complicated when you try to create production grade clusters. Add on top the complexity of how Kubernetes works and you quickly can get into trouble. The operator removes that complexity for you, and makes it easy to create and manage complex deployments with ease.</p>
+<p>Creating a simple XP deployment is quite easy, but it quickly gets more complicated when you try to create production grade clusters. Add to that the complexity of Kubernetes, and you can quickly get into trouble. The makes it easy to create and manage complex deployments.</p>
 </div>
 </div>
 </div>
@@ -475,17 +475,23 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="installation"><a class="link" href="#installation">Installation</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Before you can start using the operator you have to:</p>
+<p>The operator must be installed on a properly configued k8s cluster.</p>
 </div>
-<div class="ulist">
-<ul>
-<li>
-<p>Have a running Kubernetes cluster, version <code>1.19+</code>. If you need to setup a local test environment, you can look at our <a href="minikube.ahtml">minikube</a> guide.</p>
-</li>
-<li>
-<p>Install the operator according to the <a href="installation.ahtml">installation</a> guide.</p>
-</li>
-</ul>
+<div class="paragraph">
+<p>Follow our he <a href="installation.ahtml">installation guide</a> to get started.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+If you need to setup a local test environment, have a look at our <a href="minikube.ahtml">minikube guide</a>.
+* Install the operator according to t
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
@@ -509,7 +515,7 @@ The operator only supports Enonic XP <code>v7.13.2</code> and newer.
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-01-09 14:19:58 UTC
+Last updated 2024-01-10 12:29:14 UTC
 </div>
 </div>
 </body>
