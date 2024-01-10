@@ -441,7 +441,6 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
 <li><a href="#prerequisites">Prerequisites</a></li>
-<li><a href="#shared_storage">Shared storage</a></li>
 <li><a href="#create_chart_values_file">Create chart values file</a></li>
 <li><a href="#installing_the_operator">Installing the operator</a></li>
 <li><a href="#verify_installation">Verify installation</a></li>
@@ -460,7 +459,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>This section covers the installation of the Enonic XP Kubernetes Operator.</p>
+<p>This section covers the installation and testing of the Enonic XP Kubernetes Operator.</p>
 </div>
 </div>
 </div>
@@ -489,18 +488,6 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect1">
-<h2 id="shared_storage"><a class="link" href="#shared_storage">Shared storage</a></h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>XP7 clusters require the availability of a shared storage - NFS style. Most cloud providers offer out-of-the-box storage classes for this purpose.
-When you created your cluster, you should already have identified or configured this.</p>
-</div>
-<div class="paragraph">
-<p>If you are running an ´on-premiser´ k8s cluster, or for other reasons don&#8217;t want to use the standard NFS storage classes, we recommend setting up your own <a href="nfs.ahtml">provision your own NFS storage</a>.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
 <h2 id="create_chart_values_file"><a class="link" href="#create_chart_values_file">Create chart values file</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
@@ -520,8 +507,8 @@ When you created your cluster, you should already have identified or configured 
   operator.charts.values.storage.shared.storageClassName=nfs
 
   # Default CPU and RAM requests
-  operator.charts.values.resources.cpu.defaultRequests=1
-  operator.charts.values.resources.memory.defaultRequests=4G</code></pre>
+  operator.charts.values.resources.cpu.defaultRequests=0.2
+  operator.charts.values.resources.memory.defaultRequests=512Mi</code></pre>
 </div>
 </div>
 <div class="admonitionblock warning">
@@ -531,7 +518,27 @@ When you created your cluster, you should already have identified or configured 
 <i class="fa icon-warning" title="Warning"></i>
 </td>
 <td class="content">
-Make sure your the storage classes are compatible with your Kubernetes cluster and cloud provider.
+<div class="paragraph">
+<p><strong>Shared storage:</strong> Make sure the <code>storage classes</code> are compatible with your Kubernetes cluster and cloud provider.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+Amazon customers may use the <code>efs</code> storage class.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>For <code>on-premises</code> k8s, or less expensive storage options we recommend <a href="nfs.ahtml">provision your own NFS storage</a>.</p>
+</div>
+<div class="paragraph">
+<p>For more details on compatibility, visit the <a href="storage-classes.ahtml">storage classes section</a>.</p>
+</div>
 </td>
 </tr>
 </table>
@@ -917,7 +924,7 @@ Don´t uninstall the xp-operator while there are remaining xp7Deployments on you
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-01-10 12:29:14 UTC
+Last updated 2024-01-10 12:51:04 UTC
 </div>
 </div>
 </body>
