@@ -473,7 +473,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dl>
 <dt class="hdlist1">Kubernetes</dt>
 <dd>
-<p>A running Kubernetes cluster version <code>1.19+</code>. The k8s cluster can be on-premise or any cloud service provider. The only thing that differs depending on the type of k8s clusters is which storage class to use. And more information about that is shown in the "Storage classes" section below.</p>
+<p>A running Kubernetes cluster version <code>1.22+</code>. The k8s cluster can be on-premise or any cloud service provider. The only thing that differs depending on the type of k8s clusters is which storage class to use. And more information about that is shown in the "Storage classes" section below.</p>
 </dd>
 <dt class="hdlist1">Kubectl</dt>
 <dd>
@@ -697,7 +697,7 @@ __  ____  __  _____   ___  __ ____  ______
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-01-10 12:50:53 UTC
+Last updated 2024-01-11 14:22:02 UTC
 </div>
 </div>
 </body>
