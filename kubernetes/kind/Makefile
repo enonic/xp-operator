@@ -1,8 +1,6 @@
 K8S_VERSION:=v1.29.0
 KIND_MTU:=$(shell docker network inspect bridge -f '{{ index .Options "com.docker.network.driver.mtu" }}')
 KIND_CTX:=kind-kind
-NFS_SERVER_NAME:=kind-nfs-server
-NFS_SERVER_VOLUME:=kind-nfs-server
 
 .PHONY: kind-setup kind-bootstrap kind-ingress kind-up kind-down help
 .DEFAULT_GOAL:=help
@@ -13,9 +11,6 @@ kind-setup:
 
 	# Create kind cluster
 	@kind create cluster --image=kindest/node:${K8S_VERSION} --config=kind-config.yaml
-
-	# Create NFS volume
-	-@docker volume create ${NFS_SERVER_VOLUME}
 
 	# Set kubectl context to kind
 	@kubectl config use-context ${KIND_CTX}
@@ -68,13 +63,6 @@ kind-up: kind-setup kind-bootstrap kind-ingress ## Spin up development cluster
 kind-down: ## Destroy development cluster
 	# Delete cluster
 	-@kind delete cluster > /dev/null
-
-	# Delete NFS server
-	-@docker stop ${NFS_SERVER_NAME} > /dev/null
-	-@docker rm ${NFS_SERVER_NAME} > /dev/null
-
-	# Delete NFS volume
-	-@docker volume rm ${NFS_SERVER_VOLUME} > /dev/null
 
 	# Delete kind network
 	-@docker network rm kind
