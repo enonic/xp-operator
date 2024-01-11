@@ -1,4 +1,4 @@
-K8S_VERSION:=v1.27.3
+K8S_VERSION:=v1.29.0
 KIND_MTU:=$(shell docker network inspect bridge -f '{{ index .Options "com.docker.network.driver.mtu" }}')
 KIND_CTX:=kind-kind
 NFS_SERVER_NAME:=kind-nfs-server
@@ -17,15 +17,6 @@ kind-setup:
 	# Create NFS volume
 	-@docker volume create ${NFS_SERVER_VOLUME}
 
-	# Start NFS server
-	@(docker ps | grep ${NFS_SERVER_NAME}) || docker run -d \
-		--name ${NFS_SERVER_NAME} \
-		--network=kind \
-		--privileged \
-		-v ${NFS_SERVER_VOLUME}:/nfsshare \
-		-e SHARED_DIRECTORY=/nfsshare \
-		itsthenetwork/nfs-server-alpine:12
-
 	# Set kubectl context to kind
 	@kubectl config use-context ${KIND_CTX}
 
@@ -34,16 +25,9 @@ kind-bootstrap:
 	@[ "$(shell kubectl config current-context)" = "${KIND_CTX}" ] || \
 		(echo "Kubectl should be ${KIND_CTX}" && exit 1)
 
-	# Setup NFS storage class
-	@helm upgrade --install \
-		--namespace kube-system \
-		--set nfs.server=${NFS_SERVER_NAME} \
-		--set nfs.path=/ \
-		--set storageClass.name=nfs \
-		--set storageClass.archiveOnDelete=false \
-		--set storageClass.allowVolumeExpansion=true \
-		nfs-client \
-		https://github.com/kubernetes-sigs/nfs-subdir-external-provisioner/releases/download/nfs-subdir-external-provisioner-4.0.18/nfs-subdir-external-provisioner-4.0.18.tgz
+	# Setup NFS server provisioner
+	@helm repo add kvaps https://kvaps.github.io/charts
+	@helm install nfs-server-provisioner kvaps/nfs-server-provisioner
 
 kind-dev: ## Setup cluster for development mode (env var MY_IP required)
 	# Ensure MY_IP is set
