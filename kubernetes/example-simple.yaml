@@ -35,7 +35,7 @@ spec:
 
       resources:
         cpu: "1"
-        memory: 512Mi
+        memory: 1Gi
         dirs:
           # Snapshotter app copied to deploy folder
           - name: deploy

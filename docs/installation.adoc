@@ -6,7 +6,7 @@ This section covers the installation of the Enonic XP Kubernetes Operator.
 
 == Prerequisites
 
-Kubernetes:: A running Kubernetes cluster version `1.19+`. The k8s cluster can be on-premise or any cloud service provider. The only thing that differs depending on the type of k8s clusters is which storage class to use. And more information about that is shown in the "Storage classes" section below. 
+Kubernetes:: A running Kubernetes cluster version `1.22+`. The k8s cluster can be on-premise or any cloud service provider. The only thing that differs depending on the type of k8s clusters is which storage class to use. And more information about that is shown in the "Storage classes" section below.
 
 
 Kubectl:: Is the Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it https://kubernetes.io/docs/tasks/tools/install-kubectl/[here].
