@@ -13,7 +13,7 @@ A Google account and project:: Log in to https://cloud.google.com[GCP], and sele
 
 Gcloud CLI:: Command-line tool to manage resources in GCP. Download it https://cloud.google.com/sdk/docs/install[here]
 
-Kubectl:: The Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it https://kubernetes.io/docs/tasks/tools/install-kubectl/[here].
+Kubectl:: The Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it from https://kubernetes.io/docs/tasks/tools/install-kubectl/[Kubernetes.io].
 
 
 == Create a GKE Cluster
@@ -72,42 +72,3 @@ Once you are done with your cluster, you can delete the k8s cluster from the GCP
 ----
 gcloud container clusters delete <CLUSTER_NAME> --region <REGION_NAME>
 ----
-
-
-
-TODO: Remove below
-
-== Run XP in Cluster Mode
-
-To run xp in cluster mode it is required to have an NFS based shared volume that can be mounted as Read-Write by multiple nodes at a time. The standard storage class in `GKE` does not support `ReadWriteMany` mode. Most storage classes that support `ReadWriteMany` access mode have also a restriction in changing the modified time of files that XP requires. 
-
-In GKE, Filestore CSI driver based storage class with RWM* mode can be used to deploy XP in cluster mode. However it is an expensive option due to :
-1. Very high minimum allowed size 
-2. higher cost per GB
-
-Another alternative is to mount a disk from an existing external NFS server or use a provisoner to create NFS server in your GKE cluster and create an NFS based storage class from it. See our <<nfs#,NFS storage class>> guide for more information.
-
-Note: If you have already deployed XP operator with NFS based shared storage class, you can continue to the next step. If not update the values.yaml file from above and follow the steps in section [Deploy XP Operator in k8s]. After deploying the XP operator with shared storage support, you can continue to the next steps.
-
-=== XP deployment in cluster Mode
-
-You can get example deployment file to deploy XP in cluster mode from
-link:/https://github.com/enonic/xp-operator/kubernetes[Example Codes]. Copy cluster-xp7deployment-with-other-resources.yaml deployment file
-and make changes to it as per your requirement. For instance parameters like namespace in which XP is going to be deployed, RAM and CPU size, types and number of cluster nodes can be changed in the deployment file. Once you finished editing the file, run the command below.
-
-
-[source,bash]
-----
-$ kubectl apply -f cluster-xp7deployment-with-other-resources.yaml
-
-namespace/my-namespace created
-xp7deployment.enonic.cloud/my-deployment created
-xp7app.enonic.cloud/contentstudio created
-xp7config.enonic.cloud/my-config created
-ingress.networking.k8s.io/my-domain-com created
-----
-
-==== Access admin (through ingress)
-
-If you have setup ingress controller, you can access xp-admin through the admin end point you configured.
-

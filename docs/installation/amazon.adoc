@@ -1,26 +1,23 @@
-= Amazon Kubernetes Engine - EKS
+= Elastic Kubernetes Service - EKS
 :toc: right
 :imagesdir: images
 :experimental:
 
-Instructions on setting up a managed k8s cluster on Amazon
+Instructions on setting up a managed k8s cluster on Amazon Web Services (AWS)
 
 == Prerequisites
 
 You will need the following:
 
-TODO
 
-A Google account and project:: Log in to https://cloud.google.com[GCP], and select or create a `Project` where you will create the k8s cluster. 
+An Amazon account:: Sign up or log in to https://aws.amazon.com/[AWS] where you will create the k8s cluster. TODO Verify
 
-Gcloud CLI:: Command-line tool to manage resources in GCP. Download it https://cloud.google.com/sdk/docs/install[here]
+aws cli:: Command-line tool to manage resources in AWS. Get it https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html[Amazon].
 
-Kubectl:: The Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it https://kubernetes.io/docs/tasks/tools/install-kubectl/[here].
-
+eksctl:: Amazons version of Kubectl, eksctl, allows you to run commands against Kubernetes clusters. Download it from https://github.com/eksctl-io/eksctl#installation[Github]
 
 
-
-== Create an AKS cluster
+== Create an EKS cluster
 
 TODO
 
@@ -31,10 +28,6 @@ image::../images/gkeEnablek8sapi.png[Enable API]
 . Click btn:[Create] to launch the k8s cluster wizard. 
 +
 image::../images/gkeCreateClusterPage.png[Create GKE Cluster]
-+
-TIP: If you don't get see this page, Choose `Kubernetes Engine` -> `clusters` from the main menu.
-+
-. The XP Operator *does not support Autopilot clusters*, choose the `Standard` clusters instead.
 +
 . Follow the cluster creation steps by setting the values based on your cluster needs. 
 +
@@ -50,21 +43,38 @@ WARNING: Make sure to chose kubernetes version >= 1.27 which is requried by XP o
 +
 [source,terminal]
 ----
-kubectl get namespaces
+eksctl get namespaces
 ----
 +
 This should display the list of namespaces in the newly created k8s cluster. The "Age" column in the output shows how long has it been since the namespaces are created. 
 
+TODO OUTPUT
+
 
 == Storage classes
 
-When connected to your cluster, list the available storage classes. They may be useful for the rest of the installation.
+When connected to your cluster, list the available storage classes with this command:
 
 [source,terminal]
 ----
-kubectl get storageclasses
+eksctl get storageclasses
 ----
 
-TODO: Example
-
 This should display the list of storage classes provisioned by GKE cluster.
+
+TODO output
+
+=== EFS
+
+To run XP in clustered mode, a <<../storage-classes#, `ReadWriteMany` storage class>> (NFS type filesystem) is required.
+
+Amazon offers a managed service for shared filesystems called https://aws.amazon.com/efs/[Elastic File System (EFS)^]. 
+This is an alternative to <<nfs#, running your own NFS server>>. 
+
+To provision an EFS storage for your cluster, follow Amazons own documentation:
+
+. https://docs.aws.amazon.com/efs/latest/ug/gs-step-two-create-efs-resources.html[Create an EFS^] 
+. Then, https://aws.amazon.com/blogs/containers/introducing-efs-csi-dynamic-provisioning/[create a storage class with dynamic provisioning]
+
+Once this is configured properly, you may specify `efs` as your shared storage class when [installing the XP operator].
+
