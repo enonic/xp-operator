@@ -6,29 +6,29 @@
       },
       {
         "title": "Installation",
-        "document": "installation",
+        "document": "installation"
+      },
+      {
+        "title": "Storage classes",
+        "document" : "storage",
         "menuItems": [
           {
-            "title": "Amazon - EKS",
-            "document": "aws"
-          },
-          {
-            "title": "Azure - AKS",
-            "document": "azure"
-          },
-          {
-            "title": "Google - GKE",
-            "document": "gcp"
-          },
-          {
-            "title": "NFS storage",
-            "document" : "nfs"
+            "title": "NFS server",
+            "document" : "storage/nfs"
           }            
         ]
       },
       {
-        "title": "Storage classes",
-        "document" : "storage-classes"
+        "title": "Amazon - EKS",
+        "document": "amazon"
+      },
+      {
+        "title": "Azure - AKS",
+        "document": "azure"
+      },
+      {
+        "title": "Google - GKE",
+        "document": "google"
       },
       {
         "title": "Minikube",
