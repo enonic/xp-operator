@@ -445,11 +445,6 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#connect_to_the_cluster">Connect to the cluster</a></li>
 <li><a href="#storage_classes">Storage classes</a></li>
 <li><a href="#teardown">Teardown</a></li>
-<li><a href="#run_xp_in_cluster_mode">Run XP in Cluster Mode</a>
-<ul class="sectlevel2">
-<li><a href="#xp_deployment_in_cluster_mode">XP deployment in cluster Mode</a></li>
-</ul>
-</li>
 </ul>
 </div>
 </div>
@@ -479,7 +474,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">Kubectl</dt>
 <dd>
-<p>The Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">here</a>.</p>
+<p>The Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it from <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">Kubernetes.io</a>.</p>
 </dd>
 </dl>
 </div>
@@ -599,59 +594,12 @@ Make sure to chose kubernetes version &gt;= 1.27 which is requried by XP operato
 <pre class="highlight"><code class="language-bash" data-lang="bash">gcloud container clusters delete &lt;CLUSTER_NAME&gt; --region &lt;REGION_NAME&gt;</code></pre>
 </div>
 </div>
-<div class="paragraph">
-<p>TODO: Remove below</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="run_xp_in_cluster_mode"><a class="link" href="#run_xp_in_cluster_mode">Run XP in Cluster Mode</a></h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>To run xp in cluster mode it is required to have an NFS based shared volume that can be mounted as Read-Write by multiple nodes at a time. The standard storage class in <code>GKE</code> does not support <code>ReadWriteMany</code> mode. Most storage classes that support <code>ReadWriteMany</code> access mode have also a restriction in changing the modified time of files that XP requires.</p>
-</div>
-<div class="paragraph">
-<p>In GKE, Filestore CSI driver based storage class with RWM* mode can be used to deploy XP in cluster mode. However it is an expensive option due to :
-1. Very high minimum allowed size
-2. higher cost per GB</p>
-</div>
-<div class="paragraph">
-<p>Another alternative is to mount a disk from an existing external NFS server or use a provisoner to create NFS server in your GKE cluster and create an NFS based storage class from it. See our <a href="nfs.ahtml">NFS storage class</a> guide for more information.</p>
-</div>
-<div class="paragraph">
-<p>Note: If you have already deployed XP operator with NFS based shared storage class, you can continue to the next step. If not update the values.yaml file from above and follow the steps in section [Deploy XP Operator in k8s]. After deploying the XP operator with shared storage support, you can continue to the next steps.</p>
-</div>
-<div class="sect2">
-<h3 id="xp_deployment_in_cluster_mode"><a class="link" href="#xp_deployment_in_cluster_mode">XP deployment in cluster Mode</a></h3>
-<div class="paragraph">
-<p>You can get example deployment file to deploy XP in cluster mode from
-<a href="/https://github.com/enonic/xp-operator/kubernetes">Example Codes</a>. Copy cluster-xp7deployment-with-other-resources.yaml deployment file
-and make changes to it as per your requirement. For instance parameters like namespace in which XP is going to be deployed, RAM and CPU size, types and number of cluster nodes can be changed in the deployment file. Once you finished editing the file, run the command below.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ kubectl apply -f cluster-xp7deployment-with-other-resources.yaml
-
-namespace/my-namespace created
-xp7deployment.enonic.cloud/my-deployment created
-xp7app.enonic.cloud/contentstudio created
-xp7config.enonic.cloud/my-config created
-ingress.networking.k8s.io/my-domain-com created</code></pre>
-</div>
-</div>
-<div class="sect3">
-<h4 id="access_admin_through_ingress"><a class="link" href="#access_admin_through_ingress">Access admin (through ingress)</a></h4>
-<div class="paragraph">
-<p>If you have setup ingress controller, you can access xp-admin through the admin end point you configured.</p>
-</div>
-</div>
-</div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-01-11 14:22:14 UTC
+Last updated 2024-01-15 19:33:25 UTC
 </div>
 </div>
 </body>

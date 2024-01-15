@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.20">
-<title>Amazon Kubernetes Engine - EKS</title>
+<title>Elastic Kubernetes Service - EKS</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -436,14 +436,18 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article toc2 toc-right">
 <div id="header">
-<h1>Amazon Kubernetes Engine - EKS</h1>
+<h1>Elastic Kubernetes Service - EKS</h1>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
 <li><a href="#prerequisites">Prerequisites</a></li>
-<li><a href="#create_an_aks_cluster">Create an AKS cluster</a></li>
+<li><a href="#create_an_eks_cluster">Create an EKS cluster</a></li>
 <li><a href="#connect_to_the_cluster">Connect to the cluster</a></li>
-<li><a href="#storage_classes">Storage classes</a></li>
+<li><a href="#storage_classes">Storage classes</a>
+<ul class="sectlevel2">
+<li><a href="#efs">EFS</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -451,7 +455,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Instructions on setting up a managed k8s cluster on Amazon</p>
+<p>Instructions on setting up a managed k8s cluster on Amazon Web Services (AWS)</p>
 </div>
 </div>
 </div>
@@ -461,29 +465,26 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="paragraph">
 <p>You will need the following:</p>
 </div>
-<div class="paragraph">
-<p>TODO</p>
-</div>
 <div class="dlist">
 <dl>
-<dt class="hdlist1">A Google account and project</dt>
+<dt class="hdlist1">An Amazon account</dt>
 <dd>
-<p>Log in to <a href="https://cloud.google.com">GCP</a>, and select or create a <code>Project</code> where you will create the k8s cluster.</p>
+<p>Sign up or log in to <a href="https://aws.amazon.com/">AWS</a> where you will create the k8s cluster. TODO Verify</p>
 </dd>
-<dt class="hdlist1">Gcloud CLI</dt>
+<dt class="hdlist1">aws cli</dt>
 <dd>
-<p>Command-line tool to manage resources in GCP. Download it <a href="https://cloud.google.com/sdk/docs/install">here</a></p>
+<p>Command-line tool to manage resources in AWS. Get it <a href="https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html">Amazon</a>.</p>
 </dd>
-<dt class="hdlist1">Kubectl</dt>
+<dt class="hdlist1">eksctl</dt>
 <dd>
-<p>The Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">here</a>.</p>
+<p>Amazons version of Kubectl, eksctl, allows you to run commands against Kubernetes clusters. Download it from <a href="https://github.com/eksctl-io/eksctl#installation">Github</a></p>
 </dd>
 </dl>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="create_an_aks_cluster"><a class="link" href="#create_an_aks_cluster">Create an AKS cluster</a></h2>
+<h2 id="create_an_eks_cluster"><a class="link" href="#create_an_eks_cluster">Create an EKS cluster</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>TODO</p>
@@ -505,21 +506,6 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <img src="images/gkeCreateClusterPage.png" alt="Create GKE Cluster">
 </div>
 </div>
-<div class="admonitionblock tip">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-tip" title="Tip"></i>
-</td>
-<td class="content">
-If you don&#8217;t get see this page, Choose <code>Kubernetes Engine</code> &#8594; <code>clusters</code> from the main menu.
-</td>
-</tr>
-</table>
-</div>
-</li>
-<li>
-<p>The XP Operator <strong>does not support Autopilot clusters</strong>, choose the <code>Standard</code> clusters instead.</p>
 </li>
 <li>
 <p>Follow the cluster creation steps by setting the values based on your cluster needs.</p>
@@ -558,7 +544,7 @@ Make sure to chose kubernetes version &gt;= 1.27 which is requried by XP operato
 <p>To verify your access to the k8s cluster run the command</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-terminal" data-lang="terminal">kubectl get namespaces</code></pre>
+<pre class="highlight"><code class="language-terminal" data-lang="terminal">eksctl get namespaces</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -567,31 +553,60 @@ Make sure to chose kubernetes version &gt;= 1.27 which is requried by XP operato
 </li>
 </ol>
 </div>
+<div class="paragraph">
+<p>TODO OUTPUT</p>
+</div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="storage_classes"><a class="link" href="#storage_classes">Storage classes</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>When connected to your cluster, list the available storage classes. They may be useful for the rest of the installation.</p>
+<p>When connected to your cluster, list the available storage classes with this command:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-terminal" data-lang="terminal">kubectl get storageclasses</code></pre>
+<pre class="highlight"><code class="language-terminal" data-lang="terminal">eksctl get storageclasses</code></pre>
 </div>
-</div>
-<div class="paragraph">
-<p>TODO: Example</p>
 </div>
 <div class="paragraph">
 <p>This should display the list of storage classes provisioned by GKE cluster.</p>
+</div>
+<div class="paragraph">
+<p>TODO output</p>
+</div>
+<div class="sect2">
+<h3 id="efs"><a class="link" href="#efs">EFS</a></h3>
+<div class="paragraph">
+<p>To run XP in clustered mode, a <a href="../storage-classes.ahtml"><code>ReadWriteMany</code> storage class</a> (NFS type filesystem) is required.</p>
+</div>
+<div class="paragraph">
+<p>Amazon offers a managed service for shared filesystems called <a href="https://aws.amazon.com/efs/" target="_blank" rel="noopener">Elastic File System (EFS)</a>.
+This is an alternative to <a href="nfs.ahtml">running your own NFS server</a>.</p>
+</div>
+<div class="paragraph">
+<p>To provision an EFS storage for your cluster, follow Amazons own documentation:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><a href="https://docs.aws.amazon.com/efs/latest/ug/gs-step-two-create-efs-resources.html" target="_blank" rel="noopener">Create an EFS</a></p>
+</li>
+<li>
+<p>Then, <a href="https://aws.amazon.com/blogs/containers/introducing-efs-csi-dynamic-provisioning/">create a storage class with dynamic provisioning</a></p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Once this is configured properly, you may specify <code>efs</code> as your shared storage class when [installing the XP operator].</p>
+</div>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-01-11 14:22:14 UTC
+Last updated 2024-01-15 19:33:25 UTC
 </div>
 </div>
 </body>

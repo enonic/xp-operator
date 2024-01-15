@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.20">
-<title>Azure Kubernetes Engine - AKS</title>
+<title>Azure Kubernetes Service - AKS</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -436,7 +436,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article toc2 toc-right">
 <div id="header">
-<h1>Azure Kubernetes Engine - AKS</h1>
+<h1>Azure Kubernetes Service - AKS</h1>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
@@ -445,7 +445,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#connect_to_the_cluster">Connect to the cluster</a></li>
 <li><a href="#storage_classes">Storage classes</a>
 <ul class="sectlevel2">
-<li><a href="#efs_storage_class">EFS storage class</a></li>
+<li><a href="#todo">TODO</a></li>
+<li><a href="#instruction_to_create_efs">Instruction to create EFS</a></li>
+<li><a href="#instruction_to_create_a_storage_class_with_dynamic_provisionin">Instruction to create a storage class with dynamic provisionin</a></li>
 </ul>
 </li>
 </ul>
@@ -470,17 +472,17 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div class="dlist">
 <dl>
-<dt class="hdlist1">A Google account and project</dt>
+<dt class="hdlist1">An Azure account</dt>
 <dd>
-<p>Log in to <a href="https://cloud.google.com">GCP</a>, and select or create a <code>Project</code> where you will create the k8s cluster.</p>
+<p>Log in to <a href="https://portal.azure.com/">Azure</a></p>
 </dd>
-<dt class="hdlist1">Gcloud CLI</dt>
+<dt class="hdlist1">Az CLI</dt>
 <dd>
-<p>Command-line tool to manage resources in GCP. Download it <a href="https://cloud.google.com/sdk/docs/install">here</a></p>
+<p>Command-line tool to manage resources in Azure. Download it TODO</p>
 </dd>
 <dt class="hdlist1">Kubectl</dt>
 <dd>
-<p>The Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">here</a>.</p>
+<p>The Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it from <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">Kubernetes.io</a>.</p>
 </dd>
 </dl>
 </div>
@@ -509,21 +511,6 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <img src="images/gkeCreateClusterPage.png" alt="Create GKE Cluster">
 </div>
 </div>
-<div class="admonitionblock tip">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-tip" title="Tip"></i>
-</td>
-<td class="content">
-If you don&#8217;t get see this page, Choose <code>Kubernetes Engine</code> &#8594; <code>clusters</code> from the main menu.
-</td>
-</tr>
-</table>
-</div>
-</li>
-<li>
-<p>The XP Operator <strong>does not support Autopilot clusters</strong>, choose the <code>Standard</code> clusters instead.</p>
 </li>
 <li>
 <p>Follow the cluster creation steps by setting the values based on your cluster needs.</p>
@@ -547,6 +534,9 @@ Make sure to chose kubernetes version &gt;= 1.27 which is requried by XP operato
 <div class="sect1">
 <h2 id="connect_to_the_cluster"><a class="link" href="#connect_to_the_cluster">Connect to the cluster</a></h2>
 <div class="sectionbody">
+<div class="paragraph">
+<p>TODO</p>
+</div>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -577,7 +567,7 @@ Make sure to chose kubernetes version &gt;= 1.27 which is requried by XP operato
 <h2 id="storage_classes"><a class="link" href="#storage_classes">Storage classes</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>When connected to your cluster, list the available storage classes. They may be useful for the rest of the installation.</p>
+<p>When connected to your cluster, list the available storage classes with this command:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -591,28 +581,37 @@ Make sure to chose kubernetes version &gt;= 1.27 which is requried by XP operato
 <p>This should display the list of storage classes provisioned by GKE cluster.</p>
 </div>
 <div class="sect2">
-<h3 id="efs_storage_class"><a class="link" href="#efs_storage_class">EFS storage class</a></h3>
+<h3 id="todo"><a class="link" href="#todo">TODO</a></h3>
 <div class="paragraph">
-<p>TODO</p>
+<p>To run XP in cluster mode, a <a href="../storage-classes.ahtml"><code>ReadWriteMany</code> storage class</a> (NFS type filesystem) must exist.</p>
 </div>
 <div class="paragraph">
-<p>In this section we show how you can setup an EFS storage class that supports <code>ReadWriteMany</code> access mode.</p>
+<p>Azure offers a managed service for shared filesystems called <a href="https://azure.microsoft.com/en-us/products/storage/files" target="_blank" rel="noopener">Azure Files</a>, which can be used to provision an NFS filesystem to your AKS cluster.</p>
 </div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">aws cli and eksctl </dt>
-<dd>
-<p>These tools are required to create storage class on EKS cluster that uses an EFS filesystem.</p>
-</dd>
-</dl>
+<div class="paragraph">
+<p>A cost effective alternative is to <a href="nfs.ahtml">run your own NFS server</a>.</p>
+</div>
+<div class="paragraph">
+<p>TODO? Does Azure files work?</p>
+</div>
+<div class="paragraph">
+<p>To provision an EFS storage, you will need the</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="instruction_to_create_efs"><a class="link" href="#instruction_to_create_efs">Instruction to create EFS</a></h3>
+<div class="paragraph">
+<p><a href="https://docs.aws.amazon.com/efs/latest/ug/gs-step-two-create-efs-resources.html" class="bare">https://docs.aws.amazon.com/efs/latest/ug/gs-step-two-create-efs-resources.html</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="instruction_to_create_a_storage_class_with_dynamic_provisionin"><a class="link" href="#instruction_to_create_a_storage_class_with_dynamic_provisionin">Instruction to create a storage class with dynamic provisionin</a></h3>
+<div class="paragraph">
+<p><a href="https://aws.amazon.com/blogs/containers/introducing-efs-csi-dynamic-provisioning/" class="bare">https://aws.amazon.com/blogs/containers/introducing-efs-csi-dynamic-provisioning/</a></p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>=== Instruction to create EFS
-https://docs.aws.amazon.com/efs/latest/ug/gs-step-two-create-efs-resources.html
-
-=== Instruction to create a storage class with dynamic provisionin
-https://aws.amazon.com/blogs/containers/introducing-efs-csi-dynamic-provisioning/</pre>
+<pre></pre>
 </div>
 </div>
 </div>
@@ -621,7 +620,7 @@ https://aws.amazon.com/blogs/containers/introducing-efs-csi-dynamic-provisioning
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-01-11 14:22:14 UTC
+Last updated 2024-01-15 19:33:25 UTC
 </div>
 </div>
 </body>
