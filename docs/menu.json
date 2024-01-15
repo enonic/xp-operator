@@ -19,15 +19,15 @@
         ]
       },
       {
-        "title": "Amazon - EKS",
-        "document": "amazon"
+        "title": "AWS",
+        "document": "aws"
       },
       {
-        "title": "Azure - AKS",
+        "title": "Azure",
         "document": "azure"
       },
       {
-        "title": "Google - GKE",
+        "title": "Google Cloud",
         "document": "google"
       },
       {
