@@ -8,7 +8,7 @@ This section covers the installation and testing of the Enonic XP Kubernetes Ope
 
 Kubernetes:: A running Kubernetes cluster version `1.27+`. The k8s cluster can be on-premise or any cloud service provider. The only thing that differs depending on the type of k8s clusters is which storage class to use.
 +
-We have prepared documentation for setting up managed clusters using <<google#, Google>>, <<azure, Azure>> and <<amazon#, Amazon>>.
+Follow these steps to create a managed cluster using <<aws#, Amazon Web Services (AWS)>>, <<azure, Microsoft Azure>> or <<google#, Google Cloud Platform GCP>>.
 
 Kubectl:: Is the Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it from https://kubernetes.io/docs/tasks/tools/install-kubectl/[kubernetes.io].
 
@@ -17,7 +17,7 @@ Helm:: Is a package manager for Kubernetes. Download it from https://helm.sh/doc
 
 == Create chart values file
 
-Helm supports the use of chart files to customise the setup.
+Helm supports the use of chart files to configure the XP operator.
 
 *Create a chart file* in a suitable location on your computer:
 
@@ -27,28 +27,24 @@ Helm supports the use of chart files to customise the setup.
 ----
 config: |-
   # Set storage class names for volumes to be used by XP deployments.
-  # The default storage class can be any storage class from your k8s cluster.
-  # The shared storage class is used to run XP in cluster mode and it has to support ReadWriteMany!
   operator.charts.values.storage.default.storageClassName=standard
   operator.charts.values.storage.shared.storageClassName=nfs
 
-  # Default CPU and RAM requests
-  operator.charts.values.resources.cpu.defaultRequests=0.2
-  operator.charts.values.resources.memory.defaultRequests=512Mi
+  # Default CPU and RAM to be used by XP deployments
+  operator.charts.values.resources.cpu.defaultRequests=4
+  operator.charts.values.resources.memory.defaultRequests=16Gi
 ----
 
 [WARNING]
 ====
-*Shared storage:* Make sure the `storage classes` are compatible with your Kubernetes cluster and cloud provider.
-
-TIP: Amazon customers may use the `efs` storage class.
-
-For `on-premises` k8s, or less expensive storage options we recommend <<nfs#,provision your own NFS storage>>.
-
-For more details on compatibility, visit the <<storage-classes#, storage classes section>>.
+*Shared storage:* Must be an NFS compatible storage class available in your cluster
++
+*Default storage:* For optimal performance, use an SSD backed storage class
 ====
 
-More configuration options for the https://github.com/enonic/xp-operator/tree/master/helm[operator Helm chart]
+Visit the <<storage#, storage classes section>> for more details and compatibility list of supported storage classes.
+
+The complete list of operator configuration options can be found in the https://github.com/enonic/xp-operator/tree/master/helm[Operator Helm chart]
 
 
 == Installing the operator
@@ -131,14 +127,14 @@ __  ____  __  _____   ___  __ ____  ______
 ----
 
 
-== Test deployment
+== Test the operator
 
 The best way of verifying that thangs are working, is by creating a basic xp7deployment.
 The example below will create a namespace, a single-node XP7 server, pre-install selected applications, and configure an ingress.
 
 WARNING: Remember to use a unique namespace per XP deployment. Never use the same namespace as the operator.
 
-== Create xp7deployment
+=== Create xp7deployment
 
 . Place this yaml file in a suitable location on your computer:
 +
@@ -173,9 +169,9 @@ kubectl -n my-namespace get pods
 ----
 
 
-=== XP Admin
+=== Access XP Admin
 
-With the XP running, we can try accessing the Admin - even without using the ingress.
+With the XP running, we can try accessing the Admin - even without using an ingress.
 
 . Get the `su` password by running this command:
 +
@@ -184,7 +180,7 @@ With the XP running, we can try accessing the Admin - even without using the ing
 $ kubectl -n my-namespace get secret su -o go-template="{{ .data.pass | base64decode }}"
 ----
 +
-This will output the password string.
+This will output the plain text password.
 +
 . Activate port forwarding
 +
@@ -214,7 +210,7 @@ kubectl delete -f simple.yaml
 WARNING: Volumes are typically not deleted when you remove the deployment, so take care to remove them afterwards.
 
 
-== Uninstall operator
+== Uninstalling the operator
 
 NOTE: Don´t uninstall the xp-operator while there are remaining xp7Deployments on your cluster
 

@@ -1,9 +1,9 @@
-= Azure Kubernetes Service - AKS
+= Creating an Azure Kubernetes Service (AKS) cluster
 :toc: right
 :imagesdir: images
 :experimental:
 
-Instructions on setting up a managed k8s cluster on Azure
+Instructions on setting up a managed k8s cluster on Microsoft Azure
 
 == Prerequisites
 
