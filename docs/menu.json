@@ -9,20 +9,28 @@
         "document": "installation"
       },
       {
-        "title": "Uninstall",
-        "document": "uninstall"
+        "title": "Storage classes",
+        "document" : "storage"
+      },
+      {
+        "title": "NFS server",
+        "document" : "nfs"
+      },  
+      {
+        "title": "AWS",
+        "document": "aws"
+      },
+      {
+        "title": "Azure",
+        "document": "azure"
+      },
+      {
+        "title": "Google Cloud",
+        "document": "google"
       },
       {
         "title": "Minikube",
         "document": "minikube"
-      },
-      {
-        "title": "NFS storage",
-        "document" : "nfs"
-      },
-      {
-        "title": "EFS storage",
-        "document" : "efs"
       }
     ]
 }

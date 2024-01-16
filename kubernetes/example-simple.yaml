@@ -15,7 +15,7 @@ metadata:
   namespace: my-namespace
 spec:
   enabled: true
-  xpVersion: 7.13.4
+  xpVersion: 7.13.5
 
   # Create one node
   nodeGroups:
@@ -34,8 +34,8 @@ spec:
               mountPath: /deploy
 
       resources:
-        cpu: "1"
-        memory: 1Gi
+        cpu: "2"
+        memory: 4Gi
         dirs:
           # Snapshotter app copied to deploy folder
           - name: deploy
