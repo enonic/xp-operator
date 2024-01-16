@@ -444,14 +444,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#create_chart_values_file">Create chart values file</a></li>
 <li><a href="#installing_the_operator">Installing the operator</a></li>
 <li><a href="#verify_installation">Verify installation</a></li>
-<li><a href="#test_deployment">Test deployment</a></li>
-<li><a href="#create_xp7deployment">Create xp7deployment</a>
+<li><a href="#test_the_operator">Test the operator</a>
 <ul class="sectlevel2">
-<li><a href="#xp_admin">XP Admin</a></li>
+<li><a href="#create_xp7deployment">Create xp7deployment</a></li>
+<li><a href="#access_xp_admin">Access XP Admin</a></li>
 <li><a href="#remove_deployment">Remove deployment</a></li>
 </ul>
 </li>
-<li><a href="#uninstall_operator">Uninstall operator</a></li>
+<li><a href="#uninstalling_the_operator">Uninstalling the operator</a></li>
 </ul>
 </div>
 </div>
@@ -472,7 +472,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dd>
 <p>A running Kubernetes cluster version <code>1.27+</code>. The k8s cluster can be on-premise or any cloud service provider. The only thing that differs depending on the type of k8s clusters is which storage class to use.</p>
 <div class="paragraph">
-<p>We have prepared documentation for setting up managed clusters using <a href="google.ahtml">Google</a>, <a href="#azure">Azure</a> and <a href="amazon.ahtml">Amazon</a>.</p>
+<p>Follow these steps to create a managed cluster using <a href="aws.ahtml">Amazon Web Services (AWS)</a>, <a href="#azure">Microsoft Azure</a> or <a href="google.ahtml">Google Cloud Platform GCP</a>.</p>
 </div>
 </dd>
 <dt class="hdlist1">Kubectl</dt>
@@ -491,7 +491,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="create_chart_values_file"><a class="link" href="#create_chart_values_file">Create chart values file</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Helm supports the use of chart files to customise the setup.</p>
+<p>Helm supports the use of chart files to configure the XP operator.</p>
 </div>
 <div class="paragraph">
 <p><strong>Create a chart file</strong> in a suitable location on your computer:</p>
@@ -501,14 +501,12 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="content">
 <pre class="highlight"><code class="language-yaml" data-lang="yaml">config: |-
   # Set storage class names for volumes to be used by XP deployments.
-  # The default storage class can be any storage class from your k8s cluster.
-  # The shared storage class is used to run XP in cluster mode and it has to support ReadWriteMany!
   operator.charts.values.storage.default.storageClassName=standard
   operator.charts.values.storage.shared.storageClassName=nfs
 
-  # Default CPU and RAM requests
-  operator.charts.values.resources.cpu.defaultRequests=0.2
-  operator.charts.values.resources.memory.defaultRequests=512Mi</code></pre>
+  # Default CPU and RAM to be used by XP deployments
+  operator.charts.values.resources.cpu.defaultRequests=4
+  operator.charts.values.resources.memory.defaultRequests=16Gi</code></pre>
 </div>
 </div>
 <div class="admonitionblock warning">
@@ -519,32 +517,21 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </td>
 <td class="content">
 <div class="paragraph">
-<p><strong>Shared storage:</strong> Make sure the <code>storage classes</code> are compatible with your Kubernetes cluster and cloud provider.</p>
-</div>
-<div class="admonitionblock tip">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-tip" title="Tip"></i>
-</td>
-<td class="content">
-Amazon customers may use the <code>efs</code> storage class.
-</td>
-</tr>
-</table>
+<p><strong>Shared storage:</strong> Must be an NFS compatible storage class available in your cluster</p>
 </div>
 <div class="paragraph">
-<p>For <code>on-premises</code> k8s, or less expensive storage options we recommend <a href="nfs.ahtml">provision your own NFS storage</a>.</p>
-</div>
-<div class="paragraph">
-<p>For more details on compatibility, visit the <a href="storage-classes.ahtml">storage classes section</a>.</p>
+<p>+
+<strong>Default storage:</strong> For optimal performance, use an SSD backed storage class</p>
 </div>
 </td>
 </tr>
 </table>
 </div>
 <div class="paragraph">
-<p>More configuration options for the <a href="https://github.com/enonic/xp-operator/tree/master/helm">operator Helm chart</a></p>
+<p>Visit the <a href="storage.ahtml">storage classes section</a> for more details and compatibility list of supported storage classes.</p>
+</div>
+<div class="paragraph">
+<p>The complete list of operator configuration options can be found in the <a href="https://github.com/enonic/xp-operator/tree/master/helm">Operator Helm chart</a></p>
 </div>
 </div>
 </div>
@@ -651,7 +638,7 @@ __  ____  __  _____   ___  __ ____  ______
 </div>
 </div>
 <div class="sect1">
-<h2 id="test_deployment"><a class="link" href="#test_deployment">Test deployment</a></h2>
+<h2 id="test_the_operator"><a class="link" href="#test_the_operator">Test the operator</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>The best way of verifying that thangs are working, is by creating a basic xp7deployment.
@@ -669,11 +656,8 @@ Remember to use a unique namespace per XP deployment. Never use the same namespa
 </tr>
 </table>
 </div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="create_xp7deployment"><a class="link" href="#create_xp7deployment">Create xp7deployment</a></h2>
-<div class="sectionbody">
+<div class="sect2">
+<h3 id="create_xp7deployment"><a class="link" href="#create_xp7deployment">Create xp7deployment</a></h3>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -823,10 +807,11 @@ ingress.networking.k8s.io/my-domain-com created</code></pre>
 <pre class="highlight"><code class="language-bash" data-lang="bash">kubectl -n my-namespace get pods</code></pre>
 </div>
 </div>
+</div>
 <div class="sect2">
-<h3 id="xp_admin"><a class="link" href="#xp_admin">XP Admin</a></h3>
+<h3 id="access_xp_admin"><a class="link" href="#access_xp_admin">Access XP Admin</a></h3>
 <div class="paragraph">
-<p>With the XP running, we can try accessing the Admin - even without using the ingress.</p>
+<p>With the XP running, we can try accessing the Admin - even without using an ingress.</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
@@ -838,7 +823,7 @@ ingress.networking.k8s.io/my-domain-com created</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>This will output the password string.</p>
+<p>This will output the plain text password.</p>
 </div>
 </li>
 <li>
@@ -897,7 +882,7 @@ Volumes are typically not deleted when you remove the deployment, so take care t
 </div>
 </div>
 <div class="sect1">
-<h2 id="uninstall_operator"><a class="link" href="#uninstall_operator">Uninstall operator</a></h2>
+<h2 id="uninstalling_the_operator"><a class="link" href="#uninstalling_the_operator">Uninstalling the operator</a></h2>
 <div class="sectionbody">
 <div class="admonitionblock note">
 <table>
@@ -924,7 +909,7 @@ Don´t uninstall the xp-operator while there are remaining xp7Deployments on you
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-01-15 19:51:57 UTC
+Last updated 2024-01-16 09:01:39 UTC
 </div>
 </div>
 </body>
