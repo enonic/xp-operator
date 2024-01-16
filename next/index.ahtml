@@ -475,10 +475,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="installation"><a class="link" href="#installation">Installation</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The operator must be installed on a properly configued k8s cluster.</p>
+<p>The operator must be installed on a properly configured k8s cluster.</p>
 </div>
 <div class="paragraph">
-<p>Follow our he <a href="installation.ahtml">installation guide</a> to get started.</p>
+<p>Follow our <a href="installation.ahtml">installation guide</a> to get started.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -487,8 +487,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-If you need to setup a local test environment, have a look at our <a href="minikube.ahtml">minikube guide</a>.
-* Install the operator according to t
+If you need to set up a local test environment, have a look at our <a href="minikube.ahtml">minikube guide</a>.
 </td>
 </tr>
 </table>
@@ -515,7 +514,7 @@ The operator only supports Enonic XP <code>v7.13.2</code> and newer.
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-01-16 09:01:39 UTC
+Last updated 2024-01-16 09:45:45 UTC
 </div>
 </div>
 </body>
