@@ -10,14 +10,12 @@
       },
       {
         "title": "Storage classes",
-        "document" : "storage",
-        "menuItems": [
-          {
-            "title": "NFS server",
-            "document" : "storage/nfs"
-          }            
-        ]
+        "document" : "storage"
       },
+      {
+        "title": "NFS server",
+        "document" : "nfs"
+      },  
       {
         "title": "AWS",
         "document": "aws"

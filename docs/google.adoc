@@ -1,9 +1,9 @@
-= Google Kubernetes Engine - GKE
+= Creating a Google Kubernetes Engine (GKE) cluster
 :toc: right
 :imagesdir: images
 :experimental:
 
-Instructions on setting up a managed k8s cluster on Google Cloud Platform - GCP
+Instructions on setting up a managed k8s cluster on the Google Cloud Platform
 
 == Prerequisites
 

@@ -1,4 +1,4 @@
-= Elastic Kubernetes Service - EKS
+= Creating an Elastic Kubernetes Service (EKS) cluster
 :toc: right
 :imagesdir: images
 :experimental:
