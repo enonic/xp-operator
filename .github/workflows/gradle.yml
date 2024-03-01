@@ -20,7 +20,7 @@ jobs:
           cache: 'gradle'
 
       - name: Setup Helm
-        uses: azure/setup-helm@v3
+        uses: azure/setup-helm@v4
         with:
           version: '3.12.3'
 
@@ -58,7 +58,7 @@ jobs:
           cache: 'gradle'
 
       - name: Setup Helm
-        uses: azure/setup-helm@v3
+        uses: azure/setup-helm@v4
         with:
           version: '3.11.0'
 
