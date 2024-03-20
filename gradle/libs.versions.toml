@@ -25,7 +25,7 @@ jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", ver
 
 jakarta-validation = { module = "jakarta.validation:jakarta.validation-api", version = "2.0.2" }
 
-quarkus-universe-bom = { module = "io.quarkus:quarkus-universe-bom", version = "2.16.6.Final" }
+quarkus-universe-bom = { module = "io.quarkus:quarkus-universe-bom", version = "3.8.3" }
 
 [plugins]
 quarkus = { id = "io.quarkus", version = "2.16.6.Final" }
