@@ -2,11 +2,11 @@
 :toc: right
 :imagesdir: images
 
-The Enonic XP Kubernetes Operator is a piece of software runs on top of Kubernetes to help you manage your XP deployments. It builds on the https://kubernetes.io/docs/concepts/extend-kubernetes/operator/[operator pattern] provided by Kubernetes.
+The Enonic XP Operator lets you deploy XP instances on Kubernetes (k8s) with ease. It builds on the https://kubernetes.io/docs/concepts/extend-kubernetes/operator/[operator pattern] provided by Kubernetes.
 
 == Motivation
 
-Creating a simple XP deployment is quite easy, but it quickly gets more complicated when you try to create production grade clusters. Add on top the complexity of how Kubernetes works and you quickly can get into trouble. The operator removes that complexity for you, and makes it easy to create and manage complex deployments with ease.
+Creating a simple XP deployment is quite easy, but it quickly gets more complicated when you try to create production grade clusters. Add to that the complexity of Kubernetes, and you can quickly get into trouble. The makes it easy to create and manage complex deployments.
 
 == Usage
 
@@ -14,10 +14,11 @@ Take a look at the <<usage#,usage>> section see how to use the operator.
 
 == Installation
 
-Before you can start using the operator you have to:
+The operator must be installed on a properly configured k8s cluster.
 
-* Have a running Kubernetes cluster, version `1.22+`. If you need to setup a local test environment, you can look at our <<minikube#,minikube>> guide.
-* Install the operator according to the <<installation#,installation>> guide.
+Follow our <<installation#,installation guide>> to get started.
+
+NOTE: If you need to set up a local test environment, have a look at our <<minikube#,minikube guide>>.
 
 == Supported XP versions
 
