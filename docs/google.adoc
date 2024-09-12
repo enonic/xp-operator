@@ -11,8 +11,6 @@ You will need the following:
 
 A Google account and project:: Log in to https://cloud.google.com[GCP], and select or create a `Project` where you will create the k8s cluster. 
 
-Gcloud CLI:: Command-line tool to manage resources in GCP. Download it https://cloud.google.com/sdk/docs/install[here]
-
 Kubectl:: The Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it from https://kubernetes.io/docs/tasks/tools/install-kubectl/[Kubernetes.io].
 
 
@@ -63,12 +61,14 @@ TODO: Example
 
 This should display the list of storage classes provisioned by GKE cluster.
 
-
 == Teardown
 
-Once you are done with your cluster, you can delete the k8s cluster from the GCP console or using gcloud cli:
+Once you are done with your cluster, you can delete the k8s cluster from the GCP console or by using gcloud CLI:
 
 [source,bash]
 ----
 gcloud container clusters delete <CLUSTER_NAME> --region <REGION_NAME>
 ----
+
+TIP: https://cloud.google.com/sdk/docs/install[gcloud CLI installation instructions]
+
