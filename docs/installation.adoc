@@ -6,18 +6,19 @@ This section covers the installation and testing of the Enonic XP Kubernetes Ope
 
 == Prerequisites
 
-Kubernetes:: A running Kubernetes cluster version `1.27+`. The k8s cluster can be on-premise or any cloud service provider. The only thing that differs depending on the type of k8s clusters is which storage class to use.
+Before you can install the operator, you must have a running k8s cluster + Kubectl and Helm installed on your local machine. See details below:
+
+Kubernetes:: A running Kubernetes cluster version `1.27+`. The k8s cluster can be hosted by any cloud service provider, or even run on premises. The only thing that differs is which storage classes you can use.
 +
-Follow these steps to create a managed cluster using <<aws#, Amazon Web Services (AWS)>>, <<azure, Microsoft Azure>> or <<google#, Google Cloud Platform GCP>>.
+Follow these steps to create a managed cluster using <<aws#, Amazon Web Services (AWS)>>, <<google#, Google Cloud Platform GCP>>, or <<azure, Microsoft Azure>>.
 
 Kubectl:: Is the Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it from https://kubernetes.io/docs/tasks/tools/install-kubectl/[kubernetes.io].
 
 Helm:: Is a package manager for Kubernetes. Download it from https://helm.sh/docs/intro/install/[helm.sh].
 
-
 == Create chart values file
 
-Helm supports the use of chart files to configure the XP operator.
+With the prerequisites in place, you can start setting up your Helm chart file. This is used to configure the XP operator.
 
 *Create a chart file* in a suitable location on your computer:
 
@@ -39,7 +40,7 @@ config: |-
 ====
 *Shared storage:* Must be an NFS compatible storage class available in your cluster
 +
-*Default storage:* For optimal performance, use an SSD backed storage class
+*Default storage:* For ideal performance, use an SSD backed storage class
 ====
 
 Visit the <<storage#, storage classes section>> for more details and compatibility list of supported storage classes.
@@ -59,8 +60,16 @@ $ helm upgrade --install \
 	--namespace kube-system \
 	--values values.yaml \
 	xp-operator \
-	https://repo.enonic.com/helm/xp-operator/xp-operator-0.17.16.tgz
+	<URL to operator i.e. https://repo.enonic.com/repository/helm/xp-operator-1.0.0-RC1.tgz>
+----
 
+NOTE: Availablle operator versions: https://repo.enonic.com/#browse/browse:helm:xp-operator
+
+
+The result should look something like this:
+
+[source,terminal]
+----
 Release "xp-operator" does not exist. Installing it now.
 NAME: xp-operator
 LAST DEPLOYED: Wed Apr 27 17:18:38 2022
@@ -69,6 +78,7 @@ STATUS: deployed
 REVISION: 1
 TEST SUITE: None
 ----
+
 
 == Verify installation
 
