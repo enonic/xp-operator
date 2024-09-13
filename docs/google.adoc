@@ -119,9 +119,11 @@ standard                 kubernetes.io/gce-pd    Delete          Immediate      
 standard-rwo (default)   pd.csi.storage.gke.io   Delete          WaitForFirstConsumer   true                   89m
 ----
 
-This should display the list of storage classes currently provisioned for your GKE cluster.
+NOTE: We recommend using `standard-rwo` or `premium-rwo` when deploying XP.
 
-NOTE: If you plan to run XP clusters, you will need a ReadWriteMany (RWM) storage class. 
+=== Shared storage
+
+If you plan to run XP clusters, you will also need a ReadWriteMany (RWM) storage class. 
 
 A cost effective solution is to <<nfs#, deploy an NFS server>> in your cluster. Google also offers a managed RWM via the https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/filestore-csi-driver[Filestore CSI driver]. For more details, visit the <<storage#, storage chapter>>.
 
