@@ -508,9 +508,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
   operator.charts.values.storage.default.storageClassName=standard
   operator.charts.values.storage.shared.storageClassName=nfs
 
-  # Default CPU and RAM to be used by XP deployments
-  operator.charts.values.resources.cpu.defaultRequests=4
-  operator.charts.values.resources.memory.defaultRequests=16Gi</code></pre>
+  # Minimum CPU and RAM to be requested by XP deployments
+  operator.charts.values.resources.cpu.defaultRequests=2
+  operator.charts.values.resources.memory.defaultRequests=8Gi</code></pre>
 </div>
 </div>
 <div class="admonitionblock warning">
@@ -521,11 +521,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </td>
 <td class="content">
 <div class="paragraph">
-<p><strong>Shared storage:</strong> Must be an NFS compatible storage class available in your cluster</p>
+<p><strong>Default storage:</strong> For ideal performance, use an SSD backed storage class</p>
 </div>
 <div class="paragraph">
-<p>+
-<strong>Default storage:</strong> For ideal performance, use an SSD backed storage class</p>
+<p><strong>Shared storage:</strong> Must be an NFS compatible storage class available in your cluster</p>
 </div>
 </td>
 </tr>
@@ -684,6 +683,18 @@ Remember to use a unique namespace per XP deployment. Never use the same namespa
 <ol class="arabic">
 <li>
 <p>Place this yaml file in a suitable location on your computer:</p>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Make sure the spec is updated with latest versions of XP and other softwarwe listed.
+</td>
+</tr>
+</table>
+</div>
 <div class="listingblock">
 <div class="title">simple.yaml</div>
 <div class="content">
@@ -704,7 +715,7 @@ metadata:
   namespace: my-namespace
 spec:
   enabled: true
-  xpVersion: 7.13.5
+  xpVersion: 7.14.4
 
   # Create one node
   nodeGroups:
@@ -723,8 +734,9 @@ spec:
               mountPath: /deploy
 
       resources:
-        cpu: "2"
-        memory: 4Gi
+        # Max limits for CPU and Memory
+        cpu: "4"
+        memory: 16Gi
         dirs:
           # Snapshotter app copied to deploy folder
           - name: deploy
@@ -750,8 +762,8 @@ metadata:
   name: contentstudio
   namespace: my-namespace
 spec:
-  url: https://repo.enonic.com/public/com/enonic/app/contentstudio/5.0.3/contentstudio-5.0.3.jar
-  sha512: ba6b40ebf0808c6fa619ba2a05d07ce3e566eada7e9f3f34c1d280e9d1dcbd1e3c25eff9896d1057c4578ff3f516afa7a905c9e42ddc5e08f1cdf06f7e89774c
+  url: https://repo.enonic.com/public/com/enonic/app/contentstudio/5.2.1/contentstudio-5.2.1.jar
+  sha512: 70499d8612a4c0b4f12dc7c5dfe171b4ad331cf8df48af94de1a92b8fc8ab935916bb798f646cb7a358b5a0e1b2d9a2c1509671566d76dcea3d03f7142d4ba83
 ---
 # Add your own custom config
 apiVersion: enonic.cloud/v1
@@ -805,7 +817,7 @@ spec:
 <p>Then run the following command to create the xp7deployment:</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">kubectl apply -f single-xp7deployment-with-other-resources.yaml</code></pre>
+<pre class="highlight"><code class="language-bash" data-lang="bash">kubectl apply -f simple.yaml</code></pre>
 </div>
 </div>
 <div class="listingblock">
@@ -931,7 +943,7 @@ Don´t uninstall the xp-operator while there are remaining xp7Deployments on you
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-09-13 10:18:03 UTC
+Last updated 2024-09-13 16:07:52 UTC
 </div>
 </div>
 </body>
