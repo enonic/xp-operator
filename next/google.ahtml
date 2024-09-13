@@ -443,9 +443,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <ul class="sectlevel1">
 <li><a href="#prerequisites">Prerequisites</a></li>
 <li><a href="#create_a_gke_cluster">Create a GKE Cluster</a></li>
-<li><a href="#connect_to_the_cluster">Connect to the cluster</a></li>
+<li><a href="#connect_kubectl">Connect kubectl</a></li>
+<li><a href="#node_pool">Node pool</a></li>
 <li><a href="#storage_classes">Storage classes</a></li>
-<li><a href="#teardown">Teardown</a></li>
 </ul>
 </div>
 </div>
@@ -469,6 +469,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dd>
 <p>Log in to <a href="https://cloud.google.com">GCP</a>, and select or create a <code>Project</code> where you will create the k8s cluster.</p>
 </dd>
+<dt class="hdlist1">Gcloud</dt>
+<dd>
+<p>The Google Cloud CLI. Visit <a href="https://cloud.google.com/sdk/docs/install" class="bare">https://cloud.google.com/sdk/docs/install</a> for instructions to install.</p>
+</dd>
 <dt class="hdlist1">Kubectl</dt>
 <dd>
 <p>The Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it from <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">Kubernetes.io</a>.</p>
@@ -483,49 +487,52 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p><strong>Enable the Kubernetes Engine API</strong>. If the kubernetes engine API is not enabled for your GCP project, you need to enable it.</p>
+<p><strong>Enable the Kubernetes Engine API</strong></p>
+<div class="paragraph">
+<p>If the kubernetes engine API is not enabled for your GCP project, you need to enable it from the GCP console</p>
+</div>
 <div class="imageblock">
 <div class="content">
 <img src="images/gkeEnablek8sapi.png" alt="Enable API">
 </div>
 </div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The XP Operator <strong>does not support Autopilot clusters</strong>, so we will need to create the cluster from command line.
+</td>
+</tr>
+</table>
+</div>
 </li>
 <li>
-<p>Click <b class="button">Create</b> to launch the k8s cluster wizard.</p>
-<div class="imageblock">
+<p><strong>Connect gcloud to your project</strong></p>
+<div class="literalblock">
 <div class="content">
-<img src="images/gkeCreateClusterPage.png" alt="Create GKE Cluster">
+<pre>gcloud auth login
+gcloud config set project &lt;PROJECT_ID&gt;</pre>
 </div>
-</div>
-<div class="admonitionblock tip">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-tip" title="Tip"></i>
-</td>
-<td class="content">
-If you don&#8217;t get see this page, Choose <code>Kubernetes Engine</code> &#8594; <code>clusters</code> from the main menu.
-</td>
-</tr>
-</table>
 </div>
 </li>
 <li>
-<p>The XP Operator <strong>does not support Autopilot clusters</strong>, choose the <code>Standard</code> clusters instead.</p>
-</li>
-<li>
-<p>Follow the cluster creation steps by setting the values based on your cluster needs.</p>
-<div class="admonitionblock warning">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-warning" title="Warning"></i>
-</td>
-<td class="content">
-Make sure to chose kubernetes version &gt;= 1.27 which is requried by XP operator.
-</td>
-</tr>
-</table>
+<p><strong>Create the cluster</strong></p>
+<div class="paragraph">
+<p>Run the following command:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-terminal" data-lang="terminal">gcloud container clusters create mygkecluster \
+    --release-channel regular \
+    --zone europe-north1-c \
+    --node-locations europe-north1-c,</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This will create a cluster called <code>mygkecluster</code> in the europe-north1 region, using zone c. For more details check out Googles own docs.</p>
 </div>
 </li>
 </ol>
@@ -533,18 +540,26 @@ Make sure to chose kubernetes version &gt;= 1.27 which is requried by XP operato
 </div>
 </div>
 <div class="sect1">
-<h2 id="connect_to_the_cluster"><a class="link" href="#connect_to_the_cluster">Connect to the cluster</a></h2>
+<h2 id="connect_kubectl"><a class="link" href="#connect_kubectl">Connect kubectl</a></h2>
 <div class="sectionbody">
+<div class="paragraph">
+<p>Once the k8s cluster is created, you can test connecting to it</p>
+</div>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>Once the k8s cluster is created, click the cluster name</p>
+<p>From the Cluster details page in the Google console, click <b class="button">Connect</b> on the top of the page. This shows you the gcloud command you can use to connect to the k8s cluster from your computer. It should look something like this:</p>
+<div class="literalblock">
+<div class="content">
+<pre>gcloud container clusters get-credentials mygkecluster --zone europe-north1-c --project &lt;PROJECT_ID&gt;</pre>
+</div>
+</div>
 </li>
 <li>
-<p>Then click <b class="button">Connect</b> on the top middle section of the page. This shows you the gcloud command you can use to connect to the k8s cluster from your computer.</p>
-</li>
-<li>
-<p>Copy and run the gcloud command. If the command outputs <code>kubeconfig entry generated for &lt;newly-created-k8s-cluster-name&gt;</code>, it means proper kubectl config is generated on your computer and you are successfully authenticated to the k8s cluster.</p>
+<p>Copy and run the gcloud command.</p>
+<div class="paragraph">
+<p>If the output says <code>kubeconfig entry generated for mygkecluster</code>, you are good to go.</p>
+</div>
 </li>
 <li>
 <p>To verify your access to the k8s cluster run the command</p>
@@ -555,6 +570,57 @@ Make sure to chose kubernetes version &gt;= 1.27 which is requried by XP operato
 </div>
 <div class="paragraph">
 <p>This should display the list of namespaces in the newly created k8s cluster. The "Age" column in the output shows how long has it been since the namespaces are created.</p>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="node_pool"><a class="link" href="#node_pool">Node pool</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The cluster is created with a default node pool, using VMs (nodes) that are not suitable for running XP.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>To fix this, simply <strong>create a new node pool</strong>:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-terminal" data-lang="terminal">gcloud container node-pools create custom-pool \
+  --cluster=mygkecluster\
+  --machine-type=n2-standard-4 \
+  --num-nodes=1 \
+  --enable-autoscaling \
+  --min-nodes=1 --max-nodes=10 \
+  --zone=europe-north1-c</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The new pool is based on 4vCPU VMs, suitable for production grade deployments of Enonic XP.</p>
+</div>
+</li>
+<li>
+<p>When done, you may <strong>delete the old node pool</strong>:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-terminal" data-lang="terminal">gcloud container node-pools delete default-pool \
+  --cluster=mygkecluster\
+  --zone=europe-north1-c</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+These operation can also be done directly from the Cloud console UI.
+</td>
+</tr>
+</table>
 </div>
 </li>
 </ol>
@@ -573,42 +639,43 @@ Make sure to chose kubernetes version &gt;= 1.27 which is requried by XP operato
 </div>
 </div>
 <div class="paragraph">
-<p>TODO: Example</p>
-</div>
-<div class="paragraph">
-<p>This should display the list of storage classes provisioned by GKE cluster.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="teardown"><a class="link" href="#teardown">Teardown</a></h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Once you are done with your cluster, you can delete the k8s cluster from the GCP console or by using gcloud CLI:</p>
+<p>Output should look something like this:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">gcloud container clusters delete &lt;CLUSTER_NAME&gt; --region &lt;REGION_NAME&gt;</code></pre>
+<pre class="highlight"><code class="language-terminal" data-lang="terminal">NAME                     PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+premium-rwo              pd.csi.storage.gke.io   Delete          WaitForFirstConsumer   true                   89m
+standard                 kubernetes.io/gce-pd    Delete          Immediate              true                   89m
+standard-rwo (default)   pd.csi.storage.gke.io   Delete          WaitForFirstConsumer   true                   89m</code></pre>
 </div>
 </div>
-<div class="admonitionblock tip">
+<div class="paragraph">
+<p>This should display the list of storage classes currently provisioned for your GKE cluster.</p>
+</div>
+<div class="admonitionblock note">
 <table>
 <tr>
 <td class="icon">
-<i class="fa icon-tip" title="Tip"></i>
+<i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-<a href="https://cloud.google.com/sdk/docs/install">gcloud CLI installation instructions</a>
+If you plan to run XP clusters, you will need a ReadWriteMany (RWM) storage class.
 </td>
 </tr>
 </table>
+</div>
+<div class="paragraph">
+<p>A cost effective solution is to <a href="nfs.ahtml">deploy an NFS server</a> in your cluster. Google also offers a managed RWM via the <a href="https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/filestore-csi-driver">Filestore CSI driver</a>. For more details, visit the <a href="storage.ahtml">storage chapter</a>.</p>
+</div>
+<div class="paragraph">
+<p>You are now ready to <a href="install.ahtml">install the XP operator</a> and start <a href="usage.ahtml">deploying XP instances</a>.</p>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-09-12 07:43:52 UTC
+Last updated 2024-09-13 10:18:03 UTC
 </div>
 </div>
 </body>
