@@ -15,7 +15,7 @@ metadata:
   namespace: my-namespace
 spec:
   enabled: true
-  xpVersion: 7.13.5
+  xpVersion: 7.14.4
 
   # Create one node
   nodeGroups:
@@ -34,8 +34,9 @@ spec:
               mountPath: /deploy
 
       resources:
-        cpu: "2"
-        memory: 4Gi
+        # Max limits for CPU and Memory
+        cpu: "4"
+        memory: 16Gi
         dirs:
           # Snapshotter app copied to deploy folder
           - name: deploy
@@ -61,8 +62,8 @@ metadata:
   name: contentstudio
   namespace: my-namespace
 spec:
-  url: https://repo.enonic.com/public/com/enonic/app/contentstudio/5.0.3/contentstudio-5.0.3.jar
-  sha512: ba6b40ebf0808c6fa619ba2a05d07ce3e566eada7e9f3f34c1d280e9d1dcbd1e3c25eff9896d1057c4578ff3f516afa7a905c9e42ddc5e08f1cdf06f7e89774c
+  url: https://repo.enonic.com/public/com/enonic/app/contentstudio/5.2.1/contentstudio-5.2.1.jar
+  sha512: 70499d8612a4c0b4f12dc7c5dfe171b4ad331cf8df48af94de1a92b8fc8ab935916bb798f646cb7a358b5a0e1b2d9a2c1509671566d76dcea3d03f7142d4ba83
 ---
 # Add your own custom config
 apiVersion: enonic.cloud/v1

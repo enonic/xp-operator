@@ -31,16 +31,16 @@ config: |-
   operator.charts.values.storage.default.storageClassName=standard
   operator.charts.values.storage.shared.storageClassName=nfs
 
-  # Default CPU and RAM to be used by XP deployments
-  operator.charts.values.resources.cpu.defaultRequests=4
-  operator.charts.values.resources.memory.defaultRequests=16Gi
+  # Minimum CPU and RAM to be requested by XP deployments
+  operator.charts.values.resources.cpu.defaultRequests=2
+  operator.charts.values.resources.memory.defaultRequests=8Gi
 ----
 
 [WARNING]
 ====
-*Shared storage:* Must be an NFS compatible storage class available in your cluster
-+
 *Default storage:* For ideal performance, use an SSD backed storage class
+
+*Shared storage:* Must be an NFS compatible storage class available in your cluster
 ====
 
 Visit the <<storage#, storage classes section>> for more details and compatibility list of supported storage classes.
@@ -148,6 +148,8 @@ WARNING: Remember to use a unique namespace per XP deployment. Never use the sam
 
 . Place this yaml file in a suitable location on your computer:
 +
+NOTE: Make sure the spec is updated with latest versions of XP and other softwarwe listed.
++
 .simple.yaml
 [source,yaml]
 ----
@@ -158,7 +160,7 @@ include::../kubernetes/example-simple.yaml[]
 +
 [source,bash]
 ----
-kubectl apply -f single-xp7deployment-with-other-resources.yaml
+kubectl apply -f simple.yaml
 ----
 +
 .Output from a successful command
