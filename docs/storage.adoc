@@ -13,7 +13,7 @@ Storage classes act as an abstraction layer for Kubernetes to access different u
 
 Each storage class can create volumes with a specific access mode:
 
-ReadWriteOnce (RWO):: The slightly confusing name means it can be mounted in read and write mode from only one node (VM) at a time. Multiple pods on the same node can it at the same time.
+ReadWriteOnce (RWO):: The slightly confusing name means it can be mounted in read and write mode from only one node (VM) at a time. Multiple pods on the same node can use at the same time.
 
 ReadWriteMany (RWM):: Can be mounted in read and write mode by many nodes.
 
@@ -24,16 +24,14 @@ NOTE: There are also `ReadOnlyMany` and `ReadWriteOncePod` storage classes, but 
 An NFS-based `ReadWriteMany` storage class is required to deploy XP in clustered mode. Refer to the table below to see which storage class you can use on the major cloud service providers. 
 
 
-TODO:
-Most storage classes that support `ReadWriteMany` access mode have also a restriction in changing the modified time of files that XP requires. 
-
+WARNING: Some `ReadWriteMany` storage classes have restrictions to changing the modified time of files - XP requires this capability. 
 
 
 == Compatiblity list
 
 Below is a list of standard storage classes that are available out-of-the-box from popular cloud providers.
 
-[frame=ends]
+[cols=3*,frame=ends]
 |===
 |Provider
 |XP single mode
@@ -54,10 +52,9 @@ Below is a list of standard storage classes that are available out-of-the-box fr
 |Minikube
 |Any storage class
 |Any storage class
-
 |===
 
-NOTE: We strongly recommend using SSD/High performance storage backends for your RWO storage class. Other alternatives will slow down your XP instances significantly.
+NOTE: We strongly recommend using SSD backed storage for your RWO storage class. Other alternatives will slow down your XP instances significantly.
 
 WARNING: The managed RWM storage classes provided by Azure and Google have minimum disk size requirements which can be very high depending on your actual requirements. Please refer to each respective cloud provider's site for more information.
 
