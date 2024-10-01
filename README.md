@@ -146,14 +146,6 @@ And run proxy:
 kubectl -n mycloud-mysolution-myenv-myservice port-forward main-0 4848
 ```
 
-#### Enable dns records
-
-Set these in your IDE environment:
-
-```
-DNS_ENABLED=true;DNS_LB_STATICIP=192.168.0.69;DNS_CLOUDFLARE_APITOKEN=??
-```
-
 ## Release
 
 Make sure you workspace contains no uncommitted changes and then run:
