@@ -1328,8 +1328,7 @@ spec:
 namespace/my-namespace created
 xp7deployment.enonic.cloud/my-deployment created
 xp7app.enonic.cloud/contentstudio created
-xp7config.enonic.cloud/my-config created
-ingress.networking.k8s.io/my-domain-com created</code></pre>
+xp7config.enonic.cloud/my-config created</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1576,7 +1575,7 @@ ingress.networking.k8s.io/my-domain-com-admin created</code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-09-20 11:32:42 UTC
+Last updated 2024-10-01 13:03:32 UTC
 </div>
 </div>
 </body>
