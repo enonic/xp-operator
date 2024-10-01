@@ -35,16 +35,6 @@ public class SchemaTest
     }
 
     @Test
-    void v1Domain()
-        throws IOException
-    {
-        CustomResourceDefinition customResourceDefinition = loadCRD( "/domains.yaml" );
-        JSONSchemaProps schema = loadSchema( "/schema/v1/domain/domain.json" );
-
-        assertSchema( getSchemaVersion( customResourceDefinition, "v1" ), schema );
-    }
-
-    @Test
     void v1Xp7Config()
         throws IOException
     {

@@ -20,7 +20,6 @@ public class SearchersProducer
             xp7App( new InformerSearcher<>( informers.xp7AppInformer() ) ).
             xp7Config( new InformerSearcher<>( informers.xp7ConfigInformer() ) ).
             xp7Deployment( new InformerSearcher<>( informers.xp7DeploymentInformer() ) ).
-            domain( new InformerSearcher<>( informers.domainInformer() ) ).
             event( new InformerSearcher<>( informers.eventInformer() ) ).
             build();
     }

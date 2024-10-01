@@ -1,7 +1,6 @@
 package com.enonic.kubernetes.kubernetes.commands;
 
 import com.enonic.kubernetes.client.v1.xp7app.Xp7App;
-import com.enonic.kubernetes.client.v1.domain.Domain;
 import com.enonic.kubernetes.client.v1.xp7config.Xp7Config;
 import com.enonic.kubernetes.client.v1.xp7deployment.Xp7Deployment;
 import com.enonic.kubernetes.kubernetes.Clients;
@@ -19,7 +18,6 @@ import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilde
 import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilderServiceAccount;
 import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilderStatefulSet;
 import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilderXp7App;
-import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilderDomain;
 import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilderXp7Config;
 import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilderXp7Deployment;
 import com.google.common.base.Preconditions;
@@ -76,7 +74,6 @@ public class K8sCommandMapper
         this.builderMap.put( ServiceAccount.class, this::serviceAccount );
         this.builderMap.put( StatefulSet.class, this::statefulSet );
         this.builderMap.put( Xp7App.class, this::Xp7App);
-        this.builderMap.put( Domain.class, this::Domain);
         this.builderMap.put( Xp7Config.class, this::Xp7Config);
         this.builderMap.put( Xp7Deployment.class, this::Xp7Deployment);
     }
@@ -189,14 +186,6 @@ public class K8sCommandMapper
     {
         return ImmutableCommandBuilderXp7App.builder().
             client( clients.xp7Apps() ).
-            build().
-            apply( params );
-    }
-
-    private Optional<K8sCommand> Domain(final GenericBuilderParams params )
-    {
-        return ImmutableCommandBuilderDomain.builder().
-            client( clients.domain() ).
             build().
             apply( params );
     }

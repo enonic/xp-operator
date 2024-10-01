@@ -3,18 +3,14 @@ package com.enonic.kubernetes.operator.api.mutation;
 import com.enonic.kubernetes.client.v1.xp7app.Xp7App;
 import com.enonic.kubernetes.client.v1.xp7app.Xp7AppStatus;
 import com.enonic.kubernetes.client.v1.xp7app.Xp7AppStatusFields;
-import com.enonic.kubernetes.client.v1.domain.Domain;
 import com.enonic.kubernetes.client.v1.xp7config.Xp7Config;
 import com.enonic.kubernetes.client.v1.xp7deployment.Xp7Deployment;
-import com.enonic.kubernetes.client.v1.domain.DomainStatus;
-import com.enonic.kubernetes.client.v1.domain.DomainStatusFields;
 import com.enonic.kubernetes.client.v1.xp7config.Xp7ConfigStatus;
 import com.enonic.kubernetes.client.v1.xp7deployment.Xp7DeploymentSpecNodesPreinstalledApps;
 import com.enonic.kubernetes.client.v1.xp7deployment.Xp7DeploymentStatus;
 import com.enonic.kubernetes.client.v1.xp7deployment.Xp7DeploymentStatusFields;
 import com.enonic.kubernetes.operator.api.AdmissionOperation;
 import com.enonic.kubernetes.operator.api.BaseAdmissionApi;
-import com.enonic.kubernetes.operator.domain.LbServiceIpProducer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.io.BaseEncoding;
 import io.fabric8.kubernetes.api.model.HasMetadata;
@@ -42,11 +38,7 @@ import static com.enonic.kubernetes.kubernetes.Predicates.matchAnnotationPrefix;
 public class MutationApi
     extends BaseAdmissionApi<MutationRequest>
 {
-    @Inject
-    LbServiceIpProducer lbServiceIpProducer;
-
     List<Xp7DeploymentSpecNodesPreinstalledApps> preInstalledApps;
-
 
     public MutationApi()
     {
@@ -54,7 +46,6 @@ public class MutationApi
         addFunction( Xp7App.class, this::xp7app );
         addFunction( Xp7Config.class, this::xp7config );
         addFunction( Xp7Deployment.class, this::xp7deployment );
-        addFunction( Domain.class, this::domain );
         addFunction( Ingress.class, this::ingress );
 
         preInstalledApps = new LinkedList<>();
@@ -241,60 +232,6 @@ public class MutationApi
             List<Xp7DeploymentSpecNodesPreinstalledApps> newList = new LinkedList<>(preInstall);
             preInstalledApps.stream().filter(a -> !names.contains(a.getName())).forEach(newList::add);
             patch( mt, true, "/spec/nodesPreinstalledApps", newR.getSpec().getNodesPreinstalledApps(), newList );
-        }
-    }
-
-    private void domain( final MutationRequest mt )
-    {
-        // Collect old and new object
-        Domain oldR = (Domain) mt.getAdmissionReview().getRequest().getOldObject();
-        Domain newR = (Domain) mt.getAdmissionReview().getRequest().getObject();
-
-        // Create default status
-        DomainStatus defStatus;
-        try
-        {
-        final DomainStatusFields domainStatusFields;
-            domainStatusFields = new DomainStatusFields( lbServiceIpProducer.get(), false );
-
-            defStatus = new DomainStatus().
-                withState( DomainStatus.State.PENDING ).
-                withMessage( "Waiting for DNS records" ).
-                withDomainStatusFields( domainStatusFields );
-        }
-        catch ( Exception e )
-        {
-            defStatus = new DomainStatus().
-                withState( DomainStatus.State.ERROR ).
-                withMessage( e.getMessage() ).
-                withDomainStatusFields( new DomainStatusFields(List.of(), false) );
-        }
-
-        // Get OP
-        AdmissionOperation op = getOperation( mt.getAdmissionReview() );
-
-        // Ensure status
-        switch (op) {
-            case CREATE: // Always set the default status on new objects
-                patch( mt, true, "/status", newR.getStatus(), defStatus );
-                break;
-            case UPDATE:
-                if (newR.getSpec() != null && !newR.getSpec().equals( oldR.getSpec() )) {
-                    // On any change, set default status
-                    patch( mt, true, "/status", newR.getStatus(), defStatus );
-                } else {
-                    // Else make sure the old status is not removed
-                    patch( mt, false, "/status", newR.getStatus(), oldR.getStatus() );
-                }
-                break;
-            case DELETE:
-                // Do nothing
-                break;
-        }
-
-        if (newR.getSpec() != null) {
-            // Set default TTL
-            patch( mt, false, "/spec/dnsTTL", newR.getSpec().getDnsTTL(), 3600 );
         }
     }
 

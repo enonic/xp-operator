@@ -1,8 +1,5 @@
 package com.enonic.kubernetes.client;
 
-import com.enonic.kubernetes.client.v1.domain.Domain;
-import com.enonic.kubernetes.client.v1.domain.DomainSpec;
-import com.enonic.kubernetes.client.v1.domain.DomainSpecCertificate;
 import com.enonic.kubernetes.client.v1.xp7app.Xp7App;
 import com.enonic.kubernetes.client.v1.xp7app.Xp7AppSpec;
 import com.enonic.kubernetes.client.v1.xp7config.Xp7Config;
@@ -78,58 +75,6 @@ public class CrudTest
         // Test put
         resource.setMetadata( metadataBuilder.withLabels( Map.of( "test2", "test2" ) ).build() );
         resource.setSpec( new Xp7AppSpec().withUrl( "test" ) );
-        crdClient.withName( "test-name" ).replace( resource );
-
-        // Delete from server
-        assertFalse( crdClient.withName( "test-name" ).delete().isEmpty() );
-    }
-
-    @Test
-    void v1Domain()
-        throws IOException, URISyntaxException
-    {
-        final EnonicKubernetesClient client = new DefaultEnonicKubernetesClient( kubernetesClient );
-
-        // Create crd
-        final CustomResourceDefinition crd = client.k8s()
-            .apiextensions()
-            .v1()
-            .customResourceDefinitions()
-            .load( getClass().getResourceAsStream( "/domains.yaml" ) )
-            .item();
-
-        client.k8s().apiextensions().v1().customResourceDefinitions().resource( crd ).create();
-
-        // Create crd client
-        final MixedOperation<Domain, Domain.DomainList, Resource<Domain>> crdClient = client.enonic().v1().crds().domains();
-
-        // Create resource
-        final ObjectMetaBuilder metadataBuilder = new ObjectMetaBuilder().withName( "test-name" );
-        final Domain resource = new Domain().withSpec( new DomainSpec().withHost( "test.host.com" )
-                                                           .withCdn( true )
-                                                           .withDnsRecord( true )
-                                                           .withDomainSpecCertificate( new DomainSpecCertificate().withAuthority(
-                                                               DomainSpecCertificate.Authority.SELF_SIGNED ) ) );
-        resource.setMetadata( metadataBuilder.build() );
-        assertCrd( resource, "/crud-domain.json" );
-
-        // Send to server
-        crdClient.resource( resource ).create();
-
-        // List
-        final Domain.DomainList list = crdClient.list();
-        assertNotNull( list );
-        assertEquals( 1, list.getItems().size() );
-        assertEqualsCrd( resource, list.getItems().get( 0 ) );
-
-        // Fetch from server
-        final Domain get = crdClient.withName( "test-name" ).get();
-        assertNotNull( get );
-        assertEquals( resource, get );
-
-        // Test put
-        resource.setMetadata( metadataBuilder.withLabels( Map.of( "test2", "test2" ) ).build() );
-        resource.setSpec( resource.getSpec().withHost( "new.host.com" ) );
         crdClient.withName( "test-name" ).replace( resource );
 
         // Delete from server
