@@ -1,6 +1,5 @@
 package com.enonic.kubernetes.client;
 
-import com.enonic.kubernetes.client.v1.domain.Domain;
 import com.enonic.kubernetes.client.v1.xp7app.Xp7App;
 import com.enonic.kubernetes.client.v1.xp7config.Xp7Config;
 import com.enonic.kubernetes.client.v1.xp7deployment.Xp7Deployment;
@@ -19,7 +18,6 @@ public class CrdMappingProvider
         KubernetesDeserializer.registerCustomKind( API_VERSION, "Xp7App", Xp7App.class );
         KubernetesDeserializer.registerCustomKind( API_VERSION, "Xp7Config", Xp7Config.class );
         KubernetesDeserializer.registerCustomKind( API_VERSION, "Xp7Deployment", Xp7Deployment.class );
-        KubernetesDeserializer.registerCustomKind( API_VERSION, "Domain", Domain.class );
     }
 
     @SuppressWarnings("unused")

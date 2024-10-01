@@ -1,7 +1,6 @@
 package com.enonic.kubernetes.kubernetes;
 
 import com.enonic.kubernetes.client.v1.xp7app.Xp7App;
-import com.enonic.kubernetes.client.v1.domain.Domain;
 import com.enonic.kubernetes.client.v1.xp7config.Xp7Config;
 import com.enonic.kubernetes.client.v1.xp7deployment.Xp7Deployment;
 
@@ -49,7 +48,6 @@ public class InformersProducer
             .xp7AppInformer( xp7AppInformer( sf ) )
             .xp7ConfigInformer( xp7ConfigInformer( sf ) )
             .xp7DeploymentInformer( xp7DeploymentInformer( sf ) )
-            .domainInformer( domainInformer( sf ) )
             .build();
     }
 
@@ -91,10 +89,5 @@ public class InformersProducer
     private SharedIndexInformer<Xp7Deployment> xp7DeploymentInformer( final SharedInformerFactory sf )
     {
         return sf.sharedIndexInformerFor( Xp7Deployment.class, informerReSync );
-    }
-
-    private SharedIndexInformer<Domain> domainInformer( final SharedInformerFactory sf )
-    {
-        return sf.sharedIndexInformerFor( Domain.class, informerReSync );
     }
 }

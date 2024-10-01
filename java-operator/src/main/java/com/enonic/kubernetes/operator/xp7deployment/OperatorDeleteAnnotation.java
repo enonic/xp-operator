@@ -58,18 +58,7 @@ public class OperatorDeleteAnnotation
         String namespace = oldResource.getMetadata().getNamespace();
         String name = oldResource.getMetadata().getName();
 
-        deleteDomains( name );
         deleteNamespaces( namespace, name );
-    }
-
-    private void deleteDomains( final String name )
-    {
-        // Delete all annotated domains
-        searchers.domain().stream().
-            filter( isDeleted().negate() ).
-            filter( matchAnnotation( deleteAnnotation, name ) ).
-            forEach( d -> K8sLogHelper.logDelete( clients.domain().
-                withName( d.getMetadata().getName() ) ) );
     }
 
     private void deleteNamespaces( final String deploymentNamespace, final String name )

@@ -1,7 +1,6 @@
 package com.enonic.kubernetes.kubernetes;
 
 import com.enonic.kubernetes.client.v1.xp7app.Xp7App;
-import com.enonic.kubernetes.client.v1.domain.Domain;
 import com.enonic.kubernetes.client.v1.xp7config.Xp7Config;
 import com.enonic.kubernetes.client.v1.xp7deployment.Xp7Deployment;
 import com.enonic.kubernetes.common.annotations.Params;
@@ -41,8 +40,6 @@ public abstract class Informers
 
     public abstract SharedIndexInformer<Xp7Deployment> xp7DeploymentInformer();
 
-    public abstract SharedIndexInformer<Domain> domainInformer();
-
     public abstract SharedIndexInformer<Event> eventInformer();
 
     @Value.Derived
@@ -56,7 +53,6 @@ public abstract class Informers
         res.put( Xp7App.class, xp7AppInformer() );
         res.put( Xp7Config.class, xp7ConfigInformer() );
         res.put( Xp7Deployment.class, xp7DeploymentInformer() );
-        res.put( Domain.class, domainInformer() );
         res.put( Event.class, eventInformer() );
         return res;
     }

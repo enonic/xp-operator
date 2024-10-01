@@ -145,7 +145,6 @@ __  ____  __  _____   ___  __ ____  ______
 2022-04-27 15:18:48,488 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppStatusOnDeployments'
 2022-04-27 15:18:48,488 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorIngress'
 2022-04-27 15:18:48,488 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7ConfigSync' [delay: 13876, period: 60000]
-2022-04-27 15:18:48,488 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorDomainCertSync'
 2022-04-27 15:18:48,727 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7DeploymentHelm'
 2022-04-27 15:18:48,727 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppStartStopper'
 2022-04-27 15:18:48,728 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7AppStartStopper' [delay: 4061, period: 60000]

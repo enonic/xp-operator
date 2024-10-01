@@ -34,7 +34,6 @@ public class ClientsProducer
                 client.enonic(),
                 client.enonic().v1().crds().xp7apps(),
                 client.enonic().v1().crds().xp7configs(),
-                client.enonic().v1().crds().xp7deployments(),
-                client.enonic().v1().crds().domains() );
+                client.enonic().v1().crds().xp7deployments() );
     }
 }

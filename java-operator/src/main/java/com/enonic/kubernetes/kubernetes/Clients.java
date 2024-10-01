@@ -11,7 +11,6 @@ import io.fabric8.kubernetes.client.dsl.Resource;
 
 import com.enonic.kubernetes.common.annotations.Params;
 import com.enonic.kubernetes.client.v1.xp7app.Xp7App;
-import com.enonic.kubernetes.client.v1.domain.Domain;
 import com.enonic.kubernetes.client.v1.xp7config.Xp7Config;
 import com.enonic.kubernetes.client.v1.xp7deployment.Xp7Deployment;
 
@@ -30,5 +29,4 @@ public interface Clients
 
     MixedOperation<Xp7Deployment, Xp7Deployment.Xp7DeploymentList, Resource<Xp7Deployment>> xp7Deployments();
 
-    MixedOperation<Domain, Domain.DomainList, Resource<Domain>> domain();
 }

@@ -60,7 +60,7 @@ class TestApi
         TestInformerSearcher emptyInformerSearcher = new TestInformerSearcher();
         deploymentTestInformerSearcher = new TestInformerSearcher<>();
         searchers = SearchersImpl.of( emptyInformerSearcher, emptyInformerSearcher, emptyInformerSearcher, emptyInformerSearcher,
-                                      emptyInformerSearcher, emptyInformerSearcher, deploymentTestInformerSearcher, emptyInformerSearcher,
+                                      emptyInformerSearcher, emptyInformerSearcher, deploymentTestInformerSearcher,
                                       emptyInformerSearcher );
         mutationApi = new TestMutationApi( mapper, searchers );
         admissionApi = new TestAdmissionApi( mapper, searchers );

@@ -1,7 +1,6 @@
 package com.enonic.kubernetes.operator.api.admission;
 
 import com.enonic.kubernetes.client.v1.xp7app.Xp7App;
-import com.enonic.kubernetes.client.v1.domain.Domain;
 import com.enonic.kubernetes.client.v1.xp7config.Xp7Config;
 import com.enonic.kubernetes.client.v1.xp7deployment.Xp7Deployment;
 import com.enonic.kubernetes.client.v1.xp7deployment.Xp7DeploymentSpecNodeGroup;
@@ -58,7 +57,6 @@ public class AdmissionApi
         addFunction( Xp7App.class, this::xp7app );
         addFunction( Xp7Config.class, this::xp7config );
         addFunction( Xp7Deployment.class, this::xp7deployment );
-        addFunction( Domain.class, this::domain );
         addFunction( Ingress.class, this::ingress );
     }
 
@@ -331,62 +329,6 @@ public class AdmissionApi
 
             Preconditions.checkState( currentVersion.compareTo( new ComparableVersion( "7.12.100" ) ) > 0,
                                       "Operator only supports XP version 7.13 and higher" );
-        }
-    }
-
-
-    private void domain( final AdmissionReview admissionReview )
-    {
-        final AdmissionOperation op = getOperation( admissionReview );
-
-        if ( op == AdmissionOperation.DELETE )
-        {
-            return;
-        }
-
-        final Domain newDomain = (Domain) admissionReview.getRequest().getObject();
-
-        // Check spec
-        Preconditions.checkState( newDomain.getSpec() != null, "'spec' cannot be null" );
-        Preconditions.checkState( newDomain.getSpec().getHost() != null, "'spec.host' cannot be null" );
-        Validator.dns1123( "spec.host", newDomain.getSpec().getHost() );
-        Preconditions.checkState( newDomain.getSpec().getDnsRecord() != null, "'spec.dnsRecord' cannot be null" );
-
-        if ( newDomain.getSpec().getDnsRecord() )
-        {
-            Preconditions.checkState( newDomain.getSpec().getCdn() != null, "'spec.cdn' cannot be null if dnsRecord = true" );
-        }
-
-        if ( newDomain.getSpec().getDomainSpecCertificate() != null )
-        {
-            Preconditions.checkState( newDomain.getSpec().getDomainSpecCertificate().getAuthority() != null,
-                                      "'spec.certificate.authority' cannot be null" );
-            switch ( newDomain.getSpec().getDomainSpecCertificate().getAuthority() )
-            {
-                case CUSTOM:
-                    Preconditions.checkState( newDomain.getSpec().getDomainSpecCertificate().getIdentifier() != null,
-                                              "'spec.certificate.identifier' cannot be null when authority is CUSTOM" );
-                case CLUSTER_ISSUER:
-                    Preconditions.checkState( newDomain.getSpec().getDomainSpecCertificate().getIdentifier() != null,
-                                              "'spec.certificate.identifier' cannot be null when authority is CLUSTER_ISSUER" );
-            }
-        }
-
-        // Check status
-        Preconditions.checkState( newDomain.getStatus() != null, "'status' cannot be null" );
-        Preconditions.checkState( newDomain.getStatus().getMessage() != null, "'status.message' cannot be null" );
-        Preconditions.checkState( newDomain.getStatus().getState() != null, "'status.state' cannot be null" );
-        Preconditions.checkState( newDomain.getStatus().getDomainStatusFields() != null, "'status.fields' cannot be null" );
-        Preconditions.checkState( newDomain.getStatus().getDomainStatusFields().getDnsRecordCreated() != null,
-                                  "'status.fields.dnsRecordCreated' cannot be null" );
-        Preconditions.checkState( newDomain.getStatus().getDomainStatusFields().getPublicIps() != null,
-                                  "'status.fields.publicIps' cannot be null" );
-
-        if ( op == AdmissionOperation.UPDATE )
-        {
-            final Domain oldDomain = (Domain) admissionReview.getRequest().getOldObject();
-            Preconditions.checkState( oldDomain.getSpec().getHost().equals( newDomain.getSpec().getHost() ),
-                                      "'spec.host' cannot be changed" );
         }
     }
 

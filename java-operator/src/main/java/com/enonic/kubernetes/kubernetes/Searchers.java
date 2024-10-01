@@ -1,7 +1,6 @@
 package com.enonic.kubernetes.kubernetes;
 
 import com.enonic.kubernetes.client.v1.xp7app.Xp7App;
-import com.enonic.kubernetes.client.v1.domain.Domain;
 import com.enonic.kubernetes.client.v1.xp7config.Xp7Config;
 import com.enonic.kubernetes.client.v1.xp7deployment.Xp7Deployment;
 import com.enonic.kubernetes.common.annotations.Params;
@@ -29,8 +28,6 @@ public interface Searchers
     InformerSearcher<Xp7Config> xp7Config();
 
     InformerSearcher<Xp7Deployment> xp7Deployment();
-
-    InformerSearcher<Domain> domain();
 
     InformerSearcher<Event> event();
 }

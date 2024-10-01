@@ -12,6 +12,5 @@ public class TestMutationApi
         super();
         this.mapper = mapper;
         this.searchers = searchers;
-        this.lbServiceIpProducer = new TestLbServiceIpProducer();
     }
 }
