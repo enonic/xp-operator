@@ -127,6 +127,7 @@ If you plan to run XP clusters, you will also need a ReadWriteMany (RWM) storage
 
 A cost effective solution is to <<nfs#, deploy an NFS server>> in your cluster. Google also offers a managed RWM via the https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/filestore-csi-driver[Filestore CSI driver]. For more details, visit the <<storage#, storage chapter>>.
 
+== Install operator
 
-You are now ready to <<install#, install the XP operator>> and start <<usage#, deploying XP instances>>.
+You are now ready to <<installation#, install the XP operator>> and start <<usage#, deploying XP instances>>.
 
