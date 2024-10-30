@@ -3,12 +3,11 @@
 :imagesdir: images
 :experimental:
 
-Instructions on setting up a managed k8s cluster on Amazon Web Services (AWS)
+Instructions on setting up a managed Kubernetes cluster on Amazon Web Services (AWS)
 
 == Prerequisites
 
 You will need the following:
-
 
 An Amazon account:: Sign up or log in to https://aws.amazon.com/[AWS] where you will create the k8s cluster. TODO Verify
 
@@ -17,59 +16,115 @@ aws cli:: Command-line tool to manage resources in AWS. Get it https://docs.aws.
 eksctl:: Amazons version of Kubectl, eksctl, allows you to run commands against Kubernetes clusters. Download it from https://github.com/eksctl-io/eksctl#installation[Github]
 
 
+
 == Create an EKS cluster
 
-TODO
+image::../images/eks-create-cluster.png[Create EKS cluster]
 
-. *Enable the Kubernetes Engine API*. If the kubernetes engine API is not enabled for your GCP project, you need to enable it. 
-+
-image::../images/gkeEnablek8sapi.png[Enable API]
-+
-. Click btn:[Create] to launch the k8s cluster wizard. 
-+
-image::../images/gkeCreateClusterPage.png[Create GKE Cluster]
-+
-. Follow the cluster creation steps by setting the values based on your cluster needs. 
-+
-WARNING: Make sure to chose kubernetes version >= 1.27 which is requried by XP operator.
+You may create EKS clusters in many ways, we will describe the fundamentals for command line.
 
+NOTE: The XP operator currently does not support "Fargate" compute instances (due to limitations on open files), as such you should configure your cluster with managed instances instead.
+
+Instance type:: A recommended instance type is m5.xl (or larger).
+Kubernetes version:: Should be >= 1.27.9
+
+
+. Create an IAM user
+. Provide it with the relevant roles
+. Get the service credentials key for the user
+. Create a cluster configuration file 
++
+.cluster-config.yaml
+[source,Yaml]
+----
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: enonic
+  region: eu-north-1
+
+managedNodeGroups:
+  - name: eks-mng
+    instanceType: m5.xlarge
+    desiredCapacity: 1
+
+iam:
+  withOIDC: true
+  serviceAccounts:
+  - metadata:
+      name: aws-load-balancer-controller
+      namespace: kube-system
+    wellKnownPolicies:
+      awsLoadBalancerController: true
+
+addons:
+  - name: aws-ebs-csi-driver
+    wellKnownPolicies: # Adds an IAM service account
+      ebsCSIController: true
+
+cloudWatch:
+ clusterLogging:
+   enableTypes: ["*"]
+   logRetentionInDays: 30
+----
+
+NOTE: Replace `region` with your preferred one
++
+. Then *create the cluster* with the following command:
+
+    eksctl create cluster -f cluster-config.yaml
+
+NOTE: AWS may take quite some time to provision the cluster
+
+Once finished, you should see something like this in your output log:
+
+[source,JSON]
+----
+2024-10-30 13:47:58 [✔]  EKS cluster "enonic" in "eu-north-1" region is ready
+----
 
 == Connect to the cluster
 
-. Once the k8s cluster is created, click the cluster name
-. Then click btn:[Connect] on the top middle section of the page. This shows you the gcloud command you can use to connect to the k8s cluster from your computer.
-. Copy and run the gcloud command. If the command outputs `kubeconfig entry generated for <newly-created-k8s-cluster-name>`, it means proper kubectl config is generated on your computer and you are successfully authenticated to the k8s cluster. 
-. To verify your access to the k8s cluster run the command
+. Create a kubeconfig file with the following command
++
+    aws eks update-kubeconfig --region REGION --name CLUSTER_NAME
++
+. Verify you can now connect to the cluster with kubectl
++
+    kubectl get namespaces
++
+This should display a list of namespaces in the newly created k8s cluster. The "Age" column in the output shows how long has it been since the namespaces are created. 
 +
 [source,terminal]
 ----
-eksctl get namespaces
+NAME              STATUS   AGE
+default           Active   8h
+kube-node-lease   Active   8h
+kube-public       Active   8h
+kube-system       Active   8h
 ----
-+
-This should display the list of namespaces in the newly created k8s cluster. The "Age" column in the output shows how long has it been since the namespaces are created. 
-
-TODO OUTPUT
 
 
 == Storage classes
 
-When connected to your cluster, list the available storage classes with this command:
+Next step is to list available storage classes with this command:
 
-[source,terminal]
-----
-eksctl get storageclasses
-----
+    kubectl get storageclasses
 
 This should display the list of storage classes provisioned by GKE cluster.
 
-TODO output
+[source,terminal]
+----
+NAME   PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+gp2    kubernetes.io/aws-ebs   Delete          WaitForFirstConsumer   false                  9h
+----
 
 === EFS
 
 To run XP in clustered mode, a <<../storage-classes#, `ReadWriteMany` storage class>> (NFS type filesystem) is required.
 
-Amazon offers a managed service for shared filesystems called https://aws.amazon.com/efs/[Elastic File System (EFS)^]. 
-This is an alternative to <<nfs#, running your own NFS server>>. 
+You may <<nfs#, run your own NFS server>>, or take advantage of Amazon's managed service for shared filesystems called https://aws.amazon.com/efs/[Elastic File System (EFS)^]. 
 
 To provision an EFS storage for your cluster, follow Amazons own documentation:
 
@@ -78,3 +133,6 @@ To provision an EFS storage for your cluster, follow Amazons own documentation:
 
 Once this is configured properly, you may specify `efs` as your shared storage class when [installing the XP operator].
 
+== Install operator
+
+You are now ready to <<installation#, install the XP operator>> and start <<usage#, deploying XP instances>>.
