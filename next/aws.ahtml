@@ -449,6 +449,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#efs">EFS</a></li>
 </ul>
 </li>
+<li><a href="#install_operator">Install operator</a></li>
 </ul>
 </div>
 </div>
@@ -456,7 +457,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Instructions on setting up a managed k8s cluster on Amazon Web Services (AWS)</p>
+<p>Instructions on setting up a managed Kubernetes cluster on Amazon Web Services (AWS)</p>
 </div>
 </div>
 </div>
@@ -487,43 +488,129 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="create_an_eks_cluster"><a class="link" href="#create_an_eks_cluster">Create an EKS cluster</a></h2>
 <div class="sectionbody">
+<div class="imageblock">
+<div class="content">
+<img src="images/eks-create-cluster.png" alt="Create EKS cluster">
+</div>
+</div>
 <div class="paragraph">
-<p>TODO</p>
+<p>You may create EKS clusters in many ways, we will describe the fundamentals for command line.</p>
 </div>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p><strong>Enable the Kubernetes Engine API</strong>. If the kubernetes engine API is not enabled for your GCP project, you need to enable it.</p>
-<div class="imageblock">
-<div class="content">
-<img src="images/gkeEnablek8sapi.png" alt="Enable API">
-</div>
-</div>
-</li>
-<li>
-<p>Click <b class="button">Create</b> to launch the k8s cluster wizard.</p>
-<div class="imageblock">
-<div class="content">
-<img src="images/gkeCreateClusterPage.png" alt="Create GKE Cluster">
-</div>
-</div>
-</li>
-<li>
-<p>Follow the cluster creation steps by setting the values based on your cluster needs.</p>
-<div class="admonitionblock warning">
+<div class="admonitionblock note">
 <table>
 <tr>
 <td class="icon">
-<i class="fa icon-warning" title="Warning"></i>
+<i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-Make sure to chose kubernetes version &gt;= 1.27 which is requried by XP operator.
+The XP operator currently does not support "Fargate" compute instances (due to limitations on open files), as such you should configure your cluster with managed instances instead.
 </td>
 </tr>
 </table>
 </div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Instance type</dt>
+<dd>
+<p>A recommended instance type is m5.xl (or larger).</p>
+</dd>
+<dt class="hdlist1">Kubernetes version</dt>
+<dd>
+<p>Should be &gt;= 1.27.9</p>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Create an IAM user</p>
+</li>
+<li>
+<p>Provide it with the relevant roles</p>
+</li>
+<li>
+<p>Get the service credentials key for the user</p>
+</li>
+<li>
+<p>Create a cluster configuration file</p>
+<div class="listingblock">
+<div class="title">cluster-config.yaml</div>
+<div class="content">
+<pre class="highlight"><code class="language-Yaml" data-lang="Yaml">apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: enonic
+  region: eu-north-1
+
+managedNodeGroups:
+  - name: eks-mng
+    instanceType: m5.xlarge
+    desiredCapacity: 1
+
+iam:
+  withOIDC: true
+  serviceAccounts:
+  - metadata:
+      name: aws-load-balancer-controller
+      namespace: kube-system
+    wellKnownPolicies:
+      awsLoadBalancerController: true
+
+addons:
+  - name: aws-ebs-csi-driver
+    wellKnownPolicies: # Adds an IAM service account
+      ebsCSIController: true
+
+cloudWatch:
+ clusterLogging:
+   enableTypes: ["*"]
+   logRetentionInDays: 30</code></pre>
+</div>
+</div>
 </li>
 </ol>
+</div>
+</dd>
+</dl>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Replace <code>region</code> with your preferred one
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>+
+. Then <strong>create the cluster</strong> with the following command:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>eksctl create cluster -f cluster-config.yaml</pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+AWS may take quite some time to provision the cluster
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Once finished, you should see something like this in your output log:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-JSON" data-lang="JSON">2024-10-30 13:47:58 [✔]  EKS cluster "enonic" in "eu-north-1" region is ready</code></pre>
+</div>
 </div>
 </div>
 </div>
@@ -533,29 +620,34 @@ Make sure to chose kubernetes version &gt;= 1.27 which is requried by XP operato
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>Once the k8s cluster is created, click the cluster name</p>
-</li>
-<li>
-<p>Then click <b class="button">Connect</b> on the top middle section of the page. This shows you the gcloud command you can use to connect to the k8s cluster from your computer.</p>
-</li>
-<li>
-<p>Copy and run the gcloud command. If the command outputs <code>kubeconfig entry generated for &lt;newly-created-k8s-cluster-name&gt;</code>, it means proper kubectl config is generated on your computer and you are successfully authenticated to the k8s cluster.</p>
-</li>
-<li>
-<p>To verify your access to the k8s cluster run the command</p>
-<div class="listingblock">
+<p>Create a kubeconfig file with the following command</p>
+<div class="literalblock">
 <div class="content">
-<pre class="highlight"><code class="language-terminal" data-lang="terminal">eksctl get namespaces</code></pre>
+<pre>aws eks update-kubeconfig --region REGION --name CLUSTER_NAME</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Verify you can now connect to the cluster with kubectl</p>
+<div class="literalblock">
+<div class="content">
+<pre>kubectl get namespaces</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>This should display the list of namespaces in the newly created k8s cluster. The "Age" column in the output shows how long has it been since the namespaces are created.</p>
+<p>This should display a list of namespaces in the newly created k8s cluster. The "Age" column in the output shows how long has it been since the namespaces are created.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-terminal" data-lang="terminal">NAME              STATUS   AGE
+default           Active   8h
+kube-node-lease   Active   8h
+kube-public       Active   8h
+kube-system       Active   8h</code></pre>
+</div>
 </div>
 </li>
 </ol>
-</div>
-<div class="paragraph">
-<p>TODO OUTPUT</p>
 </div>
 </div>
 </div>
@@ -563,18 +655,21 @@ Make sure to chose kubernetes version &gt;= 1.27 which is requried by XP operato
 <h2 id="storage_classes"><a class="link" href="#storage_classes">Storage classes</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>When connected to your cluster, list the available storage classes with this command:</p>
+<p>Next step is to list available storage classes with this command:</p>
 </div>
-<div class="listingblock">
+<div class="literalblock">
 <div class="content">
-<pre class="highlight"><code class="language-terminal" data-lang="terminal">eksctl get storageclasses</code></pre>
+<pre>kubectl get storageclasses</pre>
 </div>
 </div>
 <div class="paragraph">
 <p>This should display the list of storage classes provisioned by GKE cluster.</p>
 </div>
-<div class="paragraph">
-<p>TODO output</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-terminal" data-lang="terminal">NAME   PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+gp2    kubernetes.io/aws-ebs   Delete          WaitForFirstConsumer   false                  9h</code></pre>
+</div>
 </div>
 <div class="sect2">
 <h3 id="efs"><a class="link" href="#efs">EFS</a></h3>
@@ -582,8 +677,7 @@ Make sure to chose kubernetes version &gt;= 1.27 which is requried by XP operato
 <p>To run XP in clustered mode, a <a href="../storage-classes.ahtml"><code>ReadWriteMany</code> storage class</a> (NFS type filesystem) is required.</p>
 </div>
 <div class="paragraph">
-<p>Amazon offers a managed service for shared filesystems called <a href="https://aws.amazon.com/efs/" target="_blank" rel="noopener">Elastic File System (EFS)</a>.
-This is an alternative to <a href="nfs.ahtml">running your own NFS server</a>.</p>
+<p>You may <a href="nfs.ahtml">run your own NFS server</a>, or take advantage of Amazon&#8217;s managed service for shared filesystems called <a href="https://aws.amazon.com/efs/" target="_blank" rel="noopener">Elastic File System (EFS)</a>.</p>
 </div>
 <div class="paragraph">
 <p>To provision an EFS storage for your cluster, follow Amazons own documentation:</p>
@@ -604,10 +698,18 @@ This is an alternative to <a href="nfs.ahtml">running your own NFS server</a>.</
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="install_operator"><a class="link" href="#install_operator">Install operator</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You are now ready to <a href="installation.ahtml">install the XP operator</a> and start <a href="usage.ahtml">deploying XP instances</a>.</p>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-10-01 13:03:46 UTC
+Last updated 2024-10-30 22:00:45 UTC
 </div>
 </div>
 </body>

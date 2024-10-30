@@ -450,6 +450,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#shared_storage">Shared storage</a></li>
 </ul>
 </li>
+<li><a href="#install_operator">Install operator</a></li>
 </ul>
 </div>
 </div>
@@ -673,16 +674,21 @@ We recommend using <code>standard-rwo</code> or <code>premium-rwo</code> when de
 <div class="paragraph">
 <p>A cost effective solution is to <a href="nfs.ahtml">deploy an NFS server</a> in your cluster. Google also offers a managed RWM via the <a href="https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/filestore-csi-driver">Filestore CSI driver</a>. For more details, visit the <a href="storage.ahtml">storage chapter</a>.</p>
 </div>
-<div class="paragraph">
-<p>You are now ready to <a href="install.ahtml">install the XP operator</a> and start <a href="usage.ahtml">deploying XP instances</a>.</p>
 </div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="install_operator"><a class="link" href="#install_operator">Install operator</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You are now ready to <a href="installation.ahtml">install the XP operator</a> and start <a href="usage.ahtml">deploying XP instances</a>.</p>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-10-01 13:03:46 UTC
+Last updated 2024-10-30 22:00:45 UTC
 </div>
 </div>
 </body>
