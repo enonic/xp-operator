@@ -481,6 +481,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dd>
 <p>Amazons version of Kubectl, eksctl, allows you to run commands against Kubernetes clusters. Download it from <a href="https://github.com/eksctl-io/eksctl#installation">Github</a></p>
 </dd>
+<dt class="hdlist1">IAM user</dt>
+<dd>
+<p>With these permissions/roles at least: <a href="https://eksctl.io/usage/minimum-iam-policies/" class="bare">https://eksctl.io/usage/minimum-iam-policies/</a></p>
+</dd>
 </dl>
 </div>
 </div>
@@ -494,7 +498,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="paragraph">
-<p>You may create EKS clusters in many ways, we will describe the fundamentals for command line.</p>
+<p>You may create EKS clusters from both Console and Command line. For simplcity, we use command line.</p>
+</div>
+<div class="paragraph">
+<p>Visit the AWS EKS docs for more details: <a href="https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html" class="bare">https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html</a></p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -503,7 +510,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-The XP operator currently does not support "Fargate" compute instances (due to limitations on open files), as such you should configure your cluster with managed instances instead.
+The XP operator currently does not support "AWS Fargate" (due to limitations on open file handlers). Use managed instances instead.
 </td>
 </tr>
 </table>
@@ -512,24 +519,24 @@ The XP operator currently does not support "Fargate" compute instances (due to l
 <dl>
 <dt class="hdlist1">Instance type</dt>
 <dd>
-<p>A recommended instance type is m5.xl (or larger).</p>
+<p>A recommended instance type is m5.xlarge (or bigger).</p>
 </dd>
 <dt class="hdlist1">Kubernetes version</dt>
 <dd>
 <p>Should be &gt;= 1.27.9</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>Follow the steps below to get a basic EKS cluster up and running:</p>
+</div>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>Create an IAM user</p>
+<p>Create an access key, and configure the aws CLI as described here: <a href="https://docs.aws.amazon.com/eks/latest/userguide/install-awscli.html" class="bare">https://docs.aws.amazon.com/eks/latest/userguide/install-awscli.html</a></p>
 </li>
 <li>
-<p>Provide it with the relevant roles</p>
-</li>
-<li>
-<p>Get the service credentials key for the user</p>
-</li>
-<li>
-<p>Create a cluster configuration file</p>
+<p>Make a cluster configuration Yaml file</p>
 <div class="listingblock">
 <div class="title">cluster-config.yaml</div>
 <div class="content">
@@ -565,12 +572,6 @@ cloudWatch:
    logRetentionInDays: 30</code></pre>
 </div>
 </div>
-</li>
-</ol>
-</div>
-</dd>
-</dl>
-</div>
 <div class="admonitionblock note">
 <table>
 <tr>
@@ -583,10 +584,9 @@ Replace <code>region</code> with your preferred one
 </tr>
 </table>
 </div>
-<div class="paragraph">
-<p>+
-. Then <strong>create the cluster</strong> with the following command:</p>
-</div>
+</li>
+<li>
+<p>and <strong>create the cluster</strong> with the following command:</p>
 <div class="literalblock">
 <div class="content">
 <pre>eksctl create cluster -f cluster-config.yaml</pre>
@@ -611,6 +611,17 @@ AWS may take quite some time to provision the cluster
 <div class="content">
 <pre class="highlight"><code class="language-JSON" data-lang="JSON">2024-10-30 13:47:58 [✔]  EKS cluster "enonic" in "eu-north-1" region is ready</code></pre>
 </div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">NOTE</dt>
+<dd>
+<p>For production use, you will likely also need to configure an AWS load balancer,</p>
+</dd>
+</dl>
+</div>
+</li>
+</ol>
 </div>
 </div>
 </div>
@@ -709,7 +720,7 @@ gp2    kubernetes.io/aws-ebs   Delete          WaitForFirstConsumer   false     
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-10-30 22:00:45 UTC
+Last updated 2024-11-27 09:29:38 UTC
 </div>
 </div>
 </body>

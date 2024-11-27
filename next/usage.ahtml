@@ -631,19 +631,17 @@ One important thing to remember is that, if there are several initContainers def
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">  ...
-      initContainers:
-        - name: init-db
-          image: db-init-image:latest
-          command: ["sh", "-c"]
-          args: ["until nslookup mydatabase; do echo waiting for mydatabase; sleep 2; done"]
-          env:
-            - name: CHECK_INTERVAL
-              value: "2"
-          mounts:
-            - name: init-scripts
-              mountPath: /scripts
-  ...</code></pre>
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">initContainers:
+  - name: init-db
+    image: db-init-image:latest
+    command: ["sh", "-c"]
+    args: ["until nslookup mydatabase; do echo waiting for mydatabase; sleep 2; done"]
+    env:
+      - name: CHECK_INTERVAL
+        value: "2"
+    mounts:
+      - name: init-scripts
+        mountPath: /scripts</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -671,9 +669,6 @@ One important thing to remember is that, if there are several initContainers def
 </li>
 <li>
 <p><code>mounts</code>: A list of mount dirs, disks or volumes with properties <code>name</code>, <code>mountPath</code>, <code>subPath</code>.</p>
-</li>
-</ul>
-</div>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 20%;">
@@ -700,6 +695,9 @@ One important thing to remember is that, if there are several initContainers def
 </tr>
 </tbody>
 </table>
+</li>
+</ul>
+</div>
 <div class="paragraph">
 <p>Read <a href="https://kubernetes.io/docs/concepts/workloads/pods/init-containers/">more</a> about the init containers.</p>
 </div>
@@ -717,30 +715,29 @@ One important thing to remember is that, if there are several initContainers def
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">  ...
-      sidecars:
-        - image: my-backup-agent
-          name: my-backup-agent
-          command: []
-          args: []
-          mounts:
-            - name: restic
-              mountPath: /restic
-            - name: export
-              mountPath: /enonic-xp/home/data
-            - name: shared
-              subPath: blobstore
-              mountPath: /enonic-xp/home/repo/blob
-            - name: shared
-              subPath: snapshots
-              mountPath: /enonic-xp/home/snapshots
-          ports:
-            - name: backup
-              containerPort: 8000
-              protocol: TCP
-          env:
-            - name: AGENT_K8S_CONTAINER
-              value: my-backup-agent</code></pre>
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">sidecars:
+  - image: my-backup-agent
+    name: my-backup-agent
+    command: []
+    args: []
+    mounts:
+      - name: restic
+        mountPath: /restic
+      - name: export
+        mountPath: /enonic-xp/home/data
+      - name: shared
+        subPath: blobstore
+        mountPath: /enonic-xp/home/repo/blob
+      - name: shared
+        subPath: snapshots
+        mountPath: /enonic-xp/home/snapshots
+    ports:
+      - name: backup
+        containerPort: 8000
+        protocol: TCP
+    env:
+      - name: AGENT_K8S_CONTAINER
+        value: my-backup-agent</code></pre>
 </div>
 </div>
 <div class="ulist">
@@ -765,9 +762,6 @@ One important thing to remember is that, if there are several initContainers def
 </li>
 <li>
 <p><code>mounts</code>: A list of mount dirs, disks or volumes with properties <code>name</code>, <code>mountPath</code>, <code>subPath</code>.</p>
-</li>
-</ul>
-</div>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 20%;">
@@ -794,6 +788,9 @@ One important thing to remember is that, if there are several initContainers def
 </tr>
 </tbody>
 </table>
+</li>
+</ul>
+</div>
 </div>
 <div class="sect3">
 <h4 id="env"><a class="link" href="#env">env</a></h4>
@@ -821,9 +818,9 @@ One important thing to remember is that, if there are several initContainers def
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">      env:
-        - name: MY_ENV_VAR
-          value: my-value</code></pre>
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">env:
+  - name: MY_ENV_VAR
+    value: my-value</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -831,13 +828,13 @@ One important thing to remember is that, if there are several initContainers def
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">    env:
-      - name: SECRET_USERNAME
-        valueFrom:
-          secretKeyRef:
-            name: mysecret
-            key: username
-            optional: true</code></pre>
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">env:
+  - name: SECRET_USERNAME
+    valueFrom:
+      secretKeyRef:
+        name: mysecret
+        key: username
+        optional: true</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -848,12 +845,12 @@ One important thing to remember is that, if there are several initContainers def
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">      env:
-        - name: AGENT_K8S_NAMESPACE
-          valueFrom:
-            fieldRef:
-              apiVersion: v1
-              fieldPath: metadata.namespace</code></pre>
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">env:
+  - name: AGENT_K8S_NAMESPACE
+    valueFrom:
+      fieldRef:
+        apiVersion: v1
+        fieldPath: metadata.namespace</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -864,12 +861,12 @@ One important thing to remember is that, if there are several initContainers def
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">      env:
-        - name: APP_CONFIG
-          valueFrom:
-            configMapKeyRef:
-              name: app-config
-              key: log_level</code></pre>
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">env:
+  - name: APP_CONFIG
+    valueFrom:
+      configMapKeyRef:
+        name: app-config
+        key: log_level</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -946,7 +943,7 @@ spec:
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-It can vary how fast XP registers the Xp7Config changes. It can be instant, but it can also take up to a couple of minutes, depending on the Kubernetes cluster setup.
+It can vary how fast XP registers the Xp7Config changes. It can be instant, but it can also take up to a couple of minutes, depending on your Kubernetes cluster setup.
 </td>
 </tr>
 </table>
@@ -955,7 +952,7 @@ It can vary how fast XP registers the Xp7Config changes. It can be instant, but 
 <div class="sect2">
 <h3 id="xp7app"><a class="link" href="#xp7app">Xp7App</a></h3>
 <div class="paragraph">
-<p>This resource is to manage apps with the operator. While you can manage them with XP, this provides you with the option to create a deployment complete with your custom apps using the operator. This resource namespaced, and should be created in a namespace that already contains a Xp7Deployment.</p>
+<p>This resource is to manage apps with the operator. While you can manage them with XP directly, this provides you with the option to create a deployment complete with your custom apps using the operator. This resource is namespaced, and should be created in a namespace that already contains an Xp7Deployment.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -993,13 +990,20 @@ The <code>sha512</code> field is optional, but if provided, XP will validate the
 <div class="sect2">
 <h3 id="ingresses"><a class="link" href="#ingresses">Ingresses</a></h3>
 <div class="paragraph">
-<p>To create virtual hosts for XP you use ingress annotations. These follow the format of:</p>
+<p>To expose your XP instance outside of the K8s cluster, the operator uses standard k8s Ingresses. To simplify management, XP&#8217;s virtual hosts are also managed via Ingress annotations.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Sample annotations</p>
+</li>
+</ol>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">enonic.cloud/xp7.vhost.mapping.&lt;MAPPING_NAME&gt;.source: /admin
+<pre>enonic.cloud/xp7.vhost.mapping.&lt;MAPPING_NAME&gt;.source: /admin
 enonic.cloud/xp7.vhost.mapping.&lt;MAPPING_NAME&gt;.target: /admin
-enonic.cloud/xp7.vhost.mapping.&lt;MAPPING_NAME&gt;.idproviders: &lt;DEFAULT_IDPROVIDER&gt;,&lt;OTHER_ENABLED_IDPROVIDER&gt;</code></pre>
+enonic.cloud/xp7.vhost.mapping.&lt;MAPPING_NAME&gt;.idproviders: &lt;DEFAULT_IDPROVIDER&gt;,&lt;OTHER_ENABLED_IDPROVIDER&gt;</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1577,7 +1581,7 @@ ingress.networking.k8s.io/my-domain-com-admin created</code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-10-30 22:00:45 UTC
+Last updated 2024-11-27 09:29:38 UTC
 </div>
 </div>
 </body>
