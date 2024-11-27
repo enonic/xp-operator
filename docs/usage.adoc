@@ -123,19 +123,17 @@ One important thing to remember is that, if there are several initContainers def
 
 [source,yaml]
 ----
-  ...
-      initContainers:
-        - name: init-db
-          image: db-init-image:latest
-          command: ["sh", "-c"]
-          args: ["until nslookup mydatabase; do echo waiting for mydatabase; sleep 2; done"]
-          env:
-            - name: CHECK_INTERVAL
-              value: "2"
-          mounts:
-            - name: init-scripts
-              mountPath: /scripts
-  ...
+initContainers:
+  - name: init-db
+    image: db-init-image:latest
+    command: ["sh", "-c"]
+    args: ["until nslookup mydatabase; do echo waiting for mydatabase; sleep 2; done"]
+    env:
+      - name: CHECK_INTERVAL
+        value: "2"
+    mounts:
+      - name: init-scripts
+        mountPath: /scripts
 ----
 
 An `initContainer` block in `Xp7Deployment` has several possible fields:
@@ -147,8 +145,7 @@ An `initContainer` block in `Xp7Deployment` has several possible fields:
 - `env`: Specify environment variables here. See <<env>> for more information.
 - `ports`: A list of port objects with properties `name`, `containerPort`, and `protocol`. This can be used to expose ports
 - `mounts`: A list of mount dirs, disks or volumes with properties `name`, `mountPath`, `subPath`.
-
-
++
 [cols="1,4"]
 |===
 | Property | Description
@@ -175,31 +172,29 @@ Here is how you can define a sidecar within the container structure:
 
 [source, yaml]
 ----
-  ...
-      sidecars:
-        - image: my-backup-agent
-          name: my-backup-agent
-          command: []
-          args: []
-          mounts:
-            - name: restic
-              mountPath: /restic
-            - name: export
-              mountPath: /enonic-xp/home/data
-            - name: shared
-              subPath: blobstore
-              mountPath: /enonic-xp/home/repo/blob
-            - name: shared
-              subPath: snapshots
-              mountPath: /enonic-xp/home/snapshots
-          ports:
-            - name: backup
-              containerPort: 8000
-              protocol: TCP
-          env:
-            - name: AGENT_K8S_CONTAINER
-              value: my-backup-agent
-
+sidecars:
+  - image: my-backup-agent
+    name: my-backup-agent
+    command: []
+    args: []
+    mounts:
+      - name: restic
+        mountPath: /restic
+      - name: export
+        mountPath: /enonic-xp/home/data
+      - name: shared
+        subPath: blobstore
+        mountPath: /enonic-xp/home/repo/blob
+      - name: shared
+        subPath: snapshots
+        mountPath: /enonic-xp/home/snapshots
+    ports:
+      - name: backup
+        containerPort: 8000
+        protocol: TCP
+    env:
+      - name: AGENT_K8S_CONTAINER
+        value: my-backup-agent
 ----
 - `name`:The name of the `sidecar`
 - `image`: The image to use for the `sidecar`
@@ -208,7 +203,7 @@ Here is how you can define a sidecar within the container structure:
 - `env`: Specify environment variables here. See <<env>> for more information.
 - `ports`: A list of port objects with properties `name`, `containerPort`, and `protocol`. This can be used to expose ports
 - `mounts`: A list of mount dirs, disks or volumes with properties `name`, `mountPath`, `subPath`.
-
++
 [cols="1,4"]
 |===
 | Property | Description
@@ -237,21 +232,21 @@ Simple single environment variable:
 
 [source,yaml]
 ----
-      env:
-        - name: MY_ENV_VAR
-          value: my-value
+env:
+  - name: MY_ENV_VAR
+    value: my-value
 ----
 
 Secret key reference example:
 [source,yaml]
 ----
-    env:
-      - name: SECRET_USERNAME
-        valueFrom:
-          secretKeyRef:
-            name: mysecret
-            key: username
-            optional: true
+env:
+  - name: SECRET_USERNAME
+    valueFrom:
+      secretKeyRef:
+        name: mysecret
+        key: username
+        optional: true
 
 ----
 
@@ -260,24 +255,24 @@ An environment variable SECRET_USERNAME is defined whose value is sourced from a
 Field reference example:
 [source,yaml]
 ----
-      env:
-        - name: AGENT_K8S_NAMESPACE
-          valueFrom:
-            fieldRef:
-              apiVersion: v1
-              fieldPath: metadata.namespace
+env:
+  - name: AGENT_K8S_NAMESPACE
+    valueFrom:
+      fieldRef:
+        apiVersion: v1
+        fieldPath: metadata.namespace
 ----
 This configuration means the AGENT_K8S_NAMESPACE environment variable will be set to the namespace in which the XP deployment is running.
 
 ConfigMap key reference example:
 [source,yaml]
 ----
-      env:
-        - name: APP_CONFIG
-          valueFrom:
-            configMapKeyRef:
-              name: app-config
-              key: log_level
+env:
+  - name: APP_CONFIG
+    valueFrom:
+      configMapKeyRef:
+        name: app-config
+        key: log_level
 ----
 This configuration means the APP_CONFIG environment variable will be set to the value of the `log_level` key in the `app-config` ConfigMap.
 
@@ -321,11 +316,11 @@ spec:
   data: SGVpISBZb3UgYXJlIG9uZSBub3N5IGZveC4gVGhpcyBpcyB0b3Agc2VjcmV0IGRhdGEuIEdldCBvdXQgb2YgaGVyZS4gU2hvb28uLi4uLi4uLi4uLg==
 ----
 
-NOTE: It can vary how fast XP registers the Xp7Config changes. It can be instant, but it can also take up to a couple of minutes, depending on the Kubernetes cluster setup.
+NOTE: It can vary how fast XP registers the Xp7Config changes. It can be instant, but it can also take up to a couple of minutes, depending on your Kubernetes cluster setup.
 
 === Xp7App
 
-This resource is to manage apps with the operator. While you can manage them with XP, this provides you with the option to create a deployment complete with your custom apps using the operator. This resource namespaced, and should be created in a namespace that already contains a Xp7Deployment.
+This resource is to manage apps with the operator. While you can manage them with XP directly, this provides you with the option to create a deployment complete with your custom apps using the operator. This resource is namespaced, and should be created in a namespace that already contains an Xp7Deployment.
 
 [source,yaml]
 ----
@@ -347,14 +342,16 @@ In addition to new resources, there are also new annotations that add some funct
 
 === Ingresses
 
-To create virtual hosts for XP you use ingress annotations. These follow the format of:
+To expose your XP instance outside of the K8s cluster, the operator uses standard k8s Ingresses. To simplify management, XP's virtual hosts are also managed via Ingress annotations.
 
+. Sample annotations 
 [source,yaml]
 ----
 enonic.cloud/xp7.vhost.mapping.<MAPPING_NAME>.source: /admin
 enonic.cloud/xp7.vhost.mapping.<MAPPING_NAME>.target: /admin
 enonic.cloud/xp7.vhost.mapping.<MAPPING_NAME>.idproviders: <DEFAULT_IDPROVIDER>,<OTHER_ENABLED_IDPROVIDER>
 ----
+
 
 A very important thing to keep in mind is that the annotation `enonic.cloud/xp7.vhost.mapping.<MAPPING_NAME>.source` has to match a defined `spec.rules[?].http.paths[?].path` in the same ingress. That is so the operator knows what node groups it needs to update. That brings us to the second point. The `spec.rules[?].http.paths[?].backend.serviceName` has to match a node group name defined in your Xp7Deployment.
 

@@ -15,24 +15,26 @@ aws cli:: Command-line tool to manage resources in AWS. Get it https://docs.aws.
 
 eksctl:: Amazons version of Kubectl, eksctl, allows you to run commands against Kubernetes clusters. Download it from https://github.com/eksctl-io/eksctl#installation[Github]
 
+IAM user:: With these permissions/roles at least: https://eksctl.io/usage/minimum-iam-policies/
 
 
 == Create an EKS cluster
 
 image::../images/eks-create-cluster.png[Create EKS cluster]
 
-You may create EKS clusters in many ways, we will describe the fundamentals for command line.
+You may create EKS clusters from both Console and Command line. For simplcity, we use command line.
 
-NOTE: The XP operator currently does not support "Fargate" compute instances (due to limitations on open files), as such you should configure your cluster with managed instances instead.
+Visit the AWS EKS docs for more details: https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html
 
-Instance type:: A recommended instance type is m5.xl (or larger).
+NOTE: The XP operator currently does not support "AWS Fargate" (due to limitations on open file handlers). Use managed instances instead.
+
+Instance type:: A recommended instance type is m5.xlarge (or bigger).
 Kubernetes version:: Should be >= 1.27.9
 
+Follow the steps below to get a basic EKS cluster up and running:
 
-. Create an IAM user
-. Provide it with the relevant roles
-. Get the service credentials key for the user
-. Create a cluster configuration file 
+. Create an access key, and configure the aws CLI as described here: https://docs.aws.amazon.com/eks/latest/userguide/install-awscli.html
+. Make a cluster configuration Yaml file 
 +
 .cluster-config.yaml
 [source,Yaml]
@@ -68,21 +70,23 @@ cloudWatch:
    enableTypes: ["*"]
    logRetentionInDays: 30
 ----
-
++
 NOTE: Replace `region` with your preferred one
 +
-. Then *create the cluster* with the following command:
-
+. and *create the cluster* with the following command:
++
     eksctl create cluster -f cluster-config.yaml
-
++
 NOTE: AWS may take quite some time to provision the cluster
-
++
 Once finished, you should see something like this in your output log:
-
++
 [source,JSON]
 ----
 2024-10-30 13:47:58 [✔]  EKS cluster "enonic" in "eu-north-1" region is ready
 ----
+
+NOTE:: For production use, you will likely also need to configure an AWS load balancer, 
 
 == Connect to the cluster
 
