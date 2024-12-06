@@ -1387,6 +1387,21 @@ kind: Xp7Deployment
 <div class="sect1">
 <h2 id="cluster_example"><a class="link" href="#cluster_example">Cluster example</a></h2>
 <div class="sectionbody">
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The Cluster feature is still in Beta, due to limited testing. We do not recommend using this in production at the moment.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s deploy a cluster example. Create a file called <code>cluster.yaml</code> and paste these contents to it:</p>
+</div>
 <div class="admonitionblock warning">
 <table>
 <tr>
@@ -1394,13 +1409,10 @@ kind: Xp7Deployment
 <i class="fa icon-warning" title="Warning"></i>
 </td>
 <td class="content">
-The values cpu and memory setting in this example are too low for a good cluster setup. They are set this way, so you can try it out on a low resource Kubernetes cluster.
+The default cpu and memory values in the example below are too low for a proper cluster deployment. They are set this way, so you can try it out on a low resource Kubernetes cluster.
 </td>
 </tr>
 </table>
-</div>
-<div class="paragraph">
-<p>Let&#8217;s deploy a cluster example. Create a file called <code>cluster.yaml</code> and paste these contents to it:</p>
 </div>
 <div class="listingblock">
 <div class="title">cluster.yaml</div>
@@ -1581,7 +1593,7 @@ ingress.networking.k8s.io/my-domain-com-admin created</code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-12-06 08:52:59 UTC
+Last updated 2024-12-06 08:59:42 UTC
 </div>
 </div>
 </body>
