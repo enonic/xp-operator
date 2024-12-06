@@ -584,9 +584,11 @@ kind: Xp7Deployment
 
 == Cluster example
 
-WARNING: The values cpu and memory setting in this example are too low for a good cluster setup. They are set this way, so you can try it out on a low resource Kubernetes cluster.
+NOTE: The Cluster feature is still in Beta, due to limited testing. We do not recommend using this in production at the moment.
 
 Let's deploy a cluster example. Create a file called `cluster.yaml` and paste these contents to it:
+
+WARNING: The default cpu and memory values in the example below are too low for a proper cluster deployment. They are set this way, so you can try it out on a low resource Kubernetes cluster.
 
 .cluster.yaml
 [source,yaml]
