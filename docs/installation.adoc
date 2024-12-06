@@ -10,7 +10,7 @@ Before you can install the operator, you must have a running k8s cluster + Kubec
 
 Kubernetes:: A running Kubernetes cluster version `1.27+`. The k8s cluster can be hosted by any cloud service provider, or even run on premises. The only thing that differs is which storage classes you can use.
 +
-Follow these steps to create a managed cluster using <<aws#, Amazon Web Services (AWS)>>, <<google#, Google Cloud Platform GCP>>, or <<azure, Microsoft Azure>>.
+Follow these steps to create a managed cluster using <<aws#, Amazon Web Services (AWS)>>, <<google#, Google Cloud Platform GCP>>, or Microsoft Azure.
 
 Kubectl:: Is the Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it from https://kubernetes.io/docs/tasks/tools/install-kubectl/[kubernetes.io].
 

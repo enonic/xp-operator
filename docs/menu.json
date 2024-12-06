@@ -21,10 +21,6 @@
         "document": "aws"
       },
       {
-        "title": "Azure",
-        "document": "azure"
-      },
-      {
         "title": "Google Cloud",
         "document": "google"
       },
