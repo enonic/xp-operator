@@ -1,10 +1,10 @@
-<img align="right" src="https://raw.githubusercontent.com/enonic/xp/master/misc/logo.png">
 <h1>Enonic XP Kubernetes Operator</h1>
 
 The Enonic XP Kubernetes Operator is a piece of software runs on top of Kubernetes to help you manage your XP deployments.
 
+
+- [Documentation](#documentation)
 - [Contents of this repository](#contents-of-this-repository)
-- [Usage](#usage)
 - [Development](#development)
   - [Requirements for local development](#requirements-for-local-development)
   - [Running and installing operator to kind cluster](#running-and-installing-operator-to-kind-cluster)
@@ -13,6 +13,13 @@ The Enonic XP Kubernetes Operator is a piece of software runs on top of Kubernet
     - [Spoof hosts for SSE events](#spoof-hosts-for-sse-events)
     - [Enable dns records](#enable-dns-records)
 - [Release](#release)
+
+
+## Documentation
+
+The official documentation is available on the Developer portal: https://developer.enonic.com/docs/kubernetes-operator-for-xp
+
+
 
 
 ## Contents of this repository
@@ -25,9 +32,6 @@ This repository contains these various parts relating to the operator:
 * [Enonic XP kubectl plugin](./kubectl-plugin)
 * [Enonic XP Kubernetes Operator Documentation](./docs/index.adoc)
 
-## Usage
-
-Read about how to install and use the operator in the [documentation](./docs/index.adoc).
 
 ## Development
 

@@ -4,11 +4,15 @@
 
 The Enonic XP Operator lets you deploy XP instances on Kubernetes (k8s) with ease. It builds on the https://kubernetes.io/docs/concepts/extend-kubernetes/operator/[operator pattern] provided by Kubernetes.
 
+image::xp-operator-logo.svg[XP K8S operator, 300w]
+
 == Introduction
 
 Creating a single-instance XP deployment is easy, but managing production grade XP clusters is more complex. Add to that the complexity of Kubernetes, and you can quickly get into trouble. The operator simplifies this.
 
 NOTE: The operator only supports Enonic XP `v7.13.2` and newer.
+
+
 
 
 == Installation

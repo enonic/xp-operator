@@ -15,7 +15,7 @@ metadata:
   namespace: my-namespace
 spec:
   enabled: true     # Should the pods be running
-  xpVersion: 7.13.5  # XP version, has to be >=7.13.0
+  xpVersion: 7.14.4  # XP version, has to be >=7.13.2
 
   # Create volumes shared by all nodes in this deployment
   nodesSharedDisks:
@@ -55,7 +55,7 @@ spec:
 
       initContainers:
         # Preinstall Snapshotter app on worker nodes
-        - image: enonic/snapshotter:3.1.0
+        - image: enonic/snapshotter:3.2.0
           name: snapshotter-deploy
           mounts:
             - name: deploy
