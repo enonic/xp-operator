@@ -476,7 +476,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dd>
 <p>A running Kubernetes cluster version <code>1.27+</code>. The k8s cluster can be hosted by any cloud service provider, or even run on premises. The only thing that differs is which storage classes you can use.</p>
 <div class="paragraph">
-<p>Follow these steps to create a managed cluster using <a href="aws.ahtml">Amazon Web Services (AWS)</a>, <a href="google.ahtml">Google Cloud Platform GCP</a>, or <a href="#azure">Microsoft Azure</a>.</p>
+<p>Follow these steps to create a managed cluster using <a href="aws.ahtml">Amazon Web Services (AWS)</a>, <a href="google.ahtml">Google Cloud Platform GCP</a>, or Microsoft Azure.</p>
 </div>
 </dd>
 <dt class="hdlist1">Kubectl</dt>
@@ -943,7 +943,7 @@ Don´t uninstall the xp-operator while there are remaining xp7Deployments on you
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-11-27 09:29:38 UTC
+Last updated 2024-12-06 07:13:38 UTC
 </div>
 </div>
 </body>
