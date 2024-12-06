@@ -17,11 +17,6 @@ spec:
   enabled: true     # Should the pods be running
   xpVersion: 7.14.4  # XP version, has to be >=7.13.2
 
-  # List of preinstalled apps
-  nodesPreinstalledApps:
-   - name: snapshotter
-     url: https://repo.enonic.com/public/com/enonic/app/snapshotter/3.1.0/snapshotter-3.1.0.jar
-
   # List of disks shared by all nodes (see description of disks below)
   nodesSharedDisks:
     - name: blobstore

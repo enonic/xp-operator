@@ -27,7 +27,7 @@ spec:
 
       initContainers:
         # Preinstall Snapshotter app
-        - image: enonic/snapshotter:3.2.0
+        - image: enonic/snapshotter:3.2.1
           name: snapshotter-deploy
           mounts:
             - name: deploy
