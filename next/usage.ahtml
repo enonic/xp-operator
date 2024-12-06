@@ -531,7 +531,7 @@ spec:
 
       initContainers:
         # Preinstall Snapshotter app
-        - image: enonic/snapshotter:3.1.0
+        - image: enonic/snapshotter:3.2.1
           name: snapshotter-deploy
           mounts:
             - name: deploy
@@ -1238,7 +1238,7 @@ spec:
 
       initContainers:
         # Preinstall Snapshotter app
-        - image: enonic/snapshotter:3.2.0
+        - image: enonic/snapshotter:3.2.1
           name: snapshotter-deploy
           mounts:
             - name: deploy
@@ -1474,7 +1474,7 @@ spec:
 
       initContainers:
         # Preinstall Snapshotter app on worker nodes
-        - image: enonic/snapshotter:3.2.0
+        - image: enonic/snapshotter:3.2.1
           name: snapshotter-deploy
           mounts:
             - name: deploy
@@ -1593,7 +1593,7 @@ ingress.networking.k8s.io/my-domain-com-admin created</code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-12-06 09:06:16 UTC
+Last updated 2024-12-06 09:14:14 UTC
 </div>
 </div>
 </body>

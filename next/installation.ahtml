@@ -727,7 +727,7 @@ spec:
 
       initContainers:
         # Preinstall Snapshotter app
-        - image: enonic/snapshotter:3.2.0
+        - image: enonic/snapshotter:3.2.1
           name: snapshotter-deploy
           mounts:
             - name: deploy
@@ -943,7 +943,7 @@ Don´t uninstall the xp-operator while there are remaining xp7Deployments on you
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-12-06 09:06:16 UTC
+Last updated 2024-12-06 09:14:14 UTC
 </div>
 </div>
 </body>
