@@ -1,12 +1,12 @@
 {
     "menuItems": [
       {
-        "title": "Usage",
-        "document": "usage"
-      },
-      {
         "title": "Installation",
         "document": "installation"
+      },
+      {
+        "title": "Usage",
+        "document": "usage"
       },
       {
         "title": "Storage classes",

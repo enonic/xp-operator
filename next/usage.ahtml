@@ -1238,7 +1238,7 @@ spec:
 
       initContainers:
         # Preinstall Snapshotter app
-        - image: enonic/snapshotter:3.1.0
+        - image: enonic/snapshotter:3.2.0
           name: snapshotter-deploy
           mounts:
             - name: deploy
@@ -1273,7 +1273,7 @@ metadata:
   name: contentstudio
   namespace: my-namespace
 spec:
-  url: https://repo.enonic.com/public/com/enonic/app/contentstudio/5.2.1/contentstudio-5.2.1.jar
+  url: https://repo.enonic.com/public/com/enonic/app/contentstudio/5.2.3/contentstudio-5.2.3.jar
   sha512: 70499d8612a4c0b4f12dc7c5dfe171b4ad331cf8df48af94de1a92b8fc8ab935916bb798f646cb7a358b5a0e1b2d9a2c1509671566d76dcea3d03f7142d4ba83
 ---
 # Add your own custom config
@@ -1422,7 +1422,7 @@ metadata:
   namespace: my-namespace
 spec:
   enabled: true
-  xpVersion: 7.13.4
+  xpVersion: 7.14.4
 
   # Create volumes shared by all nodes in this deployment
   nodesSharedDisks:
@@ -1462,7 +1462,7 @@ spec:
 
       initContainers:
         # Preinstall Snapshotter app on worker nodes
-        - image: enonic/snapshotter:3.1.0
+        - image: enonic/snapshotter:3.2.0
           name: snapshotter-deploy
           mounts:
             - name: deploy
@@ -1581,7 +1581,7 @@ ingress.networking.k8s.io/my-domain-com-admin created</code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-12-06 07:13:38 UTC
+Last updated 2024-12-06 08:38:56 UTC
 </div>
 </div>
 </body>

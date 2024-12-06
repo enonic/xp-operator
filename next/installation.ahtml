@@ -562,7 +562,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 	--namespace kube-system \
 	--values values.yaml \
 	xp-operator \
-	&lt;URL to operator i.e. https://repo.enonic.com/repository/helm/xp-operator-1.0.0-RC1.tgz&gt;</code></pre>
+	&lt;URL to operator i.e. https://repo.enonic.com/repository/helm/xp-operator-1.0.0.tgz&gt;</code></pre>
 </div>
 </div>
 <div class="admonitionblock note">
@@ -727,7 +727,7 @@ spec:
 
       initContainers:
         # Preinstall Snapshotter app
-        - image: enonic/snapshotter:3.1.0
+        - image: enonic/snapshotter:3.2.0
           name: snapshotter-deploy
           mounts:
             - name: deploy
@@ -762,7 +762,7 @@ metadata:
   name: contentstudio
   namespace: my-namespace
 spec:
-  url: https://repo.enonic.com/public/com/enonic/app/contentstudio/5.2.1/contentstudio-5.2.1.jar
+  url: https://repo.enonic.com/public/com/enonic/app/contentstudio/5.2.3/contentstudio-5.2.3.jar
   sha512: 70499d8612a4c0b4f12dc7c5dfe171b4ad331cf8df48af94de1a92b8fc8ab935916bb798f646cb7a358b5a0e1b2d9a2c1509671566d76dcea3d03f7142d4ba83
 ---
 # Add your own custom config
@@ -943,7 +943,7 @@ Don´t uninstall the xp-operator while there are remaining xp7Deployments on you
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-12-06 07:13:38 UTC
+Last updated 2024-12-06 08:38:56 UTC
 </div>
 </div>
 </body>
