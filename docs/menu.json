@@ -1,6 +1,10 @@
 {
     "menuItems": [
       {
+        "title": "Introduction",
+        "document": "index"
+      },
+      {
         "title": "Installation",
         "document": "installation"
       },
