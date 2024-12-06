@@ -15,7 +15,7 @@ metadata:
   namespace: my-namespace
 spec:
   enabled: true     # Should the pods be running
-  xpVersion: 7.13.5  # XP version, has to be >=7.13.0
+  xpVersion: 7.14.4  # XP version, has to be >=7.13.2
 
   # List of preinstalled apps
   nodesPreinstalledApps:
@@ -67,7 +67,7 @@ metadata:
   name: contentstudio
   namespace: my-namespace
 spec:
-  url: https://repo.enonic.com/public/com/enonic/app/contentstudio/5.1.3/contentstudio-5.1.3.jar
+  url: https://repo.enonic.com/public/com/enonic/app/contentstudio/5.2.3/contentstudio-5.2.3.jar
   sha512: 88919bcd99ebd658e218402a548d6fabd08b4b7467a9e57f98c23357936a2c163b28207c3c1db25809ec70f56a294d1b40a3e07a5fa45cfec4224f7bf2833df3
 ---
 # Add your own custom config
