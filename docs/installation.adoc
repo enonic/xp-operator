@@ -139,7 +139,7 @@ __  ____  __  _____   ___  __ ____  ______
 
 == Test the operator
 
-The best way of verifying that thangs are working, is by creating a basic xp7deployment.
+The best way of verifying that things are working, is by creating a basic xp7deployment.
 The example below will create a namespace, a single-node XP7 server, pre-install selected applications, and configure an ingress.
 
 WARNING: Remember to use a unique namespace per XP deployment. Never use the same namespace as the operator.
