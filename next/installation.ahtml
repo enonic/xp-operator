@@ -662,7 +662,7 @@ __  ____  __  _____   ___  __ ____  ______
 <h2 id="test_the_operator"><a class="link" href="#test_the_operator">Test the operator</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The best way of verifying that thangs are working, is by creating a basic xp7deployment.
+<p>The best way of verifying that things are working, is by creating a basic xp7deployment.
 The example below will create a namespace, a single-node XP7 server, pre-install selected applications, and configure an ingress.</p>
 </div>
 <div class="admonitionblock warning">
@@ -943,7 +943,7 @@ Don´t uninstall the xp-operator while there are remaining xp7Deployments on you
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-12-06 08:59:42 UTC
+Last updated 2024-12-06 09:06:16 UTC
 </div>
 </div>
 </body>
