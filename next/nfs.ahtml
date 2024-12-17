@@ -503,23 +503,11 @@ GKE (Google) Autopilot clusters do not support running NFS due to security restr
 <div class="sectionbody">
 <div class="sect2">
 <h3 id="add_helm_repository"><a class="link" href="#add_helm_repository">Add helm repository</a></h3>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-As of this writing, the helm community is slowly phasing out the stable channel. The new version of <a href="https://github.com/kubernetes-sigs/nfs-ganesha-server-and-external-provisioner">this provisioner</a> does not have its own helm repo yet.
-</td>
-</tr>
-</table>
-</div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ helm repo add stable https://charts.helm.sh/stable
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ helm repo add nfs-server-and-external-provisioner https://kubernetes-sigs.github.io/nfs-ganesha-server-and-external-provisioner/
 
-"stable" has been added to your repositories</code></pre>
+"nfs-server-and-external-provisioner" has been added to your repositories</code></pre>
 </div>
 </div>
 <div class="listingblock">
@@ -527,7 +515,7 @@ As of this writing, the helm community is slowly phasing out the stable channel.
 <pre class="highlight"><code class="language-bash" data-lang="bash">$ helm repo update
 
 Hang tight while we grab the latest from your chart repositories...
-...Successfully got an update from the "stable" chart repository
+...Successfully got an update from the "nfs-server-and-external-provisioner" chart repository
 Update Complete. ⎈Happy Helming!⎈</code></pre>
 </div>
 </div>
@@ -554,9 +542,9 @@ You might want to update <code>persistence.size</code> for more capacity.
     --set persistence.size=10Gi \
     --set storageClass.name=nfs \
     --set storageClass.allowVolumeExpansion=true \
-    --version 1.1.3 \
-    nfs-server \
-    stable/nfs-server-provisioner
+    --version 1.8.0 \
+    nfs-server-and-external-provisioner \
+    nfs-server-and-external-provisioner/nfs-server-provisioner
 
 Release "nfs-server" does not exist. Installing it now.
 WARNING: This chart is deprecated
@@ -583,10 +571,10 @@ The NFS Provisioner service has now been installed.</code></pre>
 <h3 id="add_helm_repository_2"><a class="link" href="#add_helm_repository_2">Add helm repository</a></h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ helm repo add nfs https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ helm repo add nfs-external-provisioner https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
 
 
-"nfs" has been added to your repositories</code></pre>
+"nfs-external-provisioner" has been added to your repositories</code></pre>
 </div>
 </div>
 <div class="listingblock">
@@ -594,7 +582,7 @@ The NFS Provisioner service has now been installed.</code></pre>
 <pre class="highlight"><code class="language-bash" data-lang="bash">$ helm repo update
 
 Hang tight while we grab the latest from your chart repositories...
-...Successfully got an update from the "nfs" chart repository
+...Successfully got an update from the "nfs-external-provisioner" chart repository
 Update Complete. ⎈Happy Helming!⎈</code></pre>
 </div>
 </div>
@@ -622,9 +610,9 @@ Change <code>nfs.server</code> and <code>nfs.path</code> to reflect your setup.
     --set storageClass.name=nfs \
     --set storageClass.archiveOnDelete=false \
     --set storageClass.allowVolumeExpansion=true \
-    --version 3.0.0 \
+    --version 4.0.18 \
     nfs-client \
-    nfs/nfs-subdir-external-provisioner
+    nfs-external-provisioner/nfs-subdir-external-provisioner
 
 Release "nfs-client" does not exist. Installing it now.
 NAME: nfs-client
@@ -641,7 +629,7 @@ TEST SUITE: None</code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-12-06 09:14:14 UTC
+Last updated 2024-12-17 16:28:56 UTC
 </div>
 </div>
 </body>
