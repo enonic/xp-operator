@@ -19,13 +19,11 @@ Helm:: Is a package manager for Kubernetes.
 
 === Add helm repository
 
-NOTE: As of this writing, the helm community is slowly phasing out the stable channel. The new version of https://github.com/kubernetes-sigs/nfs-ganesha-server-and-external-provisioner[this provisioner] does not have its own helm repo yet.
-
 [source,bash]
 ----
-$ helm repo add stable https://charts.helm.sh/stable
+$ helm repo add nfs-server-and-external-provisioner https://kubernetes-sigs.github.io/nfs-ganesha-server-and-external-provisioner/
 
-"stable" has been added to your repositories
+"nfs-server-and-external-provisioner" has been added to your repositories
 ----
 
 [source,bash]
@@ -33,7 +31,7 @@ $ helm repo add stable https://charts.helm.sh/stable
 $ helm repo update
 
 Hang tight while we grab the latest from your chart repositories...
-...Successfully got an update from the "stable" chart repository
+...Successfully got an update from the "nfs-server-and-external-provisioner" chart repository
 Update Complete. ⎈Happy Helming!⎈
 ----
 
@@ -49,9 +47,9 @@ $ helm upgrade --install \
     --set persistence.size=10Gi \
     --set storageClass.name=nfs \
     --set storageClass.allowVolumeExpansion=true \
-    --version 1.1.3 \
-    nfs-server \
-    stable/nfs-server-provisioner
+    --version 1.8.0 \
+    nfs-server-and-external-provisioner \
+    nfs-server-and-external-provisioner/nfs-server-provisioner
 
 Release "nfs-server" does not exist. Installing it now.
 WARNING: This chart is deprecated
@@ -74,10 +72,10 @@ If you already have an NFS server, we can create a client that uses that. Read m
 
 [source,bash]
 ----
-$ helm repo add nfs https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
+$ helm repo add nfs-external-provisioner https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
 
 
-"nfs" has been added to your repositories
+"nfs-external-provisioner" has been added to your repositories
 ----
 
 [source,bash]
@@ -85,7 +83,7 @@ $ helm repo add nfs https://kubernetes-sigs.github.io/nfs-subdir-external-provis
 $ helm repo update
 
 Hang tight while we grab the latest from your chart repositories...
-...Successfully got an update from the "nfs" chart repository
+...Successfully got an update from the "nfs-external-provisioner" chart repository
 Update Complete. ⎈Happy Helming!⎈
 ----
 
@@ -102,9 +100,9 @@ $ helm upgrade --install \
     --set storageClass.name=nfs \
     --set storageClass.archiveOnDelete=false \
     --set storageClass.allowVolumeExpansion=true \
-    --version 3.0.0 \
+    --version 4.0.18 \
     nfs-client \
-    nfs/nfs-subdir-external-provisioner
+    nfs-external-provisioner/nfs-subdir-external-provisioner
 
 Release "nfs-client" does not exist. Installing it now.
 NAME: nfs-client

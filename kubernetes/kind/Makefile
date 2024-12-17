@@ -21,16 +21,17 @@ kind-bootstrap:
 		(echo "Kubectl should be ${KIND_CTX}" && exit 1)
 
 	# Setup NFS server provisioner
-	@helm repo add stable https://charts.helm.sh/stable
+	@helm repo add nfs-server-and-external-provisioner https://kubernetes-sigs.github.io/nfs-ganesha-server-and-external-provisioner/
+
 	@helm upgrade --install \
 		--namespace kube-system \
 		--set persistence.enabled=true \
 		--set persistence.size=1Gi \
 		--set storageClass.name=nfs \
 		--set storageClass.allowVolumeExpansion=true \
-		--version 1.1.3 \
+		--version 1.8.0 \
 		nfs-server-provisioner \
-		stable/nfs-server-provisioner
+		nfs-server-and-external-provisioner/nfs-server-provisioner
 
 kind-dev: ## Setup cluster for development mode (env var MY_IP required)
 	# Ensure MY_IP is set
