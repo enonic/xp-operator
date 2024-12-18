@@ -468,9 +468,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dd>
 <p>Is local Kubernetes, focusing on making it easy to learn and develop for Kubernetes. Download it <a href="https://minikube.sigs.k8s.io/docs/start/">here</a>.</p>
 </dd>
-<dt class="hdlist1">VirtualBox</dt>
+<dt class="hdlist1">Docker</dt>
 <dd>
-<p>Is a virtualization software. You can use other virtual machine or container manager with Minikube but VirtualBox has proven most stable for minikube. Download it <a href="https://www.virtualbox.org/wiki/Downloads">here</a>.</p>
+<p>Is a container management platform. You can use other virtual machine or container managers with Minikube, but Docker is the most preferable Minikube <a href="https://minikube.sigs.k8s.io/docs/drivers/">driver</a> across all operating systems. Download it <a href="https://www.docker.com/products/docker-desktop/">here</a>.</p>
 </dd>
 <dt class="hdlist1">Kubectl</dt>
 <dd>
@@ -513,16 +513,16 @@ On Macbook clients with m1 chip, the virtualbox vm-driver is not supported and u
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-bash" data-lang="bash">$ minikube start \
-	--cpus=2 \
-	--memory=4gb \
+	--cpus=4 \
+	--memory=16gb \
 	--disk-size=10gb \
 	--vm-driver=virtualbox \
-	--kubernetes-version=v1.19.11
+	--kubernetes-version=v1.27.0
 
 * Using the virtualbox driver based on user configuration
 * Starting control plane node minikube in cluster minikube
-* Creating virtualbox VM (CPUs=2, Memory=4096MB, Disk=10240MB) ...
-* Preparing Kubernetes v1.19.11 on Docker 20.10.4 ...
+* Creating virtualbox VM (CPUs=4, Memory=4096MB, Disk=16384MB) ...
+* Preparing Kubernetes v1.27.0 on Docker 27.2.0 ...
   - Generating certificates and keys ...
   - Booting up control plane ...
   - Configuring RBAC rules ...
@@ -581,7 +581,7 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-12-18 09:59:58 UTC
+Last updated 2024-12-18 11:39:23 UTC
 </div>
 </div>
 </body>

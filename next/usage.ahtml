@@ -1246,8 +1246,8 @@ spec:
 
       resources:
         # Max limits for CPU and Memory
-        cpu: "4"
-        memory: 16Gi
+        cpu: "2"
+        memory: 8Gi
         dirs:
           # Snapshotter app copied to deploy folder
           - name: deploy
@@ -1593,7 +1593,7 @@ ingress.networking.k8s.io/my-domain-com-admin created</code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-12-18 09:59:58 UTC
+Last updated 2024-12-18 11:39:23 UTC
 </div>
 </div>
 </body>
