@@ -10,7 +10,7 @@ You need to have installed these programs on your computer:
 
 Minikube:: Is local Kubernetes, focusing on making it easy to learn and develop for Kubernetes. Download it https://minikube.sigs.k8s.io/docs/start/[here].
 
-VirtualBox:: Is a virtualization software. You can use other virtual machine or container manager with Minikube but VirtualBox has proven most stable for minikube. Download it https://www.virtualbox.org/wiki/Downloads[here].
+Docker:: Is a container management platform. You can use other virtual machine or container managers with Minikube, but Docker is the most preferable Minikube https://minikube.sigs.k8s.io/docs/drivers/[driver] across all operating systems. Download it https://www.docker.com/products/docker-desktop/[here].
 
 Kubectl:: Is the Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it https://kubernetes.io/docs/tasks/tools/install-kubectl/[here].
 
@@ -25,16 +25,16 @@ NOTE: On Macbook clients with m1 chip, the virtualbox vm-driver is not supported
 [source,bash]
 ----
 $ minikube start \
-	--cpus=2 \
-	--memory=4gb \
+	--cpus=4 \
+	--memory=16gb \
 	--disk-size=10gb \
 	--vm-driver=virtualbox \
-	--kubernetes-version=v1.19.11
+	--kubernetes-version=v1.27.0
 
 * Using the virtualbox driver based on user configuration
 * Starting control plane node minikube in cluster minikube
-* Creating virtualbox VM (CPUs=2, Memory=4096MB, Disk=10240MB) ...
-* Preparing Kubernetes v1.19.11 on Docker 20.10.4 ...
+* Creating virtualbox VM (CPUs=4, Memory=4096MB, Disk=16384MB) ...
+* Preparing Kubernetes v1.27.0 on Docker 27.2.0 ...
   - Generating certificates and keys ...
   - Booting up control plane ...
   - Configuring RBAC rules ...

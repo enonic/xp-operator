@@ -35,8 +35,8 @@ spec:
 
       resources:
         # Max limits for CPU and Memory
-        cpu: "4"
-        memory: 16Gi
+        cpu: "2"
+        memory: 8Gi
         dirs:
           # Snapshotter app copied to deploy folder
           - name: deploy
