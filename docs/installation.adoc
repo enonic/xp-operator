@@ -6,9 +6,11 @@ This section covers the installation and testing of the Enonic XP Kubernetes Ope
 
 == Prerequisites
 
-Before you can install the operator, you must have a running k8s cluster + Kubectl and Helm installed on your local machine. See details below:
+Before you can install the operator, you must have a running k8s cluster + Kubectl and Helm installed on your local machine. See details below.
 
-Kubernetes:: A running Kubernetes cluster version `1.27+`. The k8s cluster can be hosted by any cloud service provider, or even run on premises. The only thing that differs is which storage classes you can use.
+NOTE: We recommend using the latest version of Kubernetes. The minimal version of Kubernetes required by XP Operator is 1.27+. 
+
+Kubernetes:: The k8s cluster can be hosted by any cloud service provider, or even run on premises. The only thing that differs is which storage classes you can use.
 +
 Follow these steps to create a managed cluster using <<aws#, Amazon Web Services (AWS)>>, <<google#, Google Cloud Platform GCP>>, or Microsoft Azure.
 
