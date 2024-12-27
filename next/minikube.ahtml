@@ -493,19 +493,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-You can run a cluster with less resources, but it won&#8217;t be able to run any workloads. The amount of resources in this example won&#8217;t let you run XP clusters. Feel free to add more juice if your machine can handle it.
-</td>
-</tr>
-</table>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-On Macbook clients with m1 chip, the virtualbox vm-driver is not supported and use "docker" instead of "virtualbox" as a vm-driver option.
+The amount of resources you allocate to minikube will depend on your computer&#8217;s capacity and the workload you intend to run on the cluster.
 </td>
 </tr>
 </table>
@@ -516,12 +504,9 @@ On Macbook clients with m1 chip, the virtualbox vm-driver is not supported and u
 	--cpus=4 \
 	--memory=16gb \
 	--disk-size=10gb \
-	--vm-driver=virtualbox \
+    --vm-driver=docker \
 	--kubernetes-version=v1.27.0
 
-* Using the virtualbox driver based on user configuration
-* Starting control plane node minikube in cluster minikube
-* Creating virtualbox VM (CPUs=4, Memory=4096MB, Disk=16384MB) ...
 * Preparing Kubernetes v1.27.0 on Docker 27.2.0 ...
   - Generating certificates and keys ...
   - Booting up control plane ...
@@ -572,7 +557,7 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 <div class="content">
 <pre class="highlight"><code class="language-bash" data-lang="bash">$ minikube delete
 
-* Deleting "minikube" in virtualbox ...
+* Deleting "minikube" in docker ...
 * Removed all traces of the "minikube" cluster.</code></pre>
 </div>
 </div>
@@ -581,7 +566,7 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-12-18 11:39:23 UTC
+Last updated 2024-12-27 14:06:36 UTC
 </div>
 </div>
 </body>
