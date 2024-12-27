@@ -26,6 +26,7 @@ $ minikube start \
 	--cpus=4 \
 	--memory=16gb \
 	--disk-size=10gb \
+    --vm-driver=docker \
 	--kubernetes-version=v1.27.0
 
 * Preparing Kubernetes v1.27.0 on Docker 27.2.0 ...
