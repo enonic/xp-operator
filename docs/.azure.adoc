@@ -1,0 +1,91 @@
+= Creating an Azure Kubernetes Service (AKS) cluster
+:toc: right
+:imagesdir: images
+:experimental:
+
+Instructions on setting up a managed k8s cluster on Microsoft Azure
+
+== Prerequisites
+
+You will need the following:
+
+TODO
+
+An Azure account:: Log in to https://portal.azure.com/[Azure]
+
+Az CLI:: Command-line tool to manage resources in Azure. Download it TODO
+
+Kubectl:: The Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it from https://kubernetes.io/docs/tasks/tools/install-kubectl/[Kubernetes.io].
+
+
+== Create an AKS cluster
+
+TODO
+
+. *Enable the Kubernetes Engine API*. If the kubernetes engine API is not enabled for your GCP project, you need to enable it. 
++
+image::../images/gkeEnablek8sapi.png[Enable API]
++
+. Click btn:[Create] to launch the k8s cluster wizard. 
++
+image::../images/gkeCreateClusterPage.png[Create GKE Cluster]
++
+. Follow the cluster creation steps by setting the values based on your cluster needs. 
++
+WARNING: Make sure to chose kubernetes version >= 1.27 which is requried by XP operator.
+
+
+== Connect to the cluster
+
+TODO
+
+. Once the k8s cluster is created, click the cluster name
+. Then click btn:[Connect] on the top middle section of the page. This shows you the gcloud command you can use to connect to the k8s cluster from your computer.
+. Copy and run the gcloud command. If the command outputs `kubeconfig entry generated for <newly-created-k8s-cluster-name>`, it means proper kubectl config is generated on your computer and you are successfully authenticated to the k8s cluster. 
+. To verify your access to the k8s cluster run the command
++
+[source,terminal]
+----
+kubectl get namespaces
+----
++
+This should display the list of namespaces in the newly created k8s cluster. The "Age" column in the output shows how long has it been since the namespaces are created. 
+
+
+== Storage classes
+
+When connected to your cluster, list the available storage classes with this command:
+
+[source,terminal]
+----
+kubectl get storageclasses
+----
+
+TODO: Example
+
+This should display the list of storage classes provisioned by GKE cluster.
+
+=== TODO
+
+To run XP in cluster mode, a <<../storage-classes#, `ReadWriteMany` storage class>> (NFS type filesystem) must exist.
+
+Azure offers a managed service for shared filesystems called https://azure.microsoft.com/en-us/products/storage/files[Azure Files^], which can be used to provision an NFS filesystem to your AKS cluster. 
+
+A cost effective alternative is to <<nfs#, run your own NFS server>>. 
+
+
+TODO? Does Azure files work?
+
+
+To provision an EFS storage, you will need the
+
+=== Instruction to create EFS
+https://docs.aws.amazon.com/efs/latest/ug/gs-step-two-create-efs-resources.html
+
+=== Instruction to create a storage class with dynamic provisionin
+https://aws.amazon.com/blogs/containers/introducing-efs-csi-dynamic-provisioning/
+ 
+----
+
+
+

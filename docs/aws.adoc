@@ -1,0 +1,142 @@
+= Creating an Elastic Kubernetes Service (EKS) cluster
+:toc: right
+:imagesdir: images
+:experimental:
+
+Instructions on setting up a managed Kubernetes cluster on Amazon Web Services (AWS)
+
+== Prerequisites
+
+You will need the following:
+
+An Amazon account:: Sign up or log in to https://aws.amazon.com/[AWS] where you will create the k8s cluster. TODO Verify
+
+aws cli:: Command-line tool to manage resources in AWS. Get it https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html[Amazon].
+
+eksctl:: Amazons version of Kubectl, eksctl, allows you to run commands against Kubernetes clusters. Download it from https://github.com/eksctl-io/eksctl#installation[Github]
+
+IAM user:: With these permissions/roles at least: https://eksctl.io/usage/minimum-iam-policies/
+
+
+== Create an EKS cluster
+
+image::../images/eks-create-cluster.png[Create EKS cluster]
+
+You may create EKS clusters from both Console and Command line. For simplcity, we use command line.
+
+Visit the AWS EKS docs for more details: https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html
+
+NOTE: The XP operator currently does not support "AWS Fargate" (due to limitations on open file handlers). Use managed instances instead.
+
+Instance type:: A recommended instance type is m5.xlarge (or bigger).
+Kubernetes version:: Should be >= 1.27.9
+
+Follow the steps below to get a basic EKS cluster up and running:
+
+. Create an access key, and configure the aws CLI as described here: https://docs.aws.amazon.com/eks/latest/userguide/install-awscli.html
+. Make a cluster configuration Yaml file 
++
+.cluster-config.yaml
+[source,Yaml]
+----
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: enonic
+  region: eu-north-1
+
+managedNodeGroups:
+  - name: eks-mng
+    instanceType: m5.xlarge
+    desiredCapacity: 1
+
+iam:
+  withOIDC: true
+  serviceAccounts:
+  - metadata:
+      name: aws-load-balancer-controller
+      namespace: kube-system
+    wellKnownPolicies:
+      awsLoadBalancerController: true
+
+addons:
+  - name: aws-ebs-csi-driver
+    wellKnownPolicies: # Adds an IAM service account
+      ebsCSIController: true
+
+cloudWatch:
+ clusterLogging:
+   enableTypes: ["*"]
+   logRetentionInDays: 30
+----
++
+NOTE: Replace `region` with your preferred one
++
+. and *create the cluster* with the following command:
++
+    eksctl create cluster -f cluster-config.yaml
++
+NOTE: AWS may take quite some time to provision the cluster
++
+Once finished, you should see something like this in your output log:
++
+[source,JSON]
+----
+2024-10-30 13:47:58 [✔]  EKS cluster "enonic" in "eu-north-1" region is ready
+----
+
+NOTE:: For production use, you will likely also need to configure an AWS load balancer, 
+
+== Connect to the cluster
+
+. Create a kubeconfig file with the following command
++
+    aws eks update-kubeconfig --region REGION --name CLUSTER_NAME
++
+. Verify you can now connect to the cluster with kubectl
++
+    kubectl get namespaces
++
+This should display a list of namespaces in the newly created k8s cluster. The "Age" column in the output shows how long has it been since the namespaces are created. 
++
+[source,terminal]
+----
+NAME              STATUS   AGE
+default           Active   8h
+kube-node-lease   Active   8h
+kube-public       Active   8h
+kube-system       Active   8h
+----
+
+
+== Storage classes
+
+Next step is to list available storage classes with this command:
+
+    kubectl get storageclasses
+
+This should display the list of storage classes provisioned by GKE cluster.
+
+[source,terminal]
+----
+NAME   PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+gp2    kubernetes.io/aws-ebs   Delete          WaitForFirstConsumer   false                  9h
+----
+
+=== EFS
+
+To run XP in clustered mode, a <<../storage-classes#, `ReadWriteMany` storage class>> (NFS type filesystem) is required.
+
+You may <<nfs#, run your own NFS server>>, or take advantage of Amazon's managed service for shared filesystems called https://aws.amazon.com/efs/[Elastic File System (EFS)^]. 
+
+To provision an EFS storage for your cluster, follow Amazons own documentation:
+
+. https://docs.aws.amazon.com/efs/latest/ug/gs-step-two-create-efs-resources.html[Create an EFS^] 
+. Then, https://aws.amazon.com/blogs/containers/introducing-efs-csi-dynamic-provisioning/[create a storage class with dynamic provisioning]
+
+Once this is configured properly, you may specify `efs` as your shared storage class when [installing the XP operator].
+
+== Install operator
+
+You are now ready to <<installation#, install the XP operator>> and start <<usage#, deploying XP instances>>.

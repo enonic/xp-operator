@@ -1,8 +1,0 @@
-= Uninstalling
-:toc: right
-:imagesdir: images
-
-* helm uninstall xp-operator
-
-WARN: Don´t uninstall the xp-operator while there is an xp7deployment on your cluster
-----

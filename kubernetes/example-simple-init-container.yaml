@@ -4,7 +4,7 @@ kind: Namespace
 metadata:
   name: my-namespace
   annotations:
-    # Delete this namespace it the deployment is deleted
+    # Delete this namespace if the deployment is deleted
     enonic.cloud/remove.with.xp7deployment: my-deployment
 ---
 # Create deployment in the namespace
@@ -15,7 +15,7 @@ metadata:
   namespace: my-namespace
 spec:
   enabled: true
-  xpVersion: 7.13.4
+  xpVersion: 7.14.4
 
   nodesSharedVolumes:
     - name: shared

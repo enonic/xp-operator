@@ -14,45 +14,45 @@ metadata:
   name: my-deployment
   namespace: my-namespace
 spec:
-  enabled: true
-  xpVersion: 7.14.4
+  enabled: true     # Should the pods be running
+  xpVersion: 7.14.4  # XP version, has to be >=7.13.2
 
-  # Create one node
+  # List of disks shared by all nodes (see description of disks below)
+  nodesSharedDisks:
+    - name: blobstore
+      size: 1Gi
+    - name: snapshots
+      size: 1Gi
+    - name: export
+      size: 1Gi
+
+  # List of nodegroups
   nodeGroups:
+      # Name and number of replicas
     - name: main
       replicas: 1
 
+      # Role of the node
       data: true
       master: true
 
-      initContainers:
-        # Preinstall Snapshotter app
-        - image: enonic/snapshotter:3.2.1
-          name: snapshotter-deploy
-          mounts:
-            - name: deploy
-              mountPath: /deploy
+      # Environment variables
+      env:
+        - name: MY_ENV_VAR
+          value: hey
 
       resources:
-        # Max limits for CPU and Memory
-        cpu: "2"
-        memory: 8Gi
-        dirs:
-          # Snapshotter app copied to deploy folder
-          - name: deploy
-            size: 100Mi
-            mountReadOnly: true
-        # Disks private to the node
+        # Cpu and memory allocation
+        cpu: "1.5"
+        memory: 512Mi
+
+        # List of disks private to each and every node
         disks:
-          - name: blobstore
+          - name: deploy
             size: 1Gi
-          - name: snapshots
+          - name: index
             size: 1Gi
-          - name: export # Dumps and other data
-            size: 1Gi
-          - name: index # Node ES index
-            size: 1Gi
-          - name: work # Node cache
+          - name: work
             size: 1Gi
 ---
 # Install content studio
@@ -63,7 +63,7 @@ metadata:
   namespace: my-namespace
 spec:
   url: https://repo.enonic.com/public/com/enonic/app/contentstudio/5.2.3/contentstudio-5.2.3.jar
-  sha512: 70499d8612a4c0b4f12dc7c5dfe171b4ad331cf8df48af94de1a92b8fc8ab935916bb798f646cb7a358b5a0e1b2d9a2c1509671566d76dcea3d03f7142d4ba83
+  sha512: 88919bcd99ebd658e218402a548d6fabd08b4b7467a9e57f98c23357936a2c163b28207c3c1db25809ec70f56a294d1b40a3e07a5fa45cfec4224f7bf2833df3
 ---
 # Add your own custom config
 apiVersion: enonic.cloud/v1
@@ -75,38 +75,37 @@ spec:
   nodeGroup: all
   file: com.my-app.cfg
   data: |
-    my = config
+    my = custom
+    config = file
 ---
-# Expose XP through an ingress
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: my-domain-com
+  name: xp-ingress
   namespace: my-namespace
   annotations:
+    kubernetes.io/ingress.class: nginx
     enonic.cloud/xp7.vhost.mapping.my-mapping-site.source: /
     enonic.cloud/xp7.vhost.mapping.my-mapping-site.target: /site/default/master/homepage
-
     enonic.cloud/xp7.vhost.mapping.my-mapping-admin.source: /admin
     enonic.cloud/xp7.vhost.mapping.my-mapping-admin.target: /admin
     enonic.cloud/xp7.vhost.mapping.my-mapping-admin.idproviders: system
 spec:
   rules:
-    - host: my-domain.com
-      http:
-        paths:
-          - path: /
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: main
-                port:
-                  number: 8080
-
-          - path: /admin
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: main
-                port:
-                  number: 8080
+  - host: my-domain-com-admin
+    http:
+      paths:
+      - path: /
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: main
+            port:
+              number: 8080
+      - path: /admin
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: main
+            port:
+              number: 8080

@@ -2,93 +2,76 @@
 :toc: right
 :imagesdir: images
 
-This section covers the installation of the Enonic XP Kubernetes Operator.
+This section covers the installation and testing of the Enonic XP Kubernetes Operator.
 
 == Prerequisites
 
-Kubernetes:: A running Kubernetes cluster version `1.22+`. The k8s cluster can be on-premise or any cloud service provider. The only thing that differs depending on the type of k8s clusters is which storage class to use. And more information about that is shown in the "Storage classes" section below.
+Before you can install the operator, you must have a running k8s cluster + Kubectl and Helm installed on your local machine. See details below.
 
+NOTE: We recommend using the latest version of Kubernetes. The minimal version of Kubernetes required by XP Operator is 1.27+.
 
-Kubectl:: Is the Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it https://kubernetes.io/docs/tasks/tools/install-kubectl/[here].
+Kubernetes:: The k8s cluster can be hosted by any cloud service provider, or even run on premises. The only thing that differs is which storage classes you can use.
++
+Follow these steps to create a managed cluster using <<aws#, Amazon Web Services (AWS)>>, <<google#, Google Cloud Platform GCP>>, or Microsoft Azure.
 
-Helm:: Is a package manager for Kubernetes. Download it https://helm.sh/docs/intro/install/[here].
+Kubectl:: Is the Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it from https://kubernetes.io/docs/tasks/tools/install-kubectl/[kubernetes.io].
 
-== Namespaces
+Helm:: Is a package manager for Kubernetes. Download it from https://helm.sh/docs/intro/install/[helm.sh].
 
-This guide instructs you to install the operator (and potentially the NFS provisioner) into the `kube-system` namespace. Although this is not a strict requirement, it is best practice to install kubernetes extensions into a namespace that clearly indicates that it has components vital to the system. Since `kube-system` is present in all clusters and should never be deleted, it is recommended to use that. You can create your own `my-system` namespace and install the operator there. Do not, for example, install the operator and an XP7 deployment into the same namespace.
+== Create chart values file
 
-== Storage classes
+With the prerequisites in place, you can start setting up your Helm chart file. This is used to configure the XP operator.
 
-Before we deploy the operator, we need to talk about storage classes. That should be a familiar concept to people that have worked on kubernetes clusters before. If you do not know what they are, you can basically think of them as different approaches to store your data. Each storage class can create volumes that have one of these four access modes:
-
-* `ReadWriteOnce`: Can be mounted as read-write by a single node. Multiple pods can access the volume when the pods are running on the same node.
-* `ReadOnlyMany`:  Can be mounted read-only by many nodes.
-* `ReadWriteMany`: Can be mounted as read-write by many nodes.
-* `ReadWriteOncePod`: Can be mounted as read-write by a single pod.
-
-ReadWriteOnce mode is supported by the default storage classes in any k8s cluster; that satisfies the requirement of XP deployment in single mode. However, to deploy XP in cluster mode, an NFS based storage class with "ReadWriteMany" access mode is required. 
-
-For instance, the standard storage class in `minikube` supports all modes and can be used to deploy XP in single as well as in cluster mode. However, the standard storage classes in the major managed k8s providers like `GKE`, `AKS` and `EKS` do not support `ReadWriteMany` mode. Most storage classes that support `ReadWriteMany` access mode have also a restriction in changing the modified time of files that XP requires. At the time of this writing, the only storage classes that can be used to deploy XP in cluster mode are NFS based storage classes with `ReadWriteMany` access mode. Refer to the table below to see which storage class you can use on the major cloud service providers. 
-
-
-=== Compatible Storage classes for running XP in single and cluster mode
-[frame=ends]
-|===
-|XP deployment mode |Google |Azure |Amazon
-
-|Single
-|Any storage class with RWO
-|Any storage class with RWO
-|Any storage class with RWO
-
-|Cluster
-|Filestore CSI driver based storage class with RWM*
-|Azurefile CSI driver based storage class with RWM*
-|EFS
-|===
-
-`* NFS based CSI driver storage classes in AKS and GKE have minimum size requirements which can be very high depending on your storage requirement. Please refer to the respective cloud provider's site for more information.`
-
-Note: In GKE and AKS, you can get managed storage classes that are NFS based CSI driver storage backends. However, for Amazon EKS you need to create the ´EFS´ storage class. See our <<efs#,EFS storage class>> guide for more information. 
-
-=== Provisioning NFS based storage class
-
-If you are running an ´on-premiser´ k8s cluster or you don't want to use the available NFS based storage classes in managed k8s clusters, you have the possibility to self provision NFS based storage classes. See our <<nfs#,NFS storage class>> guide for more information. 
-
-== Installation
-
-=== Create chart values file
-
-The chart `values.yaml` file is how you generally configure a deployment with Helm (to learn more about how Helm uses values files, visit the https://helm.sh/docs/chart_template_guide/values_files/#helm[Helm developer docs]). You can read more about available values you can configure for the operator in the https://github.com/enonic/xp-operator/tree/master/helm[Helm chart readme]. Lets create a Helm values file to configure the operator:
-
-NOTE: Here you might have to change the storage classes depending on your cluster setup.
+*Create a chart file* in a suitable location on your computer:
 
 .values.yaml
 [[values]]
 [source,yaml]
 ----
 config: |-
-  # Set storage classes for XP deployments. Note that these two do not have to be the same.
-  # The shared storage class has to support ReadWriteMany!
-  operator.charts.values.storage.shared.storageClassName=nfs
+  # Set storage class names for volumes to be used by XP deployments.
   operator.charts.values.storage.default.storageClassName=standard
+  operator.charts.values.storage.shared.storageClassName=nfs
 
-  # Lower default requests: This is useful when trying out XP clusters when
-  #   the K8s cluster does not have enough memory and ram!
-  operator.charts.values.resources.cpu.defaultRequests=0.2
-  operator.charts.values.resources.memory.defaultRequests=512Mi
+  # Minimum CPU and RAM to be requested by XP deployments
+  operator.charts.values.resources.cpu.defaultRequests=1
+  operator.charts.values.resources.memory.defaultRequests=2Gi
 ----
 
-=== Installing chart
+[WARNING]
+====
+*Default storage:* For ideal performance, use an SSD backed storage class
 
-[source,bash]
+*Shared storage:* Must be an NFS compatible storage class available in your cluster
+====
+
+Visit the <<storage#, storage classes section>> for more details and compatibility list of supported storage classes.
+
+The complete list of operator configuration options can be found in the https://github.com/enonic/xp-operator/tree/master/helm[Operator Helm chart]
+
+
+== Installing the operator
+
+Run the following command to install the operator on your cluster:
+
+NOTE: *Namespaces* - We will be installing the XP operator in the default `kube-system` namespace, indicating that it is a vital system component, but you can also create your own if desired.
+
+[source,terminal]
 ----
 $ helm upgrade --install \
 	--namespace kube-system \
 	--values values.yaml \
 	xp-operator \
-	https://repo.enonic.com/helm/xp-operator/xp-operator-0.17.16.tgz
+	<URL to operator i.e. https://repo.enonic.com/repository/helm/xp-operator-1.0.0.tgz>
+----
 
+NOTE: Available operator versions: https://repo.enonic.com/#browse/browse:helm:xp-operator
+
+
+The result should look something like this:
+
+[source,terminal]
+----
 Release "xp-operator" does not exist. Installing it now.
 NAME: xp-operator
 LAST DEPLOYED: Wed Apr 27 17:18:38 2022
@@ -98,64 +81,158 @@ REVISION: 1
 TEST SUITE: None
 ----
 
-=== Verify installation
 
-First find out the name of the operator pod:
+== Verify installation
 
+. Find the name of the operator pod. The name of the pod will start with `xp-operator`:
++
 [source,bash]
 ----
 $ kubectl -n kube-system get pods
 
-NAME                                        READY   STATUS              RESTARTS   AGE
-coredns-6955765f44-ksgmf                    1/1     Running             0          6m36s
-xp-operator-5869fcf9f4-xrzll                0/1     ContainerCreating   0          10s
-etcd-minikube                               1/1     Running             0          6m30s
-ingress-nginx-admission-create-zl98b        0/1     Completed           0          6m21s
-ingress-nginx-admission-patch-7xqtf         0/1     Completed           2          6m20s
-ingress-nginx-controller-7f9bbb757f-nxqz6   1/1     Running             0          6m21s
-kube-apiserver-minikube                     1/1     Running             0          6m30s
-kube-controller-manager-minikube            1/1     Running             0          6m30s
-kube-proxy-f4v7v                            1/1     Running             0          6m36s
-kube-scheduler-minikube                     1/1     Running             0          6m30s
-nfs-server-nfs-server-provisioner-0         1/1     Running             0          3m40s
-storage-provisioner                         1/1     Running             0          6m50s
+NAME                                                                READY   STATUS              RESTARTS   AGE
+pod/event-exporter-gke-7bf6c99dcb-7dl56                             2/2     Running             0          16d
+pod/kube-dns-5bfd847c64-2562d                                       4/4     Running             0          16d
+pod/kube-proxy-gke-xp-test-gke-cluster-default-pool-d0fdd01c-jnfl   1/1     Running             0          16d
+pod/l7-default-backend-d86c96845-j6m9b                              1/1     Running             0          16d
+pod/xp-operator-684bb48cc5-bqjqc                                    0/1     ContainerCreating   0          9s
 ----
-
-Then look at the operator logs to see if there are any errors:
++
+. Check the operator logs for errors. Logs for a working operator should look something like this:
 
 [source,bash]
 ----
-$ kubectl -n kube-system logs -f xp-operator-5869fcf9f4-xrzll
+$ kubectl -n kube-system logs -f xp-operator-684bb48cc5-bqjqc
 
 exec java -Doperator.charts.path=helm -Djava.util.logging.manager=org.jboss.logmanager.LogManager -javaagent:/opt/agent-bond/agent-bond.jar=jmx_exporter{{9779:/opt/agent-bond/jmx_exporter_config.yml}} -XX:+ExitOnOutOfMemoryError -cp . -jar /deployments/quarkus-run.jar
 __  ____  __  _____   ___  __ ____  ______
  --/ __ \/ / / / _ | / _ \/ //_/ / / / __/
  -/ /_/ / /_/ / __ |/ , _/ ,< / /_/ /\ \
 --\___\_\____/_/ |_/_/|_/_/|_|\____/___/
-2022-04-27 15:18:45,068 INFO  io.quarkus - operator 0.17.13 on JVM (powered by Quarkus 2.8.1.Final) started in 1.572s. Listening on: https://0.0.0.0:8443
-2022-04-27 15:18:45,070 INFO  io.quarkus - Profile prod activated.
-2022-04-27 15:18:45,070 INFO  io.quarkus - Installed features: [cdi, kubernetes-client, micrometer, rest-client, resteasy, resteasy-jackson, smallrye-context-propagation, vertx]
-2022-04-27 15:18:48,480 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppInstaller'
-2022-04-27 15:18:48,481 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7AppStatus' [delay: 19241, period: 60000]
-2022-04-27 15:18:48,481 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7AppInstaller' [delay: 4497, period: 60000]
-2022-04-27 15:18:48,480 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorIngressCertSync'
-2022-04-27 15:18:48,484 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7DeploymentStatus'
-2022-04-27 15:18:48,484 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7DeploymentStatus' [delay: 6627, period: 60000]
-2022-04-27 15:18:48,485 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXpClientCacheInvalidate'
-2022-04-27 15:18:48,488 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppStatusOnDeployments'
-2022-04-27 15:18:48,488 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorIngress'
-2022-04-27 15:18:48,488 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7ConfigSync' [delay: 13876, period: 60000]
-2022-04-27 15:18:48,727 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7DeploymentHelm'
-2022-04-27 15:18:48,727 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppStartStopper'
-2022-04-27 15:18:48,728 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7AppStartStopper' [delay: 4061, period: 60000]
-2022-04-27 15:18:48,728 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7ConfigStatus'
-2022-04-27 15:18:48,728 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorIngressLabel'
-2022-04-27 15:18:48,729 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorIngressLabel' [delay: 3996, period: 60000]
-2022-04-27 15:18:48,729 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorInformers' [delay: 10390, period: 30000]
-2022-04-27 15:18:48,729 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorDeleteAnnotation'
-2022-04-27 15:18:48,729 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorConfigMapEvent'
-2022-04-27 15:18:48,730 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7Config'
-2022-04-27 15:18:48,730 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorConfigMapSync' [delay: 18077, period: 60000]
-2022-04-27 15:18:48,831 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppInstallerOnDeployments'
-2022-04-27 15:18:53,830 INFO  com.eno.kub.ope.Operator - Starting informers
+2024-01-02 23:12:24,760 INFO  io.quarkus - java-operator 1.0.0 on JVM (powered by Quarkus 2.16.6.Final) started in 6.579s. Listening on: https://0.0.0.0:8443
+2024-01-02 23:12:24,762 INFO  io.quarkus - Profile prod activated.
+2024-01-02 23:12:24,764 INFO  io.quarkus - Installed features: [cdi, micrometer, rest-client, resteasy, resteasy-jackson, smallrye-context-propagation, vertx]
+2024-01-02 23:12:25,808 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorIngress'
+2024-01-02 23:12:25,889 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXpClientCacheInvalidate'
+2024-01-02 23:12:27,738 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7DeploymentHelm'
+2024-01-02 23:12:27,787 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppStatusOnDeployments'
+2024-01-02 23:12:27,799 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorDeleteAnnotation'
+2024-01-02 23:12:27,803 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorInformers' [delay: 16337, period: 30000]
+2024-01-02 23:12:27,803 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7ConfigStatus'
+2024-01-02 23:12:27,804 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorIngressLabel'
+2024-01-02 23:12:27,804 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppInstaller'
+2024-01-02 23:12:27,805 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7AppInstaller' [delay: 15212, period: 60000]
+2024-01-02 23:12:27,805 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppInstallerOnDeployments'
+2024-01-02 23:12:27,806 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorConfigMapEvent'
+2024-01-02 23:12:27,803 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorConfigMapSync' [delay: 13252, period: 60000]
+2024-01-02 23:12:27,804 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorIngressLabel' [delay: 6622, period: 60000]
+2024-01-02 23:12:27,806 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7Config'
+2024-01-02 23:12:27,807 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorIngressCertSync'
+2024-01-02 23:12:27,807 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7ConfigSync' [delay: 10124, period: 60000]
+2024-01-02 23:12:27,808 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorDomainCertSync'
+2024-01-02 23:12:27,809 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppStartStopper'
+2024-01-02 23:12:27,809 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7AppStartStopper' [delay: 14806, period: 60000]
+2024-01-02 23:12:27,809 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7DeploymentStatus'
+2024-01-02 23:12:27,810 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7DeploymentStatus' [delay: 4146, period: 60000]
+2024-01-02 23:12:27,810 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7AppStatus' [delay: 19524, period: 60000]
+2024-01-02 23:12:32,807 INFO  com.eno.kub.ope.Operator - Starting informers
 ----
+
+
+== Test the operator
+
+The best way of verifying that things are working, is by creating a basic xp7deployment.
+The example below will create a namespace, a single-node XP7 server, pre-install selected applications, and configure an ingress.
+
+WARNING: Remember to use a unique namespace per XP deployment. Never use the same namespace as the operator.
+
+=== Create xp7deployment
+
+. Place this yaml file in a suitable location on your computer:
++
+NOTE: Make sure the spec is updated with latest versions of XP and other softwarwe listed.
++
+.simple.yaml
+[source,yaml]
+----
+include::../kubernetes/example-simple.yaml[]
+----
++
+. Then run the following command to create the xp7deployment:
++
+[source,bash]
+----
+kubectl apply -f simple.yaml
+----
++
+.Output from a successful command
+[source,terminal]
+----
+namespace/my-namespace created
+xp7deployment.enonic.cloud/my-deployment created
+xp7app.enonic.cloud/contentstudio created
+xp7config.enonic.cloud/my-config created
+ingress.networking.k8s.io/my-domain-com created
+----
++
+. Verify that the namespace exists, and that the pods have started:
+
+[source,bash]
+----
+kubectl -n my-namespace get pods
+----
+
+
+=== Access XP Admin
+
+With the XP running, we can try accessing the Admin - even without using an ingress.
+
+. Get the `su` password by running this command:
++
+[source,bash]
+----
+$ kubectl -n my-namespace get secret su -o go-template="{{ .data.pass | base64decode }}"
+----
++
+This will output the plain text password.
++
+. Activate port forwarding
++
+[source,bash]
+----
+$ kubectl -n my-namespace port-forward main-0 8080
+
+Forwarding from 127.0.0.1:8080 -> 8080
+Forwarding from [::1]:8080 -> 8080
+----
++
+. Open http://localhost:8080[http://localhost:8080^] in your browser, and login with `su` and the password you obtained earlier.
+
+TIP: Visit the <<usage#, operator usage section>> for more details.
+
+
+=== Remove deployment
+
+To remove the test deployment, run the following command:
+
+.Use the same yaml as when creating the deployment
+[source,bash]
+----
+kubectl delete -f simple.yaml
+----
+
+WARNING: Volumes are typically not deleted when you remove the deployment, so take care to remove them afterwards.
+
+
+== Uninstalling the operator
+
+NOTE: Don´t uninstall the xp-operator while there are remaining xp7Deployments on your cluster
+
+To remove the XP operator from your Kubernetes cluster, run the following command:
+
+[source,bash]
+----
+helm uninstall xp-operator
+----
+
+
