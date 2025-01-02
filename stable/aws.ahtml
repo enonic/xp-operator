@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.23">
-<title>Uninstalling</title>
+<title>Creating an Elastic Kubernetes Service (EKS) cluster</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -435,30 +435,292 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
-<body class="article">
+<body class="article toc2 toc-right">
 <div id="header">
-<h1>Uninstalling</h1>
-</div>
-<div id="content">
-<div class="ulist">
-<ul>
-<li>
-<p>helm uninstall xp-operator</p>
+<h1>Creating an Elastic Kubernetes Service (EKS) cluster</h1>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#prerequisites">Prerequisites</a></li>
+<li><a href="#create_an_eks_cluster">Create an EKS cluster</a></li>
+<li><a href="#connect_to_the_cluster">Connect to the cluster</a></li>
+<li><a href="#storage_classes">Storage classes</a>
+<ul class="sectlevel2">
+<li><a href="#efs">EFS</a></li>
+</ul>
 </li>
+<li><a href="#install_operator">Install operator</a></li>
 </ul>
 </div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
 <div class="paragraph">
-<p>WARN: Don´t uninstall the xp-operator while there is an xp7deployment on your cluster</p>
+<p>Instructions on setting up a managed Kubernetes cluster on Amazon Web Services (AWS)</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="prerequisites"><a class="link" href="#prerequisites">Prerequisites</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You will need the following:</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">An Amazon account</dt>
+<dd>
+<p>Sign up or log in to <a href="https://aws.amazon.com/">AWS</a> where you will create the k8s cluster. TODO Verify</p>
+</dd>
+<dt class="hdlist1">aws cli</dt>
+<dd>
+<p>Command-line tool to manage resources in AWS. Get it <a href="https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html">Amazon</a>.</p>
+</dd>
+<dt class="hdlist1">eksctl</dt>
+<dd>
+<p>Amazons version of Kubectl, eksctl, allows you to run commands against Kubernetes clusters. Download it from <a href="https://github.com/eksctl-io/eksctl#installation">Github</a></p>
+</dd>
+<dt class="hdlist1">IAM user</dt>
+<dd>
+<p>With these permissions/roles at least: <a href="https://eksctl.io/usage/minimum-iam-policies/" class="bare">https://eksctl.io/usage/minimum-iam-policies/</a></p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="create_an_eks_cluster"><a class="link" href="#create_an_eks_cluster">Create an EKS cluster</a></h2>
+<div class="sectionbody">
+<div class="imageblock">
+<div class="content">
+<img src="images/eks-create-cluster.png" alt="Create EKS cluster">
+</div>
+</div>
+<div class="paragraph">
+<p>You may create EKS clusters from both Console and Command line. For simplcity, we use command line.</p>
+</div>
+<div class="paragraph">
+<p>Visit the AWS EKS docs for more details: <a href="https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html" class="bare">https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html</a></p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The XP operator currently does not support "AWS Fargate" (due to limitations on open file handlers). Use managed instances instead.
+</td>
+</tr>
+</table>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Instance type</dt>
+<dd>
+<p>A recommended instance type is m5.xlarge (or bigger).</p>
+</dd>
+<dt class="hdlist1">Kubernetes version</dt>
+<dd>
+<p>Should be &gt;= 1.27.9</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>Follow the steps below to get a basic EKS cluster up and running:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Create an access key, and configure the aws CLI as described here: <a href="https://docs.aws.amazon.com/eks/latest/userguide/install-awscli.html" class="bare">https://docs.aws.amazon.com/eks/latest/userguide/install-awscli.html</a></p>
+</li>
+<li>
+<p>Make a cluster configuration Yaml file</p>
+<div class="listingblock">
+<div class="title">cluster-config.yaml</div>
+<div class="content">
+<pre class="highlight"><code class="language-Yaml" data-lang="Yaml">apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: enonic
+  region: eu-north-1
+
+managedNodeGroups:
+  - name: eks-mng
+    instanceType: m5.xlarge
+    desiredCapacity: 1
+
+iam:
+  withOIDC: true
+  serviceAccounts:
+  - metadata:
+      name: aws-load-balancer-controller
+      namespace: kube-system
+    wellKnownPolicies:
+      awsLoadBalancerController: true
+
+addons:
+  - name: aws-ebs-csi-driver
+    wellKnownPolicies: # Adds an IAM service account
+      ebsCSIController: true
+
+cloudWatch:
+ clusterLogging:
+   enableTypes: ["*"]
+   logRetentionInDays: 30</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Replace <code>region</code> with your preferred one
+</td>
+</tr>
+</table>
+</div>
+</li>
+<li>
+<p>and <strong>create the cluster</strong> with the following command:</p>
+<div class="literalblock">
+<div class="content">
+<pre>eksctl create cluster -f cluster-config.yaml</pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+AWS may take quite some time to provision the cluster
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Once finished, you should see something like this in your output log:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre></pre>
+<pre class="highlight"><code class="language-JSON" data-lang="JSON">2024-10-30 13:47:58 [✔]  EKS cluster "enonic" in "eu-north-1" region is ready</code></pre>
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">NOTE</dt>
+<dd>
+<p>For production use, you will likely also need to configure an AWS load balancer,</p>
+</dd>
+</dl>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="connect_to_the_cluster"><a class="link" href="#connect_to_the_cluster">Connect to the cluster</a></h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Create a kubeconfig file with the following command</p>
+<div class="literalblock">
+<div class="content">
+<pre>aws eks update-kubeconfig --region REGION --name CLUSTER_NAME</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Verify you can now connect to the cluster with kubectl</p>
+<div class="literalblock">
+<div class="content">
+<pre>kubectl get namespaces</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This should display a list of namespaces in the newly created k8s cluster. The "Age" column in the output shows how long has it been since the namespaces are created.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-terminal" data-lang="terminal">NAME              STATUS   AGE
+default           Active   8h
+kube-node-lease   Active   8h
+kube-public       Active   8h
+kube-system       Active   8h</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="storage_classes"><a class="link" href="#storage_classes">Storage classes</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Next step is to list available storage classes with this command:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>kubectl get storageclasses</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This should display the list of storage classes provisioned by GKE cluster.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-terminal" data-lang="terminal">NAME   PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+gp2    kubernetes.io/aws-ebs   Delete          WaitForFirstConsumer   false                  9h</code></pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="efs"><a class="link" href="#efs">EFS</a></h3>
+<div class="paragraph">
+<p>To run XP in clustered mode, a <a href="../storage-classes.ahtml"><code>ReadWriteMany</code> storage class</a> (NFS type filesystem) is required.</p>
+</div>
+<div class="paragraph">
+<p>You may <a href="nfs.ahtml">run your own NFS server</a>, or take advantage of Amazon&#8217;s managed service for shared filesystems called <a href="https://aws.amazon.com/efs/" target="_blank" rel="noopener">Elastic File System (EFS)</a>.</p>
+</div>
+<div class="paragraph">
+<p>To provision an EFS storage for your cluster, follow Amazons own documentation:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><a href="https://docs.aws.amazon.com/efs/latest/ug/gs-step-two-create-efs-resources.html" target="_blank" rel="noopener">Create an EFS</a></p>
+</li>
+<li>
+<p>Then, <a href="https://aws.amazon.com/blogs/containers/introducing-efs-csi-dynamic-provisioning/">create a storage class with dynamic provisioning</a></p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Once this is configured properly, you may specify <code>efs</code> as your shared storage class when [installing the XP operator].</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="install_operator"><a class="link" href="#install_operator">Install operator</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You are now ready to <a href="installation.ahtml">install the XP operator</a> and start <a href="usage.ahtml">deploying XP instances</a>.</p>
+</div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2025-01-02 10:19:18 UTC
+Last updated 2025-01-02 11:25:38 UTC
 </div>
 </div>
 </body>

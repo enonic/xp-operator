@@ -4,10 +4,6 @@
       "label": "stable",
       "checkout": "master",
       "latest": true
-    },
-    {
-      "label": "next",
-      "checkout": "end-user-doc"
     }
   ]
 }

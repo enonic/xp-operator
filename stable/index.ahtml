@@ -441,10 +441,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
-<li><a href="#motivation">Motivation</a></li>
-<li><a href="#usage">Usage</a></li>
+<li><a href="#introduction">Introduction</a></li>
 <li><a href="#installation">Installation</a></li>
-<li><a href="#supported_xp_versions">Supported XP versions</a></li>
+<li><a href="#usage">Usage</a></li>
 </ul>
 </div>
 </div>
@@ -452,47 +451,21 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>The Enonic XP Kubernetes Operator is a piece of software runs on top of Kubernetes to help you manage your XP deployments. It builds on the <a href="https://kubernetes.io/docs/concepts/extend-kubernetes/operator/">operator pattern</a> provided by Kubernetes.</p>
+<p>The Enonic XP Operator lets you deploy XP instances on Kubernetes (k8s) with ease. It builds on the <a href="https://kubernetes.io/docs/concepts/extend-kubernetes/operator/">operator pattern</a> provided by Kubernetes.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="images/xp-operator-logo.svg" alt="XP K8S operator" width="300w">
+</div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="motivation"><a class="link" href="#motivation">Motivation</a></h2>
+<h2 id="introduction"><a class="link" href="#introduction">Introduction</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Creating a simple XP deployment is quite easy, but it quickly gets more complicated when you try to create production grade clusters. Add on top the complexity of how Kubernetes works and you quickly can get into trouble. The operator removes that complexity for you, and makes it easy to create and manage complex deployments with ease.</p>
+<p>Creating a single-instance XP deployment is easy, but managing production grade XP clusters is more complex. Add to that the complexity of Kubernetes, and you can quickly get into trouble. The operator simplifies this.</p>
 </div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="usage"><a class="link" href="#usage">Usage</a></h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Take a look at the <a href="usage.ahtml">usage</a> section see how to use the operator.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="installation"><a class="link" href="#installation">Installation</a></h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Before you can start using the operator you have to:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>Have a running Kubernetes cluster, version <code>1.22+</code>. If you need to setup a local test environment, you can look at our <a href="minikube.ahtml">minikube</a> guide.</p>
-</li>
-<li>
-<p>Install the operator according to the <a href="installation.ahtml">installation</a> guide.</p>
-</li>
-</ul>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="supported_xp_versions"><a class="link" href="#supported_xp_versions">Supported XP versions</a></h2>
-<div class="sectionbody">
 <div class="admonitionblock note">
 <table>
 <tr>
@@ -507,10 +480,41 @@ The operator only supports Enonic XP <code>v7.13.2</code> and newer.
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="installation"><a class="link" href="#installation">Installation</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The operator must be installed on a properly configured k8s cluster.</p>
+</div>
+<div class="paragraph">
+<p>Follow our <a href="installation.ahtml">installation guide</a> to get started.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+If you need to set up a local test environment, have a look at our <a href="minikube.ahtml">minikube guide</a>.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="usage"><a class="link" href="#usage">Usage</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Dive into details on <a href="usage.ahtml">how to use the XP operator</a>.</p>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2025-01-02 10:19:18 UTC
+Last updated 2025-01-02 11:25:38 UTC
 </div>
 </div>
 </body>

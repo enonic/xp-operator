@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.23">
-<title>Creating an Elastic Kubernetes Service (EKS) cluster</title>
+<title>Creating a Google Kubernetes Engine (GKE) cluster</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -437,16 +437,17 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article toc2 toc-right">
 <div id="header">
-<h1>Creating an Elastic Kubernetes Service (EKS) cluster</h1>
+<h1>Creating a Google Kubernetes Engine (GKE) cluster</h1>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
 <li><a href="#prerequisites">Prerequisites</a></li>
-<li><a href="#create_an_eks_cluster">Create an EKS cluster</a></li>
-<li><a href="#connect_to_the_cluster">Connect to the cluster</a></li>
+<li><a href="#create_a_gke_cluster">Create a GKE Cluster</a></li>
+<li><a href="#connect_kubectl">Connect kubectl</a></li>
+<li><a href="#node_pool">Node pool</a></li>
 <li><a href="#storage_classes">Storage classes</a>
 <ul class="sectlevel2">
-<li><a href="#efs">EFS</a></li>
+<li><a href="#shared_storage">Shared storage</a></li>
 </ul>
 </li>
 <li><a href="#install_operator">Install operator</a></li>
@@ -457,7 +458,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Instructions on setting up a managed Kubernetes cluster on Amazon Web Services (AWS)</p>
+<p>Instructions on setting up a managed k8s cluster on the Google Cloud Platform</p>
 </div>
 </div>
 </div>
@@ -469,107 +470,35 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div class="dlist">
 <dl>
-<dt class="hdlist1">An Amazon account</dt>
+<dt class="hdlist1">A Google account and project</dt>
 <dd>
-<p>Sign up or log in to <a href="https://aws.amazon.com/">AWS</a> where you will create the k8s cluster. TODO Verify</p>
+<p>Log in to <a href="https://cloud.google.com">GCP</a>, and select or create a <code>Project</code> where you will create the k8s cluster.</p>
 </dd>
-<dt class="hdlist1">aws cli</dt>
+<dt class="hdlist1">Gcloud</dt>
 <dd>
-<p>Command-line tool to manage resources in AWS. Get it <a href="https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html">Amazon</a>.</p>
+<p>The Google Cloud CLI. Visit <a href="https://cloud.google.com/sdk/docs/install" class="bare">https://cloud.google.com/sdk/docs/install</a> for instructions to install.</p>
 </dd>
-<dt class="hdlist1">eksctl</dt>
+<dt class="hdlist1">Kubectl</dt>
 <dd>
-<p>Amazons version of Kubectl, eksctl, allows you to run commands against Kubernetes clusters. Download it from <a href="https://github.com/eksctl-io/eksctl#installation">Github</a></p>
-</dd>
-<dt class="hdlist1">IAM user</dt>
-<dd>
-<p>With these permissions/roles at least: <a href="https://eksctl.io/usage/minimum-iam-policies/" class="bare">https://eksctl.io/usage/minimum-iam-policies/</a></p>
+<p>The Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it from <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">Kubernetes.io</a>.</p>
 </dd>
 </dl>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="create_an_eks_cluster"><a class="link" href="#create_an_eks_cluster">Create an EKS cluster</a></h2>
+<h2 id="create_a_gke_cluster"><a class="link" href="#create_a_gke_cluster">Create a GKE Cluster</a></h2>
 <div class="sectionbody">
-<div class="imageblock">
-<div class="content">
-<img src="images/eks-create-cluster.png" alt="Create EKS cluster">
-</div>
-</div>
-<div class="paragraph">
-<p>You may create EKS clusters from both Console and Command line. For simplcity, we use command line.</p>
-</div>
-<div class="paragraph">
-<p>Visit the AWS EKS docs for more details: <a href="https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html" class="bare">https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html</a></p>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-The XP operator currently does not support "AWS Fargate" (due to limitations on open file handlers). Use managed instances instead.
-</td>
-</tr>
-</table>
-</div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">Instance type</dt>
-<dd>
-<p>A recommended instance type is m5.xlarge (or bigger).</p>
-</dd>
-<dt class="hdlist1">Kubernetes version</dt>
-<dd>
-<p>Should be &gt;= 1.27.9</p>
-</dd>
-</dl>
-</div>
-<div class="paragraph">
-<p>Follow the steps below to get a basic EKS cluster up and running:</p>
-</div>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>Create an access key, and configure the aws CLI as described here: <a href="https://docs.aws.amazon.com/eks/latest/userguide/install-awscli.html" class="bare">https://docs.aws.amazon.com/eks/latest/userguide/install-awscli.html</a></p>
-</li>
-<li>
-<p>Make a cluster configuration Yaml file</p>
-<div class="listingblock">
-<div class="title">cluster-config.yaml</div>
+<p><strong>Enable the Kubernetes Engine API</strong></p>
+<div class="paragraph">
+<p>If the kubernetes engine API is not enabled for your GCP project, you need to enable it from the GCP console</p>
+</div>
+<div class="imageblock">
 <div class="content">
-<pre class="highlight"><code class="language-Yaml" data-lang="Yaml">apiVersion: eksctl.io/v1alpha5
-kind: ClusterConfig
-
-metadata:
-  name: enonic
-  region: eu-north-1
-
-managedNodeGroups:
-  - name: eks-mng
-    instanceType: m5.xlarge
-    desiredCapacity: 1
-
-iam:
-  withOIDC: true
-  serviceAccounts:
-  - metadata:
-      name: aws-load-balancer-controller
-      namespace: kube-system
-    wellKnownPolicies:
-      awsLoadBalancerController: true
-
-addons:
-  - name: aws-ebs-csi-driver
-    wellKnownPolicies: # Adds an IAM service account
-      ebsCSIController: true
-
-cloudWatch:
- clusterLogging:
-   enableTypes: ["*"]
-   logRetentionInDays: 30</code></pre>
+<img src="images/gkeEnablek8sapi.png" alt="Enable API">
 </div>
 </div>
 <div class="admonitionblock note">
@@ -579,46 +508,36 @@ cloudWatch:
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-Replace <code>region</code> with your preferred one
+The XP Operator <strong>does not support Autopilot clusters</strong>, so we will need to create the cluster from command line.
 </td>
 </tr>
 </table>
 </div>
 </li>
 <li>
-<p>and <strong>create the cluster</strong> with the following command:</p>
+<p><strong>Connect gcloud to your project</strong></p>
 <div class="literalblock">
 <div class="content">
-<pre>eksctl create cluster -f cluster-config.yaml</pre>
+<pre>gcloud auth login
+gcloud config set project &lt;PROJECT_ID&gt;</pre>
 </div>
 </div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-AWS may take quite some time to provision the cluster
-</td>
-</tr>
-</table>
-</div>
+</li>
+<li>
+<p><strong>Create the cluster</strong></p>
 <div class="paragraph">
-<p>Once finished, you should see something like this in your output log:</p>
+<p>Run the following command:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-JSON" data-lang="JSON">2024-10-30 13:47:58 [✔]  EKS cluster "enonic" in "eu-north-1" region is ready</code></pre>
+<pre class="highlight"><code class="language-terminal" data-lang="terminal">gcloud container clusters create mygkecluster \
+    --release-channel regular \
+    --zone europe-north1-c \
+    --node-locations europe-north1-c,</code></pre>
 </div>
 </div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">NOTE</dt>
-<dd>
-<p>For production use, you will likely also need to configure an AWS load balancer,</p>
-</dd>
-</dl>
+<div class="paragraph">
+<p>This will create a cluster called <code>mygkecluster</code> in the europe-north1 region, using zone c. For more details check out Googles own docs.</p>
 </div>
 </li>
 </ol>
@@ -626,36 +545,87 @@ AWS may take quite some time to provision the cluster
 </div>
 </div>
 <div class="sect1">
-<h2 id="connect_to_the_cluster"><a class="link" href="#connect_to_the_cluster">Connect to the cluster</a></h2>
+<h2 id="connect_kubectl"><a class="link" href="#connect_kubectl">Connect kubectl</a></h2>
 <div class="sectionbody">
+<div class="paragraph">
+<p>Once the k8s cluster is created, you can test connecting to it</p>
+</div>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>Create a kubeconfig file with the following command</p>
+<p>From the Cluster details page in the Google console, click <b class="button">Connect</b> on the top of the page. This shows you the gcloud command you can use to connect to the k8s cluster from your computer. It should look something like this:</p>
 <div class="literalblock">
 <div class="content">
-<pre>aws eks update-kubeconfig --region REGION --name CLUSTER_NAME</pre>
+<pre>gcloud container clusters get-credentials mygkecluster --zone europe-north1-c --project &lt;PROJECT_ID&gt;</pre>
 </div>
 </div>
 </li>
 <li>
-<p>Verify you can now connect to the cluster with kubectl</p>
-<div class="literalblock">
+<p>Copy and run the gcloud command.</p>
+<div class="paragraph">
+<p>If the output says <code>kubeconfig entry generated for mygkecluster</code>, you are good to go.</p>
+</div>
+</li>
+<li>
+<p>To verify your access to the k8s cluster run the command</p>
+<div class="listingblock">
 <div class="content">
-<pre>kubectl get namespaces</pre>
+<pre class="highlight"><code class="language-terminal" data-lang="terminal">kubectl get namespaces</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>This should display a list of namespaces in the newly created k8s cluster. The "Age" column in the output shows how long has it been since the namespaces are created.</p>
+<p>This should display the list of namespaces in the newly created k8s cluster. The "Age" column in the output shows how long has it been since the namespaces are created.</p>
 </div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="node_pool"><a class="link" href="#node_pool">Node pool</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The cluster is created with a default node pool, using VMs (nodes) that are not suitable for running XP.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>To fix this, simply <strong>create a new node pool</strong>:</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-terminal" data-lang="terminal">NAME              STATUS   AGE
-default           Active   8h
-kube-node-lease   Active   8h
-kube-public       Active   8h
-kube-system       Active   8h</code></pre>
+<pre class="highlight"><code class="language-terminal" data-lang="terminal">gcloud container node-pools create custom-pool \
+  --cluster=mygkecluster\
+  --machine-type=n2-standard-4 \
+  --num-nodes=1 \
+  --enable-autoscaling \
+  --min-nodes=1 --max-nodes=10 \
+  --zone=europe-north1-c</code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p>The new pool is based on 4vCPU VMs, suitable for production grade deployments of Enonic XP.</p>
+</div>
+</li>
+<li>
+<p>When done, you may <strong>delete the old node pool</strong>:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-terminal" data-lang="terminal">gcloud container node-pools delete default-pool \
+  --cluster=mygkecluster\
+  --zone=europe-north1-c</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+These operation can also be done directly from the Cloud console UI.
+</td>
+</tr>
+</table>
 </div>
 </li>
 </ol>
@@ -666,45 +636,43 @@ kube-system       Active   8h</code></pre>
 <h2 id="storage_classes"><a class="link" href="#storage_classes">Storage classes</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Next step is to list available storage classes with this command:</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>kubectl get storageclasses</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>This should display the list of storage classes provisioned by GKE cluster.</p>
+<p>XP will require specific storage classes in order to work properly. List the available storage classes using the following command:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-terminal" data-lang="terminal">NAME   PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
-gp2    kubernetes.io/aws-ebs   Delete          WaitForFirstConsumer   false                  9h</code></pre>
+<pre class="highlight"><code class="language-terminal" data-lang="terminal">kubectl get storageclasses</code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p>Output should look something like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-terminal" data-lang="terminal">NAME                     PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+premium-rwo              pd.csi.storage.gke.io   Delete          WaitForFirstConsumer   true                   89m
+standard                 kubernetes.io/gce-pd    Delete          Immediate              true                   89m
+standard-rwo (default)   pd.csi.storage.gke.io   Delete          WaitForFirstConsumer   true                   89m</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+We recommend using <code>standard-rwo</code> or <code>premium-rwo</code> when deploying XP.
+</td>
+</tr>
+</table>
 </div>
 <div class="sect2">
-<h3 id="efs"><a class="link" href="#efs">EFS</a></h3>
+<h3 id="shared_storage"><a class="link" href="#shared_storage">Shared storage</a></h3>
 <div class="paragraph">
-<p>To run XP in clustered mode, a <a href="../storage-classes.ahtml"><code>ReadWriteMany</code> storage class</a> (NFS type filesystem) is required.</p>
+<p>If you plan to run XP clusters, you will also need a ReadWriteMany (RWM) storage class.</p>
 </div>
 <div class="paragraph">
-<p>You may <a href="nfs.ahtml">run your own NFS server</a>, or take advantage of Amazon&#8217;s managed service for shared filesystems called <a href="https://aws.amazon.com/efs/" target="_blank" rel="noopener">Elastic File System (EFS)</a>.</p>
-</div>
-<div class="paragraph">
-<p>To provision an EFS storage for your cluster, follow Amazons own documentation:</p>
-</div>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p><a href="https://docs.aws.amazon.com/efs/latest/ug/gs-step-two-create-efs-resources.html" target="_blank" rel="noopener">Create an EFS</a></p>
-</li>
-<li>
-<p>Then, <a href="https://aws.amazon.com/blogs/containers/introducing-efs-csi-dynamic-provisioning/">create a storage class with dynamic provisioning</a></p>
-</li>
-</ol>
-</div>
-<div class="paragraph">
-<p>Once this is configured properly, you may specify <code>efs</code> as your shared storage class when [installing the XP operator].</p>
+<p>A cost effective solution is to <a href="nfs.ahtml">deploy an NFS server</a> in your cluster. Google also offers a managed RWM via the <a href="https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/filestore-csi-driver">Filestore CSI driver</a>. For more details, visit the <a href="storage.ahtml">storage chapter</a>.</p>
 </div>
 </div>
 </div>
@@ -720,7 +688,7 @@ gp2    kubernetes.io/aws-ebs   Delete          WaitForFirstConsumer   false     
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2025-01-02 10:19:42 UTC
+Last updated 2025-01-02 11:25:38 UTC
 </div>
 </div>
 </body>

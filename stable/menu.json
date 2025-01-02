@@ -1,28 +1,32 @@
 {
     "menuItems": [
       {
-        "title": "Usage",
-        "document": "usage"
-      },
-      {
         "title": "Installation",
         "document": "installation"
       },
       {
-        "title": "Uninstall",
-        "document": "uninstall"
+        "title": "Usage",
+        "document": "usage"
+      },
+      {
+        "title": "Storage classes",
+        "document" : "storage"
+      },
+      {
+        "title": "NFS server",
+        "document" : "nfs"
+      },  
+      {
+        "title": "AWS",
+        "document": "aws"
+      },
+      {
+        "title": "Google Cloud",
+        "document": "google"
       },
       {
         "title": "Minikube",
         "document": "minikube"
-      },
-      {
-        "title": "NFS storage",
-        "document" : "nfs"
-      },
-      {
-        "title": "EFS storage",
-        "document" : "efs"
       }
     ]
 }
