@@ -639,7 +639,7 @@ __  ____  __  _____   ___  __ ____  ______
  --/ __ \/ / / / _ | / _ \/ //_/ / / / __/
  -/ /_/ / /_/ / __ |/ , _/ ,&lt; / /_/ /\ \
 --\___\_\____/_/ |_/_/|_/_/|_|\____/___/
-2024-01-02 23:12:24,760 INFO  io.quarkus - java-operator 0.22.1 on JVM (powered by Quarkus 2.16.6.Final) started in 6.579s. Listening on: https://0.0.0.0:8443
+2024-01-02 23:12:24,760 INFO  io.quarkus - java-operator 1.0.0 on JVM (powered by Quarkus 2.16.6.Final) started in 6.579s. Listening on: https://0.0.0.0:8443
 2024-01-02 23:12:24,762 INFO  io.quarkus - Profile prod activated.
 2024-01-02 23:12:24,764 INFO  io.quarkus - Installed features: [cdi, micrometer, rest-client, resteasy, resteasy-jackson, smallrye-context-propagation, vertx]
 2024-01-02 23:12:25,808 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorIngress'
@@ -955,7 +955,7 @@ Don´t uninstall the xp-operator while there are remaining xp7Deployments on you
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-12-27 14:06:36 UTC
+Last updated 2025-01-02 10:00:25 UTC
 </div>
 </div>
 </body>
