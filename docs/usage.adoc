@@ -397,7 +397,7 @@ NOTE: Like Xp7Config, changes to virtual hosts can take a couple of minutes to r
 
 === Namespaces
 
-It can be desireble to delete all created resources that are associated with an Xp7Deployment once its deleted. That is quite easy to do with this namespace annotation:
+It can be desirable to delete all created resources that are associated with an Xp7Deployment once its deleted. That is quite easy to do with this namespace annotation:
 
 [source,yaml]
 ----

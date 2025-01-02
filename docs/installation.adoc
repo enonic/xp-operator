@@ -8,7 +8,7 @@ This section covers the installation and testing of the Enonic XP Kubernetes Ope
 
 Before you can install the operator, you must have a running k8s cluster + Kubectl and Helm installed on your local machine. See details below.
 
-NOTE: We recommend using the latest version of Kubernetes. The minimal version of Kubernetes required by XP Operator is 1.27+. 
+NOTE: We recommend using the latest version of Kubernetes. The minimal version of Kubernetes required by XP Operator is 1.27+.
 
 Kubernetes:: The k8s cluster can be hosted by any cloud service provider, or even run on premises. The only thing that differs is which storage classes you can use.
 +
@@ -65,7 +65,7 @@ $ helm upgrade --install \
 	<URL to operator i.e. https://repo.enonic.com/repository/helm/xp-operator-1.0.0.tgz>
 ----
 
-NOTE: Availablle operator versions: https://repo.enonic.com/#browse/browse:helm:xp-operator
+NOTE: Available operator versions: https://repo.enonic.com/#browse/browse:helm:xp-operator
 
 
 The result should look something like this:
