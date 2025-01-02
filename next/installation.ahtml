@@ -584,7 +584,7 @@ We recommend using the latest version of Kubernetes. The minimal version of Kube
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-Availablle operator versions: <a href="https://repo.enonic.com/#browse/browse:helm:xp-operator" class="bare">https://repo.enonic.com/#browse/browse:helm:xp-operator</a>
+Available operator versions: <a href="https://repo.enonic.com/#browse/browse:helm:xp-operator" class="bare">https://repo.enonic.com/#browse/browse:helm:xp-operator</a>
 </td>
 </tr>
 </table>
@@ -955,7 +955,7 @@ Don´t uninstall the xp-operator while there are remaining xp7Deployments on you
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2025-01-02 10:00:25 UTC
+Last updated 2025-01-02 10:19:42 UTC
 </div>
 </div>
 </body>
