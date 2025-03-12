@@ -702,7 +702,7 @@ Remember to use a unique namespace per XP deployment. Never use the same namespa
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-Make sure the spec is updated with latest versions of XP and other softwarwe listed.
+Make sure the spec is updated with latest versions of XP and other software listed.
 </td>
 </tr>
 </table>
@@ -919,7 +919,7 @@ Visit the <a href="usage.ahtml">operator usage section</a> for more details.
 <i class="fa icon-warning" title="Warning"></i>
 </td>
 <td class="content">
-Volumes are typically not deleted when you remove the deployment, so take care to remove them afterwards.
+Volumes are typically not deleted when you remove the deployment, so take care to remove them afterward.
 </td>
 </tr>
 </table>
@@ -955,7 +955,7 @@ Don´t uninstall the xp-operator while there are remaining xp7Deployments on you
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2025-01-02 11:25:38 UTC
+Last updated 2025-03-12 08:45:25 UTC
 </div>
 </div>
 </body>

@@ -471,7 +471,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dl>
 <dt class="hdlist1">An Amazon account</dt>
 <dd>
-<p>Sign up or log in to <a href="https://aws.amazon.com/">AWS</a> where you will create the k8s cluster. TODO Verify</p>
+<p>Sign up or log in to <a href="https://aws.amazon.com/">AWS</a> where you will create the k8s cluster.</p>
 </dd>
 <dt class="hdlist1">aws cli</dt>
 <dd>
@@ -616,7 +616,7 @@ AWS may take quite some time to provision the cluster
 <dl>
 <dt class="hdlist1">NOTE</dt>
 <dd>
-<p>For production use, you will likely also need to configure an AWS load balancer,</p>
+<p>For production use, you will likely also need to configure an AWS load balancer</p>
 </dd>
 </dl>
 </div>
@@ -720,7 +720,7 @@ gp2    kubernetes.io/aws-ebs   Delete          WaitForFirstConsumer   false     
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2025-01-02 11:25:38 UTC
+Last updated 2025-03-12 08:45:25 UTC
 </div>
 </div>
 </body>

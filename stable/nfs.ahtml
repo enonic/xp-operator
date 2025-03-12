@@ -442,13 +442,13 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
 <li><a href="#prerequisites">Prerequisites</a></li>
-<li><a href="#alt_a_create_nfs_server_in_your_k8s_cluster">Alt A) Create NFS server in your K8s cluster</a>
+<li><a href="#alternative_a_create_nfs_server_in_your_k8s_cluster">Alternative A. Create NFS server in your K8s cluster</a>
 <ul class="sectlevel2">
 <li><a href="#add_helm_repository">Add helm repository</a></li>
 <li><a href="#install_server_provisioner">Install server provisioner</a></li>
 </ul>
 </li>
-<li><a href="#alt_b_using_an_existing_nfs_server">Alt. B) Using an existing NFS server</a>
+<li><a href="#alternative_b_using_an_existing_nfs_server">Alternative B. Using an existing NFS server</a>
 <ul class="sectlevel2">
 <li><a href="#add_helm_repository_2">Add helm repository</a></li>
 <li><a href="#install_client_provisioner">Install client provisioner</a></li>
@@ -461,7 +461,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>In this section we show how you can setup a <code>ReadWriteMany</code> storage class using NFS.</p>
+<p>In this section we show how you can set up a <code>ReadWriteMany</code> storage class using NFS.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -470,7 +470,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-GKE (Google) Autopilot clusters do not support running NFS due to security restrictions. The NFS server provisioner requires two capabilities 'DAC_READ_SEARCH' and 'SYS_RESOURCE', which are disabled by Autopilot.
+GKE (Google) Autopilot clusters do not support running NFS. The NFS server provisioner requires two capabilities <code>DAC_READ_SEARCH</code> and <code>SYS_RESOURCE</code>, which are disabled by Autopilot.
 </td>
 </tr>
 </table>
@@ -499,7 +499,7 @@ GKE (Google) Autopilot clusters do not support running NFS due to security restr
 </div>
 </div>
 <div class="sect1">
-<h2 id="alt_a_create_nfs_server_in_your_k8s_cluster"><a class="link" href="#alt_a_create_nfs_server_in_your_k8s_cluster">Alt A) Create NFS server in your K8s cluster</a></h2>
+<h2 id="alternative_a_create_nfs_server_in_your_k8s_cluster"><a class="link" href="#alternative_a_create_nfs_server_in_your_k8s_cluster">Alternative A. Create NFS server in your K8s cluster</a></h2>
 <div class="sectionbody">
 <div class="sect2">
 <h3 id="add_helm_repository"><a class="link" href="#add_helm_repository">Add helm repository</a></h3>
@@ -562,7 +562,7 @@ The NFS Provisioner service has now been installed.</code></pre>
 </div>
 </div>
 <div class="sect1">
-<h2 id="alt_b_using_an_existing_nfs_server"><a class="link" href="#alt_b_using_an_existing_nfs_server">Alt. B) Using an existing NFS server</a></h2>
+<h2 id="alternative_b_using_an_existing_nfs_server"><a class="link" href="#alternative_b_using_an_existing_nfs_server">Alternative B. Using an existing NFS server</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>If you already have an NFS server, we can create a client that uses that. Read more about this provisioner on <a href="https://github.com/kubernetes-sigs/nfs-subdir-external-provisioner">github</a>.</p>
@@ -629,7 +629,7 @@ TEST SUITE: None</code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2025-01-02 11:25:38 UTC
+Last updated 2025-03-12 08:45:25 UTC
 </div>
 </div>
 </body>

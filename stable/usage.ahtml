@@ -568,38 +568,38 @@ spec:
 <div class="sect3">
 <h4 id="disks"><a class="link" href="#disks">Disks</a></h4>
 <div class="paragraph">
-<p>In the Xp7Deployment resource we have names of disks that you can define to be shared, private or non existant.</p>
+<p>In the Xp7Deployment resource we have names of disks that you can define to be shared, private or non-existent.</p>
 </div>
 <div class="dlist">
 <dl>
 <dt class="hdlist1">blobstore</dt>
 <dd>
-<p>All blob objects. This should always be shared in a cluster.</p>
+<p>All blob objects. This must always be shared between cluster nodes.</p>
 </dd>
 <dt class="hdlist1">snapshots</dt>
 <dd>
-<p>Index snapshots. This should always be shared in a cluster.</p>
+<p>Index snapshots. This must always be shared between cluster nodes.</p>
 </dd>
 <dt class="hdlist1">export</dt>
 <dd>
-<p>Data dumps and other data. This should be shared in a cluster.</p>
+<p>Data dumps and other data. This should be shared between cluster nodes.</p>
 </dd>
 <dt class="hdlist1">index</dt>
 <dd>
-<p>Private node index. This should never be shared.</p>
+<p>Private node index. This must <em>never</em> be shared between cluster nodes.</p>
 </dd>
 <dt class="hdlist1">work</dt>
 <dd>
-<p>Private node cache. This should never be shared.</p>
+<p>Private node cache. This must <em>never</em> be shared between cluster nodes.</p>
 </dd>
 <dt class="hdlist1">deploy</dt>
 <dd>
-<p>Locally installed apps on this single node. This should never be shared.</p>
+<p>Locally installed apps on this single node. This must never be shared between cluster nodes.</p>
 </dd>
 </dl>
 </div>
 <div class="paragraph">
-<p>If you define a <code>volume</code> property, then the disk will be mounted in specified volume by subpath equals to the disk name. If you dont define a volume property, then the implicit volume will be created and the disk will be mounted in it to the root path.</p>
+<p>If you define a <code>volume</code> property, then the disk will be mounted in specified volume by subpath equals to the disk name. If you don&#8217;t define a volume property, then the implicit volume will be created and the disk will be mounted in it to the root path.</p>
 </div>
 <div class="paragraph">
 <p>For customization, two key attributes can be adjusted: size and storageClass. These attributes pertain to the implicit volume. To specify default values use the <a href="installation.ahtml#values"><code>values.yaml</code></a> file during the installation stage.</p>
@@ -990,7 +990,7 @@ The <code>sha512</code> field is optional, but if provided, XP will validate the
 <div class="sect2">
 <h3 id="ingresses"><a class="link" href="#ingresses">Ingresses</a></h3>
 <div class="paragraph">
-<p>To expose your XP instance outside of the K8s cluster, the operator uses standard k8s Ingresses. To simplify management, XP&#8217;s virtual hosts are also managed via Ingress annotations.</p>
+<p>To expose your XP instance outside the K8s cluster, the operator uses standard k8s Ingresses. To simplify management, XP&#8217;s virtual hosts are also managed via Ingress annotations.</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
@@ -1020,9 +1020,12 @@ metadata:
   name: my-domain-com
   namespace: my-namespace
   annotations:
+    # all hosts mapping
     enonic.cloud/xp7.vhost.mapping.my-mapping-site.source: /
     enonic.cloud/xp7.vhost.mapping.my-mapping-site.target: /site/default/master/homepage
 
+    # specific host mapping
+    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.host: my-domain.com
     enonic.cloud/xp7.vhost.mapping.my-mapping-admin.source: /admin
     enonic.cloud/xp7.vhost.mapping.my-mapping-admin.target: /admin
     enonic.cloud/xp7.vhost.mapping.my-mapping-admin.idproviders: system
@@ -1592,7 +1595,7 @@ ingress.networking.k8s.io/my-domain-com-admin created</code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2025-01-02 11:25:38 UTC
+Last updated 2025-03-12 08:45:25 UTC
 </div>
 </div>
 </body>
