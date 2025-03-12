@@ -150,7 +150,7 @@ WARNING: Remember to use a unique namespace per XP deployment. Never use the sam
 
 . Place this yaml file in a suitable location on your computer:
 +
-NOTE: Make sure the spec is updated with latest versions of XP and other softwarwe listed.
+NOTE: Make sure the spec is updated with latest versions of XP and other software listed.
 +
 .simple.yaml
 [source,yaml]
@@ -221,7 +221,7 @@ To remove the test deployment, run the following command:
 kubectl delete -f simple.yaml
 ----
 
-WARNING: Volumes are typically not deleted when you remove the deployment, so take care to remove them afterwards.
+WARNING: Volumes are typically not deleted when you remove the deployment, so take care to remove them afterward.
 
 
 == Uninstalling the operator

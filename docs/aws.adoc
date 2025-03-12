@@ -9,7 +9,7 @@ Instructions on setting up a managed Kubernetes cluster on Amazon Web Services (
 
 You will need the following:
 
-An Amazon account:: Sign up or log in to https://aws.amazon.com/[AWS] where you will create the k8s cluster. TODO Verify
+An Amazon account:: Sign up or log in to https://aws.amazon.com/[AWS] where you will create the k8s cluster.
 
 aws cli:: Command-line tool to manage resources in AWS. Get it https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html[Amazon].
 
@@ -34,7 +34,7 @@ Kubernetes version:: Should be >= 1.27.9
 Follow the steps below to get a basic EKS cluster up and running:
 
 . Create an access key, and configure the aws CLI as described here: https://docs.aws.amazon.com/eks/latest/userguide/install-awscli.html
-. Make a cluster configuration Yaml file 
+. Make a cluster configuration Yaml file
 +
 .cluster-config.yaml
 [source,Yaml]
@@ -86,7 +86,7 @@ Once finished, you should see something like this in your output log:
 2024-10-30 13:47:58 [✔]  EKS cluster "enonic" in "eu-north-1" region is ready
 ----
 
-NOTE:: For production use, you will likely also need to configure an AWS load balancer, 
+NOTE:: For production use, you will likely also need to configure an AWS load balancer
 
 == Connect to the cluster
 
@@ -98,7 +98,7 @@ NOTE:: For production use, you will likely also need to configure an AWS load ba
 +
     kubectl get namespaces
 +
-This should display a list of namespaces in the newly created k8s cluster. The "Age" column in the output shows how long has it been since the namespaces are created. 
+This should display a list of namespaces in the newly created k8s cluster. The "Age" column in the output shows how long has it been since the namespaces are created.
 +
 [source,terminal]
 ----
@@ -128,11 +128,11 @@ gp2    kubernetes.io/aws-ebs   Delete          WaitForFirstConsumer   false     
 
 To run XP in clustered mode, a <<../storage-classes#, `ReadWriteMany` storage class>> (NFS type filesystem) is required.
 
-You may <<nfs#, run your own NFS server>>, or take advantage of Amazon's managed service for shared filesystems called https://aws.amazon.com/efs/[Elastic File System (EFS)^]. 
+You may <<nfs#, run your own NFS server>>, or take advantage of Amazon's managed service for shared filesystems called https://aws.amazon.com/efs/[Elastic File System (EFS)^].
 
 To provision an EFS storage for your cluster, follow Amazons own documentation:
 
-. https://docs.aws.amazon.com/efs/latest/ug/gs-step-two-create-efs-resources.html[Create an EFS^] 
+. https://docs.aws.amazon.com/efs/latest/ug/gs-step-two-create-efs-resources.html[Create an EFS^]
 . Then, https://aws.amazon.com/blogs/containers/introducing-efs-csi-dynamic-provisioning/[create a storage class with dynamic provisioning]
 
 Once this is configured properly, you may specify `efs` as your shared storage class when [installing the XP operator].

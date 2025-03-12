@@ -100,9 +100,11 @@ If you need to specify a custom XP docker image, you can do so by setting the `o
 [values.yaml](helm%2Fsrc%2Ftest%2Fvalues.yaml)
 
 ```properties
-operator.charts.values.image.nameTemplate=gcr.io/playground-186616/enonic-xp:nightly
+operator.charts.values.image.nameTemplate=europe-north1-docker.pkg.dev/my-gcp-project/my-gcp-registry/enonic-xp@%s
 operator.charts.values.image.pullPolicy=Always
 ```
+
+`%s` will be replaced with the `.spec.xpVersion` value of `Xp7Deployment` resource.
 
 ### Running operator in IDE
 
@@ -115,7 +117,7 @@ make dev
 
 Start operator.
 
-Use your IDE to run the `com.enonic.kubernetes.operator.helpers.Main` class and set the VM options to to:
+Use your IDE to run the `com.enonic.kubernetes.operator.helpers.Main` class and set the VM options to:
 
 ```
 -Doperator.charts.path=java-operator/src/main/helm -Doperator.charts.values.storage.shared.storageClassName=nfs -Dquarkus.http.ssl.certificate.file=kubernetes/kind/certs/tls.crt -Dquarkus.http.ssl.certificate.key-file=kubernetes/kind/certs/tls.key

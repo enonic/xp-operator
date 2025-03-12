@@ -19,15 +19,15 @@ ReadWriteMany (RWM):: Can be mounted in read and write mode by many nodes.
 
 NOTE: There are also `ReadOnlyMany` and `ReadWriteOncePod` storage classes, but these are generally not relevant for the XP operator
 
-`ReadWriteOnce` is supported by the default storage classes available in any k8s cluster. This satisfies the requirement of XP deployment in single mode. 
+`ReadWriteOnce` is supported by the default storage classes available in any k8s cluster. This satisfies the requirement of XP deployment in single mode.
 
-An NFS-based `ReadWriteMany` storage class is required to deploy XP in clustered mode. Refer to the table below to see which storage class you can use on the major cloud service providers. 
-
-
-WARNING: Some `ReadWriteMany` storage classes have restrictions to changing the modified time of files - XP requires this capability. 
+An NFS-based `ReadWriteMany` storage class is required to deploy XP in clustered mode. Refer to the table below to see which storage class you can use on the major cloud service providers.
 
 
-== Compatiblity list
+WARNING: Some `ReadWriteMany` storage classes have restrictions to changing the modified time of files - XP requires this capability.
+
+
+== Compatibility list
 
 Below is a list of standard storage classes that are available out-of-the-box from popular cloud providers.
 

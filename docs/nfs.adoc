@@ -2,9 +2,9 @@
 :toc: right
 :imagesdir: images
 
-In this section we show how you can setup a `ReadWriteMany` storage class using NFS.
+In this section we show how you can set up a `ReadWriteMany` storage class using NFS.
 
-NOTE: GKE (Google) Autopilot clusters do not support running NFS due to security restrictions. The NFS server provisioner requires two capabilities 'DAC_READ_SEARCH' and 'SYS_RESOURCE', which are disabled by Autopilot.
+NOTE: GKE (Google) Autopilot clusters do not support running NFS. The NFS server provisioner requires two capabilities `DAC_READ_SEARCH` and `SYS_RESOURCE`, which are disabled by Autopilot.
 
 == Prerequisites
 
@@ -15,7 +15,7 @@ Kubectl:: Is the Kubernetes command-line tool, kubectl, allows you to run comman
 Helm:: Is a package manager for Kubernetes.
 
 
-== Alt A) Create NFS server in your K8s cluster
+== Alternative A. Create NFS server in your K8s cluster
 
 === Add helm repository
 
@@ -64,7 +64,7 @@ The NFS Provisioner service has now been installed.
 ----
 
 
-== Alt. B) Using an existing NFS server
+== Alternative B. Using an existing NFS server
 
 If you already have an NFS server, we can create a client that uses that. Read more about this provisioner on https://github.com/kubernetes-sigs/nfs-subdir-external-provisioner[github].
 

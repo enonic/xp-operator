@@ -86,21 +86,21 @@ spec:
 
 ==== Disks
 
-In the Xp7Deployment resource we have names of disks that you can define to be shared, private or non existant.
+In the Xp7Deployment resource we have names of disks that you can define to be shared, private or non-existent.
 
-blobstore:: All blob objects. This should always be shared in a cluster.
+blobstore:: All blob objects. This must always be shared between cluster nodes.
 
-snapshots:: Index snapshots. This should always be shared in a cluster.
+snapshots:: Index snapshots. This must always be shared between cluster nodes.
 
-export:: Data dumps and other data. This should be shared in a cluster.
+export:: Data dumps and other data. This should be shared between cluster nodes.
 
-index:: Private node index. This should never be shared.
+index:: Private node index. This must _never_ be shared between cluster nodes.
 
-work:: Private node cache. This should never be shared.
+work:: Private node cache. This must _never_ be shared between cluster nodes.
 
-deploy:: Locally installed apps on this single node. This should never be shared.
+deploy:: Locally installed apps on this single node. This must never be shared between cluster nodes.
 
-If you define a `volume` property, then the disk will be mounted in specified volume by subpath equals to the disk name. If you dont define a volume property, then the implicit volume will be created and the disk will be mounted in it to the root path.
+If you define a `volume` property, then the disk will be mounted in specified volume by subpath equals to the disk name. If you don't define a volume property, then the implicit volume will be created and the disk will be mounted in it to the root path.
 
 For customization, two key attributes can be adjusted: size and storageClass. These attributes pertain to the implicit volume. To specify default values use the <<installation#values,`values.yaml`>> file during the installation stage.
 
@@ -342,7 +342,7 @@ In addition to new resources, there are also new annotations that add some funct
 
 === Ingresses
 
-To expose your XP instance outside of the K8s cluster, the operator uses standard k8s Ingresses. To simplify management, XP's virtual hosts are also managed via Ingress annotations.
+To expose your XP instance outside the K8s cluster, the operator uses standard k8s Ingresses. To simplify management, XP's virtual hosts are also managed via Ingress annotations.
 
 . Sample annotations
 [source,yaml]
@@ -365,9 +365,12 @@ metadata:
   name: my-domain-com
   namespace: my-namespace
   annotations:
+    # all hosts mapping
     enonic.cloud/xp7.vhost.mapping.my-mapping-site.source: /
     enonic.cloud/xp7.vhost.mapping.my-mapping-site.target: /site/default/master/homepage
 
+    # specific host mapping
+    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.host: my-domain.com
     enonic.cloud/xp7.vhost.mapping.my-mapping-admin.source: /admin
     enonic.cloud/xp7.vhost.mapping.my-mapping-admin.target: /admin
     enonic.cloud/xp7.vhost.mapping.my-mapping-admin.idproviders: system
