@@ -81,19 +81,6 @@ metadata:
       controller: true
       name: "mycloud-mysolution-myenv-myservice"
 data:
-  deployApps.sh: "#!/bin/sh\n\necho \"Bootstrap deploy folder apps\"\n\nDEPLOY_DIR=\"\
-    $1\"\n\nadd() {\n    URL=\"$1\"\n    NAME=\"$2\"\n    printf \"Adding %s ... \"\
-    \ \"$NAME\"\n    if [ -f \"$DEPLOY_DIR/$NAME\" ]; then\n        echo \"skipped!\
-    \ Already exists!\"\n        exit\n    fi\n\n    fail=$(wget --quiet --output-document=\"\
-    $DEPLOY_DIR/$NAME\" \"$URL\" 2>&1)\n    if [ $? -ne 0 ]; then\n        rm -f \"\
-    $DEPLOY_DIR/$NAME\"\n        echo \"failed!\"\n        echo \"$fail\"\n      \
-    \  exit 1\n    fi\n    echo \"success!\"\n}\n\nremove() {\n    NAME=\"$1\"\n \
-    \   printf \"Removing %s ... \" \"$NAME\"\n    if [ ! -f \"$DEPLOY_DIR/$NAME\"\
-    \ ]; then\n        echo \"skipped! Not found!\"\n        exit\n    fi\n    fail=$(rm\
-    \ \"$DEPLOY_DIR/$NAME\" 2>&1) || { echo \"failed! \"; echo \"$fail\"; exit 1;\
-    \ }\n    echo \"success!\"\n}\n\n# Delete apps\nfor f in $(find \"$DEPLOY_DIR\"\
-    \ -name '*.jar'); do\n  name=$(basename \"$f\")\n  if [ \"$(echo '' | grep \"\
-    $name\")\" = \"\" ]; then\n    remove \"$name\"\n  fi\ndone\n\n# Add apps\n"
   endpoints.sh: "#!/usr/bin/env bash\n\nset -e\n\nusage () {\n    echo \"Usage: $SCRIPT_NAME\
     \ [OPTIONS]\"\n    echo \"Wait until IP has been added to endpoints\"\n    echo\
     \ \"\"\n    echo \"Options:\"\n    echo \"  -s, --service=     Service name\"\n\
@@ -588,8 +575,6 @@ spec:
                   key: "passHash"
                   name: "su"
                   optional: false
-            - name: "PRE_APP_HASH"
-              value: "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e"
             - name: "XP_OPTS"
               value: "-Xms154m -Xmx154m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof\
             \ -Dhazelcast.shutdownhook.policy=GRACEFUL -Dhazelcast.graceful.shutdown.max.wait=600"

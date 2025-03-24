@@ -23,16 +23,18 @@ helm install --namespace kube-system xp-operator enonic/xp-operator
 
 The following table lists the configurable parameters of the xp-operator chart. For details look at [values.yaml](./values.yaml).
 
-| Parameter            | Description                                                           | Default                            |
-| -------------------- | --------------------------------------------------------------------- | ---------------------------------- |
-| `image.repository`   | Operator image repository                                             | `enonic/xp-operator`               |
-| `image.tag`          | Operator image tag                                                    | _see [values.yaml](./values.yaml)_ |
-| `image.pullPolicy`   | Operator image pull policy                                            | `IfNotPresent`                     |
-| `resources.limits`   | The resources limits for the Operator container                       | `{}`                               |
-| `resources.requests` | The requested resources for the Operator container                    | `{}`                               |
-| `labels`             | Additional labels for Operator pods                                   | `{}`                               |
-| `annotations`        | Additional annotations for Operator pods                              | `{}`                               |
-| `env`                | Environmental variables for the Operator container                    | `{}`                               |
-| `secrets`            | Secrets mounted as environmental variables for the Operator container | `{}`                               |
-| `config`             | Configuration for the Operator container                              | _see [values.yaml](./values.yaml)_ |
-| `onlyDeployCrds`     | Only deploy the CRD definitions                                       | `false`                            |
+| Parameter                   | Description                                                           | Default                            |
+|-----------------------------|-----------------------------------------------------------------------|------------------------------------|
+| `image.repository`          | Operator image repository                                             | `enonic/xp-operator`               |
+| `image.tag`                 | Operator image tag                                                    | _see [values.yaml](./values.yaml)_ |
+| `image.pullPolicy`          | Operator image pull policy                                            | `IfNotPresent`                     |
+| `sysctlInitContainer.image` | Image of container to set vm.max_map_count                            | `busybox`                          |
+| `waitForDnsDiscovery.image` | Image of container to wait XP deployment's service                    | `busybox`                          |
+| `resources.limits`          | The resources limits for the Operator container                       | `{}`                               |
+| `resources.requests`        | The requested resources for the Operator container                    | `{}`                               |
+| `labels`                    | Additional labels for Operator pods                                   | `{}`                               |
+| `annotations`               | Additional annotations for Operator pods                              | `{}`                               |
+| `env`                       | Environmental variables for the Operator container                    | `{}`                               |
+| `secrets`                   | Secrets mounted as environmental variables for the Operator container | `{}`                               |
+| `config`                    | Configuration for the Operator container                              | _see [values.yaml](./values.yaml)_ |
+| `onlyDeployCrds`            | Only deploy the CRD definitions                                       | `false`                            |

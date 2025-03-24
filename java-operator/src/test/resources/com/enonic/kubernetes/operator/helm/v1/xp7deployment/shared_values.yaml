@@ -20,7 +20,6 @@ deployment:
   minimumMasterNodes: 2
   name: "mycloud-mysolution-myenv-myservice"
   namespace: "mycloud-mysolution-myenv-myservice"
-  preInstalledAppHash: "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e"
   spec:
     enabled: true
     xpVersion: "7.13.2"
@@ -151,6 +150,8 @@ storage:
     storageClassName: "standard"
   shared:
     storageClassName: "standard"
+sysctlInitContainer:
+  image: "busybox"
 volumes:
   mounts:
     blobstore: "/enonic-xp/home/repo/blob"
@@ -159,3 +160,5 @@ volumes:
     index: "/enonic-xp/home/repo/index"
     snapshots: "/enonic-xp/home/snapshots"
     work: "/enonic-xp/home/work"
+waitForDnsDiscovery:
+  image: "busybox"
