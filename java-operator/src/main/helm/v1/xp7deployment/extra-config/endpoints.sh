@@ -74,7 +74,7 @@ FOUND="0"
 
 START_TIME=$(date +%s)
 while [ "$OK" == "0" ]; do
-    (curl -s -H "Authorization: Bearer `cat /run/secrets/kubernetes.io/serviceaccount/token`" --cacert /run/secrets/kubernetes.io/serviceaccount/ca.crt https://kubernetes.default.svc.cluster.local/api/v1/namespaces/`cat /run/secrets/kubernetes.io/serviceaccount/namespace`/endpoints/${SERVICE} | grep ${IP} > /dev/null) && FOUND="1" || true
+    (curl -s -H "Authorization: Bearer `cat /var/run/secrets/kubernetes.io/serviceaccount/token`" --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt https://kubernetes.default.svc.cluster.local/api/v1/namespaces/`cat /var/run/secrets/kubernetes.io/serviceaccount/namespace`/endpoints/${SERVICE} | grep ${IP} > /dev/null) && FOUND="1" || true
 
     if [ "$FOUND" == "1" ]; then
         echo "IP ${IP} in service ${SERVICE} found!"
