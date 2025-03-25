@@ -574,7 +574,7 @@ We recommend using the latest version of Kubernetes. The minimal version of Kube
 	--namespace kube-system \
 	--values values.yaml \
 	xp-operator \
-	&lt;URL to operator i.e. https://repo.enonic.com/repository/helm/xp-operator-1.0.0.tgz&gt;</code></pre>
+	&lt;URL to operator i.e. https://repo.enonic.com/repository/helm/xp-operator-1.0.2.tgz&gt;</code></pre>
 </div>
 </div>
 <div class="admonitionblock note">
@@ -955,7 +955,7 @@ Don´t uninstall the xp-operator while there are remaining xp7Deployments on you
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2025-03-12 08:45:25 UTC
+Last updated 2025-03-25 13:37:10 UTC
 </div>
 </div>
 </body>
