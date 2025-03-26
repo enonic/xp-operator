@@ -1,0 +1,67 @@
+name: Nightly
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Push to Docker Hub Repository
+        default: 'enonic/xp-operator'
+
+jobs:
+  nightly:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 11
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: '3.11.0'
+
+      - name: Setup YQ
+        uses: chrisdickinson/setup-yq@latest
+        with:
+          yq-version: v4.25.1
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v6.1.0-20
+          platforms: all
+
+      - name: Setup buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to docker hub
+        uses: docker/login-action@v3
+        with:
+          username: enonicpublisher
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build java-client and java-operator
+        run: ./gradlew build
+
+      - name: Publish docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          pull: true
+          no-cache: true
+          push: true
+          tags: "enonic/xp-operator:nightly"
+          platforms: linux/amd64,linux/arm64,linux/ppc64le,linux/s390x,linux/arm/v7
+
+      - name: Publish helm chart as nightly
+        run: curl -u "ci:${{ secrets.ARTIFACTORY_PASSWORD }}" \
+          --upload-file helm/build/libs/xp-operator-$(./get-version.sh).tgz \
+          https://repo.enonic.com/repository/helm/xp-operator-nightly.tgz -v
+
