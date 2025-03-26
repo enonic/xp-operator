@@ -63,7 +63,14 @@ EOF
 }
 
 function sendEvent() {
-    (cat - | curl -f -s -X POST -H "Accept: application/json" -H "Content-Type: application/json" -H "Authorization: Bearer $K8S_TOKEN" --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt -d @- https://kubernetes.default.svc.cluster.local/api/v1/namespaces/`cat /var/run/secrets/kubernetes.io/serviceaccount/namespace`/events > /dev/null || (echo "failed" && false)) && echo "success"
+(cat - | curl -f -s -S -X POST \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $K8S_TOKEN" \
+  --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt \
+  -d @- \
+  "https://kubernetes.default.svc.cluster.local/api/v1/namespaces/$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)/events" \
+  > /dev/null) || (echo "failed:" >&2 && false) && echo "success"
 }
 
 
