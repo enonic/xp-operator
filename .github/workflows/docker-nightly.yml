@@ -56,8 +56,9 @@ jobs:
           tags: "enonic/xp-operator:nightly"
           platforms: linux/amd64,linux/arm64,linux/ppc64le,linux/s390x,linux/arm/v7
 
+      - name: Rename helm chart to nightly
+        run: cp helm/build/libs/xp-operator-$(./get-version.sh).tgz helm/build/libs/xp-operator-nightly.tgz
+
       - name: Publish helm chart as nightly
-        run: curl -u "ci:${{ secrets.ARTIFACTORY_PASSWORD }}" \
-          --upload-file helm/build/libs/xp-operator-$(./get-version.sh).tgz \
-          https://repo.enonic.com/repository/helm/xp-operator-nightly.tgz -v
+        run: curl -u "ci:${{ secrets.ARTIFACTORY_PASSWORD }}" https://repo.enonic.com/repository/helm/ --upload-file helm/build/libs/xp-operator-nightly.tgz -v
 
