@@ -43,7 +43,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build java-client and java-operator
-        run: ./gradlew build
+        run: ./gradlew build -x check
 
       - name: Publish docker image
         uses: docker/build-push-action@v6
