@@ -1,6 +1,15 @@
 # Inspired by https://github.com/fabric8io-images/java/blob/master/images/alpine/openjdk11/jre/Dockerfile
 
-FROM eclipse-temurin:11-jre
+## from gradle
+FROM gradle:8.3.0-jdk11 AS build
+## install helm in ubuntu
+COPY --from=alpine/helm:3.11.3 /usr/bin/helm /usr/bin/helm
+
+WORKDIR /home/gradle/project
+COPY . .
+RUN gradle build -x check
+
+FROM eclipse-temurin:11-jre AS runtime
 
 # JAVA_APP_DIR is used by run-java.sh for finding the binaries
 ENV JAVA_APP_DIR=/deployments \
@@ -33,6 +42,6 @@ COPY docker/run-java.sh /deployments/
 COPY --chown=1000:1000 java-operator/src/main/helm /deployments/helm/
 
 # Copy build target
-COPY --chown=1000:1000 java-operator/build/quarkus-app /deployments/
+COPY --from=build --chown=1000:1000 /home/gradle/project/java-operator/build/quarkus-app /deployments/
 
 CMD [ "/deployments/run-java.sh" ]

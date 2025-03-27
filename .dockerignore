@@ -1,4 +1,0 @@
-*
-!java-operator/build/quarkus-app
-!java-operator/src/main/helm
-!docker/*
