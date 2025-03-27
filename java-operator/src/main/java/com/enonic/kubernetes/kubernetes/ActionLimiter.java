@@ -118,7 +118,7 @@ public class ActionLimiter
                 }
                 else
                 {
-                    log.debug( "Limiter '{}' could not cancel previously scheduled {}. It was likely already completed", name, k );
+                    log.trace( "Limiter '{}' could not cancel previously scheduled {}. It was likely already completed", name, k );
                 }
             }
             final ScheduledFuture<?> scheduledFuture = taskRunner.scheduleOneTime( () -> {
