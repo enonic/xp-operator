@@ -124,6 +124,7 @@ public class ActionLimiter
             final ScheduledFuture<?> scheduledFuture = taskRunner.scheduleOneTime( () -> {
                 log.debug( "Limiter '{}' running {} after {} ms", name, k, delay );
                 r.run();
+                log.debug( "Limiter '{}' completed {}", name, k );
             }, delay, TimeUnit.MILLISECONDS );
 
             log.debug( "Limiter '{}' will run {} after {} ms", name, k, delay );
