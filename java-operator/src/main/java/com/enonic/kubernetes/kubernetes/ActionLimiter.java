@@ -73,6 +73,8 @@ public class ActionLimiter
 
         if ( nowMs - last >= 1000 && cleanupLastRun.compareAndSet( last, nowMs ) )
         {
+            log.trace( "Limiter '{}' cleanup", name );
+
             Instant now = Instant.ofEpochMilli( nowMs );
             cooldown.entrySet().removeIf( e -> e.getValue().isBefore( now ) );
             ops.entrySet().removeIf( e -> e.getValue().isDone() );
