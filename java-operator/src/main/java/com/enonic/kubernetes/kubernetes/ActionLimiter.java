@@ -1,17 +1,20 @@
 package com.enonic.kubernetes.kubernetes;
 
-import com.enonic.kubernetes.common.TaskRunner;
-import io.fabric8.kubernetes.api.model.HasMetadata;
-import io.vertx.core.impl.ConcurrentHashSet;
+import java.time.Instant;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-import java.util.function.Function;
+import io.fabric8.kubernetes.api.model.HasMetadata;
+
+import com.enonic.kubernetes.common.TaskRunner;
 
 public class ActionLimiter
 {
@@ -21,21 +24,22 @@ public class ActionLimiter
 
     private final TaskRunner taskRunner;
 
-    private final Map<String, Runnable> ops;
+    private final Map<String, ScheduledFuture<?>> ops = new ConcurrentHashMap<>();
 
-    private final Set<String> blocks;
+    private final Map<String, Instant> cooldown = new ConcurrentHashMap<>();
 
     private final long delay;
-    private final long block;
 
-    public ActionLimiter( final String name, final TaskRunner taskRunner, final long delay, final long block )
+    private final long cooldownPeriod;
+
+    private final AtomicLong cleanupLastRun = new AtomicLong( 0 );
+
+    public ActionLimiter( final String name, final TaskRunner taskRunner, final long delay, final long cooldownPeriod )
     {
         this.name = name;
         this.taskRunner = taskRunner;
-        this.ops = new ConcurrentHashMap<>();
-        this.blocks = new ConcurrentHashSet<>();
         this.delay = delay;
-        this.block = block;
+        this.cooldownPeriod = cooldownPeriod;
     }
 
     public ActionLimiter( final String name, final TaskRunner taskRunner, final long delay )
@@ -43,48 +47,87 @@ public class ActionLimiter
         this( name, taskRunner, delay, 0L );
     }
 
-    public <T> void limit( T t, Function<T, String> hashFunc, Runnable r )
-    {
-        final String key = hashFunc.apply( t );
-
-        // This limiter has blocks
-        if (block > 0L) {
-            // If this key is currently blocked, return
-            if (blocks.contains( key )) {
-                return;
-            }
-
-            // Add block and schedule to remove the block
-            blocks.add( key );
-            taskRunner.scheduleOneTime( () -> {
-                blocks.remove( key );
-                log.debug( String.format( "Limiter '%s' unblocked: %s", name, key ) );
-            }, block, TimeUnit.MILLISECONDS );
-            log.debug( String.format( "Limiter '%s' blocked for %d: %s", name, block, key ) );
-        }
-
-        // Schedule run
-        ops.put( key, r );
-        taskRunner.scheduleOneTime( () -> maybeRun( key ), delay, TimeUnit.MILLISECONDS );
-        log.debug( String.format( "Limiter '%s' with delay %d scheduled for: %s", name, delay, key ) );
-    }
-
-    public <T> void limit( T t, Function<T, String> hashFunc, Consumer<T> c )
-    {
-        limit( t, hashFunc, () -> c.accept( t ) );
-    }
-
     public <T extends HasMetadata> void limit( T r, Consumer<T> c )
     {
-        limit( r, x -> String.format( "%s/%s", x.getMetadata().getNamespace(), x.getMetadata().getName() ), c );
+        limit( r, x -> x.getMetadata().getNamespace() + "/" + x.getMetadata().getName(), () -> c.accept( r ) );
     }
 
-    private void maybeRun( String key )
+    public <T> void limit( T t, Function<T, String>keyFunc, Runnable r )
     {
-        Runnable r = ops.remove( key );
-        if (r != null) {
-            log.debug( String.format( "Limiter '%s' running after %d delay: %s", name, delay, r ) );
-            r.run();
+        final String key = keyFunc.apply( t );
+
+        final boolean toCooldown = cooldown( key );
+        if ( toCooldown )
+        {
+            log.debug( "Limiter '{}' will not process further tasks {} for {} ms", name, key, cooldownPeriod );
+            return;
         }
+        schedule( key, r );
+        cleanup();
+    }
+
+    private void cleanup()
+    {
+        long nowMs = System.currentTimeMillis();
+        long last = cleanupLastRun.get();
+
+        if ( nowMs - last >= 1000 && cleanupLastRun.compareAndSet( last, nowMs ) )
+        {
+            Instant now = Instant.ofEpochMilli( nowMs );
+            cooldown.entrySet().removeIf( e -> e.getValue().isBefore( now ) );
+            ops.entrySet().removeIf( e -> e.getValue().isDone() );
+        }
+    }
+
+    private boolean cooldown( final String key )
+    {
+        final Instant now = Instant.now();
+        if ( cooldownPeriod > 0L )
+        {
+            final boolean[] isPresent = {false};
+            cooldown.compute( key, ( k, v ) -> {
+                if ( v == null || now.isAfter( v ) )
+                {
+                    return now.plusMillis( cooldownPeriod );
+                }
+                else
+                {
+                    isPresent[0] = true;
+                    return v;
+                }
+            } );
+
+            if ( isPresent[0] )
+            {
+                log.debug( "Limiter '{}' skips tasks {} for now", name, key );
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void schedule( final String key, final Runnable r )
+    {
+        ops.compute( key, ( k, v ) -> {
+            if ( v != null )
+            {
+                final boolean canceled = v.cancel( false );
+                if ( canceled )
+                {
+                    log.debug( "Limiter '{}' canceled previously scheduled {}", name, k );
+                }
+                else
+                {
+                    log.debug( "Limiter '{}' could not cancel previously scheduled {}. It was likely already completed", name, k );
+                }
+            }
+            final ScheduledFuture<?> scheduledFuture = taskRunner.scheduleOneTime( () -> {
+                log.debug( "Limiter '{}' running {} after {} ms", name, k, delay );
+                r.run();
+            }, delay, TimeUnit.MILLISECONDS );
+
+            log.debug( "Limiter '{}' will run {} after {} ms", name, k, delay );
+            return scheduledFuture;
+        } );
     }
 }

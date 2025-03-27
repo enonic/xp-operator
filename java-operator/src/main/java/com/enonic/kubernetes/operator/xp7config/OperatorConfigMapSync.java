@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.enonic.kubernetes.common.Configuration.cfgLong;
@@ -69,7 +70,7 @@ public class OperatorConfigMapSync
     protected void handle( final String namespace )
     {
         // Handle all ConfigMaps in namespace with nodeGroup label
-        limiter.limit( namespace, String::toString, () -> searchers.configMap().stream().
+        limiter.limit( namespace, Function.identity(), () -> searchers.configMap().stream().
             filter( inNamespace( namespace ) ).
             filter( isDeleted().negate() ).
             filter( hasLabel( cfgStr( "operator.charts.values.labelKeys.nodeGroup" ) ) ).
