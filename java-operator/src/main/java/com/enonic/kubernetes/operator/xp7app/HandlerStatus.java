@@ -159,7 +159,7 @@ public class HandlerStatus
                 .orElse( app.getStatus().getXp7AppStatusFields() ) );
 
         if (!newStatus.equals( app.getStatus() )) {
-            log.debug("Set Deployment status : {} {} in {}", newStatus.getState(), app.getMetadata().getName(), app.getMetadata().getNamespace() );
+            log.debug("Set App status : {} {} in {}", newStatus.getState(), app.getMetadata().getName(), app.getMetadata().getNamespace() );
 
             K8sLogHelper.logEdit( clients.xp7Apps().
                 inNamespace( app.getMetadata().getNamespace() ).
