@@ -1,10 +1,6 @@
 package com.enonic.kubernetes.operator.xp7deployment;
 
-import com.enonic.kubernetes.client.v1.xp7deployment.Xp7Deployment;
-import com.enonic.kubernetes.client.v1.xp7deployment.Xp7DeploymentSpecNodeGroup;
-import com.enonic.kubernetes.client.v1.xp7deployment.Xp7DeploymentStatus;
-import com.enonic.kubernetes.client.v1.xp7deployment.Xp7DeploymentStatusFields;
-import com.enonic.kubernetes.client.v1.xp7deployment.Xp7DeploymentStatusFieldsPod;
+import com.enonic.kubernetes.client.v1.xp7deployment.*;
 import com.enonic.kubernetes.kubernetes.Clients;
 import com.enonic.kubernetes.kubernetes.Informers;
 import com.enonic.kubernetes.kubernetes.Searchers;
@@ -13,6 +9,8 @@ import com.enonic.kubernetes.operator.helpers.InformerEventHandler;
 import io.fabric8.kubernetes.api.model.ContainerStatus;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.quarkus.runtime.StartupEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -22,10 +20,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.enonic.kubernetes.kubernetes.Predicates.inSameNamespaceAs;
-import static com.enonic.kubernetes.kubernetes.Predicates.isEnonicManaged;
-import static com.enonic.kubernetes.kubernetes.Predicates.isPartOfDeployment;
-import static com.enonic.kubernetes.kubernetes.Predicates.onCondition;
+import static com.enonic.kubernetes.kubernetes.Predicates.*;
 
 /**
  * This operator class updates Xp7Deployment status fields
@@ -35,6 +30,8 @@ public class OperatorXp7DeploymentStatus
     extends InformerEventHandler<Pod>
     implements Runnable
 {
+    private static final Logger log = LoggerFactory.getLogger( OperatorXp7DeploymentStatus.class );
+
     @Inject
     Clients clients;
 
@@ -151,6 +148,8 @@ public class OperatorXp7DeploymentStatus
     private void updateOnChange( final Xp7Deployment resource, final int oldStatusHash, final Xp7DeploymentStatus newStatus )
     {
         if (oldStatusHash != newStatus.hashCode()) {
+            log.debug("Set Deployment status : {} {} in {}", newStatus.getState(), resource.getMetadata().getName(), resource.getMetadata().getNamespace());
+
             K8sLogHelper.logEdit( clients.xp7Deployments().
                 inNamespace( resource.getMetadata().getNamespace() ).
                 withName( resource.getMetadata().getName() ), d -> {

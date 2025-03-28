@@ -10,6 +10,8 @@ import com.enonic.kubernetes.operator.Operator;
 import com.google.common.hash.Hashing;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.quarkus.runtime.StartupEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -39,6 +41,8 @@ import static java.util.stream.Collectors.groupingBy;
 public class OperatorConfigMapSync
     implements Runnable
 {
+    private static final Logger log = LoggerFactory.getLogger( OperatorConfigMapSync.class );
+
     @Inject
     Operator operator;
 
@@ -122,6 +126,7 @@ public class OperatorConfigMapSync
 
         // If data is not the same, do the update
         if (!Objects.equals( oldData, data ) || !Objects.equals( oldBinaryData, binaryData )) {
+            log.debug("Syncing ConfigMap: {} in {}", configMap.getMetadata().getName(), configMap.getMetadata().getNamespace());
             K8sLogHelper.logEdit( clients.k8s().
                 configMaps().
                 inNamespace( configMap.getMetadata().getNamespace() ).

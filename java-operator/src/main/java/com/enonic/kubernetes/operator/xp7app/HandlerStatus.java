@@ -12,6 +12,8 @@ import com.enonic.kubernetes.client.v1.xp7deployment.Xp7Deployment;
 import com.enonic.kubernetes.kubernetes.Clients;
 import com.enonic.kubernetes.kubernetes.Searchers;
 import com.enonic.kubernetes.kubernetes.commands.K8sLogHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -27,6 +29,8 @@ import static com.enonic.kubernetes.operator.xp7deployment.Predicates.running;
 @Singleton
 public class HandlerStatus
 {
+    private static final Logger log = LoggerFactory.getLogger( HandlerStatus.class );
+
     @Inject
     Clients clients;
 
@@ -155,6 +159,8 @@ public class HandlerStatus
                 .orElse( app.getStatus().getXp7AppStatusFields() ) );
 
         if (!newStatus.equals( app.getStatus() )) {
+            log.debug("Set Deployment status : {} {} in {}", newStatus.getState(), app.getMetadata().getName(), app.getMetadata().getNamespace() );
+
             K8sLogHelper.logEdit( clients.xp7Apps().
                 inNamespace( app.getMetadata().getNamespace() ).
                 withName( app.getMetadata().getName() ), a -> {

@@ -11,6 +11,8 @@ import io.fabric8.kubernetes.api.model.networking.v1.HTTPIngressPath;
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
 import io.fabric8.kubernetes.api.model.networking.v1.IngressRule;
 import io.quarkus.runtime.StartupEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -33,6 +35,8 @@ public class OperatorIngressLabel
     extends InformerEventHandler<Xp7Config>
     implements Runnable
 {
+    private static final Logger log = LoggerFactory.getLogger( OperatorIngressLabel.class );
+
     @Inject
     Clients clients;
 
@@ -115,6 +119,8 @@ public class OperatorIngressLabel
 
         // Update if true
         if (loaded) {
+            log.debug("Label Ingress as vhost loaded: {} in {}", ingress.getMetadata().getName(), ingress.getMetadata().getNamespace());
+
             K8sLogHelper.logEdit( clients.k8s().network().v1().ingresses().
                 inNamespace( ingress.getMetadata().getNamespace() ).
                 withName( ingress.getMetadata().getName() ), i -> {
