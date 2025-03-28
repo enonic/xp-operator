@@ -14,12 +14,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup JDK 11
+      - name: Setup JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '11'
           distribution: 'temurin'
-          cache: 'gradle'
+          java-version: 11
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Setup Helm
         uses: azure/setup-helm@v4
@@ -53,12 +55,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup JDK 11
+      - name: Setup JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '11'
           distribution: 'temurin'
-          cache: 'gradle'
+          java-version: 11
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Setup Helm
         uses: azure/setup-helm@v4
@@ -76,10 +80,6 @@ jobs:
         with:
           strip_v: true
 
-      - name: Assert versions
-        run: |
-          [ "${{ steps.tag.outputs.tag }}" == "$(./get-version.sh)" ] || (echo "version in gradle.properties does not match tag"; exit 1)
-
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
@@ -95,8 +95,16 @@ jobs:
           username: enonicpublisher
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Operator version
+        id: operator_version
+        run: echo "::set-output name=version::$(./get-version.sh)"
+
+      - name: Assert versions
+        run: |
+          [ "${{ steps.tag.outputs.tag }}" == "${{ steps.operator_version.outputs.version }}" ] || (echo "version in gradle.properties does not match tag"; exit 1)
+
       - name: Build java-client and java-operator
-        run: ./gradlew build
+        run: ./gradlew build -x check
 
       - name: Publish docker image
         uses: docker/build-push-action@v6
@@ -107,10 +115,10 @@ jobs:
           no-cache: true
           push: true
           tags: "enonic/xp-operator:${{ steps.tag.outputs.tag }}"
-          platforms: linux/amd64,linux/arm64,linux/ppc64le,linux/s390x,linux/arm/v7
+          platforms: linux/amd64,linux/arm64
 
       - name: Publish helm chart
-        run: curl -u "ci:${{ secrets.ARTIFACTORY_PASSWORD }}" https://repo.enonic.com/repository/helm/ --upload-file helm/build/libs/xp-operator-$(./get-version.sh).tgz -v
+        run: curl -u "ci:${{ secrets.ARTIFACTORY_PASSWORD }}" https://repo.enonic.com/repository/helm/ --upload-file helm/build/libs/xp-operator-${{ steps.operator_version.outputs.version }}.tgz -v
 
       - name: Publish java-client
         run: ./gradlew publish -PrepoUser=ci -PrepoPassword=${{ secrets.ARTIFACTORY_PASSWORD }}
