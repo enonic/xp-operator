@@ -97,7 +97,7 @@ jobs:
 
       - name: Operator version
         id: operator_version
-        run: echo "version=$(./get-version.sh)" >> $GITHUB_ENV
+        run: echo "version=$(./get-version.sh)" >> $GITHUB_OUTPUT
 
       - name: Assert versions
         run: |
