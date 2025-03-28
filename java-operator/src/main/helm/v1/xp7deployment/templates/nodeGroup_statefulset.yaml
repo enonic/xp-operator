@@ -192,7 +192,7 @@ spec:
               port: 2609
               scheme: HTTP
             failureThreshold: 20
-            initialDelaySeconds: 30
+            initialDelaySeconds: 10
             periodSeconds: 5
             timeoutSeconds: 2
           livenessProbe:
