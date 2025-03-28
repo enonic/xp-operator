@@ -11,6 +11,8 @@ import io.fabric8.kubernetes.api.model.networking.v1.HTTPIngressPath;
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
 import io.fabric8.kubernetes.api.model.networking.v1.IngressRule;
 import io.quarkus.runtime.StartupEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -33,6 +35,8 @@ public class OperatorIngressLabel
     extends InformerEventHandler<Xp7Config>
     implements Runnable
 {
+    private static final Logger log = LoggerFactory.getLogger( OperatorIngressLabel.class );
+
     @Inject
     Clients clients;
 
@@ -57,6 +61,8 @@ public class OperatorIngressLabel
     @Override
     public void onUpdate( final Xp7Config oldR, final Xp7Config newR )
     {
+        log.debug( "onUpdate Xp7Config: {} in {}", newR.getMetadata().getNamespace(), newR.getMetadata().getName() );
+
         // Only handle if this is a vhost config and it is loaded
         onCondition( newR, this::handle, this::isVHostConfig, ( c ) -> c.getStatus().getState() == Xp7ConfigStatus.State.READY );
     }
@@ -70,6 +76,8 @@ public class OperatorIngressLabel
     @Override
     public void run()
     {
+        log.debug( "Resync Ingress status" );
+
         searchers.ingress().stream().
             filter( isDeleted().negate() ).
             filter( matchLabel( cfgStr( "operator.charts.values.labelKeys.ingressVhostLoaded" ), "false" ) ).
@@ -115,6 +123,8 @@ public class OperatorIngressLabel
 
         // Update if true
         if (loaded) {
+            log.debug("Label Ingress as vhost loaded: {} in {}", ingress.getMetadata().getName(), ingress.getMetadata().getNamespace());
+
             K8sLogHelper.logEdit( clients.k8s().network().v1().ingresses().
                 inNamespace( ingress.getMetadata().getNamespace() ).
                 withName( ingress.getMetadata().getName() ), i -> {

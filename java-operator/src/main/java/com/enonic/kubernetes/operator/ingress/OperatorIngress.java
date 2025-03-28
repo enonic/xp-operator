@@ -7,6 +7,8 @@ import com.enonic.kubernetes.kubernetes.commands.K8sLogHelper;
 import com.enonic.kubernetes.operator.helpers.InformerEventHandler;
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
 import io.quarkus.runtime.StartupEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -26,6 +28,8 @@ import static com.enonic.kubernetes.kubernetes.Predicates.isDeleted;
 public class OperatorIngress
     extends InformerEventHandler<Ingress>
 {
+    private static final Logger log = LoggerFactory.getLogger( OperatorIngress.class );
+
     @Inject
     Clients clients;
 
@@ -63,21 +67,23 @@ public class OperatorIngress
         handle( oldResource );
     }
 
-    private void handle( final Ingress r )
+    private void handle( final Ingress ingress )
     {
         // Bail if the namespace is being deleted
-        if (searchers.namespace().match( contains( r ), isDeleted() )) {
+        if (searchers.namespace().match( contains( ingress ), isDeleted() )) {
             return;
         }
 
         // Handle relevant namespace
-        operatorXp7ConfigSync.handle( r.getMetadata().getNamespace() );
+        operatorXp7ConfigSync.handle( ingress.getMetadata().getNamespace() );
 
         // Label ingress
-        if (!getXpVHostAnnotations( r ).isEmpty()) {
+        if (!getXpVHostAnnotations( ingress ).isEmpty()) {
+            log.debug("Label Ingress as vhost not loaded: {} in {}", ingress.getMetadata().getName(), ingress.getMetadata().getNamespace());
+
             K8sLogHelper.logEdit( clients.k8s().network().v1().ingresses().
-                inNamespace( r.getMetadata().getNamespace() ).
-                withName( r.getMetadata().getName() ), i -> {
+                inNamespace( ingress.getMetadata().getNamespace() ).
+                withName( ingress.getMetadata().getName() ), i -> {
                 Map<String, String> labels = i.getMetadata().getLabels();
                 if (labels == null) {
                     labels = new HashMap<>();

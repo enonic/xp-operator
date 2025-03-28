@@ -624,7 +624,7 @@ spec:
               path: "/health"
               port: 2609
               scheme: "HTTP"
-            initialDelaySeconds: 30
+            initialDelaySeconds: 10
             periodSeconds: 5
             timeoutSeconds: 2
           terminationMessagePath: "/dev/termination-log"

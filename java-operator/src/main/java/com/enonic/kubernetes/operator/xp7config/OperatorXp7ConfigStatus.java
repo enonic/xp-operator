@@ -10,6 +10,8 @@ import com.enonic.kubernetes.operator.helpers.InformerEventHandler;
 import io.fabric8.kubernetes.api.model.Event;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.quarkus.runtime.StartupEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -21,10 +23,7 @@ import java.util.stream.Collectors;
 
 import static com.enonic.kubernetes.common.Configuration.cfgStr;
 import static com.enonic.kubernetes.kubernetes.Comparators.creationTime;
-import static com.enonic.kubernetes.kubernetes.Predicates.createdAfter;
-import static com.enonic.kubernetes.kubernetes.Predicates.inSameNamespaceAs;
-import static com.enonic.kubernetes.kubernetes.Predicates.isEnonicManaged;
-import static com.enonic.kubernetes.kubernetes.Predicates.matchLabel;
+import static com.enonic.kubernetes.kubernetes.Predicates.*;
 
 /**
  * This operator class triggers maintains the Xp7Config status field
@@ -33,6 +32,8 @@ import static com.enonic.kubernetes.kubernetes.Predicates.matchLabel;
 public class OperatorXp7ConfigStatus
     extends InformerEventHandler<Event>
 {
+    private static final Logger log = LoggerFactory.getLogger( OperatorXp7ConfigStatus.class );
+
     @Inject
     Clients clients;
 
@@ -69,6 +70,8 @@ public class OperatorXp7ConfigStatus
 
     private void handle( final Event newEvent )
     {
+        log.debug("ConfigReload event received: {} {}", newEvent.getMetadata().getNamespace(), newEvent.getMetadata().getName());
+
         // Find out when the configmap was last updated
         Optional<Instant> configMapLastModifiedAt = searchers.event().stream().
             filter( inSameNamespaceAs( newEvent ) ).
@@ -135,6 +138,8 @@ public class OperatorXp7ConfigStatus
             map( p -> p.getMetadata().getName() ).
             collect( Collectors.joining( ", " ) );
 
+        log.debug("markPending Xp7Config: {} in {} {}", xp7Config.getMetadata().getName(), xp7Config.getMetadata().getNamespace(), podNames);
+
         K8sLogHelper.logEdit( clients.xp7Configs().
             inNamespace( xp7Config.getMetadata().getNamespace() ).
             withName( xp7Config.getMetadata().getName() ), c -> c.withStatus( new Xp7ConfigStatus().
@@ -145,6 +150,8 @@ public class OperatorXp7ConfigStatus
 
     private boolean markReady( final Xp7Config xp7Config )
     {
+        log.debug("markReady Xp7Config: {} in {}", xp7Config.getMetadata().getName(), xp7Config.getMetadata().getNamespace());
+
         K8sLogHelper.logEdit( clients.xp7Configs().
             inNamespace( xp7Config.getMetadata().getNamespace() ).
             withName( xp7Config.getMetadata().getName() ), c -> c.withStatus( new Xp7ConfigStatus().

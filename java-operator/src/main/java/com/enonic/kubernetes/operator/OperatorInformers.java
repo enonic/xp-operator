@@ -11,9 +11,9 @@ import org.slf4j.LoggerFactory;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.enonic.kubernetes.common.Configuration.cfgLong;
 
@@ -26,8 +26,8 @@ public class OperatorInformers
 {
     private static final Logger log = LoggerFactory.getLogger( OperatorInformers.class );
 
-    private final Map<Class<? extends HasMetadata>, Integer> failureMap = new HashMap<>();
-    private final Map<Class<? extends HasMetadata>, String> resourceVersionMap = new HashMap<>();
+    private final Map<Class<? extends HasMetadata>, Integer> failureMap = new ConcurrentHashMap<>();
+    private final Map<Class<? extends HasMetadata>, String> resourceVersionMap = new ConcurrentHashMap<>();
 
     @Inject
     Operator operator;

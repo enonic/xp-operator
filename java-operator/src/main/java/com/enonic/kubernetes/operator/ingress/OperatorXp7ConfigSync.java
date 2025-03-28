@@ -121,6 +121,8 @@ public class OperatorXp7ConfigSync
 
         // Update if needed
         if (!Objects.equals( xp7Config.getSpec().getData(), data )) {
+            log.debug("Syncing vhost ConfigMap: {} in {}", xp7Config.getMetadata().getName(), xp7Config.getMetadata().getNamespace());
+
             K8sLogHelper.logEdit( clients.xp7Configs().
                 inNamespace( xp7Config.getMetadata().getNamespace() ).
                 withName( xp7Config.getMetadata().getName() ), c -> {
@@ -135,7 +137,7 @@ public class OperatorXp7ConfigSync
         Set<Mapping> targetMappings = getAnnotationMappings( ingress );
 
         // No mappings
-        if (targetMappings.size() == 0) {
+        if (targetMappings.isEmpty()) {
             return false;
         }
 
