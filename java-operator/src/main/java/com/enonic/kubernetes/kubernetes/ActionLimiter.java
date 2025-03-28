@@ -55,7 +55,7 @@ public class ActionLimiter
     public <T> void limit( T t, Function<T, String>keyFunc, Runnable r )
     {
         final String key = keyFunc.apply( t );
-
+        cleanup();
         final boolean toCooldown = cooldown( key );
         if ( toCooldown )
         {
@@ -63,7 +63,6 @@ public class ActionLimiter
             return;
         }
         schedule( key, r );
-        cleanup();
     }
 
     private void cleanup()
