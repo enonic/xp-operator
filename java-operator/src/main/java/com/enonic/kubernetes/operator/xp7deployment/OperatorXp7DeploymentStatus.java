@@ -51,8 +51,8 @@ public class OperatorXp7DeploymentStatus
     protected void onNewAdd( final Pod newPod )
     {
         onCondition(newPod, pod -> {
-                    this.handle(pod);
                     log.debug("onNew Pod: {} in {}", pod.getMetadata().getNamespace(), pod.getMetadata().getName());
+                    this.handle(pod);
                 }
                 , isEnonicManaged());
     }
@@ -61,8 +61,8 @@ public class OperatorXp7DeploymentStatus
     public void onUpdate( final Pod oldPod, final Pod newPod )
     {
         onCondition( newPod, pod -> {
-            this.handle(pod);
             log.debug( "onUpdate Pod: {} in {}", pod.getMetadata().getNamespace(), pod.getMetadata().getName() );
+            this.handle(pod);
         }, isEnonicManaged() );
     }
 
@@ -70,8 +70,8 @@ public class OperatorXp7DeploymentStatus
     public void onDelete( final Pod oldPod, final boolean deletedFinalStateUnknown )
     {
         onCondition( oldPod, pod -> {
-            this.handle(pod);
             log.debug( "onDelete Pod: {} in {}", pod.getMetadata().getNamespace(), pod.getMetadata().getName() );
+            this.handle(pod);
         }, isEnonicManaged() );
     }
 

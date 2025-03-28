@@ -61,10 +61,11 @@ public class OperatorIngressLabel
     @Override
     public void onUpdate( final Xp7Config oldR, final Xp7Config newR )
     {
-        log.debug( "onUpdate Xp7Config: {} in {}", newR.getMetadata().getNamespace(), newR.getMetadata().getName() );
-
         // Only handle if this is a vhost config and it is loaded
-        onCondition( newR, this::handle, this::isVHostConfig, ( c ) -> c.getStatus().getState() == Xp7ConfigStatus.State.READY );
+        onCondition( newR, c -> {
+            log.debug("onUpdate Xp7Config: {} in {}", newR.getMetadata().getNamespace(), newR.getMetadata().getName());
+            this.handle(c);
+        }, this::isVHostConfig, ( c ) -> c.getStatus().getState() == Xp7ConfigStatus.State.READY );
     }
 
     @Override
