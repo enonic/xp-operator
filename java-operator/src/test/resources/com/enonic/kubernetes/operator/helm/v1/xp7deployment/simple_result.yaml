@@ -137,11 +137,12 @@ data:
     : \"v1\",\n        \"kind\": \"ConfigMap\",\n        \"name\": \"${XP_NODE_GROUP}\"\
     ,\n        \"namespace\": \"${NAMESPACE}\"\n    },\n    \"source\": {\n      \"\
     component\": \"pod/${XP_NODE_NAME}\"\n    },\n    \"type\": \"Normal\"\n}\nEOF\n\
-    }\n\nfunction sendEvent() {\n    (cat - | curl -f -s -X POST -H \"Accept: application/json\"\
-    \ -H \"Content-Type: application/json\" -H \"Authorization: Bearer $K8S_TOKEN\"\
-    \ --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt -d @- https://kubernetes.default.svc.cluster.local/api/v1/namespaces/`cat\
-    \ /var/run/secrets/kubernetes.io/serviceaccount/namespace`/events > /dev/null ||\
-    \ (echo \"failed\" && false)) && echo \"success\"\n}\n\n\nfunction cmEvent()\
+    }\n\nfunction sendEvent() {\n(cat - | curl -f -s -S -X POST \\\n  -H \"Accept:\
+    \ application/json\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"Authorization:\
+    \ Bearer $K8S_TOKEN\" \\\n  --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt\
+    \ \\\n  -d @- \\\n  \"https://kubernetes.default.svc.cluster.local/api/v1/namespaces/$(cat\
+    \ /var/run/secrets/kubernetes.io/serviceaccount/namespace)/events\" \\\n  > /dev/null)\
+    \ || (echo \"failed:\" >&2 && false) && echo \"success\"\n}\n\n\nfunction cmEvent()\
     \ {\n  log \"Sending ConfigReload event ... \"\n  buildEventConfigMapChange |\
     \ sendEvent\n}\n\nfunction getConfigHash() {\n  find config/ -maxdepth 1 -type\
     \ l | grep -v 'config/\\.\\.' | xargs sha1sum | awk '{print $1}' | xargs echo\n\
