@@ -37,7 +37,7 @@ This repository contains these various parts relating to the operator:
 
 ### Requirements for local development
 
-* Java 11
+* Java 17
 * make
 * yq
 * [helm](https://helm.sh/docs/intro/install/)

@@ -1,10 +1,10 @@
 # Inspired by https://github.com/fabric8io-images/java/blob/master/images/alpine/openjdk11/jre/Dockerfile
 
-FROM eclipse-temurin:11-jre
+FROM eclipse-temurin:17-jre
 
 # JAVA_APP_DIR is used by run-java.sh for finding the binaries
 ENV JAVA_APP_DIR=/deployments \
-    JAVA_MAJOR_VERSION=11
+    JAVA_MAJOR_VERSION=17
 
 # /dev/urandom is used as random source, which is perfectly safe
 # according to http://www.2uo.de/myths-about-urandom/
