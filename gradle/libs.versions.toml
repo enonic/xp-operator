@@ -3,7 +3,7 @@ junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version = 
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version = "5.11.0" }
 
 fabric8-kubernetes-clientapi = { module = "io.fabric8:kubernetes-client-api", version = "6.6.2" }
-fabric8-kubernetes-client = { module = "io.fabric8:kubernetes-client", version = "6.6.0" }
+fabric8-kubernetes-client = { module = "io.fabric8:kubernetes-client", version = "6.13.4" }
 fabric8-kubernetes-servermock = { module = "io.fabric8:kubernetes-server-mock", version = "6.6.2" }
 mockito-core = { module = "org.mockito:mockito-core", version = "5.8.0" }
 mockito-inline = { module = "org.mockito:mockito-inline", version = "5.4.0" }
