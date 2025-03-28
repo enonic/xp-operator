@@ -1,4 +1,4 @@
-name: Nightly
+name: Development
 
 on:
   workflow_dispatch:
@@ -10,12 +10,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup JDK 11
+      - name: Setup JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '11'
           distribution: 'temurin'
-          cache: 'gradle'
+          java-version: 11
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Setup Helm
         uses: azure/setup-helm@v4
@@ -42,8 +44,19 @@ jobs:
           username: enonicpublisher
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Operator version
+        id: operator_version
+        run: echo "::set-output name=version::$(./get-version.sh)"
+
+      - name: Assert versions
+        run: |
+          case "${{ steps.operator_version.outputs.version }}" in
+            0.0.*) ;;
+          *) echo "dev version must start with 0.0."; exit 1 ;;
+          esac
+
       - name: Build java-client and java-operator
-        run: ./gradlew build
+        run: ./gradlew build -x check
 
       - name: Publish docker image
         uses: docker/build-push-action@v6
@@ -53,9 +66,9 @@ jobs:
           pull: true
           no-cache: true
           push: true
-          tags: "enonic/xp-operator:nightly"
-          platforms: linux/amd64,linux/arm64,linux/ppc64le,linux/s390x,linux/arm/v7
+          tags: "enonic/xp-operator:${{ steps.operator_version.outputs.version }}"
+          platforms: linux/amd64,linux/arm64
 
-      - name: Publish helm chart as nightly
-        run: curl -u "ci:${{ secrets.ARTIFACTORY_PASSWORD }}" https://repo.enonic.com/repository/helm/ --upload-file helm/build/libs/xp-operator-$(./get-version.sh).tgz -v
+      - name: Publish helm chart
+        run: curl -u "ci:${{ secrets.ARTIFACTORY_PASSWORD }}" https://repo.enonic.com/repository/helm/ --upload-file helm/build/libs/xp-operator-${{ steps.operator_version.outputs.version }}.tgz -v
 
