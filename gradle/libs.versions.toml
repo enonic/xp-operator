@@ -25,9 +25,9 @@ jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", ver
 
 jakarta-validation = { module = "jakarta.validation:jakarta.validation-api", version = "2.0.2" }
 
-quarkus-universe-bom = { module = "io.quarkus:quarkus-universe-bom", version = "2.16.6.Final" }
+quarkus-universe-bom = { module = "io.quarkus:quarkus-universe-bom", version = "3.23.3" }
 
 [plugins]
-quarkus = { id = "io.quarkus", version = "2.16.6.Final" }
+quarkus = { id = "io.quarkus", version = "3.23.3" }
 jsonschema2pojo = { id = "org.jsonschema2pojo", version = "1.2.1" }
 gitProperties = { id = "com.gorylenko.gradle-git-properties", version = "2.4.1" }
