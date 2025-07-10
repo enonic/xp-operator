@@ -97,9 +97,6 @@ jobs:
           username: enonicpublisher
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-#      - name: Login to Docker Hub via Helm to publish chart
-#        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | helm registry login -u enonicpublisher --password-stdin docker.io
-
       - name: Operator version
         id: operator_version
         run: echo "version=$(./get-version.sh)" >> $GITHUB_OUTPUT
