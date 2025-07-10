@@ -840,7 +840,7 @@ spec:
                 secretKeyRef:
                   key: "token"
                   name: "xp-events-sa-secret"
-          image: "enonic/xp:7.13.2-ubuntu"
+          image: "alpine/curl"
           imagePullPolicy: "IfNotPresent"
           name: "events"
           securityContext:
@@ -1122,7 +1122,7 @@ spec:
                 secretKeyRef:
                   key: "token"
                   name: "xp-events-sa-secret"
-          image: "enonic/xp:7.13.2-ubuntu"
+          image: "alpine/curl"
           imagePullPolicy: "IfNotPresent"
           name: "events"
           securityContext:
@@ -1425,7 +1425,7 @@ spec:
                 secretKeyRef:
                   key: "token"
                   name: "xp-events-sa-secret"
-          image: "enonic/xp:7.13.2-ubuntu"
+          image: "alpine/curl"
           imagePullPolicy: "IfNotPresent"
           name: "events"
           securityContext:

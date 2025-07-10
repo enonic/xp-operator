@@ -86,6 +86,7 @@ finalizers:
   app:
     uninstall: "uninstall.app.enonic.cloud"
 image:
+  events: "alpine/curl"
   nameTemplate: "enonic/xp:%s-ubuntu"
   pullPolicy: "IfNotPresent"
 labelKeys:
