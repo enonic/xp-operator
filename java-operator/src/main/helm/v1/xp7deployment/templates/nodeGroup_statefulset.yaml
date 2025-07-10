@@ -233,7 +233,7 @@ spec:
         {{- include "volumeMount" (dict "disk" $disk "Values" $.Values) | indent 12 }}
         {{- end }}
         - name: events
-          image: {{ $.Values.image.nameTemplate | replace "%s" $.Values.deployment.spec.xpVersion }}
+          image: {{ $.Values.image.events }}
           imagePullPolicy: {{ $.Values.image.pullPolicy }}
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
