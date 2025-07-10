@@ -120,7 +120,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
 
       - name: Publish helm chart
-        run: curl -u "ci:${{ secrets.ARTIFACTORY_PASSWORD }}" https://repo.enonic.com/repository/helm/ --upload-file helm/build/libs/xp-operator-${{ steps.operator_version.outputs.version }}.tgz -v
+        run: curl -u "ci:${{ secrets.ARTIFACTORY_PASSWORD }}" https://repo.enonic.com/helm/ --upload-file helm/build/libs/xp-operator-${{ steps.operator_version.outputs.version }}.tgz -v
 
       - name: Publish java-client
         run: ./gradlew publish -PrepoUser=ci -PrepoPassword=${{ secrets.ARTIFACTORY_PASSWORD }}
