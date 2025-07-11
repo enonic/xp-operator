@@ -120,8 +120,8 @@ data:
     \ != \"0\" ]; then\n    echo \"Waiting for additional ${ADDITIONAL_WAIT_SECONDS}\
     \ seconds\"\n    sleep ${ADDITIONAL_WAIT_SECONDS}\nfi\n\nif [ \"${OK}\" != \"\
     1\" ]; then\n    exit 1\nfi\n"
-  events.sh: "#!/usr/bin/env bash\n\nset -e\n\nfunction now() {\n  date --iso-8601=seconds\n\
-    }\n\nfunction randomId() {\n  cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 16\
+  events.sh: "#!/usr/bin/env sh\n\nset -e\n\nnow() {\n  date -u +\"%Y-%m-%dT%H:%M:%SZ\"\
+    \n}\n\nfunction randomId() {\n  cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 16\
     \ | head -n 1\n}\n\nfunction log() {\n  echo -n \"$(now) $@\"\n}\n\nfunction logWithNL()\
     \ {\n    log \"$@\"\n    echo \"\"\n}\n\nRUNNING=\"true\"\nfunction finish {\n\
     \    logWithNL \"Stopping event loop\"\n    RUNNING=\"false\"\n}\ntrap finish\
