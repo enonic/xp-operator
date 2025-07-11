@@ -1,9 +1,9 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 set -e
 
-function now() {
-  date --iso-8601=seconds
+now() {
+  date -u +"%Y-%m-%dT%H:%M:%SZ"
 }
 
 function randomId() {
