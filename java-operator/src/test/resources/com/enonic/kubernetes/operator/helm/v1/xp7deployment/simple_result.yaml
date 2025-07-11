@@ -120,8 +120,8 @@ data:
     \ != \"0\" ]; then\n    echo \"Waiting for additional ${ADDITIONAL_WAIT_SECONDS}\
     \ seconds\"\n    sleep ${ADDITIONAL_WAIT_SECONDS}\nfi\n\nif [ \"${OK}\" != \"\
     1\" ]; then\n    exit 1\nfi\n"
-  events.sh: "#!/usr/bin/env bash\n\nset -e\n\nfunction now() {\n  date --iso-8601=seconds\n\
-    }\n\nfunction randomId() {\n  cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 16\
+  events.sh: "#!/usr/bin/env sh\n\nset -e\n\nnow() {\n  date -u +\"%Y-%m-%dT%H:%M:%SZ\"\
+    \n}\n\nfunction randomId() {\n  cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 16\
     \ | head -n 1\n}\n\nfunction log() {\n  echo -n \"$(now) $@\"\n}\n\nfunction logWithNL()\
     \ {\n    log \"$@\"\n    echo \"\"\n}\n\nRUNNING=\"true\"\nfunction finish {\n\
     \    logWithNL \"Stopping event loop\"\n    RUNNING=\"false\"\n}\ntrap finish\
@@ -144,8 +144,8 @@ data:
     \ /var/run/secrets/kubernetes.io/serviceaccount/namespace)/events\" \\\n  > /dev/null)\
     \ || (echo \"failed:\" >&2 && false) && echo \"success\"\n}\n\n\nfunction cmEvent()\
     \ {\n  log \"Sending ConfigReload event ... \"\n  buildEventConfigMapChange |\
-    \ sendEvent\n}\n\nfunction getConfigHash() {\n  find config/ -maxdepth 1 -type\
-    \ l | grep -v 'config/\\.\\.' | xargs sha1sum | awk '{print $1}' | xargs echo\n\
+    \ sendEvent\n}\n\nfunction getConfigHash() {\n  find \"${XP_CONFIG_PATH}/\" -maxdepth\
+    \ 1 -type l | grep -v \"${XP_CONFIG_PATH}/\\.\\.\" | xargs sha1sum | awk '{print $1}' | xargs echo\n\
     }\n\nOLD_HASHCODE=\"\"\n\nlogWithNL \"Starting event loop\"\n\nwhile [[ \"${RUNNING}\"\
     \ == \"true\" ]]; do\n  NEW_HASHCODE=$(getConfigHash)\n  if [[ \"${NEW_HASHCODE}\"\
     \ != \"${OLD_HASHCODE}\" ]]; then\n    cmEvent\n  fi\n  OLD_HASHCODE=${NEW_HASHCODE}\n\
@@ -649,9 +649,9 @@ spec:
             - mountPath: "/enonic-xp/home/snapshots"
               name: "snapshots"
         - args:
-            - "extra-config/events.sh"
+            - "/enonic-xp/home/extra-config/events.sh"
           command:
-            - "bash"
+            - "sh"
           env:
             - name: "NAMESPACE"
               valueFrom:
@@ -675,6 +675,8 @@ spec:
                 secretKeyRef:
                   key: "token"
                   name: "xp-events-sa-secret"
+            - name: "XP_CONFIG_PATH"
+              value: "/enonic-xp/home/config"
           image: "alpine/curl"
           imagePullPolicy: "IfNotPresent"
           name: "events"
