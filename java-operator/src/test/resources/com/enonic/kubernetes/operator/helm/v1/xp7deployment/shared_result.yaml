@@ -818,7 +818,7 @@ spec:
         - args:
             - "extra-config/events.sh"
           command:
-            - "bash"
+            - "sh"
           env:
             - name: "NAMESPACE"
               valueFrom:
@@ -1088,7 +1088,7 @@ spec:
         - args:
             - "extra-config/events.sh"
           command:
-            - "bash"
+            - "sh"
           env:
             - name: "NAMESPACE"
               valueFrom:
@@ -1393,7 +1393,7 @@ spec:
         - args:
             - "extra-config/events.sh"
           command:
-            - "bash"
+            - "sh"
           env:
             - name: "NAMESPACE"
               valueFrom:

@@ -275,7 +275,7 @@ spec:
             - name: extra-config
               mountPath: {{ $.Values.dirs.extraConfig }}
 
-          command: ["bash"]
+          command: ["sh"]
           args: ["extra-config/events.sh"]
 
         {{range $sidecar := $nodeGroup.sidecars }}
