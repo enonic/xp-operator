@@ -276,7 +276,7 @@ spec:
               mountPath: {{ $.Values.dirs.extraConfig }}
 
           command: ["sh"]
-          args: ["extra-config/events.sh"]
+          args: ["{{ $.Values.dirs.config }}/events.sh"]
 
         {{range $sidecar := $nodeGroup.sidecars }}
           {{- include "containerTemplate" (dict "container" $sidecar "Values" $.Values "sleep" true) | indent 8 }}

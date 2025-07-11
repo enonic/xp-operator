@@ -649,7 +649,7 @@ spec:
             - mountPath: "/enonic-xp/home/snapshots"
               name: "snapshots"
         - args:
-            - "extra-config/events.sh"
+            - "/enonic-xp/home/config/events.sh"
           command:
             - "sh"
           env:
