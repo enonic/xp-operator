@@ -814,7 +814,7 @@ spec:
             - mountPath: "/enonic-xp/home/snapshots"
               name: "snapshots"
         - args:
-            - "/enonic-xp/home/config/events.sh"
+            - "/enonic-xp/home/extra-config/events.sh"
           command:
             - "sh"
           env:
@@ -1096,7 +1096,7 @@ spec:
             - mountPath: "/enonic-xp/home/snapshots"
               name: "snapshots"
         - args:
-            - "/enonic-xp/home/config/events.sh"
+            - "/enonic-xp/home/extra-config/events.sh"
           command:
             - "sh"
           env:
@@ -1399,7 +1399,7 @@ spec:
             - mountPath: "/enonic-xp/home/snapshots"
               name: "snapshots"
         - args:
-            - "/enonic-xp/home/config/events.sh"
+            - "/enonic-xp/home/extra-config/events.sh"
           command:
             - "sh"
           env:
