@@ -80,7 +80,7 @@ function cmEvent() {
 }
 
 function getConfigHash() {
-  find config/ -maxdepth 1 -type l | grep -v 'config/\.\.' | xargs sha1sum | awk '{print $1}' | xargs echo
+  find "${XP_CONFIG_PATH}/" -maxdepth 1 -type l | grep -v "${XP_CONFIG_PATH}/\.\." | xargs sha1sum | awk '{print $1}' | xargs echo
 }
 
 OLD_HASHCODE=""

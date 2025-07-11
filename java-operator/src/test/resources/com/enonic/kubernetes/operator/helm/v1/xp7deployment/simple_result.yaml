@@ -144,8 +144,8 @@ data:
     \ /var/run/secrets/kubernetes.io/serviceaccount/namespace)/events\" \\\n  > /dev/null)\
     \ || (echo \"failed:\" >&2 && false) && echo \"success\"\n}\n\n\nfunction cmEvent()\
     \ {\n  log \"Sending ConfigReload event ... \"\n  buildEventConfigMapChange |\
-    \ sendEvent\n}\n\nfunction getConfigHash() {\n  find config/ -maxdepth 1 -type\
-    \ l | grep -v 'config/\\.\\.' | xargs sha1sum | awk '{print $1}' | xargs echo\n\
+    \ sendEvent\n}\n\nfunction getConfigHash() {\n  find \"${XP_CONFIG_PATH}/\" -maxdepth\
+    \ 1 -type l | grep -v \"${XP_CONFIG_PATH}/\\.\\.\" | xargs sha1sum | awk '{print $1}' | xargs echo\n\
     }\n\nOLD_HASHCODE=\"\"\n\nlogWithNL \"Starting event loop\"\n\nwhile [[ \"${RUNNING}\"\
     \ == \"true\" ]]; do\n  NEW_HASHCODE=$(getConfigHash)\n  if [[ \"${NEW_HASHCODE}\"\
     \ != \"${OLD_HASHCODE}\" ]]; then\n    cmEvent\n  fi\n  OLD_HASHCODE=${NEW_HASHCODE}\n\
@@ -675,6 +675,8 @@ spec:
                 secretKeyRef:
                   key: "token"
                   name: "xp-events-sa-secret"
+            - name: "XP_CONFIG_PATH"
+              value: "/enonic-xp/home/config"
           image: "alpine/curl"
           imagePullPolicy: "IfNotPresent"
           name: "events"
