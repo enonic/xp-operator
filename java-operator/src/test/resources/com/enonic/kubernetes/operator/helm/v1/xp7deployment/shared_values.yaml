@@ -104,6 +104,8 @@ dirs:
   config: "/enonic-xp/home/config"
   extraConfig: "/enonic-xp/home/extra-config"
 discoveryService: "cluster-discovery"
+events:
+  image: "alpine/curl"
 files:
   setEnv: "/enonic-xp/home/setenv.sh"
   vhosts: "com.enonic.xp.web.vhost.cfg"
@@ -111,7 +113,6 @@ finalizers:
   app:
     uninstall: "uninstall.app.enonic.cloud"
 image:
-  events: "alpine/curl"
   nameTemplate: "enonic/xp:%s-ubuntu"
   pullPolicy: "IfNotPresent"
 labelKeys:
