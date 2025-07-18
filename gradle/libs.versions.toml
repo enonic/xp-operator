@@ -1,33 +1,40 @@
+[versions]
+fabric8 = "6.6.2"
+quarkus = "2.16.6.Final"
+jackson = "2.15.2"
+
 [libraries]
+fabric8-bom = { module = "io.fabric8:kubernetes-client-bom", version.ref = "fabric8" }
+quarkus-universe-bom = { module = "io.quarkus:quarkus-universe-bom", version.ref = "quarkus" }
+
+fabric8-kubernetes-client = { module = "io.fabric8:kubernetes-client", version.ref = "fabric8" }
+fabric8-kubernetes-clientapi = { module = "io.fabric8:kubernetes-client-api", version.ref = "fabric8" }
+fabric8-kubernetes-servermock = { module = "io.fabric8:kubernetes-server-mock", version.ref = "fabric8" }
+
+# JUnit & Mockito
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version = "5.10.0" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version = "5.11.0" }
-
-fabric8-kubernetes-clientapi = { module = "io.fabric8:kubernetes-client-api", version = "6.6.2" }
-fabric8-kubernetes-client = { module = "io.fabric8:kubernetes-client", version = "6.6.0" }
-fabric8-kubernetes-servermock = { module = "io.fabric8:kubernetes-server-mock", version = "6.6.2" }
 mockito-core = { module = "org.mockito:mockito-core", version = "5.14.2" }
 mockito-inline = { module = "org.mockito:mockito-inline", version = "5.4.0" }
 mockito-junitjupiter = { module = "org.mockito:mockito-junit-jupiter", version = "5.10.0" }
 
+# OkHttp
 okhttp3-okhttp = { module = "com.squareup.okhttp3:okhttp", version = "3.12.2" }
 okhttp3-okhttpsse = { module = "com.squareup.okhttp3:okhttp-sse", version = "3.12.2" }
 
+# Jackson
+jackson-dataformat-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson" }
+jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jackson" }
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+
+# Other
 immutables-value = { module = "org.immutables:value", version = "2.9.3" }
 immutables-valueannotations = { module = "org.immutables:value-annotations", version = "2.9.3" }
-
 guava = { module = "com.google.guava:guava", version = "32.0.1-jre" }
-
 maven-mavenartifact = { module = "org.apache.maven:maven-artifact", version = "3.9.8" }
-
-jackson-dataformat-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version = "2.15.2" }
-jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version = "2.15.2" }
-jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version = "2.15.2" }
-
 jakarta-validation = { module = "jakarta.validation:jakarta.validation-api", version = "2.0.2" }
 
-quarkus-universe-bom = { module = "io.quarkus:quarkus-universe-bom", version = "2.16.6.Final" }
-
 [plugins]
-quarkus = { id = "io.quarkus", version = "2.16.6.Final" }
+quarkus = { id = "io.quarkus", version.ref = "quarkus" }
 jsonschema2pojo = { id = "org.jsonschema2pojo", version = "1.2.1" }
 gitProperties = { id = "com.gorylenko.gradle-git-properties", version = "2.4.1" }
