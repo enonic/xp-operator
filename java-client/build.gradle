@@ -11,8 +11,8 @@ java {
 }
 
 dependencies {
-    implementation enforcedPlatform(libs.fabric8.bom)
-    implementation enforcedPlatform(libs.quarkus.universe.bom)
+    implementation platform(libs.fabric8.bom)
+    implementation platform(libs.quarkus.universe.bom)
 
     api libs.fabric8.kubernetes.clientapi
     implementation libs.fabric8.kubernetes.client
