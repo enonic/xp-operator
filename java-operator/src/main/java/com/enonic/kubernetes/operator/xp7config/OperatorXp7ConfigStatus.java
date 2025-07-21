@@ -81,20 +81,19 @@ public class OperatorXp7ConfigStatus extends InformerEventHandler<Pod> {
             String configMapName = cm.getMetadata().getName();
             String updatedAt = getLastUpdatedTimestamp(cm);
 
-            if (updatedAt == null) {
-                log.debug("Skipping ConfigMap '{}': no {} annotation", configMapName, configMapUpdatedAnnotation);
-                continue;
-            }
-
             List<Xp7Config> relatedConfigs = allConfigs.stream()
                     .filter(cfg -> cfg.getSpec().getNodeGroup().equals(configMapName))
                     .collect(Collectors.toList());
 
-            if (relatedConfigs.isEmpty()) {
-                continue;
-            }
-
             for (Xp7Config config : relatedConfigs) {
+                if (!isEnonicManaged().test(cm)) {
+                    markReady(config); // inherited behavior from events.sh implementation
+                }
+
+                if (updatedAt == null) {
+                    continue;
+                }
+
                 boolean isAllNodes = config.getSpec().getNodeGroup().equals(cfgStr("operator.charts.values.allNodesKey"));
 
                 List<Pod> relevantPods = allPods.stream()
