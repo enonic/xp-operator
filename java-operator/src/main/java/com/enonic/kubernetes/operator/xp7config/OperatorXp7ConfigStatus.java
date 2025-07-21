@@ -62,6 +62,10 @@ public class OperatorXp7ConfigStatus extends InformerEventHandler<Pod> {
     }
 
     private void handle(Pod pod) {
+        if(!isEnonicManaged().test(pod)) {
+            return;
+        }
+
         final String namespace = pod.getMetadata().getNamespace();
 
         List<ConfigMap> configMaps = searchers.configMap().stream()
@@ -82,7 +86,7 @@ public class OperatorXp7ConfigStatus extends InformerEventHandler<Pod> {
             String updatedAt = getLastUpdatedTimestamp(cm);
 
             List<Xp7Config> relatedConfigs = allConfigs.stream()
-                    .filter(cfg -> cfg.getSpec().getNodeGroup().equals(configMapName))
+                    .filter(cfg -> cfg.getSpec().getNodeGroup().equals(configMapName) || cfg.getSpec().getNodeGroup().equals(cfgStr("operator.charts.values.allNodesKey")))
                     .collect(Collectors.toList());
 
             log.info(String.format("Updating config map %s", configMapName));
@@ -100,10 +104,8 @@ public class OperatorXp7ConfigStatus extends InformerEventHandler<Pod> {
 
                 boolean isAllNodes = config.getSpec().getNodeGroup().equals(cfgStr("operator.charts.values.allNodesKey"));
 
-                List<Pod> relevantPods = allPods.stream()
-                        .filter(isAllNodes
-                                ? p -> true
-                                : matchLabel(cfgStr("operator.charts.values.labelKeys.nodeGroup"), config.getSpec().getNodeGroup()))
+                List<Pod> relevantPods = isAllNodes ? allPods : allPods.stream()
+                        .filter(matchLabel(cfgStr("operator.charts.values.labelKeys.nodeGroup"), config.getSpec().getNodeGroup()))
                         .collect(Collectors.toList());
 
                 List<Pod> notUpdated = relevantPods.stream()
