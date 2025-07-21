@@ -7,32 +7,32 @@ import com.enonic.kubernetes.kubernetes.Informers;
 import com.enonic.kubernetes.kubernetes.Searchers;
 import com.enonic.kubernetes.kubernetes.commands.K8sLogHelper;
 import com.enonic.kubernetes.operator.helpers.InformerEventHandler;
-import io.fabric8.kubernetes.api.model.Event;
+import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.quarkus.runtime.StartupEvent;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static com.enonic.kubernetes.common.Configuration.cfgStr;
-import static com.enonic.kubernetes.kubernetes.Comparators.creationTime;
 import static com.enonic.kubernetes.kubernetes.Predicates.*;
 
-/**
- * This operator class triggers maintains the Xp7Config status field
- */
 @ApplicationScoped
-public class OperatorXp7ConfigStatus
-    extends InformerEventHandler<Event>
-{
-    private static final Logger log = LoggerFactory.getLogger( OperatorXp7ConfigStatus.class );
+public class OperatorXp7ConfigStatus extends InformerEventHandler<Pod> {
+    private static final Logger log = LoggerFactory.getLogger(OperatorXp7ConfigStatus.class);
+
+    @ConfigProperty(name = "operator.charts.values.annotationKeys.configMapUpdated")
+    String configMapUpdatedAnnotation;
+
+    @ConfigProperty(name = "operator.charts.values.annotationKeys.podConfigReloaded")
+    String podConfigReloadedAnnotation;
 
     @Inject
     Clients clients;
@@ -43,120 +43,126 @@ public class OperatorXp7ConfigStatus
     @Inject
     Informers informers;
 
-    void onStart( @Observes StartupEvent ev )
-    {
-        listen( informers.eventInformer() );
+    private static final Map<String, Object> NAMESPACE_LOGS = new ConcurrentHashMap<>();
+
+    void onStart(@Observes StartupEvent ev) {
+        listen(informers.podInformer());
     }
 
     @Override
-    public void onNewAdd( final Event newEvent )
-    {
-        if ("ConfigReload".equals( newEvent.getReason() )) {
-            handle( newEvent );
-        }
+    public void onNewAdd(Pod newPod) {
+        handle(newPod);
     }
 
     @Override
-    public void onUpdate( final Event oldEvent, final Event newEvent )
-    {
+    public void onUpdate(Pod oldPod, Pod newPod) {
+        handle(newPod);
+    }
+
+    @Override
+    public void onDelete(Pod pod, boolean b) {
         // Do nothing
     }
 
-    @Override
-    public void onDelete( final Event newEvent, final boolean b )
-    {
-        // Do nothing
-    }
-
-    private void handle( final Event newEvent )
-    {
-        log.debug("ConfigReload event received: {} {}", newEvent.getMetadata().getNamespace(), newEvent.getMetadata().getName());
-
-        // Find out when the configmap was last updated
-        Optional<Instant> configMapLastModifiedAt = searchers.event().stream().
-            filter( inSameNamespaceAs( newEvent ) ).
-            filter( e -> "ConfigModified".equals( e.getReason() ) ).
-            filter( e -> e.getInvolvedObject().getName().equals( newEvent.getRelated().getName() ) ).
-            sorted( creationTime().reversed() ).
-            map( e -> Instant.parse( e.getMetadata().getCreationTimestamp() ) ).
-            findFirst();
-
-        // We cant make any assumptions if last modified is nonexistent
-        if (configMapLastModifiedAt.isEmpty()) {
+    private void handle(Pod pod) {
+        if (!isEnonicManaged().test(pod)) {
             return;
         }
 
-        // Find pods that have been updated since then
-        List<String> updatedPods = searchers.event().stream().
-            filter( inSameNamespaceAs( newEvent ) ).
-            filter( e -> "ConfigReload".equals( e.getReason() ) ).
-            filter( createdAfter( configMapLastModifiedAt.get() ) ).
-            map( e -> e.getInvolvedObject().getName() ).
-            collect( Collectors.toList() );
+        final String namespace = pod.getMetadata().getNamespace();
+        final Object lock = NAMESPACE_LOGS.computeIfAbsent(namespace, ns -> new Object());
 
-        // Pods that have not been updated
-        List<Pod> notUpdatedPods = searchers.pod().stream().
-            filter( inSameNamespaceAs( newEvent ) ).
-            filter( isEnonicManaged() ).
-            filter( p -> !updatedPods.contains( p.getMetadata().getName() ) ).
-            collect( Collectors.toList() );
-
-        // Collect relevant XP7 configs and handle them
-        searchers.xp7Config().stream().
-            filter( inSameNamespaceAs( newEvent ) ).
-            filter( c -> c.getStatus().getState() != Xp7ConfigStatus.State.READY ).
-            forEach( c -> handle( c, notUpdatedPods ) );
-    }
-
-    private boolean handle( final Xp7Config xp7Config, final List<Pod> notUpdatedPods )
-    {
-        // All pods are updated, mark as ready
-        if (notUpdatedPods.isEmpty()) {
-            return markReady( xp7Config );
-        }
-
-        // This should apply to all pods, and some are not ready
-        if (xp7Config.getSpec().getNodeGroup().equals( cfgStr( "operator.charts.values.allNodesKey" ) )) {
-            return markPending( xp7Config, notUpdatedPods );
-        }
-
-        // This should apply to a particular node group
-        List<Pod> relevantNonUpdated = notUpdatedPods.stream().
-            filter( matchLabel( cfgStr( "operator.charts.values.labelKeys.nodeGroup" ), xp7Config.getSpec().getNodeGroup() ) ).
-            collect( Collectors.toList() );
-
-        if (relevantNonUpdated.isEmpty()) {
-            return markReady( xp7Config );
-        } else {
-            return markPending( xp7Config, relevantNonUpdated );
+        synchronized (lock) {
+            handle(namespace);
         }
     }
 
-    private boolean markPending( final Xp7Config xp7Config, final List<Pod> notUpdatedPods )
-    {
-        String podNames = notUpdatedPods.stream().
-            map( p -> p.getMetadata().getName() ).
-            collect( Collectors.joining( ", " ) );
+    private void handle(String namespace) {
+        List<ConfigMap> configMaps = searchers.configMap().stream()
+                .filter(cm -> namespace.equals(cm.getMetadata().getNamespace()))
+                .collect(Collectors.toList());
 
-        log.debug("markPending Xp7Config: {} in {} {}", xp7Config.getMetadata().getName(), xp7Config.getMetadata().getNamespace(), podNames);
+        List<Pod> allPods = searchers.pod().stream()
+                .filter(p -> namespace.equals(p.getMetadata().getNamespace()))
+                .filter(isEnonicManaged())
+                .collect(Collectors.toList());
 
-        K8sLogHelper.logEdit( clients.xp7Configs().
-            inNamespace( xp7Config.getMetadata().getNamespace() ).
-            withName( xp7Config.getMetadata().getName() ), c -> c.withStatus( new Xp7ConfigStatus().
-            withState( Xp7ConfigStatus.State.PENDING ).
-            withMessage( "Not loaded: " + podNames ) ) );
-        return false;
+        List<Xp7Config> allConfigs = searchers.xp7Config().stream()
+                .filter(cfg -> namespace.equals(cfg.getMetadata().getNamespace()))
+                .collect(Collectors.toList());
+
+        for (ConfigMap cm : configMaps) {
+            String configMapName = cm.getMetadata().getName();
+            String updatedAt = getLastUpdatedTimestamp(cm);
+
+            List<Xp7Config> relatedConfigs = allConfigs.stream()
+                    .filter(cfg -> cfg.getSpec().getNodeGroup().equals(configMapName) || cfg.getSpec().getNodeGroup().equals(cfgStr("operator.charts.values.allNodesKey")))
+                    .collect(Collectors.toList());
+
+            log.info(String.format("Updating config map %s", configMapName));
+            for (Xp7Config config : relatedConfigs) {
+
+                log.info(String.format("Updating Xp7Config %s", config.getMetadata().getName()));
+
+                if (!isEnonicManaged().test(cm)) {
+                    markReady(config); // inherited behavior from events.sh implementation
+                }
+
+                if (updatedAt == null) {
+                    continue;
+                }
+
+                boolean isAllNodes = config.getSpec().getNodeGroup().equals(cfgStr("operator.charts.values.allNodesKey"));
+
+                List<Pod> relevantPods = isAllNodes ? allPods : allPods.stream()
+                        .filter(matchLabel(cfgStr("operator.charts.values.labelKeys.nodeGroup"), config.getSpec().getNodeGroup()))
+                        .collect(Collectors.toList());
+
+                List<Pod> notUpdated = relevantPods.stream()
+                        .filter(p -> {
+                            Map<String, String> annotations = Optional.ofNullable(p.getMetadata().getAnnotations()).orElse(Collections.emptyMap());
+                            String reloadedAt = annotations.get(podConfigReloadedAnnotation);
+                            return reloadedAt == null || reloadedAt.compareTo(updatedAt) < 0;
+                        })
+                        .collect(Collectors.toList());
+
+                if (notUpdated.isEmpty()) {
+                    markReady(config);
+                } else {
+                    markPending(config, notUpdated);
+                }
+            }
+        }
     }
 
-    private boolean markReady( final Xp7Config xp7Config )
-    {
+    private String getLastUpdatedTimestamp(ConfigMap cm) {
+        return Optional.ofNullable(cm.getMetadata().getAnnotations())
+                .map(a -> a.get(configMapUpdatedAnnotation))
+                .orElse(null);
+    }
+
+    private void markReady(final Xp7Config xp7Config) {
         log.debug("markReady Xp7Config: {} in {}", xp7Config.getMetadata().getName(), xp7Config.getMetadata().getNamespace());
 
-        K8sLogHelper.logEdit( clients.xp7Configs().
-            inNamespace( xp7Config.getMetadata().getNamespace() ).
-            withName( xp7Config.getMetadata().getName() ), c -> c.withStatus( new Xp7ConfigStatus().
-            withState( Xp7ConfigStatus.State.READY ).
-            withMessage( "OK" ) ) );
-        return true;
+        K8sLogHelper.logEdit(clients.xp7Configs()
+                .inNamespace(xp7Config.getMetadata().getNamespace())
+                .withName(xp7Config.getMetadata().getName()), c -> c.withStatus(new Xp7ConfigStatus()
+                .withState(Xp7ConfigStatus.State.READY)
+                .withMessage("OK")));
+    }
+
+    private void markPending(final Xp7Config xp7Config, final List<Pod> notUpdatedPods) {
+        String podNames = notUpdatedPods.stream()
+                .map(p -> p.getMetadata().getName())
+                .collect(Collectors.joining(", "));
+
+        log.debug("markPending Xp7Config: {} in {} {}", xp7Config.getMetadata().getName(),
+                xp7Config.getMetadata().getNamespace(), podNames);
+
+        K8sLogHelper.logEdit(clients.xp7Configs()
+                .inNamespace(xp7Config.getMetadata().getNamespace())
+                .withName(xp7Config.getMetadata().getName()), c -> c.withStatus(new Xp7ConfigStatus()
+                .withState(Xp7ConfigStatus.State.PENDING)
+                .withMessage("Not loaded: " + podNames)));
     }
 }

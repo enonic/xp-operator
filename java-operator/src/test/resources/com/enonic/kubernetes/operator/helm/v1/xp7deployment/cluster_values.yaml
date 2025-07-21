@@ -2,8 +2,10 @@
 allNodesKey: "all"
 annotationKeys:
   applyPriority: "enonic.applyPriority"
+  configMapUpdated: "enonic.cloud/lastUpdated"
   ingressCertManage: "enonic.cloud/ingress.cert.manage"
   neverOverwrite: "enonic.neverOverwrite"
+  podConfigReloaded: "enonic.cloud/configReloaded"
   removeWithDeployment: "enonic.cloud/remove.with.xp7deployment"
   vhostMapping: "enonic.cloud/xp7.vhost.mapping."
 clusterId: "44ddc40b-266c-4c99-b094-e758328fc6ba"

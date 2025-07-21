@@ -11,9 +11,10 @@ java {
 }
 
 dependencies {
-    implementation enforcedPlatform(libs.quarkus.universe.bom)
+    implementation platform(libs.fabric8.bom)
+    implementation platform(libs.quarkus.universe.bom)
 
-    implementation( project(":java-client") )
+    implementation project(":java-client")
 
     implementation libs.okhttp3.okhttp
     implementation libs.okhttp3.okhttpsse
@@ -30,9 +31,9 @@ dependencies {
     implementation 'io.quarkus:quarkus-resteasy-jackson'
     implementation 'io.quarkus:quarkus-rest-client'
 
-    testImplementation "io.quarkus:quarkus-junit5"
-    testImplementation "io.rest-assured:rest-assured"
-    testImplementation "io.quarkus:quarkus-jacoco"
+    testImplementation 'io.quarkus:quarkus-junit5'
+    testImplementation 'io.rest-assured:rest-assured'
+    testImplementation 'io.quarkus:quarkus-jacoco'
     testImplementation libs.fabric8.kubernetes.servermock
     testImplementation libs.mockito.inline
     testImplementation libs.mockito.junitjupiter

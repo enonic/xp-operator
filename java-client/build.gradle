@@ -11,6 +11,9 @@ java {
 }
 
 dependencies {
+    implementation platform(libs.fabric8.bom)
+    implementation platform(libs.quarkus.universe.bom)
+
     api libs.fabric8.kubernetes.clientapi
     implementation libs.fabric8.kubernetes.client
     implementation libs.okhttp3.okhttp

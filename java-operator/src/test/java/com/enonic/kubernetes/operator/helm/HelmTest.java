@@ -44,7 +44,7 @@ public abstract class HelmTest
         throws IOException
     {
         assertYamlEquals(Files.readString( Path.of( expectedValuesFile ) ), mapper.writeValueAsString(values),
-                "Values do not match (" + Path.of(expectedValuesFile).getFileName() + ":0)");
+                         "Values do not match (" + Path.of(expectedValuesFile).getFileName() + ":0)");
 
         StringBuilder sb = new StringBuilder();
         for ( HasMetadata r : helm.templateObjects( chartRepository.get( chartName ), values ) )
