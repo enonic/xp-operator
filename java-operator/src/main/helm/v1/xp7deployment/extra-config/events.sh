@@ -24,13 +24,34 @@ hash_config() {
 patch_annotation() {
   TIMESTAMP="$(now)"
   log "Detected config change, setting ${ANNOTATION_KEY} = ${TIMESTAMP}"
-  curl -s -X PATCH "${API}" \
+
+  RESPONSE=$(curl -s -w "\n%{http_code}" -X PATCH "${API}" \
     -H "Authorization: Bearer ${K8S_TOKEN}" \
     -H "Content-Type: application/merge-patch+json" \
     --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt \
-    -d "{\"metadata\": {\"annotations\": {\"${ANNOTATION_KEY}\": \"${TIMESTAMP}\"}}}" \
-    > /dev/null || log "Failed to patch pod"
+    -d "{\"metadata\": {\"annotations\": {\"${ANNOTATION_KEY}\": \"${TIMESTAMP}\"}}}")
+
+  BODY=$(echo "$RESPONSE" | head -n -1)
+  CODE=$(echo "$RESPONSE" | tail -n1)
+
+  if [ "$CODE" -ge 200 ] && [ "$CODE" -lt 300 ]; then
+    log "Successfully patched pod annotation"
+  else
+    log "Failed to patch pod. HTTP $CODE. Response body:"
+    echo "$BODY"
+  fi
 }
+
+#patch_annotation() {
+#  TIMESTAMP="$(now)"
+#  log "Detected config change, setting ${ANNOTATION_KEY} = ${TIMESTAMP}"
+#  curl -s -X PATCH "${API}" \
+#    -H "Authorization: Bearer ${K8S_TOKEN}" \
+#    -H "Content-Type: application/merge-patch+json" \
+#    --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt \
+#    -d "{\"metadata\": {\"annotations\": {\"${ANNOTATION_KEY}\": \"${TIMESTAMP}\"}}}" \
+#    > /dev/null || log "Failed to patch pod"
+#}
 
 log() {
   echo "$(now) $@"
