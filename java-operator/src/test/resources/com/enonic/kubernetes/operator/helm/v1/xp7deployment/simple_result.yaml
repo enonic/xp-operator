@@ -120,35 +120,25 @@ data:
     \ != \"0\" ]; then\n    echo \"Waiting for additional ${ADDITIONAL_WAIT_SECONDS}\
     \ seconds\"\n    sleep ${ADDITIONAL_WAIT_SECONDS}\nfi\n\nif [ \"${OK}\" != \"\
     1\" ]; then\n    exit 1\nfi\n"
-  events.sh: "#!/bin/sh\nset -e\n\nnow() {\n  date -u +\"%Y-%m-%dT%H:%M:%SZ\"\n}\n\
-     \nrandomId() {\n  cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 16 | head -n 1\n\
-     }\n\nlog() {\n  echo -n \"$(now) $@\"\n}\n\nlogWithNL() {\n    log \"$@\"\n  \
-     \  echo \"\"\n}\n\nRUNNING=\"true\"\n\nfinish() {\n    logWithNL \"Stopping event\
-     \ loop\"\n    RUNNING=\"false\"\n}\ntrap finish TERM INT\n\nbuildEventConfigMapChange()\
-     \ {\n    cat << EOF\n{\n    \"apiVersion\": \"v1\",\n    \"involvedObject\": {\n\
-     \        \"apiVersion\": \"v1\",\n        \"kind\": \"Pod\",\n        \"name\"\
-     : \"${XP_NODE_NAME}\",\n        \"namespace\": \"${NAMESPACE}\",\n        \"fieldPath\"\
-     : \"spec.containers{exp}\",\n        \"uid\": \"${POD_UID}\"\n    },\n    \"kind\"\
-     : \"Event\",\n    \"lastTimestamp\": \"$(now)\",\n    \"firstTimestamp\": \"$(now)\"\
-     ,\n    \"message\": \"Pod ${XP_NODE_NAME} reloaded ConfigMap ${XP_NODE_GROUP}\"\
-     ,\n    \"metadata\": {\n        \"name\": \"${XP_NODE_NAME}.$(randomId)\",\n \
-     \       \"namespace\": \"${NAMESPACE}\"\n    },\n    \"reason\": \"ConfigReload\"\
-     ,\n    \"related\": {\n        \"apiVersion\": \"v1\",\n        \"kind\": \"ConfigMap\"\
-     ,\n        \"name\": \"${XP_NODE_GROUP}\",\n        \"namespace\": \"${NAMESPACE}\"\
-     \n    },\n    \"source\": {\n      \"component\": \"pod/${XP_NODE_NAME}\"\n  \
-     \  },\n    \"type\": \"Normal\"\n}\nEOF\n}\n\nsendEvent() {\n  (cat - | curl -f\
-     \ -s -S -X POST \\\n    -H \"Accept: application/json\" \\\n    -H \"Content-Type:\
-     \ application/json\" \\\n    -H \"Authorization: Bearer $K8S_TOKEN\" \\\n    --cacert\
-     \ /var/run/secrets/kubernetes.io/serviceaccount/ca.crt \\\n    -d @- \\\n    \"\
-     https://kubernetes.default.svc.cluster.local/api/v1/namespaces/$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)/events\"\
-     \ \\\n    > /dev/null) || (echo \"failed:\" >&2 && false) && echo \"success\"\n\
-     }\n\ncmEvent() {\n  log \"Sending ConfigReload event ... \"\n  buildEventConfigMapChange\
-     \ | sendEvent\n}\n\ngetConfigHash() {\n  find \"${XP_CONFIG_PATH}/\" -maxdepth\
-     \ 1 -type l | grep -v \"${XP_CONFIG_PATH}/\\.\\.\" | xargs sha1sum | awk '{print\
-     \ $1}' | xargs echo\n}\n\nOLD_HASHCODE=\"\"\n\nlogWithNL \"Starting event loop\"\
-     \n\nwhile [ \"$RUNNING\" = \"true\" ]; do\n  NEW_HASHCODE=$(getConfigHash)\n \
-     \ if [ \"$NEW_HASHCODE\" != \"$OLD_HASHCODE\" ]; then\n    cmEvent\n  fi\n  OLD_HASHCODE=$NEW_HASHCODE\n\
-     \  sleep 2\ndone\n"
+  events.sh: "#!/bin/sh\nset -e\n\nANNOTATION_KEY=\"${ANNOTATION_KEY:-enonic.io/configReloaded}\"\
+    \nCONFIG_PATH=\"${CONFIG_PATH:-/etc/xp/config}\"\n\nNAMESPACE=\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)\"\
+    \nPOD_NAME=\"$(hostname)\"\nK8S_TOKEN=\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\"\
+    \nAPI=\"https://kubernetes.default.svc/api/v1/namespaces/${NAMESPACE}/pods/${POD_NAME}\"\
+    \n\nnow() {\n  date -u +\"%Y-%m-%dT%H:%M:%SZ\"\n}\n\nhash_config() {\n  find \"\
+    ${CONFIG_PATH}\" -maxdepth 1 -type l 2>/dev/null \\\n    | grep -v \"${CONFIG_PATH}/\\\
+    .\\.\" \\\n    | xargs sha1sum 2>/dev/null \\\n    | awk '{print $1}' \\\n   \
+    \ | xargs echo\n}\n\npatch_annotation() {\n  TIMESTAMP=\"$(now)\"\n  log \"Detected\
+    \ config change, setting ${ANNOTATION_KEY} = ${TIMESTAMP}\"\n  curl -s -X PATCH\
+    \ \"${API}\" \\\n    -H \"Authorization: Bearer ${K8S_TOKEN}\" \\\n    -H \"Content-Type:\
+    \ application/merge-patch+json\" \\\n    --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt\
+    \ \\\n    -d \"{\\\"metadata\\\": {\\\"annotations\\\": {\\\"${ANNOTATION_KEY}\\\
+    \": \\\"${TIMESTAMP}\\\"}}}\" \\\n    > /dev/null || log \"Failed to patch pod\"\
+    \n}\n\nlog() {\n  echo \"$(now) $@\"\n}\n\n# Handle graceful shutdown\ntrap 'log\
+    \ \"Received termination signal, exiting.\"; exit 0' TERM INT\n\nLAST_HASH=\"\"\
+    \n\nlog \"Starting config reload watcher\"\nlog \"Watching: ${CONFIG_PATH}, annotating:\
+    \ ${ANNOTATION_KEY}\"\n\nwhile true; do\n  CURRENT_HASH=\"$(hash_config)\"\n \
+    \ if [ \"$CURRENT_HASH\" != \"$LAST_HASH\" ]; then\n    LAST_HASH=\"$CURRENT_HASH\"\
+    \n    patch_annotation\n  fi\n  sleep 2\ndone\n"
   preStop.sh: "#!/usr/bin/env bash\n\necho \"Wait for endpoints to be deleted\"\n\
     bash /enonic-xp/home/extra-config/endpoints.sh -r -s all -i ${XP_NODE_IP} -t 10\n\
     bash /enonic-xp/home/extra-config/endpoints.sh -r -s ${XP_NODE_GROUP} -i ${XP_NODE_IP}\
