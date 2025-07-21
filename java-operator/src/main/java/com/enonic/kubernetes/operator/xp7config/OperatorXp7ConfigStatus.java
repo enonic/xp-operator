@@ -85,7 +85,11 @@ public class OperatorXp7ConfigStatus extends InformerEventHandler<Pod> {
                     .filter(cfg -> cfg.getSpec().getNodeGroup().equals(configMapName))
                     .collect(Collectors.toList());
 
+            log.info(String.format("Updating config map %s", configMapName));
             for (Xp7Config config : relatedConfigs) {
+
+                log.info(String.format("Updating Xp7Config %s", config.getMetadata().getName()));
+
                 if (!isEnonicManaged().test(cm)) {
                     markReady(config); // inherited behavior from events.sh implementation
                 }
