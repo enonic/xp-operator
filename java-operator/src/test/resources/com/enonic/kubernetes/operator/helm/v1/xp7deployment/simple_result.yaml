@@ -120,25 +120,27 @@ data:
     \ != \"0\" ]; then\n    echo \"Waiting for additional ${ADDITIONAL_WAIT_SECONDS}\
     \ seconds\"\n    sleep ${ADDITIONAL_WAIT_SECONDS}\nfi\n\nif [ \"${OK}\" != \"\
     1\" ]; then\n    exit 1\nfi\n"
-  pod-annotator.sh: "#!/bin/sh\nset -e\n\nANNOTATION_KEY=\"${ANNOTATION_KEY:-enonic.io/configReloaded}\"\
-    \nCONFIG_PATH=\"${CONFIG_PATH:-/etc/xp/config}\"\n\nNAMESPACE=\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)\"\
-    \nPOD_NAME=\"$(hostname)\"\nK8S_TOKEN=\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\"\
-    \nAPI=\"https://kubernetes.default.svc/api/v1/namespaces/${NAMESPACE}/pods/${POD_NAME}\"\
+  pod-annotator.sh: "#!/bin/sh\nset -e\n\nNAMESPACE=\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)\"\
+    \nPOD_NAME=\"$(hostname)\"\nAPI=\"https://kubernetes.default.svc/api/v1/namespaces/${NAMESPACE}/pods/${POD_NAME}\"\
     \n\nnow() {\n  date -u +\"%Y-%m-%dT%H:%M:%SZ\"\n}\n\nhash_config() {\n  find \"\
     ${CONFIG_PATH}\" -maxdepth 1 -type l 2>/dev/null \\\n    | grep -v \"${CONFIG_PATH}/\\\
     .\\.\" \\\n    | xargs sha1sum 2>/dev/null \\\n    | awk '{print $1}' \\\n   \
     \ | xargs echo\n}\n\npatch_annotation() {\n  TIMESTAMP=\"$(now)\"\n  log \"Detected\
-    \ config change, setting ${ANNOTATION_KEY} = ${TIMESTAMP}\"\n  curl -s -X PATCH\
-    \ \"${API}\" \\\n    -H \"Authorization: Bearer ${K8S_TOKEN}\" \\\n    -H \"Content-Type:\
-    \ application/merge-patch+json\" \\\n    --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt\
-    \ \\\n    -d \"{\\\"metadata\\\": {\\\"annotations\\\": {\\\"${ANNOTATION_KEY}\\\
-    \": \\\"${TIMESTAMP}\\\"}}}\" \\\n    > /dev/null || log \"Failed to patch pod\"\
-    \n}\n\nlog() {\n  echo \"$(now) $@\"\n}\n\n# Handle graceful shutdown\ntrap 'log\
-    \ \"Received termination signal, exiting.\"; exit 0' TERM INT\n\nLAST_HASH=\"\"\
-    \n\nlog \"Starting config reload watcher\"\nlog \"Watching: ${CONFIG_PATH}, annotating:\
-    \ ${ANNOTATION_KEY}\"\n\nwhile true; do\n  CURRENT_HASH=\"$(hash_config)\"\n \
-    \ if [ \"$CURRENT_HASH\" != \"$LAST_HASH\" ]; then\n    LAST_HASH=\"$CURRENT_HASH\"\
-    \n    patch_annotation\n  fi\n  sleep 2\ndone\n"
+    \ config change, setting ${POD_CONFIG_RELOADED_ANNOTATION} = ${TIMESTAMP}\"\n\n\
+    \  RESPONSE=$(curl -s -w \"\\n%{http_code}\" -X PATCH \"${API}\" \\\n    -H \"\
+    Authorization: Bearer $K8S_TOKEN\" \\\n    -H \"Content-Type: application/merge-patch+json\"\
+    \ \\\n    --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt \\\n \
+    \   -d \"{\\\"metadata\\\": {\\\"annotations\\\": {\\\"${POD_CONFIG_RELOADED_ANNOTATION}\\\
+    \": \\\"${TIMESTAMP}\\\"}}}\")\n\n  BODY=$(echo \"$RESPONSE\" | head -n -1)\n\
+    \  CODE=$(echo \"$RESPONSE\" | tail -n1)\n\n  if [ \"$CODE\" -ge 200 ] && [ \"\
+    $CODE\" -lt 300 ]; then\n    log \"Successfully patched pod annotation\"\n  else\n\
+    \    log \"Failed to patch pod. HTTP $CODE. Response body:\"\n    echo \"$BODY\"\
+    \n  fi\n}\n\nlog() {\n  echo \"$(now) $@\"\n}\n\n# Handle graceful shutdown\n\
+    trap 'log \"Received termination signal, exiting.\"; exit 0' TERM INT\n\nLAST_HASH=\"\
+    \"\n\nlog \"Starting config reload watcher\"\nlog \"Watching: ${CONFIG_PATH},\
+    \ annotating: ${POD_CONFIG_RELOADED_ANNOTATION}\"\n\nwhile true; do\n  CURRENT_HASH=\"\
+    $(hash_config)\"\n  if [ \"$CURRENT_HASH\" != \"$LAST_HASH\" ]; then\n    LAST_HASH=\"\
+    $CURRENT_HASH\"\n    patch_annotation\n  fi\n  sleep 2\ndone\n"
   preStop.sh: "#!/usr/bin/env bash\n\necho \"Wait for endpoints to be deleted\"\n\
     bash /enonic-xp/home/extra-config/endpoints.sh -r -s all -i ${XP_NODE_IP} -t 10\n\
     bash /enonic-xp/home/extra-config/endpoints.sh -r -s ${XP_NODE_GROUP} -i ${XP_NODE_IP}\
@@ -291,9 +293,9 @@ rules:
   - apiGroups:
       - "*"
     resources:
-      - "events"
+      - "pods"
     verbs:
-      - "create"
+      - "patch"
 ---
 apiVersion: "rbac.authorization.k8s.io/v1"
 kind: "RoleBinding"
@@ -666,6 +668,8 @@ spec:
                   name: "xp-events-sa-secret"
             - name: "XP_CONFIG_PATH"
               value: "/enonic-xp/home/config"
+            - name: "POD_CONFIG_RELOADED_ANNOTATION"
+              value: "enonic.cloud/configReloaded"
           image: "alpine/curl"
           imagePullPolicy: "IfNotPresent"
           name: "events"

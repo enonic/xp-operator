@@ -18,6 +18,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static com.enonic.kubernetes.common.Configuration.cfgStr;
@@ -42,6 +43,8 @@ public class OperatorXp7ConfigStatus extends InformerEventHandler<Pod> {
     @Inject
     Informers informers;
 
+    private static final Map<String, Object> NAMESPACE_LOGS = new ConcurrentHashMap<>();
+
     void onStart(@Observes StartupEvent ev) {
         listen(informers.podInformer());
     }
@@ -62,12 +65,19 @@ public class OperatorXp7ConfigStatus extends InformerEventHandler<Pod> {
     }
 
     private void handle(Pod pod) {
-        if(!isEnonicManaged().test(pod)) {
+        if (!isEnonicManaged().test(pod)) {
             return;
         }
 
         final String namespace = pod.getMetadata().getNamespace();
+        final Object lock = NAMESPACE_LOGS.computeIfAbsent(namespace, ns -> new Object());
 
+        synchronized (lock) {
+            handle(namespace);
+        }
+    }
+
+    private void handle(String namespace) {
         List<ConfigMap> configMaps = searchers.configMap().stream()
                 .filter(cm -> namespace.equals(cm.getMetadata().getNamespace()))
                 .collect(Collectors.toList());
