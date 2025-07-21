@@ -6,7 +6,7 @@ CONFIG_PATH="${CONFIG_PATH:-/etc/xp/config}"
 
 NAMESPACE="$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)"
 POD_NAME="$(hostname)"
-K8S_TOKEN="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)"
+#K8S_TOKEN="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)"
 API="https://kubernetes.default.svc/api/v1/namespaces/${NAMESPACE}/pods/${POD_NAME}"
 
 now() {
@@ -26,7 +26,7 @@ patch_annotation() {
   log "Detected config change, setting ${ANNOTATION_KEY} = ${TIMESTAMP}"
 
   RESPONSE=$(curl -s -w "\n%{http_code}" -X PATCH "${API}" \
-    -H "Authorization: Bearer ${K8S_TOKEN}" \
+    -H "Authorization: Bearer $K8S_TOKEN" \
     -H "Content-Type: application/merge-patch+json" \
     --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt \
     -d "{\"metadata\": {\"annotations\": {\"${ANNOTATION_KEY}\": \"${TIMESTAMP}\"}}}")
