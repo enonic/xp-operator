@@ -120,7 +120,7 @@ data:
     \ != \"0\" ]; then\n    echo \"Waiting for additional ${ADDITIONAL_WAIT_SECONDS}\
     \ seconds\"\n    sleep ${ADDITIONAL_WAIT_SECONDS}\nfi\n\nif [ \"${OK}\" != \"\
     1\" ]; then\n    exit 1\nfi\n"
-  events.sh: "#!/bin/sh\nset -e\n\nANNOTATION_KEY=\"${ANNOTATION_KEY:-enonic.io/configReloaded}\"\
+  pod-annotator.sh: "#!/bin/sh\nset -e\n\nANNOTATION_KEY=\"${ANNOTATION_KEY:-enonic.io/configReloaded}\"\
     \nCONFIG_PATH=\"${CONFIG_PATH:-/etc/xp/config}\"\n\nNAMESPACE=\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)\"\
     \nPOD_NAME=\"$(hostname)\"\nK8S_TOKEN=\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\"\
     \nAPI=\"https://kubernetes.default.svc/api/v1/namespaces/${NAMESPACE}/pods/${POD_NAME}\"\
@@ -634,7 +634,7 @@ spec:
             - mountPath: "/enonic-xp/home/snapshots"
               name: "snapshots"
         - args:
-            - "/enonic-xp/home/extra-config/events.sh"
+            - "/enonic-xp/home/extra-config/pod-annotator.sh"
           command:
             - "sh"
           env:

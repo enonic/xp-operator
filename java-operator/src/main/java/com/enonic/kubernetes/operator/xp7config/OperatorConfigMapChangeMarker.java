@@ -8,6 +8,8 @@ import com.enonic.kubernetes.operator.helpers.InformerEventHandler;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.quarkus.runtime.StartupEvent;
+
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +28,8 @@ public class OperatorConfigMapChangeMarker
 {
     private static final Logger log = LoggerFactory.getLogger(OperatorConfigMapChangeMarker.class);
 
-    private static final String ANNOTATION_KEY = "enonic.io/lastUpdated";
+    @ConfigProperty(name = "operator.charts.values.annotationKeys.configMapUpdated")
+    String configMapUpdatedAnnotation;
 
     @Inject
     Clients clients;
@@ -77,7 +80,7 @@ public class OperatorConfigMapChangeMarker
                 if (c.getMetadata().getAnnotations() != null) {
                     annotations.putAll(c.getMetadata().getAnnotations());
                 }
-                annotations.put(ANNOTATION_KEY, timestamp);
+                annotations.put( configMapUpdatedAnnotation, timestamp);
 
                 return new ConfigMapBuilder(c)
                     .editMetadata()

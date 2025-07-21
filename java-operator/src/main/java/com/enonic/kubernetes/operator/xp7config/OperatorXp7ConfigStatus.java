@@ -3,7 +3,6 @@ package com.enonic.kubernetes.operator.xp7config;
 import com.enonic.kubernetes.client.v1.xp7config.Xp7Config;
 import com.enonic.kubernetes.client.v1.xp7config.Xp7ConfigStatus;
 import com.enonic.kubernetes.kubernetes.Clients;
-import com.enonic.kubernetes.kubernetes.InformerSearcher;
 import com.enonic.kubernetes.kubernetes.Informers;
 import com.enonic.kubernetes.kubernetes.Searchers;
 import com.enonic.kubernetes.kubernetes.commands.K8sLogHelper;
@@ -11,6 +10,7 @@ import com.enonic.kubernetes.operator.helpers.InformerEventHandler;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.quarkus.runtime.StartupEvent;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,8 +27,11 @@ import static com.enonic.kubernetes.kubernetes.Predicates.*;
 public class OperatorXp7ConfigStatus extends InformerEventHandler<Pod> {
     private static final Logger log = LoggerFactory.getLogger(OperatorXp7ConfigStatus.class);
 
-    private static final String ANNOTATION_KEY = "enonic.io/configReloaded";
-    private static final String LAST_UPDATED_ANNOTATION = "enonic.io/lastUpdated";
+    @ConfigProperty(name = "operator.charts.values.annotationKeys.configMapUpdated")
+    String configMapUpdatedAnnotation;
+
+    @ConfigProperty(name = "operator.charts.values.annotationKeys.podConfigReloaded")
+    String podConfigReloadedAnnotation;
 
     @Inject
     Clients clients;
@@ -45,12 +48,12 @@ public class OperatorXp7ConfigStatus extends InformerEventHandler<Pod> {
 
     @Override
     public void onNewAdd(Pod newPod) {
-        handle();
+        handle(newPod);
     }
 
     @Override
     public void onUpdate(Pod oldPod, Pod newPod) {
-        handle();
+        handle(newPod);
     }
 
     @Override
@@ -58,54 +61,68 @@ public class OperatorXp7ConfigStatus extends InformerEventHandler<Pod> {
         // Do nothing
     }
 
-    private void handle() {
-        InformerSearcher<Xp7Config> configs = searchers.xp7Config();
+    private void handle(Pod pod) {
+        final String namespace = pod.getMetadata().getNamespace();
 
-        configs.stream().forEach(config -> {
-            String ns = config.getMetadata().getNamespace();
-            String nodeGroup = config.getSpec().getNodeGroup();
-            boolean isAllNodes = nodeGroup.equals(cfgStr("operator.charts.values.allNodesKey"));
+        List<ConfigMap> configMaps = searchers.configMap().stream()
+                .filter(cm -> namespace.equals(cm.getMetadata().getNamespace()))
+                .collect(Collectors.toList());
 
-            Optional<String> expectedTimestamp = searchers.configMap().stream()
-                    .filter(inSameNamespaceAs(config))
-                    .filter(cm -> cm.getMetadata().getName().equals(nodeGroup))
-                    .map(this::getLastUpdatedTimestamp)
-                    .filter(Objects::nonNull)
-                    .findFirst();
+        List<Pod> allPods = searchers.pod().stream()
+                .filter(p -> namespace.equals(p.getMetadata().getNamespace()))
+                .filter(isEnonicManaged())
+                .collect(Collectors.toList());
 
-            if (expectedTimestamp.isEmpty()) {
-                log.debug("No lastUpdated annotation found for ConfigMap '{}'", nodeGroup);
-                return;
+        List<Xp7Config> allConfigs = searchers.xp7Config().stream()
+                .filter(cfg -> namespace.equals(cfg.getMetadata().getNamespace()))
+                .collect(Collectors.toList());
+
+        for (ConfigMap cm : configMaps) {
+            String configMapName = cm.getMetadata().getName();
+            String updatedAt = getLastUpdatedTimestamp(cm);
+
+            if (updatedAt == null) {
+                log.debug("Skipping ConfigMap '{}': no {} annotation", configMapName, configMapUpdatedAnnotation);
+                continue;
             }
 
-            List<Pod> relevantPods = searchers.pod().stream()
-                    .filter(inSameNamespaceAs(config))
-                    .filter(isEnonicManaged())
-                    .filter(isAllNodes
-                            ? pod -> true
-                            : matchLabel(cfgStr("operator.charts.values.labelKeys.nodeGroup"), nodeGroup))
+            List<Xp7Config> relatedConfigs = allConfigs.stream()
+                    .filter(cfg -> cfg.getSpec().getNodeGroup().equals(configMapName))
                     .collect(Collectors.toList());
 
-            List<Pod> notUpdated = relevantPods.stream()
-                    .filter(pod -> {
-                        Map<String, String> annotations = Optional.ofNullable(pod.getMetadata().getAnnotations()).orElse(Collections.emptyMap());
-                        String reloadedAt = annotations.get(ANNOTATION_KEY);
-                        return reloadedAt == null || reloadedAt.compareTo(expectedTimestamp.get()) < 0;
-                    })
-                    .collect(Collectors.toList());
-
-            if (notUpdated.isEmpty()) {
-                markReady(config);
-            } else {
-                markPending(config, notUpdated);
+            if (relatedConfigs.isEmpty()) {
+                continue;
             }
-        });
 
+            for (Xp7Config config : relatedConfigs) {
+                boolean isAllNodes = config.getSpec().getNodeGroup().equals(cfgStr("operator.charts.values.allNodesKey"));
+
+                List<Pod> relevantPods = allPods.stream()
+                        .filter(isAllNodes
+                                ? p -> true
+                                : matchLabel(cfgStr("operator.charts.values.labelKeys.nodeGroup"), config.getSpec().getNodeGroup()))
+                        .collect(Collectors.toList());
+
+                List<Pod> notUpdated = relevantPods.stream()
+                        .filter(p -> {
+                            Map<String, String> annotations = Optional.ofNullable(p.getMetadata().getAnnotations()).orElse(Collections.emptyMap());
+                            String reloadedAt = annotations.get(podConfigReloadedAnnotation);
+                            return reloadedAt == null || reloadedAt.compareTo(updatedAt) < 0;
+                        })
+                        .collect(Collectors.toList());
+
+                if (notUpdated.isEmpty()) {
+                    markReady(config);
+                } else {
+                    markPending(config, notUpdated);
+                }
+            }
+        }
     }
 
     private String getLastUpdatedTimestamp(ConfigMap cm) {
         return Optional.ofNullable(cm.getMetadata().getAnnotations())
-                .map(a -> a.get(LAST_UPDATED_ANNOTATION))
+                .map(a -> a.get(configMapUpdatedAnnotation))
                 .orElse(null);
     }
 

@@ -270,6 +270,8 @@ spec:
                   key: token
             - name:  XP_CONFIG_PATH
               value: {{ $.Values.dirs.config }}
+            - name: POD_CONFIG_RELOADED_ANNOTATION
+              value: {{ $.Values.annotationKeys.podConfigReloaded | quote }}
 
           volumeMounts:
             - name: config
@@ -278,7 +280,7 @@ spec:
               mountPath: {{ $.Values.dirs.extraConfig }}
 
           command: ["sh"]
-          args: ["{{ $.Values.dirs.extraConfig }}/events.sh"]
+          args: ["{{ $.Values.dirs.extraConfig }}/pod-annotator.sh"]
 
         {{range $sidecar := $nodeGroup.sidecars }}
           {{- include "containerTemplate" (dict "container" $sidecar "Values" $.Values "sleep" true) | indent 8 }}

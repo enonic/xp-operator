@@ -1,12 +1,8 @@
 #!/bin/sh
 set -e
 
-ANNOTATION_KEY="${ANNOTATION_KEY:-enonic.io/configReloaded}"
-CONFIG_PATH="${CONFIG_PATH:-/etc/xp/config}"
-
 NAMESPACE="$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)"
 POD_NAME="$(hostname)"
-#K8S_TOKEN="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)"
 API="https://kubernetes.default.svc/api/v1/namespaces/${NAMESPACE}/pods/${POD_NAME}"
 
 now() {
@@ -23,13 +19,13 @@ hash_config() {
 
 patch_annotation() {
   TIMESTAMP="$(now)"
-  log "Detected config change, setting ${ANNOTATION_KEY} = ${TIMESTAMP}"
+  log "Detected config change, setting ${POD_CONFIG_RELOADED_ANNOTATION} = ${TIMESTAMP}"
 
   RESPONSE=$(curl -s -w "\n%{http_code}" -X PATCH "${API}" \
     -H "Authorization: Bearer $K8S_TOKEN" \
     -H "Content-Type: application/merge-patch+json" \
     --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt \
-    -d "{\"metadata\": {\"annotations\": {\"${ANNOTATION_KEY}\": \"${TIMESTAMP}\"}}}")
+    -d "{\"metadata\": {\"annotations\": {\"${POD_CONFIG_RELOADED_ANNOTATION}\": \"${TIMESTAMP}\"}}}")
 
   BODY=$(echo "$RESPONSE" | head -n -1)
   CODE=$(echo "$RESPONSE" | tail -n1)
@@ -42,17 +38,6 @@ patch_annotation() {
   fi
 }
 
-#patch_annotation() {
-#  TIMESTAMP="$(now)"
-#  log "Detected config change, setting ${ANNOTATION_KEY} = ${TIMESTAMP}"
-#  curl -s -X PATCH "${API}" \
-#    -H "Authorization: Bearer ${K8S_TOKEN}" \
-#    -H "Content-Type: application/merge-patch+json" \
-#    --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt \
-#    -d "{\"metadata\": {\"annotations\": {\"${ANNOTATION_KEY}\": \"${TIMESTAMP}\"}}}" \
-#    > /dev/null || log "Failed to patch pod"
-#}
-
 log() {
   echo "$(now) $@"
 }
@@ -63,7 +48,7 @@ trap 'log "Received termination signal, exiting."; exit 0' TERM INT
 LAST_HASH=""
 
 log "Starting config reload watcher"
-log "Watching: ${CONFIG_PATH}, annotating: ${ANNOTATION_KEY}"
+log "Watching: ${CONFIG_PATH}, annotating: ${POD_CONFIG_RELOADED_ANNOTATION}"
 
 while true; do
   CURRENT_HASH="$(hash_config)"
