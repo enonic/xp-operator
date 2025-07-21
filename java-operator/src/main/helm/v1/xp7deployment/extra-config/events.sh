@@ -1,95 +1,54 @@
 #!/bin/sh
 set -e
 
+ANNOTATION_KEY="${ANNOTATION_KEY:-enonic.io/configReloaded}"
+CONFIG_PATH="${CONFIG_PATH:-/etc/xp/config}"
+
+NAMESPACE="$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)"
+POD_NAME="$(hostname)"
+K8S_TOKEN="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)"
+API="https://kubernetes.default.svc/api/v1/namespaces/${NAMESPACE}/pods/${POD_NAME}"
+
 now() {
   date -u +"%Y-%m-%dT%H:%M:%SZ"
 }
 
-randomId() {
-  cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 16 | head -n 1
+hash_config() {
+  find "${CONFIG_PATH}" -maxdepth 1 -type l 2>/dev/null \
+    | grep -v "${CONFIG_PATH}/\.\." \
+    | xargs sha1sum 2>/dev/null \
+    | awk '{print $1}' \
+    | xargs echo
+}
+
+patch_annotation() {
+  TIMESTAMP="$(now)"
+  log "Detected config change, setting ${ANNOTATION_KEY} = ${TIMESTAMP}"
+  curl -s -X PATCH "${API}" \
+    -H "Authorization: Bearer ${K8S_TOKEN}" \
+    -H "Content-Type: application/merge-patch+json" \
+    --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt \
+    -d "{\"metadata\": {\"annotations\": {\"${ANNOTATION_KEY}\": \"${TIMESTAMP}\"}}}" \
+    > /dev/null || log "Failed to patch pod"
 }
 
 log() {
-  echo -n "$(now) $@"
+  echo "$(now) $@"
 }
 
-logWithNL() {
-    log "$@"
-    echo ""
-}
+# Handle graceful shutdown
+trap 'log "Received termination signal, exiting."; exit 0' TERM INT
 
-RUNNING="true"
+LAST_HASH=""
 
-finish() {
-    logWithNL "Stopping event loop"
-    RUNNING="false"
-}
-trap finish TERM INT
+log "Starting config reload watcher"
+log "Watching: ${CONFIG_PATH}, annotating: ${ANNOTATION_KEY}"
 
-buildEventConfigMapChange() {
-    cat << EOF
-{
-    "apiVersion": "v1",
-    "involvedObject": {
-        "apiVersion": "v1",
-        "kind": "Pod",
-        "name": "${XP_NODE_NAME}",
-        "namespace": "${NAMESPACE}",
-        "fieldPath": "spec.containers{exp}",
-        "uid": "${POD_UID}"
-    },
-    "kind": "Event",
-    "lastTimestamp": "$(now)",
-    "firstTimestamp": "$(now)",
-    "message": "Pod ${XP_NODE_NAME} reloaded ConfigMap ${XP_NODE_GROUP}",
-    "metadata": {
-        "name": "${XP_NODE_NAME}.$(randomId)",
-        "namespace": "${NAMESPACE}"
-    },
-    "reason": "ConfigReload",
-    "related": {
-        "apiVersion": "v1",
-        "kind": "ConfigMap",
-        "name": "${XP_NODE_GROUP}",
-        "namespace": "${NAMESPACE}"
-    },
-    "source": {
-      "component": "pod/${XP_NODE_NAME}"
-    },
-    "type": "Normal"
-}
-EOF
-}
-
-sendEvent() {
-  (cat - | curl -f -s -S -X POST \
-    -H "Accept: application/json" \
-    -H "Content-Type: application/json" \
-    -H "Authorization: Bearer $K8S_TOKEN" \
-    --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt \
-    -d @- \
-    "https://kubernetes.default.svc.cluster.local/api/v1/namespaces/$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)/events" \
-    > /dev/null) || (echo "failed:" >&2 && false) && echo "success"
-}
-
-cmEvent() {
-  log "Sending ConfigReload event ... "
-  buildEventConfigMapChange | sendEvent
-}
-
-getConfigHash() {
-  find "${XP_CONFIG_PATH}/" -maxdepth 1 -type l | grep -v "${XP_CONFIG_PATH}/\.\." | xargs sha1sum | awk '{print $1}' | xargs echo
-}
-
-OLD_HASHCODE=""
-
-logWithNL "Starting event loop"
-
-while [ "$RUNNING" = "true" ]; do
-  NEW_HASHCODE=$(getConfigHash)
-  if [ "$NEW_HASHCODE" != "$OLD_HASHCODE" ]; then
-    cmEvent
+while true; do
+  CURRENT_HASH="$(hash_config)"
+  if [ "$CURRENT_HASH" != "$LAST_HASH" ]; then
+    LAST_HASH="$CURRENT_HASH"
+    patch_annotation
   fi
-  OLD_HASHCODE=$NEW_HASHCODE
   sleep 2
 done
