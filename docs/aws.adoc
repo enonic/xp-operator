@@ -126,7 +126,7 @@ gp2    kubernetes.io/aws-ebs   Delete          WaitForFirstConsumer   false     
 
 === EFS
 
-To run XP in clustered mode, a <<../storage-classes#, `ReadWriteMany` storage class>> (NFS type filesystem) is required.
+To run XP in clustered mode, a <<storage#, `ReadWriteMany` storage class>> (NFS type filesystem) is required.
 
 You may <<nfs#, run your own NFS server>>, or take advantage of Amazon's managed service for shared filesystems called https://aws.amazon.com/efs/[Elastic File System (EFS)^].
 
