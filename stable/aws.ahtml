@@ -685,7 +685,7 @@ gp2    kubernetes.io/aws-ebs   Delete          WaitForFirstConsumer   false     
 <div class="sect2">
 <h3 id="efs"><a class="link" href="#efs">EFS</a></h3>
 <div class="paragraph">
-<p>To run XP in clustered mode, a <a href="../storage-classes.ahtml"><code>ReadWriteMany</code> storage class</a> (NFS type filesystem) is required.</p>
+<p>To run XP in clustered mode, a <a href="storage.ahtml"><code>ReadWriteMany</code> storage class</a> (NFS type filesystem) is required.</p>
 </div>
 <div class="paragraph">
 <p>You may <a href="nfs.ahtml">run your own NFS server</a>, or take advantage of Amazon&#8217;s managed service for shared filesystems called <a href="https://aws.amazon.com/efs/" target="_blank" rel="noopener">Elastic File System (EFS)</a>.</p>
@@ -720,7 +720,7 @@ gp2    kubernetes.io/aws-ebs   Delete          WaitForFirstConsumer   false     
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2025-06-13 16:16:54 UTC
+Last updated 2025-08-14 12:00:06 UTC
 </div>
 </div>
 </body>
