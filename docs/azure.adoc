@@ -1,0 +1,97 @@
+= Creating an Azure Kubernetes Service (AKS) cluster
+:toc: right
+:imagesdir: images
+:experimental:
+
+Instructions on setting up a managed k8s cluster on Microsoft Azure
+
+== Prerequisites
+
+You will need the following:
+
+An Azure account:: Log in to https://portal.azure.com/[Azure]
+
+Role assignments:: Your user should have the Contributor role, scoped to the subscription
+
+Az CLI:: Command-line tool to manage resources in Azure. See https://learn.microsoft.com/en-us/cli/azure/install-azure-cli for installation instructions
+
+Kubectl:: The Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it from https://kubernetes.io/docs/tasks/tools/install-kubectl/[Kubernetes.io].
+
+Check VM quotas:: In Azure Portal, search for Quotas in the top search bar, go to the Quotas page. Go to Compute, filter on your desired region and search for the VM family name that the cluster will use. If there are not sufficient free VMs, you can send an automatic adjustment request.
+
+== Create an AKS cluster
+
+. *Create resource group*
++
+az group create -n <resource group name> -l norwayeast
++
+
+. *Create AKS resource*
++
+az aks create -l norwayeast --storage-pool-sku Premium_LRS --tier free -g <resource group name> -n <aks cluster name> --ssh-key-value ~/.ssh/aks-ssh.pub --node-vm-size standard_d4ads_v5 --node-count 1 --no-wait
++
+This will create an AKS cluster with a single node with 4 vCPUs, suitable for deploying a simple Enonic installation.
+
+If there are issues with the ssh key (can happen if there are spaces in the username) or you want to use a dedicated SSH key
++
+ssh-keygen -m PEM -t rsa -b 4096 -f ~/.ssh/aks-ssh.pem
++
+Run the az aks create command, with added parameter --ssh-key-value ~/.ssh/aks-ssh.pem.pub
++
+ssh key::  TODO (make sure the username does not contain spaces)
+
+. *Check AKS status* 
+az aks operation show-latest -g <resource group name> -n <aks cluster name>
+
+When status is Succeeded, you can connect your local kubectl:
+az aks get-credentials -g <resource group name> -n <aks cluster name>
+
+Check if AKS is running via kubectl:
+kubectl get nodes
+
+WARNING: Make sure to chose kubernetes version >= 1.27 which is required by the XP operator.
+
+== Connect to the cluster
+
+TODO
+
+. Once the k8s cluster is created, click the cluster name
+. Then click btn:[Connect] on the top middle section of the page. This shows you the gcloud command you can use to connect to the k8s cluster from your computer.
+. Copy and run the gcloud command. If the command outputs `kubeconfig entry generated for <newly-created-k8s-cluster-name>`, it means proper kubectl config is generated on your computer and you are successfully authenticated to the k8s cluster. 
+. To verify your access to the k8s cluster run the command
++
+[source,terminal]
+----
+kubectl get namespaces
+----
++
+This should display the list of namespaces in the newly created k8s cluster. The "Age" column in the output shows how long has it been since the namespaces are created. 
+
+
+== Storage classes
+
+When connected to your cluster, list the available storage classes with this command:
+
+[source,terminal]
+----
+kubectl get storageclasses
+----
+
+This should display the list of storage classes provisioned by the AKS cluster.
+
+=== TODO
+
+To run XP in cluster mode, a <<../storage#, `ReadWriteMany` storage class>> (NFS type filesystem) must exist.
+
+Separate node pools for system workloads and app work loads.
+
+azurefile-csi, azurefile-csi-premium storage classes should be set up by default in the AKS cluster, check with kubectl get sc
+These are by default dynamically provisioned, and will set up Azure storage accounts, file shares, persistent volumes and persistent volume claims automatically.
+
+Azure offers a managed service for shared filesystems called https://azure.microsoft.com/en-us/products/storage/files[Azure Files^], which can be used to provision an NFS filesystem to your AKS cluster. 
+
+A cost effective alternative is to <<nfs#, run your own NFS server>>. 
+
+Another option is Azure Blobs, need an addon that will add azureblob-fuse-premium and azureblob-nfs-premium storage classes.
+
+
