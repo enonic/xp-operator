@@ -60,7 +60,7 @@ Azure resources relating to the cluster, like VNETs, VMs and storage accounts wi
 .. *SSH issues*
 +
 An error message `string argument should contain only ASCII characters` might be shown when trying to run the `az aks create` command. This might indicate issues with spaces in the username of the default ssh key.
-If there are such issues with the ssh key or you want to use a dedicated ssh key, you can create a dedicated ssh key with this command:
+In that case you can create a dedicated ssh key with this command:
 +
 [source,terminal]
 ----
