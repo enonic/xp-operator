@@ -25,6 +25,10 @@
         "document": "google"
       },
       {
+        "title": "Azure",
+        "document": "azure"
+      },
+      {
         "title": "Minikube",
         "document": "minikube"
       }

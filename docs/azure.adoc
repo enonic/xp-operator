@@ -1,0 +1,137 @@
+= Creating an Azure Kubernetes Service (AKS) cluster
+:toc: right
+:imagesdir: images
+:experimental:
+
+Instructions on setting up a managed k8s cluster on Microsoft Azure
+
+== Prerequisites
+
+You will need the following:
+
+An Azure account:: Sign up or log in to https://portal.azure.com/[Azure] where you will create the k8s cluster.
+
+Az CLI:: Command-line tool to manage resources in Azure. See https://learn.microsoft.com/en-us/cli/azure/install-azure-cli for installation instructions
+
+Kubectl:: The Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it from https://kubernetes.io/docs/tasks/tools/install-kubectl/[Kubernetes.io].
+
+IAM user:: With the Contributor role, scoped to the subscription. Ask the manager of the Azure subscription to assign you the Contributor role if this is missing.
+
+
+== Create an AKS cluster
+
+Documentation for AKS can be found at https://learn.microsoft.com/en-us/azure/aks/
+
+. *Create a resource group*
++
+[source,terminal]
+----
+az group create --name <resource group name> --location <preferred location f.ex. norwayeast>
+----
++
+This will create a resource group, basically a container for Azure resources, which the AKS cluster will be created in.
++
+
+. *Create AKS resource*
++
+[source,terminal]
+----
+az aks create --location <preferred location f.ex. norwayeast> --storage-pool-sku Premium_LRS --tier free --resource-group <resource group name> --name <aks cluster name> --node-vm-size standard_d4ads_v5 --node-count 1 --no-wait
+----
++
+This will start creating an AKS cluster with a single node with 4 vCPUs, suitable for deploying a simple Enonic installation. 
++
+
+. *Check AKS status* 
++
+Check the status of the AKS cluster with:
++
+[source,terminal]
+----
+az aks operation show-latest --resource-group <resource group name> --name <aks cluster name>
+----
++
+This should return a JSON text with `"status": "Succeeded"` when the cluster has finished being set up.
++
+Azure resources relating to the cluster, like VNETs, VMs and storage accounts will be created in a resource group named something like `MC_<resource group name>_<aks cluster name>_<aks cluster location>`
++
+
+. *Fixes and workarounds for some common issues*
+.. *SSH issues*
++
+An error message `string argument should contain only ASCII characters` might be shown when trying to run the `az aks create` command. This might indicate issues with spaces in the username of the default ssh key.
+In that case you can create a dedicated ssh key with this command:
++
+[source,terminal]
+----
+ssh-keygen -m PEM -t rsa -b 4096 -C <your email or username without spaces> -f ~/.ssh/aks-ssh.pem
+----
++
+The SSH key should be added to the `az aks create` command with the parameter `--ssh-key-value ~/.ssh/aks-ssh.pem.pub`:
++
+[source,terminal]
+----
+az aks create --location <preferred location f.ex. norwayeast> --storage-pool-sku Premium_LRS --tier free --resource-group <resource group name> --name <aks cluster name> --node-vm-size standard_d4ads_v5 --node-count 1 --no-wait --ssh-key-value ~/.ssh/aks-ssh.pem.pub
+----
++
+.. *Insufficient VM or CPU quotas*
++
+There might be limitations on available CPUs, especially if there are other VMs or AKS clusters running in the subscription. In that case, one can request increased CPU quotas.
++
+In the Azure Portal, search for Quotas in the top search bar, go to the Quotas page. Go to Compute, filter on your desired region and search for the VM family name that the cluster will use, it should be `Standard DADSv5 Family vCPUs` in our case. Click the pencil icon on the right side of the row to send an automatic adjustment request.
++
+
+.. *Kubernetes version*
++
+Make sure to chose kubernetes version >= 1.27 which is required by the XP operator.
++
+
+
+== Connect to the cluster
+
+. When the AKS cluster has finished setting up, you can connect your local kubectl:
++
+[source,terminal]
+----
+az aks get-credentials --resource-group <resource group name> --name <aks cluster name>
+----
+
+. To verify your access to the k8s cluster run the command
++
+[source,terminal]
+----
+kubectl get namespaces
+----
++
+This should display the list of namespaces in the newly created k8s cluster. The "Age" column in the output shows how long has it been since the namespaces are created. 
+
+
+== Storage classes
+
+When connected to your cluster, list the available storage classes with this command:
+
+[source,terminal]
+----
+kubectl get storageclasses
+----
+
+This should display the list of storage classes provisioned by the AKS cluster.
+
+=== Cluster mode
+
+To run XP in cluster mode, a <<../storage#, `ReadWriteMany` storage class>> (NFS type filesystem) must exist.
+
+The `azurefile-csi` and `azurefile-csi-premium` storage classes should be set up by default in the AKS cluster, check with `kubectl get storageclasses`.
+
+Azure offers a managed service for shared filesystems called https://azure.microsoft.com/en-us/products/storage/files[Azure Files^], which can be used to provision an NFS filesystem to your AKS cluster. 
+
+When using the `azurefile-csi` or `azurefile-csi-premium` storage classes, the provisioner will automatically provision Azure storage accounts with file shares, along with persistent volumes and persistent volume claims in the k8s cluster.
+
+See https://learn.microsoft.com/en-us/azure/aks/concepts-storage[Storage options for applications in Azure Kubernetes Service (AKS)] for details about storage classes in AKS.
+
+A cost effective alternative is to <<nfs#, run your own NFS server>>. 
+
+
+== Install operator
+
+You are now ready to <<installation#, install the XP operator>> and start <<usage#, deploying XP instances>>.
