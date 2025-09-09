@@ -1,7 +1,7 @@
 [versions]
 fabric8 = "6.6.2"
 quarkus = "2.16.6.Final"
-jackson = "2.15.2"
+jackson = "2.20.0"
 
 [libraries]
 fabric8-bom = { module = "io.fabric8:kubernetes-client-bom", version.ref = "fabric8" }
