@@ -1,5 +1,5 @@
 [versions]
-fabric8 = "6.6.2"
+fabric8 = "7.4.0"
 quarkus = "2.16.6.Final"
 jackson = "2.15.2"
 
