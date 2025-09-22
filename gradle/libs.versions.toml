@@ -14,7 +14,7 @@ fabric8-kubernetes-servermock = { module = "io.fabric8:kubernetes-server-mock", 
 # JUnit & Mockito
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version = "5.10.0" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version = "5.11.0" }
-mockito-core = { module = "org.mockito:mockito-core", version = "5.14.2" }
+mockito-core = { module = "org.mockito:mockito-core", version = "5.20.0" }
 mockito-inline = { module = "org.mockito:mockito-inline", version = "5.2.0" }
 mockito-junitjupiter = { module = "org.mockito:mockito-junit-jupiter", version = "5.10.0" }
 
