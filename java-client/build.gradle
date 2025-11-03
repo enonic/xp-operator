@@ -16,6 +16,7 @@ dependencies {
 
     api libs.fabric8.kubernetes.clientapi
     implementation libs.okhttp3.okhttp
+    implementation libs.fabric8.kubernetes.client
 
     implementation libs.jakarta.validation
     implementation libs.jackson.databind
