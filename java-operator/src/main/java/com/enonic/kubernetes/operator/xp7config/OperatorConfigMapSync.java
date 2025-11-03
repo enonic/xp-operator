@@ -1,6 +1,8 @@
 package com.enonic.kubernetes.operator.xp7config;
 
 import com.enonic.kubernetes.client.v1.xp7config.Xp7Config;
+import com.enonic.kubernetes.client.v1.xp7deployment.Xp7Deployment;
+import com.enonic.kubernetes.client.v1.xp7deployment.Xp7DeploymentStatus;
 import com.enonic.kubernetes.common.TaskRunner;
 import com.enonic.kubernetes.kubernetes.ActionLimiter;
 import com.enonic.kubernetes.kubernetes.Clients;
@@ -21,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -66,9 +69,18 @@ public class OperatorConfigMapSync
     @Override
     public void run()
     {
-        searchers.xp7Config().stream().collect( groupingBy( r -> r.getMetadata().getNamespace() ) ).
-            keySet().
-            forEach( this::handle );
+        final Set<String> activeNamespaces = searchers.xp7Deployment()
+            .stream()
+            .filter( deployment -> deployment.getStatus().getState() == Xp7DeploymentStatus.State.RUNNING )
+            .map( deployment -> deployment.getMetadata().getNamespace() )
+            .collect( Collectors.toSet() );
+
+        searchers.xp7Config()
+            .stream()
+            .filter( config -> activeNamespaces.contains( config.getMetadata().getNamespace() ) )
+            .collect( groupingBy( config -> config.getMetadata().getNamespace() ) )
+            .keySet()
+            .forEach( this::handle );
     }
 
     protected void handle( final String namespace )
