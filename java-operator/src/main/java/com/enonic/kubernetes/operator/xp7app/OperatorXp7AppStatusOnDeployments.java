@@ -41,7 +41,7 @@ public class OperatorXp7AppStatusOnDeployments
     @Override
     public void onUpdate( Xp7Deployment oldDeployment, Xp7Deployment newDeployment )
     {
-        log.debug("onUpdate App status on Xp7Deployment update: {} in {}", newDeployment.getMetadata().getNamespace(), newDeployment.getMetadata().getName());
+        log.debug("onUpdate App status on Xp7Deployment update: {} in {} ---old: {} ---new:{}", newDeployment.getMetadata().getNamespace(), newDeployment.getMetadata().getName(),oldDeployment, newDeployment );
         try {
             handlerStatus.updateStatus( newDeployment );
         } catch (IOException e) {
