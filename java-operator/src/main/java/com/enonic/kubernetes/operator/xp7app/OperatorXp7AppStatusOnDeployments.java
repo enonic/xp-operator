@@ -3,14 +3,18 @@ package com.enonic.kubernetes.operator.xp7app;
 import com.enonic.kubernetes.client.v1.xp7deployment.Xp7Deployment;
 import com.enonic.kubernetes.kubernetes.Informers;
 import com.enonic.kubernetes.operator.helpers.InformerEventHandler;
+
 import io.quarkus.runtime.StartupEvent;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
+
 import java.io.IOException;
+import java.util.Objects;
 
 /**
  * This operator class updates Xp7App status fields
@@ -41,12 +45,21 @@ public class OperatorXp7AppStatusOnDeployments
     @Override
     public void onUpdate( Xp7Deployment oldDeployment, Xp7Deployment newDeployment )
     {
-        log.debug("onUpdate App status on Xp7Deployment update: {} in {} ---old: {} ---new:{}", newDeployment.getMetadata().getNamespace(), newDeployment.getMetadata().getName(),oldDeployment, newDeployment );
-        try {
+        if ( Objects.equals( oldDeployment, newDeployment ) )
+        {
+            return;
+        }
+
+        try
+        {
+            log.debug( "onUpdate App status on Xp7Deployment update: {} in {}", newDeployment.getMetadata().getNamespace(),
+                       newDeployment.getMetadata().getName() );
             handlerStatus.updateStatus( newDeployment );
-        } catch (IOException e) {
-            log.warn( String.format( "Failed updating app status in NS %s: %s", newDeployment.getMetadata().getNamespace(),
-                e.getMessage() ) );
+        }
+        catch ( IOException e )
+        {
+            log.warn(
+                String.format( "Failed updating app status in NS %s: %s", newDeployment.getMetadata().getNamespace(), e.getMessage() ) );
         }
     }
 
