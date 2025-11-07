@@ -56,6 +56,10 @@ public class OperatorXp7ConfigStatus extends InformerEventHandler<Pod> {
 
     @Override
     public void onUpdate(Pod oldPod, Pod newPod) {
+        if(Objects.equals( oldPod, newPod )) {
+            return;
+        }
+
         handle(newPod);
     }
 
