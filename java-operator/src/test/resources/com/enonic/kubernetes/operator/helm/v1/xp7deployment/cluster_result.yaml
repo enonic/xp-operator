@@ -123,7 +123,7 @@ data:
   pod-annotator.sh: "#!/bin/sh\nset -e\n\nNAMESPACE=\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)\"\
     \nPOD_NAME=\"$(hostname)\"\nAPI=\"https://kubernetes.default.svc/api/v1/namespaces/${NAMESPACE}/pods/${POD_NAME}\"\
     \n\nnow() {\n  date -u +\"%Y-%m-%dT%H:%M:%SZ\"\n}\n\nhash_config() {\n  find \"\
-    ${CONFIG_PATH}\" -maxdepth 1 -type l 2>/dev/null \\\n    | grep -v \"${CONFIG_PATH}/\\\
+    ${XP_CONFIG_PATH}\" -maxdepth 1 -type l 2>/dev/null \\\n    | grep -v \"${XP_CONFIG_PATH}/\\\
     .\\.\" \\\n    | xargs sha1sum 2>/dev/null \\\n    | awk '{print $1}' \\\n   \
     \ | xargs echo\n}\n\npatch_annotation() {\n  TIMESTAMP=\"$(now)\"\n  log \"Detected\
     \ config change, setting ${POD_CONFIG_RELOADED_ANNOTATION} = ${TIMESTAMP}\"\n\n\
@@ -137,7 +137,7 @@ data:
     \    log \"Failed to patch pod. HTTP $CODE. Response body:\"\n    echo \"$BODY\"\
     \n  fi\n}\n\nlog() {\n  echo \"$(now) $@\"\n}\n\n# Handle graceful shutdown\n\
     trap 'log \"Received termination signal, exiting.\"; exit 0' TERM INT\n\nLAST_HASH=\"\
-    \"\n\nlog \"Starting config reload watcher\"\nlog \"Watching: ${CONFIG_PATH},\
+    \"\n\nlog \"Starting config reload watcher\"\nlog \"Watching: ${XP_CONFIG_PATH},\
     \ annotating: ${POD_CONFIG_RELOADED_ANNOTATION}\"\n\nwhile true; do\n  CURRENT_HASH=\"\
     $(hash_config)\"\n  if [ \"$CURRENT_HASH\" != \"$LAST_HASH\" ]; then\n    LAST_HASH=\"\
     $CURRENT_HASH\"\n    patch_annotation\n  fi\n  sleep 2\ndone\n"
