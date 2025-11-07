@@ -10,8 +10,8 @@ now() {
 }
 
 hash_config() {
-  find "${CONFIG_PATH}" -maxdepth 1 -type l 2>/dev/null \
-    | grep -v "${CONFIG_PATH}/\.\." \
+  find "${XP_CONFIG_PATH}" -maxdepth 1 -type l 2>/dev/null \
+    | grep -v "${XP_CONFIG_PATH}/\.\." \
     | xargs sha1sum 2>/dev/null \
     | awk '{print $1}' \
     | xargs echo
@@ -48,7 +48,7 @@ trap 'log "Received termination signal, exiting."; exit 0' TERM INT
 LAST_HASH=""
 
 log "Starting config reload watcher"
-log "Watching: ${CONFIG_PATH}, annotating: ${POD_CONFIG_RELOADED_ANNOTATION}"
+log "Watching: ${XP_CONFIG_PATH}, annotating: ${POD_CONFIG_RELOADED_ANNOTATION}"
 
 while true; do
   CURRENT_HASH="$(hash_config)"
