@@ -35,7 +35,8 @@ public class TaskRunner
             Executors.newScheduledThreadPool( 4, new ThreadFactoryBuilder().setNameFormat( "task-scheduler-%d" ).build() );
 
         executor = new ThreadPoolExecutor( 1, cfgInt( "operator.tasks.threads" ), 60L, TimeUnit.SECONDS, new SynchronousQueue<>(),
-                                           new ThreadFactoryBuilder().setNameFormat( "task-runner-%d" ).build() );
+                                           new ThreadFactoryBuilder().setNameFormat( "task-runner-%d" ).build(),
+                                           new ThreadPoolExecutor.CallerRunsPolicy() );
     }
 
     public void scheduleAtFixedRate( final Runnable command, final long initialDelay, final long period, final TimeUnit unit )

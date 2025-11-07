@@ -22,9 +22,9 @@ import javax.inject.Inject;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static com.enonic.kubernetes.operator.xp7deployment.Predicates.running;
 import static com.enonic.kubernetes.common.Configuration.cfgStr;
 import static com.enonic.kubernetes.kubernetes.Predicates.inSameNamespaceAs;
 import static com.enonic.kubernetes.kubernetes.Predicates.isDeleted;
@@ -65,11 +65,15 @@ public class OperatorIngressLabel
     @Override
     public void onUpdate( final Xp7Config oldR, final Xp7Config newR )
     {
+        if ( Objects.equals( oldR, newR ) )
+        {
+            return;
+        }
         // Only handle if this is a vhost config and it is loaded
         onCondition( newR, c -> {
             log.debug( "onUpdate Xp7Config: {} in {}", newR.getMetadata().getNamespace(), newR.getMetadata().getName() );
             this.handle( c );
-        }, this::isVHostConfig, ( c ) -> c.getStatus().getState() == Xp7ConfigStatus.State.READY, this::isDeploymentRunning );
+        }, this::isVHostConfig, ( c ) -> c.getStatus().getState() == Xp7ConfigStatus.State.READY );
     }
 
     @Override
@@ -161,13 +165,5 @@ public class OperatorIngressLabel
     private boolean isVHostConfig( final Xp7Config c )
     {
         return c.getSpec().getFile().equals( cfgStr( "operator.charts.values.files.vhosts" ) );
-    }
-
-    boolean isDeploymentRunning( Xp7Config config )
-    {
-        return searchers.xp7Deployment()
-            .find( deployment -> deployment.getMetadata().getNamespace().equals( config.getMetadata().getNamespace() ) )
-            .map( deployment -> running().test( deployment ) )
-            .orElse( false );
     }
 }

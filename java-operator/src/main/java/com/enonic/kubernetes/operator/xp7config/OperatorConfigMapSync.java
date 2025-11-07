@@ -1,7 +1,6 @@
 package com.enonic.kubernetes.operator.xp7config;
 
 import com.enonic.kubernetes.client.v1.xp7config.Xp7Config;
-import com.enonic.kubernetes.client.v1.xp7deployment.Xp7Deployment;
 import com.enonic.kubernetes.client.v1.xp7deployment.Xp7DeploymentStatus;
 import com.enonic.kubernetes.common.TaskRunner;
 import com.enonic.kubernetes.kubernetes.ActionLimiter;
@@ -9,6 +8,8 @@ import com.enonic.kubernetes.kubernetes.Clients;
 import com.enonic.kubernetes.kubernetes.Searchers;
 import com.enonic.kubernetes.kubernetes.commands.K8sLogHelper;
 import com.enonic.kubernetes.operator.Operator;
+import com.enonic.kubernetes.operator.xp7deployment.Predicates;
+
 import com.google.common.hash.Hashing;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.quarkus.runtime.StartupEvent;
@@ -71,7 +72,7 @@ public class OperatorConfigMapSync
     {
         final Set<String> activeNamespaces = searchers.xp7Deployment()
             .stream()
-            .filter( deployment -> deployment.getStatus().getState() == Xp7DeploymentStatus.State.RUNNING )
+            .filter( Predicates.running() )
             .map( deployment -> deployment.getMetadata().getNamespace() )
             .collect( Collectors.toSet() );
 
