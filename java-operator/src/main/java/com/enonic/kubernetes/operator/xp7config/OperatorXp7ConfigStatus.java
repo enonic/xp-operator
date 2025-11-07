@@ -142,6 +142,9 @@ public class OperatorXp7ConfigStatus extends InformerEventHandler<Pod> {
     }
 
     private void markReady(final Xp7Config xp7Config) {
+        if(xp7Config.getStatus().getState() == Xp7ConfigStatus.State.READY) {
+            return;
+        }
         log.debug("markReady Xp7Config: {} in {}", xp7Config.getMetadata().getName(), xp7Config.getMetadata().getNamespace());
 
         K8sLogHelper.logEdit(clients.xp7Configs()
@@ -152,6 +155,9 @@ public class OperatorXp7ConfigStatus extends InformerEventHandler<Pod> {
     }
 
     private void markPending(final Xp7Config xp7Config, final List<Pod> notUpdatedPods) {
+        if(xp7Config.getStatus().getState() == Xp7ConfigStatus.State.PENDING) {
+            return;
+        }
         String podNames = notUpdatedPods.stream()
                 .map(p -> p.getMetadata().getName())
                 .collect(Collectors.joining(", "));
