@@ -30,7 +30,7 @@ jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", ver
 # Other
 immutables-value = { module = "org.immutables:value", version = "2.9.3" }
 immutables-valueannotations = { module = "org.immutables:value-annotations", version = "2.9.3" }
-guava = { module = "com.google.guava:guava", version = "32.0.1-jre" }
+guava = { module = "com.google.guava:guava", version = "33.5.0-jre" }
 maven-mavenartifact = { module = "org.apache.maven:maven-artifact", version = "3.9.8" }
 jakarta-validation = { module = "jakarta.validation:jakarta.validation-api", version = "2.0.2" }
 
