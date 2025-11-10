@@ -36,5 +36,5 @@ jakarta-validation = { module = "jakarta.validation:jakarta.validation-api", ver
 
 [plugins]
 quarkus = { id = "io.quarkus", version.ref = "quarkus" }
-jsonschema2pojo = { id = "org.jsonschema2pojo", version = "1.2.1" }
+jsonschema2pojo = { id = "org.jsonschema2pojo", version = "1.2.2" }
 gitProperties = { id = "com.gorylenko.gradle-git-properties", version = "2.4.1" }
