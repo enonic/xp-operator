@@ -32,6 +32,7 @@ nb-configuration.xml
 /.gradle/*
 
 # Build
+/build/*
 /helm/build/*
 /java-client/build/*
 /java-operator/build/*
