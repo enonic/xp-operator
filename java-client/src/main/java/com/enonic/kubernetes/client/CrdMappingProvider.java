@@ -15,9 +15,10 @@ public class CrdMappingProvider
     @SuppressWarnings("unused")
     public static void register()
     {
-        KubernetesDeserializer.registerCustomKind( API_VERSION, "Xp7App", Xp7App.class );
-        KubernetesDeserializer.registerCustomKind( API_VERSION, "Xp7Config", Xp7Config.class );
-        KubernetesDeserializer.registerCustomKind( API_VERSION, "Xp7Deployment", Xp7Deployment.class );
+        KubernetesDeserializer deserializer = new KubernetesDeserializer();
+        deserializer.registerCustomKind( API_VERSION, "Xp7App", Xp7App.class );
+        deserializer.registerCustomKind( API_VERSION, "Xp7Config", Xp7Config.class );
+        deserializer.registerCustomKind( API_VERSION, "Xp7Deployment", Xp7Deployment.class );
     }
 
     @SuppressWarnings("unused")

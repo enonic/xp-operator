@@ -12,7 +12,7 @@ import io.fabric8.kubernetes.api.model.admission.v1.AdmissionReview;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;

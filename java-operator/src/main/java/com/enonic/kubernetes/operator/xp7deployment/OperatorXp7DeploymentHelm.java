@@ -18,10 +18,10 @@ import com.google.common.hash.Hashing;
 import io.fabric8.kubernetes.api.model.ServiceAccount;
 import io.quarkus.runtime.StartupEvent;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;

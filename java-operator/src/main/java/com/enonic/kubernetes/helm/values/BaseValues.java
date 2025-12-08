@@ -2,7 +2,7 @@ package com.enonic.kubernetes.helm.values;
 
 import com.google.common.base.Preconditions;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
