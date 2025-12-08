@@ -16,8 +16,8 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Singleton;
-import javax.ws.rs.Produces;
+import jakarta.inject.Singleton;
+import jakarta.ws.rs.Produces;
 
 import static com.enonic.kubernetes.common.SingletonAssert.singletonAssert;
 

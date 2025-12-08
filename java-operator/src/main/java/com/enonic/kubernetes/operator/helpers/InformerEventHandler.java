@@ -6,7 +6,7 @@ import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.client.informers.ResourceEventHandler;
 import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import static com.enonic.kubernetes.common.Configuration.cfgLong;
 

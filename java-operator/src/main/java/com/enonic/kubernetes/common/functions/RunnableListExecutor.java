@@ -3,7 +3,7 @@ package com.enonic.kubernetes.common.functions;
 import java.util.List;
 import java.util.function.Function;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 @Singleton
 public class RunnableListExecutor

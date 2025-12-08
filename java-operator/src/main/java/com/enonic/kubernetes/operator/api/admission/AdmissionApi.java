@@ -20,11 +20,11 @@ import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
 
 import org.apache.maven.artifact.versioning.ComparableVersion;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
 
 import java.util.Collection;
 import java.util.Collections;

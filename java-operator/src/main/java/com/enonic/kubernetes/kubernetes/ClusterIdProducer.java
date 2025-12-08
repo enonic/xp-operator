@@ -2,9 +2,9 @@ package com.enonic.kubernetes.kubernetes;
 
 import java.util.UUID;
 
-import javax.inject.Named;
-import javax.inject.Singleton;
-import javax.ws.rs.Produces;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
+import jakarta.ws.rs.Produces;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

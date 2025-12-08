@@ -5,9 +5,9 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.inject.Singleton;
+import jakarta.enterprise.context.Dependent;
 
-@Singleton
+@Dependent
 public class OptionalListPruner<O>
     implements Function<List<Optional<O>>, List<O>>
 {
