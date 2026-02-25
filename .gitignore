@@ -35,3 +35,4 @@ nb-configuration.xml
 /helm/build/*
 /java-client/build/*
 /java-operator/build/*
+/build/
