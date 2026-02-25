@@ -41,8 +41,13 @@ spec:
             {{- with .Values.resources }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
-          {{- if or .Values.env .Values.secrets }}
           env:
+            - name: OPERATOR_NAME
+              value: "{{ .Release.Name }}"
+            - name: OPERATOR_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
             {{- range $n, $v := .Values.env }}
             - name: "{{ $n }}"
               value: "{{ $v }}"
@@ -54,7 +59,6 @@ spec:
                   name: "{{ $.Release.Name }}-secrets"
                   key: "{{ $n }}"
             {{- end }}
-          {{- end }}
           volumeMounts:
             - name: config
               mountPath: /deployments/config
