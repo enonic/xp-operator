@@ -1,0 +1,66 @@
+{{- if not .Values.onlyDeployCrds }}
+---
+# VAP #1: Restrict RoleBinding creation to managed namespaces
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: {{ .Release.Name }}-restrict-rolebinding
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [ "rbac.authorization.k8s.io" ]
+        apiVersions: [ "v1" ]
+        operations: [ "CREATE", "UPDATE" ]
+        resources: [ "rolebindings" ]
+  validations:
+    - expression: >
+        has(namespaceObject.metadata.labels) && 
+        namespaceObject.metadata.labels.exists(k, k == 'operator.enonic.cloud/managed' && namespaceObject.metadata.labels[k] == 'true')
+      message: "RoleBindings may only be created in namespaces labeled operator.enonic.cloud/managed=true"
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: {{ .Release.Name }}-restrict-rolebinding
+spec:
+  policyName: {{ .Release.Name }}-restrict-rolebinding
+  validationActions: [ Deny ]
+  matchResources:
+    namespaceSelector:
+      matchExpressions:
+        - key: operator.enonic.cloud/managed
+          operator: DoesNotExist
+---
+# VAP #2: Restrict namespace mutations to managed namespaces
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: {{ .Release.Name }}-restrict-namespace-mutations
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [ "" ]
+        apiVersions: [ "v1" ]
+        operations: [ "UPDATE", "PATCH", "DELETE" ]
+        resources: [ "namespaces" ]
+  matchConditions:
+    - name: is-operator-sa
+      expression: >
+        request.userInfo.username == 'system:serviceaccount:{{ .Release.Namespace }}:{{ .Release.Name }}'
+  validations:
+    - expression: >
+        has(oldObject.metadata.labels) && 
+        oldObject.metadata.labels.exists(k, k == 'operator.enonic.cloud/managed' && oldObject.metadata.labels[k] == 'true')
+      message: "The operator may only update or delete namespaces labeled operator.enonic.cloud/managed=true"
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: {{ .Release.Name }}-restrict-namespace-mutations
+spec:
+  policyName: {{ .Release.Name }}-restrict-namespace-mutations
+  validationActions: [ Deny ]
+---
+{{- end }}
