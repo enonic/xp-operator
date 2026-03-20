@@ -66,5 +66,5 @@ jobs:
           platforms: linux/amd64,linux/arm64
 
       - name: Publish helm chart
-        run: curl --fail -u "ci:${{ secrets.ARTIFACTORY_PASSWORD }}" https://repo.enonic.com/repository/helm/xp-operator-${{ steps.operator_version.outputs.version }}-dev.tgz --upload-file helm/build/libs/xp-operator-${{ steps.operator_version.outputs.version }}-dev.tgz
+        run: curl -u "ci:${{ secrets.ARTIFACTORY_PASSWORD }}" https://repo.enonic.com/helm/ --upload-file helm/build/libs/xp-operator-${{ steps.operator_version.outputs.version }}-dev.tgz -v
 
