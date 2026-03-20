@@ -48,12 +48,8 @@ jobs:
         id: operator_version
         run: echo "version=$(./get-version.sh)" >> $GITHUB_OUTPUT
 
-      - name: Assert versions
-        run: |
-          case "${{ steps.operator_version.outputs.version }}" in
-            0.0.*) ;;
-          *) echo "dev version must start with 0.0."; exit 1 ;;
-          esac
+      - name: Set dev version
+        run: yq -i -p=props -o=props '.version = "${{ steps.operator_version.outputs.version }}-dev"' gradle.properties
 
       - name: Build java-client and java-operator
         run: ./gradlew build -x check
@@ -66,9 +62,9 @@ jobs:
           pull: true
           no-cache: true
           push: true
-          tags: "enonic/xp-operator:${{ steps.operator_version.outputs.version }}"
+          tags: "enonic/xp-operator:${{ steps.operator_version.outputs.version }}-dev"
           platforms: linux/amd64,linux/arm64
 
       - name: Publish helm chart
-        run: curl -u "ci:${{ secrets.ARTIFACTORY_PASSWORD }}" https://repo.enonic.com/repository/helm/ --upload-file helm/build/libs/xp-operator-${{ steps.operator_version.outputs.version }}.tgz -v
+        run: curl --fail -u "ci:${{ secrets.ARTIFACTORY_PASSWORD }}" https://repo.enonic.com/repository/helm/ --upload-file helm/build/libs/xp-operator-${{ steps.operator_version.outputs.version }}-dev.tgz
 
