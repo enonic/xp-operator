@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.26">
-<title>Minikube</title>
+<title>Kubernetes Operator for Enonic XP</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -437,14 +437,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article toc2 toc-right">
 <div id="header">
-<h1>Minikube</h1>
+<h1>Kubernetes Operator for Enonic XP</h1>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
-<li><a href="#prerequisites">Prerequisites</a></li>
-<li><a href="#setup">Setup</a></li>
-<li><a href="#verify">Verify</a></li>
-<li><a href="#teardown">Teardown</a></li>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#installation">Installation</a></li>
+<li><a href="#usage">Usage</a></li>
+<li><a href="#security">Security</a></li>
 </ul>
 </div>
 </div>
@@ -452,39 +452,20 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>This section briefly describes how to install and set up minikube for testing the operator.</p>
+<p>The Enonic XP Operator lets you deploy XP instances on Kubernetes (k8s) with ease. It builds on the <a href="https://kubernetes.io/docs/concepts/extend-kubernetes/operator/">operator pattern</a> provided by Kubernetes.</p>
 </div>
+<div class="imageblock">
+<div class="content">
+<img src="images/xp-operator-logo.svg" alt="XP K8S operator" width="300w">
 </div>
-</div>
-<div class="sect1">
-<h2 id="prerequisites"><a class="link" href="#prerequisites">Prerequisites</a></h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>You need to have installed these programs on your computer:</p>
-</div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">Minikube</dt>
-<dd>
-<p>Is local Kubernetes, focusing on making it easy to learn and develop for Kubernetes. Download it <a href="https://minikube.sigs.k8s.io/docs/start/">here</a>.</p>
-</dd>
-<dt class="hdlist1">Docker</dt>
-<dd>
-<p>Is a container management platform. You can use other virtual machine or container managers with Minikube, but Docker is the most preferable Minikube <a href="https://minikube.sigs.k8s.io/docs/drivers/">driver</a> across all operating systems. Download it <a href="https://www.docker.com/products/docker-desktop/">here</a>.</p>
-</dd>
-<dt class="hdlist1">Kubectl</dt>
-<dd>
-<p>Is the Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">here</a>.</p>
-</dd>
-</dl>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="setup"><a class="link" href="#setup">Setup</a></h2>
+<h2 id="introduction"><a class="link" href="#introduction">Introduction</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Once you have minikube working, it is quite easy to start a local cluster.</p>
+<p>Creating a single-instance XP deployment is easy, but managing production grade XP clusters is more complex. Add to that the complexity of Kubernetes, and you can quickly get into trouble. The operator simplifies this.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -493,80 +474,56 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-The amount of resources you allocate to minikube will depend on your computer&#8217;s capacity and the workload you intend to run on the cluster.
+The operator only supports Enonic XP <code>v7.13.2</code> and newer.
 </td>
 </tr>
 </table>
 </div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ minikube start \
-	--cpus=4 \
-	--memory=16gb \
-	--disk-size=10gb \
-    --vm-driver=docker \
-	--kubernetes-version=v1.27.0
-
-* Preparing Kubernetes v1.27.0 on Docker 27.2.0 ...
-  - Generating certificates and keys ...
-  - Booting up control plane ...
-  - Configuring RBAC rules ...
-* Verifying Kubernetes components...
-* Enabled addons: storage-provisioner, default-storageclass
-* Done! kubectl is now configured to use "minikube" cluster and "default" namespace by default</code></pre>
 </div>
+</div>
+<div class="sect1">
+<h2 id="installation"><a class="link" href="#installation">Installation</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The operator must be installed on a properly configured k8s cluster.</p>
 </div>
 <div class="paragraph">
-<p>When your cluster is up, it is good to add the ingress controller to it to test load balancing:</p>
+<p>Follow our <a href="installation.ahtml">installation guide</a> to get started.</p>
 </div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ minikube addons enable ingress
-
-* Verifying ingress addon...
-* The 'ingress' addon is enabled</code></pre>
-</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+If you need to set up a local test environment, have a look at our <a href="minikube.ahtml">minikube guide</a>.
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="verify"><a class="link" href="#verify">Verify</a></h2>
+<h2 id="usage"><a class="link" href="#usage">Usage</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Verify your setup by running:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ kubectl cluster-info
-
-Kubernetes control plane is running at https://192.168.99.252:8443
-KubeDNS is running at https://192.168.99.252:8443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
-
-To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.</code></pre>
-</div>
+<p>Dive into details on <a href="usage.ahtml">how to use the XP operator</a>.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="teardown"><a class="link" href="#teardown">Teardown</a></h2>
+<h2 id="security"><a class="link" href="#security">Security</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Once you are done with your cluster, you can delete the machine and all the data by running:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ minikube delete
-
-* Deleting "minikube" in docker ...
-* Removed all traces of the "minikube" cluster.</code></pre>
-</div>
+<p>See the <a href="security.ahtml">security section</a> for details on how the operator restricts itself to managed namespaces.</p>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2026-03-27 11:07:14 UTC
+Last updated 2026-03-27 11:07:39 UTC
 </div>
 </div>
 </body>

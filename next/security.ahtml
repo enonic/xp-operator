@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.26">
-<title>Minikube</title>
+<title>Security</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -437,14 +437,13 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article toc2 toc-right">
 <div id="header">
-<h1>Minikube</h1>
+<h1>Security</h1>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
-<li><a href="#prerequisites">Prerequisites</a></li>
-<li><a href="#setup">Setup</a></li>
-<li><a href="#verify">Verify</a></li>
-<li><a href="#teardown">Teardown</a></li>
+<li><a href="#how_the_operator_manages_namespace_access">How the operator manages namespace access</a></li>
+<li><a href="#managed_namespaces">Managed namespaces</a></li>
+<li><a href="#validatingadmissionpolicies_kubernetes_1_30">ValidatingAdmissionPolicies (Kubernetes 1.30+)</a></li>
 </ul>
 </div>
 </div>
@@ -452,121 +451,95 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>This section briefly describes how to install and set up minikube for testing the operator.</p>
+<p>This section describes the security model of the XP Operator — how it limits its own access to only the resources it manages.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="prerequisites"><a class="link" href="#prerequisites">Prerequisites</a></h2>
+<h2 id="how_the_operator_manages_namespace_access"><a class="link" href="#how_the_operator_manages_namespace_access">How the operator manages namespace access</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>You need to have installed these programs on your computer:</p>
+<p>To manage XP deployments, the operator needs broad permissions inside a namespace — it creates and updates StatefulSets, Services, ConfigMaps, Secrets, Roles, RoleBindings, and more. Rather than granting a single massive ClusterRole that covers all namespaces cluster-wide, the operator uses a scoped approach:</p>
 </div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">Minikube</dt>
-<dd>
-<p>Is local Kubernetes, focusing on making it easy to learn and develop for Kubernetes. Download it <a href="https://minikube.sigs.k8s.io/docs/start/">here</a>.</p>
-</dd>
-<dt class="hdlist1">Docker</dt>
-<dd>
-<p>Is a container management platform. You can use other virtual machine or container managers with Minikube, but Docker is the most preferable Minikube <a href="https://minikube.sigs.k8s.io/docs/drivers/">driver</a> across all operating systems. Download it <a href="https://www.docker.com/products/docker-desktop/">here</a>.</p>
-</dd>
-<dt class="hdlist1">Kubectl</dt>
-<dd>
-<p>Is the Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">here</a>.</p>
-</dd>
-</dl>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>A pre-created <code>xp-operator-namespace-role</code> ClusterRole holds all the namespace-level permissions the operator needs.</p>
+</li>
+<li>
+<p>When an Xp7Deployment is created, the operator creates a <code>RoleBinding</code> in that namespace, binding <code>xp-operator-namespace-role</code> to its own ServiceAccount.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>This means the operator&#8217;s cluster-level ClusterRole only needs the ability to <em>bind</em> the pre-created role — not to hold all the permissions itself.</p>
+</div>
+<div class="paragraph">
+<p>The downside of this approach is that the operator technically has the ability to grant itself access to <em>any</em> namespace by creating a RoleBinding. On Kubernetes 1.30+, this is prevented at the API level by ValidatingAdmissionPolicies — the operator cannot create RoleBindings or modify resources in namespaces that are not labelled as managed.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="setup"><a class="link" href="#setup">Setup</a></h2>
+<h2 id="managed_namespaces"><a class="link" href="#managed_namespaces">Managed namespaces</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Once you have minikube working, it is quite easy to start a local cluster.</p>
+<p>A cluster admin controls which namespaces the operator is allowed to manage by labelling them with the managed label. The label key defaults to <code>enonic.managed</code> but can be overridden via the <code>managedLabelKey</code> value in the operator Helm chart.</p>
 </div>
-<div class="admonitionblock note">
-<table>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">kubectl label namespace &lt;your-namespace&gt; enonic.managed=true</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The operator checks for this label before acting on any namespace, and refuses to create deployments in unlabelled namespaces.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="validatingadmissionpolicies_kubernetes_1_30"><a class="link" href="#validatingadmissionpolicies_kubernetes_1_30">ValidatingAdmissionPolicies (Kubernetes 1.30+)</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>On Kubernetes 1.30+, the Helm chart installs <code>ValidatingAdmissionPolicy</code> resources that enforce the managed namespace boundary at the Kubernetes API level — making it impossible for the operator to act outside its intended scope, even if a bug or misconfiguration would otherwise allow it.</p>
+</div>
+<div class="paragraph">
+<p>The policies apply exclusively to requests made by the operator&#8217;s own ServiceAccount:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 75%;">
+</colgroup>
+<thead>
 <tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-The amount of resources you allocate to minikube will depend on your computer&#8217;s capacity and the workload you intend to run on the cluster.
-</td>
+<th class="tableblock halign-left valign-top">Policy</th>
+<th class="tableblock halign-left valign-top">What it prevents</th>
 </tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>xp-operator-rolebinding-managed-ns</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Creating RoleBindings in namespaces not labelled as managed</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>xp-operator-namespace-managed</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Modifying or deleting namespaces not labelled as managed</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>xp-operator-clusterrolebinding-allowlist</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Creating ClusterRoleBindings referencing any ClusterRole other than <code>xp-operator-hazelcast</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>xp-operator-role-managed-ns</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Creating Roles in namespaces not labelled as managed</p></td>
+</tr>
+</tbody>
 </table>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ minikube start \
-	--cpus=4 \
-	--memory=16gb \
-	--disk-size=10gb \
-    --vm-driver=docker \
-	--kubernetes-version=v1.27.0
-
-* Preparing Kubernetes v1.27.0 on Docker 27.2.0 ...
-  - Generating certificates and keys ...
-  - Booting up control plane ...
-  - Configuring RBAC rules ...
-* Verifying Kubernetes components...
-* Enabled addons: storage-provisioner, default-storageclass
-* Done! kubectl is now configured to use "minikube" cluster and "default" namespace by default</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>When your cluster is up, it is good to add the ingress controller to it to test load balancing:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ minikube addons enable ingress
-
-* Verifying ingress addon...
-* The 'ingress' addon is enabled</code></pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="verify"><a class="link" href="#verify">Verify</a></h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Verify your setup by running:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ kubectl cluster-info
-
-Kubernetes control plane is running at https://192.168.99.252:8443
-KubeDNS is running at https://192.168.99.252:8443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
-
-To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.</code></pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="teardown"><a class="link" href="#teardown">Teardown</a></h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Once you are done with your cluster, you can delete the machine and all the data by running:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ minikube delete
-
-* Deleting "minikube" in docker ...
-* Removed all traces of the "minikube" cluster.</code></pre>
-</div>
-</div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2026-03-27 11:07:14 UTC
+Last updated 2026-03-27 11:07:39 UTC
 </div>
 </div>
 </body>

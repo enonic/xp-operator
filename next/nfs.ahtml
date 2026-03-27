@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.26">
-<title>Minikube</title>
+<title>NFS storage class</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -437,14 +437,23 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article toc2 toc-right">
 <div id="header">
-<h1>Minikube</h1>
+<h1>NFS storage class</h1>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
 <li><a href="#prerequisites">Prerequisites</a></li>
-<li><a href="#setup">Setup</a></li>
-<li><a href="#verify">Verify</a></li>
-<li><a href="#teardown">Teardown</a></li>
+<li><a href="#alternative_a_create_nfs_server_in_your_k8s_cluster">Alternative A. Create NFS server in your K8s cluster</a>
+<ul class="sectlevel2">
+<li><a href="#add_helm_repository">Add helm repository</a></li>
+<li><a href="#install_server_provisioner">Install server provisioner</a></li>
+</ul>
+</li>
+<li><a href="#alternative_b_using_an_existing_nfs_server">Alternative B. Using an existing NFS server</a>
+<ul class="sectlevel2">
+<li><a href="#add_helm_repository_2">Add helm repository</a></li>
+<li><a href="#install_client_provisioner">Install client provisioner</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -452,39 +461,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>This section briefly describes how to install and set up minikube for testing the operator.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="prerequisites"><a class="link" href="#prerequisites">Prerequisites</a></h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>You need to have installed these programs on your computer:</p>
-</div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">Minikube</dt>
-<dd>
-<p>Is local Kubernetes, focusing on making it easy to learn and develop for Kubernetes. Download it <a href="https://minikube.sigs.k8s.io/docs/start/">here</a>.</p>
-</dd>
-<dt class="hdlist1">Docker</dt>
-<dd>
-<p>Is a container management platform. You can use other virtual machine or container managers with Minikube, but Docker is the most preferable Minikube <a href="https://minikube.sigs.k8s.io/docs/drivers/">driver</a> across all operating systems. Download it <a href="https://www.docker.com/products/docker-desktop/">here</a>.</p>
-</dd>
-<dt class="hdlist1">Kubectl</dt>
-<dd>
-<p>Is the Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">here</a>.</p>
-</dd>
-</dl>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="setup"><a class="link" href="#setup">Setup</a></h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Once you have minikube working, it is quite easy to start a local cluster.</p>
+<p>In this section we show how you can set up a <code>ReadWriteMany</code> storage class using NFS.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -493,72 +470,158 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-The amount of resources you allocate to minikube will depend on your computer&#8217;s capacity and the workload you intend to run on the cluster.
+GKE (Google) Autopilot clusters do not support running NFS. The NFS server provisioner requires two capabilities <code>DAC_READ_SEARCH</code> and <code>SYS_RESOURCE</code>, which are disabled by Autopilot.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="prerequisites"><a class="link" href="#prerequisites">Prerequisites</a></h2>
+<div class="sectionbody">
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Kubernetes</dt>
+<dd>
+<p>A running Kubernetes cluster.</p>
+</dd>
+<dt class="hdlist1">Kubectl</dt>
+<dd>
+<p>Is the Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters.</p>
+</dd>
+<dt class="hdlist1">Helm</dt>
+<dd>
+<p>Is a package manager for Kubernetes.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="alternative_a_create_nfs_server_in_your_k8s_cluster"><a class="link" href="#alternative_a_create_nfs_server_in_your_k8s_cluster">Alternative A. Create NFS server in your K8s cluster</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="add_helm_repository"><a class="link" href="#add_helm_repository">Add helm repository</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ helm repo add nfs-server-and-external-provisioner https://kubernetes-sigs.github.io/nfs-ganesha-server-and-external-provisioner/
+
+"nfs-server-and-external-provisioner" has been added to your repositories</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ helm repo update
+
+Hang tight while we grab the latest from your chart repositories...
+...Successfully got an update from the "nfs-server-and-external-provisioner" chart repository
+Update Complete. ⎈Happy Helming!⎈</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="install_server_provisioner"><a class="link" href="#install_server_provisioner">Install server provisioner</a></h3>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+You might want to update <code>persistence.size</code> for more capacity.
 </td>
 </tr>
 </table>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ minikube start \
-	--cpus=4 \
-	--memory=16gb \
-	--disk-size=10gb \
-    --vm-driver=docker \
-	--kubernetes-version=v1.27.0
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ helm upgrade --install \
+    --namespace kube-system \
+    --set persistence.enabled=true \
+    --set persistence.size=10Gi \
+    --set storageClass.name=nfs \
+    --set storageClass.allowVolumeExpansion=true \
+    --version 1.8.0 \
+    nfs-server-and-external-provisioner \
+    nfs-server-and-external-provisioner/nfs-server-provisioner
 
-* Preparing Kubernetes v1.27.0 on Docker 27.2.0 ...
-  - Generating certificates and keys ...
-  - Booting up control plane ...
-  - Configuring RBAC rules ...
-* Verifying Kubernetes components...
-* Enabled addons: storage-provisioner, default-storageclass
-* Done! kubectl is now configured to use "minikube" cluster and "default" namespace by default</code></pre>
+Release "nfs-server" does not exist. Installing it now.
+WARNING: This chart is deprecated
+NAME: nfs-server
+LAST DEPLOYED: Thu Feb 18 16:41:20 2021
+NAMESPACE: kube-system
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+The NFS Provisioner service has now been installed.</code></pre>
 </div>
-</div>
-<div class="paragraph">
-<p>When your cluster is up, it is good to add the ingress controller to it to test load balancing:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ minikube addons enable ingress
-
-* Verifying ingress addon...
-* The 'ingress' addon is enabled</code></pre>
 </div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="verify"><a class="link" href="#verify">Verify</a></h2>
+<h2 id="alternative_b_using_an_existing_nfs_server"><a class="link" href="#alternative_b_using_an_existing_nfs_server">Alternative B. Using an existing NFS server</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Verify your setup by running:</p>
+<p>If you already have an NFS server, we can create a client that uses that. Read more about this provisioner on <a href="https://github.com/kubernetes-sigs/nfs-subdir-external-provisioner">github</a>.</p>
+</div>
+<div class="sect2">
+<h3 id="add_helm_repository_2"><a class="link" href="#add_helm_repository_2">Add helm repository</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ helm repo add nfs-external-provisioner https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
+
+
+"nfs-external-provisioner" has been added to your repositories</code></pre>
+</div>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ kubectl cluster-info
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ helm repo update
 
-Kubernetes control plane is running at https://192.168.99.252:8443
-KubeDNS is running at https://192.168.99.252:8443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
-
-To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.</code></pre>
+Hang tight while we grab the latest from your chart repositories...
+...Successfully got an update from the "nfs-external-provisioner" chart repository
+Update Complete. ⎈Happy Helming!⎈</code></pre>
 </div>
 </div>
 </div>
-</div>
-<div class="sect1">
-<h2 id="teardown"><a class="link" href="#teardown">Teardown</a></h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Once you are done with your cluster, you can delete the machine and all the data by running:</p>
+<div class="sect2">
+<h3 id="install_client_provisioner"><a class="link" href="#install_client_provisioner">Install client provisioner</a></h3>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Change <code>nfs.server</code> and <code>nfs.path</code> to reflect your setup.
+</td>
+</tr>
+</table>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ minikube delete
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ helm upgrade --install \
+    --namespace kube-system \
+    --set nfs.server=?.?.?.? \
+    --set nfs.path=/some/exported/path \
+    --set storageClass.name=nfs \
+    --set storageClass.archiveOnDelete=false \
+    --set storageClass.allowVolumeExpansion=true \
+    --version 4.0.18 \
+    nfs-client \
+    nfs-external-provisioner/nfs-subdir-external-provisioner
 
-* Deleting "minikube" in docker ...
-* Removed all traces of the "minikube" cluster.</code></pre>
+Release "nfs-client" does not exist. Installing it now.
+NAME: nfs-client
+LAST DEPLOYED: Thu Feb 18 16:37:40 2021
+NAMESPACE: kube-system
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None</code></pre>
+</div>
 </div>
 </div>
 </div>
@@ -566,7 +629,7 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2026-03-27 11:07:14 UTC
+Last updated 2026-03-27 11:07:39 UTC
 </div>
 </div>
 </body>

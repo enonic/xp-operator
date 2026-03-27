@@ -1,0 +1,40 @@
+{
+    "menuItems": [
+      {
+        "title": "Installation",
+        "document": "installation"
+      },
+      {
+        "title": "Usage",
+        "document": "usage"
+      },
+      {
+        "title": "Storage classes",
+        "document" : "storage"
+      },
+      {
+        "title": "NFS server",
+        "document" : "nfs"
+      },  
+      {
+        "title": "AWS",
+        "document": "aws"
+      },
+      {
+        "title": "Google Cloud",
+        "document": "google"
+      },
+      {
+        "title": "Azure",
+        "document": "azure"
+      },
+      {
+        "title": "Minikube",
+        "document": "minikube"
+      },
+      {
+        "title": "Security",
+        "document": "security"
+      }
+    ]
+}

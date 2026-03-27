@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.26">
-<title>Minikube</title>
+<title>K8s storage classes</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -437,14 +437,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article toc2 toc-right">
 <div id="header">
-<h1>Minikube</h1>
+<h1>K8s storage classes</h1>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
-<li><a href="#prerequisites">Prerequisites</a></li>
-<li><a href="#setup">Setup</a></li>
-<li><a href="#verify">Verify</a></li>
-<li><a href="#teardown">Teardown</a></li>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#access_modes">Access modes</a></li>
+<li><a href="#compatibility_list">Compatibility list</a></li>
+<li><a href="#custom_nfs_provider">Custom NFS provider</a></li>
 </ul>
 </div>
 </div>
@@ -452,39 +452,35 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>This section briefly describes how to install and set up minikube for testing the operator.</p>
+<p>This section discusses the various storage classes and requirements for the XP operator.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="prerequisites"><a class="link" href="#prerequisites">Prerequisites</a></h2>
+<h2 id="introduction"><a class="link" href="#introduction">Introduction</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>You need to have installed these programs on your computer:</p>
+<p>Storage classes act as an abstraction layer for Kubernetes to access different underlying storage solutions. A cloud provider will typically offer a range of different storage types. You may define your own storage class, and map it to the desired infrastructure.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="access_modes"><a class="link" href="#access_modes">Access modes</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Each storage class can create volumes with a specific access mode:</p>
 </div>
 <div class="dlist">
 <dl>
-<dt class="hdlist1">Minikube</dt>
+<dt class="hdlist1">ReadWriteOnce (RWO)</dt>
 <dd>
-<p>Is local Kubernetes, focusing on making it easy to learn and develop for Kubernetes. Download it <a href="https://minikube.sigs.k8s.io/docs/start/">here</a>.</p>
+<p>The slightly confusing name means it can be mounted in read and write mode from only one node (VM) at a time. Multiple pods on the same node can use at the same time.</p>
 </dd>
-<dt class="hdlist1">Docker</dt>
+<dt class="hdlist1">ReadWriteMany (RWM)</dt>
 <dd>
-<p>Is a container management platform. You can use other virtual machine or container managers with Minikube, but Docker is the most preferable Minikube <a href="https://minikube.sigs.k8s.io/docs/drivers/">driver</a> across all operating systems. Download it <a href="https://www.docker.com/products/docker-desktop/">here</a>.</p>
-</dd>
-<dt class="hdlist1">Kubectl</dt>
-<dd>
-<p>Is the Kubernetes command-line tool, kubectl, allows you to run commands against Kubernetes clusters. Download it <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">here</a>.</p>
+<p>Can be mounted in read and write mode by many nodes.</p>
 </dd>
 </dl>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="setup"><a class="link" href="#setup">Setup</a></h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Once you have minikube working, it is quite easy to start a local cluster.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -493,80 +489,109 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-The amount of resources you allocate to minikube will depend on your computer&#8217;s capacity and the workload you intend to run on the cluster.
+There are also <code>ReadOnlyMany</code> and <code>ReadWriteOncePod</code> storage classes, but these are generally not relevant for the XP operator
 </td>
 </tr>
 </table>
 </div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ minikube start \
-	--cpus=4 \
-	--memory=16gb \
-	--disk-size=10gb \
-    --vm-driver=docker \
-	--kubernetes-version=v1.27.0
-
-* Preparing Kubernetes v1.27.0 on Docker 27.2.0 ...
-  - Generating certificates and keys ...
-  - Booting up control plane ...
-  - Configuring RBAC rules ...
-* Verifying Kubernetes components...
-* Enabled addons: storage-provisioner, default-storageclass
-* Done! kubectl is now configured to use "minikube" cluster and "default" namespace by default</code></pre>
-</div>
+<div class="paragraph">
+<p><code>ReadWriteOnce</code> is supported by the default storage classes available in any k8s cluster. This satisfies the requirement of XP deployment in single mode.</p>
 </div>
 <div class="paragraph">
-<p>When your cluster is up, it is good to add the ingress controller to it to test load balancing:</p>
+<p>An NFS-based <code>ReadWriteMany</code> storage class is required to deploy XP in clustered mode. Refer to the table below to see which storage class you can use on the major cloud service providers.</p>
 </div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ minikube addons enable ingress
-
-* Verifying ingress addon...
-* The 'ingress' addon is enabled</code></pre>
-</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+Some <code>ReadWriteMany</code> storage classes have restrictions to changing the modified time of files - XP requires this capability.
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="verify"><a class="link" href="#verify">Verify</a></h2>
+<h2 id="compatibility_list"><a class="link" href="#compatibility_list">Compatibility list</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Verify your setup by running:</p>
+<p>Below is a list of standard storage classes that are available out-of-the-box from popular cloud providers.</p>
 </div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ kubectl cluster-info
-
-Kubernetes control plane is running at https://192.168.99.252:8443
-KubeDNS is running at https://192.168.99.252:8443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
-
-To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.</code></pre>
+<table class="tableblock frame-ends grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Provider</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">XP single mode</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">XP cluster mode</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Azure</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Any storage class with RWO</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">azurefile-csi and azurefile-csi-premium in NFS mode, provided by <a href="https://learn.microsoft.com/en-us/azure/aks/azure-files-csi">Azure file CSI driver</a></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">AWS</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Any storage class with RWO</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">EFS</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Google Cloud</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Any storage class with RWO</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/filestore-csi-driver">Filestore CSI driver</a></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Minikube</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Any storage class</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Any storage class</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+We strongly recommend using SSD backed storage for your RWO storage class. Other alternatives will slow down your XP instances significantly.
+</td>
+</tr>
+</table>
 </div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+The managed RWM storage classes provided by Azure and Google have minimum disk size requirements which can be very high depending on your actual requirements. Please refer to each respective cloud provider&#8217;s site for more information.
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="teardown"><a class="link" href="#teardown">Teardown</a></h2>
+<h2 id="custom_nfs_provider"><a class="link" href="#custom_nfs_provider">Custom NFS provider</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Once you are done with your cluster, you can delete the machine and all the data by running:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ minikube delete
-
-* Deleting "minikube" in docker ...
-* Removed all traces of the "minikube" cluster.</code></pre>
-</div>
+<p>An alternative to using your cloud provider&#8217;s managed RWM service, is <a href="nfs.ahtml">deploying your own NFS storage</a>.</p>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2026-03-27 11:07:14 UTC
+Last updated 2026-03-27 11:07:39 UTC
 </div>
 </div>
 </body>

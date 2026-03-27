@@ -505,9 +505,9 @@ The amount of resources you allocate to minikube will depend on your computer&#8
 	--memory=16gb \
 	--disk-size=10gb \
     --vm-driver=docker \
-	--kubernetes-version=v1.27.0
+	--kubernetes-version=v1.30.0
 
-* Preparing Kubernetes v1.27.0 on Docker 27.2.0 ...
+* Preparing Kubernetes v1.30.0 on Docker 27.2.0 ...
   - Generating certificates and keys ...
   - Booting up control plane ...
   - Configuring RBAC rules ...
@@ -566,7 +566,7 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2026-03-27 11:07:14 UTC
+Last updated 2026-03-27 11:07:39 UTC
 </div>
 </div>
 </body>
