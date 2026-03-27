@@ -17,7 +17,7 @@ metadata:
   namespace: my-namespace
 spec:
   enabled: true
-  xpVersion: 7.14.4
+  xpVersion: 7.16.2
 
   # Create one node
   nodeGroups:
@@ -56,7 +56,6 @@ spec:
             size: 1Gi
           - name: work # Node cache
             size: 1Gi
----
 # Install content studio
 #apiVersion: enonic.cloud/v1
 #kind: Xp7App

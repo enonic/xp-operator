@@ -17,7 +17,7 @@ metadata:
   namespace: my-namespace
 spec:
   enabled: true
-  xpVersion: 7.14.4
+  xpVersion: 7.16.2
 
   # Create volumes shared by all nodes in this deployment
   nodesSharedDisks:

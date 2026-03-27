@@ -1,0 +1,49 @@
+= Security
+:toc: right
+
+This section describes the security model of the XP Operator — how it limits its own access to only the resources it manages.
+
+== How the operator manages namespace access
+
+To manage XP deployments, the operator needs broad permissions inside a namespace — it creates and updates StatefulSets, Services, ConfigMaps, Secrets, Roles, RoleBindings, and more. Rather than granting a single massive ClusterRole that covers all namespaces cluster-wide, the operator uses a scoped approach:
+
+. A pre-created `xp-operator-namespace-role` ClusterRole holds all the namespace-level permissions the operator needs.
+. When an Xp7Deployment is created, the operator creates a `RoleBinding` in that namespace, binding `xp-operator-namespace-role` to its own ServiceAccount.
+
+This means the operator's cluster-level ClusterRole only needs the ability to _bind_ the pre-created role — not to hold all the permissions itself.
+
+The downside of this approach is that the operator technically has the ability to grant itself access to _any_ namespace by creating a RoleBinding. On Kubernetes 1.30+, this is prevented at the API level by ValidatingAdmissionPolicies — the operator cannot create RoleBindings or modify resources in namespaces that are not labelled as managed.
+
+== Managed namespaces
+
+A cluster admin controls which namespaces the operator is allowed to manage by labelling them with the managed label. The label key defaults to `enonic.managed` but can be overridden via the `managedLabelKey` value in the operator Helm chart.
+
+[source,bash]
+----
+kubectl label namespace <your-namespace> enonic.managed=true
+----
+
+The operator checks for this label before acting on any namespace, and refuses to create deployments in unlabelled namespaces.
+
+== ValidatingAdmissionPolicies (Kubernetes 1.30+)
+
+On Kubernetes 1.30+, the Helm chart installs `ValidatingAdmissionPolicy` resources that enforce the managed namespace boundary at the Kubernetes API level — making it impossible for the operator to act outside its intended scope, even if a bug or misconfiguration would otherwise allow it.
+
+The policies apply exclusively to requests made by the operator's own ServiceAccount:
+
+[cols="1,3"]
+|===
+|Policy |What it prevents
+
+|`xp-operator-rolebinding-managed-ns`
+|Creating RoleBindings in namespaces not labelled as managed
+
+|`xp-operator-namespace-managed`
+|Modifying or deleting namespaces not labelled as managed
+
+|`xp-operator-clusterrolebinding-allowlist`
+|Creating ClusterRoleBindings referencing any ClusterRole other than `xp-operator-hazelcast`
+
+|`xp-operator-role-managed-ns`
+|Creating Roles in namespaces not labelled as managed
+|===
