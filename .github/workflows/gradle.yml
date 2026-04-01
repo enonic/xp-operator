@@ -83,7 +83,7 @@ jobs:
           strip_v: true
 
       - name: Setup QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@v4
         with:
           image: tonistiigi/binfmt:qemu-v6.1.0-20
           platforms: all
