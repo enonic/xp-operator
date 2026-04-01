@@ -8,7 +8,7 @@ This section covers the installation and testing of the Enonic XP Kubernetes Ope
 
 Before you can install the operator, you must have a running k8s cluster + Kubectl and Helm installed on your local machine. See details below.
 
-NOTE: We recommend using the latest version of Kubernetes. The minimal version of Kubernetes required by XP Operator is 1.27+.
+NOTE: We recommend using the latest version of Kubernetes. The minimal version of Kubernetes required by XP Operator is 1.30+.
 
 Kubernetes:: The k8s cluster can be hosted by any cloud service provider, or even run on premises. The only thing that differs is which storage classes you can use.
 +
@@ -146,6 +146,19 @@ The example below will create a namespace, a single-node XP7 server, pre-install
 
 WARNING: Remember to use a unique namespace per XP deployment. Never use the same namespace as the operator.
 
+=== Prepare namespace
+
+Before creating an Xp7Deployment, the target namespace must have the managed label set to `"true"`. The label key defaults to `enonic.managed` but can be overridden via the `managedLabelKey` value in the operator Helm chart.
+
+A cluster admin must label the namespace manually:
+
+[source,bash]
+----
+kubectl label namespace <your-namespace> enonic.managed=true
+----
+
+Alternatively, include the label when creating the namespace via YAML.
+
 === Create xp7deployment
 
 . Place this yaml file in a suitable location on your computer:
@@ -223,6 +236,8 @@ kubectl delete -f simple.yaml
 
 WARNING: Volumes are typically not deleted when you remove the deployment, so take care to remove them afterward.
 
+
+TIP: For details on the operator's security model and how it restricts itself to managed namespaces, see the <<security#, Security>> section.
 
 == Uninstalling the operator
 

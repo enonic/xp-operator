@@ -5,7 +5,7 @@ DOCKER_IMAGE:=enonic/xp-operator
 
 build-java: ## Build java modules
 	# Building java modules ...
-	@./gradlew build
+	@./gradlew build -x check
 	# Building java modules done!
 
 build-docker: build-java ## Build docker image

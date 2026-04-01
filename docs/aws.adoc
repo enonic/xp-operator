@@ -29,7 +29,7 @@ Visit the AWS EKS docs for more details: https://docs.aws.amazon.com/eks/latest/
 NOTE: The XP operator currently does not support "AWS Fargate" (due to limitations on open file handlers). Use managed instances instead.
 
 Instance type:: A recommended instance type is m5.xlarge (or bigger).
-Kubernetes version:: Should be >= 1.27.9
+Kubernetes version:: Should be >= 1.30
 
 Follow the steps below to get a basic EKS cluster up and running:
 

@@ -166,3 +166,7 @@ volumes:
     work: "/enonic-xp/home/work"
 waitForDnsDiscovery:
   image: "busybox"
+
+operator:
+  hazelcastClusterRoleName: "xp-operator-hazelcast"
+  name: "xp-operator"

@@ -1,4 +1,4 @@
-K8S_VERSION:=v1.29.0
+K8S_VERSION:=v1.31.0
 KIND_MTU:=$(shell docker network inspect bridge -f '{{ index .Options "com.docker.network.driver.mtu" }}')
 KIND_CTX:=kind-kind
 

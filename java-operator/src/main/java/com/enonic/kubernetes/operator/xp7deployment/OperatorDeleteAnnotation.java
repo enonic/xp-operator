@@ -58,7 +58,19 @@ public class OperatorDeleteAnnotation
         String namespace = oldResource.getMetadata().getNamespace();
         String name = oldResource.getMetadata().getName();
 
+        deleteHazelcastClusterRoleBinding( namespace );
         deleteNamespaces( namespace, name );
+    }
+
+    private void deleteHazelcastClusterRoleBinding( final String deploymentNamespace )
+    {
+        // Kubernetes GC does not clean up cluster-scoped resources owned by namespace-scoped objects,
+        // so explicitly delete the hazelcast ClusterRoleBinding on deployment removal.
+        String crbName = deploymentNamespace + "-hazelcast";
+        var resource = clients.k8s().rbac().clusterRoleBindings().withName( crbName );
+        if (resource.get() != null) {
+            K8sLogHelper.logDelete( resource );
+        }
     }
 
     private void deleteNamespaces( final String deploymentNamespace, final String name )
