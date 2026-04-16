@@ -444,6 +444,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#introduction">Introduction</a></li>
 <li><a href="#installation">Installation</a></li>
 <li><a href="#usage">Usage</a></li>
+<li><a href="#security">Security</a></li>
 </ul>
 </div>
 </div>
@@ -511,10 +512,18 @@ If you need to set up a local test environment, have a look at our <a href="mini
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="security"><a class="link" href="#security">Security</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>See the <a href="security.ahtml">security section</a> for details on how the operator restricts itself to managed namespaces.</p>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2026-03-27 11:22:05 UTC
+Last updated 2026-04-16 10:34:13 UTC
 </div>
 </div>
 </body>

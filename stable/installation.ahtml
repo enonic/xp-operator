@@ -447,6 +447,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#verify_installation">Verify installation</a></li>
 <li><a href="#test_the_operator">Test the operator</a>
 <ul class="sectlevel2">
+<li><a href="#prepare_namespace">Prepare namespace</a></li>
 <li><a href="#create_xp7deployment">Create xp7deployment</a></li>
 <li><a href="#access_xp_admin">Access XP Admin</a></li>
 <li><a href="#remove_deployment">Remove deployment</a></li>
@@ -477,7 +478,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-We recommend using the latest version of Kubernetes. The minimal version of Kubernetes required by XP Operator is 1.27+.
+We recommend using the latest version of Kubernetes. The minimal version of Kubernetes required by XP Operator is 1.30+.
 </td>
 </tr>
 </table>
@@ -690,6 +691,23 @@ Remember to use a unique namespace per XP deployment. Never use the same namespa
 </table>
 </div>
 <div class="sect2">
+<h3 id="prepare_namespace"><a class="link" href="#prepare_namespace">Prepare namespace</a></h3>
+<div class="paragraph">
+<p>Before creating an Xp7Deployment, the target namespace must have the managed label set to <code>"true"</code>. The label key defaults to <code>enonic.managed</code> but can be overridden via the <code>managedLabelKey</code> value in the operator Helm chart.</p>
+</div>
+<div class="paragraph">
+<p>A cluster admin must label the namespace manually:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">kubectl label namespace &lt;your-namespace&gt; enonic.managed=true</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Alternatively, include the label when creating the namespace via YAML.</p>
+</div>
+</div>
+<div class="sect2">
 <h3 id="create_xp7deployment"><a class="link" href="#create_xp7deployment">Create xp7deployment</a></h3>
 <div class="olist arabic">
 <ol class="arabic">
@@ -715,6 +733,8 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: my-namespace
+  labels:
+    enonic.managed: "true"
   annotations:
     # Delete this namespace if the deployment is deleted
     enonic.cloud/remove.with.xp7deployment: my-deployment
@@ -727,7 +747,7 @@ metadata:
   namespace: my-namespace
 spec:
   enabled: true
-  xpVersion: 7.14.4
+  xpVersion: 7.16.2
 
   # Create one node
   nodeGroups:
@@ -766,16 +786,6 @@ spec:
             size: 1Gi
           - name: work # Node cache
             size: 1Gi
----
-# Install content studio
-apiVersion: enonic.cloud/v1
-kind: Xp7App
-metadata:
-  name: contentstudio
-  namespace: my-namespace
-spec:
-  url: https://repo.enonic.com/public/com/enonic/app/contentstudio/5.2.3/contentstudio-5.2.3.jar
-  sha512: 70499d8612a4c0b4f12dc7c5dfe171b4ad331cf8df48af94de1a92b8fc8ab935916bb798f646cb7a358b5a0e1b2d9a2c1509671566d76dcea3d03f7142d4ba83
 ---
 # Add your own custom config
 apiVersion: enonic.cloud/v1
@@ -924,6 +934,18 @@ Volumes are typically not deleted when you remove the deployment, so take care t
 </tr>
 </table>
 </div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+For details on the operator&#8217;s security model and how it restricts itself to managed namespaces, see the <a href="security.ahtml">Security</a> section.
+</td>
+</tr>
+</table>
+</div>
 </div>
 </div>
 </div>
@@ -955,7 +977,7 @@ Don´t uninstall the xp-operator while there are remaining xp7Deployments on you
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2026-03-27 11:22:05 UTC
+Last updated 2026-04-16 10:34:13 UTC
 </div>
 </div>
 </body>

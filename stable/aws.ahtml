@@ -523,7 +523,7 @@ The XP operator currently does not support "AWS Fargate" (due to limitations on 
 </dd>
 <dt class="hdlist1">Kubernetes version</dt>
 <dd>
-<p>Should be &gt;= 1.27.9</p>
+<p>Should be &gt;= 1.30</p>
 </dd>
 </dl>
 </div>
@@ -720,7 +720,7 @@ gp2    kubernetes.io/aws-ebs   Delete          WaitForFirstConsumer   false     
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2026-03-27 11:22:05 UTC
+Last updated 2026-04-16 10:34:13 UTC
 </div>
 </div>
 </body>
