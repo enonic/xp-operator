@@ -31,6 +31,10 @@
       {
         "title": "Minikube",
         "document": "minikube"
+      },
+      {
+        "title": "Security",
+        "document": "security"
       }
     ]
 }

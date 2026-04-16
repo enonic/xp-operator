@@ -1,4 +1,4 @@
-K8S_VERSION:=v1.29.0
+K8S_VERSION:=v1.31.0
 KIND_MTU:=$(shell docker network inspect bridge -f '{{ index .Options "com.docker.network.driver.mtu" }}')
 KIND_CTX:=kind-kind
 
@@ -38,7 +38,7 @@ kind-dev: ## Setup cluster for development mode (env var MY_IP required)
 	@[ ! -z "${MY_IP}" ] || (echo "Set MY_IP variable to you host IP" && exit 1)
 
 	# Apply CRDs
-	@ls --color=none ../../helm/crds/* | xargs -I {} kubectl apply -f {}
+	@ls --color=none ../../helm/src/main/crds/* | xargs -I {} kubectl apply -f {}
 
 	# Apply K8s services
 	@cat operator-service.yaml | sed s%#IP#%${MY_IP}%g | kubectl apply -f -

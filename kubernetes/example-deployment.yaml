@@ -10,7 +10,7 @@ metadata:
     service: myservice
 spec:
   enabled: true
-  xpVersion: 7.14.4
+  xpVersion: 7.16.2
 
   nodesSharedDisks:
     - name: blobstore

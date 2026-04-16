@@ -269,26 +269,6 @@ spec:
   storageClassName: "standard"
 ---
 apiVersion: "rbac.authorization.k8s.io/v1"
-kind: "ClusterRole"
-metadata:
-  annotations:
-    enonic.applyPriority: "30"
-  name: "mycloud-mysolution-myenv-myservice-hazelcast"
-  ownerReferences:
-    - apiVersion: "enonic.cloud/v1"
-      kind: "Xp7Deployment"
-      blockOwnerDeletion: false
-      controller: true
-      name: "mycloud-mysolution-myenv-myservice"
-rules:
-  - apiGroups:
-      - "*"
-    resources:
-      - "nodes"
-    verbs:
-      - "get"
----
-apiVersion: "rbac.authorization.k8s.io/v1"
 kind: "ClusterRoleBinding"
 metadata:
   annotations:
@@ -303,7 +283,7 @@ metadata:
 roleRef:
   kind: "ClusterRole"
   apiGroup: "rbac.authorization.k8s.io"
-  name: "mycloud-mysolution-myenv-myservice-hazelcast"
+  name: "xp-operator-hazelcast"
 subjects:
   - kind: "ServiceAccount"
     name: "xp-node-sa"

@@ -83,7 +83,7 @@ In the Azure Portal, search for Quotas in the top search bar, go to the Quotas p
 
 .. *Kubernetes version*
 +
-Make sure to chose kubernetes version >= 1.27 which is required by the XP operator.
+Make sure to chose kubernetes version >= 1.30 which is required by the XP operator.
 +
 
 

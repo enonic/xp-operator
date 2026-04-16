@@ -1,0 +1,133 @@
+{{- if not .Values.onlyDeployCrds }}
+{{- /* ValidatingAdmissionPolicy/v1 is GA since k8s 1.30 */}}
+{{- if ge (.Capabilities.KubeVersion.Minor | int) 30 }}
+---
+# VAP #1 — RoleBinding mutations only allowed in managed namespaces, scoped to operator SA
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+
+  name: {{ .Release.Name }}-rolebinding-managed-ns
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+      - apiGroups: ["rbac.authorization.k8s.io"]
+        apiVersions: ["v1"]
+        operations: ["CREATE", "UPDATE", "DELETE"]
+        resources: ["rolebindings"]
+  matchConditions:
+    - name: operator-sa-only
+      expression: >
+        request.userInfo.username == 'system:serviceaccount:{{ .Release.Namespace }}:{{ .Release.Name }}'
+  validations:
+    - expression: >
+        '{{ .Values.managedLabelKey }}' in namespaceObject.metadata.labels &&
+        namespaceObject.metadata.labels['{{ .Values.managedLabelKey }}'] == 'true'
+      message: "RoleBindings may only be created/deleted in namespaces labelled {{ .Values.managedLabelKey }}=true"
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: {{ .Release.Name }}-rolebinding-managed-ns
+spec:
+  policyName: {{ .Release.Name }}-rolebinding-managed-ns
+  validationActions: ["Deny"]
+  matchResources: {}
+---
+# VAP #2 — Namespace mutations (UPDATE/DELETE) only allowed on managed namespaces, scoped to operator SA
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: {{ .Release.Name }}-namespace-managed
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["UPDATE", "DELETE"]
+        resources: ["namespaces"]
+  matchConditions:
+    - name: operator-sa-only
+      expression: >
+        request.userInfo.username == 'system:serviceaccount:{{ .Release.Namespace }}:{{ .Release.Name }}'
+  validations:
+    - expression: >
+        '{{ .Values.managedLabelKey }}' in oldObject.metadata.labels &&
+        oldObject.metadata.labels['{{ .Values.managedLabelKey }}'] == 'true'
+      message: "The operator may only modify or delete namespaces it manages ({{ .Values.managedLabelKey }}=true). Label the namespace manually first."
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: {{ .Release.Name }}-namespace-managed
+spec:
+  policyName: {{ .Release.Name }}-namespace-managed
+  validationActions: ["Deny"]
+  matchResources: {}
+---
+# VAP #3 — ClusterRoleBinding mutations only for known roles, scoped to operator SA
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: {{ .Release.Name }}-clusterrolebinding-allowlist
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+      - apiGroups: ["rbac.authorization.k8s.io"]
+        apiVersions: ["v1"]
+        operations: ["CREATE", "UPDATE", "DELETE"]
+        resources: ["clusterrolebindings"]
+  matchConditions:
+    - name: operator-sa-only
+      expression: >
+        request.userInfo.username == 'system:serviceaccount:{{ .Release.Namespace }}:{{ .Release.Name }}'
+  validations:
+    - expression: >
+        (request.operation == 'DELETE' ? oldObject : object).roleRef.name == '{{ .Release.Name }}-hazelcast'
+      message: "The operator may only create/delete ClusterRoleBindings referencing {{ .Release.Name }}-hazelcast"
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: {{ .Release.Name }}-clusterrolebinding-allowlist
+spec:
+  policyName: {{ .Release.Name }}-clusterrolebinding-allowlist
+  validationActions: ["Deny"]
+  matchResources: {}
+---
+# VAP #4 — Role mutations only allowed in managed namespaces, scoped to operator SA, name-restricted
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: {{ .Release.Name }}-role-managed-ns
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+      - apiGroups: ["rbac.authorization.k8s.io"]
+        apiVersions: ["v1"]
+        operations: ["CREATE", "UPDATE", "DELETE"]
+        resources: ["roles"]
+  matchConditions:
+    - name: operator-sa-only
+      expression: >
+        request.userInfo.username == 'system:serviceaccount:{{ .Release.Namespace }}:{{ .Release.Name }}'
+  validations:
+    - expression: >
+        '{{ .Values.managedLabelKey }}' in namespaceObject.metadata.labels &&
+        namespaceObject.metadata.labels['{{ .Values.managedLabelKey }}'] == 'true'
+      message: "The operator may only manage Roles in namespaces labelled {{ .Values.managedLabelKey }}=true"
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: {{ .Release.Name }}-role-managed-ns
+spec:
+  policyName: {{ .Release.Name }}-role-managed-ns
+  validationActions: ["Deny"]
+  matchResources: {}
+{{- end }}
+{{- end }}

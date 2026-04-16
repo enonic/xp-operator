@@ -106,7 +106,7 @@ jobs:
           [ "${{ steps.tag.outputs.tag }}" == "${{ steps.operator_version.outputs.version }}" ] || (echo "version in gradle.properties does not match tag"; exit 1)
 
       - name: Build java-client and java-operator
-        run: ./gradlew build -x check
+        run: ./gradlew build
 
       - name: Publish docker image
         uses: docker/build-push-action@v7

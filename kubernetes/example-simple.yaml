@@ -3,6 +3,8 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: my-namespace
+  labels:
+    enonic.managed: "true"
   annotations:
     # Delete this namespace if the deployment is deleted
     enonic.cloud/remove.with.xp7deployment: my-deployment
@@ -15,7 +17,7 @@ metadata:
   namespace: my-namespace
 spec:
   enabled: true
-  xpVersion: 7.14.4
+  xpVersion: 7.16.2
 
   # Create one node
   nodeGroups:
@@ -54,16 +56,6 @@ spec:
             size: 1Gi
           - name: work # Node cache
             size: 1Gi
----
-# Install content studio
-apiVersion: enonic.cloud/v1
-kind: Xp7App
-metadata:
-  name: contentstudio
-  namespace: my-namespace
-spec:
-  url: https://repo.enonic.com/public/com/enonic/app/contentstudio/5.2.3/contentstudio-5.2.3.jar
-  sha512: 70499d8612a4c0b4f12dc7c5dfe171b4ad331cf8df48af94de1a92b8fc8ab935916bb798f646cb7a358b5a0e1b2d9a2c1509671566d76dcea3d03f7142d4ba83
 ---
 # Add your own custom config
 apiVersion: enonic.cloud/v1

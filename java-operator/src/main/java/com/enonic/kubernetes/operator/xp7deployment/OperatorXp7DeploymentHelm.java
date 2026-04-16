@@ -8,15 +8,20 @@ import com.enonic.kubernetes.helm.values.BaseValues;
 import com.enonic.kubernetes.helm.values.MapValues;
 import com.enonic.kubernetes.helm.values.ValueBuilder;
 import com.enonic.kubernetes.helm.values.Values;
+import com.enonic.kubernetes.kubernetes.Clients;
 import com.enonic.kubernetes.kubernetes.Informers;
+import com.enonic.kubernetes.kubernetes.commands.K8sLogHelper;
 import com.enonic.kubernetes.operator.helpers.HandlerHelm;
 import com.enonic.kubernetes.operator.ingress.OperatorXp7ConfigSync;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
+import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.ServiceAccount;
+import io.fabric8.kubernetes.api.model.rbac.RoleBindingBuilder;
 import io.quarkus.runtime.StartupEvent;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -35,7 +40,6 @@ import java.util.stream.Stream;
 
 import static com.enonic.kubernetes.common.Configuration.*;
 import static com.enonic.kubernetes.common.Utils.createOwnerReference;
-
 
 /**
  * This operator class creates/updates/deletes resources defined in the xp7deployment helm chart
@@ -62,15 +66,77 @@ public class OperatorXp7DeploymentHelm
     @Inject
     Informers informers;
 
+    @Inject
+    Clients clients;
+
+    @ConfigProperty(name = "operator.operator.name")
+    String operatorName;
+
+    @ConfigProperty(name = "operator.operator.namespace")
+    String operatorNamespace;
+
+    @ConfigProperty(name = "operator.operator.hazelcastClusterRoleName")
+    String hazelcastClusterRoleName;
+
     void onStart( @Observes StartupEvent ev )
     {
         listen( informers.xp7DeploymentInformer() );
     }
 
     @Override
+    public void onNewAdd( final Xp7Deployment newResource )
+    {
+        ensureNamespaceReady( newResource.getMetadata().getNamespace() );
+        super.onNewAdd( newResource );
+    }
+
+    @Override
+    public void onUpdate( final Xp7Deployment oldResource, final Xp7Deployment newResource )
+    {
+        ensureNamespaceReady( newResource.getMetadata().getNamespace() );
+        super.onUpdate( oldResource, newResource );
+    }
+
+    private void ensureNamespaceReady( final String namespace )
+    {
+        final String managedLabelKey = cfgStr( "operator.charts.values.labelKeys.managed" );
+
+        // 1. Check namespace has managed label
+        Namespace ns = clients.k8s().namespaces().withName( namespace ).get();
+        if (!"true".equals( ns.getMetadata().getLabels() == null ? null : ns.getMetadata().getLabels().get( managedLabelKey ) )) {
+            throw new IllegalStateException( String.format(
+                "Namespace '%s' is missing label '%s=true'. " +
+                "A cluster admin must label it manually: kubectl label namespace %s %s=true",
+                namespace, managedLabelKey, namespace, managedLabelKey ) );
+        }
+
+        // 2. Create RoleBinding so the operator SA has permissions in this namespace
+        //    before the inner helm chart runs. References the pre-created ClusterRole.
+        String clusterRoleName = operatorName + "-namespace-role";
+        String rbName = operatorName + "-namespace-access";
+        if (clients.k8s().rbac().roleBindings().inNamespace( namespace ).withName( rbName ).get() == null) {
+            clients.k8s().rbac().roleBindings().inNamespace( namespace ).resource(
+                new RoleBindingBuilder()
+                    .withNewMetadata().withName( rbName ).withNamespace( namespace ).endMetadata()
+                    .withNewRoleRef()
+                        .withApiGroup( "rbac.authorization.k8s.io" )
+                        .withKind( "ClusterRole" )
+                        .withName( clusterRoleName )
+                    .endRoleRef()
+                    .addNewSubject()
+                        .withKind( "ServiceAccount" )
+                        .withName( operatorName )
+                        .withNamespace( operatorNamespace )
+                    .endSubject()
+                    .build()
+            ).create();
+        }
+    }
+
+    @Override
     protected ValueBuilder<Xp7Deployment> getValueBuilder( final BaseValues baseValues )
     {
-        return new Xp7DeploymentValueBuilder( baseValues, suPassSupplier, cloudApi );
+        return new Xp7DeploymentValueBuilder( baseValues, suPassSupplier, cloudApi, operatorName, hazelcastClusterRoleName );
     }
 
     @Override
@@ -97,12 +163,19 @@ public class OperatorXp7DeploymentHelm
 
         private final Supplier<ServiceAccount> cloudApiSa;
 
+        private final String operatorName;
+
+        private final String hazelcastClusterRoleName;
+
         public Xp7DeploymentValueBuilder( final BaseValues baseValues, final Supplier<String> passSupplier,
-                                          final Supplier<ServiceAccount> cloudApiSa )
+                                          final Supplier<ServiceAccount> cloudApiSa, final String operatorName,
+                                          final String hazelcastClusterRoleName )
         {
             this.baseValues = baseValues;
             this.passSupplier = passSupplier;
             this.cloudApiSa = cloudApiSa;
+            this.operatorName = operatorName;
+            this.hazelcastClusterRoleName = hazelcastClusterRoleName;
         }
 
         @SuppressWarnings("unchecked")
@@ -192,10 +265,15 @@ public class OperatorXp7DeploymentHelm
                 deployment.put( "metadata", metadata );
             }
 
-
             values.put( "deployment", deployment );
 
             values.put( "ownerReferences", Collections.singletonList( createOwnerReference( resource ) ) );
+
+            // Operator identity values consumed by inner helm templates (e.g. base_sa.yaml)
+            Map<String, Object> operatorValues = new HashMap<>();
+            operatorValues.put( "name", operatorName );
+            operatorValues.put( "hazelcastClusterRoleName", hazelcastClusterRoleName );
+            values.put( "operator", operatorValues );
 
             return values;
         }

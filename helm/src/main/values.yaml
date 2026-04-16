@@ -10,6 +10,7 @@ labels: {}
 secrets: {}
 env: {}
 onlyDeployCrds: false
+managedLabelKey: enonic.managed
 # For a full list of configuration options see operator properties file:
 # https://github.com/enonic/xp-operator/blob/master/java-operator/src/main/resources/application.properties
 config: |-

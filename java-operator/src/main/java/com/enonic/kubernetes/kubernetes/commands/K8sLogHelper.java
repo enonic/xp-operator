@@ -19,7 +19,12 @@ public class K8sLogHelper
     }
 
     public static <T extends HasMetadata> void logEdit( final Resource<T> editable, UnaryOperator<T> op ) {
-        T res = editable.edit( op );
+        T current = editable.get();
+        if (current.getMetadata() != null) {
+            current.getMetadata().setManagedFields( null );
+        }
+        T updated = op.apply( current );
+        T res = editable.replace( updated );
         log.info( log( K8sCommandAction.UPDATE, res ) );
     }
 

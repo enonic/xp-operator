@@ -27,4 +27,8 @@ NOTE: If you need to set up a local test environment, have a look at our <<minik
 
 Dive into details on <<usage#,how to use the XP operator>>.
 
+== Security
+
+See the <<security#,security section>> for details on how the operator restricts itself to managed namespaces.
+
 

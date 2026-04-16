@@ -5,6 +5,7 @@ import com.enonic.kubernetes.kubernetes.ActionLimiter;
 import com.enonic.kubernetes.kubernetes.Clients;
 import com.enonic.kubernetes.kubernetes.Informers;
 import com.enonic.kubernetes.operator.helpers.InformerEventHandler;
+import com.enonic.kubernetes.kubernetes.commands.K8sLogHelper;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.quarkus.runtime.StartupEvent;
@@ -72,10 +73,9 @@ public class OperatorConfigMapChangeMarker
         final String timestamp = Instant.now().toString();
         log.debug("Setting lastUpdated={} on ConfigMap: {} in {}", timestamp, cm.getMetadata().getName(), cm.getMetadata().getNamespace());
 
-        clients.k8s().configMaps()
+        K8sLogHelper.logEdit( clients.k8s().configMaps()
             .inNamespace(cm.getMetadata().getNamespace())
-            .withName(cm.getMetadata().getName())
-            .edit(c -> {
+            .withName(cm.getMetadata().getName()), c -> {
                 Map<String, String> annotations = new HashMap<>();
                 if (c.getMetadata().getAnnotations() != null) {
                     annotations.putAll(c.getMetadata().getAnnotations());
@@ -87,6 +87,6 @@ public class OperatorConfigMapChangeMarker
                     .withAnnotations(annotations)
                     .endMetadata()
                     .build();
-            });
+            } );
     }
 }
