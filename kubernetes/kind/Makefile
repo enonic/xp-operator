@@ -38,7 +38,7 @@ kind-dev: ## Setup cluster for development mode (env var MY_IP required)
 	@[ ! -z "${MY_IP}" ] || (echo "Set MY_IP variable to you host IP" && exit 1)
 
 	# Apply CRDs
-	@ls --color=none ../../helm/crds/* | xargs -I {} kubectl apply -f {}
+	@ls --color=none ../../helm/src/main/crds/* | xargs -I {} kubectl apply -f {}
 
 	# Apply K8s services
 	@cat operator-service.yaml | sed s%#IP#%${MY_IP}%g | kubectl apply -f -

@@ -52,7 +52,7 @@ jobs:
         run: yq -i -p=props -o=props '.version = "${{ steps.operator_version.outputs.version }}-dev"' gradle.properties
 
       - name: Build java-client and java-operator
-        run: ./gradlew build -x check
+        run: ./gradlew build
 
       - name: Publish docker image
         uses: docker/build-push-action@v6
