@@ -1,6 +1,6 @@
 [versions]
 fabric8 = "6.6.2"
-quarkus = "2.16.6.Final"
+quarkus = "3.35.3"
 jackson = "2.15.4"
 
 [libraries]
