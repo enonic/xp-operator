@@ -35,6 +35,7 @@ deployment:
       master: true
       replicas: 1
       initContainers: [ ]
+      secretMounts: [ ]
       sidecars: [ ]
       env:
       - name: "JUST_ENV"

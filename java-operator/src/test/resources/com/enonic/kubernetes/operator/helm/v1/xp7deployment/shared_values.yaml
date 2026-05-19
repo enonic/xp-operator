@@ -43,6 +43,7 @@ deployment:
       master: true
       replicas: 3
       initContainers: []
+      secretMounts: []
       sidecars: []
       env:
       - name: "XP_OPTS"
@@ -59,6 +60,7 @@ deployment:
       master: false
       replicas: 2
       initContainers: []
+      secretMounts: []
       sidecars: []
       env:
       - name: "XP_OPTS"
@@ -84,6 +86,7 @@ deployment:
       master: false
       replicas: 3
       initContainers: []
+      secretMounts: []
       sidecars: []
       env:
       - name: "CUSTOM_ENV"
