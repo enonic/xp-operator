@@ -470,6 +470,35 @@
                   }
                 }
               },
+              "secretMounts": {
+                "javaName": "Xp7DeploymentSpecNodeGroupSecretMounts",
+                "type": "array",
+                "items": {
+                  "javaName": "Xp7DeploymentSpecNodeGroupSecretMount",
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "secretName": {
+                      "type": "string"
+                    },
+                    "mountPath": {
+                      "type": "string"
+                    },
+                    "readOnly": {
+                      "type": "boolean"
+                    },
+                    "defaultMode": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "optional": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              },
               "resources": {
                 "javaName": "Xp7DeploymentSpecNodeGroupResources",
                 "type": "object",

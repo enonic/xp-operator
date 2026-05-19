@@ -297,6 +297,24 @@ spec:
                                       type: string
                                     optional:
                                       type: boolean
+                      secretMounts:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                            secretName:
+                              type: string
+                            mountPath:
+                              type: string
+                            readOnly:
+                              type: boolean
+                            defaultMode:
+                              type: integer
+                              format: int32
+                            optional:
+                              type: boolean
                       resources:
                         type: object
                         properties:
