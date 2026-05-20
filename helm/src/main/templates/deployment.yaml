@@ -33,10 +33,18 @@ spec:
         {{- end }}
     spec:
       serviceAccountName: {{ .Release.Name }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           name: {{ .Release.Name }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           resources:
             {{- with .Values.resources }}
             {{- toYaml . | nindent 12 }}

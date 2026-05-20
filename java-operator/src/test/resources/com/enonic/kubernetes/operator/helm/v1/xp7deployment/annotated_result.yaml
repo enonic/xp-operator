@@ -604,6 +604,7 @@ spec:
               cpu: "1"
               memory: "512Mi"
           securityContext:
+            allowPrivilegeEscalation: false
             capabilities:
               drop:
                 - "ALL"
@@ -670,6 +671,7 @@ spec:
           imagePullPolicy: "IfNotPresent"
           name: "events"
           securityContext:
+            allowPrivilegeEscalation: false
             capabilities:
               drop:
                 - "ALL"
@@ -701,6 +703,8 @@ spec:
       schedulerName: "default-scheduler"
       securityContext:
         fsGroup: 0
+        seccompProfile:
+          type: "RuntimeDefault"
       serviceAccount: "xp-node-sa"
       serviceAccountName: "xp-node-sa"
       terminationGracePeriodSeconds: 600
