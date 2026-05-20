@@ -2,6 +2,7 @@ image:
   repository: enonic/xp-operator
   tag: "${version}"
   pullPolicy: IfNotPresent
+imagePullSecrets: []
 podSecurityContext: {}
 securityContext: {}
 resources:
