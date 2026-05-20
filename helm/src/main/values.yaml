@@ -3,6 +3,8 @@ image:
   tag: "${version}"
   pullPolicy: IfNotPresent
 imagePullSecrets: []
+podSecurityContext: {}
+securityContext: {}
 resources:
   requests: {}
   limits: {}
