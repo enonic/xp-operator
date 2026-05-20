@@ -76,6 +76,8 @@ spec:
 
       securityContext:
         fsGroup: {{ $.Values.pods.securityContext.fsGroup }}
+        seccompProfile:
+          type: RuntimeDefault
 
       {{- if or $.Values.pods.sysctlInitContainer $.Values.deployment.clustered $nodeGroup.initContainers }}
       initContainers:
@@ -121,6 +123,7 @@ spec:
           terminationMessagePolicy: File
 
           securityContext:
+            allowPrivilegeEscalation: false
             capabilities:
               drop:
                 - ALL
@@ -239,6 +242,7 @@ spec:
           terminationMessagePolicy: File
 
           securityContext:
+            allowPrivilegeEscalation: false
             capabilities:
               drop:
                 - ALL
@@ -371,6 +375,7 @@ spec:
   terminationMessagePolicy: File
 
   securityContext:
+    allowPrivilegeEscalation: false
     capabilities:
       drop:
         - ALL

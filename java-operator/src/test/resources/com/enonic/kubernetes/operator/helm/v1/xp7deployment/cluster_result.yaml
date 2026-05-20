@@ -757,6 +757,7 @@ spec:
               cpu: "1"
               memory: "1Gi"
           securityContext:
+            allowPrivilegeEscalation: false
             capabilities:
               drop:
                 - "ALL"
@@ -819,6 +820,7 @@ spec:
           imagePullPolicy: "IfNotPresent"
           name: "events"
           securityContext:
+            allowPrivilegeEscalation: false
             capabilities:
               drop:
                 - "ALL"
@@ -869,6 +871,8 @@ spec:
       schedulerName: "default-scheduler"
       securityContext:
         fsGroup: 0
+        seccompProfile:
+          type: "RuntimeDefault"
       serviceAccount: "xp-node-sa"
       serviceAccountName: "xp-node-sa"
       terminationGracePeriodSeconds: 600
@@ -1041,6 +1045,7 @@ spec:
               cpu: "2"
               memory: "2Gi"
           securityContext:
+            allowPrivilegeEscalation: false
             capabilities:
               drop:
                 - "ALL"
@@ -1105,6 +1110,7 @@ spec:
           imagePullPolicy: "IfNotPresent"
           name: "events"
           securityContext:
+            allowPrivilegeEscalation: false
             capabilities:
               drop:
                 - "ALL"
@@ -1155,6 +1161,8 @@ spec:
       schedulerName: "default-scheduler"
       securityContext:
         fsGroup: 0
+        seccompProfile:
+          type: "RuntimeDefault"
       serviceAccount: "xp-node-sa"
       serviceAccountName: "xp-node-sa"
       terminationGracePeriodSeconds: 600
@@ -1348,6 +1356,7 @@ spec:
               cpu: "3"
               memory: "3Gi"
           securityContext:
+            allowPrivilegeEscalation: false
             capabilities:
               drop:
                 - "ALL"
@@ -1412,6 +1421,7 @@ spec:
           imagePullPolicy: "IfNotPresent"
           name: "events"
           securityContext:
+            allowPrivilegeEscalation: false
             capabilities:
               drop:
                 - "ALL"
@@ -1462,6 +1472,8 @@ spec:
       schedulerName: "default-scheduler"
       securityContext:
         fsGroup: 0
+        seccompProfile:
+          type: "RuntimeDefault"
       serviceAccount: "xp-node-sa"
       serviceAccountName: "xp-node-sa"
       terminationGracePeriodSeconds: 600
