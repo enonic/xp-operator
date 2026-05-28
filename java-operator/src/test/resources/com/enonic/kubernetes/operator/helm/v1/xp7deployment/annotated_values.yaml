@@ -19,11 +19,11 @@ deployment:
   hasDedicatedFrontendNodes: false
   metadata:
     annotations:
-      io.enonic.backup.prescripts: '["/usr/local/bin/backup.sh"]'
-      io.enonic.backup.prescriptsContainer: exp
-      io.enonic.backup.volumes: blobstore,snapshots
-  name: mycloud-mysolution-myenv-myservice
-  namespace: mycloud-mysolution-myenv-myservice
+      io.enonic.backup.prescripts: "[\"/usr/local/bin/backup.sh\"]"
+      io.enonic.backup.prescriptsContainer: "exp"
+      io.enonic.backup.volumes: "blobstore,snapshots"
+  name: "mycloud-mysolution-myenv-myservice"
+  namespace: "mycloud-mysolution-myenv-myservice"
   spec:
     enabled: true
     xpVersion: "7.13.0"
@@ -39,8 +39,8 @@ deployment:
       data: true
       master: true
       replicas: 1
-      initContainers: [ ]
-      sidecars: [ ]
+      initContainers: []
+      sidecars: []
       env:
       - name: "XP_OPTS"
         value: "-Xms154m -Xmx154m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof\
@@ -81,6 +81,9 @@ labelKeys:
   managed: "enonic.managed"
   master: "enonic.master"
   nodeGroup: "enonic.nodeGroup"
+operator:
+  hazelcastClusterRoleName: "xp-operator-hazelcast"
+  name: "xp-operator"
 ownerReferences:
 - apiVersion: "enonic.cloud/v1"
   kind: "Xp7Deployment"
@@ -88,9 +91,12 @@ ownerReferences:
   controller: true
   name: "mycloud-mysolution-myenv-myservice"
 pods:
+  automountServiceAccountToken: true
   nodeGroupAntiAffinity: false
+  preStopSleepSeconds: "15"
+  readOnlyRootFilesystem: false
   securityContext:
-    fsGroup: "0"
+    fsGroup: "1337"
     user: "1337"
   sysctlInitContainer: true
   terminationGracePeriodSeconds: "600"
@@ -123,7 +129,3 @@ volumes:
     work: "/enonic-xp/home/work"
 waitForDnsDiscovery:
   image: "busybox"
-
-operator:
-  hazelcastClusterRoleName: "xp-operator-hazelcast"
-  name: "xp-operator"

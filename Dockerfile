@@ -35,4 +35,10 @@ COPY --chown=1000:1000 java-operator/src/main/helm /deployments/helm/
 # Copy build target
 COPY --chown=1000:1000 java-operator/build/quarkus-app /deployments/
 
+# Ensure run-java.sh is executable regardless of host fs mode
+RUN chmod +x /deployments/run-java.sh
+
+ENV HOME=/tmp
+USER 1000:1000
+
 CMD [ "/deployments/run-java.sh" ]

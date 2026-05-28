@@ -74,6 +74,8 @@ spec:
             - name: ssl
               mountPath: /deployments/ssl
               readOnly: true
+            - name: tmp
+              mountPath: /tmp
       volumes:
         - name: config
           configMap:
@@ -81,6 +83,8 @@ spec:
         - name: ssl
           secret:
             secretName: {{ .Release.Name }}-tls
+        - name: tmp
+          emptyDir: {}
 ---
 apiVersion: v1
 kind: Service

@@ -35,13 +35,7 @@ rules:
       - get
       - list
 {{- else }}
-  # For preStopHook
-  - apiGroups:
-      - '*'
-    resources:
-      - endpoints
-    verbs:
-      - get
+  []
 {{- end }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1

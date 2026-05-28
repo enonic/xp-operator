@@ -1,0 +1,28 @@
+{{- if and (not $.Values.pods.automountServiceAccountToken) $.Values.deployment.clustered }}
+# Empty token file mounted on the `exp` container at
+# /var/run/secrets/kubernetes.io/serviceaccount/token to satisfy the
+# Hazelcast Kubernetes discovery plugin's eager file read at startup.
+# The content is unused in DNS discovery mode (settings.hzApiDiscovery=false),
+# but the file must exist or the plugin throws "Could not get token file".
+# Required only for clustered deployments with automountServiceAccountToken=false.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: empty-sa
+  namespace: {{ $.Values.deployment.namespace }}
+  annotations:
+    {{ $.Values.annotationKeys.applyPriority }}: "60"
+  labels:
+    {{ $.Values.labelKeys.managed }}: true
+    {{- with $.Values.defaultLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  ownerReferences:
+    {{- with $.Values.ownerReferences }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+data:
+  token: ""
+  ca.crt: ""
+  namespace: {{ $.Values.deployment.namespace }}
+{{- end }}
