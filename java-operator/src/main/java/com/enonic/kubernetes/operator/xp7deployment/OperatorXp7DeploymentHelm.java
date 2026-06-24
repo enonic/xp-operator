@@ -10,7 +10,6 @@ import com.enonic.kubernetes.helm.values.ValueBuilder;
 import com.enonic.kubernetes.helm.values.Values;
 import com.enonic.kubernetes.kubernetes.Clients;
 import com.enonic.kubernetes.kubernetes.Informers;
-import com.enonic.kubernetes.kubernetes.commands.K8sLogHelper;
 import com.enonic.kubernetes.operator.helpers.HandlerHelm;
 import com.enonic.kubernetes.operator.ingress.OperatorXp7ConfigSync;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -258,7 +257,7 @@ public class OperatorXp7DeploymentHelm
 
             final Map<String, Object> metadata = new HashMap<>();
 
-            final Map<String, String> annotations = annatations( resource );
+            final Map<String, String> annotations = annotations( resource );
             if(!annotations.isEmpty())
             {
                 metadata.put( "annotations", annotations );
@@ -354,7 +353,7 @@ public class OperatorXp7DeploymentHelm
             return resource.getMetadata().getLabels();
         }
 
-        private Map<String, String> annatations( final Xp7Deployment resource )
+        private Map<String, String> annotations(final Xp7Deployment resource )
         {
             return resource.getMetadata().getAnnotations();
         }

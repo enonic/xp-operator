@@ -1,7 +1,6 @@
 #!/bin/sh
 set -e
 
-NAMESPACE="$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)"
 POD_NAME="$(hostname)"
 API="https://kubernetes.default.svc/api/v1/namespaces/${NAMESPACE}/pods/${POD_NAME}"
 
@@ -24,7 +23,7 @@ patch_annotation() {
   RESPONSE=$(curl -s -w "\n%{http_code}" -X PATCH "${API}" \
     -H "Authorization: Bearer $K8S_TOKEN" \
     -H "Content-Type: application/merge-patch+json" \
-    --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt \
+    --cacert "${K8S_CA_CRT_PATH}" \
     -d "{\"metadata\": {\"annotations\": {\"${POD_CONFIG_RELOADED_ANNOTATION}\": \"${TIMESTAMP}\"}}}")
 
   BODY=$(echo "$RESPONSE" | head -n -1)

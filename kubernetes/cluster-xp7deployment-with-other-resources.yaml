@@ -47,6 +47,8 @@ spec:
         disks:
           - name: index # Node ES index
             size: 1Gi
+          - name: work # OSGi bundle cache
+            size: 200Mi
 
     # 2 data nodes
     - name: worker
@@ -76,6 +78,8 @@ spec:
         disks:
           - name: index # Node ES index
             size: 1Gi
+          - name: work # OSGi bundle cache
+            size: 200Mi
 ---
 # Install content studio
 apiVersion: enonic.cloud/v1

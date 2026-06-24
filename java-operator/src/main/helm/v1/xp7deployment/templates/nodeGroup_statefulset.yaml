@@ -55,6 +55,7 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
+      automountServiceAccountToken: {{ $.Values.pods.automountServiceAccountToken }}
       serviceAccount: xp-node-sa
       serviceAccountName: xp-node-sa
       {{- if $.Values.pods.nodeGroupAntiAffinity }}
@@ -76,6 +77,8 @@ spec:
 
       securityContext:
         fsGroup: {{ $.Values.pods.securityContext.fsGroup }}
+        seccompProfile:
+          type: RuntimeDefault
 
       {{- if or $.Values.pods.sysctlInitContainer $.Values.deployment.clustered $nodeGroup.initContainers }}
       initContainers:
@@ -95,6 +98,15 @@ spec:
         - name: wait-for-dns-discovery
           image: {{ $.Values.waitForDnsDiscovery.image }}
           imagePullPolicy: {{ $.Values.image.pullPolicy }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: {{ $.Values.pods.readOnlyRootFilesystem }}
+            runAsNonRoot: true
+            runAsUser: {{ $.Values.pods.securityContext.user }}
+            runAsGroup: {{ $.Values.pods.securityContext.user }}
           command: ['sh', '-c', "until nslookup ${XP_NODE_NAME}.cluster-discovery.${NAMESPACE}.svc.cluster.local; do echo waiting for ${XP_NODE_NAME}; sleep 2; done"]
           env:
             - name: NAMESPACE
@@ -121,11 +133,14 @@ spec:
           terminationMessagePolicy: File
 
           securityContext:
+            allowPrivilegeEscalation: false
             capabilities:
               drop:
                 - ALL
+            readOnlyRootFilesystem: {{ $.Values.pods.readOnlyRootFilesystem }}
             runAsNonRoot: true
             runAsUser: {{ $.Values.pods.securityContext.user }}
+            runAsGroup: {{ $.Values.pods.securityContext.user }}
 
           resources:
             requests:
@@ -214,7 +229,7 @@ spec:
           lifecycle:
             preStop:
               exec:
-                command: ["/bin/bash","{{ $.Values.dirs.extraConfig }}/preStop.sh"]
+                command: ["/bin/sh", "-c", "sleep {{ $.Values.pods.preStopSleepSeconds }}"]
           {{- end }}
 
           volumeMounts:
@@ -222,6 +237,15 @@ spec:
               mountPath: {{ $.Values.dirs.config }}
             - name: extra-config
               mountPath: {{ $.Values.dirs.extraConfig }}
+            - name: tmp
+              mountPath: /tmp
+            - name: xp-logs
+              mountPath: /enonic-xp/home/logs
+            {{- if and (not $.Values.pods.automountServiceAccountToken) $.Values.deployment.clustered }}
+            - name: empty-sa-token
+              mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+              readOnly: true
+            {{- end }}
 
         {{- range $dir := $nodeGroup.resources.dirs }}
         {{- include "volumeMount" (dict "disk" $dir "Values" $.Values) | indent 12 }}
@@ -239,11 +263,14 @@ spec:
           terminationMessagePolicy: File
 
           securityContext:
+            allowPrivilegeEscalation: false
             capabilities:
               drop:
                 - ALL
+            readOnlyRootFilesystem: {{ $.Values.pods.readOnlyRootFilesystem }}
             runAsNonRoot: true
             runAsUser: {{ $.Values.pods.securityContext.user }}
+            runAsGroup: {{ $.Values.pods.securityContext.user }}
 
           env:
             - name: NAMESPACE
@@ -268,6 +295,8 @@ spec:
                 secretKeyRef:
                   name: xp-events-sa-secret
                   key: token
+            - name: K8S_CA_CRT_PATH
+              value: /etc/k8s-ca.crt
             - name:  XP_CONFIG_PATH
               value: {{ $.Values.dirs.config }}
             - name: POD_CONFIG_RELOADED_ANNOTATION
@@ -278,6 +307,14 @@ spec:
               mountPath: {{ $.Values.dirs.config }}
             - name: extra-config
               mountPath: {{ $.Values.dirs.extraConfig }}
+            - name: tmp
+              mountPath: /tmp
+            - name: xp-logs
+              mountPath: /enonic-xp/home/logs
+            - name: events-sa-ca
+              mountPath: /etc/k8s-ca.crt
+              subPath: ca.crt
+              readOnly: true
 
           command: ["sh"]
           args: ["{{ $.Values.dirs.extraConfig }}/pod-annotator.sh"]
@@ -295,6 +332,21 @@ spec:
           configMap:
             defaultMode: 0644
             name: extra-config
+        - name: tmp
+          emptyDir: {}
+        - name: xp-logs
+          emptyDir: {}
+        - name: events-sa-ca
+          secret:
+            secretName: xp-events-sa-secret
+            items:
+              - key: ca.crt
+                path: ca.crt
+        {{- if and (not $.Values.pods.automountServiceAccountToken) $.Values.deployment.clustered }}
+        - name: empty-sa-token
+          configMap:
+            name: empty-sa
+        {{- end }}
 
         {{- range $dir := $nodeGroup.resources.dirs }}
         - name: {{ $dir.name }}
@@ -371,11 +423,14 @@ spec:
   terminationMessagePolicy: File
 
   securityContext:
+    allowPrivilegeEscalation: false
     capabilities:
       drop:
         - ALL
+    readOnlyRootFilesystem: {{ $.Values.pods.readOnlyRootFilesystem }}
     runAsNonRoot: true
     runAsUser: {{ $.Values.pods.securityContext.user }}
+    runAsGroup: {{ $.Values.pods.securityContext.user }}
 
   {{- if and $.container.ports }}
   ports:

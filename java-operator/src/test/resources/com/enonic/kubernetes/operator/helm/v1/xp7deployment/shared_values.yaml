@@ -27,16 +27,16 @@ deployment:
     xpVersion: "7.13.2"
     nodesPreinstalledApps: []
     nodesSharedVolumes:
-    - name: shared
+    - name: "shared"
       size: "1Gi"
-      class: sharedClass
+      class: "sharedClass"
     nodesSharedDisks:
     - name: "blobstore"
-      volume: shared
+      volume: "shared"
     - name: "snapshots"
-      volume: shared
-    - name: export
-      size: 2Gi
+      volume: "shared"
+    - name: "export"
+      size: "2Gi"
     nodeGroups:
     - name: "master"
       data: false
@@ -69,7 +69,7 @@ deployment:
         memory: "2Gi"
         dirs: []
         volumes:
-        - name: inner
+        - name: "inner"
           size: "1Gi"
           class: "innerClass"
         disks:
@@ -124,6 +124,9 @@ labelKeys:
   managed: "enonic.managed"
   master: "enonic.master"
   nodeGroup: "enonic.nodeGroup"
+operator:
+  hazelcastClusterRoleName: "xp-operator-hazelcast"
+  name: "xp-operator"
 ownerReferences:
 - apiVersion: "enonic.cloud/v1"
   kind: "Xp7Deployment"
@@ -131,9 +134,12 @@ ownerReferences:
   controller: true
   name: "mycloud-mysolution-myenv-myservice"
 pods:
+  automountServiceAccountToken: true
   nodeGroupAntiAffinity: false
+  preStopSleepSeconds: "15"
+  readOnlyRootFilesystem: false
   securityContext:
-    fsGroup: "0"
+    fsGroup: "1337"
     user: "1337"
   sysctlInitContainer: true
   terminationGracePeriodSeconds: "600"
@@ -166,7 +172,3 @@ volumes:
     work: "/enonic-xp/home/work"
 waitForDnsDiscovery:
   image: "busybox"
-
-operator:
-  hazelcastClusterRoleName: "xp-operator-hazelcast"
-  name: "xp-operator"
