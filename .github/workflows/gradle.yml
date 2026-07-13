@@ -34,8 +34,8 @@ jobs:
         run: |
           if [[ "$(./get-version.sh)" == *"-SNAPSHOT" ]]
           then
-            echo "Building and publishing snapshot version"
-            ./gradlew ci publish -PrepoUser=ci -PrepoPassword=${{ secrets.ARTIFACTORY_PASSWORD }}
+            echo "Building snapshot version"
+            ./gradlew ci
           else
             echo "Building release version"
             ./gradlew build 
@@ -105,7 +105,7 @@ jobs:
         run: |
           [ "${{ steps.tag.outputs.tag }}" == "${{ steps.operator_version.outputs.version }}" ] || (echo "version in gradle.properties does not match tag"; exit 1)
 
-      - name: Build java-client and java-operator
+      - name: Build operator
         run: ./gradlew build
 
       - name: Publish docker image
@@ -122,5 +122,5 @@ jobs:
       - name: Publish helm chart
         run: curl -u "ci:${{ secrets.ARTIFACTORY_PASSWORD }}" https://repo.enonic.com/helm/ --upload-file helm/build/libs/xp-operator-${{ steps.operator_version.outputs.version }}.tgz -v
 
-      - name: Publish java-client
-        run: ./gradlew publish -PrepoUser=ci -PrepoPassword=${{ secrets.ARTIFACTORY_PASSWORD }}
+      - name: Publish mgmt OpenAPI
+        run: curl -f -u "ci:${{ secrets.ARTIFACTORY_PASSWORD }}" https://repo.enonic.com/public/com/enonic/kubernetes/xp-operator/${{ steps.operator_version.outputs.version }}/operator-mgmt.yaml --upload-file java-operator/build/openapi/openapi.yaml -v
