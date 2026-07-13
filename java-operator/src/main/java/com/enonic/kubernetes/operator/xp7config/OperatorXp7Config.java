@@ -1,6 +1,6 @@
 package com.enonic.kubernetes.operator.xp7config;
 
-import com.enonic.kubernetes.client.v1.xp7config.Xp7Config;
+import com.enonic.kubernetes.crd.v1.Xp7Config;
 import com.enonic.kubernetes.kubernetes.Informers;
 import com.enonic.kubernetes.operator.helpers.InformerEventHandler;
 import io.quarkus.runtime.StartupEvent;

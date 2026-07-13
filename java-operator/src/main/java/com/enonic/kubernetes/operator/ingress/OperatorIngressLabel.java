@@ -1,7 +1,7 @@
 package com.enonic.kubernetes.operator.ingress;
 
-import com.enonic.kubernetes.client.v1.xp7config.Xp7Config;
-import com.enonic.kubernetes.client.v1.xp7config.Xp7ConfigStatus;
+import com.enonic.kubernetes.crd.v1.Xp7Config;
+import com.enonic.kubernetes.crd.v1.Xp7ConfigStatus;
 import com.enonic.kubernetes.kubernetes.Clients;
 import com.enonic.kubernetes.kubernetes.Informers;
 import com.enonic.kubernetes.kubernetes.Searchers;

@@ -1,6 +1,10 @@
 package com.enonic.kubernetes.operator.xp7deployment;
 
-import com.enonic.kubernetes.client.v1.xp7deployment.*;
+import com.enonic.kubernetes.crd.v1.Xp7Deployment;
+import com.enonic.kubernetes.crd.v1.Xp7DeploymentStatus;
+import com.enonic.kubernetes.crd.v1.xp7deploymentspec.NodeGroups;
+import com.enonic.kubernetes.crd.v1.xp7deploymentstatus.Fields;
+import com.enonic.kubernetes.crd.v1.xp7deploymentstatus.fields.Pods;
 import com.enonic.kubernetes.kubernetes.Clients;
 import com.enonic.kubernetes.kubernetes.Informers;
 import com.enonic.kubernetes.kubernetes.Searchers;
@@ -8,6 +12,7 @@ import com.enonic.kubernetes.kubernetes.commands.K8sLogHelper;
 import com.enonic.kubernetes.operator.helpers.InformerEventHandler;
 import io.fabric8.kubernetes.api.model.ContainerStatus;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.client.utils.Serialization;
 import io.quarkus.runtime.StartupEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,7 +107,7 @@ public class OperatorXp7DeploymentStatus
 
         // Get current status
         Xp7DeploymentStatus currentStatus = xp7Deployment.get().getStatus();
-        int oldStatusHash = currentStatus.hashCode();
+        String oldStatusJson = Serialization.asJson( currentStatus );
 
         // Get all pods in deployment
         List<Pod> pods = searchers.pod().stream().
@@ -111,32 +116,32 @@ public class OperatorXp7DeploymentStatus
             collect( Collectors.toList() );
 
         // Set pod fields
-        currentStatus.setXp7DeploymentStatusFields( buildFields( pods ) );
+        currentStatus.setFields( buildFields( pods ) );
 
         // Get expected number of pods
         int expectedNumberOfPods = expectedNumberOfPods( xp7Deployment.get() );
 
         // If pod count does not match
         if (pods.size() != expectedNumberOfPods) {
-            updateOnChange( xp7Deployment.get(), oldStatusHash, currentStatus.
-                withState( Xp7DeploymentStatus.State.PENDING ).
-                withMessage( "Pod count mismatch" ) );
+            currentStatus.setState( Xp7DeploymentStatus.State.PENDING );
+            currentStatus.setMessage( "Pod count mismatch" );
+            updateOnChange( xp7Deployment.get(), oldStatusJson, currentStatus );
             return;
         }
 
         // If deployment is disabled
         if (!xp7Deployment.get().getSpec().getEnabled()) {
-            updateOnChange( xp7Deployment.get(), oldStatusHash, currentStatus.
-                withState( Xp7DeploymentStatus.State.STOPPED ).
-                withMessage( "OK" ) );
+            currentStatus.setState( Xp7DeploymentStatus.State.STOPPED );
+            currentStatus.setMessage( "OK" );
+            updateOnChange( xp7Deployment.get(), oldStatusJson, currentStatus );
             return;
         }
 
         // Iterate over pods and check status
         List<String> waitingForPods = new LinkedList<>();
-        for (Xp7DeploymentStatusFieldsPod p : currentStatus.
-            getXp7DeploymentStatusFields().
-            getXp7DeploymentStatusFieldsPods()) {
+        for (Pods p : currentStatus.
+            getFields().
+            getPods()) {
             if (!p.getPhase().equals( "Running" ) || !p.getReady()) {
                 waitingForPods.add( p.getName() );
             }
@@ -145,21 +150,21 @@ public class OperatorXp7DeploymentStatus
         // If we are still waiting
         if (!waitingForPods.isEmpty()) {
             waitingForPods.sort( String::compareTo );
-            updateOnChange( xp7Deployment.get(), oldStatusHash, currentStatus.
-                withState( Xp7DeploymentStatus.State.PENDING ).
-                withMessage( String.format( "Waiting for pods: %s", waitingForPods.stream().collect( Collectors.joining( ", " ) ) ) ) );
+            currentStatus.setState( Xp7DeploymentStatus.State.PENDING );
+            currentStatus.setMessage( String.format( "Waiting for pods: %s", waitingForPods.stream().collect( Collectors.joining( ", " ) ) ) );
+            updateOnChange( xp7Deployment.get(), oldStatusJson, currentStatus );
             return;
         }
 
         // Return OK
-        updateOnChange( xp7Deployment.get(), oldStatusHash, currentStatus.
-            withState( Xp7DeploymentStatus.State.RUNNING ).
-            withMessage( "OK" ) );
+        currentStatus.setState( Xp7DeploymentStatus.State.RUNNING );
+        currentStatus.setMessage( "OK" );
+        updateOnChange( xp7Deployment.get(), oldStatusJson, currentStatus );
     }
 
-    private void updateOnChange( final Xp7Deployment resource, final int oldStatusHash, final Xp7DeploymentStatus newStatus )
+    private void updateOnChange( final Xp7Deployment resource, final String oldStatusJson, final Xp7DeploymentStatus newStatus )
     {
-        if (oldStatusHash != newStatus.hashCode()) {
+        if (!oldStatusJson.equals( Serialization.asJson( newStatus ) )) {
             log.debug("Set Deployment status : {} {} in {}", newStatus.getState(), resource.getMetadata().getName(), resource.getMetadata().getNamespace());
 
             K8sLogHelper.logEdit( clients.xp7Deployments().
@@ -171,18 +176,21 @@ public class OperatorXp7DeploymentStatus
         }
     }
 
-    private Xp7DeploymentStatusFields buildFields( final List<Pod> pods )
+    private Fields buildFields( final List<Pod> pods )
     {
-        List<Xp7DeploymentStatusFieldsPod> fieldPods = new LinkedList<>();
+        List<Pods> fieldPods = new LinkedList<>();
         for (Pod pod : pods) {
             Optional<ContainerStatus> cs =
                 pod.getStatus().getContainerStatuses().stream().filter( s -> s.getName().equals( "exp" ) ).findFirst();
-            fieldPods.add( new Xp7DeploymentStatusFieldsPod().
-                withName( pod.getMetadata().getName() ).
-                withReady( cs.isPresent() && cs.get().getReady() ).
-                withPhase( pod.getStatus().getPhase() ) );
+            Pods fieldPod = new Pods();
+            fieldPod.setName( pod.getMetadata().getName() );
+            fieldPod.setReady( cs.isPresent() && cs.get().getReady() );
+            fieldPod.setPhase( pod.getStatus().getPhase() );
+            fieldPods.add( fieldPod );
         }
-        return new Xp7DeploymentStatusFields().withXp7DeploymentStatusFieldsPods( fieldPods );
+        Fields fields = new Fields();
+        fields.setPods( fieldPods );
+        return fields;
     }
 
     private int expectedNumberOfPods( final Xp7Deployment deployment )
@@ -192,8 +200,8 @@ public class OperatorXp7DeploymentStatus
         }
 
         return deployment.getSpec().
-            getXp7DeploymentSpecNodeGroups().stream().
-            mapToInt( Xp7DeploymentSpecNodeGroup::getReplicas ).
+            getNodeGroups().stream().
+            mapToInt( NodeGroups::getReplicas ).
             sum();
     }
 }

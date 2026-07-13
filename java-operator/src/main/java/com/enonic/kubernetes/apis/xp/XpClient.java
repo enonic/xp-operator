@@ -4,6 +4,7 @@ import com.enonic.kubernetes.apis.xp.service.*;
 import com.enonic.kubernetes.client.v1.api.xp7.idproviders.Xp7MgmtIdProvider;
 import com.enonic.kubernetes.client.v1.api.xp7.projects.Xp7MgmtProject;
 import com.enonic.kubernetes.client.v1.api.xp7.snapshots.Xp7MgmtSnapshotsList;
+import com.enonic.kubernetes.client.v1.api.xp7.webapps.Xp7MgmtWebapp;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -319,10 +320,10 @@ public class XpClient
         }
     }
 
-    public List<Xp7MgmtProject> webappsList() throws XpClientException {
+    public List<Xp7MgmtWebapp> webappsList() throws XpClientException {
         try {
             Response response = get("/webapps/list");
-            return mapper.readerForListOf( Xp7MgmtProject.class ).readValue( response.body().bytes());
+            return mapper.readerForListOf( Xp7MgmtWebapp.class ).readValue( response.body().bytes());
         } catch (Exception e) {
             throw new XpClientException("Failed to list webapps", e);
         }

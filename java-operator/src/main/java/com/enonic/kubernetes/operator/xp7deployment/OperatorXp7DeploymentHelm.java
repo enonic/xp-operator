@@ -1,8 +1,8 @@
 package com.enonic.kubernetes.operator.xp7deployment;
 
-import com.enonic.kubernetes.client.v1.xp7deployment.Xp7Deployment;
-import com.enonic.kubernetes.client.v1.xp7deployment.Xp7DeploymentSpecNodeGroup;
-import com.enonic.kubernetes.client.v1.xp7deployment.Xp7DeploymentSpecNodeGroupEnvVar;
+import com.enonic.kubernetes.crd.v1.Xp7Deployment;
+import com.enonic.kubernetes.crd.v1.xp7deploymentspec.NodeGroups;
+import com.enonic.kubernetes.crd.v1.xp7deploymentspec.nodegroups.Env;
 import com.enonic.kubernetes.helm.functions.Templator;
 import com.enonic.kubernetes.helm.values.BaseValues;
 import com.enonic.kubernetes.helm.values.MapValues;
@@ -195,16 +195,16 @@ public class OperatorXp7DeploymentHelm
                         Map.of( "name", sa.getMetadata().getName(), "namespace", sa.getMetadata().getNamespace() ) );
             }
 
-            for (Xp7DeploymentSpecNodeGroup ng : resource.getSpec().getXp7DeploymentSpecNodeGroups()) {
-                Optional<Xp7DeploymentSpecNodeGroupEnvVar> optionalXpOpts =
-                    ng.getXp7DeploymentSpecNodeGroupEnvironment().stream().filter( e -> e.getName().equals( "XP_OPTS" ) ).findFirst();
+            for (NodeGroups ng : resource.getSpec().getNodeGroups()) {
+                Optional<Env> optionalXpOpts =
+                    ng.getEnv().stream().filter( e -> e.getName().equals( "XP_OPTS" ) ).findFirst();
 
-                Xp7DeploymentSpecNodeGroupEnvVar xpOpts;
+                Env xpOpts;
                 if (optionalXpOpts.isEmpty()) {
-                    xpOpts = new Xp7DeploymentSpecNodeGroupEnvVar().
-                        withName( "XP_OPTS" ).
-                        withValue( "" );
-                    ng.getXp7DeploymentSpecNodeGroupEnvironment().add( xpOpts );
+                    xpOpts = new Env();
+                    xpOpts.setName( "XP_OPTS" );
+                    xpOpts.setValue( "" );
+                    ng.getEnv().add( xpOpts );
                 } else {
                     xpOpts = optionalXpOpts.get();
                 }
@@ -246,9 +246,9 @@ public class OperatorXp7DeploymentHelm
             deployment.put( "suPassHash", sha512( pass ) );
 
             if (isClustered) {
-                deployment.put( "clusterMajority", getClusterMajority( resource.getSpec().getXp7DeploymentSpecNodeGroups() ) );
-                deployment.put( "minimumMasterNodes", getMinimumMasterNodes( resource.getSpec().getXp7DeploymentSpecNodeGroups() ) );
-                deployment.put( "minimumDataNodes", getMinimumDataNodes( resource.getSpec().getXp7DeploymentSpecNodeGroups() ) );
+                deployment.put( "clusterMajority", getClusterMajority( resource.getSpec().getNodeGroups() ) );
+                deployment.put( "minimumMasterNodes", getMinimumMasterNodes( resource.getSpec().getNodeGroups() ) );
+                deployment.put( "minimumDataNodes", getMinimumDataNodes( resource.getSpec().getNodeGroups() ) );
             }
 
             deployment.put( "spec", resource.getSpec() );
@@ -279,7 +279,7 @@ public class OperatorXp7DeploymentHelm
 
         private boolean hasDedicatedFrontendNodes( Xp7Deployment deployment )
         {
-            return deployment.getSpec().getXp7DeploymentSpecNodeGroups().stream()
+            return deployment.getSpec().getNodeGroups().stream()
                 .filter( n -> !n.getData() )
                 .anyMatch( n -> !n.getMaster() );
         }
@@ -293,32 +293,32 @@ public class OperatorXp7DeploymentHelm
             }
         }
 
-        private int getClusterMajority( final List<Xp7DeploymentSpecNodeGroup> xp7DeploymentSpecNodeGroups )
+        private int getClusterMajority( final List<NodeGroups> xp7DeploymentSpecNodeGroups )
         {
             return (xp7DeploymentSpecNodeGroups.stream().
-                map( Xp7DeploymentSpecNodeGroup::getReplicas ).
+                map( NodeGroups::getReplicas ).
                 reduce( 0, Integer::sum ) / 2) + 1;
         }
 
-        private int getMinimumMasterNodes( final List<Xp7DeploymentSpecNodeGroup> xp7DeploymentSpecNodeGroups )
+        private int getMinimumMasterNodes( final List<NodeGroups> xp7DeploymentSpecNodeGroups )
         {
             return (xp7DeploymentSpecNodeGroups.stream().
-                filter( Xp7DeploymentSpecNodeGroup::getMaster ).
-                map( Xp7DeploymentSpecNodeGroup::getReplicas ).
+                filter( NodeGroups::getMaster ).
+                map( NodeGroups::getReplicas ).
                 reduce( 0, Integer::sum ) / 2) + 1;
         }
 
-        private Object getMinimumDataNodes( final List<Xp7DeploymentSpecNodeGroup> xp7DeploymentSpecNodeGroups )
+        private Object getMinimumDataNodes( final List<NodeGroups> xp7DeploymentSpecNodeGroups )
         {
             return (xp7DeploymentSpecNodeGroups.stream().
-                filter( Xp7DeploymentSpecNodeGroup::getData ).
-                map( Xp7DeploymentSpecNodeGroup::getReplicas ).
+                filter( NodeGroups::getData ).
+                map( NodeGroups::getReplicas ).
                 reduce( 0, Integer::sum ) / 2) + 1;
         }
 
-        private String getMemoryOpts( final Xp7DeploymentSpecNodeGroup ng )
+        private String getMemoryOpts( final NodeGroups ng )
         {
-            double memoryInMb = getMemory( ng.getXp7DeploymentSpecNodeGroupResources().getMemory() );
+            double memoryInMb = getMemory( ng.getResources().getMemory() );
 
             double heapMemory;
             if (ng.getData()) {
@@ -361,9 +361,9 @@ public class OperatorXp7DeploymentHelm
         private boolean isClustered( Xp7Deployment resource )
         {
             return resource.getSpec().
-                getXp7DeploymentSpecNodeGroups().
+                getNodeGroups().
                 stream().
-                mapToInt( Xp7DeploymentSpecNodeGroup::getReplicas ).sum() > 1;
+                mapToInt( NodeGroups::getReplicas ).sum() > 1;
         }
 
         private static String joinOpts( String... opts )

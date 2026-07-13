@@ -1,8 +1,8 @@
 package com.enonic.kubernetes.operator.xp7deployment;
 
-import com.enonic.kubernetes.client.v1.xp7deployment.Xp7Deployment;
-import com.enonic.kubernetes.client.v1.xp7deployment.Xp7DeploymentSpecNodeGroup;
-import com.enonic.kubernetes.client.v1.xp7deployment.Xp7DeploymentStatus;
+import com.enonic.kubernetes.crd.v1.Xp7Deployment;
+import com.enonic.kubernetes.crd.v1.xp7deploymentspec.NodeGroups;
+import com.enonic.kubernetes.crd.v1.Xp7DeploymentStatus;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 
 import java.util.function.Predicate;
@@ -28,8 +28,8 @@ public class Predicates {
                 return true;
             }
             if (deployment.getSpec() != null) {
-                if (deployment.getSpec().getXp7DeploymentSpecNodeGroups() != null) {
-                    for (Xp7DeploymentSpecNodeGroup ng : deployment.getSpec().getXp7DeploymentSpecNodeGroups()) {
+                if (deployment.getSpec().getNodeGroups() != null) {
+                    for (NodeGroups ng : deployment.getSpec().getNodeGroups()) {
                         if (ng.getName().equals(nodeGroup)) {
                             return true;
                         }

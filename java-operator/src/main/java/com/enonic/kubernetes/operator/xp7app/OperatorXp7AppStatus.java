@@ -4,8 +4,8 @@ import com.enonic.kubernetes.apis.xp.XpClientCache;
 import com.enonic.kubernetes.apis.xp.XpClientException;
 import com.enonic.kubernetes.apis.xp.service.AppEvent;
 import com.enonic.kubernetes.apis.xp.service.AppEventType;
-import com.enonic.kubernetes.client.v1.xp7app.Xp7App;
-import com.enonic.kubernetes.client.v1.xp7deployment.Xp7Deployment;
+import com.enonic.kubernetes.crd.v1.Xp7App;
+import com.enonic.kubernetes.crd.v1.Xp7Deployment;
 import com.enonic.kubernetes.kubernetes.Clients;
 import com.enonic.kubernetes.kubernetes.Searchers;
 import com.enonic.kubernetes.operator.Operator;
@@ -114,7 +114,7 @@ public class OperatorXp7AppStatus
         }
 
         // If app version in XP does not match K8s
-        if (!appEvent.info().version().equals( app.getStatus().getXp7AppStatusFields().getXp7AppStatusFieldsAppInfo().getVersion() )) {
+        if (!appEvent.info().version().equals( app.getStatus().getFields().getAppInfo().getVersion() )) {
             triggerAppReinstall( clients, app );
             return;
         }

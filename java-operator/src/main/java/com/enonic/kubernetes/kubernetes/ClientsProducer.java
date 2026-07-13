@@ -3,14 +3,14 @@ package com.enonic.kubernetes.kubernetes;
 import javax.inject.Singleton;
 import javax.ws.rs.Produces;
 
-import com.enonic.kubernetes.client.DefaultEnonicKubernetesClient;
-import com.enonic.kubernetes.client.EnonicKubernetesClient;
+import com.enonic.kubernetes.crd.v1.Xp7App;
+import com.enonic.kubernetes.crd.v1.Xp7Config;
+import com.enonic.kubernetes.crd.v1.Xp7Deployment;
 
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 import io.quarkus.arc.profile.IfBuildProfile;
-import io.quarkus.arc.profile.UnlessBuildProfile;
 import io.quarkus.runtime.configuration.ProfileManager;
 
 import static com.enonic.kubernetes.common.SingletonAssert.singletonAssert;
@@ -26,14 +26,12 @@ public class ClientsProducer
 
         ProfileManager.getActiveProfile();
 
-        final NamespacedKubernetesClient defaultKubernetesClient = new DefaultKubernetesClient().inAnyNamespace();
-        final EnonicKubernetesClient client = new DefaultEnonicKubernetesClient(defaultKubernetesClient);
+        final NamespacedKubernetesClient k8s = new DefaultKubernetesClient().inAnyNamespace();
 
         return ClientsImpl.of(
-                client.k8s(),
-                client.enonic(),
-                client.enonic().v1().crds().xp7apps(),
-                client.enonic().v1().crds().xp7configs(),
-                client.enonic().v1().crds().xp7deployments() );
+                k8s,
+                k8s.resources( Xp7App.class ),
+                k8s.resources( Xp7Config.class ),
+                k8s.resources( Xp7Deployment.class ) );
     }
 }

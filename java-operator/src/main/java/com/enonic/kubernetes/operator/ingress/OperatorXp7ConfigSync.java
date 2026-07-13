@@ -1,6 +1,6 @@
 package com.enonic.kubernetes.operator.ingress;
 
-import com.enonic.kubernetes.client.v1.xp7config.Xp7Config;
+import com.enonic.kubernetes.crd.v1.Xp7Config;
 import com.enonic.kubernetes.kubernetes.Clients;
 import com.enonic.kubernetes.kubernetes.Searchers;
 import com.enonic.kubernetes.kubernetes.commands.K8sLogHelper;
@@ -126,7 +126,7 @@ public class OperatorXp7ConfigSync
             K8sLogHelper.logEdit( clients.xp7Configs().
                 inNamespace( xp7Config.getMetadata().getNamespace() ).
                 withName( xp7Config.getMetadata().getName() ), c -> {
-                c.getSpec().withData( data );
+                c.getSpec().setData( data );
                 return c;
             } );
         }

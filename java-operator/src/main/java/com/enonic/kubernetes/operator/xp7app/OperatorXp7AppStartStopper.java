@@ -1,8 +1,8 @@
 package com.enonic.kubernetes.operator.xp7app;
 
 import com.enonic.kubernetes.apis.xp.XpClientCache;
-import com.enonic.kubernetes.client.v1.xp7app.Xp7App;
-import com.enonic.kubernetes.client.v1.xp7deployment.Xp7Deployment;
+import com.enonic.kubernetes.crd.v1.Xp7App;
+import com.enonic.kubernetes.crd.v1.Xp7Deployment;
 import com.enonic.kubernetes.kubernetes.Informers;
 import com.enonic.kubernetes.kubernetes.Searchers;
 import com.enonic.kubernetes.operator.helpers.InformerEventHandler;
@@ -95,12 +95,12 @@ public class OperatorXp7AppStartStopper
         // Collect info
         Boolean enabled = xp7App.getSpec().getEnabled();
         String state = xp7App.getStatus()
-            .getXp7AppStatusFields()
-            .getXp7AppStatusFieldsAppInfo()
+            .getFields()
+            .getAppInfo()
             .getState();
         String key = xp7App.getStatus()
-            .getXp7AppStatusFields()
-            .getXp7AppStatusFieldsAppInfo()
+            .getFields()
+            .getAppInfo()
             .getKey();
         String namespace = xp7App.getMetadata().getNamespace();
         String name = xp7Deployment.get().getMetadata().getName();

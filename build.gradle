@@ -7,7 +7,6 @@ allprojects {
 }
 
 dependencies {
-    jacocoAggregation project(':java-client')
     jacocoAggregation project(':java-operator')
 }
 

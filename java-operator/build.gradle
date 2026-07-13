@@ -3,18 +3,41 @@ plugins {
     id 'jacoco'
     alias(libs.plugins.quarkus)
     alias(libs.plugins.gitProperties)
+    id 'io.fabric8.java-generator' version '6.7.2'
 }
 
+javaGen {
+    source = file("${rootDir}/helm/src/main/crds")
+    target = file("${buildDir}/generated/sources/crds/java")
+    packageOverrides = ['cloud.enonic.v1': 'com.enonic.kubernetes.crd.v1']
+}
+
+sourceSets.main.java.srcDirs += "${buildDir}/generated/sources/crds/java"
+tasks.named('compileJava') { dependsOn 'crd2java' }
+tasks.named('crd2java') { dependsOn ':helm:processHelmResources' }
+
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+// smallrye-open-api-core (pulled by quarkus-smallrye-openapi) transitively drags
+// microprofile-config-api 3.0, newer than the 2.0.1 Quarkus 2.16.6 is built against. That
+// mismatch breaks @ConfigProperty injection at runtime, so pin it back to the platform version.
+configurations.all {
+    resolutionStrategy {
+        force 'org.eclipse.microprofile.config:microprofile-config-api:2.0.1'
+    }
 }
 
 dependencies {
     implementation platform(libs.fabric8.bom)
-    implementation platform(libs.quarkus.universe.bom)
+    implementation platform(libs.quarkus.bom)
 
-    implementation project(":java-client")
+    implementation 'io.fabric8:generator-annotations'
+    api libs.fabric8.kubernetes.clientapi
+    implementation libs.fabric8.kubernetes.client
 
     implementation libs.okhttp3.okhttp
     implementation libs.okhttp3.okhttpsse
@@ -30,6 +53,7 @@ dependencies {
     implementation 'io.quarkus:quarkus-resteasy'
     implementation 'io.quarkus:quarkus-resteasy-jackson'
     implementation 'io.quarkus:quarkus-rest-client'
+    implementation 'io.quarkus:quarkus-smallrye-openapi'
 
     testImplementation 'io.quarkus:quarkus-junit5'
     testImplementation 'io.rest-assured:rest-assured'

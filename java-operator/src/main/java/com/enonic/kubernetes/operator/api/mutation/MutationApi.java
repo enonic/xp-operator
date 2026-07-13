@@ -1,18 +1,17 @@
 package com.enonic.kubernetes.operator.api.mutation;
 
-import com.enonic.kubernetes.client.v1.xp7app.Xp7App;
-import com.enonic.kubernetes.client.v1.xp7app.Xp7AppStatus;
-import com.enonic.kubernetes.client.v1.xp7app.Xp7AppStatusFields;
-import com.enonic.kubernetes.client.v1.xp7config.Xp7Config;
-import com.enonic.kubernetes.client.v1.xp7deployment.Xp7Deployment;
-import com.enonic.kubernetes.client.v1.xp7config.Xp7ConfigStatus;
-import com.enonic.kubernetes.client.v1.xp7deployment.Xp7DeploymentStatus;
-import com.enonic.kubernetes.client.v1.xp7deployment.Xp7DeploymentStatusFields;
+import com.enonic.kubernetes.crd.v1.Xp7App;
+import com.enonic.kubernetes.crd.v1.Xp7AppStatus;
+import com.enonic.kubernetes.crd.v1.Xp7Config;
+import com.enonic.kubernetes.crd.v1.Xp7Deployment;
+import com.enonic.kubernetes.crd.v1.Xp7ConfigStatus;
+import com.enonic.kubernetes.crd.v1.Xp7DeploymentStatus;
 import com.enonic.kubernetes.operator.api.AdmissionOperation;
 import com.enonic.kubernetes.operator.api.BaseAdmissionApi;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.io.BaseEncoding;
 import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.client.utils.Serialization;
 import io.fabric8.kubernetes.api.model.admission.v1.AdmissionResponseBuilder;
 import io.fabric8.kubernetes.api.model.admission.v1.AdmissionReview;
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
@@ -80,10 +79,10 @@ public class MutationApi
         Xp7App newR = (Xp7App) mt.getAdmissionReview().getRequest().getObject();
 
         // Create default status
-        Xp7AppStatus defStatus = new Xp7AppStatus().
-            withMessage( "Created" ).
-            withState( Xp7AppStatus.State.PENDING ).
-            withXp7AppStatusFields( new Xp7AppStatusFields() );
+        Xp7AppStatus defStatus = new Xp7AppStatus();
+        defStatus.setMessage( "Created" );
+        defStatus.setState( Xp7AppStatus.State.PENDING );
+        defStatus.setFields( new com.enonic.kubernetes.crd.v1.xp7appstatus.Fields() );
 
         // Get OP
         AdmissionOperation op = getOperation( mt.getAdmissionReview() );
@@ -135,9 +134,9 @@ public class MutationApi
         Xp7Config newR = (Xp7Config) mt.getAdmissionReview().getRequest().getObject();
 
         // Create default status
-        Xp7ConfigStatus defStatus = new Xp7ConfigStatus().
-            withMessage( "Not loaded" ).
-            withState( Xp7ConfigStatus.State.PENDING );
+        Xp7ConfigStatus defStatus = new Xp7ConfigStatus();
+        defStatus.setMessage( "Not loaded" );
+        defStatus.setState( Xp7ConfigStatus.State.PENDING );
 
         // Get OP
         AdmissionOperation op = getOperation( mt.getAdmissionReview() );
@@ -148,7 +147,7 @@ public class MutationApi
                 patch( mt, true, "/status", newR.getStatus(), defStatus );
                 break;
             case UPDATE:
-                if (newR.getSpec() != null && !newR.getSpec().equals( oldR.getSpec() )) {
+                if (newR.getSpec() != null && !Serialization.asJson( newR.getSpec() ).equals( Serialization.asJson( oldR.getSpec() ) )) {
                     // On any change change, set default status
                     patch( mt, true, "/status", newR.getStatus(), defStatus );
                 } else {
@@ -180,11 +179,13 @@ public class MutationApi
         final Xp7Deployment newR = (Xp7Deployment) mt.getAdmissionReview().getRequest().getObject();
 
         // Create default status
-        final Xp7DeploymentStatus defStatus = new Xp7DeploymentStatus().
-            withMessage( "Waiting for pods" ).
-            withState( Xp7DeploymentStatus.State.PENDING ).
-            withXp7DeploymentStatusFields( new Xp7DeploymentStatusFields().
-                withXp7DeploymentStatusFieldsPods( new LinkedList<>() ) );
+        final com.enonic.kubernetes.crd.v1.xp7deploymentstatus.Fields defStatusFields =
+            new com.enonic.kubernetes.crd.v1.xp7deploymentstatus.Fields();
+        defStatusFields.setPods( new LinkedList<>() );
+        final Xp7DeploymentStatus defStatus = new Xp7DeploymentStatus();
+        defStatus.setMessage( "Waiting for pods" );
+        defStatus.setState( Xp7DeploymentStatus.State.PENDING );
+        defStatus.setFields( defStatusFields );
 
         if(newR.getSpec() != null && newR.getSpec().getEnabled() != null && !newR.getSpec().getEnabled()) {
             defStatus.setState( Xp7DeploymentStatus.State.STOPPED );
@@ -200,7 +201,7 @@ public class MutationApi
                 patch( mt, true, "/status", newR.getStatus(), defStatus );
                 break;
             case UPDATE:
-                if (newR.getSpec() != null && !newR.getSpec().equals( oldR.getSpec() )) {
+                if (newR.getSpec() != null && !Serialization.asJson( newR.getSpec() ).equals( Serialization.asJson( oldR.getSpec() ) )) {
                     // On any change, set default status
                     patch( mt, true, "/status", newR.getStatus(), defStatus );
                 } else {

@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -36,6 +37,7 @@ public abstract class HelmTest
     {
         mapper = new ObjectMapper( new YAMLFactory() );
         mapper.configure( SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true );
+        mapper.configure( DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false );
         helm = new Helm();
         chartRepository = new LocalRepository( new File( cfgStr( "operator.charts.path" ) ) );
     }

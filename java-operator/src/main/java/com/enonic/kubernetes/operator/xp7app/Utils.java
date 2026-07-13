@@ -1,6 +1,6 @@
 package com.enonic.kubernetes.operator.xp7app;
 
-import com.enonic.kubernetes.client.v1.xp7app.Xp7App;
+import com.enonic.kubernetes.crd.v1.Xp7App;
 import com.enonic.kubernetes.kubernetes.Clients;
 import com.enonic.kubernetes.kubernetes.commands.K8sLogHelper;
 

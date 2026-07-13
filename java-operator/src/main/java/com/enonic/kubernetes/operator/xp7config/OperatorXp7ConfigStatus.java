@@ -1,7 +1,7 @@
 package com.enonic.kubernetes.operator.xp7config;
 
-import com.enonic.kubernetes.client.v1.xp7config.Xp7Config;
-import com.enonic.kubernetes.client.v1.xp7config.Xp7ConfigStatus;
+import com.enonic.kubernetes.crd.v1.Xp7Config;
+import com.enonic.kubernetes.crd.v1.Xp7ConfigStatus;
 import com.enonic.kubernetes.kubernetes.Clients;
 import com.enonic.kubernetes.kubernetes.Informers;
 import com.enonic.kubernetes.kubernetes.Searchers;
@@ -153,9 +153,13 @@ public class OperatorXp7ConfigStatus extends InformerEventHandler<Pod> {
 
         K8sLogHelper.logEdit(clients.xp7Configs()
                 .inNamespace(xp7Config.getMetadata().getNamespace())
-                .withName(xp7Config.getMetadata().getName()), c -> c.withStatus(new Xp7ConfigStatus()
-                .withState(Xp7ConfigStatus.State.READY)
-                .withMessage("OK")));
+                .withName(xp7Config.getMetadata().getName()), c -> {
+                    Xp7ConfigStatus status = new Xp7ConfigStatus();
+                    status.setState(Xp7ConfigStatus.State.READY);
+                    status.setMessage("OK");
+                    c.setStatus(status);
+                    return c;
+                });
     }
 
     private void markPending(final Xp7Config xp7Config, final List<Pod> notUpdatedPods) {
@@ -171,8 +175,12 @@ public class OperatorXp7ConfigStatus extends InformerEventHandler<Pod> {
 
         K8sLogHelper.logEdit(clients.xp7Configs()
                 .inNamespace(xp7Config.getMetadata().getNamespace())
-                .withName(xp7Config.getMetadata().getName()), c -> c.withStatus(new Xp7ConfigStatus()
-                .withState(Xp7ConfigStatus.State.PENDING)
-                .withMessage("Not loaded: " + podNames)));
+                .withName(xp7Config.getMetadata().getName()), c -> {
+                    Xp7ConfigStatus status = new Xp7ConfigStatus();
+                    status.setState(Xp7ConfigStatus.State.PENDING);
+                    status.setMessage("Not loaded: " + podNames);
+                    c.setStatus(status);
+                    return c;
+                });
     }
 }

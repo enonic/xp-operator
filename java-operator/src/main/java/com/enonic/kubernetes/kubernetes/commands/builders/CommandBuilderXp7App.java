@@ -5,15 +5,16 @@ import java.util.Optional;
 
 import org.immutables.value.Value;
 
+import io.fabric8.kubernetes.api.model.KubernetesResourceList;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 
-import com.enonic.kubernetes.client.v1.xp7app.Xp7App;
+import com.enonic.kubernetes.crd.v1.Xp7App;
 
 
 @Value.Immutable
 public abstract class CommandBuilderXp7App
-    extends GenericBuilder<MixedOperation<Xp7App, Xp7App.Xp7AppList, Resource<Xp7App>>, Xp7App>
+    extends GenericBuilder<MixedOperation<Xp7App, KubernetesResourceList<Xp7App>, Resource<Xp7App>>, Xp7App>
 {
     @Override
     protected Optional<Xp7App> getOldResource( final String namespace, final String name )

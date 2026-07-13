@@ -7,7 +7,8 @@ import com.enonic.kubernetes.apis.xp.XpClientException;
 import com.enonic.kubernetes.client.v1.api.xp7.idproviders.Xp7MgmtIdProvider;
 import com.enonic.kubernetes.client.v1.api.xp7.projects.Xp7MgmtProject;
 import com.enonic.kubernetes.client.v1.api.xp7.snapshots.Xp7MgmtSnapshotsList;
-import com.enonic.kubernetes.client.v1.xp7deployment.Xp7Deployment;
+import com.enonic.kubernetes.client.v1.api.xp7.webapps.Xp7MgmtWebapp;
+import com.enonic.kubernetes.crd.v1.Xp7Deployment;
 import com.enonic.kubernetes.kubernetes.Searchers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -136,8 +137,8 @@ public class Xp7ManagementApi
     @GET
     @Path("/xp7/{namespace}/{name}/{nodegroup}/mgmt/webapps/list")
     @Produces("application/json")
-    public List<Xp7MgmtProject> webappsList( @PathParam("namespace") final String namespace, @PathParam("name") final String name,
-                                              @PathParam("nodegroup") final String nodeGroup )
+    public List<Xp7MgmtWebapp> webappsList( @PathParam("namespace") final String namespace, @PathParam("name") final String name,
+                                            @PathParam("nodegroup") final String nodeGroup )
         throws KubernetesClientException
     {
         try

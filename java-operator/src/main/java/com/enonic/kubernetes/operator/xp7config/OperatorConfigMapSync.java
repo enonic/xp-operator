@@ -1,7 +1,7 @@
 package com.enonic.kubernetes.operator.xp7config;
 
-import com.enonic.kubernetes.client.v1.xp7config.Xp7Config;
-import com.enonic.kubernetes.client.v1.xp7deployment.Xp7DeploymentStatus;
+import com.enonic.kubernetes.crd.v1.Xp7Config;
+import com.enonic.kubernetes.crd.v1.Xp7DeploymentStatus;
 import com.enonic.kubernetes.common.TaskRunner;
 import com.enonic.kubernetes.kubernetes.ActionLimiter;
 import com.enonic.kubernetes.kubernetes.Clients;

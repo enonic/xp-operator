@@ -22,11 +22,12 @@ public class OperatorApi {
         Properties git = new Properties();
         git.load(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("git.properties")));
 
-        return new OperatorVersion()
-                .withVersion(git.getProperty("git.build.version"))
-                .withBuildDate(git.getProperty("git.build.time"))
-                .withGitCommit(git.getProperty("git.commit.id"))
-                .withGitTags(git.getProperty("git.tags"))
-                .withGitTreeState(git.getProperty("git.dirty").equals("true") ? "dirty" : "clean");
+        OperatorVersion operatorVersion = new OperatorVersion();
+        operatorVersion.setVersion(git.getProperty("git.build.version"));
+        operatorVersion.setBuildDate(git.getProperty("git.build.time"));
+        operatorVersion.setGitCommit(git.getProperty("git.commit.id"));
+        operatorVersion.setGitTags(git.getProperty("git.tags"));
+        operatorVersion.setGitTreeState(git.getProperty("git.dirty").equals("true") ? "dirty" : "clean");
+        return operatorVersion;
     }
 }

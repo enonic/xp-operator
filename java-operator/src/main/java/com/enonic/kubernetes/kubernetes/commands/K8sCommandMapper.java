@@ -1,8 +1,8 @@
 package com.enonic.kubernetes.kubernetes.commands;
 
-import com.enonic.kubernetes.client.v1.xp7app.Xp7App;
-import com.enonic.kubernetes.client.v1.xp7config.Xp7Config;
-import com.enonic.kubernetes.client.v1.xp7deployment.Xp7Deployment;
+import com.enonic.kubernetes.crd.v1.Xp7App;
+import com.enonic.kubernetes.crd.v1.Xp7Config;
+import com.enonic.kubernetes.crd.v1.Xp7Deployment;
 import com.enonic.kubernetes.kubernetes.Clients;
 import com.enonic.kubernetes.kubernetes.commands.builders.GenericBuilderParams;
 import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilderClusterRole;

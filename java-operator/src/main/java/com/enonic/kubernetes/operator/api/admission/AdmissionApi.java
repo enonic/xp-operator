@@ -1,11 +1,10 @@
 package com.enonic.kubernetes.operator.api.admission;
 
-import com.enonic.kubernetes.client.v1.xp7app.Xp7App;
-import com.enonic.kubernetes.client.v1.xp7config.Xp7Config;
-import com.enonic.kubernetes.client.v1.xp7deployment.Xp7Deployment;
-import com.enonic.kubernetes.client.v1.xp7deployment.Xp7DeploymentSpecNodeGroup;
-import com.enonic.kubernetes.client.v1.xp7deployment.Xp7DeploymentSpecNodeGroupSidecar;
-import com.enonic.kubernetes.common.Validator;
+import com.enonic.kubernetes.crd.v1.Xp7App;
+import com.enonic.kubernetes.crd.v1.Xp7Config;
+import com.enonic.kubernetes.crd.v1.Xp7Deployment;
+import com.enonic.kubernetes.crd.v1.xp7deploymentspec.NodeGroups;
+import com.enonic.kubernetes.crd.v1.xp7deploymentspec.nodegroups.Sidecars;
 import com.enonic.kubernetes.operator.api.AdmissionOperation;
 import com.enonic.kubernetes.operator.api.BaseAdmissionApi;
 import com.enonic.kubernetes.operator.ingress.Mapping;
@@ -130,7 +129,7 @@ public class AdmissionApi
         Preconditions.checkState( newApp.getStatus() != null, "'status' cannot be null" );
         Preconditions.checkState( newApp.getStatus().getMessage() != null, "'status.message' cannot be null" );
         Preconditions.checkState( newApp.getStatus().getState() != null, "'status.state' cannot be null" );
-        Preconditions.checkState( newApp.getStatus().getXp7AppStatusFields() != null, "'status.fields' cannot be null" );
+        Preconditions.checkState( newApp.getStatus().getFields() != null, "'status.fields' cannot be null" );
 
         if ( op == AdmissionOperation.CREATE )
         {
@@ -195,28 +194,28 @@ public class AdmissionApi
             Preconditions.checkState( newDeployment.getSpec() != null, "'spec' cannot be null" );
             Preconditions.checkState( newDeployment.getSpec().getEnabled() != null, "'spec.enabled' cannot be null" );
             Preconditions.checkState( newDeployment.getSpec().getXpVersion() != null, "'spec.xpVersion' cannot be null" );
-            Preconditions.checkState( newDeployment.getSpec().getXp7DeploymentSpecNodesSharedDisks() != null,
+            Preconditions.checkState( newDeployment.getSpec().getNodesSharedDisks() != null,
                                       "'spec.nodesSharedDisks' cannot be null" );
-            Preconditions.checkState( newDeployment.getSpec().getXp7DeploymentSpecNodeGroups() != null,
+            Preconditions.checkState( newDeployment.getSpec().getNodeGroups() != null,
                                       "'spec.nodeGroups' cannot be null" );
 
-            Preconditions.checkState( newDeployment.getSpec().getXp7DeploymentSpecNodeGroups() != null,
+            Preconditions.checkState( newDeployment.getSpec().getNodeGroups() != null,
                                       "'spec.nodeGroups' cannot be null" );
 
             // Check status
             Preconditions.checkState( newDeployment.getStatus() != null, "'status' cannot be null" );
             Preconditions.checkState( newDeployment.getStatus().getMessage() != null, "'status.message' cannot be null" );
             Preconditions.checkState( newDeployment.getStatus().getState() != null, "'status.state' cannot be null" );
-            Preconditions.checkState( newDeployment.getStatus().getXp7DeploymentStatusFields() != null, "'status.fields' cannot be null" );
-            Preconditions.checkState( newDeployment.getStatus().getXp7DeploymentStatusFields().getXp7DeploymentStatusFieldsPods() != null,
+            Preconditions.checkState( newDeployment.getStatus().getFields() != null, "'status.fields' cannot be null" );
+            Preconditions.checkState( newDeployment.getStatus().getFields().getPods() != null,
                                       "'status.fields.pods' cannot be null" );
 
             // Check node groups
             int nrOfMasterNodes = 0;
-            final List<Xp7DeploymentSpecNodeGroup> xp7DeploymentSpecNodeGroups = newDeployment.getSpec().getXp7DeploymentSpecNodeGroups();
+            final List<NodeGroups> xp7DeploymentSpecNodeGroups = newDeployment.getSpec().getNodeGroups();
             for ( int i = 0; i < xp7DeploymentSpecNodeGroups.size(); i++ )
             {
-                final Xp7DeploymentSpecNodeGroup ng = xp7DeploymentSpecNodeGroups.get( i );
+                final NodeGroups ng = xp7DeploymentSpecNodeGroups.get( i );
 
                 Preconditions.checkState( ng.getName() != null, "'spec.nodeGroups[" + i + "].name' cannot be null" );
                 Preconditions.checkState( !ng.getName().equals( cfgStr( "operator.charts.values.allNodesKey" ) ),
@@ -226,25 +225,25 @@ public class AdmissionApi
                 Preconditions.checkState( ng.getMaster() != null, "'spec.nodeGroups[" + i + "].master' cannot be null" );
                 Preconditions.checkState( ng.getReplicas() != null, "'spec.nodeGroups[" + i + "].replicas' cannot be null" );
                 Preconditions.checkState( ng.getReplicas() >= 0, "'spec.nodeGroups[" + i + "].replicas' has to be >= 0" );
-                Preconditions.checkState( ng.getXp7DeploymentSpecNodeGroupEnvironment() != null,
+                Preconditions.checkState( ng.getEnv() != null,
                                           "'spec.nodeGroups[" + i + "].env' cannot be null" );
-                Preconditions.checkState( ng.getXp7DeploymentSpecNodeGroupResources() != null,
+                Preconditions.checkState( ng.getResources() != null,
                                           "'spec.nodeGroups[" + i + "].resources' cannot be null" );
-                Preconditions.checkState( ng.getXp7DeploymentSpecNodeGroupResources().getCpu() != null,
+                Preconditions.checkState( ng.getResources().getCpu() != null,
                                           "'spec.nodeGroups[" + i + "].resources.cpu' cannot be null" );
-                Preconditions.checkState( ng.getXp7DeploymentSpecNodeGroupResources().getMemory() != null,
+                Preconditions.checkState( ng.getResources().getMemory() != null,
                                           "'spec.nodeGroups[" + i + "].resources.memory' cannot be null" );
-                Preconditions.checkState( ng.getXp7DeploymentSpecNodeGroupResources().getMemory().contains( "Mi" ) ||
-                                              ng.getXp7DeploymentSpecNodeGroupResources().getMemory().contains( "Gi" ),
+                Preconditions.checkState( ng.getResources().getMemory().contains( "Mi" ) ||
+                                              ng.getResources().getMemory().contains( "Gi" ),
                                           "'spec.nodeGroups[" + i + "].resources.memory' can only be defined with Gi or Mi" );
-                Preconditions.checkState( ng.getXp7DeploymentSpecNodeGroupResources().getXp7DeploymentSpecNodeGroupDisks() != null,
+                Preconditions.checkState( ng.getResources().getDisks() != null,
                                           "'spec.nodeGroups[" + i + "].resources.disks' cannot be null" );
 
                 // Check disks
                 if ( ng.getData() )
                 {
-                    Preconditions.checkState( ng.getXp7DeploymentSpecNodeGroupResources()
-                                                  .getXp7DeploymentSpecNodeGroupDisks()
+                    Preconditions.checkState( ng.getResources()
+                                                  .getDisks()
                                                   .stream()
                                                   .anyMatch( d -> d.getName().equals( "index" ) ),
                                               "nodes with data=true must have disk 'index' defined" );
@@ -256,15 +255,15 @@ public class AdmissionApi
                 }
 
                 //check sidecars
-                Preconditions.checkState( ng.getXp7DeploymentSpecNodeGroupSidecars() != null,
+                Preconditions.checkState( ng.getSidecars() != null,
                                           "'spec.nodeGroups[" + i + "].sidecars' cannot be null" );
 
-                final List<Xp7DeploymentSpecNodeGroupSidecar> xp7DeploymentSpecNodeGroupSidecars =
-                    ng.getXp7DeploymentSpecNodeGroupSidecars();
+                final List<Sidecars> xp7DeploymentSpecNodeGroupSidecars =
+                    ng.getSidecars();
 
                 for ( int j = 0; j < xp7DeploymentSpecNodeGroupSidecars.size(); j++ )
                 {
-                    final Xp7DeploymentSpecNodeGroupSidecar sidecar = xp7DeploymentSpecNodeGroupSidecars.get( j );
+                    final Sidecars sidecar = xp7DeploymentSpecNodeGroupSidecars.get( j );
 
                     Preconditions.checkState( sidecar.getName() != null,
                                               "'spec.nodeGroups[" + i + "].sidecars[" + j + "].name' cannot be null" );
@@ -341,9 +340,9 @@ public class AdmissionApi
         {
             final Set<String> xpDeploymentNodeGroups = xp7Deployments.get()
                 .getSpec()
-                .getXp7DeploymentSpecNodeGroups()
+                .getNodeGroups()
                 .stream()
-                .map( Xp7DeploymentSpecNodeGroup::getName )
+                .map( NodeGroups::getName )
                 .collect( Collectors.toSet() );
             final Set<String> tmp = new HashSet<>( nodeGroups );
             tmp.removeAll( xpDeploymentNodeGroups );

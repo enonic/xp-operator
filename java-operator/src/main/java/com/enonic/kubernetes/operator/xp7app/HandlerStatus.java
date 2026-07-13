@@ -4,14 +4,14 @@ import com.enonic.kubernetes.apis.xp.XpClientCache;
 import com.enonic.kubernetes.apis.xp.XpClientException;
 import com.enonic.kubernetes.apis.xp.service.AppEvent;
 import com.enonic.kubernetes.apis.xp.service.AppInfo;
-import com.enonic.kubernetes.client.v1.xp7app.Xp7App;
-import com.enonic.kubernetes.client.v1.xp7app.Xp7AppStatus;
-import com.enonic.kubernetes.client.v1.xp7app.Xp7AppStatusFields;
-import com.enonic.kubernetes.client.v1.xp7app.Xp7AppStatusFieldsAppInfo;
-import com.enonic.kubernetes.client.v1.xp7deployment.Xp7Deployment;
+import com.enonic.kubernetes.crd.v1.Xp7App;
+import com.enonic.kubernetes.crd.v1.Xp7AppStatus;
+import com.enonic.kubernetes.crd.v1.xp7appstatus.Fields;
+import com.enonic.kubernetes.crd.v1.Xp7Deployment;
 import com.enonic.kubernetes.kubernetes.Clients;
 import com.enonic.kubernetes.kubernetes.Searchers;
 import com.enonic.kubernetes.kubernetes.commands.K8sLogHelper;
+import io.fabric8.kubernetes.client.utils.Serialization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +46,7 @@ public class HandlerStatus
 
         if (successfullyInstalled().test( app ) && running().test( deployment )) {
             try {
-                appInfo = xpClientCache.appInfo( deployment.getMetadata().getNamespace(), deployment.getMetadata().getName(), app.getStatus().getXp7AppStatusFields().getXp7AppStatusFieldsAppInfo().getKey() );
+                appInfo = xpClientCache.appInfo( deployment.getMetadata().getNamespace(), deployment.getMetadata().getName(), app.getStatus().getFields().getAppInfo().getKey() );
             } catch (XpClientException e) {
                 return updateStatus( Optional.of( app ), findDeployment( app.getMetadata().getNamespace() ), appInfo, Optional.of( "Unable to connect to XP" ) );
             }
@@ -142,23 +142,27 @@ public class HandlerStatus
 
     protected boolean setStatus( final Xp7App app, final Xp7AppStatus.State state, final String message, final Optional<AppInfo> appInfo )
     {
-        final Xp7AppStatus newStatus = new Xp7AppStatus()
-            .withState( state )
-            .withMessage( message )
-            .withXp7AppStatusFields( appInfo.map( i -> new Xp7AppStatusFields()
-                .withXp7AppStatusFieldsAppInfo( new Xp7AppStatusFieldsAppInfo()
-                    .withDescription( i.description() )
-                    .withDisplayName( i.displayName() )
-                    .withKey( i.key() )
-                    .withModifiedTime( i.modifiedTime() )
-                    .withState( i.state() )
-                    .withUrl( i.url() )
-                    .withVendorName( i.vendorName() )
-                    .withVendorUrl( i.vendorUrl() )
-                    .withVersion( i.version() ) ) )
-                .orElse( app.getStatus().getXp7AppStatusFields() ) );
+        final Xp7AppStatus newStatus = new Xp7AppStatus();
+        newStatus.setState( state );
+        newStatus.setMessage( message );
+        newStatus.setFields( appInfo.map( i -> {
+            com.enonic.kubernetes.crd.v1.xp7appstatus.fields.AppInfo statusAppInfo =
+                new com.enonic.kubernetes.crd.v1.xp7appstatus.fields.AppInfo();
+            statusAppInfo.setDescription( i.description() );
+            statusAppInfo.setDisplayName( i.displayName() );
+            statusAppInfo.setKey( i.key() );
+            statusAppInfo.setModifiedTime( i.modifiedTime() );
+            statusAppInfo.setState( i.state() );
+            statusAppInfo.setUrl( i.url() );
+            statusAppInfo.setVendorName( i.vendorName() );
+            statusAppInfo.setVendorUrl( i.vendorUrl() );
+            statusAppInfo.setVersion( i.version() );
+            Fields fields = new Fields();
+            fields.setAppInfo( statusAppInfo );
+            return fields;
+        } ).orElse( app.getStatus().getFields() ) );
 
-        if (!newStatus.equals( app.getStatus() )) {
+        if (!Serialization.asJson( newStatus ).equals( Serialization.asJson( app.getStatus() ) )) {
             log.debug("Set App status : {} {} in {}", newStatus.getState(), app.getMetadata().getName(), app.getMetadata().getNamespace() );
 
             K8sLogHelper.logEdit( clients.xp7Apps().
