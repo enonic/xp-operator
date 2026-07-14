@@ -1,11 +1,5 @@
 DOCKER_IMAGE:=enonic/xp-operator
 
-# Pin the JDK to the version in .sdkmanrc (installed via sdkman) so Gradle runs on the
-# right JDK regardless of the shell's default. Gradle 8.13 does not run on newer JDKs.
-SDKMAN_JAVA:=$(shell sed -n 's/^java=//p' .sdkmanrc)
-JAVA_HOME:=$(HOME)/.sdkman/candidates/java/$(SDKMAN_JAVA)
-export JAVA_HOME
-
 .PHONY: help build clean test
 .DEFAULT_GOAL:=help
 

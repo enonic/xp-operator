@@ -22,9 +22,11 @@ java {
     }
 }
 
-// smallrye-open-api-core (pulled by quarkus-smallrye-openapi) transitively drags
-// microprofile-config-api 3.0, newer than the 2.0.1 Quarkus 2.16.6 is built against. That
-// mismatch breaks @ConfigProperty injection at runtime, so pin it back to the platform version.
+// quarkus-smallrye-openapi pulls smallrye-open-api-core, which transitively requires
+// microprofile-config-api 3.0. Gradle conflict resolution picks that over the quarkus-bom's
+// 2.0.1 constraint (a BOM sets a recommended minimum, not a hard cap), and 3.0 breaks Quarkus
+// 2.16.6's @ConfigProperty CDI injection at runtime. force is the only thing that overrides
+// conflict resolution back to the 2.0.1 that Quarkus 2.16.6 is built against.
 configurations.all {
     resolutionStrategy {
         force 'org.eclipse.microprofile.config:microprofile-config-api:2.0.1'

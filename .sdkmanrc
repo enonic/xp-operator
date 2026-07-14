@@ -1,3 +1,0 @@
-# Pins the JDK for this project (sdkman). Run `sdk env install` to install it,
-# `sdk env` to switch. The Makefile also reads this to set JAVA_HOME for Gradle.
-java=17.0.8.1-tem
