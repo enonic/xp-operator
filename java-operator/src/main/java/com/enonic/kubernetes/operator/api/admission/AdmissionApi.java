@@ -1,6 +1,5 @@
 package com.enonic.kubernetes.operator.api.admission;
 
-import com.enonic.kubernetes.crd.v1.Xp7App;
 import com.enonic.kubernetes.crd.v1.Xp7Config;
 import com.enonic.kubernetes.crd.v1.Xp7Deployment;
 import com.enonic.kubernetes.crd.v1.xp7deploymentspec.NodeGroups;
@@ -53,7 +52,6 @@ public class AdmissionApi
     public AdmissionApi()
     {
         super();
-        addFunction( Xp7App.class, this::xp7app );
         addFunction( Xp7Config.class, this::xp7config );
         addFunction( Xp7Deployment.class, this::xp7deployment );
         addFunction( Ingress.class, this::ingress );
@@ -106,34 +104,6 @@ public class AdmissionApi
             Preconditions.checkArgument( paths.contains( m.source() ), String.format(
                 "source '%s' in 'enonic.cloud/xp7.vhost.mapping' annotation not defined in ingress rules on host %s, port 8080", m.source(),
                 m.host() ) );
-        }
-    }
-
-    private void xp7app( AdmissionReview admissionReview )
-    {
-        final AdmissionOperation op = getOperation( admissionReview );
-
-        if ( op == AdmissionOperation.DELETE )
-        {
-            return;
-        }
-
-        final Xp7App newApp = (Xp7App) admissionReview.getRequest().getObject();
-
-        // Check spec
-        Preconditions.checkState( newApp.getSpec() != null, "'spec' cannot be null" );
-        Preconditions.checkState( newApp.getSpec().getUrl() != null, "'spec.url' cannot be null" );
-        Preconditions.checkState( newApp.getSpec().getEnabled() != null, "'spec.enabled' cannot be null" );
-
-        // Check status
-        Preconditions.checkState( newApp.getStatus() != null, "'status' cannot be null" );
-        Preconditions.checkState( newApp.getStatus().getMessage() != null, "'status.message' cannot be null" );
-        Preconditions.checkState( newApp.getStatus().getState() != null, "'status.state' cannot be null" );
-        Preconditions.checkState( newApp.getStatus().getFields() != null, "'status.fields' cannot be null" );
-
-        if ( op == AdmissionOperation.CREATE )
-        {
-            assertXp7Deployment( admissionReview, null );
         }
     }
 

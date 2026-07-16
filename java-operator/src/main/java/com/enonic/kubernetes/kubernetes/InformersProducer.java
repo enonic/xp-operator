@@ -1,6 +1,5 @@
 package com.enonic.kubernetes.kubernetes;
 
-import com.enonic.kubernetes.crd.v1.Xp7App;
 import com.enonic.kubernetes.crd.v1.Xp7Config;
 import com.enonic.kubernetes.crd.v1.Xp7Deployment;
 
@@ -45,7 +44,6 @@ public class InformersProducer
             .namespaceInformer( namespaceInformer( sf ) )
             .podInformer( podInformer( sf ) )
             .eventInformer( eventInformer( sf ) )
-            .xp7AppInformer( xp7AppInformer( sf ) )
             .xp7ConfigInformer( xp7ConfigInformer( sf ) )
             .xp7DeploymentInformer( xp7DeploymentInformer( sf ) )
             .build();
@@ -74,11 +72,6 @@ public class InformersProducer
     private SharedIndexInformer<Event> eventInformer( final SharedInformerFactory sf )
     {
         return sf.sharedIndexInformerFor( Event.class, informerReSync );
-    }
-
-    private SharedIndexInformer<Xp7App> xp7AppInformer( final SharedInformerFactory sf )
-    {
-        return sf.sharedIndexInformerFor( Xp7App.class, informerReSync );
     }
 
     private SharedIndexInformer<Xp7Config> xp7ConfigInformer( final SharedInformerFactory sf )

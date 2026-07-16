@@ -1,6 +1,5 @@
 package com.enonic.kubernetes.kubernetes;
 
-import com.enonic.kubernetes.crd.v1.Xp7App;
 import com.enonic.kubernetes.crd.v1.Xp7Config;
 import com.enonic.kubernetes.crd.v1.Xp7Deployment;
 import com.enonic.kubernetes.common.annotations.Params;
@@ -22,8 +21,6 @@ public interface Searchers
     InformerSearcher<Namespace> namespace();
 
     InformerSearcher<Pod> pod();
-
-    InformerSearcher<Xp7App> xp7App();
 
     InformerSearcher<Xp7Config> xp7Config();
 
