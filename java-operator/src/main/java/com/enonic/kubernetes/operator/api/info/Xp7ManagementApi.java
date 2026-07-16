@@ -4,6 +4,10 @@ import com.enonic.kubernetes.apis.xp.XpClient;
 import com.enonic.kubernetes.apis.xp.XpClientCache;
 import com.enonic.kubernetes.apis.xp.XpClientCacheKeyImpl;
 import com.enonic.kubernetes.apis.xp.XpClientException;
+import com.enonic.kubernetes.apis.xp.service.AppInfo;
+import com.enonic.kubernetes.apis.xp.service.AppInstallRequest;
+import com.enonic.kubernetes.apis.xp.service.AppInstallResponse;
+import com.enonic.kubernetes.apis.xp.service.AppKey;
 import com.enonic.kubernetes.client.v1.api.xp7.idproviders.Xp7MgmtIdProvider;
 import com.enonic.kubernetes.client.v1.api.xp7.projects.Xp7MgmtProject;
 import com.enonic.kubernetes.client.v1.api.xp7.snapshots.Xp7MgmtSnapshotsList;
@@ -21,7 +25,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -148,6 +154,97 @@ public class Xp7ManagementApi
         catch ( Exception e )
         {
             logger.error( "Failed listing webapps", e );
+            throw k8sException( 500, e.getMessage() );
+        }
+    }
+
+    @GET
+    @Path("/xp7/{namespace}/{name}/{nodegroup}/mgmt/apps/list")
+    @Produces("application/json")
+    public List<AppInfo> appsList( @PathParam("namespace") final String namespace, @PathParam("name") final String name,
+                                   @PathParam("nodegroup") final String nodeGroup )
+        throws KubernetesClientException
+    {
+        try
+        {
+            return getClient( namespace, name, nodeGroup ).appList();
+        }
+        catch ( Exception e )
+        {
+            logger.error( "Failed listing apps", e );
+            throw k8sException( 500, e.getMessage() );
+        }
+    }
+
+    @POST
+    @Path("/xp7/{namespace}/{name}/{nodegroup}/mgmt/apps/install")
+    @Consumes("application/json")
+    @Produces("application/json")
+    public AppInstallResponse appInstall( @PathParam("namespace") final String namespace, @PathParam("name") final String name,
+                                          @PathParam("nodegroup") final String nodeGroup, final AppInstallRequest request )
+        throws KubernetesClientException
+    {
+        try
+        {
+            return getClient( namespace, name, nodeGroup ).appInstall( request );
+        }
+        catch ( Exception e )
+        {
+            logger.error( "Failed installing app", e );
+            throw k8sException( 500, e.getMessage() );
+        }
+    }
+
+    @POST
+    @Path("/xp7/{namespace}/{name}/{nodegroup}/mgmt/apps/uninstall")
+    @Consumes("application/json")
+    public void appUninstall( @PathParam("namespace") final String namespace, @PathParam("name") final String name,
+                              @PathParam("nodegroup") final String nodeGroup, final AppKey key )
+        throws KubernetesClientException
+    {
+        try
+        {
+            getClient( namespace, name, nodeGroup ).appUninstall( key );
+        }
+        catch ( Exception e )
+        {
+            logger.error( "Failed uninstalling app", e );
+            throw k8sException( 500, e.getMessage() );
+        }
+    }
+
+    @POST
+    @Path("/xp7/{namespace}/{name}/{nodegroup}/mgmt/apps/start")
+    @Consumes("application/json")
+    public void appStart( @PathParam("namespace") final String namespace, @PathParam("name") final String name,
+                          @PathParam("nodegroup") final String nodeGroup, final AppKey key )
+        throws KubernetesClientException
+    {
+        try
+        {
+            getClient( namespace, name, nodeGroup ).appStart( key );
+        }
+        catch ( Exception e )
+        {
+            logger.error( "Failed starting app", e );
+            throw k8sException( 500, e.getMessage() );
+        }
+    }
+
+    @POST
+    @Path("/xp7/{namespace}/{name}/{nodegroup}/mgmt/apps/stop")
+    @Consumes("application/json")
+    public void appStop( @PathParam("namespace") final String namespace, @PathParam("name") final String name,
+                         @PathParam("nodegroup") final String nodeGroup, final AppKey key )
+        throws KubernetesClientException
+    {
+        try
+        {
+            getClient( namespace, name, nodeGroup ).appStop( key );
+        }
+        catch ( Exception e )
+        {
+            logger.error( "Failed stopping app", e );
             throw k8sException( 500, e.getMessage() );
         }
     }

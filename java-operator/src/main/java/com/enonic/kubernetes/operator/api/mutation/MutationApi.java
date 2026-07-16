@@ -1,7 +1,5 @@
 package com.enonic.kubernetes.operator.api.mutation;
 
-import com.enonic.kubernetes.crd.v1.Xp7App;
-import com.enonic.kubernetes.crd.v1.Xp7AppStatus;
 import com.enonic.kubernetes.crd.v1.Xp7Config;
 import com.enonic.kubernetes.crd.v1.Xp7Deployment;
 import com.enonic.kubernetes.crd.v1.Xp7ConfigStatus;
@@ -39,7 +37,6 @@ public class MutationApi
     public MutationApi()
     {
         super();
-        addFunction( Xp7App.class, this::xp7app );
         addFunction( Xp7Config.class, this::xp7config );
         addFunction( Xp7Deployment.class, this::xp7deployment );
         addFunction( Ingress.class, this::ingress );
@@ -69,61 +66,6 @@ public class MutationApi
             builder.
                 withPatch( BaseEncoding.base64().encode( mapper.writeValueAsString( mutationRequest.getPatches() ).getBytes() ) ).
                 withPatchType( "JSONPatch" );
-        }
-    }
-
-    private void xp7app( MutationRequest mt )
-    {
-        // Collect old and new object
-        Xp7App oldR = (Xp7App) mt.getAdmissionReview().getRequest().getOldObject();
-        Xp7App newR = (Xp7App) mt.getAdmissionReview().getRequest().getObject();
-
-        // Create default status
-        Xp7AppStatus defStatus = new Xp7AppStatus();
-        defStatus.setMessage( "Created" );
-        defStatus.setState( Xp7AppStatus.State.PENDING );
-        defStatus.setFields( new com.enonic.kubernetes.crd.v1.xp7appstatus.Fields() );
-
-        // Get OP
-        AdmissionOperation op = getOperation( mt.getAdmissionReview() );
-
-        // Ensure status
-        switch (op) {
-            case CREATE: // Always set the default status on new objects
-                patch( mt, true, "/status", newR.getStatus(), defStatus );
-                break;
-            case UPDATE:
-                if (newR.getSpec() != null && !newR.getSpec().getUrl().equals( oldR.getSpec().getUrl() )) {
-                    // On url change, set default status
-                    patch( mt, true, "/status", newR.getStatus(), defStatus );
-                } else {
-                    // Else make sure the old status is not removed
-                    patch( mt, false, "/status", newR.getStatus(), oldR.getStatus() );
-                }
-                break;
-            case DELETE:
-                // Set pending deletion status
-                oldR.getStatus().setState( Xp7AppStatus.State.PENDING );
-                oldR.getStatus().setMessage( "Pending deletion" );
-                patch( mt, true, "/status", newR.getStatus(), oldR.getStatus() );
-                break;
-        }
-
-        // Ensure enabled
-        patch( mt, false, "/spec/enabled", newR.getSpec().getEnabled(), true );
-
-        if (op == AdmissionOperation.CREATE) {
-            // Ensure finalizers
-            List<String> oldFinalizers = ((HasMetadata) mt.getAdmissionReview().getRequest().getObject()).getMetadata().getFinalizers();
-            Set<String> newFinalizers = oldFinalizers != null ? new HashSet<>( oldFinalizers ) : new HashSet<>();
-            String uninstallFinalizer = cfgStr( "operator.charts.values.finalizers.app.uninstall" );
-            if (!newFinalizers.contains( uninstallFinalizer )) {
-                newFinalizers.add( uninstallFinalizer );
-                patch( mt, true, "/metadata/finalizers", null, newFinalizers );
-            }
-
-            // Ensure owner reference
-            ensureOwnerReference( mt );
         }
     }
 

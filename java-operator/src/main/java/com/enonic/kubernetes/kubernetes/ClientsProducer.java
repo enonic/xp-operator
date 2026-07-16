@@ -3,7 +3,6 @@ package com.enonic.kubernetes.kubernetes;
 import javax.inject.Singleton;
 import javax.ws.rs.Produces;
 
-import com.enonic.kubernetes.crd.v1.Xp7App;
 import com.enonic.kubernetes.crd.v1.Xp7Config;
 import com.enonic.kubernetes.crd.v1.Xp7Deployment;
 
@@ -30,7 +29,6 @@ public class ClientsProducer
 
         return ClientsImpl.of(
                 k8s,
-                k8s.resources( Xp7App.class ),
                 k8s.resources( Xp7Config.class ),
                 k8s.resources( Xp7Deployment.class ) );
     }

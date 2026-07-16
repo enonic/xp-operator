@@ -115,14 +115,10 @@ __  ____  __  _____   ___  __ ____  ______
 2024-01-02 23:12:25,808 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorIngress'
 2024-01-02 23:12:25,889 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXpClientCacheInvalidate'
 2024-01-02 23:12:27,738 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7DeploymentHelm'
-2024-01-02 23:12:27,787 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppStatusOnDeployments'
 2024-01-02 23:12:27,799 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorDeleteAnnotation'
 2024-01-02 23:12:27,803 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorInformers' [delay: 16337, period: 30000]
 2024-01-02 23:12:27,803 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7ConfigStatus'
 2024-01-02 23:12:27,804 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorIngressLabel'
-2024-01-02 23:12:27,804 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppInstaller'
-2024-01-02 23:12:27,805 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7AppInstaller' [delay: 15212, period: 60000]
-2024-01-02 23:12:27,805 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppInstallerOnDeployments'
 2024-01-02 23:12:27,806 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorConfigMapEvent'
 2024-01-02 23:12:27,803 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorConfigMapSync' [delay: 13252, period: 60000]
 2024-01-02 23:12:27,804 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorIngressLabel' [delay: 6622, period: 60000]
@@ -130,11 +126,8 @@ __  ____  __  _____   ___  __ ____  ______
 2024-01-02 23:12:27,807 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorIngressCertSync'
 2024-01-02 23:12:27,807 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7ConfigSync' [delay: 10124, period: 60000]
 2024-01-02 23:12:27,808 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorDomainCertSync'
-2024-01-02 23:12:27,809 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppStartStopper'
-2024-01-02 23:12:27,809 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7AppStartStopper' [delay: 14806, period: 60000]
 2024-01-02 23:12:27,809 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7DeploymentStatus'
 2024-01-02 23:12:27,810 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7DeploymentStatus' [delay: 4146, period: 60000]
-2024-01-02 23:12:27,810 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7AppStatus' [delay: 19524, period: 60000]
 2024-01-02 23:12:32,807 INFO  com.eno.kub.ope.Operator - Starting informers
 ----
 
@@ -183,7 +176,6 @@ kubectl apply -f simple.yaml
 ----
 namespace/my-namespace created
 xp7deployment.enonic.cloud/my-deployment created
-xp7app.enonic.cloud/contentstudio created
 xp7config.enonic.cloud/my-config created
 ingress.networking.k8s.io/my-domain-com created
 ----
