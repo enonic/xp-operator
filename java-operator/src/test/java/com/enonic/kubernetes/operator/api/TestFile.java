@@ -4,7 +4,7 @@ import java.util.List;
 
 import io.fabric8.kubernetes.api.model.admission.v1.AdmissionReview;
 import org.immutables.value.Value;
-import org.wildfly.common.annotation.Nullable;
+import io.micronaut.core.annotation.Nullable;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 

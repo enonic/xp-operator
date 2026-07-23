@@ -1,28 +1,25 @@
 package com.enonic.kubernetes.operator.api.info;
 
-import org.eclipse.microprofile.config.inject.ConfigProperty;
+import io.micronaut.context.annotation.Value;
+import io.micronaut.http.annotation.Controller;
+import io.micronaut.http.annotation.Get;
+import io.micronaut.http.annotation.Produces;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-@ApplicationScoped
-@Path("/apis/operator.enonic.cloud/v1")
+@Controller("/apis/operator.enonic.cloud/v1")
 public class InfoApi {
-    @ConfigProperty(name = "operator.api.version")
+    @Value("${operator.api.version}")
     String apiVersion;
 
-    @ConfigProperty(name = "operator.api.group")
+    @Value("${operator.api.group}")
     String group;
 
     @SuppressWarnings("DuplicatedCode")
-    @GET
-    @Path("/")
+    @Get("/")
     @Produces("application/json")
     public Map<String, Object> api() {
         Map<String, Object> admissionResource = new HashMap<>();

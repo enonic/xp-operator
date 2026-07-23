@@ -11,25 +11,26 @@ import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
 import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
 import io.fabric8.kubernetes.client.informers.SharedInformerFactory;
 
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Singleton;
-import javax.ws.rs.Produces;
+
+import io.micronaut.context.annotation.Factory;
+import io.micronaut.context.annotation.Value;
 
 import static com.enonic.kubernetes.common.SingletonAssert.singletonAssert;
 
 
+@Factory
 public class InformersProducer
 {
     private static final Logger log = LoggerFactory.getLogger( InformersProducer.class );
 
-    @ConfigProperty(name = "operator.informers.reSync")
+    @Value("${operator.informers.reSync}")
     long informerReSync;
 
     @Singleton
-    @Produces
     Informers createInformers( final Clients clients )
     {
         singletonAssert( this, "createInformers" );

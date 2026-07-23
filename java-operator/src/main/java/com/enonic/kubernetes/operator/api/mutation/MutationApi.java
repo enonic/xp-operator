@@ -14,12 +14,12 @@ import io.fabric8.kubernetes.api.model.admission.v1.AdmissionResponseBuilder;
 import io.fabric8.kubernetes.api.model.admission.v1.AdmissionReview;
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import io.micronaut.http.annotation.Body;
+import io.micronaut.http.annotation.Consumes;
+import io.micronaut.http.annotation.Controller;
+import io.micronaut.http.annotation.Post;
+import io.micronaut.http.annotation.Produces;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,8 +29,7 @@ import static com.enonic.kubernetes.common.Configuration.cfgStrChild;
 import static com.enonic.kubernetes.common.Utils.createOwnerReference;
 import static com.enonic.kubernetes.kubernetes.Predicates.matchAnnotationPrefix;
 
-@ApplicationScoped
-@Path("/apis/operator.enonic.cloud/v1")
+@Controller("/apis/operator.enonic.cloud/v1")
 public class MutationApi
     extends BaseAdmissionApi<MutationRequest>
 {
@@ -42,11 +41,10 @@ public class MutationApi
         addFunction( Ingress.class, this::ingress );
     }
 
-    @POST
-    @Path("/mutations")
+    @Post("/mutations")
     @Consumes("application/json")
     @Produces("application/json")
-    public AdmissionReview mutate( AdmissionReview admissionReview )
+    public AdmissionReview mutate( @Body AdmissionReview admissionReview )
         throws JsonProcessingException
     {
         return handle( admissionReview );
@@ -193,13 +191,6 @@ public class MutationApi
         }
 
         patch( mt, true, "/metadata/annotations", newR.getMetadata().getAnnotations(), na );
-    }
-
-    private void setDefaultValueInMap( Map<String, String> m, String key, String def )
-    {
-        if (!m.containsKey( key )) {
-            m.put( key, def );
-        }
     }
 
     private void ensureOwnerReference( MutationRequest mt )

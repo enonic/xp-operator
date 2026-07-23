@@ -1,14 +1,15 @@
 package com.enonic.kubernetes.kubernetes;
 
 import javax.inject.Singleton;
-import javax.ws.rs.Produces;
+
+import io.micronaut.context.annotation.Factory;
 
 import static com.enonic.kubernetes.common.SingletonAssert.singletonAssert;
 
+@Factory
 public class SearchersProducer
 {
     @Singleton
-    @Produces
     Searchers searchers( Informers informers )
     {
         singletonAssert(this, "createSearchers");

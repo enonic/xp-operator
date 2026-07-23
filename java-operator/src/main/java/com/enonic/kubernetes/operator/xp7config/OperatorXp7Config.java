@@ -3,11 +3,11 @@ package com.enonic.kubernetes.operator.xp7config;
 import com.enonic.kubernetes.crd.v1.Xp7Config;
 import com.enonic.kubernetes.kubernetes.Informers;
 import com.enonic.kubernetes.operator.helpers.InformerEventHandler;
-import io.quarkus.runtime.StartupEvent;
+import io.micronaut.context.event.ApplicationEventListener;
+import io.micronaut.runtime.server.event.ServerStartupEvent;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import static com.enonic.kubernetes.kubernetes.Predicates.fieldEquals;
 import static com.enonic.kubernetes.kubernetes.Predicates.onCondition;
@@ -15,9 +15,10 @@ import static com.enonic.kubernetes.kubernetes.Predicates.onCondition;
 /**
  * This operator class triggers ConfigMap sync on Xp7Config changes
  */
-@ApplicationScoped
+@Singleton
 public class OperatorXp7Config
     extends InformerEventHandler<Xp7Config>
+    implements ApplicationEventListener<ServerStartupEvent>
 {
     @Inject
     OperatorConfigMapSync operatorConfigMapSync;
@@ -25,7 +26,8 @@ public class OperatorXp7Config
     @Inject
     Informers informers;
 
-    void onStart( @Observes StartupEvent ev )
+    @Override
+    public void onApplicationEvent( ServerStartupEvent event )
     {
         listen( informers.xp7ConfigInformer() );
     }

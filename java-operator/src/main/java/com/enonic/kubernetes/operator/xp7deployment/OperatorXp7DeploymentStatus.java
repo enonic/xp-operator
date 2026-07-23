@@ -13,13 +13,13 @@ import com.enonic.kubernetes.operator.helpers.InformerEventHandler;
 import io.fabric8.kubernetes.api.model.ContainerStatus;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.utils.Serialization;
-import io.quarkus.runtime.StartupEvent;
+import io.micronaut.context.event.ApplicationEventListener;
+import io.micronaut.runtime.server.event.ServerStartupEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -30,10 +30,10 @@ import static com.enonic.kubernetes.kubernetes.Predicates.*;
 /**
  * This operator class updates Xp7Deployment status fields
  */
-@ApplicationScoped
+@Singleton
 public class OperatorXp7DeploymentStatus
     extends InformerEventHandler<Pod>
-    implements Runnable
+    implements Runnable, ApplicationEventListener<ServerStartupEvent>
 {
     private static final Logger log = LoggerFactory.getLogger( OperatorXp7DeploymentStatus.class );
 
@@ -46,7 +46,8 @@ public class OperatorXp7DeploymentStatus
     @Inject
     Informers informers;
 
-    void onStart( @Observes StartupEvent ev )
+    @Override
+    public void onApplicationEvent( ServerStartupEvent event )
     {
         listen( informers.podInformer() );
         scheduleSync( this );

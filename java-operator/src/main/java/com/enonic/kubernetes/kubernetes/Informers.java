@@ -40,9 +40,9 @@ public abstract class Informers
     public abstract SharedIndexInformer<Event> eventInformer();
 
     @Value.Derived
-    public Map<Class<? extends HasMetadata>, SharedIndexInformer> allInformers()
+    public Map<Class<? extends HasMetadata>, SharedIndexInformer<?>> allInformers()
     {
-        Map<Class<? extends HasMetadata>, SharedIndexInformer> res = new HashMap<>();
+        Map<Class<? extends HasMetadata>, SharedIndexInformer<?>> res = new HashMap<>();
         res.put( ConfigMap.class, configMapInformer() );
         res.put( Ingress.class, ingressInformer() );
         res.put( Namespace.class, namespaceInformer() );

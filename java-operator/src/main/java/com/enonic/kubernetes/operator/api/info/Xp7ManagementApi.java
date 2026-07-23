@@ -23,14 +23,15 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.enterprise.context.ApplicationScoped;
+import io.micronaut.http.annotation.Body;
+import io.micronaut.http.annotation.Consumes;
+import io.micronaut.http.annotation.Controller;
+import io.micronaut.http.annotation.Get;
+import io.micronaut.http.annotation.PathVariable;
+import io.micronaut.http.annotation.Post;
+import io.micronaut.http.annotation.Produces;
+
 import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
 
 import java.util.List;
 import java.util.Optional;
@@ -40,8 +41,7 @@ import static com.enonic.kubernetes.kubernetes.Predicates.withName;
 import static com.enonic.kubernetes.operator.xp7deployment.Predicates.running;
 import static com.enonic.kubernetes.operator.xp7deployment.Predicates.withNodeGroup;
 
-@ApplicationScoped
-@Path("/apis/operator.enonic.cloud/v1")
+@Controller("/apis/operator.enonic.cloud/v1")
 public class Xp7ManagementApi
 {
 
@@ -84,11 +84,10 @@ public class Xp7ManagementApi
         return xpClientCache.getClient( XpClientCacheKeyImpl.of( namespace, name, nodeGroup ) );
     }
 
-    @GET
-    @Path("/xp7/{namespace}/{name}/{nodegroup}/mgmt/repo/snapshots/list")
+    @Get("/xp7/{namespace}/{name}/{nodegroup}/mgmt/repo/snapshots/list")
     @Produces("application/json")
-    public Xp7MgmtSnapshotsList snapshotList( @PathParam("namespace") final String namespace, @PathParam("name") final String name,
-                                              @PathParam("nodegroup") final String nodeGroup )
+    public Xp7MgmtSnapshotsList snapshotList( @PathVariable("namespace") final String namespace, @PathVariable("name") final String name,
+                                              @PathVariable("nodegroup") final String nodeGroup )
         throws KubernetesClientException
     {
         try
@@ -104,11 +103,10 @@ public class Xp7ManagementApi
         }
     }
 
-    @GET
-    @Path("/xp7/{namespace}/{name}/{nodegroup}/mgmt/idproviders/list")
+    @Get("/xp7/{namespace}/{name}/{nodegroup}/mgmt/idproviders/list")
     @Produces("application/json")
-    public List<Xp7MgmtIdProvider> idProvidersList( @PathParam("namespace") final String namespace, @PathParam("name") final String name,
-                                                    @PathParam("nodegroup") final String nodeGroup )
+    public List<Xp7MgmtIdProvider> idProvidersList( @PathVariable("namespace") final String namespace, @PathVariable("name") final String name,
+                                                    @PathVariable("nodegroup") final String nodeGroup )
         throws KubernetesClientException
     {
         try
@@ -122,11 +120,10 @@ public class Xp7ManagementApi
         }
     }
 
-    @GET
-    @Path("/xp7/{namespace}/{name}/{nodegroup}/mgmt/content/projects/list")
+    @Get("/xp7/{namespace}/{name}/{nodegroup}/mgmt/content/projects/list")
     @Produces("application/json")
-    public List<Xp7MgmtProject> projectsList( @PathParam("namespace") final String namespace, @PathParam("name") final String name,
-                                              @PathParam("nodegroup") final String nodeGroup )
+    public List<Xp7MgmtProject> projectsList( @PathVariable("namespace") final String namespace, @PathVariable("name") final String name,
+                                              @PathVariable("nodegroup") final String nodeGroup )
         throws KubernetesClientException
     {
         try
@@ -140,11 +137,10 @@ public class Xp7ManagementApi
         }
     }
 
-    @GET
-    @Path("/xp7/{namespace}/{name}/{nodegroup}/mgmt/webapps/list")
+    @Get("/xp7/{namespace}/{name}/{nodegroup}/mgmt/webapps/list")
     @Produces("application/json")
-    public List<Xp7MgmtWebapp> webappsList( @PathParam("namespace") final String namespace, @PathParam("name") final String name,
-                                            @PathParam("nodegroup") final String nodeGroup )
+    public List<Xp7MgmtWebapp> webappsList( @PathVariable("namespace") final String namespace, @PathVariable("name") final String name,
+                                            @PathVariable("nodegroup") final String nodeGroup )
         throws KubernetesClientException
     {
         try
@@ -158,11 +154,10 @@ public class Xp7ManagementApi
         }
     }
 
-    @GET
-    @Path("/xp7/{namespace}/{name}/{nodegroup}/mgmt/apps/list")
+    @Get("/xp7/{namespace}/{name}/{nodegroup}/mgmt/apps/list")
     @Produces("application/json")
-    public List<AppInfo> appsList( @PathParam("namespace") final String namespace, @PathParam("name") final String name,
-                                   @PathParam("nodegroup") final String nodeGroup )
+    public List<AppInfo> appsList( @PathVariable("namespace") final String namespace, @PathVariable("name") final String name,
+                                   @PathVariable("nodegroup") final String nodeGroup )
         throws KubernetesClientException
     {
         try
@@ -176,12 +171,11 @@ public class Xp7ManagementApi
         }
     }
 
-    @POST
-    @Path("/xp7/{namespace}/{name}/{nodegroup}/mgmt/apps/install")
+    @Post("/xp7/{namespace}/{name}/{nodegroup}/mgmt/apps/install")
     @Consumes("application/json")
     @Produces("application/json")
-    public AppInstallResponse appInstall( @PathParam("namespace") final String namespace, @PathParam("name") final String name,
-                                          @PathParam("nodegroup") final String nodeGroup, final AppInstallRequest request )
+    public AppInstallResponse appInstall( @PathVariable("namespace") final String namespace, @PathVariable("name") final String name,
+                                          @PathVariable("nodegroup") final String nodeGroup, @Body final AppInstallRequest request )
         throws KubernetesClientException
     {
         try
@@ -195,11 +189,10 @@ public class Xp7ManagementApi
         }
     }
 
-    @POST
-    @Path("/xp7/{namespace}/{name}/{nodegroup}/mgmt/apps/uninstall")
+    @Post("/xp7/{namespace}/{name}/{nodegroup}/mgmt/apps/uninstall")
     @Consumes("application/json")
-    public void appUninstall( @PathParam("namespace") final String namespace, @PathParam("name") final String name,
-                              @PathParam("nodegroup") final String nodeGroup, final AppKey key )
+    public void appUninstall( @PathVariable("namespace") final String namespace, @PathVariable("name") final String name,
+                              @PathVariable("nodegroup") final String nodeGroup, @Body final AppKey key )
         throws KubernetesClientException
     {
         try
@@ -213,11 +206,10 @@ public class Xp7ManagementApi
         }
     }
 
-    @POST
-    @Path("/xp7/{namespace}/{name}/{nodegroup}/mgmt/apps/start")
+    @Post("/xp7/{namespace}/{name}/{nodegroup}/mgmt/apps/start")
     @Consumes("application/json")
-    public void appStart( @PathParam("namespace") final String namespace, @PathParam("name") final String name,
-                          @PathParam("nodegroup") final String nodeGroup, final AppKey key )
+    public void appStart( @PathVariable("namespace") final String namespace, @PathVariable("name") final String name,
+                          @PathVariable("nodegroup") final String nodeGroup, @Body final AppKey key )
         throws KubernetesClientException
     {
         try
@@ -231,11 +223,10 @@ public class Xp7ManagementApi
         }
     }
 
-    @POST
-    @Path("/xp7/{namespace}/{name}/{nodegroup}/mgmt/apps/stop")
+    @Post("/xp7/{namespace}/{name}/{nodegroup}/mgmt/apps/stop")
     @Consumes("application/json")
-    public void appStop( @PathParam("namespace") final String namespace, @PathParam("name") final String name,
-                         @PathParam("nodegroup") final String nodeGroup, final AppKey key )
+    public void appStop( @PathVariable("namespace") final String namespace, @PathVariable("name") final String name,
+                         @PathVariable("nodegroup") final String nodeGroup, @Body final AppKey key )
         throws KubernetesClientException
     {
         try

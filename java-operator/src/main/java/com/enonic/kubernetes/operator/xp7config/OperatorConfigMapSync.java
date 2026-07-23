@@ -12,13 +12,13 @@ import com.enonic.kubernetes.operator.xp7deployment.Predicates;
 
 import com.google.common.hash.Hashing;
 import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.quarkus.runtime.StartupEvent;
+import io.micronaut.context.event.ApplicationEventListener;
+import io.micronaut.runtime.server.event.ServerStartupEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -41,9 +41,9 @@ import static java.util.stream.Collectors.groupingBy;
 /**
  * This operator class collects all Xp7Configs and merges them into the nodegroup ConfigMaps
  */
-@ApplicationScoped
+@Singleton
 public class OperatorConfigMapSync
-    implements Runnable
+    implements Runnable, ApplicationEventListener<ServerStartupEvent>
 {
     private static final Logger log = LoggerFactory.getLogger( OperatorConfigMapSync.class );
 
@@ -61,7 +61,8 @@ public class OperatorConfigMapSync
 
     ActionLimiter limiter;
 
-    void onStart( @Observes StartupEvent ev )
+    @Override
+    public void onApplicationEvent( ServerStartupEvent event )
     {
         limiter = new ActionLimiter( this.getClass().getSimpleName(), taskRunner, 1000L );
         operator.schedule( cfgLong( "operator.tasks.sync.interval" ), this );

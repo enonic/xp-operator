@@ -4,18 +4,19 @@ import com.enonic.kubernetes.apis.xp.XpClientCache;
 import com.enonic.kubernetes.crd.v1.Xp7Deployment;
 import com.enonic.kubernetes.kubernetes.Informers;
 import com.enonic.kubernetes.operator.helpers.InformerEventHandler;
-import io.quarkus.runtime.StartupEvent;
+import io.micronaut.context.event.ApplicationEventListener;
+import io.micronaut.runtime.server.event.ServerStartupEvent;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * This operator class invalidates XP client cache if Xp7Deployment is deleted
  */
-@ApplicationScoped
+@Singleton
 public class OperatorXpClientCacheInvalidate
     extends InformerEventHandler<Xp7Deployment>
+    implements ApplicationEventListener<ServerStartupEvent>
 {
     @Inject
     XpClientCache xpClientCache;
@@ -23,7 +24,8 @@ public class OperatorXpClientCacheInvalidate
     @Inject
     Informers informers;
 
-    void onStart( @Observes StartupEvent ev )
+    @Override
+    public void onApplicationEvent( ServerStartupEvent event )
     {
         listen( informers.xp7DeploymentInformer() );
     }

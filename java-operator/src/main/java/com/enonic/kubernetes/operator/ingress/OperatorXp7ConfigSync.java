@@ -10,13 +10,13 @@ import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.networking.v1.HTTPIngressPath;
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
 import io.fabric8.kubernetes.api.model.networking.v1.IngressRule;
-import io.quarkus.runtime.StartupEvent;
+import io.micronaut.context.event.ApplicationEventListener;
+import io.micronaut.runtime.server.event.ServerStartupEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -37,9 +37,9 @@ import static java.util.stream.Collectors.groupingBy;
 /**
  * This operator class collects all annotated ingresses and creates the VHost configuration for XP
  */
-@ApplicationScoped
+@Singleton
 public class OperatorXp7ConfigSync
-    implements Runnable
+    implements Runnable, ApplicationEventListener<ServerStartupEvent>
 {
     private static final Logger log = LoggerFactory.getLogger( OperatorXp7ConfigSync.class );
 
@@ -52,7 +52,8 @@ public class OperatorXp7ConfigSync
     @Inject
     Searchers searchers;
 
-    void onStart( @Observes StartupEvent ev )
+    @Override
+    public void onApplicationEvent( ServerStartupEvent event )
     {
         operator.schedule( cfgLong( "operator.tasks.sync.interval" ), this );
     }

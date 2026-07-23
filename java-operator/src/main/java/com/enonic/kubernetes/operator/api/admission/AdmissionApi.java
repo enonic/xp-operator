@@ -12,17 +12,18 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Preconditions;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.KubernetesResource;
 import io.fabric8.kubernetes.api.model.admission.v1.AdmissionReview;
 import io.fabric8.kubernetes.api.model.networking.v1.HTTPIngressPath;
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
 
 import org.apache.maven.artifact.versioning.ComparableVersion;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import io.micronaut.http.annotation.Body;
+import io.micronaut.http.annotation.Consumes;
+import io.micronaut.http.annotation.Controller;
+import io.micronaut.http.annotation.Post;
+import io.micronaut.http.annotation.Produces;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -44,8 +45,7 @@ import static com.enonic.kubernetes.kubernetes.Predicates.matchAnnotationPrefix;
 import static com.enonic.kubernetes.kubernetes.Predicates.withName;
 import static com.enonic.kubernetes.operator.ingress.OperatorXp7ConfigSync.getAnnotationMappings;
 
-@ApplicationScoped
-@Path("/apis/operator.enonic.cloud/v1")
+@Controller("/apis/operator.enonic.cloud/v1")
 public class AdmissionApi
     extends BaseAdmissionApi<AdmissionReview>
 {
@@ -57,11 +57,10 @@ public class AdmissionApi
         addFunction( Ingress.class, this::ingress );
     }
 
-    @POST
-    @Path("/validations")
+    @Post("/validations")
     @Consumes("application/json")
     @Produces("application/json")
-    public AdmissionReview validate( AdmissionReview admissionReview )
+    public AdmissionReview validate( @Body AdmissionReview admissionReview )
         throws JsonProcessingException
     {
         return handle( admissionReview );
@@ -269,7 +268,7 @@ public class AdmissionApi
 
         if ( op == AdmissionOperation.CREATE )
         {
-            final Optional<Xp7Deployment> xp7Deployments = getXp7Deployment( admissionReview.getRequest().getObject() );
+            final Optional<Xp7Deployment> xp7Deployments = getXp7Deployment( (KubernetesResource) admissionReview.getRequest().getObject() );
             Preconditions.checkState( xp7Deployments.isEmpty(), "There is already an Xp7Deployment in NS '%s'",
                                       newDeployment.getMetadata().getNamespace() );
 
@@ -303,7 +302,7 @@ public class AdmissionApi
 
     private void assertXp7Deployment( AdmissionReview admissionReview, Set<String> nodeGroups )
     {
-        final Optional<Xp7Deployment> xp7Deployments = getXp7Deployment( admissionReview.getRequest().getObject() );
+        final Optional<Xp7Deployment> xp7Deployments = getXp7Deployment( (KubernetesResource) admissionReview.getRequest().getObject() );
         Preconditions.checkState( xp7Deployments.isPresent(), "No Xp7Deployment found in NS '%s'",
                                   ( (HasMetadata) admissionReview.getRequest().getObject() ).getMetadata().getNamespace() );
         if ( nodeGroups != null )

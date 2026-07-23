@@ -6,13 +6,13 @@ import com.enonic.kubernetes.kubernetes.Searchers;
 import com.enonic.kubernetes.kubernetes.commands.K8sLogHelper;
 import com.enonic.kubernetes.operator.helpers.InformerEventHandler;
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
-import io.quarkus.runtime.StartupEvent;
+import io.micronaut.context.event.ApplicationEventListener;
+import io.micronaut.runtime.server.event.ServerStartupEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -24,9 +24,10 @@ import static com.enonic.kubernetes.kubernetes.Predicates.isDeleted;
 /**
  * This operator class triggers vhost sync on Ingress changes
  */
-@ApplicationScoped
+@Singleton
 public class OperatorIngress
     extends InformerEventHandler<Ingress>
+    implements ApplicationEventListener<ServerStartupEvent>
 {
     private static final Logger log = LoggerFactory.getLogger( OperatorIngress.class );
 
@@ -42,7 +43,8 @@ public class OperatorIngress
     @Inject
     Informers informers;
 
-    void onStart( @Observes StartupEvent ev )
+    @Override
+    public void onApplicationEvent( ServerStartupEvent event )
     {
         listen( informers.ingressInformer() );
     }

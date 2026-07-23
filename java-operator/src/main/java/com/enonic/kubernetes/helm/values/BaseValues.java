@@ -2,11 +2,15 @@ package com.enonic.kubernetes.helm.values;
 
 import com.google.common.base.Preconditions;
 
+import io.micronaut.context.env.PropertySource;
+
 import javax.inject.Named;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.enonic.kubernetes.common.Configuration.cfgStr;
 import static com.enonic.kubernetes.common.Configuration.globalConfig;
@@ -20,7 +24,13 @@ public class BaseValues
     {
         super();
         put( "clusterId", clusterId );
-        globalConfig().getPropertyNames().forEach( name -> {
+
+        Set<String> names = new HashSet<>();
+        for (PropertySource source : globalConfig().getPropertySources()) {
+            source.forEach( names::add );
+        }
+
+        names.forEach( name -> {
             if (name.startsWith( keyPrefix )) {
                 handleKey( this, name.replace( keyPrefix, "" ), cfgStr( name ) );
             }
