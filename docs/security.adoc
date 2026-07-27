@@ -8,7 +8,7 @@ This section describes the security model of the XP Operator — how it limits i
 To manage XP deployments, the operator needs broad permissions inside a namespace — it creates and updates StatefulSets, Services, ConfigMaps, Secrets, Roles, RoleBindings, and more. Rather than granting a single massive ClusterRole that covers all namespaces cluster-wide, the operator uses a scoped approach:
 
 . A pre-created `xp-operator-namespace-role` ClusterRole holds all the namespace-level permissions the operator needs.
-. When an Xp7Deployment is created, the operator creates a `RoleBinding` in that namespace, binding `xp-operator-namespace-role` to its own ServiceAccount.
+. When an Xp8Deployment is created, the operator creates a `RoleBinding` in that namespace, binding `xp-operator-namespace-role` to its own ServiceAccount.
 
 This means the operator's cluster-level ClusterRole only needs the ability to _bind_ the pre-created role — not to hold all the permissions itself.
 

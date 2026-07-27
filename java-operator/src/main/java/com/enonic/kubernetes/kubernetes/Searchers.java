@@ -1,7 +1,7 @@
 package com.enonic.kubernetes.kubernetes;
 
-import com.enonic.kubernetes.crd.v1.Xp7Config;
-import com.enonic.kubernetes.crd.v1.Xp7Deployment;
+import com.enonic.kubernetes.crd.v1.Xp8Config;
+import com.enonic.kubernetes.crd.v1.Xp8Deployment;
 import com.enonic.kubernetes.common.annotations.Params;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Event;
@@ -22,9 +22,9 @@ public interface Searchers
 
     InformerSearcher<Pod> pod();
 
-    InformerSearcher<Xp7Config> xp7Config();
+    InformerSearcher<Xp8Config> xp8Config();
 
-    InformerSearcher<Xp7Deployment> xp7Deployment();
+    InformerSearcher<Xp8Deployment> xp8Deployment();
 
     InformerSearcher<Event> event();
 }

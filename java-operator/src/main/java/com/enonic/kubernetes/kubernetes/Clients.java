@@ -10,8 +10,8 @@ import io.fabric8.kubernetes.client.dsl.Resource;
 
 
 import com.enonic.kubernetes.common.annotations.Params;
-import com.enonic.kubernetes.crd.v1.Xp7Config;
-import com.enonic.kubernetes.crd.v1.Xp7Deployment;
+import com.enonic.kubernetes.crd.v1.Xp8Config;
+import com.enonic.kubernetes.crd.v1.Xp8Deployment;
 
 
 @Value.Immutable
@@ -20,8 +20,8 @@ public interface Clients
 {
     KubernetesClient k8s();
 
-    MixedOperation<Xp7Config, KubernetesResourceList<Xp7Config>, Resource<Xp7Config>> xp7Configs();
+    MixedOperation<Xp8Config, KubernetesResourceList<Xp8Config>, Resource<Xp8Config>> xp8Configs();
 
-    MixedOperation<Xp7Deployment, KubernetesResourceList<Xp7Deployment>, Resource<Xp7Deployment>> xp7Deployments();
+    MixedOperation<Xp8Deployment, KubernetesResourceList<Xp8Deployment>, Resource<Xp8Deployment>> xp8Deployments();
 
 }

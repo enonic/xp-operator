@@ -1,7 +1,7 @@
 package com.enonic.kubernetes.kubernetes;
 
-import com.enonic.kubernetes.crd.v1.Xp7Config;
-import com.enonic.kubernetes.crd.v1.Xp7Deployment;
+import com.enonic.kubernetes.crd.v1.Xp8Config;
+import com.enonic.kubernetes.crd.v1.Xp8Deployment;
 import com.enonic.kubernetes.common.annotations.Params;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Event;
@@ -33,9 +33,9 @@ public abstract class Informers
 
     public abstract SharedIndexInformer<Pod> podInformer();
 
-    public abstract SharedIndexInformer<Xp7Config> xp7ConfigInformer();
+    public abstract SharedIndexInformer<Xp8Config> xp8ConfigInformer();
 
-    public abstract SharedIndexInformer<Xp7Deployment> xp7DeploymentInformer();
+    public abstract SharedIndexInformer<Xp8Deployment> xp8DeploymentInformer();
 
     public abstract SharedIndexInformer<Event> eventInformer();
 
@@ -47,8 +47,8 @@ public abstract class Informers
         res.put( Ingress.class, ingressInformer() );
         res.put( Namespace.class, namespaceInformer() );
         res.put( Pod.class, podInformer() );
-        res.put( Xp7Config.class, xp7ConfigInformer() );
-        res.put( Xp7Deployment.class, xp7DeploymentInformer() );
+        res.put( Xp8Config.class, xp8ConfigInformer() );
+        res.put( Xp8Deployment.class, xp8DeploymentInformer() );
         res.put( Event.class, eventInformer() );
         return res;
     }

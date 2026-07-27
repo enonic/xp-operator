@@ -40,7 +40,7 @@ webhooks:
       - apiGroups: ["enonic.cloud"]
         operations: ["*"]
         apiVersions: ["v1"]
-        resources: ["xp7deployments", "xp7configs"]
+        resources: ["xp8deployments", "xp8configs"]
         scope: "*"
       - apiGroups: ["networking.k8s.io"]
         operations: ["*"]
@@ -68,7 +68,7 @@ webhooks:
       - apiGroups: ["enonic.cloud"]
         operations: ["*"]
         apiVersions: ["v1"]
-        resources: ["xp7deployments", "xp7configs"]
+        resources: ["xp8deployments", "xp8configs"]
         scope: "*"
       - apiGroups: ["networking.k8s.io"]
         operations: ["*"]

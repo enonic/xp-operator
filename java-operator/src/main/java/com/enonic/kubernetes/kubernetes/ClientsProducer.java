@@ -2,8 +2,8 @@ package com.enonic.kubernetes.kubernetes;
 
 import javax.inject.Singleton;
 
-import com.enonic.kubernetes.crd.v1.Xp7Config;
-import com.enonic.kubernetes.crd.v1.Xp7Deployment;
+import com.enonic.kubernetes.crd.v1.Xp8Config;
+import com.enonic.kubernetes.crd.v1.Xp8Deployment;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
@@ -23,7 +23,7 @@ public class ClientsProducer
 
         return ClientsImpl.of(
                 k8s,
-                k8s.resources( Xp7Config.class ),
-                k8s.resources( Xp7Deployment.class ) );
+                k8s.resources( Xp8Config.class ),
+                k8s.resources( Xp8Deployment.class ) );
     }
 }

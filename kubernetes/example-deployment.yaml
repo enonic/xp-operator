@@ -1,5 +1,5 @@
 apiVersion: enonic.cloud/v1
-kind: Xp7Deployment
+kind: Xp8Deployment
 metadata:
   name: mycloud-mysolution-myenv-myservice
   namespace: mycloud-mysolution-myenv-myservice
@@ -10,7 +10,7 @@ metadata:
     service: myservice
 spec:
   enabled: true
-  xpVersion: 7.16.2
+  xpVersion: 8.0.0
 
   nodesSharedDisks:
     - name: blobstore

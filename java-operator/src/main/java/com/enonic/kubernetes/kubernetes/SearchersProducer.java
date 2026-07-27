@@ -18,8 +18,8 @@ public class SearchersProducer
             ingress( new InformerSearcher<>( informers.ingressInformer() ) ).
             namespace( new InformerSearcher<>( informers.namespaceInformer() ) ).
             pod( new InformerSearcher<>( informers.podInformer() ) ).
-            xp7Config( new InformerSearcher<>( informers.xp7ConfigInformer() ) ).
-            xp7Deployment( new InformerSearcher<>( informers.xp7DeploymentInformer() ) ).
+            xp8Config( new InformerSearcher<>( informers.xp8ConfigInformer() ) ).
+            xp8Deployment( new InformerSearcher<>( informers.xp8DeploymentInformer() ) ).
             event( new InformerSearcher<>( informers.eventInformer() ) ).
             build();
     }
