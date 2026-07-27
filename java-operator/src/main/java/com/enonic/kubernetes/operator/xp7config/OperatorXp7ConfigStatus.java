@@ -9,14 +9,14 @@ import com.enonic.kubernetes.kubernetes.commands.K8sLogHelper;
 import com.enonic.kubernetes.operator.helpers.InformerEventHandler;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Pod;
-import io.quarkus.runtime.StartupEvent;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
+import io.micronaut.context.annotation.Value;
+import io.micronaut.context.event.ApplicationEventListener;
+import io.micronaut.runtime.server.event.ServerStartupEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -24,14 +24,14 @@ import java.util.stream.Collectors;
 import static com.enonic.kubernetes.common.Configuration.cfgStr;
 import static com.enonic.kubernetes.kubernetes.Predicates.*;
 
-@ApplicationScoped
-public class OperatorXp7ConfigStatus extends InformerEventHandler<Pod> {
+@Singleton
+public class OperatorXp7ConfigStatus extends InformerEventHandler<Pod> implements ApplicationEventListener<ServerStartupEvent> {
     private static final Logger log = LoggerFactory.getLogger(OperatorXp7ConfigStatus.class);
 
-    @ConfigProperty(name = "operator.charts.values.annotationKeys.configMapUpdated")
+    @Value("${operator.charts.values.annotationKeys.configMapUpdated}")
     String configMapUpdatedAnnotation;
 
-    @ConfigProperty(name = "operator.charts.values.annotationKeys.podConfigReloaded")
+    @Value("${operator.charts.values.annotationKeys.podConfigReloaded}")
     String podConfigReloadedAnnotation;
 
     @Inject
@@ -45,7 +45,8 @@ public class OperatorXp7ConfigStatus extends InformerEventHandler<Pod> {
 
     private static final Map<String, Object> NAMESPACE_LOGS = new ConcurrentHashMap<>();
 
-    void onStart(@Observes StartupEvent ev) {
+    @Override
+    public void onApplicationEvent(ServerStartupEvent event) {
         listen(informers.podInformer());
     }
 

@@ -5,12 +5,12 @@ import com.enonic.kubernetes.kubernetes.Informers;
 import com.enonic.kubernetes.operator.helpers.InformerEventHandler;
 import io.fabric8.kubernetes.client.informers.ResourceEventHandler;
 import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
-import io.quarkus.runtime.StartupEvent;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
+import io.micronaut.context.annotation.Value;
+import io.micronaut.context.event.ApplicationEventListener;
+import io.micronaut.runtime.server.event.ServerStartupEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.concurrent.TimeUnit;
@@ -22,10 +22,11 @@ import static com.enonic.kubernetes.common.SingletonAssert.singletonAssert;
  */
 @Singleton
 public class Operator
+    implements ApplicationEventListener<ServerStartupEvent>
 {
     private static final Logger log = LoggerFactory.getLogger( Operator.class );
 
-    @ConfigProperty(name = "operator.tasks.initial.delay")
+    @Value("${operator.tasks.initial.delay}")
     Long initialDelay;
 
     @Inject
@@ -39,7 +40,8 @@ public class Operator
         singletonAssert( this, "constructor" );
     }
 
-    void onStart( @Observes StartupEvent ev )
+    @Override
+    public void onApplicationEvent( ServerStartupEvent event )
     {
         taskRunner.scheduleOneTime( () -> {
             log.info( "Starting informers" );

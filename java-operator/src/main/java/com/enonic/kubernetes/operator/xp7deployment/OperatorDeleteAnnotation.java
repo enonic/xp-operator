@@ -6,12 +6,12 @@ import com.enonic.kubernetes.kubernetes.Informers;
 import com.enonic.kubernetes.kubernetes.Searchers;
 import com.enonic.kubernetes.kubernetes.commands.K8sLogHelper;
 import com.enonic.kubernetes.operator.helpers.InformerEventHandler;
-import io.quarkus.runtime.StartupEvent;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
+import io.micronaut.context.annotation.Value;
+import io.micronaut.context.event.ApplicationEventListener;
+import io.micronaut.runtime.server.event.ServerStartupEvent;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import static com.enonic.kubernetes.kubernetes.Predicates.*;
 
@@ -19,9 +19,10 @@ import static com.enonic.kubernetes.kubernetes.Predicates.*;
 /**
  * This operator class deletes resources that are annotated with the delete annotation
  */
-@ApplicationScoped
+@Singleton
 public class OperatorDeleteAnnotation
     extends InformerEventHandler<Xp7Deployment>
+    implements ApplicationEventListener<ServerStartupEvent>
 {
     @Inject
     Clients clients;
@@ -29,13 +30,14 @@ public class OperatorDeleteAnnotation
     @Inject
     Searchers searchers;
 
-    @ConfigProperty(name = "operator.charts.values.annotationKeys.removeWithDeployment")
+    @Value("${operator.charts.values.annotationKeys.removeWithDeployment}")
     String deleteAnnotation;
 
     @Inject
     Informers informers;
 
-    void onStart( @Observes StartupEvent ev )
+    @Override
+    public void onApplicationEvent( ServerStartupEvent event )
     {
         listen( informers.xp7DeploymentInformer() );
     }

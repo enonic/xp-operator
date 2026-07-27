@@ -1,6 +1,5 @@
 package com.enonic.kubernetes.common;
 
-import io.quarkus.runtime.Quarkus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +34,6 @@ public class Exit
     public static void exit( Code code, String message, Throwable error )
     {
         log.error( "FATAL: " + message, error );
-        Quarkus.asyncExit( code.value );
+        System.exit( code.value );
     }
 }

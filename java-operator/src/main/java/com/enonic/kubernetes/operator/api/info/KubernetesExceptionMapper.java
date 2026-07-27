@@ -2,14 +2,19 @@ package com.enonic.kubernetes.operator.api.info;
 
 import io.fabric8.kubernetes.client.KubernetesClientException;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
+import io.micronaut.http.HttpRequest;
+import io.micronaut.http.HttpResponse;
+import io.micronaut.http.HttpStatus;
+import io.micronaut.http.annotation.Produces;
+import io.micronaut.http.server.exceptions.ExceptionHandler;
 
-@Provider
-public class KubernetesExceptionMapper implements ExceptionMapper<KubernetesClientException> {
+import javax.inject.Singleton;
+
+@Produces
+@Singleton
+public class KubernetesExceptionMapper implements ExceptionHandler<KubernetesClientException, HttpResponse<?>> {
     @Override
-    public Response toResponse(KubernetesClientException e) {
-        return Response.status(e.getCode()).entity(e.getStatus()).build();
+    public HttpResponse<?> handle(HttpRequest request, KubernetesClientException e) {
+        return HttpResponse.status( HttpStatus.valueOf( e.getCode() ) ).body( e.getStatus() );
     }
 }

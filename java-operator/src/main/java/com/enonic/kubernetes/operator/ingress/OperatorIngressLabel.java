@@ -11,14 +11,14 @@ import com.enonic.kubernetes.operator.helpers.InformerEventHandler;
 import io.fabric8.kubernetes.api.model.networking.v1.HTTPIngressPath;
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
 import io.fabric8.kubernetes.api.model.networking.v1.IngressRule;
-import io.quarkus.runtime.StartupEvent;
+import io.micronaut.context.event.ApplicationEventListener;
+import io.micronaut.runtime.server.event.ServerStartupEvent;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,10 +34,10 @@ import static com.enonic.kubernetes.kubernetes.Predicates.onCondition;
 /**
  * This operator class triggers vhost sync on Ingress changes
  */
-@ApplicationScoped
+@Singleton
 public class OperatorIngressLabel
     extends InformerEventHandler<Xp7Config>
-    implements Runnable
+    implements Runnable, ApplicationEventListener<ServerStartupEvent>
 {
     private static final Logger log = LoggerFactory.getLogger( OperatorIngressLabel.class );
 
@@ -50,7 +50,8 @@ public class OperatorIngressLabel
     @Inject
     Informers informers;
 
-    void onStart( @Observes StartupEvent ev )
+    @Override
+    public void onApplicationEvent( ServerStartupEvent event )
     {
         listen( informers.xp7ConfigInformer() );
         scheduleSync( this );

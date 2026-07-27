@@ -1,9 +1,17 @@
 plugins {
     id 'java-library'
     id 'jacoco'
-    alias(libs.plugins.quarkus)
+    alias(libs.plugins.micronautApplication)
     alias(libs.plugins.gitProperties)
     id 'io.fabric8.java-generator' version '6.7.2'
+}
+
+micronaut {
+    runtime("netty")
+}
+
+application {
+    mainClass.set('com.enonic.kubernetes.operator.helpers.Main')
 }
 
 javaGen {
@@ -18,24 +26,13 @@ tasks.named('crd2java') { dependsOn ':helm:processHelmResources' }
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
-// quarkus-smallrye-openapi pulls smallrye-open-api-core, which transitively requires
-// microprofile-config-api 3.0. Gradle conflict resolution picks that over the quarkus-bom's
-// 2.0.1 constraint (a BOM sets a recommended minimum, not a hard cap), and 3.0 breaks Quarkus
-// 2.16.6's @ConfigProperty CDI injection at runtime. force is the only thing that overrides
-// conflict resolution back to the 2.0.1 that Quarkus 2.16.6 is built against.
-configurations.all {
-    resolutionStrategy {
-        force 'org.eclipse.microprofile.config:microprofile-config-api:2.0.1'
-    }
-}
 
 dependencies {
     implementation platform(libs.fabric8.bom)
-    implementation platform(libs.quarkus.bom)
 
     implementation 'io.fabric8:generator-annotations'
     api libs.fabric8.kubernetes.clientapi
@@ -51,19 +48,31 @@ dependencies {
     implementation libs.guava
     implementation libs.maven.mavenartifact
 
-    implementation 'io.quarkus:quarkus-micrometer-registry-prometheus'
-    implementation 'io.quarkus:quarkus-resteasy'
-    implementation 'io.quarkus:quarkus-resteasy-jackson'
-    implementation 'io.quarkus:quarkus-rest-client'
-    implementation 'io.quarkus:quarkus-smallrye-openapi'
+    implementation 'javax.inject:javax.inject:1'
 
-    testImplementation 'io.quarkus:quarkus-junit5'
+    implementation 'io.micronaut:micronaut-http-server-netty'
+    implementation 'io.micronaut:micronaut-jackson-databind'
+    implementation 'io.micronaut.micrometer:micronaut-micrometer-registry-prometheus'
+
+    runtimeOnly 'ch.qos.logback:logback-classic:1.5.37'
+
+    annotationProcessor 'io.micronaut.openapi:micronaut-openapi'
+    compileOnly 'io.micronaut.openapi:micronaut-openapi-annotations'
+
     testImplementation 'io.rest-assured:rest-assured'
-    testImplementation 'io.quarkus:quarkus-jacoco'
     testImplementation libs.fabric8.kubernetes.servermock
     testImplementation libs.mockito.inline
     testImplementation libs.mockito.junitjupiter
 
+    testImplementation libs.junit.jupiter.api
+    testImplementation 'io.fabric8:zjsonpatch'
+    testRuntimeOnly libs.junit.jupiter.engine
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
     testCompileOnly libs.immutables.valueannotations
     testAnnotationProcessor libs.immutables.value
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
 }

@@ -4,12 +4,12 @@ import java.util.function.Supplier;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
-import javax.ws.rs.Produces;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.fabric8.kubernetes.api.model.ServiceAccount;
+import io.micronaut.context.annotation.Factory;
 
 import com.enonic.kubernetes.kubernetes.Clients;
 import com.enonic.kubernetes.operator.helpers.PasswordGenerator;
@@ -17,12 +17,12 @@ import com.enonic.kubernetes.operator.helpers.PasswordGenerator;
 import static com.enonic.kubernetes.common.Configuration.cfgHasKey;
 import static com.enonic.kubernetes.common.Configuration.cfgStr;
 
-@Singleton
+@Factory
 public class HelmValueProvider
 {
     private static final Logger log = LoggerFactory.getLogger( HelmValueProvider.class );
 
-    @Produces
+    @Singleton
     @Named("suPass")
     Supplier<String> suPassSupplier()
     {
@@ -37,7 +37,7 @@ public class HelmValueProvider
         }
     }
 
-    @Produces
+    @Singleton
     @Named("cloudApi")
     Supplier<ServiceAccount> saSupplier( Clients clients )
     {

@@ -19,13 +19,13 @@ import com.google.common.hash.Hashing;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.ServiceAccount;
 import io.fabric8.kubernetes.api.model.rbac.RoleBindingBuilder;
-import io.quarkus.runtime.StartupEvent;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
+import io.micronaut.context.annotation.Value;
+import io.micronaut.context.event.ApplicationEventListener;
+import io.micronaut.runtime.server.event.ServerStartupEvent;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Singleton;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -43,9 +43,10 @@ import static com.enonic.kubernetes.common.Utils.createOwnerReference;
 /**
  * This operator class creates/updates/deletes resources defined in the xp7deployment helm chart
  */
-@ApplicationScoped
+@Singleton
 public class OperatorXp7DeploymentHelm
     extends HandlerHelm<Xp7Deployment>
+    implements ApplicationEventListener<ServerStartupEvent>
 {
     @Inject
     @Named("v1/xp7deployment")
@@ -68,16 +69,17 @@ public class OperatorXp7DeploymentHelm
     @Inject
     Clients clients;
 
-    @ConfigProperty(name = "operator.operator.name")
+    @Value("${operator.operator.name}")
     String operatorName;
 
-    @ConfigProperty(name = "operator.operator.namespace")
+    @Value("${operator.operator.namespace}")
     String operatorNamespace;
 
-    @ConfigProperty(name = "operator.operator.hazelcastClusterRoleName")
+    @Value("${operator.operator.hazelcastClusterRoleName}")
     String hazelcastClusterRoleName;
 
-    void onStart( @Observes StartupEvent ev )
+    @Override
+    public void onApplicationEvent( ServerStartupEvent event )
     {
         listen( informers.xp7DeploymentInformer() );
     }
