@@ -8,14 +8,14 @@ This section covers the operator functionality and how to use it, once installed
 
 The operator introduces a couple of new resources into your Kubernetes cluster.
 
-=== Xp7Deployment
+=== Xp8Deployment
 
-This is the main custom resource that defines your deployment. It is namespaced, so you have to create a namespace for it. Only 1 Xp7Deployment can reside in each namespace.
+This is the main custom resource that defines your deployment. It is namespaced, so you have to create a namespace for it. Only 1 Xp8Deployment can reside in each namespace.
 
 [source,yaml]
 ----
 apiVersion: enonic.cloud/v1
-kind: Xp7Deployment
+kind: Xp8Deployment
 metadata:
   name: my-deployment
   namespace: my-namespace
@@ -86,7 +86,7 @@ spec:
 
 ==== Disks
 
-In the Xp7Deployment resource we have names of disks that you can define to be shared, private or non-existent.
+In the Xp8Deployment resource we have names of disks that you can define to be shared, private or non-existent.
 
 blobstore:: All blob objects. This must always be shared between cluster nodes.
 
@@ -118,7 +118,7 @@ A `size` and `class` params can be specified for every volume. If you don't spec
 
 ==== initContainers
 
-In the context of Xp7Deployment, `initContainers` are containers launched before the XP container itself, as part of the deployment lifecycle. This mechanism can be useful to install applications (add applications to `deploy` folder of the main container), preinstall custom workloads or set up the settings of the XP container or perform other tasks.
+In the context of Xp8Deployment, `initContainers` are containers launched before the XP container itself, as part of the deployment lifecycle. This mechanism can be useful to install applications (add applications to `deploy` folder of the main container), preinstall custom workloads or set up the settings of the XP container or perform other tasks.
 One important thing to remember is that, if there are several initContainers defined, they will be launched sequentially, following the order in the configuration. If any of the `initContainers` fail, Kubernetes will keep retrying until it succeeds.
 
 [source,yaml]
@@ -136,7 +136,7 @@ initContainers:
         mountPath: /scripts
 ----
 
-An `initContainer` block in `Xp7Deployment` has several possible fields:
+An `initContainer` block in `Xp8Deployment` has several possible fields:
 
 - `name`:The name of the `initContainer`
 - `image`: The image to use for the `initContainer`
@@ -151,7 +151,7 @@ An `initContainer` block in `Xp7Deployment` has several possible fields:
 | Property | Description
 
 |name
-|name of an actual `dir`, `disk` or `volume` name, defined in `Xp7Deployment` resource.
+|name of an actual `dir`, `disk` or `volume` name, defined in `Xp8Deployment` resource.
 
 |mountPath
 |It is the path to mount the `dir`, `disk` or `volume` in the container.
@@ -209,7 +209,7 @@ sidecars:
 | Property | Description
 
 |name
-|name of an actual `dir`, `disk` or `volume` name, defined in `Xp7Deployment` resource.
+|name of an actual `dir`, `disk` or `volume` name, defined in `Xp8Deployment` resource.
 
 |mountPath
 |It is the path to mount the `dir`, `disk` or `volume` in the container.
@@ -220,7 +220,7 @@ sidecars:
 
 [#env]
 ==== env
-In the same way as for initContainers and sidecars, you can specify environment variables for the XP containers. This can be done by adding an env block to the particular nodeGroup of the Xp7Deployment resource.
+In the same way as for initContainers and sidecars, you can specify environment variables for the XP containers. This can be done by adding an env block to the particular nodeGroup of the Xp8Deployment resource.
 
 Every environment variable in the env array is an object with properties:
 
@@ -276,14 +276,14 @@ env:
 ----
 This configuration means the APP_CONFIG environment variable will be set to the value of the `log_level` key in the `app-config` ConfigMap.
 
-=== Xp7Config
+=== Xp8Config
 
-This custom resource manages the configuration of XP nodes. This resource namespaced, and should be created in a namespace that already contains a Xp7Deployment.
+This custom resource manages the configuration of XP nodes. This resource namespaced, and should be created in a namespace that already contains a Xp8Deployment.
 
 [source,yaml]
 ----
 apiVersion: enonic.cloud/v1
-kind: Xp7Config
+kind: Xp8Config
 metadata:
   name: my-config
   namespace: my-namespace
@@ -300,12 +300,12 @@ NOTE: The `nodegroup` field is optional and defaults to `all` nodegroups. If you
 
 NOTE: The `dataBase64` field is optional and defaults to `false`.
 
-You can also create Xp7Config files that hold binary data. To do that you have to base64 encode the data and set the `dataBase64` field to true like so:
+You can also create Xp8Config files that hold binary data. To do that you have to base64 encode the data and set the `dataBase64` field to true like so:
 
 [source,yaml]
 ----
 apiVersion: enonic.cloud/v1
-kind: Xp7Config
+kind: Xp8Config
 metadata:
   name: my-config
   namespace: my-namespace
@@ -316,7 +316,7 @@ spec:
   data: SGVpISBZb3UgYXJlIG9uZSBub3N5IGZveC4gVGhpcyBpcyB0b3Agc2VjcmV0IGRhdGEuIEdldCBvdXQgb2YgaGVyZS4gU2hvb28uLi4uLi4uLi4uLg==
 ----
 
-NOTE: It can vary how fast XP registers the Xp7Config changes. It can be instant, but it can also take up to a couple of minutes, depending on your Kubernetes cluster setup.
+NOTE: It can vary how fast XP registers the Xp8Config changes. It can be instant, but it can also take up to a couple of minutes, depending on your Kubernetes cluster setup.
 
 == Added functionality
 
@@ -329,13 +329,13 @@ To expose your XP instance outside the K8s cluster, the operator uses standard k
 . Sample annotations
 [source,yaml]
 ----
-enonic.cloud/xp7.vhost.mapping.<MAPPING_NAME>.source: /admin
-enonic.cloud/xp7.vhost.mapping.<MAPPING_NAME>.target: /admin
-enonic.cloud/xp7.vhost.mapping.<MAPPING_NAME>.idproviders: <DEFAULT_IDPROVIDER>,<OTHER_ENABLED_IDPROVIDER>
+enonic.cloud/xp8.vhost.mapping.<MAPPING_NAME>.source: /admin
+enonic.cloud/xp8.vhost.mapping.<MAPPING_NAME>.target: /admin
+enonic.cloud/xp8.vhost.mapping.<MAPPING_NAME>.idproviders: <DEFAULT_IDPROVIDER>,<OTHER_ENABLED_IDPROVIDER>
 ----
 
 
-A very important thing to keep in mind is that the annotation `enonic.cloud/xp7.vhost.mapping.<MAPPING_NAME>.source` has to match a defined `spec.rules[?].http.paths[?].path` in the same ingress. That is so the operator knows what node groups it needs to update. That brings us to the second point. The `spec.rules[?].http.paths[?].backend.serviceName` has to match a node group name defined in your Xp7Deployment.
+A very important thing to keep in mind is that the annotation `enonic.cloud/xp8.vhost.mapping.<MAPPING_NAME>.source` has to match a defined `spec.rules[?].http.paths[?].path` in the same ingress. That is so the operator knows what node groups it needs to update. That brings us to the second point. The `spec.rules[?].http.paths[?].backend.serviceName` has to match a node group name defined in your Xp8Deployment.
 
 An example of a valid ingress, assuming you have a nodegroup `main`, would look something like this.
 
@@ -348,14 +348,14 @@ metadata:
   namespace: my-namespace
   annotations:
     # all hosts mapping
-    enonic.cloud/xp7.vhost.mapping.my-mapping-site.source: /
-    enonic.cloud/xp7.vhost.mapping.my-mapping-site.target: /site/default/master/homepage
+    enonic.cloud/xp8.vhost.mapping.my-mapping-site.source: /
+    enonic.cloud/xp8.vhost.mapping.my-mapping-site.target: /site/default/master/homepage
 
     # specific host mapping
-    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.host: my-domain.com
-    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.source: /admin
-    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.target: /admin
-    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.idproviders: system
+    enonic.cloud/xp8.vhost.mapping.my-mapping-admin.host: my-domain.com
+    enonic.cloud/xp8.vhost.mapping.my-mapping-admin.source: /admin
+    enonic.cloud/xp8.vhost.mapping.my-mapping-admin.target: /admin
+    enonic.cloud/xp8.vhost.mapping.my-mapping-admin.idproviders: system
 spec:
   rules:
     - host: my-domain.com
@@ -378,11 +378,11 @@ spec:
                   number: 8080
 ----
 
-NOTE: Like Xp7Config, changes to virtual hosts can take a couple of minutes to register in XP.
+NOTE: Like Xp8Config, changes to virtual hosts can take a couple of minutes to register in XP.
 
 === Namespaces
 
-It can be desirable to delete all created resources that are associated with an Xp7Deployment once its deleted. That is quite easy to do with this namespace annotation:
+It can be desirable to delete all created resources that are associated with an Xp8Deployment once its deleted. That is quite easy to do with this namespace annotation:
 
 [source,yaml]
 ----
@@ -391,7 +391,7 @@ kind: Namespace
 metadata:
   name: my-namespace
   annotations:
-    enonic.cloud/remove.with.xp7deployment: my-deployment
+    enonic.cloud/remove.with.xp8deployment: my-deployment
 ----
 
 == Common operations
@@ -400,7 +400,7 @@ metadata:
 
 [source,bash]
 ----
-$ kubectl -n my-namespace get xp7deployments.enonic.cloud
+$ kubectl -n my-namespace get xp8deployments.enonic.cloud
 
 NAME            ENABLED   VERSION   STATE     MSG
 my-deployment   true      7.13.2     RUNNING   OK
@@ -410,7 +410,7 @@ my-deployment   true      7.13.2     RUNNING   OK
 
 [source,bash]
 ----
-$ kubectl -n my-namespace get xp7configs.enonic.cloud
+$ kubectl -n my-namespace get xp8configs.enonic.cloud
 
 NAME                 NODEGROUP   FILE                                 STATE   MSG
 all-admin            all         com.enonic.xp.app.main.cfg           READY   OK
@@ -471,16 +471,16 @@ _  _ \_  __ \  __ \_  __ \_  /_  ___/   __  |/_/__  __ \
 
 [source,bash]
 ----
-$ kubectl -n my-namespace edit xp7configs.enonic.cloud my-config
+$ kubectl -n my-namespace edit xp8configs.enonic.cloud my-config
 
-xp7config.enonic.cloud/my-config edited
+xp8config.enonic.cloud/my-config edited
 ----
 
 === Watch configuration
 
 [source,bash]
 ----
-$ kubectl -n my-namespace get xp7configs.enonic.cloud -w
+$ kubectl -n my-namespace get xp8configs.enonic.cloud -w
 
 NAME                 NODEGROUP   FILE                                 STATE     MSG
 all-admin            all         com.enonic.xp.app.main.cfg           READY     OK
@@ -511,21 +511,21 @@ Deploy this by running:
 $ kubectl apply -f simple.yaml
 
 namespace/my-namespace created
-xp7deployment.enonic.cloud/my-deployment created
-xp7config.enonic.cloud/my-config created
+xp8deployment.enonic.cloud/my-deployment created
+xp8config.enonic.cloud/my-config created
 ----
 
 Once the XP pods have started you can open up the admin by following the <<access-admin>> section or call the ingress controller, if you have one set up.
 
 === Simple shared volume example
-In case you want to map all your disks to a single volume, you can change the `Xp7Deployment` resource from the previous example to look like this:
+In case you want to map all your disks to a single volume, you can change the `Xp8Deployment` resource from the previous example to look like this:
 
 .simple-shared-volume.yaml
 [source,yaml]
 ----
 # Create deployment in the namespace
 apiVersion: enonic.cloud/v1
-kind: Xp7Deployment
+kind: Xp8Deployment
 
 ...
 
@@ -577,8 +577,8 @@ Deploy this by running:
 $ kubectl apply -f cluster.yaml
 
 namespace/my-namespace created
-xp7deployment.enonic.cloud/my-deployment created
-xp7config.enonic.cloud/my-config created
+xp8deployment.enonic.cloud/my-deployment created
+xp8config.enonic.cloud/my-config created
 ingress.networking.k8s.io/my-domain-com-site created
 ingress.networking.k8s.io/my-domain-com-admin created
 ----

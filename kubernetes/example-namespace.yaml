@@ -3,4 +3,4 @@ kind: Namespace
 metadata:
   name: mycloud-mysolution-myenv-myservice
   annotations:
-    enonic.cloud/remove.with.xp7deployment: mycloud-mysolution-myenv-myservice
+    enonic.cloud/remove.with.xp8deployment: mycloud-mysolution-myenv-myservice

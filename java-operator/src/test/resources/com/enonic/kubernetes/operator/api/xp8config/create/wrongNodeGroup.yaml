@@ -1,0 +1,16 @@
+admissionRequest:
+  request:
+    operation: CREATE
+    object:
+      apiVersion: enonic.cloud/v1
+      kind: Xp8Config
+      metadata:
+        name: test
+        namespace: mycloud-mysolution-myenv-myservice
+      spec:
+        file: mytest.cfg
+        nodeGroup: wrong
+        data: |
+          hello
+
+assertException: "Xp8Deployment 'mycloud-mysolution-myenv-myservice' does not contain nodeGroups [wrong]"

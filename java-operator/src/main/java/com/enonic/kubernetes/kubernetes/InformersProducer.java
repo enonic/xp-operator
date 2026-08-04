@@ -1,7 +1,7 @@
 package com.enonic.kubernetes.kubernetes;
 
-import com.enonic.kubernetes.crd.v1.Xp7Config;
-import com.enonic.kubernetes.crd.v1.Xp7Deployment;
+import com.enonic.kubernetes.crd.v1.Xp8Config;
+import com.enonic.kubernetes.crd.v1.Xp8Deployment;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Event;
@@ -45,8 +45,8 @@ public class InformersProducer
             .namespaceInformer( namespaceInformer( sf ) )
             .podInformer( podInformer( sf ) )
             .eventInformer( eventInformer( sf ) )
-            .xp7ConfigInformer( xp7ConfigInformer( sf ) )
-            .xp7DeploymentInformer( xp7DeploymentInformer( sf ) )
+            .xp8ConfigInformer( xp8ConfigInformer( sf ) )
+            .xp8DeploymentInformer( xp8DeploymentInformer( sf ) )
             .build();
     }
 
@@ -75,13 +75,13 @@ public class InformersProducer
         return sf.sharedIndexInformerFor( Event.class, informerReSync );
     }
 
-    private SharedIndexInformer<Xp7Config> xp7ConfigInformer( final SharedInformerFactory sf )
+    private SharedIndexInformer<Xp8Config> xp8ConfigInformer( final SharedInformerFactory sf )
     {
-        return sf.sharedIndexInformerFor( Xp7Config.class, informerReSync );
+        return sf.sharedIndexInformerFor( Xp8Config.class, informerReSync );
     }
 
-    private SharedIndexInformer<Xp7Deployment> xp7DeploymentInformer( final SharedInformerFactory sf )
+    private SharedIndexInformer<Xp8Deployment> xp8DeploymentInformer( final SharedInformerFactory sf )
     {
-        return sf.sharedIndexInformerFor( Xp7Deployment.class, informerReSync );
+        return sf.sharedIndexInformerFor( Xp8Deployment.class, informerReSync );
     }
 }

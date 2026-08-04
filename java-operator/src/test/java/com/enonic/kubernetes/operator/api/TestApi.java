@@ -22,7 +22,7 @@ import io.fabric8.zjsonpatch.JsonPatch;
 
 import com.enonic.kubernetes.kubernetes.Searchers;
 import com.enonic.kubernetes.kubernetes.SearchersImpl;
-import com.enonic.kubernetes.crd.v1.Xp7Deployment;
+import com.enonic.kubernetes.crd.v1.Xp8Deployment;
 import com.enonic.kubernetes.operator.api.admission.AdmissionApi;
 import com.enonic.kubernetes.operator.api.admission.TestAdmissionApi;
 import com.enonic.kubernetes.operator.api.mutation.MutationApi;
@@ -36,7 +36,7 @@ class TestApi
 
     ObjectMapper jsonMapper;
 
-    TestInformerSearcher<Xp7Deployment> deploymentTestInformerSearcher;
+    TestInformerSearcher<Xp8Deployment> deploymentTestInformerSearcher;
 
     Searchers searchers;
 
@@ -65,13 +65,13 @@ class TestApi
         TestFileSupplier testFileSupplier = new TestFileSupplier();
 
         // Add deployments to cache
-        File cache = testFileSupplier.getFile( TestApi.class, "xp7deploymentsCache.yaml" );
-        List<Xp7Deployment> deployments = this.mapper.readValue( cache, new TypeReference<>()
+        File cache = testFileSupplier.getFile( TestApi.class, "xp8deploymentsCache.yaml" );
+        List<Xp8Deployment> deployments = this.mapper.readValue( cache, new TypeReference<>()
         {
         } );
         deployments.forEach( deploymentTestInformerSearcher::add );
 
-        return testFileSupplier.createTests( TestApi.class, this::runTest, "xp7deploymentsCache.yaml", "xp7VHostCache.yaml" );
+        return testFileSupplier.createTests( TestApi.class, this::runTest, "xp8deploymentsCache.yaml", "xp8VHostCache.yaml" );
     }
 
     @SuppressWarnings("unchecked")

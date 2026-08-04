@@ -104,7 +104,7 @@ operator.charts.values.image.nameTemplate=europe-north1-docker.pkg.dev/my-gcp-pr
 operator.charts.values.image.pullPolicy=Always
 ```
 
-`%s` will be replaced with the `.spec.xpVersion` value of `Xp7Deployment` resource.
+`%s` will be replaced with the `.spec.xpVersion` value of `Xp8Deployment` resource.
 
 ### Running operator in IDE
 

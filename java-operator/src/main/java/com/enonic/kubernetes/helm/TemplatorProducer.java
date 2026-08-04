@@ -14,10 +14,10 @@ import static com.enonic.kubernetes.common.SingletonAssert.singletonAssert;
 public class TemplatorProducer
 {
     @Singleton
-    @Named("v1/xp7deployment")
+    @Named("v1/xp8deployment")
     public Templator createTemplator( Helm helm, @Named("local") ChartRepository chartRepository )
     {
         singletonAssert(this, "createTemplator");
-        return ( values -> helm.templateObjects( chartRepository.get( "v1/xp7deployment" ), values ) );
+        return ( values -> helm.templateObjects( chartRepository.get( "v1/xp8deployment" ), values ) );
     }
 }

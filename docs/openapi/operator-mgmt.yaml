@@ -72,7 +72,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AdmissionReview'
-  /apis/operator.enonic.cloud/v1/xp7/{namespace}/{name}/{nodegroup}/mgmt/content/projects/list:
+  /apis/operator.enonic.cloud/v1/xp8/{namespace}/{name}/{nodegroup}/mgmt/content/projects/list:
     get:
       tags:
       - Xp 7 Management Api
@@ -100,8 +100,8 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Xp7MgmtProject'
-  /apis/operator.enonic.cloud/v1/xp7/{namespace}/{name}/{nodegroup}/mgmt/idproviders/list:
+                  $ref: '#/components/schemas/Xp8MgmtProject'
+  /apis/operator.enonic.cloud/v1/xp8/{namespace}/{name}/{nodegroup}/mgmt/idproviders/list:
     get:
       tags:
       - Xp 7 Management Api
@@ -129,8 +129,8 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Xp7MgmtIdProvider'
-  /apis/operator.enonic.cloud/v1/xp7/{namespace}/{name}/{nodegroup}/mgmt/repo/snapshots/list:
+                  $ref: '#/components/schemas/Xp8MgmtIdProvider'
+  /apis/operator.enonic.cloud/v1/xp8/{namespace}/{name}/{nodegroup}/mgmt/repo/snapshots/list:
     get:
       tags:
       - Xp 7 Management Api
@@ -156,8 +156,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Xp7MgmtSnapshotsList'
-  /apis/operator.enonic.cloud/v1/xp7/{namespace}/{name}/{nodegroup}/mgmt/webapps/list:
+                $ref: '#/components/schemas/Xp8MgmtSnapshotsList'
+  /apis/operator.enonic.cloud/v1/xp8/{namespace}/{name}/{nodegroup}/mgmt/webapps/list:
     get:
       tags:
       - Xp 7 Management Api
@@ -185,7 +185,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Xp7MgmtWebapp'
+                  $ref: '#/components/schemas/Xp8MgmtWebapp'
 components:
   schemas:
     AdmissionRequest:
@@ -362,7 +362,7 @@ components:
           type: string
         username:
           type: string
-    Xp7MgmtBranch:
+    Xp8MgmtBranch:
       type: object
       properties:
         name:
@@ -370,8 +370,8 @@ components:
         sites:
           type: array
           items:
-            $ref: '#/components/schemas/Xp7MgmtSite'
-    Xp7MgmtIdProvider:
+            $ref: '#/components/schemas/Xp8MgmtSite'
+    Xp8MgmtIdProvider:
       type: object
       properties:
         key:
@@ -380,7 +380,7 @@ components:
           type: string
         description:
           type: string
-    Xp7MgmtProject:
+    Xp8MgmtProject:
       type: object
       properties:
         name:
@@ -394,8 +394,8 @@ components:
         branches:
           type: array
           items:
-            $ref: '#/components/schemas/Xp7MgmtBranch'
-    Xp7MgmtSite:
+            $ref: '#/components/schemas/Xp8MgmtBranch'
+    Xp8MgmtSite:
       type: object
       properties:
         displayName:
@@ -404,14 +404,14 @@ components:
           type: string
         language:
           type: string
-    Xp7MgmtSnapshotsList:
+    Xp8MgmtSnapshotsList:
       type: object
       properties:
         results:
           type: array
           items:
-            $ref: '#/components/schemas/Xp7MgmtSnapshotsListSnapshot'
-    Xp7MgmtSnapshotsListSnapshot:
+            $ref: '#/components/schemas/Xp8MgmtSnapshotsListSnapshot'
+    Xp8MgmtSnapshotsListSnapshot:
       type: object
       properties:
         name:
@@ -426,7 +426,7 @@ components:
           type: array
           items:
             type: string
-    Xp7MgmtWebapp:
+    Xp8MgmtWebapp:
       type: object
       properties:
         name:

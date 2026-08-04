@@ -7,17 +7,17 @@ metadata:
     enonic.managed: "true"
   annotations:
     # Delete this namespace if the deployment is deleted
-    enonic.cloud/remove.with.xp7deployment: my-deployment
+    enonic.cloud/remove.with.xp8deployment: my-deployment
 ---
 # Create deployment in the namespace
 apiVersion: enonic.cloud/v1
-kind: Xp7Deployment
+kind: Xp8Deployment
 metadata:
   name: my-deployment
   namespace: my-namespace
 spec:
   enabled: true
-  xpVersion: 7.16.2
+  xpVersion: 8.0.0
 
   # Create one node
   nodeGroups:
@@ -59,7 +59,7 @@ spec:
 ---
 # Add your own custom config
 apiVersion: enonic.cloud/v1
-kind: Xp7Config
+kind: Xp8Config
 metadata:
   name: my-config
   namespace: my-namespace
@@ -76,12 +76,12 @@ metadata:
   name: my-domain-com
   namespace: my-namespace
   annotations:
-    enonic.cloud/xp7.vhost.mapping.my-mapping-site.source: /
-    enonic.cloud/xp7.vhost.mapping.my-mapping-site.target: /site/default/master/homepage
+    enonic.cloud/xp8.vhost.mapping.my-mapping-site.source: /
+    enonic.cloud/xp8.vhost.mapping.my-mapping-site.target: /site/default/master/homepage
 
-    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.source: /admin
-    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.target: /admin
-    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.idproviders: system
+    enonic.cloud/xp8.vhost.mapping.my-mapping-admin.source: /admin
+    enonic.cloud/xp8.vhost.mapping.my-mapping-admin.target: /admin
+    enonic.cloud/xp8.vhost.mapping.my-mapping-admin.idproviders: system
 spec:
   rules:
     - host: my-domain.com

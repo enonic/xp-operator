@@ -1,0 +1,16 @@
+admissionRequest:
+  request:
+    operation: CREATE
+    object:
+      apiVersion: enonic.cloud/v1
+      kind: Xp8Config
+      metadata:
+        name: test
+        namespace: wrongnamespace
+      spec:
+        file: mytest.cfg
+        nodeGroup: main
+        data: |
+          hello
+
+assertException: "No Xp8Deployment found in NS 'wrongnamespace'"

@@ -1,5 +1,5 @@
 apiVersion: enonic.cloud/v1
-kind: Xp7Deployment
+kind: Xp8Deployment
 metadata:
   name: mycloud-mysolution-myenv-myservice
   namespace: mycloud-mysolution-myenv-myservice

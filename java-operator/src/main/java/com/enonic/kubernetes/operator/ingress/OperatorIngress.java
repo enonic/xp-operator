@@ -35,7 +35,7 @@ public class OperatorIngress
     Clients clients;
 
     @Inject
-    OperatorXp7ConfigSync operatorXp7ConfigSync;
+    OperatorXp8ConfigSync operatorXp8ConfigSync;
 
     @Inject
     Searchers searchers;
@@ -77,7 +77,7 @@ public class OperatorIngress
         }
 
         // Handle relevant namespace
-        operatorXp7ConfigSync.handle( ingress.getMetadata().getNamespace() );
+        operatorXp8ConfigSync.handle( ingress.getMetadata().getNamespace() );
 
         // Label ingress
         if (!getXpVHostAnnotations( ingress ).isEmpty()) {

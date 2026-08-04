@@ -1,0 +1,102 @@
+admissionRequest:
+  request:
+    operation: CREATE
+    object:
+      apiVersion: enonic.cloud/v1
+      kind: Xp8Deployment
+      metadata:
+        name: mycloud-mysolution-myenv-myservice2
+        namespace: mycloud-mysolution-myenv-myservice2
+        labels:
+          cloud: mycloud
+          solution: mysolution
+          environment: myenv
+          service: myservice2
+      spec:
+        enabled: true
+        xpVersion: 8.0.0
+        nodesSharedDisks:
+          - name: blobstore
+            size: 1Gi
+          - name: snapshots
+            size: 1Gi
+        nodeGroups:
+          - name: master
+            master: true
+            data: false
+            replicas: 1
+            resources:
+              cpu: "1"
+              memory: 512Mi
+          - name: data
+            master: false
+            data: true
+            replicas: 1
+            resources:
+              cpu: "1"
+              memory: 512Mi
+              disks:
+                - name: index
+                  size: 200Mi
+          - name: frontend
+            master: false
+            data: false
+            replicas: 1
+            resources:
+              cpu: "1"
+              memory: 512Mi
+
+assertResult:
+  apiVersion: "enonic.cloud/v1"
+  kind: "Xp8Deployment"
+  metadata:
+    labels:
+      cloud: "mycloud"
+      solution: "mysolution"
+      environment: "myenv"
+      service: "myservice2"
+    name: "mycloud-mysolution-myenv-myservice2"
+    namespace: "mycloud-mysolution-myenv-myservice2"
+  spec:
+    enabled: true
+    xpVersion: "8.0.0"
+    nodesSharedDisks:
+      - name: "blobstore"
+        size: "1Gi"
+      - name: "snapshots"
+        size: "1Gi"
+    nodeGroups:
+      - name: "master"
+        data: false
+        master: true
+        replicas: 1
+        env: [ ]
+        resources:
+          cpu: "1"
+          memory: "512Mi"
+          disks: [ ]
+      - name: "data"
+        data: true
+        master: false
+        replicas: 1
+        env: [ ]
+        resources:
+          cpu: "1"
+          memory: "512Mi"
+          disks:
+            - name: "index"
+              size: "200Mi"
+      - name: "frontend"
+        data: false
+        master: false
+        replicas: 1
+        env: [ ]
+        resources:
+          cpu: "1"
+          memory: "512Mi"
+          disks: [ ]
+  status:
+    state: "PENDING"
+    message: "Waiting for pods"
+    fields:
+      pods: [ ]
