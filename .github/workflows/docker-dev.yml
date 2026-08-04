@@ -69,5 +69,5 @@ jobs:
         run: curl -u "ci:${{ secrets.ARTIFACTORY_PASSWORD }}" https://repo.enonic.com/helm/ --upload-file helm/build/libs/xp-operator-${{ steps.operator_version.outputs.version }}-dev.tgz -v
 
       - name: Publish mgmt OpenAPI
-        run: curl -f -u "ci:${{ secrets.ARTIFACTORY_PASSWORD }}" https://repo.enonic.com/public/com/enonic/kubernetes/xp-operator/${{ steps.operator_version.outputs.version }}-dev/operator-mgmt.yaml --upload-file java-operator/build/openapi/openapi.yaml -v
+        run: curl -f -u "ci:${{ secrets.ARTIFACTORY_PASSWORD }}" https://repo.enonic.com/public/com/enonic/kubernetes/xp-operator/${{ steps.operator_version.outputs.version }}-dev/operator-mgmt.yaml --upload-file java-operator/build/classes/java/main/META-INF/swagger/*.yml -v
 
