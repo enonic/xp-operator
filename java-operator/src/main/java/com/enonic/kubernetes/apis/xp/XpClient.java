@@ -261,36 +261,43 @@ public class XpClient
         }
     }
 
-    private void appOp(String op, AppKey req, String exceptionToThrow)
+    private AppOpResult appOp(String op, AppKey req, String exceptionToThrow)
             throws XpClientException {
         try {
             Request request = requestBuilder.apply("/app/" + op)
                     .post(RequestBody.create(MediaType.parse("application/json"), mapper.writeValueAsString(req)))
                     .build();
             Response response = restClient.newCall(request).execute();
-            Preconditions.checkState(response.code() == 204, "Response code " + response.code());
+            Preconditions.checkState(response.code() == 200, "Response code " + response.code());
+            AppOpResponse opResponse = mapper.readValue(response.body().bytes(), AppOpResponse.class);
+            boolean success = opResponse.results().stream()
+                    .filter(r -> r.id().equals(req.key()))
+                    .findFirst()
+                    .map(AppOpResponseItem::success)
+                    .orElse(false);
+            return ImmutableAppOpResult.builder().success(success).build();
         } catch (Exception e) {
             registry.counter("xp_apps_error", tags).increment();
             throw new XpClientException(exceptionToThrow, e);
         }
     }
 
-    public void appUninstall(AppKey req)
+    public AppOpResult appUninstall(AppKey req)
             throws XpClientException {
         registry.counter("xp_apps_uninstall", tags).increment();
-        appOp("uninstall", req, String.format("Failed uninstalling app on '%s'", params.url()));
+        return appOp("uninstall", req, String.format("Failed uninstalling app on '%s'", params.url()));
     }
 
-    public void appStart(AppKey req)
+    public AppOpResult appStart(AppKey req)
             throws XpClientException {
         registry.counter("xp_apps_start", tags).increment();
-        appOp("start", req, String.format("Failed starting app on '%s'", params.url()));
+        return appOp("start", req, String.format("Failed starting app on '%s'", params.url()));
     }
 
-    public void appStop(AppKey req)
+    public AppOpResult appStop(AppKey req)
             throws XpClientException {
         registry.counter("xp_apps_stop", tags).increment();
-        appOp("stop", req, String.format("Failed stopping app on '%s'", params.url()));
+        return appOp("stop", req, String.format("Failed stopping app on '%s'", params.url()));
     }
 
     public Xp8MgmtSnapshotsList snapshotsList() throws XpClientException {
