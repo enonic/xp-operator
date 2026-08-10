@@ -3,6 +3,7 @@ plugins {
 }
 
 task processHelmResources(type: Copy) {
+    inputs.property "version", "${project.version}"
     from 'src/main' into "${buildDir}/resources/main"
     filesMatching('values.yaml') {
         expand version: "${project.version}"
