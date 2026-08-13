@@ -58,6 +58,12 @@ spec:
       automountServiceAccountToken: {{ $.Values.pods.automountServiceAccountToken }}
       serviceAccount: xp-node-sa
       serviceAccountName: xp-node-sa
+      {{- with $.Values.pods.imagePullSecretNames }}
+      imagePullSecrets:
+        {{- range . }}
+        - name: {{ . }}
+        {{- end }}
+      {{- end }}
       {{- if $.Values.pods.nodeGroupAntiAffinity }}
       affinity:
         podAntiAffinity:
