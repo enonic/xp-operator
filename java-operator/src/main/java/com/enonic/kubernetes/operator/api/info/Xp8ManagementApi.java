@@ -8,6 +8,7 @@ import com.enonic.kubernetes.apis.xp.service.AppInfo;
 import com.enonic.kubernetes.apis.xp.service.AppInstallRequest;
 import com.enonic.kubernetes.apis.xp.service.AppInstallResponse;
 import com.enonic.kubernetes.apis.xp.service.AppKey;
+import com.enonic.kubernetes.apis.xp.service.AppOpResult;
 import com.enonic.kubernetes.client.v1.api.xp8.idproviders.Xp8MgmtIdProvider;
 import com.enonic.kubernetes.client.v1.api.xp8.projects.Xp8MgmtProject;
 import com.enonic.kubernetes.client.v1.api.xp8.snapshots.Xp8MgmtSnapshotsList;
@@ -191,13 +192,14 @@ public class Xp8ManagementApi
 
     @Post("/xp8/{namespace}/{name}/{nodegroup}/mgmt/apps/uninstall")
     @Consumes("application/json")
-    public void appUninstall( @PathVariable("namespace") final String namespace, @PathVariable("name") final String name,
+    @Produces("application/json")
+    public AppOpResult appUninstall( @PathVariable("namespace") final String namespace, @PathVariable("name") final String name,
                               @PathVariable("nodegroup") final String nodeGroup, @Body final AppKey key )
         throws KubernetesClientException
     {
         try
         {
-            getClient( namespace, name, nodeGroup ).appUninstall( key );
+            return getClient( namespace, name, nodeGroup ).appUninstall( key );
         }
         catch ( Exception e )
         {
@@ -208,13 +210,14 @@ public class Xp8ManagementApi
 
     @Post("/xp8/{namespace}/{name}/{nodegroup}/mgmt/apps/start")
     @Consumes("application/json")
-    public void appStart( @PathVariable("namespace") final String namespace, @PathVariable("name") final String name,
+    @Produces("application/json")
+    public AppOpResult appStart( @PathVariable("namespace") final String namespace, @PathVariable("name") final String name,
                           @PathVariable("nodegroup") final String nodeGroup, @Body final AppKey key )
         throws KubernetesClientException
     {
         try
         {
-            getClient( namespace, name, nodeGroup ).appStart( key );
+            return getClient( namespace, name, nodeGroup ).appStart( key );
         }
         catch ( Exception e )
         {
@@ -225,13 +228,14 @@ public class Xp8ManagementApi
 
     @Post("/xp8/{namespace}/{name}/{nodegroup}/mgmt/apps/stop")
     @Consumes("application/json")
-    public void appStop( @PathVariable("namespace") final String namespace, @PathVariable("name") final String name,
+    @Produces("application/json")
+    public AppOpResult appStop( @PathVariable("namespace") final String namespace, @PathVariable("name") final String name,
                          @PathVariable("nodegroup") final String nodeGroup, @Body final AppKey key )
         throws KubernetesClientException
     {
         try
         {
-            getClient( namespace, name, nodeGroup ).appStop( key );
+            return getClient( namespace, name, nodeGroup ).appStop( key );
         }
         catch ( Exception e )
         {
