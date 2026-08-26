@@ -467,7 +467,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>A pre-created <code>xp-operator-namespace-role</code> ClusterRole holds all the namespace-level permissions the operator needs.</p>
 </li>
 <li>
-<p>When an Xp7Deployment is created, the operator creates a <code>RoleBinding</code> in that namespace, binding <code>xp-operator-namespace-role</code> to its own ServiceAccount.</p>
+<p>When an Xp8Deployment is created, the operator creates a <code>RoleBinding</code> in that namespace, binding <code>xp-operator-namespace-role</code> to its own ServiceAccount.</p>
 </li>
 </ol>
 </div>
@@ -539,7 +539,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2026-04-16 10:34:13 UTC
+Last updated 2026-08-26 07:33:36 UTC
 </div>
 </div>
 </body>

@@ -448,7 +448,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#test_the_operator">Test the operator</a>
 <ul class="sectlevel2">
 <li><a href="#prepare_namespace">Prepare namespace</a></li>
-<li><a href="#create_xp7deployment">Create xp7deployment</a></li>
+<li><a href="#create_xp8deployment">Create xp8deployment</a></li>
 <li><a href="#access_xp_admin">Access XP Admin</a></li>
 <li><a href="#remove_deployment">Remove deployment</a></li>
 </ul>
@@ -635,37 +635,30 @@ pod/xp-operator-684bb48cc5-bqjqc                                    0/1     Cont
 <div class="content">
 <pre class="highlight"><code class="language-bash" data-lang="bash">$ kubectl -n kube-system logs -f xp-operator-684bb48cc5-bqjqc
 
-exec java -Doperator.charts.path=helm -Djava.util.logging.manager=org.jboss.logmanager.LogManager -javaagent:/opt/agent-bond/agent-bond.jar=jmx_exporter{{9779:/opt/agent-bond/jmx_exporter_config.yml}} -XX:+ExitOnOutOfMemoryError -cp . -jar /deployments/quarkus-run.jar
-__  ____  __  _____   ___  __ ____  ______
- --/ __ \/ / / / _ | / _ \/ //_/ / / / __/
- -/ /_/ / /_/ / __ |/ , _/ ,&lt; / /_/ /\ \
---\___\_\____/_/ |_/_/|_/_/|_|\____/___/
-2024-01-02 23:12:24,760 INFO  io.quarkus - java-operator 1.0.0 on JVM (powered by Quarkus 2.16.6.Final) started in 6.579s. Listening on: https://0.0.0.0:8443
-2024-01-02 23:12:24,762 INFO  io.quarkus - Profile prod activated.
-2024-01-02 23:12:24,764 INFO  io.quarkus - Installed features: [cdi, micrometer, rest-client, resteasy, resteasy-jackson, smallrye-context-propagation, vertx]
-2024-01-02 23:12:25,808 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorIngress'
-2024-01-02 23:12:25,889 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXpClientCacheInvalidate'
-2024-01-02 23:12:27,738 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7DeploymentHelm'
-2024-01-02 23:12:27,787 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppStatusOnDeployments'
-2024-01-02 23:12:27,799 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorDeleteAnnotation'
-2024-01-02 23:12:27,803 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorInformers' [delay: 16337, period: 30000]
-2024-01-02 23:12:27,803 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7ConfigStatus'
-2024-01-02 23:12:27,804 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorIngressLabel'
-2024-01-02 23:12:27,804 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppInstaller'
-2024-01-02 23:12:27,805 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7AppInstaller' [delay: 15212, period: 60000]
-2024-01-02 23:12:27,805 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppInstallerOnDeployments'
-2024-01-02 23:12:27,806 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorConfigMapEvent'
-2024-01-02 23:12:27,803 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorConfigMapSync' [delay: 13252, period: 60000]
-2024-01-02 23:12:27,804 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorIngressLabel' [delay: 6622, period: 60000]
-2024-01-02 23:12:27,806 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7Config'
+exec java -Doperator.charts.path=helm -Dmicronaut.config.files=/deployments/config/application.properties -javaagent:/opt/agent-bond/agent-bond.jar=jmx_exporter{{9779:/opt/agent-bond/jmx_exporter_config.yml}} -XX:+ExitOnOutOfMemoryError -cp . -jar /deployments/application.jar
+ __  __ _                                  _
+|  \/  (_) ___ _ __ ___  _ __   __ _ _   _| |_
+| |\/| | |/ __| '__/ _ \| '_ \ / _` | | | | __|
+| |  | | | (__| | | (_) | | | | (_| | |_| | |_
+|_|  |_|_|\___|_|  \___/|_| |_|\__,_|\__,_|\__|
+2026-01-02 23:12:24.760 INFO  i.m.c.DefaultApplicationContext$RuntimeConfiguredEnvironment - Established active environments: [k8s, cloud]
+2026-01-02 23:12:26.151 INFO  io.micronaut.runtime.Micronaut - Startup completed in 2200ms. Server Running: https://0.0.0.0:8443
+2026-01-02 23:12:27,808 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorIngress'
+2026-01-02 23:12:27,889 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXpClientCacheInvalidate'
+2026-01-02 23:12:27,738 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp8DeploymentHelm'
+2026-01-02 23:12:27,799 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorDeleteAnnotation'
+2026-01-02 23:12:27,803 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorInformers' [delay: 16337, period: 30000]
+2026-01-02 23:12:27,803 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp8ConfigStatus'
+2026-01-02 23:12:27,804 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorIngressLabel'
+2026-01-02 23:12:27,806 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorConfigMapEvent'
+2026-01-02 23:12:27,803 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorConfigMapSync' [delay: 13252, period: 60000]
+2026-01-02 23:12:27,804 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorIngressLabel' [delay: 6622, period: 60000]
+2024-01-02 23:12:27,806 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp8Config'
 2024-01-02 23:12:27,807 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorIngressCertSync'
-2024-01-02 23:12:27,807 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7ConfigSync' [delay: 10124, period: 60000]
+2024-01-02 23:12:27,807 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp8ConfigSync' [delay: 10124, period: 60000]
 2024-01-02 23:12:27,808 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorDomainCertSync'
-2024-01-02 23:12:27,809 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7AppStartStopper'
-2024-01-02 23:12:27,809 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7AppStartStopper' [delay: 14806, period: 60000]
-2024-01-02 23:12:27,809 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp7DeploymentStatus'
-2024-01-02 23:12:27,810 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7DeploymentStatus' [delay: 4146, period: 60000]
-2024-01-02 23:12:27,810 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp7AppStatus' [delay: 19524, period: 60000]
+2024-01-02 23:12:27,809 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp8DeploymentStatus'
+2024-01-02 23:12:27,810 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorXp8DeploymentStatus' [delay: 4146, period: 60000]
 2024-01-02 23:12:32,807 INFO  com.eno.kub.ope.Operator - Starting informers</code></pre>
 </div>
 </div>
@@ -675,8 +668,8 @@ __  ____  __  _____   ___  __ ____  ______
 <h2 id="test_the_operator"><a class="link" href="#test_the_operator">Test the operator</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The best way of verifying that things are working, is by creating a basic xp7deployment.
-The example below will create a namespace, a single-node XP7 server, pre-install selected applications, and configure an ingress.</p>
+<p>The best way of verifying that things are working, is by creating a basic xp8deployment.
+The example below will create a namespace, a single-node XP8 server, pre-install selected applications, and configure an ingress.</p>
 </div>
 <div class="admonitionblock warning">
 <table>
@@ -693,7 +686,7 @@ Remember to use a unique namespace per XP deployment. Never use the same namespa
 <div class="sect2">
 <h3 id="prepare_namespace"><a class="link" href="#prepare_namespace">Prepare namespace</a></h3>
 <div class="paragraph">
-<p>Before creating an Xp7Deployment, the target namespace must have the managed label set to <code>"true"</code>. The label key defaults to <code>enonic.managed</code> but can be overridden via the <code>managedLabelKey</code> value in the operator Helm chart.</p>
+<p>Before creating an Xp8Deployment, the target namespace must have the managed label set to <code>"true"</code>. The label key defaults to <code>enonic.managed</code> but can be overridden via the <code>managedLabelKey</code> value in the operator Helm chart.</p>
 </div>
 <div class="paragraph">
 <p>A cluster admin must label the namespace manually:</p>
@@ -708,7 +701,7 @@ Remember to use a unique namespace per XP deployment. Never use the same namespa
 </div>
 </div>
 <div class="sect2">
-<h3 id="create_xp7deployment"><a class="link" href="#create_xp7deployment">Create xp7deployment</a></h3>
+<h3 id="create_xp8deployment"><a class="link" href="#create_xp8deployment">Create xp8deployment</a></h3>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -737,17 +730,17 @@ metadata:
     enonic.managed: "true"
   annotations:
     # Delete this namespace if the deployment is deleted
-    enonic.cloud/remove.with.xp7deployment: my-deployment
+    enonic.cloud/remove.with.xp8deployment: my-deployment
 ---
 # Create deployment in the namespace
 apiVersion: enonic.cloud/v1
-kind: Xp7Deployment
+kind: Xp8Deployment
 metadata:
   name: my-deployment
   namespace: my-namespace
 spec:
   enabled: true
-  xpVersion: 7.16.2
+  xpVersion: 8.0.0
 
   # Create one node
   nodeGroups:
@@ -789,7 +782,7 @@ spec:
 ---
 # Add your own custom config
 apiVersion: enonic.cloud/v1
-kind: Xp7Config
+kind: Xp8Config
 metadata:
   name: my-config
   namespace: my-namespace
@@ -806,12 +799,12 @@ metadata:
   name: my-domain-com
   namespace: my-namespace
   annotations:
-    enonic.cloud/xp7.vhost.mapping.my-mapping-site.source: /
-    enonic.cloud/xp7.vhost.mapping.my-mapping-site.target: /site/default/master/homepage
+    enonic.cloud/xp8.vhost.mapping.my-mapping-site.source: /
+    enonic.cloud/xp8.vhost.mapping.my-mapping-site.target: /site/default/master/homepage
 
-    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.source: /admin
-    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.target: /admin
-    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.idproviders: system
+    enonic.cloud/xp8.vhost.mapping.my-mapping-admin.source: /admin
+    enonic.cloud/xp8.vhost.mapping.my-mapping-admin.target: /admin
+    enonic.cloud/xp8.vhost.mapping.my-mapping-admin.idproviders: system
 spec:
   rules:
     - host: my-domain.com
@@ -836,7 +829,7 @@ spec:
 </div>
 </li>
 <li>
-<p>Then run the following command to create the xp7deployment:</p>
+<p>Then run the following command to create the xp8deployment:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-bash" data-lang="bash">kubectl apply -f simple.yaml</code></pre>
@@ -846,9 +839,8 @@ spec:
 <div class="title">Output from a successful command</div>
 <div class="content">
 <pre class="highlight"><code class="language-terminal" data-lang="terminal">namespace/my-namespace created
-xp7deployment.enonic.cloud/my-deployment created
-xp7app.enonic.cloud/contentstudio created
-xp7config.enonic.cloud/my-config created
+xp8deployment.enonic.cloud/my-deployment created
+xp8config.enonic.cloud/my-config created
 ingress.networking.k8s.io/my-domain-com created</code></pre>
 </div>
 </div>
@@ -959,7 +951,7 @@ For details on the operator&#8217;s security model and how it restricts itself t
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-Don´t uninstall the xp-operator while there are remaining xp7Deployments on your cluster
+Don´t uninstall the xp-operator while there are remaining xp8Deployments on your cluster
 </td>
 </tr>
 </table>
@@ -977,7 +969,7 @@ Don´t uninstall the xp-operator while there are remaining xp7Deployments on you
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2026-04-16 10:34:13 UTC
+Last updated 2026-08-26 07:33:36 UTC
 </div>
 </div>
 </body>

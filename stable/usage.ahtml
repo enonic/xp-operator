@@ -443,9 +443,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <ul class="sectlevel1">
 <li><a href="#custom_resources">Custom Resources</a>
 <ul class="sectlevel2">
-<li><a href="#xp7deployment">Xp7Deployment</a></li>
-<li><a href="#xp7config">Xp7Config</a></li>
-<li><a href="#xp7app">Xp7App</a></li>
+<li><a href="#xp8deployment">Xp8Deployment</a></li>
+<li><a href="#xp8config">Xp8Config</a></li>
 </ul>
 </li>
 <li><a href="#added_functionality">Added functionality</a>
@@ -458,7 +457,6 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <ul class="sectlevel2">
 <li><a href="#get_deployment_status">Get deployment status</a></li>
 <li><a href="#get_config_status">Get config status</a></li>
-<li><a href="#get_app_status">Get app status</a></li>
 <li><a href="#fetching_su_password">Fetching SU password</a></li>
 <li><a href="#access-admin">Access admin (bypassing ingress)</a></li>
 <li><a href="#view_xp_logs">View XP logs</a></li>
@@ -490,14 +488,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>The operator introduces a couple of new resources into your Kubernetes cluster.</p>
 </div>
 <div class="sect2">
-<h3 id="xp7deployment"><a class="link" href="#xp7deployment">Xp7Deployment</a></h3>
+<h3 id="xp8deployment"><a class="link" href="#xp8deployment">Xp8Deployment</a></h3>
 <div class="paragraph">
-<p>This is the main custom resource that defines your deployment. It is namespaced, so you have to create a namespace for it. Only 1 Xp7Deployment can reside in each namespace.</p>
+<p>This is the main custom resource that defines your deployment. It is namespaced, so you have to create a namespace for it. Only 1 Xp8Deployment can reside in each namespace.</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-yaml" data-lang="yaml">apiVersion: enonic.cloud/v1
-kind: Xp7Deployment
+kind: Xp8Deployment
 metadata:
   name: my-deployment
   namespace: my-namespace
@@ -568,7 +566,7 @@ spec:
 <div class="sect3">
 <h4 id="disks"><a class="link" href="#disks">Disks</a></h4>
 <div class="paragraph">
-<p>In the Xp7Deployment resource we have names of disks that you can define to be shared, private or non-existent.</p>
+<p>In the Xp8Deployment resource we have names of disks that you can define to be shared, private or non-existent.</p>
 </div>
 <div class="dlist">
 <dl>
@@ -626,7 +624,7 @@ spec:
 <div class="sect3">
 <h4 id="initcontainers"><a class="link" href="#initcontainers">initContainers</a></h4>
 <div class="paragraph">
-<p>In the context of Xp7Deployment, <code>initContainers</code> are containers launched before the XP container itself, as part of the deployment lifecycle. This mechanism can be useful to install applications (add applications to <code>deploy</code> folder of the main container), preinstall custom workloads or set up the settings of the XP container or perform other tasks.
+<p>In the context of Xp8Deployment, <code>initContainers</code> are containers launched before the XP container itself, as part of the deployment lifecycle. This mechanism can be useful to install applications (add applications to <code>deploy</code> folder of the main container), preinstall custom workloads or set up the settings of the XP container or perform other tasks.
 One important thing to remember is that, if there are several initContainers defined, they will be launched sequentially, following the order in the configuration. If any of the <code>initContainers</code> fail, Kubernetes will keep retrying until it succeeds.</p>
 </div>
 <div class="listingblock">
@@ -645,7 +643,7 @@ One important thing to remember is that, if there are several initContainers def
 </div>
 </div>
 <div class="paragraph">
-<p>An <code>initContainer</code> block in <code>Xp7Deployment</code> has several possible fields:</p>
+<p>An <code>initContainer</code> block in <code>Xp8Deployment</code> has several possible fields:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -683,7 +681,7 @@ One important thing to remember is that, if there are several initContainers def
 <tbody>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">name</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">name of an actual <code>dir</code>, <code>disk</code> or <code>volume</code> name, defined in <code>Xp7Deployment</code> resource.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">name of an actual <code>dir</code>, <code>disk</code> or <code>volume</code> name, defined in <code>Xp8Deployment</code> resource.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">mountPath</p></td>
@@ -776,7 +774,7 @@ One important thing to remember is that, if there are several initContainers def
 <tbody>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">name</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">name of an actual <code>dir</code>, <code>disk</code> or <code>volume</code> name, defined in <code>Xp7Deployment</code> resource.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">name of an actual <code>dir</code>, <code>disk</code> or <code>volume</code> name, defined in <code>Xp8Deployment</code> resource.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">mountPath</p></td>
@@ -795,7 +793,7 @@ One important thing to remember is that, if there are several initContainers def
 <div class="sect3">
 <h4 id="env"><a class="link" href="#env">env</a></h4>
 <div class="paragraph">
-<p>In the same way as for initContainers and sidecars, you can specify environment variables for the XP containers. This can be done by adding an env block to the particular nodeGroup of the Xp7Deployment resource.</p>
+<p>In the same way as for initContainers and sidecars, you can specify environment variables for the XP containers. This can be done by adding an env block to the particular nodeGroup of the Xp8Deployment resource.</p>
 </div>
 <div class="paragraph">
 <p>Every environment variable in the env array is an object with properties:</p>
@@ -875,14 +873,14 @@ One important thing to remember is that, if there are several initContainers def
 </div>
 </div>
 <div class="sect2">
-<h3 id="xp7config"><a class="link" href="#xp7config">Xp7Config</a></h3>
+<h3 id="xp8config"><a class="link" href="#xp8config">Xp8Config</a></h3>
 <div class="paragraph">
-<p>This custom resource manages the configuration of XP nodes. This resource namespaced, and should be created in a namespace that already contains a Xp7Deployment.</p>
+<p>This custom resource manages the configuration of XP nodes. This resource namespaced, and should be created in a namespace that already contains a Xp8Deployment.</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-yaml" data-lang="yaml">apiVersion: enonic.cloud/v1
-kind: Xp7Config
+kind: Xp8Config
 metadata:
   name: my-config
   namespace: my-namespace
@@ -920,12 +918,12 @@ The <code>dataBase64</code> field is optional and defaults to <code>false</code>
 </table>
 </div>
 <div class="paragraph">
-<p>You can also create Xp7Config files that hold binary data. To do that you have to base64 encode the data and set the <code>dataBase64</code> field to true like so:</p>
+<p>You can also create Xp8Config files that hold binary data. To do that you have to base64 encode the data and set the <code>dataBase64</code> field to true like so:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-yaml" data-lang="yaml">apiVersion: enonic.cloud/v1
-kind: Xp7Config
+kind: Xp8Config
 metadata:
   name: my-config
   namespace: my-namespace
@@ -943,37 +941,7 @@ spec:
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-It can vary how fast XP registers the Xp7Config changes. It can be instant, but it can also take up to a couple of minutes, depending on your Kubernetes cluster setup.
-</td>
-</tr>
-</table>
-</div>
-</div>
-<div class="sect2">
-<h3 id="xp7app"><a class="link" href="#xp7app">Xp7App</a></h3>
-<div class="paragraph">
-<p>This resource is to manage apps with the operator. While you can manage them with XP directly, this provides you with the option to create a deployment complete with your custom apps using the operator. This resource is namespaced, and should be created in a namespace that already contains an Xp7Deployment.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">apiVersion: enonic.cloud/v1
-kind: Xp7App
-metadata:
-  name: contentstudio
-  namespace: my-namespace
-spec:
-  url: https://repo.enonic.com/public/com/enonic/app/contentstudio/5.0.3/contentstudio-5.0.3.jar
-  #sha512: ba6b40ebf0808c6fa619ba2a05d07ce3e566eada7e9f3f34c1d280e9d1dcbd1e3c25eff9896d1057c4578ff3f516afa7a905c9e42ddc5e08f1cdf06f7e89774c</code></pre>
-</div>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-The <code>sha512</code> field is optional, but if provided, XP will validate the sha512 sum of the jar before installing it. This prevents installing of potential malicious apps from the internet.
+It can vary how fast XP registers the Xp8Config changes. It can be instant, but it can also take up to a couple of minutes, depending on your Kubernetes cluster setup.
 </td>
 </tr>
 </table>
@@ -1001,13 +969,13 @@ The <code>sha512</code> field is optional, but if provided, XP will validate the
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>enonic.cloud/xp7.vhost.mapping.&lt;MAPPING_NAME&gt;.source: /admin
-enonic.cloud/xp7.vhost.mapping.&lt;MAPPING_NAME&gt;.target: /admin
-enonic.cloud/xp7.vhost.mapping.&lt;MAPPING_NAME&gt;.idproviders: &lt;DEFAULT_IDPROVIDER&gt;,&lt;OTHER_ENABLED_IDPROVIDER&gt;</pre>
+<pre>enonic.cloud/xp8.vhost.mapping.&lt;MAPPING_NAME&gt;.source: /admin
+enonic.cloud/xp8.vhost.mapping.&lt;MAPPING_NAME&gt;.target: /admin
+enonic.cloud/xp8.vhost.mapping.&lt;MAPPING_NAME&gt;.idproviders: &lt;DEFAULT_IDPROVIDER&gt;,&lt;OTHER_ENABLED_IDPROVIDER&gt;</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>A very important thing to keep in mind is that the annotation <code>enonic.cloud/xp7.vhost.mapping.&lt;MAPPING_NAME&gt;.source</code> has to match a defined <code>spec.rules[?].http.paths[?].path</code> in the same ingress. That is so the operator knows what node groups it needs to update. That brings us to the second point. The <code>spec.rules[?].http.paths[?].backend.serviceName</code> has to match a node group name defined in your Xp7Deployment.</p>
+<p>A very important thing to keep in mind is that the annotation <code>enonic.cloud/xp8.vhost.mapping.&lt;MAPPING_NAME&gt;.source</code> has to match a defined <code>spec.rules[?].http.paths[?].path</code> in the same ingress. That is so the operator knows what node groups it needs to update. That brings us to the second point. The <code>spec.rules[?].http.paths[?].backend.serviceName</code> has to match a node group name defined in your Xp8Deployment.</p>
 </div>
 <div class="paragraph">
 <p>An example of a valid ingress, assuming you have a nodegroup <code>main</code>, would look something like this.</p>
@@ -1021,14 +989,14 @@ metadata:
   namespace: my-namespace
   annotations:
     # all hosts mapping
-    enonic.cloud/xp7.vhost.mapping.my-mapping-site.source: /
-    enonic.cloud/xp7.vhost.mapping.my-mapping-site.target: /site/default/master/homepage
+    enonic.cloud/xp8.vhost.mapping.my-mapping-site.source: /
+    enonic.cloud/xp8.vhost.mapping.my-mapping-site.target: /site/default/master/homepage
 
     # specific host mapping
-    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.host: my-domain.com
-    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.source: /admin
-    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.target: /admin
-    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.idproviders: system
+    enonic.cloud/xp8.vhost.mapping.my-mapping-admin.host: my-domain.com
+    enonic.cloud/xp8.vhost.mapping.my-mapping-admin.source: /admin
+    enonic.cloud/xp8.vhost.mapping.my-mapping-admin.target: /admin
+    enonic.cloud/xp8.vhost.mapping.my-mapping-admin.idproviders: system
 spec:
   rules:
     - host: my-domain.com
@@ -1058,7 +1026,7 @@ spec:
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-Like Xp7Config, changes to virtual hosts can take a couple of minutes to register in XP.
+Like Xp8Config, changes to virtual hosts can take a couple of minutes to register in XP.
 </td>
 </tr>
 </table>
@@ -1067,7 +1035,7 @@ Like Xp7Config, changes to virtual hosts can take a couple of minutes to registe
 <div class="sect2">
 <h3 id="namespaces"><a class="link" href="#namespaces">Namespaces</a></h3>
 <div class="paragraph">
-<p>It can be desirable to delete all created resources that are associated with an Xp7Deployment once its deleted. That is quite easy to do with this namespace annotation:</p>
+<p>It can be desirable to delete all created resources that are associated with an Xp8Deployment once its deleted. That is quite easy to do with this namespace annotation:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1076,7 +1044,7 @@ kind: Namespace
 metadata:
   name: my-namespace
   annotations:
-    enonic.cloud/remove.with.xp7deployment: my-deployment</code></pre>
+    enonic.cloud/remove.with.xp8deployment: my-deployment</code></pre>
 </div>
 </div>
 </div>
@@ -1089,7 +1057,7 @@ metadata:
 <h3 id="get_deployment_status"><a class="link" href="#get_deployment_status">Get deployment status</a></h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ kubectl -n my-namespace get xp7deployments.enonic.cloud
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ kubectl -n my-namespace get xp8deployments.enonic.cloud
 
 NAME            ENABLED   VERSION   STATE     MSG
 my-deployment   true      7.13.2     RUNNING   OK</code></pre>
@@ -1100,7 +1068,7 @@ my-deployment   true      7.13.2     RUNNING   OK</code></pre>
 <h3 id="get_config_status"><a class="link" href="#get_config_status">Get config status</a></h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ kubectl -n my-namespace get xp7configs.enonic.cloud
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ kubectl -n my-namespace get xp8configs.enonic.cloud
 
 NAME                 NODEGROUP   FILE                                 STATE   MSG
 all-admin            all         com.enonic.xp.app.main.cfg           READY   OK
@@ -1112,17 +1080,6 @@ all-system           all         system.properties                    READY   OK
 main-elasticsearch   main        com.enonic.xp.elasticsearch.cfg      READY   OK
 main-vhosts          main        com.enonic.xp.web.vhost.cfg          READY   OK
 my-config            all         com.my-app.cfg                       READY   OK</code></pre>
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="get_app_status"><a class="link" href="#get_app_status">Get app status</a></h3>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ kubectl -n my-namespace get xp7apps.enonic.cloud
-
-NAME            KEY                            VERSION   STATE     MSG
-contentstudio   com.enonic.app.contentstudio   3.2.0     RUNNING   OK</code></pre>
 </div>
 </div>
 </div>
@@ -1176,9 +1133,9 @@ _  _ \_  __ \  __ \_  __ \_  /_  ___/   __  |/_/__  __ \
 <h3 id="edit_configuration"><a class="link" href="#edit_configuration">Edit configuration</a></h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ kubectl -n my-namespace edit xp7configs.enonic.cloud my-config
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ kubectl -n my-namespace edit xp8configs.enonic.cloud my-config
 
-xp7config.enonic.cloud/my-config edited</code></pre>
+xp8config.enonic.cloud/my-config edited</code></pre>
 </div>
 </div>
 </div>
@@ -1186,7 +1143,7 @@ xp7config.enonic.cloud/my-config edited</code></pre>
 <h3 id="watch_configuration"><a class="link" href="#watch_configuration">Watch configuration</a></h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ kubectl -n my-namespace get xp7configs.enonic.cloud -w
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ kubectl -n my-namespace get xp8configs.enonic.cloud -w
 
 NAME                 NODEGROUP   FILE                                 STATE     MSG
 all-admin            all         com.enonic.xp.app.main.cfg           READY     OK
@@ -1221,17 +1178,17 @@ metadata:
     enonic.managed: "true"
   annotations:
     # Delete this namespace if the deployment is deleted
-    enonic.cloud/remove.with.xp7deployment: my-deployment
+    enonic.cloud/remove.with.xp8deployment: my-deployment
 ---
 # Create deployment in the namespace
 apiVersion: enonic.cloud/v1
-kind: Xp7Deployment
+kind: Xp8Deployment
 metadata:
   name: my-deployment
   namespace: my-namespace
 spec:
   enabled: true
-  xpVersion: 7.16.2
+  xpVersion: 8.0.0
 
   # Create one node
   nodeGroups:
@@ -1273,7 +1230,7 @@ spec:
 ---
 # Add your own custom config
 apiVersion: enonic.cloud/v1
-kind: Xp7Config
+kind: Xp8Config
 metadata:
   name: my-config
   namespace: my-namespace
@@ -1290,12 +1247,12 @@ metadata:
   name: my-domain-com
   namespace: my-namespace
   annotations:
-    enonic.cloud/xp7.vhost.mapping.my-mapping-site.source: /
-    enonic.cloud/xp7.vhost.mapping.my-mapping-site.target: /site/default/master/homepage
+    enonic.cloud/xp8.vhost.mapping.my-mapping-site.source: /
+    enonic.cloud/xp8.vhost.mapping.my-mapping-site.target: /site/default/master/homepage
 
-    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.source: /admin
-    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.target: /admin
-    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.idproviders: system
+    enonic.cloud/xp8.vhost.mapping.my-mapping-admin.source: /admin
+    enonic.cloud/xp8.vhost.mapping.my-mapping-admin.target: /admin
+    enonic.cloud/xp8.vhost.mapping.my-mapping-admin.idproviders: system
 spec:
   rules:
     - host: my-domain.com
@@ -1326,9 +1283,8 @@ spec:
 <pre class="highlight"><code class="language-bash" data-lang="bash">$ kubectl apply -f simple.yaml
 
 namespace/my-namespace created
-xp7deployment.enonic.cloud/my-deployment created
-xp7app.enonic.cloud/contentstudio created
-xp7config.enonic.cloud/my-config created</code></pre>
+xp8deployment.enonic.cloud/my-deployment created
+xp8config.enonic.cloud/my-config created</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1337,14 +1293,14 @@ xp7config.enonic.cloud/my-config created</code></pre>
 <div class="sect2">
 <h3 id="simple_shared_volume_example"><a class="link" href="#simple_shared_volume_example">Simple shared volume example</a></h3>
 <div class="paragraph">
-<p>In case you want to map all your disks to a single volume, you can change the <code>Xp7Deployment</code> resource from the previous example to look like this:</p>
+<p>In case you want to map all your disks to a single volume, you can change the <code>Xp8Deployment</code> resource from the previous example to look like this:</p>
 </div>
 <div class="listingblock">
 <div class="title">simple-shared-volume.yaml</div>
 <div class="content">
 <pre class="highlight"><code class="language-yaml" data-lang="yaml"># Create deployment in the namespace
 apiVersion: enonic.cloud/v1
-kind: Xp7Deployment
+kind: Xp8Deployment
 
 ...
 
@@ -1420,17 +1376,17 @@ metadata:
     enonic.managed: "true"
   annotations:
     # Delete this namespace if the deployment is deleted
-    enonic.cloud/remove.with.xp7deployment: my-deployment
+    enonic.cloud/remove.with.xp8deployment: my-deployment
 ---
 # Create deployment in the namespace
 apiVersion: enonic.cloud/v1
-kind: Xp7Deployment
+kind: Xp8Deployment
 metadata:
   name: my-deployment
   namespace: my-namespace
 spec:
   enabled: true
-  xpVersion: 7.16.2
+  xpVersion: 8.0.0
 
   # Create volumes shared by all nodes in this deployment
   nodesSharedDisks:
@@ -1460,6 +1416,8 @@ spec:
         disks:
           - name: index # Node ES index
             size: 1Gi
+          - name: work # OSGi bundle cache
+            size: 200Mi
 
     # 2 data nodes
     - name: worker
@@ -1489,20 +1447,12 @@ spec:
         disks:
           - name: index # Node ES index
             size: 1Gi
----
-# Install content studio
-apiVersion: enonic.cloud/v1
-kind: Xp7App
-metadata:
-  name: contentstudio
-  namespace: my-namespace
-spec:
-  url: https://repo.enonic.com/public/com/enonic/app/contentstudio/5.0.3/contentstudio-5.0.3.jar
-  sha512: ba6b40ebf0808c6fa619ba2a05d07ce3e566eada7e9f3f34c1d280e9d1dcbd1e3c25eff9896d1057c4578ff3f516afa7a905c9e42ddc5e08f1cdf06f7e89774c
+          - name: work # OSGi bundle cache
+            size: 200Mi
 ---
 # Add your own custom config
 apiVersion: enonic.cloud/v1
-kind: Xp7Config
+kind: Xp8Config
 metadata:
   name: my-config
   namespace: my-namespace
@@ -1519,8 +1469,8 @@ metadata:
   name: my-domain-com-site
   namespace: my-namespace
   annotations:
-    enonic.cloud/xp7.vhost.mapping.my-mapping-site.source: /
-    enonic.cloud/xp7.vhost.mapping.my-mapping-site.target: /site/default/master/homepage
+    enonic.cloud/xp8.vhost.mapping.my-mapping-site.source: /
+    enonic.cloud/xp8.vhost.mapping.my-mapping-site.target: /site/default/master/homepage
 spec:
   rules:
     - host: my-domain.com
@@ -1548,9 +1498,9 @@ metadata:
     nginx.ingress.kubernetes.io/session-cookie-max-age: "129600" # 36 hours
     nginx.ingress.kubernetes.io/session-cookie-change-on-failure: "true"
 
-    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.source: /admin
-    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.target: /admin
-    enonic.cloud/xp7.vhost.mapping.my-mapping-admin.idproviders: system
+    enonic.cloud/xp8.vhost.mapping.my-mapping-admin.source: /admin
+    enonic.cloud/xp8.vhost.mapping.my-mapping-admin.target: /admin
+    enonic.cloud/xp8.vhost.mapping.my-mapping-admin.idproviders: system
 spec:
   ingressClassName: nginx
   rules:
@@ -1574,9 +1524,8 @@ spec:
 <pre class="highlight"><code class="language-bash" data-lang="bash">$ kubectl apply -f cluster.yaml
 
 namespace/my-namespace created
-xp7deployment.enonic.cloud/my-deployment created
-xp7app.enonic.cloud/contentstudio created
-xp7config.enonic.cloud/my-config created
+xp8deployment.enonic.cloud/my-deployment created
+xp8config.enonic.cloud/my-config created
 ingress.networking.k8s.io/my-domain-com-site created
 ingress.networking.k8s.io/my-domain-com-admin created</code></pre>
 </div>
@@ -1589,7 +1538,7 @@ ingress.networking.k8s.io/my-domain-com-admin created</code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2026-04-16 10:34:13 UTC
+Last updated 2026-08-26 07:33:36 UTC
 </div>
 </div>
 </body>
