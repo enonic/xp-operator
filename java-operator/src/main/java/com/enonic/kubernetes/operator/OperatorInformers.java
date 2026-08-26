@@ -4,13 +4,13 @@ import com.enonic.kubernetes.common.Exit;
 import com.enonic.kubernetes.kubernetes.Informers;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
-import io.quarkus.runtime.StartupEvent;
+import io.micronaut.context.event.ApplicationEventListener;
+import io.micronaut.runtime.server.event.ServerStartupEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,9 +20,9 @@ import static com.enonic.kubernetes.common.Configuration.cfgLong;
 /**
  * This operator class kills the operator if it fails to keep informers in sync
  */
-@ApplicationScoped
+@Singleton
 public class OperatorInformers
-    implements Runnable
+    implements Runnable, ApplicationEventListener<ServerStartupEvent>
 {
     private static final Logger log = LoggerFactory.getLogger( OperatorInformers.class );
 
@@ -35,13 +35,15 @@ public class OperatorInformers
     @Inject
     Informers informers;
 
-    void onStart( @Observes StartupEvent ev )
+    @Override
+    public void onApplicationEvent( ServerStartupEvent event )
     {
         // Add hook that terminates the operator on informer errors
-        informers.informerFactory().addSharedInformerEventListener( e -> {
+        informers.allInformers().values().forEach( informer -> informer.exceptionHandler( ( started, e ) -> {
             log.error( "Informer exception: " + e.getMessage(), e );
             Exit.exit( Exit.Code.INFORMER_FAILED, "Unrecoverable error with informers!" );
-        } );
+            return false;
+        } ) );
 
         // Schedule checks
         operator.schedule( cfgLong( "operator.informers.reSync" ), this );
@@ -51,12 +53,12 @@ public class OperatorInformers
     public void run()
     {
         // Check all informers
-        for (Map.Entry<Class<? extends HasMetadata>, SharedIndexInformer> e : informers.allInformers().entrySet()) {
+        for (Map.Entry<Class<? extends HasMetadata>, SharedIndexInformer<?>> e : informers.allInformers().entrySet()) {
             checkInformer( e.getKey(), e.getValue() );
         }
     }
 
-    private void checkInformer( Class<? extends HasMetadata> klass, SharedIndexInformer informer )
+    private void checkInformer( Class<? extends HasMetadata> klass, SharedIndexInformer<?> informer )
     {
         // Log when resource versions change
         String lastResourceVersion = resourceVersionMap.getOrDefault( klass, null );

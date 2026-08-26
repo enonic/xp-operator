@@ -1,11 +1,10 @@
 [versions]
-fabric8 = "6.6.2"
-quarkus = "2.16.6.Final"
+fabric8 = "7.8.0"
+micronaut-gradle-plugin = "5.0.2"
 jackson = "2.15.4"
 
 [libraries]
 fabric8-bom = { module = "io.fabric8:kubernetes-client-bom", version.ref = "fabric8" }
-quarkus-universe-bom = { module = "io.quarkus:quarkus-universe-bom", version.ref = "quarkus" }
 
 fabric8-kubernetes-client = { module = "io.fabric8:kubernetes-client", version.ref = "fabric8" }
 fabric8-kubernetes-clientapi = { module = "io.fabric8:kubernetes-client-api", version.ref = "fabric8" }
@@ -35,6 +34,6 @@ maven-mavenartifact = { module = "org.apache.maven:maven-artifact", version = "3
 jakarta-validation = { module = "jakarta.validation:jakarta.validation-api", version = "2.0.2" }
 
 [plugins]
-quarkus = { id = "io.quarkus", version.ref = "quarkus" }
+micronautApplication = { id = "io.micronaut.application", version.ref = "micronaut-gradle-plugin" }
 jsonschema2pojo = { id = "org.jsonschema2pojo", version = "1.2.2" }
 gitProperties = { id = "com.gorylenko.gradle-git-properties", version = "2.5.4" }

@@ -1,8 +1,7 @@
 package com.enonic.kubernetes.kubernetes.commands;
 
-import com.enonic.kubernetes.client.v1.xp7app.Xp7App;
-import com.enonic.kubernetes.client.v1.xp7config.Xp7Config;
-import com.enonic.kubernetes.client.v1.xp7deployment.Xp7Deployment;
+import com.enonic.kubernetes.crd.v1.Xp8Config;
+import com.enonic.kubernetes.crd.v1.Xp8Deployment;
 import com.enonic.kubernetes.kubernetes.Clients;
 import com.enonic.kubernetes.kubernetes.commands.builders.GenericBuilderParams;
 import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilderClusterRole;
@@ -17,9 +16,8 @@ import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilde
 import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilderService;
 import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilderServiceAccount;
 import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilderStatefulSet;
-import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilderXp7App;
-import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilderXp7Config;
-import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilderXp7Deployment;
+import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilderXp8Config;
+import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilderXp8Deployment;
 import com.google.common.base.Preconditions;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.HasMetadata;
@@ -73,9 +71,8 @@ public class K8sCommandMapper
         this.builderMap.put( Service.class, this::service );
         this.builderMap.put( ServiceAccount.class, this::serviceAccount );
         this.builderMap.put( StatefulSet.class, this::statefulSet );
-        this.builderMap.put( Xp7App.class, this::Xp7App);
-        this.builderMap.put( Xp7Config.class, this::Xp7Config);
-        this.builderMap.put( Xp7Deployment.class, this::Xp7Deployment);
+        this.builderMap.put( Xp8Config.class, this::Xp8Config);
+        this.builderMap.put( Xp8Deployment.class, this::Xp8Deployment);
     }
 
     public Optional<K8sCommand> getCommand( final GenericBuilderParams params )
@@ -182,26 +179,18 @@ public class K8sCommandMapper
             apply( params );
     }
 
-    private Optional<K8sCommand> Xp7App(final GenericBuilderParams params )
+    private Optional<K8sCommand> Xp8Config(final GenericBuilderParams params )
     {
-        return ImmutableCommandBuilderXp7App.builder().
-            client( clients.xp7Apps() ).
+        return ImmutableCommandBuilderXp8Config.builder().
+            client( clients.xp8Configs() ).
             build().
             apply( params );
     }
 
-    private Optional<K8sCommand> Xp7Config(final GenericBuilderParams params )
+    private Optional<K8sCommand> Xp8Deployment(final GenericBuilderParams params )
     {
-        return ImmutableCommandBuilderXp7Config.builder().
-            client( clients.xp7Configs() ).
-            build().
-            apply( params );
-    }
-
-    private Optional<K8sCommand> Xp7Deployment(final GenericBuilderParams params )
-    {
-        return ImmutableCommandBuilderXp7Deployment.builder().
-            client( clients.xp7Deployments() ).
+        return ImmutableCommandBuilderXp8Deployment.builder().
+            client( clients.xp8Deployments() ).
             build().
             apply( params );
     }

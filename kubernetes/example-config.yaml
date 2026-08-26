@@ -1,5 +1,5 @@
 apiVersion: enonic.cloud/v1
-kind: Xp7Config
+kind: Xp8Config
 metadata:
   name: test
   namespace: mycloud-mysolution-myenv-myservice
@@ -10,7 +10,7 @@ spec:
     metricsUrl = http://asdf:2609/
 ---
 apiVersion: enonic.cloud/v1
-kind: Xp7Config
+kind: Xp8Config
 metadata:
   name: test2
   namespace: mycloud-mysolution-myenv-myservice
@@ -20,7 +20,7 @@ spec:
   data: YXNkZg==
 ---
 apiVersion: enonic.cloud/v1
-kind: Xp7Config
+kind: Xp8Config
 metadata:
   name: all-com-enonic-xp-app-applications-cfg
   namespace: mycloud-mysolution-myenv-myservice

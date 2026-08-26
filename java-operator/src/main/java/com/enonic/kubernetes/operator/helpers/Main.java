@@ -1,17 +1,15 @@
 package com.enonic.kubernetes.operator.helpers;
 
-import io.quarkus.runtime.Quarkus;
-import io.quarkus.runtime.annotations.QuarkusMain;
+import io.micronaut.runtime.Micronaut;
 
 /**
  * Run this method in you IDE to start the operator
  */
-@QuarkusMain
 public class Main
 {
     public static void main( String... args )
     {
-        Quarkus.run( args );
+        Micronaut.run( Main.class, args );
     }
 }
 

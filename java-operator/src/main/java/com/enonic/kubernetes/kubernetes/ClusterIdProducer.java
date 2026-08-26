@@ -4,21 +4,21 @@ import java.util.UUID;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
-import javax.ws.rs.Produces;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.fabric8.kubernetes.api.model.Namespace;
+import io.micronaut.context.annotation.Factory;
 
 import static com.enonic.kubernetes.common.SingletonAssert.singletonAssert;
 
+@Factory
 public class ClusterIdProducer
 {
     private static final Logger log = LoggerFactory.getLogger( ClusterIdProducer.class );
 
     @Singleton
-    @Produces
     @Named("clusterId")
     String createClusterId( Clients clients )
     {

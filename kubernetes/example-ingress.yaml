@@ -7,9 +7,9 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-body-size: 100m
 
     enonic.cloud/ingress.cert.manage: "true"
-    enonic.cloud/xp7.vhost.mapping.1.source: /proxy
-    enonic.cloud/xp7.vhost.mapping.1.target: /webapp/com.enonic.app.proxydebug
-    enonic.cloud/xp7.vhost.mapping.1.idproviders: system
+    enonic.cloud/xp8.vhost.mapping.1.source: /proxy
+    enonic.cloud/xp8.vhost.mapping.1.target: /webapp/com.enonic.app.proxydebug
+    enonic.cloud/xp8.vhost.mapping.1.idproviders: system
 spec:
   rules:
     - host: localhost

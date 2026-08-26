@@ -3,7 +3,7 @@ package com.enonic.kubernetes.apis.xp.service;
 import java.util.List;
 
 import org.immutables.value.Value;
-import org.wildfly.common.annotation.Nullable;
+import io.micronaut.core.annotation.Nullable;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 

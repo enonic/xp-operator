@@ -1,7 +1,7 @@
 package com.enonic.kubernetes.operator.ingress;
 
 import org.immutables.value.Value;
-import org.wildfly.common.annotation.Nullable;
+import io.micronaut.core.annotation.Nullable;
 
 import com.enonic.kubernetes.common.annotations.Params;
 

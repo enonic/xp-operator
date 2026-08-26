@@ -1,20 +1,42 @@
 plugins {
     id 'java-library'
     id 'jacoco'
-    alias(libs.plugins.quarkus)
+    alias(libs.plugins.micronautApplication)
     alias(libs.plugins.gitProperties)
+    id 'io.fabric8.java-generator' version '6.7.2'
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+micronaut {
+    runtime("netty")
 }
+
+application {
+    mainClass.set('com.enonic.kubernetes.operator.helpers.Main')
+}
+
+javaGen {
+    source = file("${rootDir}/helm/src/main/crds")
+    target = file("${buildDir}/generated/sources/crds/java")
+    packageOverrides = ['cloud.enonic.v1': 'com.enonic.kubernetes.crd.v1']
+}
+
+sourceSets.main.java.srcDirs += "${buildDir}/generated/sources/crds/java"
+tasks.named('compileJava') { dependsOn 'crd2java' }
+tasks.named('crd2java') { dependsOn ':helm:processHelmResources' }
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
 
 dependencies {
     implementation platform(libs.fabric8.bom)
-    implementation platform(libs.quarkus.universe.bom)
 
-    implementation project(":java-client")
+    implementation 'io.fabric8:generator-annotations'
+    api libs.fabric8.kubernetes.clientapi
+    implementation libs.fabric8.kubernetes.client
 
     implementation libs.okhttp3.okhttp
     implementation libs.okhttp3.okhttpsse
@@ -26,18 +48,31 @@ dependencies {
     implementation libs.guava
     implementation libs.maven.mavenartifact
 
-    implementation 'io.quarkus:quarkus-micrometer-registry-prometheus'
-    implementation 'io.quarkus:quarkus-resteasy'
-    implementation 'io.quarkus:quarkus-resteasy-jackson'
-    implementation 'io.quarkus:quarkus-rest-client'
+    implementation 'javax.inject:javax.inject:1'
 
-    testImplementation 'io.quarkus:quarkus-junit5'
+    implementation 'io.micronaut:micronaut-http-server-netty'
+    implementation 'io.micronaut:micronaut-jackson-databind'
+    implementation 'io.micronaut.micrometer:micronaut-micrometer-registry-prometheus'
+
+    runtimeOnly 'ch.qos.logback:logback-classic:1.5.37'
+
+    annotationProcessor 'io.micronaut.openapi:micronaut-openapi'
+    compileOnly 'io.micronaut.openapi:micronaut-openapi-annotations'
+
     testImplementation 'io.rest-assured:rest-assured'
-    testImplementation 'io.quarkus:quarkus-jacoco'
     testImplementation libs.fabric8.kubernetes.servermock
     testImplementation libs.mockito.inline
     testImplementation libs.mockito.junitjupiter
 
+    testImplementation libs.junit.jupiter.api
+    testImplementation 'io.fabric8:zjsonpatch'
+    testRuntimeOnly libs.junit.jupiter.engine
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
     testCompileOnly libs.immutables.valueannotations
     testAnnotationProcessor libs.immutables.value
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
 }

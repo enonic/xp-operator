@@ -33,7 +33,7 @@ function get_deployment() {
     namespace=$1
 
     tmpfile=$(mktemp /tmp/kubectl.XXXXXX)
-    kubectl -n $namespace get xp7deployments.enonic.cloud --no-headers -o custom-columns=":metadata.name" >$tmpfile
+    kubectl -n $namespace get xp8deployments.enonic.cloud --no-headers -o custom-columns=":metadata.name" >$tmpfile
 
     if [ "$(cat $tmpfile | wc -l)" == "1" ]; then
         deployment="$(cat $tmpfile)"
@@ -49,7 +49,7 @@ function get_nodegroup() {
     deployment=$2
 
     tmpfile=$(mktemp /tmp/kubectl.XXXXXX)
-    kubectl -n $namespace get xp7deployments.enonic.cloud $deployment --no-headers -o custom-columns=":spec.nodeGroups[].name" | sed 's% %\n%g' >$tmpfile
+    kubectl -n $namespace get xp8deployments.enonic.cloud $deployment --no-headers -o custom-columns=":spec.nodeGroups[].name" | sed 's% %\n%g' >$tmpfile
 
     if [ "$(cat $tmpfile | wc -l)" == "1" ]; then
         nodegroup="all"

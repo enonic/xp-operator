@@ -1,6 +1,6 @@
 package com.enonic.kubernetes.operator.api;
 
-import com.enonic.kubernetes.client.v1.xp7deployment.Xp7Deployment;
+import com.enonic.kubernetes.crd.v1.Xp8Deployment;
 import com.enonic.kubernetes.kubernetes.Searchers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -127,9 +127,9 @@ public abstract class BaseAdmissionApi<R>
 
     protected abstract R createApiObject( final AdmissionReview admissionReview );
 
-    protected Optional<Xp7Deployment> getXp7Deployment( KubernetesResource resource )
+    protected Optional<Xp8Deployment> getXp8Deployment( KubernetesResource resource )
     {
-        return searchers.xp7Deployment().stream().
+        return searchers.xp8Deployment().stream().
             filter( inSameNamespaceAs( (HasMetadata) resource ) ).
             findFirst();
     }

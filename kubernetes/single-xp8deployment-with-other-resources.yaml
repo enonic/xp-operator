@@ -1,0 +1,103 @@
+# Create a namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: my-namespace
+  labels:
+    enonic.managed: "true"
+  annotations:
+    # Delete this namespace if the deployment is deleted
+    enonic.cloud/remove.with.xp8deployment: my-deployment
+---
+# Create deployment in the namespace
+apiVersion: enonic.cloud/v1
+kind: Xp8Deployment
+metadata:
+  name: my-deployment
+  namespace: my-namespace
+spec:
+  enabled: true     # Should the pods be running
+  xpVersion: 8.0.0  # XP version, has to be 8.x
+
+  # List of disks shared by all nodes (see description of disks below)
+  nodesSharedDisks:
+    - name: blobstore
+      size: 1Gi
+    - name: snapshots
+      size: 1Gi
+    - name: export
+      size: 1Gi
+
+  # List of nodegroups
+  nodeGroups:
+      # Name and number of replicas
+    - name: main
+      replicas: 1
+
+      # Role of the node
+      data: true
+      master: true
+
+      # Environment variables
+      env:
+        - name: MY_ENV_VAR
+          value: hey
+
+      resources:
+        # Cpu and memory allocation
+        cpu: "1.5"
+        memory: 512Mi
+
+        # List of disks private to each and every node
+        disks:
+          - name: deploy
+            size: 1Gi
+          - name: index
+            size: 1Gi
+          - name: work
+            size: 1Gi
+---
+# Add your own custom config
+apiVersion: enonic.cloud/v1
+kind: Xp8Config
+metadata:
+  name: my-config
+  namespace: my-namespace
+spec:
+  nodeGroup: all
+  file: com.my-app.cfg
+  data: |
+    my = custom
+    config = file
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: xp-ingress
+  namespace: my-namespace
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    enonic.cloud/xp8.vhost.mapping.my-mapping-site.source: /
+    enonic.cloud/xp8.vhost.mapping.my-mapping-site.target: /site/default/master/homepage
+    enonic.cloud/xp8.vhost.mapping.my-mapping-admin.source: /admin
+    enonic.cloud/xp8.vhost.mapping.my-mapping-admin.target: /admin
+    enonic.cloud/xp8.vhost.mapping.my-mapping-admin.idproviders: system
+spec:
+  rules:
+  - host: my-domain-com-admin
+    http:
+      paths:
+      - path: /
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: main
+            port:
+              number: 8080
+      - path: /admin
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: main
+            port:
+              number: 8080

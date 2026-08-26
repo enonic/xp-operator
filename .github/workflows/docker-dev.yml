@@ -14,7 +14,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
-          java-version: 17
+          java-version: 25
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
@@ -51,7 +51,7 @@ jobs:
       - name: Set dev version
         run: yq -i -p=props -o=props '.version = "${{ steps.operator_version.outputs.version }}-dev"' gradle.properties
 
-      - name: Build java-client and java-operator
+      - name: Build operator
         run: ./gradlew build
 
       - name: Publish docker image
@@ -67,4 +67,7 @@ jobs:
 
       - name: Publish helm chart
         run: curl -u "ci:${{ secrets.ARTIFACTORY_PASSWORD }}" https://repo.enonic.com/helm/ --upload-file helm/build/libs/xp-operator-${{ steps.operator_version.outputs.version }}-dev.tgz -v
+
+      - name: Publish mgmt OpenAPI
+        run: curl -f -u "ci:${{ secrets.ARTIFACTORY_PASSWORD }}" https://repo.enonic.com/public/com/enonic/kubernetes/xp-operator/${{ steps.operator_version.outputs.version }}-dev/operator-mgmt.yaml --upload-file java-operator/build/classes/java/main/META-INF/swagger/*.yml -v
 

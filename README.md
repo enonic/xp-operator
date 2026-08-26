@@ -37,7 +37,7 @@ This repository contains these various parts relating to the operator:
 
 ### Requirements for local development
 
-* Java 17
+* Java 25
 * make
 * yq
 * [helm](https://helm.sh/docs/intro/install/)
@@ -104,7 +104,7 @@ operator.charts.values.image.nameTemplate=europe-north1-docker.pkg.dev/my-gcp-pr
 operator.charts.values.image.pullPolicy=Always
 ```
 
-`%s` will be replaced with the `.spec.xpVersion` value of `Xp7Deployment` resource.
+`%s` will be replaced with the `.spec.xpVersion` value of `Xp8Deployment` resource.
 
 ### Running operator in IDE
 
@@ -120,7 +120,7 @@ Start operator.
 Use your IDE to run the `com.enonic.kubernetes.operator.helpers.Main` class and set the VM options to:
 
 ```
--Doperator.charts.path=java-operator/src/main/helm -Doperator.charts.values.storage.shared.storageClassName=nfs -Dquarkus.http.ssl.certificate.file=kubernetes/kind/certs/tls.crt -Dquarkus.http.ssl.certificate.key-file=kubernetes/kind/certs/tls.key
+-Doperator.charts.path=java-operator/src/main/helm -Doperator.charts.values.storage.shared.storageClassName=nfs -Dmicronaut.server.ssl.enabled=true -Dmicronaut.server.ssl.port=8443 -Dmicronaut.server.ssl.key-name=xp-operator-tls -Dmicronaut.certificate.file.xp-operator-tls.format=PEM -Dmicronaut.certificate.file.xp-operator-tls.path=kubernetes/kind/certs/tls.key -Dmicronaut.certificate.file.xp-operator-tls.certificate-path=kubernetes/kind/certs/tls.crt
 ```
 
 Then verify it all works:

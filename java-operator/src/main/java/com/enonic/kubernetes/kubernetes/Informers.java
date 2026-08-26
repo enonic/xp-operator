@@ -1,8 +1,7 @@
 package com.enonic.kubernetes.kubernetes;
 
-import com.enonic.kubernetes.client.v1.xp7app.Xp7App;
-import com.enonic.kubernetes.client.v1.xp7config.Xp7Config;
-import com.enonic.kubernetes.client.v1.xp7deployment.Xp7Deployment;
+import com.enonic.kubernetes.crd.v1.Xp8Config;
+import com.enonic.kubernetes.crd.v1.Xp8Deployment;
 import com.enonic.kubernetes.common.annotations.Params;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Event;
@@ -34,25 +33,22 @@ public abstract class Informers
 
     public abstract SharedIndexInformer<Pod> podInformer();
 
-    public abstract SharedIndexInformer<Xp7App> xp7AppInformer();
+    public abstract SharedIndexInformer<Xp8Config> xp8ConfigInformer();
 
-    public abstract SharedIndexInformer<Xp7Config> xp7ConfigInformer();
-
-    public abstract SharedIndexInformer<Xp7Deployment> xp7DeploymentInformer();
+    public abstract SharedIndexInformer<Xp8Deployment> xp8DeploymentInformer();
 
     public abstract SharedIndexInformer<Event> eventInformer();
 
     @Value.Derived
-    public Map<Class<? extends HasMetadata>, SharedIndexInformer> allInformers()
+    public Map<Class<? extends HasMetadata>, SharedIndexInformer<?>> allInformers()
     {
-        Map<Class<? extends HasMetadata>, SharedIndexInformer> res = new HashMap<>();
+        Map<Class<? extends HasMetadata>, SharedIndexInformer<?>> res = new HashMap<>();
         res.put( ConfigMap.class, configMapInformer() );
         res.put( Ingress.class, ingressInformer() );
         res.put( Namespace.class, namespaceInformer() );
         res.put( Pod.class, podInformer() );
-        res.put( Xp7App.class, xp7AppInformer() );
-        res.put( Xp7Config.class, xp7ConfigInformer() );
-        res.put( Xp7Deployment.class, xp7DeploymentInformer() );
+        res.put( Xp8Config.class, xp8ConfigInformer() );
+        res.put( Xp8Deployment.class, xp8DeploymentInformer() );
         res.put( Event.class, eventInformer() );
         return res;
     }

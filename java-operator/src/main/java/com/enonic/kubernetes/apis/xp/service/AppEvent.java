@@ -1,7 +1,7 @@
 package com.enonic.kubernetes.apis.xp.service;
 
 import org.immutables.value.Value;
-import org.wildfly.common.annotation.Nullable;
+import io.micronaut.core.annotation.Nullable;
 
 
 @Value.Immutable

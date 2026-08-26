@@ -1,0 +1,100 @@
+admissionRequest:
+  request:
+    operation: UPDATE
+    oldObject:
+      apiVersion: enonic.cloud/v1
+      kind: Xp8Deployment
+      metadata:
+        name: mycloud-mysolution-myenv-myservice
+        namespace: mycloud-mysolution-myenv-myservice
+        labels:
+          cloud: mycloud
+          solution: mysolution
+          environment: myenv
+          service: myservice
+      spec:
+        enabled: true
+        xpVersion: 8.0.2
+        nodesSharedDisks:
+          - name: blobstore
+            size: 1Gi
+          - name: snapshots
+            size: 1Gi
+        nodeGroups:
+          - name: main
+            master: true
+            data: true
+            replicas: 1
+            resources:
+              cpu: "1"
+              memory: 512Mi
+              disks:
+                - name: index
+                  size: 200Mi
+    object:
+      apiVersion: enonic.cloud/v1
+      kind: Xp8Deployment
+      metadata:
+        name: mycloud-mysolution-myenv-myservice
+        namespace: mycloud-mysolution-myenv-myservice
+        labels:
+          cloud: mycloud
+          solution: mysolution
+          environment: myenv
+          service: myservice
+      spec:
+        enabled: true
+        xpVersion: 8.0.0
+        nodesSharedDisks:
+          - name: blobstore
+            size: 1Gi
+          - name: snapshots
+            size: 1Gi
+        nodeGroups:
+          - name: main
+            master: true
+            data: true
+            replicas: 1
+            resources:
+              cpu: "1"
+              memory: 512Mi
+              disks:
+                - name: index
+                  size: 200Mi
+
+assertResult:
+  apiVersion: "enonic.cloud/v1"
+  kind: "Xp8Deployment"
+  metadata:
+    labels:
+      cloud: "mycloud"
+      solution: "mysolution"
+      environment: "myenv"
+      service: "myservice"
+    name: "mycloud-mysolution-myenv-myservice"
+    namespace: "mycloud-mysolution-myenv-myservice"
+  spec:
+    enabled: true
+    xpVersion: "8.0.0"
+    nodesSharedDisks:
+      - name: "blobstore"
+        size: "1Gi"
+      - name: "snapshots"
+        size: "1Gi"
+    nodeGroups:
+      - name: "main"
+        data: true
+        master: true
+        replicas: 1
+        env: [ ]
+        resources:
+          cpu: "1"
+          memory: "512Mi"
+          disks:
+            - name: "index"
+              size: "200Mi"
+  status:
+    state: "PENDING"
+    message: "Waiting for pods"
+    fields:
+      pods: [ ]

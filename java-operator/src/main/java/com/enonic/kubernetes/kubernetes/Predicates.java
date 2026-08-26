@@ -1,7 +1,7 @@
 package com.enonic.kubernetes.kubernetes;
 
-import com.enonic.kubernetes.client.v1.xp7config.Xp7Config;
-import com.enonic.kubernetes.client.v1.xp7deployment.Xp7Deployment;
+import com.enonic.kubernetes.crd.v1.Xp8Config;
+import com.enonic.kubernetes.crd.v1.Xp8Deployment;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.Namespace;
@@ -150,12 +150,12 @@ public class Predicates
         return dataEquals( c ).negate();
     }
 
-    public static Predicate<Xp7Config> inNodeGroup( String... nodegroup )
+    public static Predicate<Xp8Config> inNodeGroup( String... nodegroup )
     {
         return ( r ) -> Arrays.asList( nodegroup ).contains( r.getSpec().getNodeGroup() );
     }
 
-    public static Predicate<Xp7Config> inNodeGroupAllOr( String nodeGroup )
+    public static Predicate<Xp8Config> inNodeGroupAllOr( String nodeGroup )
     {
         return inNodeGroup( cfgStr( "operator.charts.values.allNodesKey" ), nodeGroup );
     }
@@ -165,7 +165,7 @@ public class Predicates
         return inNamespace(namespace).and(matchLabel( cfgStr( "operator.charts.values.labelKeys.deployment" ), name ));
     }
 
-    public static Predicate<HasMetadata> isPartOfDeployment( Xp7Deployment deployment )
+    public static Predicate<HasMetadata> isPartOfDeployment( Xp8Deployment deployment )
     {
         return isPartOfDeployment( deployment.getMetadata().getNamespace(), deployment.getMetadata().getName() );
     }

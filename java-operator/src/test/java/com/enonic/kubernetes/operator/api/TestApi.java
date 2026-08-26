@@ -2,34 +2,27 @@ package com.enonic.kubernetes.operator.api;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.List;
 import java.util.stream.Stream;
-
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonPatchBuilder;
-import javax.json.JsonReader;
-import javax.json.JsonStructure;
-import javax.json.JsonValue;
 
 import io.fabric8.kubernetes.api.model.admission.v1.AdmissionReview;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.io.BaseEncoding;
 
 import io.fabric8.kubernetes.api.model.KubernetesResource;
+import io.fabric8.zjsonpatch.JsonPatch;
 
 
 import com.enonic.kubernetes.kubernetes.Searchers;
 import com.enonic.kubernetes.kubernetes.SearchersImpl;
-import com.enonic.kubernetes.client.v1.xp7deployment.Xp7Deployment;
+import com.enonic.kubernetes.crd.v1.Xp8Deployment;
 import com.enonic.kubernetes.operator.api.admission.AdmissionApi;
 import com.enonic.kubernetes.operator.api.admission.TestAdmissionApi;
 import com.enonic.kubernetes.operator.api.mutation.MutationApi;
@@ -43,7 +36,7 @@ class TestApi
 
     ObjectMapper jsonMapper;
 
-    TestInformerSearcher<Xp7Deployment> deploymentTestInformerSearcher;
+    TestInformerSearcher<Xp8Deployment> deploymentTestInformerSearcher;
 
     Searchers searchers;
 
@@ -60,8 +53,7 @@ class TestApi
         TestInformerSearcher emptyInformerSearcher = new TestInformerSearcher();
         deploymentTestInformerSearcher = new TestInformerSearcher<>();
         searchers = SearchersImpl.of( emptyInformerSearcher, emptyInformerSearcher, emptyInformerSearcher, emptyInformerSearcher,
-                                      emptyInformerSearcher, emptyInformerSearcher, deploymentTestInformerSearcher,
-                                      emptyInformerSearcher );
+                                      emptyInformerSearcher, deploymentTestInformerSearcher, emptyInformerSearcher );
         mutationApi = new TestMutationApi( mapper, searchers );
         admissionApi = new TestAdmissionApi( mapper, searchers );
     }
@@ -73,13 +65,13 @@ class TestApi
         TestFileSupplier testFileSupplier = new TestFileSupplier();
 
         // Add deployments to cache
-        File cache = testFileSupplier.getFile( TestApi.class, "xp7deploymentsCache.yaml" );
-        List<Xp7Deployment> deployments = this.mapper.readValue( cache, new TypeReference<>()
+        File cache = testFileSupplier.getFile( TestApi.class, "xp8deploymentsCache.yaml" );
+        List<Xp8Deployment> deployments = this.mapper.readValue( cache, new TypeReference<>()
         {
         } );
         deployments.forEach( deploymentTestInformerSearcher::add );
 
-        return testFileSupplier.createTests( TestApi.class, this::runTest, "xp7deploymentsCache.yaml", "xp7VHostCache.yaml" );
+        return testFileSupplier.createTests( TestApi.class, this::runTest, "xp8deploymentsCache.yaml", "xp8VHostCache.yaml" );
     }
 
     @SuppressWarnings("unchecked")
@@ -120,37 +112,12 @@ class TestApi
     }
 
     private AdmissionReview applyPatch( final List<Patch> patches, final AdmissionReview review )
-        throws JsonProcessingException
     {
-        JsonPatchBuilder jsonPatchBuilder = Json.createPatchBuilder();
-        for ( Patch patch : patches )
-        {
-            // Convert value into JsonValue
-            JsonReader jsonReader = Json.createReader( new StringReader( jsonMapper.writeValueAsString( patch ) ) );
-            JsonObject p = jsonReader.readObject();
-            jsonReader.close();
-            JsonValue val = p.getValue( "/value" );
+        JsonNode patchNode = jsonMapper.valueToTree( patches );
+        JsonNode sourceNode = jsonMapper.valueToTree( review.getRequest().getObject() );
+        JsonNode result = JsonPatch.apply( patchNode, sourceNode );
 
-            switch ( patch.op() )
-            {
-                case "add":
-                    jsonPatchBuilder.add( patch.path(), val );
-                    break;
-                case "replace":
-                    jsonPatchBuilder.replace( patch.path(), val );
-                    break;
-                case "remove":
-                    jsonPatchBuilder.remove( patch.path() );
-                    break;
-            }
-        }
-
-        // Apply the patch
-        JsonReader reader = Json.createReader( new StringReader( jsonMapper.writeValueAsString( review.getRequest().getObject() ) ) );
-        JsonStructure json = reader.read();
-        json = jsonPatchBuilder.build().apply( json );
-        reader.close();
-        review.getRequest().setObject( jsonMapper.readValue( json.toString(), KubernetesResource.class ) );
+        review.getRequest().setObject( jsonMapper.convertValue( result, KubernetesResource.class ) );
         review.setResponse( null );
 
         return review;

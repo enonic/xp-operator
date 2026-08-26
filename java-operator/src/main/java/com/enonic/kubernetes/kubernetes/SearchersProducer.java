@@ -1,14 +1,15 @@
 package com.enonic.kubernetes.kubernetes;
 
 import javax.inject.Singleton;
-import javax.ws.rs.Produces;
+
+import io.micronaut.context.annotation.Factory;
 
 import static com.enonic.kubernetes.common.SingletonAssert.singletonAssert;
 
+@Factory
 public class SearchersProducer
 {
     @Singleton
-    @Produces
     Searchers searchers( Informers informers )
     {
         singletonAssert(this, "createSearchers");
@@ -17,9 +18,8 @@ public class SearchersProducer
             ingress( new InformerSearcher<>( informers.ingressInformer() ) ).
             namespace( new InformerSearcher<>( informers.namespaceInformer() ) ).
             pod( new InformerSearcher<>( informers.podInformer() ) ).
-            xp7App( new InformerSearcher<>( informers.xp7AppInformer() ) ).
-            xp7Config( new InformerSearcher<>( informers.xp7ConfigInformer() ) ).
-            xp7Deployment( new InformerSearcher<>( informers.xp7DeploymentInformer() ) ).
+            xp8Config( new InformerSearcher<>( informers.xp8ConfigInformer() ) ).
+            xp8Deployment( new InformerSearcher<>( informers.xp8DeploymentInformer() ) ).
             event( new InformerSearcher<>( informers.eventInformer() ) ).
             build();
     }

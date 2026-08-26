@@ -1,0 +1,36 @@
+admissionRequest:
+  request:
+    operation: CREATE
+    object:
+      apiVersion: enonic.cloud/v1
+      kind: Xp8Config
+      metadata:
+        name: test
+        namespace: mycloud-mysolution-myenv-myservice
+      spec:
+        file: mytest.cfg
+        #nodeGroup: main
+        data: |
+          hello
+
+assertResult:
+  apiVersion: "enonic.cloud/v1"
+  kind: "Xp8Config"
+  metadata:
+    name: "test"
+    namespace: "mycloud-mysolution-myenv-myservice"
+    ownerReferences:
+      - apiVersion: "enonic.cloud/v1"
+        kind: "Xp8Deployment"
+        blockOwnerDeletion: false
+        controller: true
+        name: "mycloud-mysolution-myenv-myservice"
+        uid: "9265a02a-000f-421a-b4aa-4768e8eab21e"
+  spec:
+    nodeGroup: "all"
+    file: "mytest.cfg"
+    data: "hello\n"
+    dataBase64: false
+  status:
+    state: "PENDING"
+    message: "Not loaded"

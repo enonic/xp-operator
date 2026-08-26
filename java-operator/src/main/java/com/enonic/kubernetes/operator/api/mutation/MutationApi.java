@@ -1,28 +1,25 @@
 package com.enonic.kubernetes.operator.api.mutation;
 
-import com.enonic.kubernetes.client.v1.xp7app.Xp7App;
-import com.enonic.kubernetes.client.v1.xp7app.Xp7AppStatus;
-import com.enonic.kubernetes.client.v1.xp7app.Xp7AppStatusFields;
-import com.enonic.kubernetes.client.v1.xp7config.Xp7Config;
-import com.enonic.kubernetes.client.v1.xp7deployment.Xp7Deployment;
-import com.enonic.kubernetes.client.v1.xp7config.Xp7ConfigStatus;
-import com.enonic.kubernetes.client.v1.xp7deployment.Xp7DeploymentStatus;
-import com.enonic.kubernetes.client.v1.xp7deployment.Xp7DeploymentStatusFields;
+import com.enonic.kubernetes.crd.v1.Xp8Config;
+import com.enonic.kubernetes.crd.v1.Xp8Deployment;
+import com.enonic.kubernetes.crd.v1.Xp8ConfigStatus;
+import com.enonic.kubernetes.crd.v1.Xp8DeploymentStatus;
 import com.enonic.kubernetes.operator.api.AdmissionOperation;
 import com.enonic.kubernetes.operator.api.BaseAdmissionApi;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.io.BaseEncoding;
 import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.client.utils.Serialization;
 import io.fabric8.kubernetes.api.model.admission.v1.AdmissionResponseBuilder;
 import io.fabric8.kubernetes.api.model.admission.v1.AdmissionReview;
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import io.micronaut.http.annotation.Body;
+import io.micronaut.http.annotation.Consumes;
+import io.micronaut.http.annotation.Controller;
+import io.micronaut.http.annotation.Post;
+import io.micronaut.http.annotation.Produces;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -32,25 +29,22 @@ import static com.enonic.kubernetes.common.Configuration.cfgStrChild;
 import static com.enonic.kubernetes.common.Utils.createOwnerReference;
 import static com.enonic.kubernetes.kubernetes.Predicates.matchAnnotationPrefix;
 
-@ApplicationScoped
-@Path("/apis/operator.enonic.cloud/v1")
+@Controller("/apis/operator.enonic.cloud/v1")
 public class MutationApi
     extends BaseAdmissionApi<MutationRequest>
 {
     public MutationApi()
     {
         super();
-        addFunction( Xp7App.class, this::xp7app );
-        addFunction( Xp7Config.class, this::xp7config );
-        addFunction( Xp7Deployment.class, this::xp7deployment );
+        addFunction( Xp8Config.class, this::xp8config );
+        addFunction( Xp8Deployment.class, this::xp8deployment );
         addFunction( Ingress.class, this::ingress );
     }
 
-    @POST
-    @Path("/mutations")
+    @Post("/mutations")
     @Consumes("application/json")
     @Produces("application/json")
-    public AdmissionReview mutate( AdmissionReview admissionReview )
+    public AdmissionReview mutate( @Body AdmissionReview admissionReview )
         throws JsonProcessingException
     {
         return handle( admissionReview );
@@ -73,17 +67,16 @@ public class MutationApi
         }
     }
 
-    private void xp7app( MutationRequest mt )
+    private void xp8config( MutationRequest mt )
     {
         // Collect old and new object
-        Xp7App oldR = (Xp7App) mt.getAdmissionReview().getRequest().getOldObject();
-        Xp7App newR = (Xp7App) mt.getAdmissionReview().getRequest().getObject();
+        Xp8Config oldR = (Xp8Config) mt.getAdmissionReview().getRequest().getOldObject();
+        Xp8Config newR = (Xp8Config) mt.getAdmissionReview().getRequest().getObject();
 
         // Create default status
-        Xp7AppStatus defStatus = new Xp7AppStatus().
-            withMessage( "Created" ).
-            withState( Xp7AppStatus.State.PENDING ).
-            withXp7AppStatusFields( new Xp7AppStatusFields() );
+        Xp8ConfigStatus defStatus = new Xp8ConfigStatus();
+        defStatus.setMessage( "Not loaded" );
+        defStatus.setState( Xp8ConfigStatus.State.PENDING );
 
         // Get OP
         AdmissionOperation op = getOperation( mt.getAdmissionReview() );
@@ -94,61 +87,7 @@ public class MutationApi
                 patch( mt, true, "/status", newR.getStatus(), defStatus );
                 break;
             case UPDATE:
-                if (newR.getSpec() != null && !newR.getSpec().getUrl().equals( oldR.getSpec().getUrl() )) {
-                    // On url change, set default status
-                    patch( mt, true, "/status", newR.getStatus(), defStatus );
-                } else {
-                    // Else make sure the old status is not removed
-                    patch( mt, false, "/status", newR.getStatus(), oldR.getStatus() );
-                }
-                break;
-            case DELETE:
-                // Set pending deletion status
-                oldR.getStatus().setState( Xp7AppStatus.State.PENDING );
-                oldR.getStatus().setMessage( "Pending deletion" );
-                patch( mt, true, "/status", newR.getStatus(), oldR.getStatus() );
-                break;
-        }
-
-        // Ensure enabled
-        patch( mt, false, "/spec/enabled", newR.getSpec().getEnabled(), true );
-
-        if (op == AdmissionOperation.CREATE) {
-            // Ensure finalizers
-            List<String> oldFinalizers = ((HasMetadata) mt.getAdmissionReview().getRequest().getObject()).getMetadata().getFinalizers();
-            Set<String> newFinalizers = oldFinalizers != null ? new HashSet<>( oldFinalizers ) : new HashSet<>();
-            String uninstallFinalizer = cfgStr( "operator.charts.values.finalizers.app.uninstall" );
-            if (!newFinalizers.contains( uninstallFinalizer )) {
-                newFinalizers.add( uninstallFinalizer );
-                patch( mt, true, "/metadata/finalizers", null, newFinalizers );
-            }
-
-            // Ensure owner reference
-            ensureOwnerReference( mt );
-        }
-    }
-
-    private void xp7config( MutationRequest mt )
-    {
-        // Collect old and new object
-        Xp7Config oldR = (Xp7Config) mt.getAdmissionReview().getRequest().getOldObject();
-        Xp7Config newR = (Xp7Config) mt.getAdmissionReview().getRequest().getObject();
-
-        // Create default status
-        Xp7ConfigStatus defStatus = new Xp7ConfigStatus().
-            withMessage( "Not loaded" ).
-            withState( Xp7ConfigStatus.State.PENDING );
-
-        // Get OP
-        AdmissionOperation op = getOperation( mt.getAdmissionReview() );
-
-        // Ensure status
-        switch (op) {
-            case CREATE: // Always set the default status on new objects
-                patch( mt, true, "/status", newR.getStatus(), defStatus );
-                break;
-            case UPDATE:
-                if (newR.getSpec() != null && !newR.getSpec().equals( oldR.getSpec() )) {
+                if (newR.getSpec() != null && !Serialization.asJson( newR.getSpec() ).equals( Serialization.asJson( oldR.getSpec() ) )) {
                     // On any change change, set default status
                     patch( mt, true, "/status", newR.getStatus(), defStatus );
                 } else {
@@ -173,21 +112,23 @@ public class MutationApi
         }
     }
 
-    private void xp7deployment( final MutationRequest mt )
+    private void xp8deployment( final MutationRequest mt )
     {
         // Collect old and new object
-        final Xp7Deployment oldR = (Xp7Deployment) mt.getAdmissionReview().getRequest().getOldObject();
-        final Xp7Deployment newR = (Xp7Deployment) mt.getAdmissionReview().getRequest().getObject();
+        final Xp8Deployment oldR = (Xp8Deployment) mt.getAdmissionReview().getRequest().getOldObject();
+        final Xp8Deployment newR = (Xp8Deployment) mt.getAdmissionReview().getRequest().getObject();
 
         // Create default status
-        final Xp7DeploymentStatus defStatus = new Xp7DeploymentStatus().
-            withMessage( "Waiting for pods" ).
-            withState( Xp7DeploymentStatus.State.PENDING ).
-            withXp7DeploymentStatusFields( new Xp7DeploymentStatusFields().
-                withXp7DeploymentStatusFieldsPods( new LinkedList<>() ) );
+        final com.enonic.kubernetes.crd.v1.xp8deploymentstatus.Fields defStatusFields =
+            new com.enonic.kubernetes.crd.v1.xp8deploymentstatus.Fields();
+        defStatusFields.setPods( new LinkedList<>() );
+        final Xp8DeploymentStatus defStatus = new Xp8DeploymentStatus();
+        defStatus.setMessage( "Waiting for pods" );
+        defStatus.setState( Xp8DeploymentStatus.State.PENDING );
+        defStatus.setFields( defStatusFields );
 
         if(newR.getSpec() != null && newR.getSpec().getEnabled() != null && !newR.getSpec().getEnabled()) {
-            defStatus.setState( Xp7DeploymentStatus.State.STOPPED );
+            defStatus.setState( Xp8DeploymentStatus.State.STOPPED );
             defStatus.setMessage( "XP deployment stopped" );
         }
 
@@ -200,7 +141,7 @@ public class MutationApi
                 patch( mt, true, "/status", newR.getStatus(), defStatus );
                 break;
             case UPDATE:
-                if (newR.getSpec() != null && !newR.getSpec().equals( oldR.getSpec() )) {
+                if (newR.getSpec() != null && !Serialization.asJson( newR.getSpec() ).equals( Serialization.asJson( oldR.getSpec() ) )) {
                     // On any change, set default status
                     patch( mt, true, "/status", newR.getStatus(), defStatus );
                 } else {
@@ -252,13 +193,6 @@ public class MutationApi
         patch( mt, true, "/metadata/annotations", newR.getMetadata().getAnnotations(), na );
     }
 
-    private void setDefaultValueInMap( Map<String, String> m, String key, String def )
-    {
-        if (!m.containsKey( key )) {
-            m.put( key, def );
-        }
-    }
-
     private void ensureOwnerReference( MutationRequest mt )
     {
         HasMetadata obj = (HasMetadata) mt.getAdmissionReview().getRequest().getObject();
@@ -267,12 +201,12 @@ public class MutationApi
             return;
         }
 
-        Optional<Xp7Deployment> xp7Deployments = getXp7Deployment( obj );
-        if (xp7Deployments.isEmpty()) {
+        Optional<Xp8Deployment> xp8Deployments = getXp8Deployment( obj );
+        if (xp8Deployments.isEmpty()) {
             return;
         }
 
-        patch( mt, false, "/metadata/ownerReferences", null, Collections.singletonList( createOwnerReference( xp7Deployments.get() ) ) );
+        patch( mt, false, "/metadata/ownerReferences", null, Collections.singletonList( createOwnerReference( xp8Deployments.get() ) ) );
     }
 
     private <T> boolean patch( MutationRequest mt, boolean force, String path, T currentValue, T value )

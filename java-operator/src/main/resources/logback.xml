@@ -1,0 +1,14 @@
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %logger{36} - %msg%n%throwable</pattern>
+        </encoder>
+    </appender>
+
+    <!-- <logger name="com.enonic.kubernetes" level="DEBUG" /> -->
+    <!-- <logger name="io.fabric8.kubernetes.client.dsl.internal" level="DEBUG" /> -->
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT" />
+    </root>
+</configuration>

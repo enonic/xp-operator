@@ -1,9 +1,10 @@
 package com.enonic.kubernetes.apis.xp;
 
 import com.enonic.kubernetes.apis.xp.service.*;
-import com.enonic.kubernetes.client.v1.api.xp7.idproviders.Xp7MgmtIdProvider;
-import com.enonic.kubernetes.client.v1.api.xp7.projects.Xp7MgmtProject;
-import com.enonic.kubernetes.client.v1.api.xp7.snapshots.Xp7MgmtSnapshotsList;
+import com.enonic.kubernetes.client.v1.api.xp8.idproviders.Xp8MgmtIdProvider;
+import com.enonic.kubernetes.client.v1.api.xp8.projects.Xp8MgmtProject;
+import com.enonic.kubernetes.client.v1.api.xp8.snapshots.Xp8MgmtSnapshotsList;
+import com.enonic.kubernetes.client.v1.api.xp8.webapps.Xp8MgmtWebapp;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -260,69 +261,76 @@ public class XpClient
         }
     }
 
-    private void appOp(String op, AppKey req, String exceptionToThrow)
+    private AppOpResult appOp(String op, AppKey req, String exceptionToThrow)
             throws XpClientException {
         try {
             Request request = requestBuilder.apply("/app/" + op)
                     .post(RequestBody.create(MediaType.parse("application/json"), mapper.writeValueAsString(req)))
                     .build();
             Response response = restClient.newCall(request).execute();
-            Preconditions.checkState(response.code() == 204, "Response code " + response.code());
+            Preconditions.checkState(response.code() == 200, "Response code " + response.code());
+            AppOpResponse opResponse = mapper.readValue(response.body().bytes(), AppOpResponse.class);
+            boolean success = opResponse.results().stream()
+                    .filter(r -> r.id().equals(req.key()))
+                    .findFirst()
+                    .map(AppOpResponseItem::success)
+                    .orElse(false);
+            return ImmutableAppOpResult.builder().success(success).build();
         } catch (Exception e) {
             registry.counter("xp_apps_error", tags).increment();
             throw new XpClientException(exceptionToThrow, e);
         }
     }
 
-    public void appUninstall(AppKey req)
+    public AppOpResult appUninstall(AppKey req)
             throws XpClientException {
         registry.counter("xp_apps_uninstall", tags).increment();
-        appOp("uninstall", req, String.format("Failed uninstalling app on '%s'", params.url()));
+        return appOp("uninstall", req, String.format("Failed uninstalling app on '%s'", params.url()));
     }
 
-    public void appStart(AppKey req)
+    public AppOpResult appStart(AppKey req)
             throws XpClientException {
         registry.counter("xp_apps_start", tags).increment();
-        appOp("start", req, String.format("Failed starting app on '%s'", params.url()));
+        return appOp("start", req, String.format("Failed starting app on '%s'", params.url()));
     }
 
-    public void appStop(AppKey req)
+    public AppOpResult appStop(AppKey req)
             throws XpClientException {
         registry.counter("xp_apps_stop", tags).increment();
-        appOp("stop", req, String.format("Failed stopping app on '%s'", params.url()));
+        return appOp("stop", req, String.format("Failed stopping app on '%s'", params.url()));
     }
 
-    public Xp7MgmtSnapshotsList snapshotsList() throws XpClientException {
+    public Xp8MgmtSnapshotsList snapshotsList() throws XpClientException {
         try {
             Response response = get("/repo/snapshot/list");
-            return mapper.readValue(response.body().bytes(), Xp7MgmtSnapshotsList.class);
+            return mapper.readValue(response.body().bytes(), Xp8MgmtSnapshotsList.class);
         } catch (Exception e) {
             throw new XpClientException("Failed to list snapshots", e);
         }
     }
 
-    public List<Xp7MgmtIdProvider> idProvidersList() throws XpClientException {
+    public List<Xp8MgmtIdProvider> idProvidersList() throws XpClientException {
         try {
             Response response = get("/idproviders/list");
-            return mapper.readerForListOf( Xp7MgmtIdProvider.class ).readValue( response.body().bytes());
+            return mapper.readerForListOf( Xp8MgmtIdProvider.class ).readValue( response.body().bytes());
         } catch (Exception e) {
             throw new XpClientException("Failed to list idproviders", e);
         }
     }
 
-    public List<Xp7MgmtProject> projectsList() throws XpClientException {
+    public List<Xp8MgmtProject> projectsList() throws XpClientException {
         try {
             Response response = get("/content/projects/list");
-            return mapper.readerForListOf( Xp7MgmtProject.class ).readValue( response.body().bytes());
+            return mapper.readerForListOf( Xp8MgmtProject.class ).readValue( response.body().bytes());
         } catch (Exception e) {
             throw new XpClientException("Failed to list projects", e);
         }
     }
 
-    public List<Xp7MgmtProject> webappsList() throws XpClientException {
+    public List<Xp8MgmtWebapp> webappsList() throws XpClientException {
         try {
             Response response = get("/webapps/list");
-            return mapper.readerForListOf( Xp7MgmtProject.class ).readValue( response.body().bytes());
+            return mapper.readerForListOf( Xp8MgmtWebapp.class ).readValue( response.body().bytes());
         } catch (Exception e) {
             throw new XpClientException("Failed to list webapps", e);
         }

@@ -1,7 +1,7 @@
 package com.enonic.kubernetes.operator.api.mutation;
 
 import org.immutables.value.Value;
-import org.wildfly.common.annotation.Nullable;
+import io.micronaut.core.annotation.Nullable;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
