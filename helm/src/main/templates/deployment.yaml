@@ -28,11 +28,14 @@ spec:
       annotations:
         checksum/config: {{ include (print .Template.BasePath "/config.yaml") . | sha256sum }} # Ensure restart on config change
         checksum/secret: {{ include (print .Template.BasePath "/secrets.yaml") . | sha256sum }} # Ensure restart on secret change
+        {{- if or .Values.tls.existingSecret .Values.tls.crt }}
+        checksum/tls: {{ printf "%s|%s|%s" .Values.tls.caBundle .Values.tls.crt .Values.tls.key | sha256sum }} # Ensure restart on TLS change
+        {{- end }}
         {{- with .Values.annotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
-      serviceAccountName: {{ .Release.Name }}
+      serviceAccountName: {{ include "serviceAccountName" . }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -82,7 +85,7 @@ spec:
             name: {{ .Release.Name }}
         - name: ssl
           secret:
-            secretName: {{ .Release.Name }}-tls
+            secretName: {{ include "tlsSecretName" . }}
         - name: tmp
           emptyDir: {}
 ---

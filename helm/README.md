@@ -38,3 +38,15 @@ The following table lists the configurable parameters of the xp-operator chart. 
 | `secrets`                   | Secrets mounted as environmental variables for the Operator container | `{}`                               |
 | `config`                    | Configuration for the Operator container                              | _see [values.yaml](./values.yaml)_ |
 | `onlyDeployCrds`            | Only deploy the CRD definitions                                       | `false`                            |
+| `serviceAccount.create`     | Create the operator ServiceAccount                                    | `true`                             |
+| `serviceAccount.name`       | Name of the ServiceAccount to use                                     | `""`                               |
+| `rbac.create`               | Create the operator ClusterRoles and binding                          | `true`                             |
+| `rbac.namespaceRoleName`    | ClusterRole bound in each managed namespace                           | `""`                               |
+| `rbac.hazelcastClusterRoleName` | ClusterRole bound for Hazelcast discovery                             | `""`                               |
+| `webhook.enabled`           | Create the webhook configurations                                     | `true`                             |
+| `apiService.enabled`        | Create the APIService                                                 | `true`                             |
+| `admissionPolicy.enabled`   | Create the ValidatingAdmissionPolicies                                | `true`                             |
+| `tls.existingSecret`        | Existing kubernetes.io/tls Secret to mount                            | `""`                               |
+| `tls.crt`                   | Base64 encoded server certificate                                     | `""`                               |
+| `tls.key`                   | Base64 encoded private key                                            | `""`                               |
+| `tls.caBundle`              | Base64 encoded CA for the APIService caBundle                         | `""`                               |

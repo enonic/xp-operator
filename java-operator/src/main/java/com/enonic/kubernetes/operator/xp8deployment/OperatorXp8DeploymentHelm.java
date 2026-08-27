@@ -18,6 +18,9 @@ import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.ServiceAccount;
+import io.fabric8.kubernetes.api.model.rbac.ClusterRoleBinding;
+import io.fabric8.kubernetes.api.model.rbac.RoleBinding;
+import io.fabric8.kubernetes.api.model.rbac.RoleRef;
 import io.fabric8.kubernetes.api.model.rbac.RoleBindingBuilder;
 import io.micronaut.context.annotation.Value;
 import io.micronaut.context.event.ApplicationEventListener;
@@ -75,6 +78,12 @@ public class OperatorXp8DeploymentHelm
     @Value("${operator.operator.namespace}")
     String operatorNamespace;
 
+    @Value("${operator.operator.serviceAccountName}")
+    String serviceAccountName;
+
+    @Value("${operator.operator.namespaceRoleName}")
+    String namespaceRoleName;
+
     @Value("${operator.operator.hazelcastClusterRoleName}")
     String hazelcastClusterRoleName;
 
@@ -87,19 +96,20 @@ public class OperatorXp8DeploymentHelm
     @Override
     public void onNewAdd( final Xp8Deployment newResource )
     {
-        ensureNamespaceReady( newResource.getMetadata().getNamespace() );
+        ensureNamespaceReady( newResource );
         super.onNewAdd( newResource );
     }
 
     @Override
     public void onUpdate( final Xp8Deployment oldResource, final Xp8Deployment newResource )
     {
-        ensureNamespaceReady( newResource.getMetadata().getNamespace() );
+        ensureNamespaceReady( newResource );
         super.onUpdate( oldResource, newResource );
     }
 
-    private void ensureNamespaceReady( final String namespace )
+    private void ensureNamespaceReady( final Xp8Deployment resource )
     {
+        final String namespace = resource.getMetadata().getNamespace();
         final String managedLabelKey = cfgStr( "operator.charts.values.labelKeys.managed" );
 
         // 1. Check namespace has managed label
@@ -113,25 +123,94 @@ public class OperatorXp8DeploymentHelm
 
         // 2. Create RoleBinding so the operator SA has permissions in this namespace
         //    before the inner helm chart runs. References the pre-created ClusterRole.
-        String clusterRoleName = operatorName + "-namespace-role";
         String rbName = operatorName + "-namespace-access";
-        if (clients.k8s().rbac().roleBindings().inNamespace( namespace ).withName( rbName ).get() == null) {
+        if (isClustered( resource )) {
+            assertHazelcastBindingMatchesConfig( namespace );
+        }
+
+        RoleBinding existing = clients.k8s().rbac().roleBindings().inNamespace( namespace ).withName( rbName ).get();
+        if (existing != null) {
+            assertBindingMatchesConfig( existing, namespace, rbName );
+        } else {
             clients.k8s().rbac().roleBindings().inNamespace( namespace ).resource(
                 new RoleBindingBuilder()
                     .withNewMetadata().withName( rbName ).withNamespace( namespace ).endMetadata()
                     .withNewRoleRef()
                         .withApiGroup( "rbac.authorization.k8s.io" )
                         .withKind( "ClusterRole" )
-                        .withName( clusterRoleName )
+                        .withName( namespaceRoleName )
                     .endRoleRef()
                     .addNewSubject()
                         .withKind( "ServiceAccount" )
-                        .withName( operatorName )
+                        .withName( serviceAccountName )
                         .withNamespace( operatorNamespace )
                     .endSubject()
                     .build()
             ).create();
         }
+    }
+
+    private static boolean isClustered( final Xp8Deployment resource )
+    {
+        return resource.getSpec().
+            getNodeGroups().
+            stream().
+            mapToInt( NodeGroups::getReplicas ).sum() > 1;
+    }
+
+    private void assertHazelcastBindingMatchesConfig( final String namespace )
+    {
+        String crbName = namespace + "-hazelcast";
+        ClusterRoleBinding binding = clients.k8s().rbac().clusterRoleBindings().withName( crbName ).get();
+        if (binding == null) {
+            return;
+        }
+
+        RoleRef ref = binding.getRoleRef();
+        if (ref != null && "rbac.authorization.k8s.io".equals( ref.getApiGroup() ) &&
+            "ClusterRole".equals( ref.getKind() ) && hazelcastClusterRoleName.equals( ref.getName() )) {
+            return;
+        }
+
+        throw new IllegalStateException( String.format(
+            "ClusterRoleBinding '%s' references %s, but the operator is configured for ClusterRole/%s. " +
+            "roleRef cannot be changed in place and the operator may not delete a binding referencing " +
+            "another role, so a cluster admin must delete it and let the operator recreate it: " +
+            "kubectl delete clusterrolebinding %s",
+            crbName, ref == null ? "none" : String.format( "%s/%s", ref.getKind(), ref.getName() ),
+            hazelcastClusterRoleName, crbName ) );
+    }
+
+    private void assertBindingMatchesConfig( final RoleBinding binding, final String namespace, final String rbName )
+    {
+        RoleRef ref = binding.getRoleRef();
+        boolean roleMatches = ref != null &&
+            "rbac.authorization.k8s.io".equals( ref.getApiGroup() ) &&
+            "ClusterRole".equals( ref.getKind() ) &&
+            namespaceRoleName.equals( ref.getName() );
+
+        boolean subjectMatches = binding.getSubjects() != null && binding.getSubjects().stream().anyMatch(
+            s -> "ServiceAccount".equals( s.getKind() ) &&
+                 serviceAccountName.equals( s.getName() ) &&
+                 operatorNamespace.equals( s.getNamespace() ) );
+
+        if (roleMatches && subjectMatches) {
+            return;
+        }
+
+        String describedRole = ref == null ? "none" : String.format( "%s/%s", ref.getKind(), ref.getName() );
+        String describedSubjects = binding.getSubjects() == null
+            ? "none"
+            : binding.getSubjects().stream()
+                .map( s -> String.format( "%s %s/%s", s.getKind(), s.getNamespace(), s.getName() ) )
+                .collect( Collectors.joining( ", " ) );
+
+        throw new IllegalStateException( String.format(
+            "RoleBinding '%s' in namespace '%s' references %s and binds %s, but the operator needs " +
+            "ClusterRole/%s bound to ServiceAccount %s/%s. roleRef cannot be changed in place, so a " +
+            "cluster admin must delete it and let the operator recreate it: kubectl delete rolebinding %s -n %s",
+            rbName, namespace, describedRole, describedSubjects,
+            namespaceRoleName, operatorNamespace, serviceAccountName, rbName, namespace ) );
     }
 
     @Override
