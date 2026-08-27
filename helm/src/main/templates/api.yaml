@@ -1,20 +1,62 @@
 {{- if not .Values.onlyDeployCrds }}
 
-{{- $altNames := list ( printf "%s.%s" .Release.Name .Release.Namespace ) ( printf "%s.%s.svc" .Release.Name .Release.Namespace ) ( printf "%s.%s.svc.cluster.local" .Release.Name .Release.Namespace ) -}}
-{{- $ca := genCA "enonic-operator-ca" 3650 -}}
-{{- $cert := genSignedCert .Release.Name nil $altNames 3650 $ca -}}
+{{- if and .Values.tls.existingSecret (or .Values.tls.crt .Values.tls.key) }}
+{{- fail "tls.existingSecret and tls.crt/tls.key are mutually exclusive: either point at a Secret you own, or supply the certificate through values" }}
+{{- end }}
 
+{{- if ne (empty .Values.tls.crt) (empty .Values.tls.key) }}
+{{- fail "tls.crt and tls.key must be supplied together" }}
+{{- end }}
+
+{{- /* genCA is non-deterministic, so the Secret and every caBundle must come from one call. All three variables hold base64. */}}
+{{- $caBundle := "" -}}
+{{- $tlsCrt := "" -}}
+{{- $tlsKey := "" -}}
+{{- if or .Values.tls.existingSecret .Values.tls.crt -}}
+  {{- if .Values.apiService.enabled -}}
+    {{- $caBundle = required "tls.caBundle is required when tls.existingSecret or tls.crt/tls.key is set and apiService.enabled is true" .Values.tls.caBundle -}}
+  {{- end -}}
+  {{- $tlsCrt = .Values.tls.crt -}}
+  {{- $tlsKey = .Values.tls.key -}}
+{{- else -}}
+  {{- $existing := lookup "v1" "Secret" .Release.Namespace (include "managedTlsSecretName" .) -}}
+  {{- $data := ($existing.data | default dict) -}}
+  {{- $annotations := (index ($existing.metadata | default dict) "annotations" | default dict) -}}
+  {{- /* Absence of the annotation means generated, so Secrets predating it keep being reused. */}}
+  {{- $fromValues := eq (index $annotations "enonic.cloud/tls.source" | default "") "values" -}}
+  {{- if and (not $fromValues) (hasKey $data "ca.crt") (hasKey $data "tls.crt") (hasKey $data "tls.key") -}}
+    {{- $caBundle = index $data "ca.crt" -}}
+    {{- $tlsCrt = index $data "tls.crt" -}}
+    {{- $tlsKey = index $data "tls.key" -}}
+  {{- else -}}
+    {{- $altNames := list ( printf "%s.%s" .Release.Name .Release.Namespace ) ( printf "%s.%s.svc" .Release.Name .Release.Namespace ) ( printf "%s.%s.svc.cluster.local" .Release.Name .Release.Namespace ) -}}
+    {{- $ca := genCA "enonic-operator-ca" 3650 -}}
+    {{- $cert := genSignedCert .Release.Name nil $altNames 3650 $ca -}}
+    {{- $caBundle = $ca.Cert | b64enc -}}
+    {{- $tlsCrt = $cert.Cert | b64enc -}}
+    {{- $tlsKey = $cert.Key | b64enc -}}
+  {{- end -}}
+{{- end -}}
+
+{{- if not .Values.tls.existingSecret }}
 ---
+# Not gated on the webhook/apiService toggles: the operator always serves HTTPS.
 apiVersion: v1
 kind: Secret
 type: kubernetes.io/tls
 metadata:
-  name: {{ .Release.Name }}-tls
+  name: {{ include "managedTlsSecretName" . }}
   namespace: {{ .Release.Namespace }}
+  {{- if .Values.tls.crt }}
+  annotations:
+    enonic.cloud/tls.source: values
+  {{- end }}
 data:
-  ca.crt: {{ $ca.Cert | b64enc }}
-  tls.crt: {{ $cert.Cert | b64enc }}
-  tls.key: {{ $cert.Key | b64enc }}
+  ca.crt: {{ $caBundle }}
+  tls.crt: {{ $tlsCrt }}
+  tls.key: {{ $tlsKey }}
+{{- end }}
+{{- if .Values.apiService.enabled }}
 ---
 apiVersion: apiregistration.k8s.io/v1
 kind: APIService
@@ -24,11 +66,13 @@ spec:
   group: operator.enonic.cloud
   groupPriorityMinimum: 1000
   versionPriority: 15
-  caBundle: {{ $ca.Cert | b64enc }}
+  caBundle: {{ $caBundle }}
   service:
     name: {{ .Release.Name }}
     namespace: {{ .Release.Namespace }}
   version: v1
+{{- end }}
+{{- if .Values.webhook.enabled }}
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
@@ -52,7 +96,7 @@ webhooks:
     sideEffects: None
     timeoutSeconds: 5
     clientConfig:
-      caBundle: {{ $ca.Cert | b64enc }}
+      caBundle: {{ $caBundle }}
       service:
         name: kubernetes
         namespace: default
@@ -80,10 +124,19 @@ webhooks:
     sideEffects: None
     timeoutSeconds: 5
     clientConfig:
-      caBundle: {{ $ca.Cert | b64enc }}
+      caBundle: {{ $caBundle }}
       service:
         name: kubernetes
         namespace: default
         path: /apis/operator.enonic.cloud/v1/mutations
+{{- end }}
 ---
 {{- end }}
+
+{{- define "managedTlsSecretName" -}}
+{{- printf "%s-tls" .Release.Name -}}
+{{- end -}}
+
+{{- define "tlsSecretName" -}}
+{{- default (include "managedTlsSecretName" .) .Values.tls.existingSecret -}}
+{{- end -}}

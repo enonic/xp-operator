@@ -11,13 +11,16 @@ data:
     quarkus.http.ssl.certificate.file=/deployments/ssl/tls.crt
     quarkus.http.ssl.certificate.key-file=/deployments/ssl/tls.key
 
-    # Operator identity — used for namespace lifecycle and RBAC management
-    operator.operator.name={{ .Release.Name }}
-    operator.operator.namespace={{ .Release.Namespace }}
-    operator.operator.hazelcastClusterRoleName={{ .Release.Name }}-hazelcast
-    operator.charts.values.labelKeys.managed={{ .Values.managedLabelKey }}
-
     # User defined config
 {{ indent 4 .Values.config }}
+
+    # Operator identity — used for namespace lifecycle and RBAC management
+    # Rendered last so a duplicate key above cannot override it.
+    operator.operator.name={{ .Release.Name }}
+    operator.operator.namespace={{ .Release.Namespace }}
+    operator.operator.serviceAccountName={{ include "serviceAccountName" . }}
+    operator.operator.namespaceRoleName={{ include "namespaceRoleName" . }}
+    operator.operator.hazelcastClusterRoleName={{ include "hazelcastClusterRoleName" . }}
+    operator.charts.values.labelKeys.managed={{ .Values.managedLabelKey }}
 ---
 {{- end }}
