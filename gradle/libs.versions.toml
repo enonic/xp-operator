@@ -30,4 +30,4 @@ pebble = { module = "io.pebbletemplates:pebble", version = "4.1.2" }
 
 [plugins]
 micronautApplication = { id = "io.micronaut.application", version.ref = "micronaut-gradle-plugin" }
-gitProperties = { id = "com.gorylenko.gradle-git-properties", version = "2.5.4" }
+gitProperties = { id = "com.gorylenko.gradle-git-properties", version = "4.0.1" }
