@@ -1,4 +1,5 @@
 {{- if not .Values.onlyDeployCrds }}
+{{- if .Values.admissionPolicy.enabled }}
 {{- /* ValidatingAdmissionPolicy/v1 is GA since k8s 1.30 */}}
 {{- if ge (.Capabilities.KubeVersion.Minor | int) 30 }}
 ---
@@ -19,7 +20,7 @@ spec:
   matchConditions:
     - name: operator-sa-only
       expression: >
-        request.userInfo.username == 'system:serviceaccount:{{ .Release.Namespace }}:{{ .Release.Name }}'
+        request.userInfo.username == 'system:serviceaccount:{{ .Release.Namespace }}:{{ include "serviceAccountName" . }}'
   validations:
     - expression: >
         '{{ .Values.managedLabelKey }}' in namespaceObject.metadata.labels &&
@@ -51,7 +52,7 @@ spec:
   matchConditions:
     - name: operator-sa-only
       expression: >
-        request.userInfo.username == 'system:serviceaccount:{{ .Release.Namespace }}:{{ .Release.Name }}'
+        request.userInfo.username == 'system:serviceaccount:{{ .Release.Namespace }}:{{ include "serviceAccountName" . }}'
   validations:
     - expression: >
         '{{ .Values.managedLabelKey }}' in oldObject.metadata.labels &&
@@ -83,11 +84,11 @@ spec:
   matchConditions:
     - name: operator-sa-only
       expression: >
-        request.userInfo.username == 'system:serviceaccount:{{ .Release.Namespace }}:{{ .Release.Name }}'
+        request.userInfo.username == 'system:serviceaccount:{{ .Release.Namespace }}:{{ include "serviceAccountName" . }}'
   validations:
     - expression: >
-        (request.operation == 'DELETE' ? oldObject : object).roleRef.name == '{{ .Release.Name }}-hazelcast'
-      message: "The operator may only create/delete ClusterRoleBindings referencing {{ .Release.Name }}-hazelcast"
+        (request.operation == 'DELETE' ? oldObject : object).roleRef.name == '{{ include "hazelcastClusterRoleName" . }}'
+      message: "The operator may only create/delete ClusterRoleBindings referencing {{ include "hazelcastClusterRoleName" . }}"
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingAdmissionPolicyBinding
@@ -114,7 +115,7 @@ spec:
   matchConditions:
     - name: operator-sa-only
       expression: >
-        request.userInfo.username == 'system:serviceaccount:{{ .Release.Namespace }}:{{ .Release.Name }}'
+        request.userInfo.username == 'system:serviceaccount:{{ .Release.Namespace }}:{{ include "serviceAccountName" . }}'
   validations:
     - expression: >
         '{{ .Values.managedLabelKey }}' in namespaceObject.metadata.labels &&
@@ -129,5 +130,6 @@ spec:
   policyName: {{ .Release.Name }}-role-managed-ns
   validationActions: ["Deny"]
   matchResources: {}
+{{- end }}
 {{- end }}
 {{- end }}
