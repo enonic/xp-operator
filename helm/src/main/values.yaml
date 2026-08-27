@@ -14,6 +14,32 @@ secrets: {}
 env: {}
 onlyDeployCrds: false
 managedLabelKey: enonic.managed
+
+serviceAccount:
+  create: true
+  # Empty means {release}.
+  name: ""
+rbac:
+  create: true
+  # Empty means {release}-namespace-role and {release}-hazelcast.
+  namespaceRoleName: ""
+  hazelcastClusterRoleName: ""
+webhook:
+  enabled: true
+apiService:
+  enabled: true
+admissionPolicy:
+  enabled: true
+
+tls:
+  # Empty means the chart creates and owns {release}-tls.
+  existingSecret: ""
+  # Base64 encoded CA certificate for the APIService caBundle.
+  caBundle: ""
+  # Base64 encoded certificate and key, used instead of generating them.
+  crt: ""
+  key: ""
+
 # For a full list of configuration options see operator properties file:
 # https://github.com/enonic/xp-operator/blob/master/java-operator/src/main/resources/application.properties
 config: |-
