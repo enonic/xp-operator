@@ -36,4 +36,4 @@ jakarta-validation = { module = "jakarta.validation:jakarta.validation-api", ver
 [plugins]
 micronautApplication = { id = "io.micronaut.application", version.ref = "micronaut-gradle-plugin" }
 jsonschema2pojo = { id = "org.jsonschema2pojo", version = "1.2.2" }
-gitProperties = { id = "com.gorylenko.gradle-git-properties", version = "2.5.4" }
+gitProperties = { id = "com.gorylenko.gradle-git-properties", version = "4.0.1" }
