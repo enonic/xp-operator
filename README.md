@@ -106,6 +106,13 @@ operator.charts.values.image.pullPolicy=Always
 
 `%s` will be replaced with the `.spec.xpVersion` value of `Xp8Deployment` resource.
 
+#### Nightly XP build
+
+Set `.spec.xpVersion` to `nightly` to run the nightly build of XP master. The XP container then uses the image from
+`operator.charts.values.image.nightly` (default `enonic/xp:nightly`) instead of `nameTemplate`, with
+`imagePullPolicy: Always`, so every pod start pulls the current build. Running pods keep their build until they are
+recreated, so pods of one deployment can run different nightly builds.
+
 ### Running operator in IDE
 
 Start kind cluster in dev mode:

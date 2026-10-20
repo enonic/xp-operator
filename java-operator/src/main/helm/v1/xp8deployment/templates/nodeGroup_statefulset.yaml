@@ -131,10 +131,12 @@ spec:
       {{- end}}
       {{- end}}
 
+      {{- /* nightly is a mutable tag, so every pod start pulls the current build */}}
+      {{- $nightly := eq $.Values.deployment.spec.xpVersion "nightly" }}
       containers:
         - name: exp
-          image: {{ $.Values.image.nameTemplate | replace "%s" $.Values.deployment.spec.xpVersion }}
-          imagePullPolicy: {{ $.Values.image.pullPolicy }}
+          image: {{ if $nightly }}{{ $.Values.image.nightly }}{{ else }}{{ $.Values.image.nameTemplate | replace "%s" $.Values.deployment.spec.xpVersion }}{{ end }}
+          imagePullPolicy: {{ if $nightly }}Always{{ else }}{{ $.Values.image.pullPolicy }}{{ end }}
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
 

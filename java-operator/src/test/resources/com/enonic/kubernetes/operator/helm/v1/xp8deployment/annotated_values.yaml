@@ -73,6 +73,7 @@ finalizers:
     uninstall: "uninstall.app.enonic.cloud"
 image:
   nameTemplate: "enonic/xp:%s-ubuntu"
+  nightly: "enonic/xp:nightly"
   pullPolicy: "IfNotPresent"
 labelKeys:
   data: "enonic.data"

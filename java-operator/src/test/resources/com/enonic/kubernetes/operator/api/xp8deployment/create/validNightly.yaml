@@ -1,0 +1,70 @@
+admissionRequest:
+  request:
+    operation: CREATE
+    object:
+      apiVersion: enonic.cloud/v1
+      kind: Xp8Deployment
+      metadata:
+        name: mycloud-mysolution-myenv-myservice3
+        namespace: mycloud-mysolution-myenv-myservice3
+        labels:
+          cloud: mycloud
+          solution: mysolution
+          environment: myenv
+          service: myservice3
+      spec:
+        enabled: true
+        xpVersion: nightly
+        nodesSharedDisks:
+          - name: blobstore
+            size: 1Gi
+          - name: snapshots
+            size: 1Gi
+        nodeGroups:
+          - name: main
+            master: true
+            data: true
+            replicas: 1
+            resources:
+              cpu: "1"
+              memory: 512Mi
+              disks:
+                - name: index
+                  size: 200Mi
+
+assertResult:
+  apiVersion: "enonic.cloud/v1"
+  kind: "Xp8Deployment"
+  metadata:
+    labels:
+      cloud: "mycloud"
+      solution: "mysolution"
+      environment: "myenv"
+      service: "myservice3"
+    name: "mycloud-mysolution-myenv-myservice3"
+    namespace: "mycloud-mysolution-myenv-myservice3"
+  spec:
+    enabled: true
+    xpVersion: "nightly"
+    nodesSharedDisks:
+      - name: "blobstore"
+        size: "1Gi"
+      - name: "snapshots"
+        size: "1Gi"
+    nodeGroups:
+      - name: "main"
+        data: true
+        master: true
+        replicas: 1
+        env: [ ]
+        resources:
+          cpu: "1"
+          memory: "512Mi"
+          disks:
+          - name: "index"
+            size: "200Mi"
+  status:
+    state: "PENDING"
+    message: "Waiting for pods"
+    fields:
+      pods: [ ]
