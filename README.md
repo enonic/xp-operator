@@ -106,6 +106,34 @@ operator.charts.values.image.pullPolicy=Always
 
 `%s` will be replaced with the `.spec.xpVersion` value of `Xp8Deployment` resource.
 
+To use a different image for a single deployment, set `.spec.image` to a full image reference. It is used as is, and
+`nameTemplate` is ignored. `.spec.imagePullPolicy` overrides `operator.charts.values.image.pullPolicy`. Use `Always` for
+mutable tags such as `nightly`, so every pod start pulls the current build:
+
+```yaml
+spec:
+  xpVersion: 8.1.0
+  image: enonic/xp:nightly
+  imagePullPolicy: Always
+```
+
+#### Pulling images through a registry proxy
+
+To pull all images of XP pods through a registry proxy, such as a GCP Artifact Registry remote repository for Docker
+Hub, set `operator.charts.values.image.registryPrefix`:
+
+```properties
+operator.charts.values.image.registryPrefix=europe-north1-docker.pkg.dev/my-gcp-project/dockerhub-proxy
+```
+
+The prefix is applied to the XP image (from `.spec.image` or `nameTemplate`), the operator helper images, and the
+sidecar and init container images of `Xp8Deployment`, e.g. `enonic/xp:nightly` becomes
+`europe-north1-docker.pkg.dev/my-gcp-project/dockerhub-proxy/enonic/xp:nightly`. Docker Hub official images get the
+`library/` path Docker otherwise implies, e.g. `busybox` becomes `.../dockerhub-proxy/library/busybox`. Images that
+already name a registry host, such as `ghcr.io/acme/app:1.0`, are left as is.
+
+`.spec.xpVersion` is still required and is validated to be 8.x.
+
 ### Running operator in IDE
 
 Start kind cluster in dev mode:

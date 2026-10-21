@@ -21,7 +21,9 @@ metadata:
   namespace: my-namespace
 spec:
   enabled: true     # Should the pods be running
-  xpVersion: 7.16.2  # XP version
+  xpVersion: 8.0.0   # XP version
+  image: enonic/xp:8.0.0-ubuntu  # Optional full image reference, defaults to the operator image template with xpVersion
+  imagePullPolicy: IfNotPresent  # Optional, Always | IfNotPresent | Never, defaults to the operator setting
 
   # List of volumes shared by all nodes (see description of volumes below)
   nodesSharedVolumes:

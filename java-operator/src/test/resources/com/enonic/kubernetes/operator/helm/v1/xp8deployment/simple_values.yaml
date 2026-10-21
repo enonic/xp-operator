@@ -76,6 +76,7 @@ finalizers:
 image:
   nameTemplate: "enonic/xp:%s-ubuntu"
   pullPolicy: "IfNotPresent"
+  registryPrefix: ""
 labelKeys:
   data: "enonic.data"
   deployment: "enonic.deployment"
