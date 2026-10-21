@@ -106,6 +106,19 @@ operator.charts.values.image.pullPolicy=Always
 
 `%s` will be replaced with the `.spec.xpVersion` value of `Xp8Deployment` resource.
 
+To use a different image for a single deployment, set `.spec.image` to a full image reference. It is used as is, and
+`nameTemplate` is ignored. `.spec.imagePullPolicy` overrides `operator.charts.values.image.pullPolicy`. Use `Always` for
+mutable tags such as `nightly`, so every pod start pulls the current build:
+
+```yaml
+spec:
+  xpVersion: 8.1.0
+  image: my-proxy.example.com/enonic/xp:nightly
+  imagePullPolicy: Always
+```
+
+`.spec.xpVersion` is still required and is validated to be 8.x.
+
 ### Running operator in IDE
 
 Start kind cluster in dev mode:

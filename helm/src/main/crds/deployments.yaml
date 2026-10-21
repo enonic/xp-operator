@@ -27,6 +27,16 @@ spec:
                   type: boolean
                 xpVersion:
                   type: string
+                image:
+                  type: string
+                  nullable: true
+                imagePullPolicy:
+                  type: string
+                  nullable: true
+                  enum:
+                    - Always
+                    - IfNotPresent
+                    - Never
                 nodesPreinstalledApps:
                   type: array
                   default: []

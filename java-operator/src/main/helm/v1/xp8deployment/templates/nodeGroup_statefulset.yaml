@@ -133,8 +133,8 @@ spec:
 
       containers:
         - name: exp
-          image: {{ $.Values.image.nameTemplate | replace "%s" $.Values.deployment.spec.xpVersion }}
-          imagePullPolicy: {{ $.Values.image.pullPolicy }}
+          image: {{ $.Values.deployment.spec.image | default ($.Values.image.nameTemplate | replace "%s" $.Values.deployment.spec.xpVersion) }}
+          imagePullPolicy: {{ $.Values.deployment.spec.imagePullPolicy | default $.Values.image.pullPolicy }}
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
 
