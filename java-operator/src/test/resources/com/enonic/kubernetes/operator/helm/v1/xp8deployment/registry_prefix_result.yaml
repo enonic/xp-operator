@@ -102,7 +102,11 @@ data:
     \ != \"$LAST_HASH\" ]; then\n    LAST_HASH=\"$CURRENT_HASH\"\n    patch_annotation\n\
     \  fi\n  sleep 2\ndone\n"
   vhost-defaults.cfg: "enabled = true\n\nmapping.localhost.host = localhost\nmapping.localhost.source\
-    \ = /\nmapping.localhost.target = /\nmapping.localhost.idProvider.system = default"
+    \ = /\nmapping.localhost.target = /\nmapping.localhost.idProvider.system = default\n\
+    \nmapping.k8s-fisk.host = fisk.mycloud-mysolution-myenv-myservice.svc\nmapping.k8s-fisk.source\
+    \ = /\nmapping.k8s-fisk.target = /\nmapping.k8s-fisk.endpoint = management\nmapping.k8s-fisk.idProvider.enonic-cloud\
+    \ = default\nmapping.k8s-fisk.idProvider.enonic-cloud.flows = autologin,k8s\n\
+    mapping.k8s-fisk.allow = role:system.admin"
 ---
 apiVersion: "v1"
 kind: "ConfigMap"

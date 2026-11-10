@@ -102,7 +102,18 @@ data:
     \ != \"$LAST_HASH\" ]; then\n    LAST_HASH=\"$CURRENT_HASH\"\n    patch_annotation\n\
     \  fi\n  sleep 2\ndone\n"
   vhost-defaults.cfg: "enabled = true\n\nmapping.localhost.host = localhost\nmapping.localhost.source\
-    \ = /\nmapping.localhost.target = /\nmapping.localhost.idProvider.system = default"
+    \ = /\nmapping.localhost.target = /\nmapping.localhost.idProvider.system = default\n\
+    \nmapping.k8s-master.host = master.mycloud-mysolution-myenv-myservice.svc\nmapping.k8s-master.source\
+    \ = /\nmapping.k8s-master.target = /\nmapping.k8s-master.endpoint = management\n\
+    mapping.k8s-master.idProvider.enonic-cloud = default\nmapping.k8s-master.idProvider.enonic-cloud.flows\
+    \ = autologin,k8s\nmapping.k8s-master.allow = role:system.admin\n\nmapping.k8s-data.host\
+    \ = data.mycloud-mysolution-myenv-myservice.svc\nmapping.k8s-data.source = /\n\
+    mapping.k8s-data.target = /\nmapping.k8s-data.endpoint = management\nmapping.k8s-data.idProvider.enonic-cloud\
+    \ = default\nmapping.k8s-data.idProvider.enonic-cloud.flows = autologin,k8s\n\
+    mapping.k8s-data.allow = role:system.admin\n\nmapping.k8s-frontend.host = frontend.mycloud-mysolution-myenv-myservice.svc\n\
+    mapping.k8s-frontend.source = /\nmapping.k8s-frontend.target = /\nmapping.k8s-frontend.endpoint\
+    \ = management\nmapping.k8s-frontend.idProvider.enonic-cloud = default\nmapping.k8s-frontend.idProvider.enonic-cloud.flows\
+    \ = autologin,k8s\nmapping.k8s-frontend.allow = role:system.admin"
 ---
 apiVersion: "v1"
 kind: "ConfigMap"
