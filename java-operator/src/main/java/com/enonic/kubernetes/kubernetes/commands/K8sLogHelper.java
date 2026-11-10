@@ -25,7 +25,7 @@ public class K8sLogHelper
     /**
      * Replaces the resource with {@code op} applied to what the server holds now. An unlocked replace
      * retries a conflict by resending the same object under the newest resourceVersion, which puts back
-     * whatever another writer changed in between, such as cloud-api's data while a status is set here.
+     * whatever another writer changed in between, such as an Xp8Config's data while its status is set here.
      * So the version that was read is locked, and a conflict reads again and redoes the edit.
      */
     public static <T extends HasMetadata> void logEdit( final Resource<T> editable, UnaryOperator<T> op ) {

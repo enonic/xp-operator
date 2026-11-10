@@ -108,9 +108,6 @@ resources:
   memory:
     defaultRequests: null
 settings:
-  cloudApiServiceAccount:
-    name: "cloudApi"
-    namespace: "ec-system"
   hzApiDiscovery: true
   linkerd: false
 storage:

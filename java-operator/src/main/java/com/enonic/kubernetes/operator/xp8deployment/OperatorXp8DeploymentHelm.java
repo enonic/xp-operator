@@ -15,7 +15,6 @@ import com.enonic.kubernetes.operator.ingress.OperatorXp8ConfigSync;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.fabric8.kubernetes.api.model.Namespace;
-import io.fabric8.kubernetes.api.model.ServiceAccount;
 import io.fabric8.kubernetes.api.model.rbac.ClusterRoleBinding;
 import io.fabric8.kubernetes.api.model.rbac.RoleBinding;
 import io.fabric8.kubernetes.api.model.rbac.RoleRef;
@@ -34,7 +33,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -55,10 +53,6 @@ public class OperatorXp8DeploymentHelm
 
     @Inject
     OperatorXp8ConfigSync operatorXp8ConfigSync;
-
-    @Inject
-    @Named("cloudApi")
-    Supplier<ServiceAccount> cloudApi;
 
     @Inject
     Informers informers;
@@ -210,7 +204,7 @@ public class OperatorXp8DeploymentHelm
     @Override
     protected ValueBuilder<Xp8Deployment> getValueBuilder( final BaseValues baseValues )
     {
-        return new Xp8DeploymentValueBuilder( baseValues, cloudApi, operatorName, hazelcastClusterRoleName );
+        return new Xp8DeploymentValueBuilder( baseValues, operatorName, hazelcastClusterRoleName );
     }
 
     @Override
@@ -233,38 +227,23 @@ public class OperatorXp8DeploymentHelm
 
         private final BaseValues baseValues;
 
-        private final Supplier<ServiceAccount> cloudApiSa;
-
         private final String operatorName;
 
         private final String hazelcastClusterRoleName;
 
-        public Xp8DeploymentValueBuilder( final BaseValues baseValues, final Supplier<ServiceAccount> cloudApiSa,
-                                          final String operatorName, final String hazelcastClusterRoleName )
+        public Xp8DeploymentValueBuilder( final BaseValues baseValues, final String operatorName,
+                                          final String hazelcastClusterRoleName )
         {
             this.baseValues = baseValues;
-            this.cloudApiSa = cloudApiSa;
             this.operatorName = operatorName;
             this.hazelcastClusterRoleName = hazelcastClusterRoleName;
         }
 
-        @SuppressWarnings("unchecked")
         @Override
         public Values apply( final Xp8Deployment in )
         {
             Xp8Deployment resource = cloneResource( in );
             MapValues values = new MapValues( baseValues );
-
-            if (!values.containsKey( "settings" )) {
-                values.put( "settings", new HashMap<>() );
-            }
-
-            ServiceAccount sa = cloudApiSa.get();
-            if (sa != null) {
-                ((Map<String, Object>) values.get( "settings" )).
-                    put( "cloudApiServiceAccount",
-                        Map.of( "name", sa.getMetadata().getName(), "namespace", sa.getMetadata().getNamespace() ) );
-            }
 
             for (NodeGroups ng : resource.getSpec().getNodeGroups()) {
                 Optional<Env> optionalXpOpts =
