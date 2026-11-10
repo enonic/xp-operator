@@ -20,7 +20,7 @@ public class K8sLogHelperTest
     KubernetesClient client;
 
     /**
-     * Another writer changes the resource between the read and the write of an edit, as cloud-api
+     * Another writer changes the resource between the read and the write of an edit, as a client
      * patches an Xp8Config's data while the operator sets its status. The edit must land on top of
      * that change, not put back the copy it read.
      */

@@ -7,9 +7,6 @@ import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.fabric8.kubernetes.api.model.ObjectMeta;
-import io.fabric8.kubernetes.api.model.ServiceAccount;
-
 import com.enonic.kubernetes.crd.v1.Xp8Deployment;
 import com.enonic.kubernetes.helm.values.BaseValues;
 import com.enonic.kubernetes.helm.values.ValueBuilder;
@@ -26,17 +23,7 @@ public class Xp8DeploymentTest
     {
         super();
         valueBuilder = new OperatorXp8DeploymentHelm.Xp8DeploymentValueBuilder( new BaseValues( "44ddc40b-266c-4c99-b094-e758328fc6ba" ),
-                                                                                this::createTestSa, "xp-operator", "xp-operator-hazelcast" );
-    }
-
-    private ServiceAccount createTestSa()
-    {
-        ServiceAccount sa = new ServiceAccount();
-        ObjectMeta meta = new ObjectMeta();
-        meta.setName( "cloudApi" );
-        meta.setNamespace( "ec-system" );
-        sa.setMetadata( meta );
-        return sa;
+                                                                                "xp-operator", "xp-operator-hazelcast" );
     }
 
     @Override
