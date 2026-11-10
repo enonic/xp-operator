@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 import static com.enonic.kubernetes.common.Configuration.cfgStr;
 import static com.enonic.kubernetes.kubernetes.Predicates.inSameNamespaceAs;
 import static com.enonic.kubernetes.kubernetes.Predicates.isDeleted;
-import static com.enonic.kubernetes.kubernetes.Predicates.matchLabel;
 import static com.enonic.kubernetes.kubernetes.Predicates.onCondition;
 
 /**
@@ -91,7 +90,7 @@ public class OperatorIngressLabel
         searchers.ingress()
             .stream()
             .filter( isDeleted().negate() )
-            .filter( matchLabel( cfgStr( "operator.charts.values.labelKeys.ingressVhostLoaded" ), "false" ) )
+            .filter( OperatorIngressLabel::awaitsVhost )
             .forEach( this::setStatus );
     }
 
@@ -101,8 +100,25 @@ public class OperatorIngressLabel
             .stream()
             .filter( inSameNamespaceAs( xp8Config ) )
             .filter( isDeleted().negate() )
-            .filter( matchLabel( cfgStr( "operator.charts.values.labelKeys.ingressVhostLoaded" ), "false" ) )
+            .filter( OperatorIngressLabel::awaitsVhost )
             .forEach( this::setStatus );
+    }
+
+    /**
+     * Labelled as not loaded, or never labelled at all: the label edit on create fails until the
+     * operator's role exists in a new namespace, and nothing else labels the ingress afterwards.
+     */
+    static boolean awaitsVhost( final Ingress ingress )
+    {
+        final String key = cfgStr( "operator.charts.values.labelKeys.ingressVhostLoaded" );
+        final Map<String, String> labels = ingress.getMetadata().getLabels();
+        if ( labels != null && labels.containsKey( key ) )
+        {
+            return "false".equals( labels.get( key ) );
+        }
+        final Map<String, String> annotations = ingress.getMetadata().getAnnotations();
+        final String prefix = cfgStr( "operator.charts.values.annotationKeys.vhostMapping" );
+        return annotations != null && annotations.keySet().stream().anyMatch( k -> k.startsWith( prefix ) );
     }
 
     private void setStatus( final Ingress ingress )
