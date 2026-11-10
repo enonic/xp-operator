@@ -47,7 +47,7 @@ config: |-
 
 Visit the <<storage#, storage classes section>> for more details and compatibility list of supported storage classes.
 
-The complete list of operator configuration options can be found in the https://github.com/enonic/xp-operator/tree/master/helm[Operator Helm chart]
+The complete list of operator configuration options can be found in the https://github.com/enonic/xp-operator/tree/1.x/helm[Operator Helm chart]
 
 
 == Installing the operator
