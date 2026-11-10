@@ -38,30 +38,6 @@ metadata:
 type: "kubernetes.io/service-account-token"
 ---
 apiVersion: "v1"
-kind: "Secret"
-metadata:
-  annotations:
-    enonic.applyPriority: "60"
-    enonic.neverOverwrite: "true"
-  labels:
-    cloud: "mycloud"
-    enonic.managed: "true"
-    environment: "myenv"
-    service: "myservice"
-    solution: "mysolution"
-  name: "su"
-  namespace: "mycloud-mysolution-myenv-myservice"
-  ownerReferences:
-  - apiVersion: "enonic.cloud/v1"
-    kind: "Xp8Deployment"
-    blockOwnerDeletion: false
-    controller: true
-    name: "mycloud-mysolution-myenv-myservice"
-data:
-  pass: "cGFzc3dvcmQ="
-  passHash: "YjEwOWYzYmJiYzI0NGViODI0NDE5MTdlZDA2ZDYxOGI5MDA4ZGQwOWIzYmVmZDFiNWUwNzM5NGM3MDZhOGJiOTgwYjFkNzc4NWU1OTc2ZWMwNDliNDZkZjVmMTMyNmFmNWEyZWE2ZDEwM2ZkMDdjOTUzODVmZmFiMGNhY2JjODY="
----
-apiVersion: "v1"
 kind: "ConfigMap"
 metadata:
   annotations:
@@ -664,12 +640,6 @@ spec:
             fieldRef:
               apiVersion: "v1"
               fieldPath: "status.podIP"
-        - name: "SU_PASS_HASH"
-          valueFrom:
-            secretKeyRef:
-              key: "passHash"
-              name: "su"
-              optional: false
         - name: "XP_OPTS"
           value: "-Xms512m -Xmx512m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof\
             \ -Dhazelcast.shutdownhook.policy=GRACEFUL -Dhazelcast.graceful.shutdown.max.wait=600"
@@ -973,12 +943,6 @@ spec:
             fieldRef:
               apiVersion: "v1"
               fieldPath: "status.podIP"
-        - name: "SU_PASS_HASH"
-          valueFrom:
-            secretKeyRef:
-              key: "passHash"
-              name: "su"
-              optional: false
         - name: "XP_OPTS"
           value: "-Xms614m -Xmx614m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof\
             \ -Dhazelcast.shutdownhook.policy=GRACEFUL -Dhazelcast.graceful.shutdown.max.wait=600"
@@ -1329,12 +1293,6 @@ spec:
             fieldRef:
               apiVersion: "v1"
               fieldPath: "status.podIP"
-        - name: "SU_PASS_HASH"
-          valueFrom:
-            secretKeyRef:
-              key: "passHash"
-              name: "su"
-              optional: false
         - name: "CUSTOM_ENV"
           value: "myenvvar"
         - name: "XP_OPTS"
@@ -1603,7 +1561,7 @@ metadata:
 spec:
   nodeGroup: "all"
   file: "system.properties"
-  data: "xp.name = mycloud-mysolution-myenv-myservice\nxp.suPassword = {sha512}${env.SU_PASS_HASH}\n\
+  data: "xp.name = mycloud-mysolution-myenv-myservice\nxp.suPassword = ${env.XP_SU_PASSWORD}\n\
     xp.init.adminUserCreation = false"
   dataBase64: false
 ---

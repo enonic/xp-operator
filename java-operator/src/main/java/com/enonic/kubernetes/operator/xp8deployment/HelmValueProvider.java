@@ -12,7 +12,6 @@ import io.fabric8.kubernetes.api.model.ServiceAccount;
 import io.micronaut.context.annotation.Factory;
 
 import com.enonic.kubernetes.kubernetes.Clients;
-import com.enonic.kubernetes.operator.helpers.PasswordGenerator;
 
 import static com.enonic.kubernetes.common.Configuration.cfgHasKey;
 import static com.enonic.kubernetes.common.Configuration.cfgStr;
@@ -21,21 +20,6 @@ import static com.enonic.kubernetes.common.Configuration.cfgStr;
 public class HelmValueProvider
 {
     private static final Logger log = LoggerFactory.getLogger( HelmValueProvider.class );
-
-    @Singleton
-    @Named("suPass")
-    Supplier<String> suPassSupplier()
-    {
-        if ( cfgHasKey( "operator.deployment.fixedSuPass" ) )
-        {
-            log.warn( "Password provider fixed to a single password" );
-            return () -> cfgStr( "operator.deployment.fixedSuPass" );
-        }
-        else
-        {
-            return () -> PasswordGenerator.getPassword( 32 );
-        }
-    }
 
     @Singleton
     @Named("cloudApi")

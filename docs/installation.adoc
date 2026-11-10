@@ -191,14 +191,24 @@ kubectl -n my-namespace get pods
 
 With the XP running, we can try accessing the Admin - even without using an ingress.
 
-. Get the `su` password by running this command:
+The operator sets no password for `su`, XP's super user, so nobody can log in yet. For this test, give `su` a password.
+
+. Store the hash of the password in a Secret, as XP reads it:
 +
 [source,bash]
 ----
-$ kubectl -n my-namespace get secret su -o go-template="{{ .data.pass | base64decode }}"
+$ kubectl -n my-namespace create secret generic my-su \
+    --from-literal=passHash="{sha512}$(printf %s 'my-password' | sha512sum | cut -d ' ' -f 1)"
 ----
 +
-This will output the plain text password.
+. Pass the hash to XP as the `XP_SU_PASSWORD` environment variable of the node group, and wait for the pod to restart with it:
++
+[source,bash]
+----
+$ kubectl -n my-namespace patch xp8deployment my-deployment --type json \
+    -p '[{"op":"add","path":"/spec/nodeGroups/0/env/-","value":{"name":"XP_SU_PASSWORD","valueFrom":{"secretKeyRef":{"name":"my-su","key":"passHash"}}}}]'
+$ kubectl -n my-namespace rollout status statefulset main
+----
 +
 . Activate port forwarding
 +
@@ -210,9 +220,9 @@ Forwarding from 127.0.0.1:8080 -> 8080
 Forwarding from [::1]:8080 -> 8080
 ----
 +
-. Open http://localhost:8080[http://localhost:8080^] in your browser, and login with `su` and the password you obtained earlier.
+. Open http://localhost:8080[http://localhost:8080^] in your browser, and login with `su` and the password you chose.
 
-TIP: Visit the <<usage#, operator usage section>> for more details.
+TIP: Visit the <<usage#su, operator usage section>> for more details.
 
 
 === Remove deployment

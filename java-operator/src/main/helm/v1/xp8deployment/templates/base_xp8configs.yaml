@@ -1,4 +1,4 @@
-# Setup admin user with generated password
+# System properties. su can log in only when a node group's env sets XP_SU_PASSWORD to its password hash
 apiVersion: enonic.cloud/v1
 kind: Xp8Config
 metadata:
@@ -22,7 +22,7 @@ spec:
   dataBase64: false
   data: |-
     xp.name = {{ .Values.deployment.name }}
-    xp.suPassword = {sha512}${env.SU_PASS_HASH}
+    xp.suPassword = ${env.XP_SU_PASSWORD}
     xp.init.adminUserCreation = false
 ---
 # Disable tour in admin
