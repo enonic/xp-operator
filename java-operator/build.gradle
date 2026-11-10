@@ -38,9 +38,6 @@ dependencies {
     api libs.fabric8.kubernetes.clientapi
     implementation libs.fabric8.kubernetes.client
 
-    implementation libs.okhttp3.okhttp
-    implementation libs.okhttp3.okhttpsse
-
     compileOnly libs.immutables.valueannotations
     annotationProcessor libs.immutables.value
 
@@ -52,12 +49,8 @@ dependencies {
 
     implementation 'io.micronaut:micronaut-http-server-netty'
     implementation 'io.micronaut:micronaut-jackson-databind'
-    implementation 'io.micronaut.micrometer:micronaut-micrometer-registry-prometheus'
 
     runtimeOnly 'ch.qos.logback:logback-classic:1.5.37'
-
-    annotationProcessor 'io.micronaut.openapi:micronaut-openapi'
-    compileOnly 'io.micronaut.openapi:micronaut-openapi-annotations'
 
     testImplementation 'io.rest-assured:rest-assured'
     testImplementation libs.fabric8.kubernetes.servermock
