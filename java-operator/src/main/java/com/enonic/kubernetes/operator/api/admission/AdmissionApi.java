@@ -92,14 +92,35 @@ public class AdmissionApi
 
         for ( Mapping m : mappings )
         {
-            List<String> paths = newIngress.getSpec().getRules().stream().map( r -> r.getHttp()
+            Preconditions.checkArgument( m.port() != -1,
+                                         String.format( "endpoint '%s' in 'enonic.cloud/xp8.vhost.mapping' annotation is not '%s'",
+                                                        m.endpoint(), Mapping.MANAGEMENT_ENDPOINT ) );
+
+            Set<String> idProviders =
+                m.idProviders() == null ? Set.of() : Set.of( m.idProviders().split( "," ) );
+            for ( String idProvider : m.flows().keySet() )
+            {
+                Preconditions.checkArgument( idProviders.contains( idProvider ), String.format(
+                    "flows for id provider '%s' in 'enonic.cloud/xp8.vhost.mapping' annotation, which its idproviders do not list",
+                    idProvider ) );
+            }
+
+            List<HTTPIngressPath> paths = newIngress.getSpec().getRules().stream().map( r -> r.getHttp()
                 .getPaths()
                 .stream().
                 // TODO: Filter nodegroups
-                    filter( p -> p.getBackend().getService().getPort().getNumber() == 8080 )
-                .map( HTTPIngressPath::getPath )
+                    filter( p -> p.getBackend().getService().getPort().getNumber() == m.port() )
                 .collect( Collectors.toList() ) ).flatMap( Collection::stream ).collect( Collectors.toList() );
-            Preconditions.checkArgument( paths.contains( m.source() ), String.format(
+
+            if ( m.endpoint() != null )
+            {
+                Preconditions.checkArgument( !paths.isEmpty(), String.format(
+                    "'%s' endpoint in 'enonic.cloud/xp8.vhost.mapping' annotation has no ingress rule on host %s, port %d",
+                    m.endpoint(), m.host(), m.port() ) );
+                continue;
+            }
+
+            Preconditions.checkArgument( paths.stream().map( HTTPIngressPath::getPath ).anyMatch( m.source()::equals ), String.format(
                 "source '%s' in 'enonic.cloud/xp8.vhost.mapping' annotation not defined in ingress rules on host %s, port 8080", m.source(),
                 m.host() ) );
         }

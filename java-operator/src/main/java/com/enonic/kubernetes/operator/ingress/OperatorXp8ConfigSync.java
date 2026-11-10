@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import static com.enonic.kubernetes.common.Configuration.cfgLong;
@@ -85,13 +86,26 @@ public class OperatorXp8ConfigSync
             Function<String, String> g = ( k ) -> annotations.get( m + "." + k );
             try {
                 String name = m.replace( prefix, ingress.getMetadata().getName() + "-" );
-                result.add( MappingImpl.of( name, g.apply( "host" ), g.apply( "source" ), g.apply( "target" ), g.apply( "idproviders" ) ) );
+                result.add( MappingImpl.of( name, g.apply( "host" ), g.apply( "source" ), g.apply( "target" ), g.apply( "idproviders" ),
+                                            g.apply( "endpoint" ), g.apply( "allow" ), getFlows( annotations, m + ".flows." ) ) );
             } catch (Exception e) {
                 log.warn( String.format( "Invalid vhost mappings on ingress '%s'", ingress.getMetadata().getName() ) );
             }
         }
 
         return result;
+    }
+
+    // <mapping prefix>.flows.<idprovider> = <flow>,<flow>
+    private static Map<String, String> getFlows( final Map<String, String> annotations, final String flowsPrefix )
+    {
+        Map<String, String> flows = new TreeMap<>();
+        for (Map.Entry<String, String> e : annotations.entrySet()) {
+            if (e.getKey().startsWith( flowsPrefix ) && e.getKey().length() > flowsPrefix.length()) {
+                flows.put( e.getKey().substring( flowsPrefix.length() ), e.getValue() );
+            }
+        }
+        return flows;
     }
 
     public void handle( final String namespace )
@@ -163,8 +177,8 @@ public class OperatorXp8ConfigSync
                 String service = path.getBackend().getService().getName();
                 Integer port = path.getBackend().getService().getPort().getNumber();
 
-                // Only if service is the same as a nodegroup and port is 8080
-                if (nodeGroups.contains( service ) && port == 8080) {
+                // Only if service is the same as a nodegroup and the port is one a mapping serves
+                if (nodeGroups.contains( service ) && targetMappings.stream().anyMatch( m -> port != null && m.port() == port )) {
                     return true;
                 }
             }
@@ -212,33 +226,44 @@ public class OperatorXp8ConfigSync
                     mapping = MappingImpl.copyOf( mapping ).withHost( rule.getHost() );
                 }
 
-                // If host matches
-                if (mapping.host().equals( rule.getHost() )) {
-                    // Iterate over paths
-                    for (HTTPIngressPath path : rule.getHttp().getPaths()) {
-                        // Path matches mapping
-                        if (nodeGroups.contains( path.getBackend().getService().getName() ) && mapping.source().equals( path.getPath() )) {
-                            addVHostMappings( sb, mapping );
-                        }
+                // If host matches and the mapping applies to a path of a node group, once per rule:
+                // a management mapping covers several paths
+                if (mapping.host().equals( rule.getHost() ) && rule.getHttp() != null && rule.getHttp().getPaths() != null) {
+                    final Mapping m = mapping;
+                    boolean applies = rule.getHttp().getPaths().stream().
+                        filter( path -> nodeGroups.contains( path.getBackend().getService().getName() ) ).
+                        anyMatch( path -> m.appliesTo( path.getPath(), path.getBackend().getService().getPort().getNumber() ) );
+                    if (applies) {
+                        addVHostMappings( sb, mapping );
                     }
                 }
             }
         }
     }
 
-    private void addVHostMappings( final StringBuilder sb, final Mapping m )
+    static void addVHostMappings( final StringBuilder sb, final Mapping m )
     {
         sb.append( "\n\n" );
         sb.append( String.format( "mapping.%s.host=%s\n", m.name(), m.host() ) );
         sb.append( String.format( "mapping.%s.source=%s\n", m.name(), m.source() ) );
         sb.append( String.format( "mapping.%s.target=%s", m.name(), m.target() ) );
+        if (m.endpoint() != null) {
+            sb.append( String.format( "\nmapping.%s.endpoint=%s", m.name(), m.endpoint() ) );
+        }
         if (m.idProviders() != null) {
             String postFix = "default";
             for (String idProvider : m.idProviders().split( "," )) {
                 sb.append( "\n" );
                 sb.append( String.format( "mapping.%s.idProvider.%s=%s", m.name(), idProvider, postFix ) );
                 postFix = "enabled";
+                String flows = m.flows().get( idProvider );
+                if (flows != null) {
+                    sb.append( String.format( "\nmapping.%s.idProvider.%s.flows=%s", m.name(), idProvider, flows ) );
+                }
             }
+        }
+        if (m.allow() != null) {
+            sb.append( String.format( "\nmapping.%s.allow=%s", m.name(), m.allow() ) );
         }
     }
 }
