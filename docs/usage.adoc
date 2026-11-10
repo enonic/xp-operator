@@ -380,6 +380,22 @@ spec:
                   number: 8080
 ----
 
+==== Management endpoint
+
+A mapping can serve XP's management endpoint instead of the web one. It then applies to every path the ingress routes to port `4848` of a node group, rather than to the path named by its `source`, and can name the login flows of its id providers and the principals it allows:
+
+[source,yaml]
+----
+enonic.cloud/xp8.vhost.mapping.<MAPPING_NAME>.source: /
+enonic.cloud/xp8.vhost.mapping.<MAPPING_NAME>.target: /
+enonic.cloud/xp8.vhost.mapping.<MAPPING_NAME>.endpoint: management
+enonic.cloud/xp8.vhost.mapping.<MAPPING_NAME>.idproviders: <DEFAULT_IDPROVIDER>
+enonic.cloud/xp8.vhost.mapping.<MAPPING_NAME>.flows.<DEFAULT_IDPROVIDER>: autologin,k8s
+enonic.cloud/xp8.vhost.mapping.<MAPPING_NAME>.allow: role:system.admin
+----
+
+`endpoint` accepts only `management`. `flows.<IDPROVIDER>` must name an id provider listed in `idproviders`. `flows` and `allow` also work on a web mapping.
+
 NOTE: Like Xp8Config, changes to virtual hosts can take a couple of minutes to register in XP.
 
 === Namespaces

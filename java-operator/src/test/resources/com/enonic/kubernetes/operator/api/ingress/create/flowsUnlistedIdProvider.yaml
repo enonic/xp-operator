@@ -1,0 +1,37 @@
+admissionRequest:
+  request:
+    operation: CREATE
+    object:
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: mgmt
+        namespace: mycloud-mysolution-myenv-myservice
+        annotations:
+          enonic.cloud/ingress.cert.manage: "true"
+          enonic.cloud/xp8.vhost.mapping.1.source: /
+          enonic.cloud/xp8.vhost.mapping.1.target: /
+          enonic.cloud/xp8.vhost.mapping.1.idproviders: enonic-cloud
+          enonic.cloud/xp8.vhost.mapping.1.endpoint: management
+          enonic.cloud/xp8.vhost.mapping.1.flows.system: autologin
+      spec:
+        rules:
+          - host: env-mgmt.purplejs.io
+            http:
+              paths:
+                - path: /server:app/
+                  pathType: ImplementationSpecific
+                  backend:
+                    service:
+                      name: master
+                      port:
+                        number: 4848
+                - path: /server:project/
+                  pathType: ImplementationSpecific
+                  backend:
+                    service:
+                      name: master
+                      port:
+                        number: 4848
+
+assertException: "flows for id provider 'system' in 'enonic.cloud/xp8.vhost.mapping' annotation, which its idproviders do not list"
