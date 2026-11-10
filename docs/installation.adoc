@@ -113,7 +113,6 @@ exec java -Doperator.charts.path=helm -Dmicronaut.config.files=/deployments/conf
 2026-01-02 23:12:24.760 INFO  i.m.c.DefaultApplicationContext$RuntimeConfiguredEnvironment - Established active environments: [k8s, cloud]
 2026-01-02 23:12:26.151 INFO  io.micronaut.runtime.Micronaut - Startup completed in 2200ms. Server Running: https://0.0.0.0:8443
 2026-01-02 23:12:27,808 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorIngress'
-2026-01-02 23:12:27,889 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXpClientCacheInvalidate'
 2026-01-02 23:12:27,738 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorXp8DeploymentHelm'
 2026-01-02 23:12:27,799 INFO  com.eno.kub.ope.Operator - Adding listener 'OperatorDeleteAnnotation'
 2026-01-02 23:12:27,803 INFO  com.eno.kub.ope.Operator - Adding schedule 'OperatorInformers' [delay: 16337, period: 30000]

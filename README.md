@@ -10,7 +10,6 @@ The Enonic XP Kubernetes Operator is a piece of software runs on top of Kubernet
   - [Running and installing operator to kind cluster](#running-and-installing-operator-to-kind-cluster)
   - [Using custom XP docker image](#using-custom-xp-docker-image)
   - [Running operator in IDE](#running-operator-in-ide)
-    - [Spoof hosts for SSE events](#spoof-hosts-for-sse-events)
     - [Enable dns records](#enable-dns-records)
 - [Release](#release)
 
@@ -164,20 +163,6 @@ make verify-kind
   "version": "0.16.0",
   "gitTreeState": "dirty"
 }
-```
-
-#### Spoof hosts for SSE events
-
-Add to your hosts file:
-
-```
-127.0.0.1 all.mycloud-mysolution-myenv-myservice.svc.cluster.local
-```
-
-And run proxy:
-
-```bash
-kubectl -n mycloud-mysolution-myenv-myservice port-forward main-0 4848
 ```
 
 ## Release

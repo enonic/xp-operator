@@ -44,23 +44,6 @@ function get_deployment() {
     echo -n $deployment
 }
 
-function get_nodegroup() {
-    namespace=$1
-    deployment=$2
-
-    tmpfile=$(mktemp /tmp/kubectl.XXXXXX)
-    kubectl -n $namespace get xp8deployments.enonic.cloud $deployment --no-headers -o custom-columns=":spec.nodeGroups[].name" | sed 's% %\n%g' >$tmpfile
-
-    if [ "$(cat $tmpfile | wc -l)" == "1" ]; then
-        nodegroup="all"
-    else
-        nodegroup="$(cat $tmpfile | (echo all && cat) | fzf --prompt "Select node group!")"
-    fi
-
-    rm $tmpfile
-    echo -n $nodegroup
-}
-
 function get_pod() {
     namespace=$1
     deployment=$2
@@ -86,7 +69,6 @@ export -f get_url
 
 export -f get_namespace
 export -f get_deployment
-export -f get_nodegroup
 export -f get_pod
 
 export -f kubectl_get
