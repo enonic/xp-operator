@@ -52,24 +52,25 @@ public class OperatorIngress
     @Override
     public void onNewAdd( final Ingress newResource )
     {
-        handle( newResource );
+        handle( newResource, true );
     }
 
     @Override
     public void onUpdate( final Ingress oldResource, final Ingress newResource )
     {
         if (!ingressMappingsEqual( oldResource, newResource )) {
-            handle( newResource );
+            handle( newResource, true );
         }
     }
 
     @Override
     public void onDelete( final Ingress oldResource, final boolean b )
     {
-        handle( oldResource );
+        // The vhost config drops the mapping; the ingress itself is gone and cannot be labelled.
+        handle( oldResource, false );
     }
 
-    private void handle( final Ingress ingress )
+    private void handle( final Ingress ingress, final boolean label )
     {
         // Bail if the namespace is being deleted
         if (searchers.namespace().match( contains( ingress ), isDeleted() )) {
@@ -80,7 +81,7 @@ public class OperatorIngress
         operatorXp8ConfigSync.handle( ingress.getMetadata().getNamespace() );
 
         // Label ingress
-        if (!getXpVHostAnnotations( ingress ).isEmpty()) {
+        if (label && !getXpVHostAnnotations( ingress ).isEmpty()) {
             log.debug("Label Ingress as vhost not loaded: {} in {}", ingress.getMetadata().getName(), ingress.getMetadata().getNamespace());
 
             K8sLogHelper.logEdit( clients.k8s().network().v1().ingresses().
