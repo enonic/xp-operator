@@ -197,12 +197,6 @@ spec:
                 fieldRef:
                   apiVersion: v1
                   fieldPath: status.podIP
-            - name: SU_PASS_HASH
-              valueFrom:
-                secretKeyRef:
-                  name: su
-                  key: passHash
-                  optional: false
             {{- with $nodeGroup.env }}
             {{- toYaml . | nindent 12 }}
             {{- end }}

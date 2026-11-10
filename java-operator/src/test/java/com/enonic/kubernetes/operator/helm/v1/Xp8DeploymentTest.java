@@ -26,7 +26,7 @@ public class Xp8DeploymentTest
     {
         super();
         valueBuilder = new OperatorXp8DeploymentHelm.Xp8DeploymentValueBuilder( new BaseValues( "44ddc40b-266c-4c99-b094-e758328fc6ba" ),
-                                                                                () -> "password", this::createTestSa, "xp-operator", "xp-operator-hazelcast" );
+                                                                                this::createTestSa, "xp-operator", "xp-operator-hazelcast" );
     }
 
     private ServiceAccount createTestSa()

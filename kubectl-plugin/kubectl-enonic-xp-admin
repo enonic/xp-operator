@@ -17,5 +17,4 @@ pd=$(get_pod $ns $dp)
 port=$((9999 + $RANDOM % 10000))
 
 echo "Url:  http://localhost:$port"
-echo "Pass: $(kubectl enonic xp supass)"
 kubectl enonic xp forward $port:8080

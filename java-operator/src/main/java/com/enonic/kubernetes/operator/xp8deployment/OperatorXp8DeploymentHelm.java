@@ -14,8 +14,6 @@ import com.enonic.kubernetes.operator.helpers.HandlerHelm;
 import com.enonic.kubernetes.operator.ingress.OperatorXp8ConfigSync;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Charsets;
-import com.google.common.hash.Hashing;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.ServiceAccount;
 import io.fabric8.kubernetes.api.model.rbac.ClusterRoleBinding;
@@ -57,10 +55,6 @@ public class OperatorXp8DeploymentHelm
 
     @Inject
     OperatorXp8ConfigSync operatorXp8ConfigSync;
-
-    @Inject
-    @Named("suPass")
-    Supplier<String> suPassSupplier;
 
     @Inject
     @Named("cloudApi")
@@ -216,7 +210,7 @@ public class OperatorXp8DeploymentHelm
     @Override
     protected ValueBuilder<Xp8Deployment> getValueBuilder( final BaseValues baseValues )
     {
-        return new Xp8DeploymentValueBuilder( baseValues, suPassSupplier, cloudApi, operatorName, hazelcastClusterRoleName );
+        return new Xp8DeploymentValueBuilder( baseValues, cloudApi, operatorName, hazelcastClusterRoleName );
     }
 
     @Override
@@ -239,20 +233,16 @@ public class OperatorXp8DeploymentHelm
 
         private final BaseValues baseValues;
 
-        private final Supplier<String> passSupplier;
-
         private final Supplier<ServiceAccount> cloudApiSa;
 
         private final String operatorName;
 
         private final String hazelcastClusterRoleName;
 
-        public Xp8DeploymentValueBuilder( final BaseValues baseValues, final Supplier<String> passSupplier,
-                                          final Supplier<ServiceAccount> cloudApiSa, final String operatorName,
-                                          final String hazelcastClusterRoleName )
+        public Xp8DeploymentValueBuilder( final BaseValues baseValues, final Supplier<ServiceAccount> cloudApiSa,
+                                          final String operatorName, final String hazelcastClusterRoleName )
         {
             this.baseValues = baseValues;
-            this.passSupplier = passSupplier;
             this.cloudApiSa = cloudApiSa;
             this.operatorName = operatorName;
             this.hazelcastClusterRoleName = hazelcastClusterRoleName;
@@ -316,15 +306,12 @@ public class OperatorXp8DeploymentHelm
             }
 
             boolean isClustered = isClustered( resource );
-            String pass = passSupplier.get();
 
             Map<String, Object> deployment = new HashMap<>();
             deployment.put( "name", resource.getMetadata().getName() );
             deployment.put( "namespace", resource.getMetadata().getNamespace() );
             deployment.put( "clustered", isClustered );
             deployment.put( "hasDedicatedFrontendNodes", hasDedicatedFrontendNodes( resource ) );
-            deployment.put( "suPass", pass );
-            deployment.put( "suPassHash", sha512( pass ) );
 
             if (isClustered) {
                 deployment.put( "clusterMajority", getClusterMajority( resource.getSpec().getNodeGroups() ) );
@@ -421,12 +408,6 @@ public class OperatorXp8DeploymentHelm
             } else {
                 throw new RuntimeException( "Invalid memory mappings" );
             }
-        }
-
-        @SuppressWarnings("UnstableApiUsage")
-        private Object sha512( final String s )
-        {
-            return Hashing.sha512().hashString( s, Charsets.UTF_8 ).toString();
         }
 
         private Map<String, String> defaultLabels( final Xp8Deployment resource )

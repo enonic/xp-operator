@@ -278,6 +278,37 @@ env:
 ----
 This configuration means the APP_CONFIG environment variable will be set to the value of the `log_level` key in the `app-config` ConfigMap.
 
+[#su]
+==== Super user
+
+The operator neither generates nor stores a password for `su`, XP's super user. `su` cannot log in, and users get their access through an ID provider.
+
+To let `su` log in, keep the hash of its password in a Secret of your own, in the namespace of the deployment. XP reads it as `+{sha512}+` followed by the SHA-512 hash in hexadecimal:
+
+[source,bash]
+----
+$ kubectl -n my-namespace create secret generic my-su \
+    --from-literal=passHash="{sha512}$(printf %s 'my-password' | sha512sum | cut -d ' ' -f 1)"
+----
+
+NOTE: On macOS, use `shasum -a 512` instead of `sha512sum`.
+
+WARNING: XP takes nothing else for a password hash. With the password itself in the Secret `su` cannot log in, and with anything but hexadecimal characters after `+{sha512}+` XP does not become ready.
+
+Then pass it to XP as the `XP_SU_PASSWORD` environment variable, on every node group:
+
+[source,yaml]
+----
+env:
+  - name: XP_SU_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: my-su
+        key: passHash
+----
+
+The operator writes `system.properties` with `+xp.suPassword = ${env.XP_SU_PASSWORD}+`, so `su` has a password only where the variable is set. The pods wait for the Secret, and read the hash when they start: restart them after you change it.
+
 === Xp8Config
 
 This custom resource manages the configuration of XP nodes. This resource namespaced, and should be created in a namespace that already contains a Xp8Deployment.
@@ -442,14 +473,17 @@ main-vhosts          main        com.enonic.xp.web.vhost.cfg          READY   OK
 my-config            all         com.my-app.cfg                       READY   OK
 ----
 
-=== Fetching SU password
+=== Set the SU password
 
 [source,bash]
 ----
-$ kubectl -n my-namespace get secret su -o go-template="{{ .data.pass | base64decode }}"
+$ kubectl -n my-namespace create secret generic my-su \
+    --from-literal=passHash="{sha512}$(printf %s 'my-password' | sha512sum | cut -d ' ' -f 1)"
 
-NGDDlGdFYkX8i@#49#Z6N45tfhX6#3Rw
+secret/my-su created
 ----
+
+The node groups have to pass it to XP, see <<su>>.
 
 [#access-admin]
 === Access admin (bypassing ingress)
