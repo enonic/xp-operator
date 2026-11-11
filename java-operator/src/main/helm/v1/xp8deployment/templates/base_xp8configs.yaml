@@ -5,7 +5,6 @@ metadata:
   name: {{ .Values.allNodesKey }}-system
   namespace: {{ $.Values.deployment.namespace }}
   annotations:
-    {{ $.Values.annotationKeys.neverOverwrite }}: true
     {{ $.Values.annotationKeys.applyPriority }}: "70"
   labels:
     {{ $.Values.labelKeys.managed }}: true

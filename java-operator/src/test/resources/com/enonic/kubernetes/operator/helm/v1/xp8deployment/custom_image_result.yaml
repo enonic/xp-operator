@@ -698,7 +698,6 @@ kind: "Xp8Config"
 metadata:
   annotations:
     enonic.applyPriority: "70"
-    enonic.neverOverwrite: "true"
   labels:
     cloud: "mycloud"
     enonic.managed: "true"
