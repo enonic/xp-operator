@@ -17,7 +17,7 @@ public class ConfigurationTestExtension
     {
         if ( STARTED.compareAndSet( false, true ) )
         {
-            ApplicationContext.builder().deduceEnvironment( false ).start();
+            ApplicationContext.builder().deduceEnvironment( false ).environments( "test" ).start();
         }
     }
 }

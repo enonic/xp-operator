@@ -1,6 +1,6 @@
 package com.enonic.kubernetes.common;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 import io.micronaut.context.annotation.Context;
 import io.micronaut.context.env.Environment;

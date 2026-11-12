@@ -2,8 +2,8 @@ package com.enonic.kubernetes.operator.api;
 
 import com.enonic.kubernetes.crd.v1.Xp8Deployment;
 import com.enonic.kubernetes.kubernetes.Searchers;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesResource;
 import io.fabric8.kubernetes.api.model.StatusBuilder;
@@ -12,7 +12,7 @@ import io.fabric8.kubernetes.api.model.admission.v1.AdmissionReview;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -25,7 +25,7 @@ import static com.enonic.kubernetes.kubernetes.Predicates.inSameNamespaceAs;
 
 public abstract class BaseAdmissionApi<R>
 {
-    private final static Logger log = LoggerFactory.getLogger( BaseAdmissionApi.class );
+    private static final Logger LOG = LoggerFactory.getLogger( BaseAdmissionApi.class );
 
     private final Map<Class<? extends HasMetadata>, Consumer<R>> functionMap;
 
@@ -46,14 +46,14 @@ public abstract class BaseAdmissionApi<R>
     }
 
     protected AdmissionReview handle( AdmissionReview admissionReview )
-        throws JsonProcessingException
+        throws JacksonException
     {
         String apiName = this.getClass().getSimpleName();
         cfgIfBool( "operator.api.debug", () -> {
             try {
-                log.info( String.format( "%s Request: %s", apiName,
+                LOG.info( String.format( "%s Request: %s", apiName,
                     mapper.writerWithDefaultPrettyPrinter().writeValueAsString( admissionReview ) ) );
-            } catch (JsonProcessingException e) {
+            } catch (JacksonException e) {
                 // Ignore
             }
         } );
@@ -61,7 +61,7 @@ public abstract class BaseAdmissionApi<R>
         HasMetadata obj = getObject( admissionReview );
 
         String type = String.format( "%s/%s", obj.getApiVersion(), obj.getKind() );
-        log.debug( String.format( "%s called with type %s", apiName, type ) );
+        LOG.debug( String.format( "%s called with type %s", apiName, type ) );
 
         Consumer<R> func = functionMap.get( obj.getClass() );
         String error = null;
@@ -87,7 +87,7 @@ public abstract class BaseAdmissionApi<R>
         StatusBuilder statusBuilder = new StatusBuilder();
         if (error != null) {
             statusBuilder.withMessage( error );
-            log.warn( String.format( "%s failed for %s %s in NS %s: %s", apiName, obj.getKind(), obj.getMetadata().getName(),
+            LOG.warn( String.format( "%s failed for %s %s in NS %s: %s", apiName, obj.getKind(), obj.getMetadata().getName(),
                 obj.getMetadata().getNamespace(), error ) );
         } else if (apiObject != null) {
             postRequestHook( apiObject, builder );
@@ -97,9 +97,9 @@ public abstract class BaseAdmissionApi<R>
         admissionReview.setResponse( builder.build() );
         cfgIfBool( "operator.api.debug", () -> {
             try {
-                log.info( String.format( "%s Response: %s", apiName,
+                LOG.info( String.format( "%s Response: %s", apiName,
                     mapper.writerWithDefaultPrettyPrinter().writeValueAsString( admissionReview ) ) );
-            } catch (JsonProcessingException e) {
+            } catch (JacksonException e) {
                 // Ignore
             }
         } );
@@ -112,7 +112,7 @@ public abstract class BaseAdmissionApi<R>
     }
 
     protected void postRequestHook( final R apiObject, final AdmissionResponseBuilder builder )
-        throws JsonProcessingException
+        throws JacksonException
     {
         // Do nothing
     }
@@ -125,7 +125,7 @@ public abstract class BaseAdmissionApi<R>
         return (HasMetadata) admissionReview.getRequest().getOldObject();
     }
 
-    protected abstract R createApiObject( final AdmissionReview admissionReview );
+    protected abstract R createApiObject( AdmissionReview admissionReview );
 
     protected Optional<Xp8Deployment> getXp8Deployment( KubernetesResource resource )
     {

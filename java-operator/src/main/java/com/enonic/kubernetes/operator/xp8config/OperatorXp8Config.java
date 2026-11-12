@@ -6,8 +6,8 @@ import com.enonic.kubernetes.operator.helpers.InformerEventHandler;
 import io.micronaut.context.event.ApplicationEventListener;
 import io.micronaut.runtime.server.event.ServerStartupEvent;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 import static com.enonic.kubernetes.kubernetes.Predicates.fieldEquals;
 import static com.enonic.kubernetes.kubernetes.Predicates.onCondition;

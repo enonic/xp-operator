@@ -11,8 +11,8 @@ import io.micronaut.runtime.server.event.ServerStartupEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.concurrent.TimeUnit;
 
 import static com.enonic.kubernetes.common.SingletonAssert.singletonAssert;
@@ -24,7 +24,7 @@ import static com.enonic.kubernetes.common.SingletonAssert.singletonAssert;
 public class Operator
     implements ApplicationEventListener<ServerStartupEvent>
 {
-    private static final Logger log = LoggerFactory.getLogger( Operator.class );
+    private static final Logger LOG = LoggerFactory.getLogger( Operator.class );
 
     @Value("${operator.tasks.initial.delay}")
     Long initialDelay;
@@ -44,7 +44,7 @@ public class Operator
     public void onApplicationEvent( ServerStartupEvent event )
     {
         taskRunner.scheduleOneTime( () -> {
-            log.info( "Starting informers" );
+            LOG.info( "Starting informers" );
             informers.informerFactory().startAllRegisteredInformers();
         }, initialDelay + 5000L, TimeUnit.MILLISECONDS );
     }
@@ -55,7 +55,7 @@ public class Operator
             long leftLimit = 1000L;
             long rightLimit = 20000L;
             long initialDelayMs = leftLimit + (long) (Math.random() * (rightLimit - leftLimit));
-            log.info( String.format( "Adding schedule '%s' [delay: %d, period: %d]", runnable.getClass().getSimpleName(), initialDelayMs,
+            LOG.info( String.format( "Adding schedule '%s' [delay: %d, period: %d]", runnable.getClass().getSimpleName(), initialDelayMs,
                 periodMs ) );
             taskRunner.scheduleAtFixedRate( runnable, initialDelayMs, periodMs, TimeUnit.MILLISECONDS );
         }, initialDelay, TimeUnit.MILLISECONDS );
@@ -64,7 +64,7 @@ public class Operator
     public <T> void listen( SharedIndexInformer<T> informer, ResourceEventHandler<T> handler )
     {
         taskRunner.scheduleOneTime( () -> {
-            log.info( String.format( "Adding listener '%s'", handler.getClass().getSimpleName() ) );
+            LOG.info( String.format( "Adding listener '%s'", handler.getClass().getSimpleName() ) );
             if (handler instanceof InformerEventHandler) {
                 ((InformerEventHandler) handler).initialize();
             }

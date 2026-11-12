@@ -6,7 +6,7 @@ import com.enonic.kubernetes.crd.v1.Xp8ConfigStatus;
 import com.enonic.kubernetes.crd.v1.Xp8DeploymentStatus;
 import com.enonic.kubernetes.operator.api.AdmissionOperation;
 import com.enonic.kubernetes.operator.api.BaseAdmissionApi;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import tools.jackson.core.JacksonException;
 import java.util.Base64;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.client.utils.Serialization;
@@ -43,7 +43,7 @@ public class MutationApi
     @Consumes("application/json")
     @Produces("application/json")
     public AdmissionReview mutate( @Body AdmissionReview admissionReview )
-        throws JsonProcessingException
+        throws JacksonException
     {
         return handle( admissionReview );
     }
@@ -56,7 +56,7 @@ public class MutationApi
 
     @Override
     protected void postRequestHook( final MutationRequest mutationRequest, final AdmissionResponseBuilder builder )
-        throws JsonProcessingException
+        throws JacksonException
     {
         if (mutationRequest.hasPatches()) {
             builder.

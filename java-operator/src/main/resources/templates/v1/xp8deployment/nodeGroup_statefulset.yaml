@@ -317,11 +317,11 @@ spec:
       volumes:
         - name: config
           configMap:
-            defaultMode: 0644
+            defaultMode: 420 # 0644, in decimal because YAML 1.2 has no leading-zero octal
             name: {{ nodeGroup.name }}
         - name: extra-config
           configMap:
-            defaultMode: 0644
+            defaultMode: 420 # 0644, in decimal because YAML 1.2 has no leading-zero octal
             name: extra-config
         - name: tmp
           emptyDir: {}

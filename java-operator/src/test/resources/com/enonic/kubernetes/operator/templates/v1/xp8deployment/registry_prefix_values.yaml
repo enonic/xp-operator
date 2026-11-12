@@ -109,6 +109,7 @@ ownerReferences:
   name: "mycloud-mysolution-myenv-myservice"
 pods:
   automountServiceAccountToken: true
+  imagePullSecretNames: ""
   nodeGroupAntiAffinity: false
   preStopSleepSeconds: "15"
   readOnlyRootFilesystem: false

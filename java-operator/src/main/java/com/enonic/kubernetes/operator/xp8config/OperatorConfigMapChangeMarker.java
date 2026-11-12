@@ -15,8 +15,8 @@ import io.micronaut.runtime.server.event.ServerStartupEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,7 +28,7 @@ public class OperatorConfigMapChangeMarker
     extends InformerEventHandler<ConfigMap>
     implements ApplicationEventListener<ServerStartupEvent>
 {
-    private static final Logger log = LoggerFactory.getLogger(OperatorConfigMapChangeMarker.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OperatorConfigMapChangeMarker.class);
 
     @Value("${operator.charts.values.annotationKeys.configMapUpdated}")
     String configMapUpdatedAnnotation;
@@ -53,7 +53,7 @@ public class OperatorConfigMapChangeMarker
     @Override
     protected void onNewAdd(final ConfigMap newCm) {
         onCondition(newCm, cm -> {
-            log.debug("onNew ConfigMap: {} in {}", cm.getMetadata().getNamespace(), cm.getMetadata().getName());
+            LOG.debug("onNew ConfigMap: {} in {}", cm.getMetadata().getNamespace(), cm.getMetadata().getName());
             handle(cm);
         }, isEnonicManaged());
     }
@@ -61,7 +61,7 @@ public class OperatorConfigMapChangeMarker
     @Override
     public void onUpdate(final ConfigMap oldCm, final ConfigMap newCm) {
         if (dataNotEquals(oldCm).and(isEnonicManaged()).test(newCm)) {
-            log.debug("onUpdate ConfigMap: {} in {}", newCm.getMetadata().getNamespace(), newCm.getMetadata().getName());
+            LOG.debug("onUpdate ConfigMap: {} in {}", newCm.getMetadata().getNamespace(), newCm.getMetadata().getName());
             limiter.limit(newCm, this::handle);
         }
     }
@@ -73,7 +73,7 @@ public class OperatorConfigMapChangeMarker
 
     private void handle(final ConfigMap cm) {
         final String timestamp = Instant.now().toString();
-        log.debug("Setting lastUpdated={} on ConfigMap: {} in {}", timestamp, cm.getMetadata().getName(), cm.getMetadata().getNamespace());
+        LOG.debug("Setting lastUpdated={} on ConfigMap: {} in {}", timestamp, cm.getMetadata().getName(), cm.getMetadata().getNamespace());
 
         K8sLogHelper.logEdit( clients.k8s().configMaps()
             .inNamespace(cm.getMetadata().getNamespace())

@@ -8,7 +8,7 @@ import com.enonic.kubernetes.operator.api.AdmissionOperation;
 import com.enonic.kubernetes.operator.api.BaseAdmissionApi;
 import com.enonic.kubernetes.operator.ingress.Mapping;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import tools.jackson.core.JacksonException;
 import com.enonic.kubernetes.common.Preconditions;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
@@ -60,7 +60,7 @@ public class AdmissionApi
     @Consumes("application/json")
     @Produces("application/json")
     public AdmissionReview validate( @Body AdmissionReview admissionReview )
-        throws JsonProcessingException
+        throws JacksonException
     {
         return handle( admissionReview );
     }

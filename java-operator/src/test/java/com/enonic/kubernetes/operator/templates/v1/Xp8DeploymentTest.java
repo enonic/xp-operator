@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import com.enonic.kubernetes.crd.v1.Xp8Deployment;
 import com.enonic.kubernetes.templates.values.BaseValues;

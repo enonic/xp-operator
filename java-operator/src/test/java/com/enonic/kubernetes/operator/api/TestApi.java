@@ -11,10 +11,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.yaml.YAMLFactory;
 
 import io.fabric8.kubernetes.api.model.KubernetesResource;
 import io.fabric8.zjsonpatch.JsonPatch;
@@ -104,7 +105,7 @@ class TestApi
                                          mapper.writeValueAsString( review.getRequest().getObject() ), "Result does not match" );
             }
         }
-        catch ( IOException e )
+        catch ( JacksonException e )
         {
             throw new RuntimeException( e );
         }

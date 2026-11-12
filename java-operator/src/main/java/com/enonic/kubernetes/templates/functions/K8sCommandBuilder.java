@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 
