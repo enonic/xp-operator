@@ -1,7 +1,8 @@
 name: Development
 
-# Publishes <version>-dev<N> from any branch: <version> is read from gradle.properties,
-# N is one above the highest existing v<version>-dev<N> tag. The commit is tagged after publishing.
+# Publishes <version>-dev.<N> from any branch: <version> is read from gradle.properties,
+# N is one above the highest existing v<version>-dev.<N> tag. The commit is tagged after publishing.
+# The dot keeps N numeric in semver, so dev.10 sorts after dev.2.
 on:
   workflow_dispatch:
 
@@ -61,8 +62,8 @@ jobs:
             *-*) echo "gradle.properties version '$base' must be a plain release version"; exit 1 ;;
           esac
           git fetch --tags --force --quiet origin
-          last=$(git tag -l "v${base}-dev*" | sed -n "s/^v${base//./\\.}-dev\([0-9][0-9]*\)$/\1/p" | sort -n | tail -1)
-          version="${base}-dev$(( ${last:-0} + 1 ))"
+          last=$(git tag -l "v${base}-dev.*" | sed -n "s/^v${base//./\\.}-dev\.\([0-9][0-9]*\)$/\1/p" | sort -n | tail -1)
+          version="${base}-dev.$(( ${last:-0} + 1 ))"
           echo "Publishing $version"
           echo "version=$version" >> $GITHUB_OUTPUT
 
