@@ -1,7 +1,16 @@
 name: Development
 
+# Publishes <version>-dev<N> from any branch: <version> is read from gradle.properties,
+# N is one above the highest existing v<version>-dev<N> tag. The commit is tagged after publishing.
 on:
   workflow_dispatch:
+
+concurrency:
+  group: publish-dev
+  cancel-in-progress: false
+
+permissions:
+  contents: write
 
 jobs:
   publish-dev:
@@ -46,10 +55,19 @@ jobs:
 
       - name: Operator version
         id: operator_version
-        run: echo "version=$(./get-version.sh)" >> $GITHUB_OUTPUT
+        run: |
+          base="$(./get-version.sh)"
+          case "$base" in
+            *-*) echo "gradle.properties version '$base' must be a plain release version"; exit 1 ;;
+          esac
+          git fetch --tags --force --quiet origin
+          last=$(git tag -l "v${base}-dev*" | sed -n "s/^v${base//./\\.}-dev\([0-9][0-9]*\)$/\1/p" | sort -n | tail -1)
+          version="${base}-dev$(( ${last:-0} + 1 ))"
+          echo "Publishing $version"
+          echo "version=$version" >> $GITHUB_OUTPUT
 
       - name: Set dev version
-        run: yq -i -p=props -o=props '.version = "${{ steps.operator_version.outputs.version }}-dev"' gradle.properties
+        run: yq -i -p=props -o=props '.version = "${{ steps.operator_version.outputs.version }}"' gradle.properties
 
       - name: Build operator
         run: ./gradlew build
@@ -62,9 +80,14 @@ jobs:
           pull: true
           no-cache: true
           push: true
-          tags: "enonic/xp-operator:${{ steps.operator_version.outputs.version }}-dev"
+          tags: "enonic/xp-operator:${{ steps.operator_version.outputs.version }}"
           platforms: linux/amd64,linux/arm64
 
       - name: Publish helm chart
-        run: curl -u "ci:${{ secrets.ARTIFACTORY_PASSWORD }}" https://repo.enonic.com/helm/ --upload-file helm/build/libs/xp-operator-${{ steps.operator_version.outputs.version }}-dev.tgz -v
+        run: curl -u "ci:${{ secrets.ARTIFACTORY_PASSWORD }}" https://repo.enonic.com/helm/ --upload-file helm/build/libs/xp-operator-${{ steps.operator_version.outputs.version }}.tgz --fail-with-body
+
+      - name: Tag commit
+        run: |
+          git tag "v${{ steps.operator_version.outputs.version }}" "$GITHUB_SHA"
+          git push origin "v${{ steps.operator_version.outputs.version }}"
 
