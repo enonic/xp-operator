@@ -2,7 +2,7 @@ package com.enonic.kubernetes.common.logwrappers;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.micronaut.core.annotation.Nullable;
+import org.wildfly.common.annotation.Nullable;
 
 public abstract class LoggedRunnable
     implements Runnable

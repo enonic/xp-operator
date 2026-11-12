@@ -1,0 +1,33 @@
+{
+  "javaName": "Xp7MgmtSnapshotsList",
+  "type": "object",
+  "properties": {
+    "results": {
+      "type": "array",
+      "items": {
+        "javaName": "Xp7MgmtSnapshotsListSnapshot",
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string"
+          },
+          "indices": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}

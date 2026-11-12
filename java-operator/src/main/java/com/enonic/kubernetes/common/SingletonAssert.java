@@ -1,13 +1,14 @@
 package com.enonic.kubernetes.common;
 
+import io.vertx.core.impl.ConcurrentHashSet;
+
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static com.enonic.kubernetes.common.Exit.exit;
 
 public class SingletonAssert
 {
-    private static final Set<String> set = ConcurrentHashMap.newKeySet();
+    private static final Set<String> set = new ConcurrentHashSet<>();
 
     public static void singletonAssert( Object obj, String key )
     {
