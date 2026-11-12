@@ -1,18 +1,19 @@
 package com.enonic.kubernetes.operator;
 
-import io.micronaut.http.HttpResponse;
-import io.micronaut.http.HttpStatus;
-import io.micronaut.http.annotation.Controller;
-import io.micronaut.http.annotation.Get;
-import io.micronaut.http.annotation.Produces;
+import javax.enterprise.context.ApplicationScoped;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Response;
 
-@Controller("/apis")
+@ApplicationScoped
+@Path("/apis")
 public class DiscoveryApi
 {
-    @Get
+    @GET
     @Produces("application/json")
-    public HttpResponse<?> get()
+    public Response get()
     {
-        return HttpResponse.status( HttpStatus.NOT_ACCEPTABLE );
+        return Response.status( Response.Status.NOT_ACCEPTABLE ).build();
     }
 }

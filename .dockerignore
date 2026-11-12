@@ -1,6 +1,4 @@
 *
-!java-operator/build/docker/main/layers/app
-!java-operator/build/docker/main/layers/libs
-!java-operator/build/docker/main/layers/resources
+!java-operator/build/quarkus-app
 !java-operator/src/main/helm
 !docker/*

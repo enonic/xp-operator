@@ -1,0 +1,91 @@
+{
+  "javaName": "Xp7AppPlaceholder",
+  "type": "object",
+  "properties": {
+    "spec": {
+      "javaName": "Xp7AppSpec",
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "nullable": true
+        },
+        "url": {
+          "type": "string"
+        },
+        "sha512": {
+          "type": "string",
+          "nullable": true
+        }
+      }
+    },
+    "status": {
+      "javaName": "Xp7AppStatus",
+      "type": "object",
+      "nullable": true,
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": [
+            "ERROR",
+            "PENDING",
+            "STOPPED",
+            "RUNNING"
+          ]
+        },
+        "message": {
+          "type": "string"
+        },
+        "fields": {
+          "javaName": "Xp7AppStatusFields",
+          "type": "object",
+          "properties": {
+            "appInfo": {
+              "javaName": "Xp7AppStatusFieldsAppInfo",
+              "type": "object",
+              "nullable": true,
+              "properties": {
+                "description": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "displayName": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "key": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "modifiedTime": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "state": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "url": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "vendorName": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "vendorUrl": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "version": {
+                  "type": "string",
+                  "nullable": true
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

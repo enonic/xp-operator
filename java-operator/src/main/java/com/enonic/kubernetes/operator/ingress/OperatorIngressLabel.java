@@ -1,7 +1,7 @@
 package com.enonic.kubernetes.operator.ingress;
 
-import com.enonic.kubernetes.crd.v1.Xp8Config;
-import com.enonic.kubernetes.crd.v1.Xp8ConfigStatus;
+import com.enonic.kubernetes.client.v1.xp7config.Xp7Config;
+import com.enonic.kubernetes.client.v1.xp7config.Xp7ConfigStatus;
 import com.enonic.kubernetes.kubernetes.Clients;
 import com.enonic.kubernetes.kubernetes.Informers;
 import com.enonic.kubernetes.kubernetes.Searchers;
@@ -11,14 +11,14 @@ import com.enonic.kubernetes.operator.helpers.InformerEventHandler;
 import io.fabric8.kubernetes.api.model.networking.v1.HTTPIngressPath;
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
 import io.fabric8.kubernetes.api.model.networking.v1.IngressRule;
-import io.micronaut.context.event.ApplicationEventListener;
-import io.micronaut.runtime.server.event.ServerStartupEvent;
+import io.quarkus.runtime.StartupEvent;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,10 +34,10 @@ import static com.enonic.kubernetes.kubernetes.Predicates.onCondition;
 /**
  * This operator class triggers vhost sync on Ingress changes
  */
-@Singleton
+@ApplicationScoped
 public class OperatorIngressLabel
-    extends InformerEventHandler<Xp8Config>
-    implements Runnable, ApplicationEventListener<ServerStartupEvent>
+    extends InformerEventHandler<Xp7Config>
+    implements Runnable
 {
     private static final Logger log = LoggerFactory.getLogger( OperatorIngressLabel.class );
 
@@ -50,21 +50,20 @@ public class OperatorIngressLabel
     @Inject
     Informers informers;
 
-    @Override
-    public void onApplicationEvent( ServerStartupEvent event )
+    void onStart( @Observes StartupEvent ev )
     {
-        listen( informers.xp8ConfigInformer() );
+        listen( informers.xp7ConfigInformer() );
         scheduleSync( this );
     }
 
     @Override
-    protected void onNewAdd( final Xp8Config newR )
+    protected void onNewAdd( final Xp7Config newR )
     {
         // Do nothing
     }
 
     @Override
-    public void onUpdate( final Xp8Config oldR, final Xp8Config newR )
+    public void onUpdate( final Xp7Config oldR, final Xp7Config newR )
     {
         if ( Objects.equals( oldR, newR ) )
         {
@@ -72,13 +71,13 @@ public class OperatorIngressLabel
         }
         // Only handle if this is a vhost config and it is loaded
         onCondition( newR, c -> {
-            log.debug( "onUpdate Xp8Config: {} in {}", newR.getMetadata().getNamespace(), newR.getMetadata().getName() );
+            log.debug( "onUpdate Xp7Config: {} in {}", newR.getMetadata().getNamespace(), newR.getMetadata().getName() );
             this.handle( c );
-        }, this::isVHostConfig, ( c ) -> c.getStatus().getState() == Xp8ConfigStatus.State.READY );
+        }, this::isVHostConfig, ( c ) -> c.getStatus().getState() == Xp7ConfigStatus.State.READY );
     }
 
     @Override
-    public void onDelete( final Xp8Config oldR, final boolean deletedFinalStateUnknown )
+    public void onDelete( final Xp7Config oldR, final boolean deletedFinalStateUnknown )
     {
         // Do nothing
     }
@@ -95,11 +94,11 @@ public class OperatorIngressLabel
             .forEach( this::setStatus );
     }
 
-    private void handle( final Xp8Config xp8Config )
+    private void handle( final Xp7Config xp7Config )
     {
         searchers.ingress()
             .stream()
-            .filter( inSameNamespaceAs( xp8Config ) )
+            .filter( inSameNamespaceAs( xp7Config ) )
             .filter( isDeleted().negate() )
             .filter( matchLabel( cfgStr( "operator.charts.values.labelKeys.ingressVhostLoaded" ), "false" ) )
             .forEach( this::setStatus );
@@ -108,7 +107,7 @@ public class OperatorIngressLabel
     private void setStatus( final Ingress ingress )
     {
         // Collect all nodegroup vhost states
-        Map<String, Xp8ConfigStatus.State> states = searchers.xp8Config()
+        Map<String, Xp7ConfigStatus.State> states = searchers.xp7Config()
             .stream()
             .filter( inSameNamespaceAs( ingress ) )
             .filter( isDeleted().negate() )
@@ -116,13 +115,13 @@ public class OperatorIngressLabel
             .collect( Collectors.toMap( c -> c.getSpec().getNodeGroup(), c -> c.getStatus().getState() ) );
 
         // Set all nodeGroups state
-        if ( states.values().stream().anyMatch( s -> !s.equals( Xp8ConfigStatus.State.READY ) ) )
+        if ( states.values().stream().anyMatch( s -> !s.equals( Xp7ConfigStatus.State.READY ) ) )
         {
-            states.put( cfgStr( "operator.charts.values.allNodesKey" ), Xp8ConfigStatus.State.PENDING );
+            states.put( cfgStr( "operator.charts.values.allNodesKey" ), Xp7ConfigStatus.State.PENDING );
         }
         else
         {
-            states.put( cfgStr( "operator.charts.values.allNodesKey" ), Xp8ConfigStatus.State.READY );
+            states.put( cfgStr( "operator.charts.values.allNodesKey" ), Xp7ConfigStatus.State.READY );
         }
 
         // Figure out state
@@ -131,8 +130,8 @@ public class OperatorIngressLabel
         {
             for ( HTTPIngressPath p : r.getHttp().getPaths() )
             {
-                Xp8ConfigStatus.State pathState = states.get( p.getBackend().getService().getName() );
-                if ( pathState != null && !pathState.equals( Xp8ConfigStatus.State.READY ) )
+                Xp7ConfigStatus.State pathState = states.get( p.getBackend().getService().getName() );
+                if ( pathState != null && !pathState.equals( Xp7ConfigStatus.State.READY ) )
                 {
                     loaded = false;
                     break;
@@ -163,7 +162,7 @@ public class OperatorIngressLabel
         }
     }
 
-    private boolean isVHostConfig( final Xp8Config c )
+    private boolean isVHostConfig( final Xp7Config c )
     {
         return c.getSpec().getFile().equals( cfgStr( "operator.charts.values.files.vhosts" ) );
     }

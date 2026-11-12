@@ -1,0 +1,9 @@
+{
+  "javaName" : "Xp7MgmtWebapp",
+  "type" : "object",
+  "properties" : {
+    "name" : {
+      "type" : "string"
+    }
+  }
+}
