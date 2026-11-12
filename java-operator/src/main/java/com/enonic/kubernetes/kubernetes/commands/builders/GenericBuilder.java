@@ -7,11 +7,10 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import com.google.common.base.Preconditions;
+import com.enonic.kubernetes.common.Preconditions;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 
-import com.enonic.kubernetes.kubernetes.commands.ImmutableK8sCommand;
 import com.enonic.kubernetes.kubernetes.commands.K8sCommand;
 import com.enonic.kubernetes.kubernetes.commands.K8sCommandAction;
 
@@ -21,21 +20,21 @@ import static com.enonic.kubernetes.common.Configuration.cfgStr;
 public abstract class GenericBuilder<C, R extends HasMetadata>
     implements Function<GenericBuilderParams<R>, Optional<K8sCommand>>
 {
-    protected abstract C client();
+    private final C client;
+
+    protected GenericBuilder( final C client )
+    {
+        this.client = client;
+    }
+
+    protected C client()
+    {
+        return client;
+    }
 
     @Override
     public Optional<K8sCommand> apply( final GenericBuilderParams<R> params )
     {
-        // If always override, do not bother to check old resource
-//        if ( params.action() == GenericBuilderAction.APPLY && params.alwaysOverwrite() )
-//        {
-//            return Optional.of( ImmutableK8sCommand.builder().
-//                action( K8sCommandAction.OVERWRITE ).
-//                resource( params.resource() ).
-//                wrappedRunnable( createOrReplaceCommand( params.resource().getMetadata().getNamespace(), params.resource() ) ).
-//                build() );
-//        }
-
         Optional<R> oldResource =
             getOldResource( params.resource().getMetadata().getNamespace(), params.resource().getMetadata().getName() );
 
@@ -47,21 +46,15 @@ public abstract class GenericBuilder<C, R extends HasMetadata>
             }
             else
             {
-                return Optional.of( ImmutableK8sCommand.builder().
-                    action( K8sCommandAction.DELETE ).
-                    resource( oldResource.get() ).
-                    wrappedRunnable( deleteCommand( oldResource.get().getMetadata().getNamespace(), oldResource.get() ) ).
-                    build() );
+                return Optional.of( new K8sCommand( K8sCommandAction.DELETE, oldResource.get(),
+                                                deleteCommand( oldResource.get().getMetadata().getNamespace(), oldResource.get() ) ) );
             }
         }
 
         if ( oldResource.isEmpty() )
         {
-            return Optional.of( ImmutableK8sCommand.builder().
-                action( K8sCommandAction.CREATE ).
-                resource( params.resource() ).
-                wrappedRunnable( createOrReplaceCommand( params.resource().getMetadata().getNamespace(), params.resource() ) ).
-                build() );
+            return Optional.of( new K8sCommand( K8sCommandAction.CREATE, params.resource(),
+                                                createOrReplaceCommand( params.resource().getMetadata().getNamespace(), params.resource() ) ) );
         }
 
         // If both old and new have never overwrite
@@ -73,11 +66,8 @@ public abstract class GenericBuilder<C, R extends HasMetadata>
         if ( !equals( oldResource.get(), params.resource() ) )
 
         {
-            return Optional.of( ImmutableK8sCommand.builder().
-                action( K8sCommandAction.UPDATE ).
-                resource( params.resource() ).
-                wrappedRunnable( updateCommand( params.resource().getMetadata().getNamespace(), params.resource() ) ).
-                build() );
+            return Optional.of( new K8sCommand( K8sCommandAction.UPDATE, params.resource(),
+                                                updateCommand( params.resource().getMetadata().getNamespace(), params.resource() ) ) );
         }
 
         return Optional.empty();
@@ -107,19 +97,6 @@ public abstract class GenericBuilder<C, R extends HasMetadata>
         }
 
         boolean equalSpec = equalsSpec( o, n );
-//        if ( !equalSpec )
-//        {
-//            ObjectMapper mapper = new ObjectMapper();
-//            try
-//            {
-//                System.out.println( mapper.writeValueAsString( o ) );
-//                System.out.println( mapper.writeValueAsString( n ) );
-//            }
-//            catch ( JsonProcessingException e )
-//            {
-//                e.printStackTrace();
-//            }
-//        }
 
         return equalSpec;
     }
@@ -153,12 +130,12 @@ public abstract class GenericBuilder<C, R extends HasMetadata>
         return getOrDefault( m, Collections::emptyMap );
     }
 
-    protected abstract Optional<R> getOldResource( final String namespace, final String name );
+    protected abstract Optional<R> getOldResource( String namespace, String name );
 
-    protected abstract Runnable createOrReplaceCommand( final String namespace, final R r );
+    protected abstract Runnable createOrReplaceCommand( String namespace, R r );
 
-    protected abstract Runnable updateCommand( final String namespace, final R r );
+    protected abstract Runnable updateCommand( String namespace, R r );
 
-    protected abstract Runnable deleteCommand( final String namespace, final R r );
+    protected abstract Runnable deleteCommand( String namespace, R r );
 
 }

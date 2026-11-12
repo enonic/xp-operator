@@ -4,16 +4,19 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.immutables.value.Value;
 
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
 
-@Value.Immutable
-public abstract class CommandBuilderPVC
+public class CommandBuilderPVC
     extends GenericBuilder<KubernetesClient, PersistentVolumeClaim>
 {
+    public CommandBuilderPVC( final KubernetesClient client )
+    {
+        super( client );
+    }
+
     @Override
     protected Optional<PersistentVolumeClaim> getOldResource( final String namespace, final String name )
     {

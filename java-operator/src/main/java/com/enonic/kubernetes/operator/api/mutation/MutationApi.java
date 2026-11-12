@@ -7,7 +7,7 @@ import com.enonic.kubernetes.crd.v1.Xp8DeploymentStatus;
 import com.enonic.kubernetes.operator.api.AdmissionOperation;
 import com.enonic.kubernetes.operator.api.BaseAdmissionApi;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.common.io.BaseEncoding;
+import java.util.Base64;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.client.utils.Serialization;
 import io.fabric8.kubernetes.api.model.admission.v1.AdmissionResponseBuilder;
@@ -21,11 +21,9 @@ import io.micronaut.http.annotation.Post;
 import io.micronaut.http.annotation.Produces;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.enonic.kubernetes.common.Configuration.cfgBool;
 import static com.enonic.kubernetes.common.Configuration.cfgStr;
-import static com.enonic.kubernetes.common.Configuration.cfgStrChild;
 import static com.enonic.kubernetes.common.Utils.createOwnerReference;
 import static com.enonic.kubernetes.kubernetes.Predicates.matchAnnotationPrefix;
 
@@ -62,7 +60,7 @@ public class MutationApi
     {
         if (mutationRequest.hasPatches()) {
             builder.
-                withPatch( BaseEncoding.base64().encode( mapper.writeValueAsString( mutationRequest.getPatches() ).getBytes() ) ).
+                withPatch( Base64.getEncoder().encodeToString( mapper.writeValueAsString( mutationRequest.getPatches() ).getBytes() ) ).
                 withPatchType( "JSONPatch" );
         }
     }

@@ -3,16 +3,19 @@ package com.enonic.kubernetes.kubernetes.commands.builders;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.immutables.value.Value;
 
 import io.fabric8.kubernetes.api.model.rbac.RoleBinding;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
 
-@Value.Immutable
-public abstract class CommandBuilderRoleBinding
+public class CommandBuilderRoleBinding
     extends GenericBuilder<KubernetesClient, RoleBinding>
 {
+    public CommandBuilderRoleBinding( final KubernetesClient client )
+    {
+        super( client );
+    }
+
     @Override
     protected Optional<RoleBinding> getOldResource( final String namespace, final String name )
     {

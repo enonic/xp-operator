@@ -3,7 +3,6 @@ package com.enonic.kubernetes.kubernetes.commands.builders;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.immutables.value.Value;
 
 import io.fabric8.kubernetes.api.model.KubernetesResourceList;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
@@ -12,10 +11,14 @@ import io.fabric8.kubernetes.client.dsl.Resource;
 import com.enonic.kubernetes.crd.v1.Xp8Deployment;
 
 
-@Value.Immutable
-public abstract class CommandBuilderXp8Deployment
+public class CommandBuilderXp8Deployment
     extends GenericBuilder<MixedOperation<Xp8Deployment, KubernetesResourceList<Xp8Deployment>, Resource<Xp8Deployment>>, Xp8Deployment>
 {
+    public CommandBuilderXp8Deployment( final MixedOperation<Xp8Deployment, KubernetesResourceList<Xp8Deployment>, Resource<Xp8Deployment>> client )
+    {
+        super( client );
+    }
+
     @Override
     protected Optional<Xp8Deployment> getOldResource( final String namespace, final String name )
     {

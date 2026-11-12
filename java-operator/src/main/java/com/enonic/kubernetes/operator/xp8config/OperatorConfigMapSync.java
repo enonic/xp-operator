@@ -1,7 +1,6 @@
 package com.enonic.kubernetes.operator.xp8config;
 
 import com.enonic.kubernetes.crd.v1.Xp8Config;
-import com.enonic.kubernetes.crd.v1.Xp8DeploymentStatus;
 import com.enonic.kubernetes.common.TaskRunner;
 import com.enonic.kubernetes.kubernetes.ActionLimiter;
 import com.enonic.kubernetes.kubernetes.Clients;
@@ -10,7 +9,6 @@ import com.enonic.kubernetes.kubernetes.commands.K8sLogHelper;
 import com.enonic.kubernetes.operator.Operator;
 import com.enonic.kubernetes.operator.xp8deployment.Predicates;
 
-import com.google.common.hash.Hashing;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.micronaut.context.event.ApplicationEventListener;
 import io.micronaut.runtime.server.event.ServerStartupEvent;
@@ -19,6 +17,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HexFormat;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -45,7 +46,7 @@ import static java.util.stream.Collectors.groupingBy;
 public class OperatorConfigMapSync
     implements Runnable, ApplicationEventListener<ServerStartupEvent>
 {
-    private static final Logger log = LoggerFactory.getLogger( OperatorConfigMapSync.class );
+    private static final Logger LOG = LoggerFactory.getLogger( OperatorConfigMapSync.class );
 
     @Inject
     Operator operator;
@@ -132,7 +133,7 @@ public class OperatorConfigMapSync
                 append( c.getSpec().getFile() ).append( "\n" );
         }
         // We add this to be sure that events are always sent when small changes are made
-        data.put( "operator-hash", Hashing.sha256().hashBytes( index.toString().getBytes() ).toString() );
+        data.put( "operator-hash", sha256( index.toString() ) );
 
         // Get old data
         Map<String, String> oldData = configMap.getData() != null ? configMap.getData() : Collections.emptyMap();
@@ -140,7 +141,7 @@ public class OperatorConfigMapSync
 
         // If data is not the same, do the update
         if (!Objects.equals( oldData, data ) || !Objects.equals( oldBinaryData, binaryData )) {
-            log.debug("Syncing ConfigMap: {} in {}", configMap.getMetadata().getName(), configMap.getMetadata().getNamespace());
+            LOG.debug("Syncing ConfigMap: {} in {}", configMap.getMetadata().getName(), configMap.getMetadata().getNamespace());
             K8sLogHelper.logEdit( clients.k8s().
                 configMaps().
                 inNamespace( configMap.getMetadata().getNamespace() ).
@@ -149,6 +150,18 @@ public class OperatorConfigMapSync
                 c.setBinaryData( binaryData );
                 return c;
             } );
+        }
+    }
+
+    private static String sha256( final String value )
+    {
+        try
+        {
+            return HexFormat.of().formatHex( MessageDigest.getInstance( "SHA-256" ).digest( value.getBytes() ) );
+        }
+        catch ( NoSuchAlgorithmException e )
+        {
+            throw new IllegalStateException( e );
         }
     }
 }

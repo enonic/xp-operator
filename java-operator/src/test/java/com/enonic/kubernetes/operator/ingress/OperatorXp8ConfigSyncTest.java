@@ -26,6 +26,7 @@ class OperatorXp8ConfigSyncTest
         assertTrue( m.appliesTo( "/", 8080 ) );
         assertFalse( m.appliesTo( "/other", 8080 ) );
         assertFalse( m.appliesTo( "/", 4848 ) );
+        assertFalse( m.appliesTo( "/", null ) );
         assertEquals( """
 
 

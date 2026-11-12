@@ -3,16 +3,19 @@ package com.enonic.kubernetes.kubernetes.commands.builders;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.immutables.value.Value;
 
 import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
 
-@Value.Immutable
-public abstract class CommandBuilderStatefulSet
+public class CommandBuilderStatefulSet
     extends GenericBuilder<KubernetesClient, StatefulSet>
 {
+    public CommandBuilderStatefulSet( final KubernetesClient client )
+    {
+        super( client );
+    }
+
     @Override
     protected Optional<StatefulSet> getOldResource( final String namespace, final String name )
     {

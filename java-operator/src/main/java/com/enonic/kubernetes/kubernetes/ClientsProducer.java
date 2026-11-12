@@ -21,7 +21,7 @@ public class ClientsProducer
 
         final KubernetesClient k8s = new KubernetesClientBuilder().build();
 
-        return ClientsImpl.of(
+        return new Clients(
                 k8s,
                 k8s.resources( Xp8Config.class ),
                 k8s.resources( Xp8Deployment.class ) );

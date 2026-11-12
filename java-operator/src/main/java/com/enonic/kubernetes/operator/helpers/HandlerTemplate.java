@@ -10,8 +10,7 @@ import io.fabric8.kubernetes.client.CustomResource;
 import com.enonic.kubernetes.common.functions.OptionalListPruner;
 import com.enonic.kubernetes.common.functions.RunnableListExecutor;
 import com.enonic.kubernetes.templates.functions.TemplateToK8s;
-import com.enonic.kubernetes.templates.functions.TemplateToK8sImpl;
-import com.enonic.kubernetes.templates.functions.TemplateToK8sParamsImpl;
+import com.enonic.kubernetes.templates.functions.TemplateToK8sParams;
 import com.enonic.kubernetes.templates.functions.K8sCommandBuilder;
 import com.enonic.kubernetes.templates.functions.K8sCommandSorter;
 import com.enonic.kubernetes.templates.functions.Templator;
@@ -49,7 +48,7 @@ public abstract class HandlerTemplate<R extends HasMetadata>
     public void initialize()
     {
         super.initialize();
-        templateToK8s = TemplateToK8sImpl.of( k8sCommandMapper, getValueBuilder( baseValues ), getTemplator() );
+        templateToK8s = new TemplateToK8s<>( k8sCommandMapper, getValueBuilder( baseValues ), getTemplator() );
     }
 
     @Override
@@ -80,7 +79,7 @@ public abstract class HandlerTemplate<R extends HasMetadata>
             andThen( listPruner ).
             andThen( commandSorter ).
             andThen( runnableListExecutor ).
-            apply( TemplateToK8sParamsImpl.of( Optional.ofNullable( oldResource ), Optional.ofNullable( newResource ) ) );
+            apply( new TemplateToK8sParams<>( Optional.ofNullable( oldResource ), Optional.ofNullable( newResource ) ) );
 
         postHandle( newResource.getMetadata().getNamespace() );
     }

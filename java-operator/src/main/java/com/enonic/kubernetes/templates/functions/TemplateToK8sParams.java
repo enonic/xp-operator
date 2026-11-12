@@ -1,16 +1,12 @@
 package com.enonic.kubernetes.templates.functions;
 
+import org.jspecify.annotations.NullMarked;
+
 import java.util.Optional;
 
-import org.immutables.value.Value;
 
-import com.enonic.kubernetes.common.annotations.Params;
 
-@Value.Immutable
-@Params
-public interface TemplateToK8sParams<T>
+@NullMarked
+public record TemplateToK8sParams<T>( Optional<T> oldResource, Optional<T> newResource )
 {
-    Optional<T> oldResource();
-
-    Optional<T> newResource();
 }

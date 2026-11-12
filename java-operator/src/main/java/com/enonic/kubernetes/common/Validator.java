@@ -1,6 +1,5 @@
 package com.enonic.kubernetes.common;
 
-import com.google.common.base.Preconditions;
 
 @SuppressWarnings("unused")
 public class Validator

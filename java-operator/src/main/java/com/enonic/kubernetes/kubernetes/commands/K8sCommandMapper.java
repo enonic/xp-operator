@@ -4,21 +4,21 @@ import com.enonic.kubernetes.crd.v1.Xp8Config;
 import com.enonic.kubernetes.crd.v1.Xp8Deployment;
 import com.enonic.kubernetes.kubernetes.Clients;
 import com.enonic.kubernetes.kubernetes.commands.builders.GenericBuilderParams;
-import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilderClusterRole;
-import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilderClusterRoleBinding;
-import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilderConfigMap;
-import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilderDaemonSet;
-import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilderIngress;
-import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilderPVC;
-import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilderRole;
-import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilderRoleBinding;
-import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilderSecret;
-import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilderService;
-import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilderServiceAccount;
-import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilderStatefulSet;
-import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilderXp8Config;
-import com.enonic.kubernetes.kubernetes.commands.builders.ImmutableCommandBuilderXp8Deployment;
-import com.google.common.base.Preconditions;
+import com.enonic.kubernetes.kubernetes.commands.builders.CommandBuilderClusterRole;
+import com.enonic.kubernetes.kubernetes.commands.builders.CommandBuilderClusterRoleBinding;
+import com.enonic.kubernetes.kubernetes.commands.builders.CommandBuilderConfigMap;
+import com.enonic.kubernetes.kubernetes.commands.builders.CommandBuilderDaemonSet;
+import com.enonic.kubernetes.kubernetes.commands.builders.CommandBuilderIngress;
+import com.enonic.kubernetes.kubernetes.commands.builders.CommandBuilderPVC;
+import com.enonic.kubernetes.kubernetes.commands.builders.CommandBuilderRole;
+import com.enonic.kubernetes.kubernetes.commands.builders.CommandBuilderRoleBinding;
+import com.enonic.kubernetes.kubernetes.commands.builders.CommandBuilderSecret;
+import com.enonic.kubernetes.kubernetes.commands.builders.CommandBuilderService;
+import com.enonic.kubernetes.kubernetes.commands.builders.CommandBuilderServiceAccount;
+import com.enonic.kubernetes.kubernetes.commands.builders.CommandBuilderStatefulSet;
+import com.enonic.kubernetes.kubernetes.commands.builders.CommandBuilderXp8Config;
+import com.enonic.kubernetes.kubernetes.commands.builders.CommandBuilderXp8Deployment;
+import com.enonic.kubernetes.common.Preconditions;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
@@ -85,113 +85,71 @@ public class K8sCommandMapper
 
     private Optional<K8sCommand> clusterRole( final GenericBuilderParams params )
     {
-        return ImmutableCommandBuilderClusterRole.builder().
-            client( clients.k8s() ).
-            build().
-            apply( params );
+        return new CommandBuilderClusterRole( clients.k8s() ).apply( params );
     }
 
     private Optional<K8sCommand> clusterRoleBinding( final GenericBuilderParams params )
     {
-        return ImmutableCommandBuilderClusterRoleBinding.builder().
-            client( clients.k8s() ).
-            build().
-            apply( params );
+        return new CommandBuilderClusterRoleBinding( clients.k8s() ).apply( params );
     }
 
     private Optional<K8sCommand> configMap( final GenericBuilderParams params )
     {
-        return ImmutableCommandBuilderConfigMap.builder().
-            client( clients.k8s() ).
-            build().
-            apply( params );
+        return new CommandBuilderConfigMap( clients.k8s() ).apply( params );
     }
 
     private Optional<K8sCommand> daemonSet( final GenericBuilderParams params )
     {
-        return ImmutableCommandBuilderDaemonSet.builder().
-            client( clients.k8s() ).
-            build().
-            apply( params );
+        return new CommandBuilderDaemonSet( clients.k8s() ).apply( params );
     }
 
     private Optional<K8sCommand> ingress( final GenericBuilderParams params )
     {
-        return ImmutableCommandBuilderIngress.builder().
-            client( clients.k8s() ).
-            build().
-            apply( params );
+        return new CommandBuilderIngress( clients.k8s() ).apply( params );
     }
 
     private Optional<K8sCommand> pvc( final GenericBuilderParams params )
     {
-        return ImmutableCommandBuilderPVC.builder().
-            client( clients.k8s() ).
-            build().
-            apply( params );
+        return new CommandBuilderPVC( clients.k8s() ).apply( params );
     }
 
     private Optional<K8sCommand> role( final GenericBuilderParams params )
     {
-        return ImmutableCommandBuilderRole.builder().
-            client( clients.k8s() ).
-            build().
-            apply( params );
+        return new CommandBuilderRole( clients.k8s() ).apply( params );
     }
 
     private Optional<K8sCommand> roleBinding( final GenericBuilderParams params )
     {
-        return ImmutableCommandBuilderRoleBinding.builder().
-            client( clients.k8s() ).
-            build().
-            apply( params );
+        return new CommandBuilderRoleBinding( clients.k8s() ).apply( params );
     }
 
     private Optional<K8sCommand> secret( final GenericBuilderParams params )
     {
-        return ImmutableCommandBuilderSecret.builder().
-            client( clients.k8s() ).
-            build().
-            apply( params );
+        return new CommandBuilderSecret( clients.k8s() ).apply( params );
     }
 
     private Optional<K8sCommand> service( final GenericBuilderParams params )
     {
-        return ImmutableCommandBuilderService.builder().
-            client( clients.k8s() ).
-            build().
-            apply( params );
+        return new CommandBuilderService( clients.k8s() ).apply( params );
     }
 
     private Optional<K8sCommand> serviceAccount( final GenericBuilderParams params )
     {
-        return ImmutableCommandBuilderServiceAccount.builder().
-            client( clients.k8s() ).
-            build().
-            apply( params );
+        return new CommandBuilderServiceAccount( clients.k8s() ).apply( params );
     }
 
     private Optional<K8sCommand> statefulSet( final GenericBuilderParams params )
     {
-        return ImmutableCommandBuilderStatefulSet.builder().
-            client( clients.k8s() ).
-            build().
-            apply( params );
+        return new CommandBuilderStatefulSet( clients.k8s() ).apply( params );
     }
 
     private Optional<K8sCommand> Xp8Config(final GenericBuilderParams params )
     {
-        return ImmutableCommandBuilderXp8Config.builder().
-            client( clients.xp8Configs() ).
-            build().
-            apply( params );
+        return new CommandBuilderXp8Config( clients.xp8Configs() ).apply( params );
     }
 
     private Optional<K8sCommand> Xp8Deployment(final GenericBuilderParams params )
     {
-        return ImmutableCommandBuilderXp8Deployment.builder().
-            client( clients.xp8Deployments() ).
-            build().
-            apply( params );
+        return new CommandBuilderXp8Deployment( clients.xp8Deployments() ).apply( params );
     }
 }

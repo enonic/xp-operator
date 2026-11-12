@@ -48,14 +48,9 @@ dependencies {
     api libs.fabric8.kubernetes.clientapi
     implementation libs.fabric8.kubernetes.client
 
-    compileOnly libs.immutables.valueannotations
-    annotationProcessor libs.immutables.value
-
     implementation libs.jackson.dataformat.yaml
     implementation libs.pebble
     implementation libs.jspecify
-    implementation libs.guava
-    implementation libs.maven.mavenartifact
 
     implementation 'javax.inject:javax.inject:1'
 
@@ -74,9 +69,6 @@ dependencies {
     testImplementation 'io.fabric8:zjsonpatch'
     testRuntimeOnly libs.junit.jupiter.engine
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-    testCompileOnly libs.immutables.valueannotations
-    testAnnotationProcessor libs.immutables.value
 }
 
 tasks.named('test') {

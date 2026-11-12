@@ -1,21 +1,9 @@
 package com.enonic.kubernetes.operator.api.mutation;
 
-import org.immutables.value.Value;
-import io.micronaut.core.annotation.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-
-import com.enonic.kubernetes.common.annotations.Params;
-
-@JsonDeserialize(builder = PatchImpl.Builder.class)
-@Value.Immutable
-@Params
-public abstract class Patch
+@NullMarked
+public record Patch( String op, String path, @Nullable Object value )
 {
-    public abstract String op();
-
-    public abstract String path();
-
-    @Nullable
-    public abstract Object value();
 }

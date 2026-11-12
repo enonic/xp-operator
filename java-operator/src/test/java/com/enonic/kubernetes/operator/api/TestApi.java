@@ -2,6 +2,7 @@ package com.enonic.kubernetes.operator.api;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Base64;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -14,14 +15,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.google.common.io.BaseEncoding;
 
 import io.fabric8.kubernetes.api.model.KubernetesResource;
 import io.fabric8.zjsonpatch.JsonPatch;
 
 
 import com.enonic.kubernetes.kubernetes.Searchers;
-import com.enonic.kubernetes.kubernetes.SearchersImpl;
 import com.enonic.kubernetes.crd.v1.Xp8Deployment;
 import com.enonic.kubernetes.operator.api.admission.AdmissionApi;
 import com.enonic.kubernetes.operator.api.admission.TestAdmissionApi;
@@ -52,7 +51,7 @@ class TestApi
 
         TestInformerSearcher emptyInformerSearcher = new TestInformerSearcher();
         deploymentTestInformerSearcher = new TestInformerSearcher<>();
-        searchers = SearchersImpl.of( emptyInformerSearcher, emptyInformerSearcher, emptyInformerSearcher, emptyInformerSearcher,
+        searchers = new Searchers( emptyInformerSearcher, emptyInformerSearcher, emptyInformerSearcher, emptyInformerSearcher,
                                       emptyInformerSearcher, deploymentTestInformerSearcher, emptyInformerSearcher );
         mutationApi = new TestMutationApi( mapper, searchers );
         admissionApi = new TestAdmissionApi( mapper, searchers );
@@ -90,7 +89,7 @@ class TestApi
             List<Patch> patch = null;
             if ( review.getResponse().getPatch() != null )
             {
-                String patchDecoded = new String( BaseEncoding.base64().decode( review.getResponse().getPatch() ) );
+                String patchDecoded = new String( Base64.getDecoder().decode( review.getResponse().getPatch() ) );
                 patch = mapper.readValue( patchDecoded, new TypeReference<List<Patch>>()
                 {
                 } );

@@ -30,7 +30,7 @@ public class MutationRequest
 
     public void addPatch( String op, String path, Object value )
     {
-        addPatch( PatchImpl.of( op, path, value ) );
+        addPatch( new Patch( op, path, value ) );
     }
 
     private void addPatch( Patch patch )
