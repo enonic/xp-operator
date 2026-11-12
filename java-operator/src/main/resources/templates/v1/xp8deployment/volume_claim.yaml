@@ -1,0 +1,20 @@
+    - metadata:
+        name: {{ claim.name }}
+        annotations:
+          {%- for e in storage.default.annotations | entries %}
+          {{ e.key }}: {{ e.value }}
+          {%- endfor %}
+        labels:
+          {{ labelKeys.managed }}: true
+          {{ labelKeys.nodeGroup }}: {{ nodeGroup.name }}
+          {%- for e in defaultLabels | entries %}
+          {{ e.key }}: {{ e.value }}
+          {%- endfor %}
+      spec:
+        volumeMode: Filesystem
+        storageClassName: {{ claim.class | default(storage.default.storageClassName) }}
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ claim.size }}

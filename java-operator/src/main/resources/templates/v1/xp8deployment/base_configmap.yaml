@@ -1,0 +1,17 @@
+# Setup extra config that is mapped to the container
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: extra-config
+  namespace: {{ deployment.namespace }}
+  annotations:
+    {{ annotationKeys.applyPriority }}: "60"
+  labels:
+    {{ labelKeys.managed }}: true
+    {%- for e in defaultLabels | entries %}
+    {{ e.key }}: {{ e.value }}
+    {%- endfor %}
+  ownerReferences: {{ ownerReferences | toJson }}
+data:
+  pod-annotator.sh: {{ file("extra-config/pod-annotator.sh") }}
+  vhost-defaults.cfg: {{ file("extra-config/vhost-defaults.cfg") }}

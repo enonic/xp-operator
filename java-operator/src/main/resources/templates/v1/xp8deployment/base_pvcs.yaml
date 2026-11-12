@@ -1,0 +1,10 @@
+# Setup shared volumes persistent claims
+{%- for claim in deployment.spec.nodesSharedVolumes %}
+{% include "claim.yaml" %}
+{%- endfor %}
+# Setup shared disks persistent claims. A disk that names a volume is a sub path of that volume, and has no claim of its own
+{%- for claim in deployment.spec.nodesSharedDisks %}
+{%- if claim.volume is empty %}
+{% include "claim.yaml" %}
+{%- endif %}
+{%- endfor %}

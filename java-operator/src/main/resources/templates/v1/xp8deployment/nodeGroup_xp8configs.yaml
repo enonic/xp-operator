@@ -1,0 +1,60 @@
+# Setup Xp8Config for each node
+{%- for nodeGroup in deployment.spec.nodeGroups %}
+# VHost configuration
+apiVersion: enonic.cloud/v1
+kind: Xp8Config
+metadata:
+  name: "{{ nodeGroup.name | raw }}-vhosts"
+  namespace: {{ deployment.namespace }}
+  annotations:
+    {{ annotationKeys.neverOverwrite }}: true
+    {{ annotationKeys.applyPriority }}: "71"
+  labels:
+    {{ labelKeys.managed }}: true
+    {%- for e in defaultLabels | entries %}
+    {{ e.key }}: {{ e.value }}
+    {%- endfor %}
+  ownerReferences: {{ ownerReferences | toJson }}
+spec:
+  nodeGroup: {{ nodeGroup.name }}
+  file: com.enonic.xp.web.vhost.cfg
+  dataBase64: false
+  data: |-
+    enabled = true
+---
+# Elastic Search configuration
+apiVersion: enonic.cloud/v1
+kind: Xp8Config
+metadata:
+  name: "{{ nodeGroup.name | raw }}-elasticsearch"
+  namespace: {{ deployment.namespace }}
+  annotations:
+    {{ annotationKeys.applyPriority }}: "71"
+  labels:
+    {{ labelKeys.managed }}: true
+    {%- for e in defaultLabels | entries %}
+    {{ e.key }}: {{ e.value }}
+    {%- endfor %}
+  ownerReferences: {{ ownerReferences | toJson }}
+spec:
+  nodeGroup: {{ nodeGroup.name }}
+  file: com.enonic.xp.elasticsearch.cfg
+  dataBase64: false
+  data: |-
+    http.enabled=true
+    cluster.name={{ deployment.name | raw }}
+    {%- if not deployment.clustered %}
+    index.auto_expand_replicas=0-all
+    {%- else %}
+    node.master=${env.XP_IS_MASTER}
+    node.data=${env.XP_IS_DATA}
+    gateway.expected_master_nodes=${env.XP_ES_MIN_MASTERS}
+    gateway.expected_data_nodes=${env.XP_ES_MIN_DATAS}
+    gateway.recover_after_time=5m
+    discovery.zen.minimum_master_nodes=${env.XP_ES_MIN_MASTERS}
+    discovery.unicast.sockets={{ discoveryService | raw }}.{{ deployment.namespace | raw }}.svc.cluster.local
+    network.tcp.keep_alive=true
+    index.auto_expand_replicas=1-all
+    {%- endif %}
+---
+{%- endfor %}

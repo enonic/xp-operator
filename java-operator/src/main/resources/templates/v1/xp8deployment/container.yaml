@@ -1,0 +1,24 @@
+        - name: {{ container.name }}
+          image: {{ imageRef(container.image, image.registryPrefix) }}
+          imagePullPolicy: {{ image.pullPolicy }}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: {{ pods.readOnlyRootFilesystem }}
+            runAsNonRoot: true
+            runAsUser: {{ pods.securityContext.user }}
+            runAsGroup: {{ pods.securityContext.user }}
+          ports: {{ container.ports | toJson }}
+          env: {{ container.env | toJson }}
+          volumeMounts:
+            {%- for mount in container.mounts %}
+            - name: {{ mount.name }}
+              mountPath: {{ mount.mountPath }}
+              subPath: {{ mount.subPath }}
+            {%- endfor %}
+          command: {{ container.command | toJson }}
+          args: {{ container.args | toJson }}

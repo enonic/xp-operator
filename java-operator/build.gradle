@@ -52,6 +52,8 @@ dependencies {
     annotationProcessor libs.immutables.value
 
     implementation libs.jackson.dataformat.yaml
+    implementation libs.pebble
+    implementation libs.jspecify
     implementation libs.guava
     implementation libs.maven.mavenartifact
 
@@ -65,6 +67,7 @@ dependencies {
     testImplementation 'io.rest-assured:rest-assured'
     testImplementation libs.fabric8.kubernetes.servermock
     testImplementation libs.mockito.inline
+    testImplementation libs.assertj.core
     testImplementation libs.mockito.junitjupiter
 
     testImplementation libs.junit.jupiter.api

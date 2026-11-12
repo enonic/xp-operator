@@ -1,0 +1,10 @@
+            {%- if disk.volume is empty %}
+            - name: {{ disk.name }}
+            {%- else %}
+            - name: {{ disk.volume }}
+              subPath: {{ disk.name }}
+            {%- endif %}
+              mountPath: {{ volumes.mounts[disk.name] }}
+              {%- if disk.mountReadOnly %}
+              readOnly: true
+              {%- endif %}

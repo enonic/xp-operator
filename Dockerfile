@@ -18,18 +18,12 @@ RUN chmod 444 /opt/agent-bond/agent-bond.jar && \
 COPY docker/jmx_exporter_config.yml /opt/agent-bond/
 EXPOSE 8778 9779
 
-# Install helm
-COPY --from=alpine/helm:3.11.3 /usr/bin/helm /usr/bin/helm
-
 # Set ENV vars
-ENV JAVA_OPTIONS="-Doperator.charts.path=helm -Dmicronaut.config.files=/deployments/config/application.properties" \
+ENV JAVA_OPTIONS="-Dmicronaut.config.files=/deployments/config/application.properties" \
     AB_ENABLED=jmx_exporter
 
 # Add run script as /deployments/run-java.sh
 COPY docker/run-java.sh /deployments/
-
-# Copy helm charts
-COPY --chown=1000:1000 java-operator/src/main/helm /deployments/helm/
 
 # Copy build target
 COPY --chown=1000:1000 java-operator/build/docker/main/layers/app/application.jar /deployments/

@@ -1,0 +1,38 @@
+# Setup service pointing to each nodeGroup
+{%- for nodeGroup in deployment.spec.nodeGroups %}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ nodeGroup.name }}
+  namespace: {{ deployment.namespace }}
+  annotations:
+    {{ annotationKeys.applyPriority }}: "100"
+  labels:
+    {{ labelKeys.managed }}: true
+    {{ labelKeys.nodeGroup }}: {{ nodeGroup.name }}
+    {%- for e in defaultLabels | entries %}
+    {{ e.key }}: {{ e.value }}
+    {%- endfor %}
+  ownerReferences: {{ ownerReferences | toJson }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  sessionAffinity: None
+  selector:
+    {{ labelKeys.nodeGroup }}: {{ nodeGroup.name }}
+    {{ labelKeys.deployment }}: {{ deployment.name }}
+  ports:
+    - name: xp-metrics
+      port: 2609
+      targetPort: 2609
+      protocol: TCP
+    - name: xp-management
+      port: 4848
+      targetPort: 4848
+      protocol: TCP
+    - name: xp-main
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+---
+{%- endfor %}

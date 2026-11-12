@@ -1,0 +1,369 @@
+# Create StatefulSet for each nodeGroup
+{%- for nodeGroup in deployment.spec.nodeGroups %}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ nodeGroup.name }}
+  namespace: {{ deployment.namespace }}
+  annotations:
+    {{ annotationKeys.applyPriority }}: "90"
+  labels:
+    {{ labelKeys.managed }}: true
+    {{ labelKeys.nodeGroup }}: {{ nodeGroup.name }}
+    {%- for e in defaultLabels | entries %}
+    {{ e.key }}: {{ e.value }}
+    {%- endfor %}
+  ownerReferences: {{ ownerReferences | toJson }}
+spec:
+  serviceName: {{ discoveryService }}
+  replicas: {{ deployment.spec.enabled ? nodeGroup.replicas : 0 }}
+  revisionHistoryLimit: 10
+  podManagementPolicy: Parallel
+  updateStrategy:
+    type: {{ pods.updateStrategy }}
+  selector:
+    matchLabels:
+      {{ labelKeys.managed }}: true
+      {{ labelKeys.nodeGroup }}: {{ nodeGroup.name }}
+      {{ labelKeys.deployment }}: {{ deployment.name }}
+      {%- for e in defaultLabels | entries %}
+      {{ e.key }}: {{ e.value }}
+      {%- endfor %}
+  template:
+    metadata:
+      annotations:
+        enonic.cloud/metrics.xp8: "true"
+        enonic.cloud/logs.xp8: "true"
+        {%- for e in deployment.metadata.annotations | entries %}
+        {{ e.key }}: {{ e.value }}
+        {%- endfor %}
+      labels:
+        {{ labelKeys.managed }}: true
+        {{ labelKeys.nodeGroup }}: {{ nodeGroup.name }}
+        {{ labelKeys.master }}: {{ nodeGroup.master }}
+        {{ labelKeys.data }}: {{ nodeGroup.data }}
+        {{ labelKeys.deployment }}: {{ deployment.name }}
+        {%- for e in defaultLabels | entries %}
+        {{ e.key }}: {{ e.value }}
+        {%- endfor %}
+    spec:
+      automountServiceAccountToken: {{ pods.automountServiceAccountToken }}
+      serviceAccount: xp-node-sa
+      serviceAccountName: xp-node-sa
+      imagePullSecrets:
+        {%- if pods.imagePullSecretNames is iterable %}
+        {%- for secretName in pods.imagePullSecretNames %}
+        - name: {{ secretName }}
+        {%- endfor %}
+        {%- elseif pods.imagePullSecretNames is not empty %}
+        - name: {{ pods.imagePullSecretNames }}
+        {%- endif %}
+      {%- if pods.nodeGroupAntiAffinity %}
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: {{ labelKeys.nodeGroup }}
+                    operator: In
+                    values:
+                      - {{ nodeGroup.name }}
+              topologyKey: "kubernetes.io/hostname"
+      {%- endif %}
+      restartPolicy: Always
+      dnsPolicy: ClusterFirst
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: {{ pods.terminationGracePeriodSeconds }}
+
+      securityContext:
+        fsGroup: {{ pods.securityContext.fsGroup }}
+        seccompProfile:
+          type: RuntimeDefault
+
+      initContainers:
+      {%- if pods.sysctlInitContainer %}
+        - name: configure-sysctl
+          securityContext:
+            runAsUser: 0
+            privileged: true
+          image: {{ imageRef(sysctlInitContainer.image, image.registryPrefix) }}
+          imagePullPolicy: {{ image.pullPolicy }}
+          command: ["sysctl", "-w", "vm.max_map_count=262144"]
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      {%- endif %}
+      {%- if deployment.clustered %}
+        - name: wait-for-dns-discovery
+          image: {{ imageRef(waitForDnsDiscovery.image, image.registryPrefix) }}
+          imagePullPolicy: {{ image.pullPolicy }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: {{ pods.readOnlyRootFilesystem }}
+            runAsNonRoot: true
+            runAsUser: {{ pods.securityContext.user }}
+            runAsGroup: {{ pods.securityContext.user }}
+          command: ['sh', '-c', "until nslookup ${XP_NODE_NAME}.cluster-discovery.${NAMESPACE}.svc.cluster.local; do echo waiting for ${XP_NODE_NAME}; sleep 2; done"]
+          env:
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
+            - name: XP_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+      {%- endif %}
+      {%- for container in nodeGroup.initContainers %}
+{% include "container.yaml" %}
+      {%- endfor %}
+
+      containers:
+        - name: exp
+          image: {{ imageRef(deployment.spec.image | default(image.nameTemplate | replace({"%s": deployment.spec.xpVersion})), image.registryPrefix) }}
+          imagePullPolicy: {{ deployment.spec.imagePullPolicy | default(image.pullPolicy) }}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: {{ pods.readOnlyRootFilesystem }}
+            runAsNonRoot: true
+            runAsUser: {{ pods.securityContext.user }}
+            runAsGroup: {{ pods.securityContext.user }}
+
+          resources:
+            requests:
+              cpu: {{ resources.cpu.defaultRequests | default(nodeGroup.resources.cpu) }}
+              memory: {{ resources.memory.defaultRequests | default(nodeGroup.resources.memory) }}
+            limits:
+              cpu: {{ nodeGroup.resources.cpu }}
+              memory: {{ nodeGroup.resources.memory }}
+
+          ports:
+            - name: xp-stats
+              containerPort: 2609
+              protocol: TCP
+            - name: xp-main
+              containerPort: 8080
+              protocol: TCP
+            - name: es-transport
+              containerPort: 9300
+              protocol: TCP
+
+          env:
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
+            - name: XP_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+            - name: XP_NODE_GROUP
+              value: {{ nodeGroup.name }}
+            - name: XP_CLUSTERED # This is to ensure that XP is restarted when deployment is changed from clustered to non clustered
+              value: {{ deployment.clustered }}
+            - name: XP_HZ_MIN_SIZE
+              value: {{ deployment.clusterMajority }}
+            - name: XP_ES_MIN_MASTERS
+              value: {{ deployment.minimumMasterNodes }}
+            - name: XP_ES_MIN_DATAS
+              value: {{ deployment.minimumDataNodes }}
+            - name: XP_IS_MASTER
+              value: {{ nodeGroup.master }}
+            - name: XP_IS_DATA
+              value: {{ nodeGroup.data }}
+            - name: XP_NODE_IP
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.podIP
+            {%- for env in nodeGroup.env %}
+            - {{ env | toJson }}
+            {%- endfor %}
+
+          startupProbe:
+            httpGet:
+              path: "/health"
+              port: 2609
+              scheme: HTTP
+            failureThreshold: 20
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 2
+          livenessProbe:
+            httpGet:
+              path: "/health"
+              port: 2609
+              scheme: HTTP
+            failureThreshold: 10
+            timeoutSeconds: 2
+          readinessProbe:
+            httpGet:
+              path: "/ready"
+              port: 2609
+              scheme: HTTP
+            failureThreshold: 2
+            timeoutSeconds: 2
+
+          {%- if deployment.clustered %}
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep {{ pods.preStopSleepSeconds | raw }}"]
+          {%- endif %}
+
+          volumeMounts:
+            - name: config
+              mountPath: {{ dirs.config }}
+            - name: extra-config
+              mountPath: {{ dirs.extraConfig }}
+            - name: tmp
+              mountPath: /tmp
+            - name: xp-logs
+              mountPath: /enonic-xp/home/logs
+            {%- if deployment.clustered and not pods.automountServiceAccountToken %}
+            - name: empty-sa-token
+              mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+              readOnly: true
+            {%- endif %}
+            {%- for disk in nodeGroup.resources.dirs %}
+{% include "disk_mount.yaml" %}
+            {%- endfor %}
+            {%- for disk in nodeGroup.resources.disks %}
+{% include "disk_mount.yaml" %}
+            {%- endfor %}
+            {%- for disk in deployment.spec.nodesSharedDisks %}
+{% include "disk_mount.yaml" %}
+            {%- endfor %}
+        - name: events
+          image: {{ imageRef(events.image, image.registryPrefix) }}
+          imagePullPolicy: {{ image.pullPolicy }}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: {{ pods.readOnlyRootFilesystem }}
+            runAsNonRoot: true
+            runAsUser: {{ pods.securityContext.user }}
+            runAsGroup: {{ pods.securityContext.user }}
+
+          env:
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
+            - name: POD_UID
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.uid
+            - name: XP_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+            - name: XP_NODE_GROUP
+              value: {{ nodeGroup.name }}
+            - name: K8S_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: xp-events-sa-secret
+                  key: token
+            - name: K8S_CA_CRT_PATH
+              value: /etc/k8s-ca.crt
+            - name:  XP_CONFIG_PATH
+              value: {{ dirs.config }}
+            - name: POD_CONFIG_RELOADED_ANNOTATION
+              value: {{ annotationKeys.podConfigReloaded }}
+
+          volumeMounts:
+            - name: config
+              mountPath: {{ dirs.config }}
+            - name: extra-config
+              mountPath: {{ dirs.extraConfig }}
+            - name: tmp
+              mountPath: /tmp
+            - name: xp-logs
+              mountPath: /enonic-xp/home/logs
+            - name: events-sa-ca
+              mountPath: /etc/k8s-ca.crt
+              subPath: ca.crt
+              readOnly: true
+
+          command: ["sh"]
+          args: ["{{ dirs.extraConfig | raw }}/pod-annotator.sh"]
+
+        {%- for container in nodeGroup.sidecars %}
+{% include "container.yaml" %}
+        {%- endfor %}
+
+      volumes:
+        - name: config
+          configMap:
+            defaultMode: 0644
+            name: {{ nodeGroup.name }}
+        - name: extra-config
+          configMap:
+            defaultMode: 0644
+            name: extra-config
+        - name: tmp
+          emptyDir: {}
+        - name: xp-logs
+          emptyDir: {}
+        - name: events-sa-ca
+          secret:
+            secretName: xp-events-sa-secret
+            items:
+              - key: ca.crt
+                path: ca.crt
+        {%- if deployment.clustered and not pods.automountServiceAccountToken %}
+        - name: empty-sa-token
+          configMap:
+            name: empty-sa
+        {%- endif %}
+        {%- for dir in nodeGroup.resources.dirs %}
+        - name: {{ dir.name }}
+          emptyDir:
+            sizeLimit: {{ dir.size }}
+        {%- endfor %}
+        {%- for volume in deployment.spec.nodesSharedVolumes %}
+        - name: {{ volume.name }}
+          persistentVolumeClaim:
+            claimName: {{ volume.name }}
+        {%- endfor %}
+        {%- for disk in deployment.spec.nodesSharedDisks %}
+        {%- if disk.volume is empty %}
+        - name: {{ disk.name }}
+          persistentVolumeClaim:
+            claimName: {{ disk.name }}
+        {%- endif %}
+        {%- endfor %}
+  volumeClaimTemplates:
+    {%- for claim in nodeGroup.resources.volumes %}
+{% include "volume_claim.yaml" %}
+    {%- endfor %}
+    {%- for claim in nodeGroup.resources.disks %}
+    {%- if claim.volume is empty %}
+{% include "volume_claim.yaml" %}
+    {%- endif %}
+    {%- endfor %}
+---
+{%- endfor %}
+

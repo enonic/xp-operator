@@ -1,0 +1,20 @@
+# Setup ConfigMap for each node group
+{%- for nodeGroup in deployment.spec.nodeGroups %}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ nodeGroup.name }}
+  namespace: {{ deployment.namespace }}
+  annotations:
+    {{ annotationKeys.neverOverwrite }}: true
+    {{ annotationKeys.applyPriority }}: "50"
+  labels:
+    {{ labelKeys.managed }}: true
+    {{ labelKeys.nodeGroup }}: {{ nodeGroup.name }}
+    {%- for e in defaultLabels | entries %}
+    {{ e.key }}: {{ e.value }}
+    {%- endfor %}
+  ownerReferences: {{ ownerReferences | toJson }}
+data: {} # Operator will manage this ConfigMap so leave data empty
+---
+{%- endfor %}

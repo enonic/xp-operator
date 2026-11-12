@@ -1,0 +1,22 @@
+{% include "base_sa.yaml" %}
+---
+{% include "base_sa_events.yaml" %}
+---
+{% include "base_configmap.yaml" %}
+---
+{% include "base_empty_sa.yaml" %}
+---
+{% include "base_pvcs.yaml" %}
+---
+{% include "base_services.yaml" %}
+---
+{% include "base_xp8configs.yaml" %}
+---
+{% include "nodeGroup_configmap.yaml" %}
+---
+{% include "nodeGroup_services.yaml" %}
+---
+{% include "nodeGroup_xp8configs.yaml" %}
+---
+{% include "nodeGroup_statefulset.yaml" %}
+---
