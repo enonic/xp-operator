@@ -69,4 +69,4 @@ assertResult:
     fields:
       pods: [ ]
 
-assertException: "Operator only supports XP version 8.x"
+assertException: "Operator only supports XP version 8.2 and newer"

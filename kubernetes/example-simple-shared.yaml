@@ -17,7 +17,7 @@ metadata:
   namespace: my-namespace
 spec:
   enabled: true
-  xpVersion: 8.0.0
+  xpVersion: 8.2.0
 
   # Create one node
   nodeGroups:

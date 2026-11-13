@@ -293,10 +293,13 @@ public class AdmissionApi
                                       newDeployment.getMetadata().getNamespace() );
 
             String xpVersion = newDeployment.getSpec().getXpVersion();
-            Matcher m = Pattern.compile( "^(?:enonic/xp:)?([0-9]+\\.[0-9]+\\.[0-9]+)" ).matcher( xpVersion );
+            Matcher m = Pattern.compile( "^(?:enonic/xp:)?([0-9]+)\\.([0-9]+)" ).matcher( xpVersion );
             if ( m.find() )
             {
-                Preconditions.checkState( m.group( 1 ).startsWith( "8." ), "Operator only supports XP version 8.x" );
+                final int major = Integer.parseInt( m.group( 1 ) );
+                final int minor = Integer.parseInt( m.group( 2 ) );
+                Preconditions.checkState( major > 8 || ( major == 8 && minor >= 2 ),
+                                          "Operator only supports XP version 8.2 and newer" );
             }
         }
     }

@@ -24,7 +24,6 @@ deployment:
     xpVersion: "8.1.0"
     image: "my-proxy.example.com/enonic/xp:nightly"
     imagePullPolicy: "Always"
-    nodesPreinstalledApps: []
     nodesSharedVolumes: []
     nodesSharedDisks:
     - name: "blobstore"
@@ -70,9 +69,6 @@ events:
 files:
   setEnv: "/enonic-xp/home/setenv.sh"
   vhosts: "com.enonic.xp.web.vhost.cfg"
-finalizers:
-  app:
-    uninstall: "uninstall.app.enonic.cloud"
 image:
   nameTemplate: "enonic/xp:%s-ubuntu"
   pullPolicy: "IfNotPresent"

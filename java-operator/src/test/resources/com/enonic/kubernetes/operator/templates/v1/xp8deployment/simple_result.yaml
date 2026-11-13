@@ -450,7 +450,7 @@ spec:
         - name: "XP_OPTS"
           value: "-Xms154m -Xmx154m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof\
             \ -Dhazelcast.shutdownhook.policy=GRACEFUL -Dhazelcast.graceful.shutdown.max.wait=600"
-        image: "enonic/xp:7.13.2-ubuntu"
+        image: "enonic/xp:8.2.0-ubuntu"
         imagePullPolicy: "IfNotPresent"
         livenessProbe:
           failureThreshold: 10
@@ -716,8 +716,7 @@ metadata:
 spec:
   nodeGroup: "all"
   file: "system.properties"
-  data: "xp.name = mycloud-mysolution-myenv-myservice\nxp.suPassword = ${env.XP_SU_PASSWORD}\n\
-    xp.init.adminUserCreation = false"
+  data: "xp.name = mycloud-mysolution-myenv-myservice\nxp.suPassword = ${env.XP_SU_PASSWORD}"
   dataBase64: false
 ---
 apiVersion: "enonic.cloud/v1"

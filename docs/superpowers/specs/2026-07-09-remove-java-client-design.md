@@ -4,6 +4,7 @@
 **Issue:** [enonic/xp-operator#799](https://github.com/enonic/xp-operator/issues/799) — *"Remove Java client / Use pure K8S API instead of wrapping java client"*
 **Milestone:** 2.0.0 (breaking changes allowed)
 **Update:** the mgmt REST API, its DTOs and `docs/openapi/operator-mgmt.yaml`, described below, were removed in [enonic/xp-operator#849](https://github.com/enonic/xp-operator/issues/849).
+**Note:** kept as a historical record. The `Xp7*` types it describes were replaced by `Xp8Deployment` and `Xp8Config` in operator 2.0, which supports XP 8.2 and newer only.
 
 ## Problem
 
