@@ -35,6 +35,7 @@ deployment:
       data: true
       master: true
       replicas: 1
+      secretMounts: []
       initContainers: []
       sidecars: []
       env:

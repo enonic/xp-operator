@@ -36,6 +36,7 @@ deployment:
       data: false
       master: true
       replicas: 3
+      secretMounts: []
       initContainers: []
       sidecars: []
       env:
@@ -54,6 +55,7 @@ deployment:
       data: true
       master: false
       replicas: 2
+      secretMounts: []
       initContainers: []
       sidecars: []
       env:
@@ -74,6 +76,7 @@ deployment:
       data: false
       master: false
       replicas: 3
+      secretMounts: []
       initContainers: []
       sidecars: []
       env:

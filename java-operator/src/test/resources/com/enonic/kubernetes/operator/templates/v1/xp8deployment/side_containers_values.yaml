@@ -33,6 +33,7 @@ deployment:
       data: true
       master: true
       replicas: 1
+      secretMounts: []
       initContainers:
       - image: "busybox"
         name: "my-sidecar-1"

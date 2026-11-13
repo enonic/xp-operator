@@ -247,6 +247,11 @@ spec:
             {%- for disk in deployment.spec.nodesSharedDisks %}
 {% include "disk_mount.yaml" %}
             {%- endfor %}
+            {%- for secretMount in nodeGroup.secretMounts %}
+            - name: {{ secretMount.name }}
+              mountPath: {{ secretMount.mountPath }}
+              readOnly: {{ secretMount.readOnly | default(true) }}
+            {%- endfor %}
         - name: events
           image: {{ imageRef(events.image, image.registryPrefix) }}
           imagePullPolicy: {{ image.pullPolicy }}
@@ -354,6 +359,13 @@ spec:
           persistentVolumeClaim:
             claimName: {{ disk.name }}
         {%- endif %}
+        {%- endfor %}
+        {%- for secretMount in nodeGroup.secretMounts %}
+        - name: {{ secretMount.name }}
+          secret:
+            secretName: {{ secretMount.secretName }}
+            defaultMode: {{ secretMount.defaultMode }}
+            optional: {{ secretMount.optional }}
         {%- endfor %}
   volumeClaimTemplates:
     {%- for claim in nodeGroup.resources.volumes %}
