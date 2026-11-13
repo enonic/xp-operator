@@ -2,6 +2,7 @@
 fabric8 = "8.0.0"
 micronaut-gradle-plugin = "5.0.2"
 checkstyle = "14.3.0"
+junit = "6.1.3"
 
 [libraries]
 fabric8-bom = { module = "io.fabric8:kubernetes-client-bom", version.ref = "fabric8" }
@@ -11,8 +12,10 @@ fabric8-kubernetes-clientapi = { module = "io.fabric8:kubernetes-client-api", ve
 fabric8-kubernetes-servermock = { module = "io.fabric8:kubernetes-server-mock", version.ref = "fabric8" }
 
 # JUnit & Mockito
-junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version = "5.10.0" }
-junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version = "5.11.0" }
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
+junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api" }
+junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
 assertj-core = { module = "org.assertj:assertj-core", version = "3.27.6" }
 mockito-core = { module = "org.mockito:mockito-core", version = "5.21.0" }
 mockito-inline = { module = "org.mockito:mockito-inline", version = "5.2.0" }
