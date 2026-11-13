@@ -51,9 +51,7 @@ spec:
         memory: 3Gi
         disks:
           - name: export
-            value: 6Gi
           - name: work
-            value: 7Gi
       env:
         - name: CUSTOM_ENV
           value: "myenvvar"
