@@ -22,6 +22,11 @@ public class BaseValues
 
     public BaseValues( @Named("clusterId") String clusterId )
     {
+        this( clusterId, Map.of() );
+    }
+
+    public BaseValues( String clusterId, Map<String, String> overrides )
+    {
         super();
         put( "clusterId", clusterId );
 
@@ -34,6 +39,11 @@ public class BaseValues
             if (name.startsWith( KEY_PREFIX )) {
                 handleKey( this, name.replace( KEY_PREFIX, "" ), cfgStr( name ) );
             }
+        } );
+
+        overrides.forEach( ( name, value ) -> {
+            Preconditions.checkState( name.startsWith( KEY_PREFIX ), "'%s' does not start with '%s'", name, KEY_PREFIX );
+            handleKey( this, name.replace( KEY_PREFIX, "" ), value );
         } );
     }
 
