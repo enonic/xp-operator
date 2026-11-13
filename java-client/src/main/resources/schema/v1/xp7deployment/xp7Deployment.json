@@ -486,10 +486,6 @@
                     "mountPath": {
                       "type": "string"
                     },
-                    "defaultMode": {
-                      "type": "integer",
-                      "format": "int32"
-                    },
                     "optional": {
                       "type": "boolean"
                     }

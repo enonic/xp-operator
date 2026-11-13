@@ -285,19 +285,17 @@ secretMounts:
   - name: juke-key
     secretName: juke-service-account-key
     mountPath: /enonic-xp/home/keys
-    defaultMode: 256
   - name: tls-pair
     secretName: my-tls
     mountPath: /etc/tls
     optional: true
 ----
 
-Every key of the Secret becomes a read-only file in `mountPath`. A secret mount has these properties:
+Every key of the Secret becomes a file in `mountPath` with mode `0440`: read-only, and readable by the XP process and no other user. A secret mount has these properties:
 
 - `name`: The name of the volume. It must be unique in the node group and must not clash with the names of `dirs`, `volumes` or `disks`.
 - `secretName`: The name of the Secret to mount.
 - `mountPath`: The directory in the XP container where the files of the Secret appear.
-- `defaultMode`: The file permissions of the mounted files, as a decimal number: `256` is `0400`. Kubernetes uses `0644` if it is not set.
 - `optional`: Whether the pod may start when the Secret does not exist. Defaults to `false`.
 
 Kubernetes updates the mounted files when the Secret changes, so an application that rereads its file picks up a rotated key without a restart.

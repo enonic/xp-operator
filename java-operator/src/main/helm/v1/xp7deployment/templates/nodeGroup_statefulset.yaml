@@ -376,9 +376,7 @@ spec:
         - name: {{ $sm.name }}
           secret:
             secretName: {{ $sm.secretName }}
-            {{- if hasKey $sm "defaultMode" }}
-            defaultMode: {{ $sm.defaultMode }}
-            {{- end }}
+            defaultMode: 0440
             {{- if hasKey $sm "optional" }}
             optional: {{ $sm.optional }}
             {{- end }}
