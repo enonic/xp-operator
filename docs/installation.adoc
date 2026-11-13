@@ -104,7 +104,6 @@ pod/xp-operator-684bb48cc5-bqjqc                                    0/1     Cont
 ----
 $ kubectl -n kube-system logs -f xp-operator-684bb48cc5-bqjqc
 
-exec java -Dmicronaut.config.files=/deployments/config/application.properties -javaagent:/opt/agent-bond/agent-bond.jar=jmx_exporter{{9779:/opt/agent-bond/jmx_exporter_config.yml}} -XX:+ExitOnOutOfMemoryError -cp . -jar /deployments/application.jar
  __  __ _                                  _
 |  \/  (_) ___ _ __ ___  _ __   __ _ _   _| |_
 | |\/| | |/ __| '__/ _ \| '_ \ / _` | | | | __|

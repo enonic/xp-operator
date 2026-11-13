@@ -1,0 +1,5118 @@
+{
+  "reflection": [
+    {
+      "type": "byte[]"
+    },
+    {
+      "type": "ch.qos.logback.classic.encoder.PatternLayoutEncoder",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "ch.qos.logback.classic.spi.LogbackServiceProvider"
+    },
+    {
+      "type": "ch.qos.logback.classic.util.DefaultJoranConfigurator",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "ch.qos.logback.core.ConsoleAppender",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "ch.qos.logback.core.OutputStreamAppender",
+      "methods": [
+        {
+          "name": "setEncoder",
+          "parameterTypes": [
+            "ch.qos.logback.core.encoder.Encoder"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "ch.qos.logback.core.encoder.Encoder"
+    },
+    {
+      "type": "ch.qos.logback.core.encoder.LayoutWrappingEncoder",
+      "methods": [
+        {
+          "name": "setParent",
+          "parameterTypes": [
+            "ch.qos.logback.core.spi.ContextAware"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "ch.qos.logback.core.pattern.PatternLayoutEncoderBase",
+      "methods": [
+        {
+          "name": "setPattern",
+          "parameterTypes": [
+            "java.lang.String"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "ch.qos.logback.core.spi.ContextAware"
+    },
+    {
+      "type": "com.aayushatharva.brotli4j.Brotli4jLoader"
+    },
+    {
+      "type": "com.enonic.kubernetes.client.v1.api.operator.OperatorVersion",
+      "methods": [
+        {
+          "name": "getBuildDate",
+          "parameterTypes": []
+        },
+        {
+          "name": "getGitCommit",
+          "parameterTypes": []
+        },
+        {
+          "name": "getGitTags",
+          "parameterTypes": []
+        },
+        {
+          "name": "getGitTreeState",
+          "parameterTypes": []
+        },
+        {
+          "name": "getVersion",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.enonic.kubernetes.common.$ConfigurationInitializer$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.enonic.kubernetes.common.$TaskRunner$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.enonic.kubernetes.common.functions.$OptionalListPruner$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.enonic.kubernetes.common.functions.$RunnableListExecutor$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.enonic.kubernetes.crd.v1.Xp8ConfigList"
+    },
+    {
+      "type": "com.enonic.kubernetes.crd.v1.Xp8DeploymentList"
+    },
+    {
+      "type": "com.enonic.kubernetes.kubernetes.$ClientsProducer$CreateClients0$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.enonic.kubernetes.kubernetes.$ClientsProducer$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.enonic.kubernetes.kubernetes.$ClusterIdProducer$CreateClusterId0$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.enonic.kubernetes.kubernetes.$ClusterIdProducer$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.enonic.kubernetes.kubernetes.$InformersProducer$CreateInformers0$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.enonic.kubernetes.kubernetes.$InformersProducer$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.enonic.kubernetes.kubernetes.$SearchersProducer$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.enonic.kubernetes.kubernetes.$SearchersProducer$Searchers0$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.enonic.kubernetes.kubernetes.commands.$K8sCommandMapper$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.enonic.kubernetes.operator.$DiscoveryApi$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.enonic.kubernetes.operator.$Operator$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.enonic.kubernetes.operator.$OperatorInformers$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.enonic.kubernetes.operator.api.admission.$AdmissionApi$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.enonic.kubernetes.operator.api.info.$InfoApi$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.enonic.kubernetes.operator.api.info.$OperatorApi$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.enonic.kubernetes.operator.api.mutation.$MutationApi$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.enonic.kubernetes.operator.api.mutation.Patch",
+      "methods": [
+        {
+          "name": "op",
+          "parameterTypes": []
+        },
+        {
+          "name": "path",
+          "parameterTypes": []
+        },
+        {
+          "name": "value",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.enonic.kubernetes.operator.helpers.InformerEventHandler",
+      "fields": [
+        {
+          "name": "operator"
+        }
+      ]
+    },
+    {
+      "type": "com.enonic.kubernetes.operator.ingress.$OperatorIngress$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.enonic.kubernetes.operator.ingress.$OperatorIngressLabel$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.enonic.kubernetes.operator.ingress.$OperatorXp8ConfigSync$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.enonic.kubernetes.operator.xp8config.$OperatorConfigMapChangeMarker$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.enonic.kubernetes.operator.xp8config.$OperatorConfigMapSync$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.enonic.kubernetes.operator.xp8config.$OperatorXp8Config$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.enonic.kubernetes.operator.xp8config.$OperatorXp8ConfigStatus$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.enonic.kubernetes.operator.xp8deployment.$OperatorDeleteAnnotation$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.enonic.kubernetes.operator.xp8deployment.$OperatorXp8DeploymentStatus$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.enonic.kubernetes.operator.xp8deployment.$OperatorXp8DeploymentTemplate$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.enonic.kubernetes.operator.xp8deployment.$Xp8DeploymentTemplator$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.enonic.kubernetes.templates.functions.$K8sCommandBuilder$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.enonic.kubernetes.templates.functions.$K8sCommandSorter$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.enonic.kubernetes.templates.values.$BaseValuesProducer$CreateBaseValues0$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.enonic.kubernetes.templates.values.$BaseValuesProducer$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.enonic.kubernetes.templates.values.MapValues"
+    },
+    {
+      "type": "com.enonic.kubernetes.templates.values.Values"
+    },
+    {
+      "type": "com.github.luben.zstd.Zstd"
+    },
+    {
+      "type": "com.sun.crypto.provider.AESCipher$General",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.crypto.provider.AESKeyGenerator",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.crypto.provider.ARCFOURCipher",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.crypto.provider.ChaCha20Cipher$ChaCha20Poly1305",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.crypto.provider.DESCipher",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.crypto.provider.DESedeCipher",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.crypto.provider.DHParameters",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.crypto.provider.GaloisCounterMode$AESGCM",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.crypto.provider.HKDFKeyDerivation$HKDFSHA256",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "javax.crypto.KDFParameters"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "com.sun.crypto.provider.HmacCore$HmacSHA256",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.crypto.provider.PBEKeyFactory$PBEWithMD5AndDES",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.crypto.provider.PBES2Core$HmacSHA256AndAES_256",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.crypto.provider.PBES2Parameters$General",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.crypto.provider.PBES2Parameters$HmacSHA256AndAES_256",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.crypto.provider.TlsMasterSecretGenerator",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.builder.Editable"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.admission.v1beta1.AdmissionReview"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.admissionregistration.v1.MutatingAdmissionPolicy"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.admissionregistration.v1.MutatingAdmissionPolicyBinding"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.admissionregistration.v1.MutatingAdmissionPolicyBindingList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.admissionregistration.v1.MutatingAdmissionPolicyList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.admissionregistration.v1.MutatingWebhookConfiguration"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.admissionregistration.v1.MutatingWebhookConfigurationList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.admissionregistration.v1.ValidatingAdmissionPolicy"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.admissionregistration.v1.ValidatingAdmissionPolicyBinding"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.admissionregistration.v1.ValidatingAdmissionPolicyBindingList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.admissionregistration.v1.ValidatingAdmissionPolicyList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.admissionregistration.v1.ValidatingWebhookConfiguration"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.admissionregistration.v1.ValidatingWebhookConfigurationList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.admissionregistration.v1alpha1.MutatingAdmissionPolicy"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.admissionregistration.v1alpha1.MutatingAdmissionPolicyBinding"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.admissionregistration.v1alpha1.MutatingAdmissionPolicyBindingList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.admissionregistration.v1alpha1.MutatingAdmissionPolicyList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.admissionregistration.v1beta1.MutatingAdmissionPolicy"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.admissionregistration.v1beta1.MutatingAdmissionPolicyBinding"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.admissionregistration.v1beta1.MutatingAdmissionPolicyBindingList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.admissionregistration.v1beta1.MutatingAdmissionPolicyList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.admissionregistration.v1beta1.MutatingWebhookConfiguration"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.admissionregistration.v1beta1.MutatingWebhookConfigurationList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.admissionregistration.v1beta1.ValidatingWebhookConfiguration"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.admissionregistration.v1beta1.ValidatingWebhookConfigurationList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.apiextensions.v1.ConversionReview"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.apiextensions.v1.CustomResourceDefinition"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.apiextensions.v1.CustomResourceDefinitionList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.apiextensions.v1beta1.CustomResourceDefinition"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.apiextensions.v1beta1.CustomResourceDefinitionList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.authentication.v1beta1.TokenReview"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.authorization.v1.LocalSubjectAccessReview"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.authorization.v1.SelfSubjectAccessReview"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.authorization.v1.SelfSubjectRulesReview"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.authorization.v1.SubjectAccessReview"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.authorization.v1beta1.LocalSubjectAccessReview"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.authorization.v1beta1.SelfSubjectAccessReview"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.authorization.v1beta1.SelfSubjectRulesReview"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.authorization.v1beta1.SubjectAccessReview"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.autoscaling.v1.HorizontalPodAutoscaler"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.autoscaling.v1.HorizontalPodAutoscalerList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.autoscaling.v1.Scale"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.autoscaling.v2.HorizontalPodAutoscaler"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.autoscaling.v2.HorizontalPodAutoscalerList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.autoscaling.v2beta1.HorizontalPodAutoscaler"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.autoscaling.v2beta1.HorizontalPodAutoscalerList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.autoscaling.v2beta2.HorizontalPodAutoscaler"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.autoscaling.v2beta2.HorizontalPodAutoscalerList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.batch.v1.CronJob"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.batch.v1.CronJobList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.batch.v1.Job"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.batch.v1.JobList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.batch.v1beta1.CronJob"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.batch.v1beta1.CronJobList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.certificates.v1.CertificateSigningRequest"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.certificates.v1.CertificateSigningRequestList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.certificates.v1.ClusterTrustBundle"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.certificates.v1.ClusterTrustBundleList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.certificates.v1.PodCertificateRequest"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.certificates.v1.PodCertificateRequestList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.certificates.v1beta1.CertificateSigningRequest"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.certificates.v1beta1.CertificateSigningRequestList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.certificates.v1beta1.ClusterTrustBundle"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.certificates.v1beta1.ClusterTrustBundleList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.certificates.v1beta1.PodCertificateRequest"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.certificates.v1beta1.PodCertificateRequestList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.coordination.v1.Lease"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.coordination.v1.LeaseList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.coordination.v1alpha2.LeaseCandidate"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.coordination.v1alpha2.LeaseCandidateList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.coordination.v1beta1.LeaseCandidate"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.coordination.v1beta1.LeaseCandidateList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.discovery.v1.EndpointSlice"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.discovery.v1.EndpointSliceList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.discovery.v1beta1.EndpointSlice"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.discovery.v1beta1.EndpointSliceList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.events.v1.Event"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.events.v1.EventList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.events.v1beta1.Event"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.events.v1beta1.EventList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.extensions.DaemonSet"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.extensions.DaemonSetList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.extensions.Deployment"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.extensions.DeploymentList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.extensions.Ingress"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.extensions.IngressList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.extensions.NetworkPolicy"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.extensions.NetworkPolicyList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.extensions.PodSecurityPolicy"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.extensions.PodSecurityPolicyList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.extensions.ReplicaSet"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.extensions.ReplicaSetList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.extensions.Scale"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.flowcontrol.v1.FlowSchema"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.flowcontrol.v1.FlowSchemaList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.flowcontrol.v1.PriorityLevelConfiguration"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.flowcontrol.v1.PriorityLevelConfigurationList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.flowcontrol.v1beta1.FlowSchema"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.flowcontrol.v1beta1.FlowSchemaList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.flowcontrol.v1beta1.PriorityLevelConfiguration"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.flowcontrol.v1beta1.PriorityLevelConfigurationList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.flowcontrol.v1beta2.FlowSchema"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.flowcontrol.v1beta2.FlowSchemaList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.flowcontrol.v1beta2.PriorityLevelConfiguration"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.flowcontrol.v1beta2.PriorityLevelConfigurationList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.flowcontrol.v1beta3.FlowSchema"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.flowcontrol.v1beta3.FlowSchemaList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.flowcontrol.v1beta3.PriorityLevelConfiguration"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.flowcontrol.v1beta3.PriorityLevelConfigurationList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1.BackendTLSPolicy"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1.BackendTLSPolicyList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1.GRPCRoute"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1.GRPCRouteList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1.Gateway"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1.GatewayClass"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1.GatewayClassList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1.GatewayList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1.HTTPRoute"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1.HTTPRouteList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1.ListenerSet"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1.ListenerSetList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1.ReferenceGrant"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1.ReferenceGrantList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1.TCPRoute"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1.TCPRouteList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1.TLSRoute"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1.TLSRouteList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1.UDPRoute"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1.UDPRouteList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1alpha2.GRPCRoute"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1alpha2.GRPCRouteList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1alpha2.ReferenceGrant"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1alpha2.ReferenceGrantList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1alpha2.TCPRoute"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1alpha2.TCPRouteList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1alpha2.TLSRoute"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1alpha2.TLSRouteList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1alpha2.UDPRoute"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1alpha2.UDPRouteList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1alpha3.BackendTLSPolicy"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1alpha3.BackendTLSPolicyList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1alpha3.TLSRoute"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1alpha3.TLSRouteList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1beta1.Gateway"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1beta1.GatewayClass"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1beta1.GatewayClassList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1beta1.GatewayList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1beta1.HTTPRoute"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1beta1.HTTPRouteList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1beta1.ReferenceGrant"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.gatewayapi.v1beta1.ReferenceGrantList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.lifecycle.v1alpha1.Eviction"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.lifecycle.v1alpha1.EvictionList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.lifecycle.v1alpha1.EvictionRequest"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.lifecycle.v1alpha1.EvictionRequestList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.metrics.v1beta1.NodeMetrics"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.metrics.v1beta1.NodeMetricsList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.metrics.v1beta1.PodMetrics"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.metrics.v1beta1.PodMetricsList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.networking.v1beta1.Ingress"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.networking.v1beta1.IngressClass"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.networking.v1beta1.IngressClassList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.networking.v1beta1.IngressList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.node.v1.RuntimeClass"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.node.v1.RuntimeClassList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.node.v1alpha1.RuntimeClass"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.node.v1alpha1.RuntimeClassList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.node.v1beta1.RuntimeClass"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.node.v1beta1.RuntimeClassList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.policy.v1.Eviction"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.policy.v1.PodDisruptionBudget"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.policy.v1.PodDisruptionBudgetList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.policy.v1beta1.Eviction"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.policy.v1beta1.PodDisruptionBudget"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.policy.v1beta1.PodDisruptionBudgetList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.policy.v1beta1.PodSecurityPolicy"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.policy.v1beta1.PodSecurityPolicyList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1.DeviceClass"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1.DeviceClassList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1.DeviceTaintRule"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1.DeviceTaintRuleList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1.ResourceClaim"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1.ResourceClaimList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1.ResourceClaimTemplate"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1.ResourceClaimTemplateList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1.ResourceSlice"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1.ResourceSliceList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1alpha2.PodSchedulingContext"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1alpha2.PodSchedulingContextList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1alpha2.ResourceClaim"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1alpha2.ResourceClaimList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1alpha2.ResourceClaimParameters"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1alpha2.ResourceClaimParametersList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1alpha2.ResourceClaimTemplate"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1alpha2.ResourceClaimTemplateList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1alpha2.ResourceClass"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1alpha2.ResourceClassList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1alpha2.ResourceClassParameters"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1alpha2.ResourceClassParametersList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1alpha2.ResourceSlice"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1alpha2.ResourceSliceList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1alpha3.DeviceTaintRule"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1alpha3.DeviceTaintRuleList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1alpha3.ResourcePoolStatusRequest"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1alpha3.ResourcePoolStatusRequestList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1beta1.DeviceClass"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1beta1.DeviceClassList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1beta1.ResourceClaim"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1beta1.ResourceClaimList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1beta1.ResourceClaimTemplate"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1beta1.ResourceClaimTemplateList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1beta1.ResourceSlice"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1beta1.ResourceSliceList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1beta2.DeviceClass"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1beta2.DeviceClassList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1beta2.DeviceTaintRule"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1beta2.DeviceTaintRuleList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1beta2.ResourceClaim"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1beta2.ResourceClaimList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1beta2.ResourceClaimTemplate"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1beta2.ResourceClaimTemplateList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1beta2.ResourceSlice"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.resource.v1beta2.ResourceSliceList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.scheduling.v1.PriorityClass"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.scheduling.v1.PriorityClassList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.scheduling.v1alpha1.PriorityClass"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.scheduling.v1alpha1.PriorityClassList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.scheduling.v1alpha3.CompositePodGroup"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.scheduling.v1alpha3.CompositePodGroupList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.scheduling.v1alpha3.PodGroup"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.scheduling.v1alpha3.PodGroupList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.scheduling.v1alpha3.Workload"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.scheduling.v1alpha3.WorkloadList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.scheduling.v1beta1.PodGroup"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.scheduling.v1beta1.PodGroupList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.scheduling.v1beta1.PriorityClass"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.scheduling.v1beta1.PriorityClassList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.scheduling.v1beta1.Workload"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.scheduling.v1beta1.WorkloadList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.storage.CSIDriver"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.storage.CSIDriverList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.storage.CSINode"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.storage.CSINodeList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.storage.CSIStorageCapacity"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.storage.CSIStorageCapacityList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.storage.StorageClass"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.storage.StorageClassList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.storage.VolumeAttachment"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.storage.VolumeAttachmentList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.storage.VolumeAttributesClass"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.storage.VolumeAttributesClassList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.storage.v1alpha1.CSIStorageCapacity"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.storage.v1alpha1.CSIStorageCapacityList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.storage.v1alpha1.VolumeAttachment"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.storage.v1alpha1.VolumeAttachmentList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.storage.v1beta1.CSIDriver"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.storage.v1beta1.CSIDriverList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.storage.v1beta1.CSINode"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.storage.v1beta1.CSINodeList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.storage.v1beta1.CSIStorageCapacity"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.storage.v1beta1.CSIStorageCapacityList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.storage.v1beta1.StorageClass"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.storage.v1beta1.StorageClassList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.storage.v1beta1.VolumeAttachment"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.storage.v1beta1.VolumeAttachmentList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.storagemigration.v1.StorageVersionMigration"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.storagemigration.v1.StorageVersionMigrationList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.storagemigration.v1beta1.StorageVersionMigration"
+    },
+    {
+      "type": "io.fabric8.kubernetes.api.model.storagemigration.v1beta1.StorageVersionMigrationList"
+    },
+    {
+      "type": "io.fabric8.kubernetes.client.CustomResource",
+      "methods": [
+        {
+          "name": "getApiVersion",
+          "parameterTypes": []
+        },
+        {
+          "name": "getKind",
+          "parameterTypes": []
+        },
+        {
+          "name": "getMetadata",
+          "parameterTypes": []
+        },
+        {
+          "name": "getSpec",
+          "parameterTypes": []
+        },
+        {
+          "name": "getStatus",
+          "parameterTypes": []
+        },
+        {
+          "name": "setApiVersion",
+          "parameterTypes": [
+            "java.lang.String"
+          ]
+        },
+        {
+          "name": "setKind",
+          "parameterTypes": [
+            "java.lang.String"
+          ]
+        },
+        {
+          "name": "setMetadata",
+          "parameterTypes": [
+            "io.fabric8.kubernetes.api.model.ObjectMeta"
+          ]
+        },
+        {
+          "name": "setSpec",
+          "parameterTypes": [
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "io.fabric8.kubernetes.client.dsl.internal.BaseOperation",
+      "methods": [
+        {
+          "name": "submitList",
+          "parameterTypes": [
+            "io.fabric8.kubernetes.api.model.ListOptions"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "io.fabric8.kubernetes.client.dsl.internal.OperationSupport",
+      "methods": [
+        {
+          "name": "handleResponse",
+          "parameterTypes": [
+            "io.fabric8.kubernetes.client.http.HttpRequest$Builder",
+            "java.lang.Class"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "io.fabric8.kubernetes.client.impl.KubernetesClientImpl",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "io.fabric8.kubernetes.client.http.HttpClient",
+            "io.fabric8.kubernetes.client.Config",
+            "io.fabric8.kubernetes.client.KubernetesClientBuilder$ExecutorSupplier",
+            "io.fabric8.kubernetes.client.utils.KubernetesSerialization"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "io.fabric8.kubernetes.client.utils.KubernetesSerialization",
+      "methods": [
+        {
+          "name": "unmarshal",
+          "parameterTypes": [
+            "java.io.InputStream",
+            "java.lang.Class"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "io.fabric8.kubernetes.client.vertx5.Vertx5HttpClientFactory"
+    },
+    {
+      "type": "io.fabric8.kubernetes.internal.KubernetesDeserializer",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micrometer.context.ContextRegistry"
+    },
+    {
+      "type": "io.micronaut.aop.internal.InterceptorRegistryBean",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.buffer.netty.$BeanConfiguration",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.buffer.netty.$DefaultByteBufAllocatorConfiguration$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.buffer.netty.$NettyByteBufferFactory$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.buffer.netty.NettyByteBufferConverters",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.context.annotation.Prototype"
+    },
+    {
+      "type": "io.micronaut.context.beans.DefaultBeanDefinitionService$BeanDefinitionProducer"
+    },
+    {
+      "type": "io.micronaut.context.env.ClasspathPropertySourceImporter",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.context.env.ClasspathWildcardPropertySourceImporter",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.context.env.ConfigTreePropertySourceImporter",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.context.env.EnvPropertySourceImporter",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.context.env.FilePropertySourceImporter",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.context.event.ApplicationEventPublisherFactory",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.context.propagation.$PropagatedContextConfigurationProperties$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.context.propagation.instrument.execution.$ExecutorServiceInstrumenter$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.context.time.$InstantSourceFactory$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.context.time.$InstantSourceFactory$SystemClock0$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.core.async.ReactiveStreamsTypeInformationProvider",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.core.async.converters.ReactiveTypeConverterRegistrar",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.core.async.publisher.CompletableFuturePublisher"
+    },
+    {
+      "type": "io.micronaut.core.async.publisher.Publishers$JustPublisher"
+    },
+    {
+      "type": "io.micronaut.core.async.publisher.Publishers$JustThrowPublisher"
+    },
+    {
+      "type": "io.micronaut.core.async.subscriber.Completable"
+    },
+    {
+      "type": "io.micronaut.http.HttpMethod[]"
+    },
+    {
+      "type": "io.micronaut.http.HttpTypeConverterRegistrar",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.bind.$DefaultRequestBinderRegistry$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.bind.binders.$DefaultBodyAnnotationBinder$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.body.$ByteArrayBodyHandler$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.body.$ByteBodyWriter$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.body.$ByteBufferBodyHandler$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.body.$CharSequenceBodyWriter$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.body.$ConversionTextPlainHandler$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.body.$DefaultMessageBodyHandlerRegistry$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.body.$StringBodyReader$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.body.$TextPlainObjectBodyReader$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.body.$TextPlainObjectBodyWriter$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.body.$TextStreamBodyWriter$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.body.$WritableBodyWriter$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.codec.$CodecConfiguration$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.converters.$HttpConverterRegistrar$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.converters.SharedHttpConvertersRegistrar",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.expression.$RequestConditionContext$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.form.$FormConfigurationProperties$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.hateoas.$AbstractResource$Introspection",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.hateoas.$DefaultLink$Introspection",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.hateoas.$GenericResource$Introspection",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.hateoas.$JsonError$Introspection",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.hateoas.$Resource$Introspection",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.hateoas.$VndError$Introspection",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.netty.$BeanConfiguration",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.netty.body.$NettyByteBufMessageBodyHandler$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.netty.body.$NettyJsonHandler$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.netty.body.$NettyJsonStreamHandler$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.netty.channel.$DefaultEventLoopGroupConfiguration$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.netty.channel.$DefaultEventLoopGroupFactory$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.netty.channel.$DefaultEventLoopGroupRegistry$DefaultEventLoopGroup1$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.netty.channel.$DefaultEventLoopGroupRegistry$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.netty.channel.$DefaultEventLoopGroupRegistry$EventLoopGroup0$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.netty.channel.$EpollAvailabilityCondition$Introspection",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.netty.channel.$EpollEventLoopGroupFactory$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.netty.channel.$IoUringAvailabilityCondition$Introspection",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.netty.channel.$IoUringEventLoopGroupFactory$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.netty.channel.$KQueueAvailabilityCondition$Introspection",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.netty.channel.$KQueueEventLoopGroupFactory$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.netty.channel.$NettyThreadFactory$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.netty.channel.$NettyThreadFactory$NettyThreadFactory0$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.netty.channel.$NioEventLoopGroupFactory$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.netty.channel.converters.$DefaultChannelOptionFactory$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.netty.channel.converters.$EpollChannelOptionFactory$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.netty.channel.converters.$KQueueChannelOptionFactory$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.netty.channel.loom.$EventLoopLoomFactory$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.netty.channel.loom.$EventLoopLoomFactory$EventLoopGroupThreadFactory0$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.netty.channel.loom.$LoomCarrierConfiguration$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.netty.channel.loom.$LoomCarrierGroup$Factory$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.netty.channel.loom.$PrivateLoomSupport$PrivateLoomCondition$Introspection",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.netty.configuration.$NettyGlobalConfiguration$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.netty.websocket.$NettyServerWebSocketBroadcaster$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.netty.websocket.$WebSocketMessageEncoder$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.resource.$ResourceLoaderFactory$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.resource.$ResourceLoaderFactory$FileSystemResourceLoader1$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.resource.$ResourceLoaderFactory$GetBase64ResourceLoader3$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.resource.$ResourceLoaderFactory$GetClassPathResourceLoader0$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.resource.$ResourceLoaderFactory$GetStringResourceLoader2$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.resource.$ResourceLoaderFactory$ResourceResolver4$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.$CoroutineHelper$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.$HttpServerConfiguration$CorsConfiguration$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.$HttpServerConfiguration$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.$HttpServerConfiguration$FileTypeHandlerConfiguration$CacheControlConfiguration$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.$HttpServerConfiguration$FileTypeHandlerConfiguration$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.$HttpServerConfiguration$HostResolutionConfiguration$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.$HttpServerConfiguration$HttpLocaleResolutionConfigurationProperties$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.$HttpServerConfiguration$MultipartConfiguration$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.$OptionsFilter$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.$RouteExecutor$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.HttpServerTypeConvertersRegistrar",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.binding.$BasicAuthArgumentBinder$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.binding.$LocaleArgumentBinder$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.binding.$RawFormFieldArgumentBinder$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.binding.$RequestArgumentSatisfier$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.binding.$RouteInfoArgumentBinder$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.binding.$RouteMatchArgumentBinder$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.body.$FileBodyWriter$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.body.$FileCustomizableResponseTypeBodyWriter$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.body.$InputStreamBodyWriter$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.body.$StreamFileBodyWriter$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.body.$SystemFileBodyWriter$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.codec.$TextStreamCodec$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.cors.$CorsFilter$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.cors.$CorsResponseHeaderPopulatorFactory$CrossOriginPolicies0$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.cors.$CorsResponseHeaderPopulatorFactory$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.exceptions.$BufferLengthExceededHandler$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.exceptions.$ContentLengthExceededHandler$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.exceptions.$ConversionErrorHandler$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.exceptions.$CookieSizeExceededHandler$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.exceptions.$DuplicateRouteHandler$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.exceptions.$HttpStatusHandler$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.exceptions.$JacksonExceptionHandler$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.exceptions.$JsonExceptionHandler$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.exceptions.$NotAllowedExceptionHandler$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.exceptions.$URISyntaxHandler$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.exceptions.$UnsatisfiedArgumentHandler$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.exceptions.$UnsatisfiedRouteHandler$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.exceptions.response.$DefaultErrorResponseProcessor$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.exceptions.response.$DefaultHtmlErrorResponseBodyProvider$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.exceptions.response.$DefaultJsonErrorResponseBodyProvider$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.filter.$DefaultFilterBodyParser$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.filter.$ResponseHeaderPopulatorFilter$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.multipart.$FormFactory$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.netty.$BeanConfiguration",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.netty.$DefaultHttpCompressionStrategy$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.netty.$DefaultNettyEmbeddedServerFactory$BuildDefaultServer0$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.netty.$DefaultNettyEmbeddedServerFactory$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.netty.$NettyRequestArgumentSatisfier$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.netty.NettyHttpResponseFactory",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.netty.NettyHttpServer$1"
+    },
+    {
+      "type": "io.micronaut.http.server.netty.NettyHttpServer$Listener"
+    },
+    {
+      "type": "io.micronaut.http.server.netty.binders.$NettyServerRequestBinderRegistry$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.netty.configuration.$NettyHttpServerConfiguration$AccessLogger$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.netty.configuration.$NettyHttpServerConfiguration$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.netty.configuration.$NettyHttpServerConfiguration$FileTypeHandlerConfiguration$CacheControlConfiguration$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.netty.configuration.$NettyHttpServerConfiguration$FileTypeHandlerConfiguration$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.netty.configuration.$NettyHttpServerConfiguration$Http2Settings$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.netty.configuration.$NettyHttpServerConfiguration$Http3Settings$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.netty.configuration.$NettyHttpServerConfiguration$NettyListenerConfiguration$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.netty.configuration.$NettyHttpServerConfiguration$Parent$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.netty.configuration.$NettyHttpServerConfiguration$Worker$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.netty.converters.$NettyConverters$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.netty.converters.NettyConvertersSpi",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.netty.discovery.$NettyEmbeddedServerInstance$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.netty.discovery.$NettyServiceDiscovery$ApplicationEventListener$onStart1$Intercepted$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.netty.discovery.$NettyServiceDiscovery$ApplicationEventListener$onStop2$Intercepted$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.netty.discovery.$NettyServiceDiscovery$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.netty.handler.PipeliningServerHandler"
+    },
+    {
+      "type": "io.micronaut.http.server.netty.ssl.$BuildSelfSignedCondition$Introspection",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.netty.ssl.$CertificateProvidedSslBuilder$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.netty.ssl.$CertificateProvidedSslBuilder$SelfSignedNotConfigured$Introspection",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.netty.ssl.$NettyServerSslFactory$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.netty.ssl.$SelfSignedSslBuilder$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.netty.ssl.$SelfSignedSslBuilder$SelfSignedConfigured$Introspection",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.netty.ssl.$SslEnabledCondition$Introspection",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.netty.websocket.$WebSocketUpgradeHandlerFactory$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.util.$DefaultHttpClientAddressResolver$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.util.$DefaultHttpHostResolver$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.util.locale.$CompositeHttpLocaleResolver$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.util.locale.$CookieLocaleResolver$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.util.locale.$HttpFixedLocaleResolver$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.util.locale.$HttpLocalizedMessageSource$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.util.locale.$HttpLocalizedMessageSource$Definition$Intercepted$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.util.locale.$RequestLocaleResolver$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.server.websocket.$ServerWebSocketProcessor$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.ssl.$ClientSslConfiguration$DefaultKeyConfiguration$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.ssl.$ClientSslConfiguration$DefaultKeyStoreConfiguration$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.ssl.$ClientSslConfiguration$DefaultTrustStoreConfiguration$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.ssl.$ClientSslConfiguration$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.ssl.$DefaultSslConfiguration$DefaultKeyConfiguration$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.ssl.$DefaultSslConfiguration$DefaultKeyStoreConfiguration$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.ssl.$DefaultSslConfiguration$DefaultTrustStoreConfiguration$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.ssl.$DefaultSslConfiguration$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.ssl.$FileCertificateProvider$Config$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.ssl.$FileCertificateProvider$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.ssl.$ResourceCertificateProvider$Config$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.ssl.$ResourceCertificateProvider$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.ssl.$SelfSignedCertificateProvider$Config$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.ssl.$SelfSignedCertificateProvider$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.ssl.$ServerSslConfiguration$DefaultKeyConfiguration$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.ssl.$ServerSslConfiguration$DefaultKeyStoreConfiguration$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.ssl.$ServerSslConfiguration$DefaultTrustStoreConfiguration$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.ssl.$ServerSslConfiguration$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.uri.$DefaultFormUrlEncodedDecoder$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.util.$HtmlEntityEncodingHtmlSanitizer$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.util.$OutgoingHttpRequestProcessorImpl$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.http.util.HttpTypeInformationProvider",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.inject.annotation.AnnotationConvertersRegistrar",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.inject.provider.BeanProviderDefinition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.inject.provider.JakartaProviderBeanDefinition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.inject.provider.JavaxProviderBeanDefinition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.inject.provider.ProviderTypeInformationProvider",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.jackson.$BeanConfiguration",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.jackson.$JacksonConfiguration$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.jackson.$ObjectMapperFactory$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.jackson.$ObjectMapperFactory$JsonFactory0$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.jackson.$ObjectMapperFactory$JsonMapper1$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.jackson.$ObjectMapperFactory$JsonMapperBuilder2$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.jackson.codec.$JsonMediaTypeCodec$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.jackson.codec.$JsonStreamMediaTypeCodec$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.jackson.core.env.CloudFoundryVcapApplicationPropertySourceLoader",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.jackson.core.env.CloudFoundryVcapServicesPropertySourceLoader",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.jackson.core.env.EnvJsonPropertySourceLoader",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.jackson.core.env.JsonPropertySourceLoader",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.jackson.databind.$DatabindPropertyBinderExceptionHandler$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.jackson.databind.$JacksonDatabindMapper$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.jackson.databind.convert.$JacksonConverterRegistrar$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.jackson.serialize.$ConvertibleMultiValuesSerializer$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.jackson.serialize.$ConvertibleValuesSerializer$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.jackson.serialize.$JacksonObjectSerializer$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.jackson.serialize.$JsonNodeDeserializer$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.jackson.serialize.$JsonNodeSerializer$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.jackson.serialize.$OptionalValuesSerializer$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.jackson.serialize.$ResourceModule$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.jackson.serialize.$ResourceSerializerModifier$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.jackson.validation.$ValidationJacksonDeserializationPreInstantiateCallback$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.json.$JsonObjectSerializer$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.json.bind.$JsonBeanPropertyBinder$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.json.body.$JsonMessageHandler$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.json.codec.$JsonMediaTypeCodec$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.json.codec.$JsonStreamMediaTypeCodec$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.json.convert.$JsonConverterRegistrar$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.logging.$LogLevel$Introspection",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.logging.$PropertiesLoggingLevelsConfigurer$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.logging.$PropertiesLoggingLevelsConfigurer$PropertiesLoggingLevelsConfiguration$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.logging.LoggingConverterRegistrar",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.logging.impl.$Log4jLoggingSystem$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.logging.impl.$LogbackLoggingSystem$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.runtime.$ApplicationConfiguration$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.runtime.$ApplicationConfiguration$InstanceConfiguration$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.runtime.beans.$MapperIntroduction$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.runtime.beans.$MapperMethodProcessor$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.runtime.context.$CompositeMessageSource$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.runtime.context.env.$ConfigurationIntroductionAdvice$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.runtime.context.scope.$ThreadLocalCustomScope$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.runtime.context.scope.refresh.$RefreshInterceptor$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.runtime.context.scope.refresh.$RefreshScope$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.runtime.context.scope.refresh.$RefreshScopeCondition$Introspection",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.runtime.converters.time.TimeConverterRegistrar",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.runtime.graceful.$GracefulShutdownConfiguration$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.runtime.graceful.$GracefulShutdownListener$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.runtime.graceful.$GracefulShutdownManager$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.runtime.http.codec.$MediaTypeCodecRegistryFactory$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.runtime.http.codec.$MediaTypeCodecRegistryFactory$MediaTypeCodecRegistry0$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.runtime.http.codec.$TextPlainCodec$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.runtime.http.scope.$RequestCustomScope$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.runtime.server.watch.event.$FileWatchRestartListener$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.scheduling.$DefaultTaskExceptionHandler$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.scheduling.$LoomSupport$LoomCondition$Introspection",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.scheduling.$ScheduledExecutorTaskScheduler$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.scheduling.async.$AsyncInterceptor$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.scheduling.executor.$DefaultExecutorSelector$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.scheduling.executor.$DefaultThreadFactory$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.scheduling.executor.$DefaultThreadFactory$ThreadFactory0$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.scheduling.executor.$ExecutorFactory$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.scheduling.executor.$ExecutorFactory$EventLoopGroupThreadFactory0$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.scheduling.executor.$ExecutorFactory$ExecutorService1$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.scheduling.executor.$IOExecutorServiceConfig$Blocking2$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.scheduling.executor.$IOExecutorServiceConfig$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.scheduling.executor.$IOExecutorServiceConfig$Io0$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.scheduling.executor.$IOExecutorServiceConfig$Virtual1$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.scheduling.executor.$ScheduledExecutorServiceConfig$Configuration0$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.scheduling.executor.$ScheduledExecutorServiceConfig$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.scheduling.executor.$UserExecutorConfiguration$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.scheduling.io.watch.$DefaultWatchThread$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.scheduling.io.watch.$FileWatchCondition$Introspection",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.scheduling.io.watch.$FileWatchConfiguration$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.scheduling.io.watch.$WatchServiceFactory$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.scheduling.io.watch.$WatchServiceFactory$WatchService0$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.scheduling.processor.$ScheduledMethodProcessor$ApplicationEventListener$scheduleTasks1$Intercepted$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.scheduling.processor.$ScheduledMethodProcessor$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.web.router.$AnnotatedFilterRouteBuilder$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.web.router.$AnnotatedMethodRouteBuilder$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.web.router.$DefaultRouter$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.web.router.$ServerFilterRouteBuilder$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.web.router.naming.$HyphenatedUriNamingStrategy$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.web.router.resource.$StaticResourceConfiguration$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.web.router.resource.$StaticResourceResolverFactory$Build0$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.web.router.resource.$StaticResourceResolverFactory$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.web.router.version.$ConfigurationDefaultVersionProvider$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.web.router.version.$RouteVersionFilter$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.web.router.version.$RoutesVersioningConfiguration$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.web.router.version.$VersionAwareRouterListener$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.web.router.version.resolution.$HeaderVersionResolver$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.web.router.version.resolution.$HeaderVersionResolverConfiguration$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.web.router.version.resolution.$ParameterVersionResolver$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.micronaut.web.router.version.resolution.$ParameterVersionResolverConfiguration$Definition",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.netty.bootstrap.ServerBootstrap$1"
+    },
+    {
+      "type": "io.netty.bootstrap.ServerBootstrap$ServerBootstrapAcceptor"
+    },
+    {
+      "type": "io.netty.buffer.AbstractByteBufAllocator"
+    },
+    {
+      "type": "io.netty.buffer.AdaptivePoolingAllocator$Magazine"
+    },
+    {
+      "type": "io.netty.buffer.AdaptivePoolingAllocator$SizeClassedChunk"
+    },
+    {
+      "type": "io.netty.buffer.ByteBuf"
+    },
+    {
+      "type": "io.netty.channel.AbstractChannelHandlerContext"
+    },
+    {
+      "type": "io.netty.channel.ChannelOutboundBuffer"
+    },
+    {
+      "type": "io.netty.channel.DefaultChannelConfig"
+    },
+    {
+      "type": "io.netty.channel.DefaultChannelPipeline"
+    },
+    {
+      "type": "io.netty.channel.DefaultChannelPipeline$HeadContext"
+    },
+    {
+      "type": "io.netty.channel.DefaultChannelPipeline$TailContext"
+    },
+    {
+      "type": "io.netty.handler.codec.http.HttpClientCodec"
+    },
+    {
+      "type": "io.netty.handler.codec.http.HttpServerCodec"
+    },
+    {
+      "type": "io.netty.handler.codec.http.websocketx.WebSocket13FrameDecoder"
+    },
+    {
+      "type": "io.netty.handler.codec.http.websocketx.WebSocket13FrameEncoder"
+    },
+    {
+      "type": "io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker"
+    },
+    {
+      "type": "io.netty.handler.ssl.SslHandler"
+    },
+    {
+      "type": "io.netty.handler.timeout.IdleStateHandler"
+    },
+    {
+      "type": "io.netty.internal.tcnative.CertificateCallback"
+    },
+    {
+      "type": "io.netty.internal.tcnative.CertificateCallbackTask"
+    },
+    {
+      "type": "io.netty.internal.tcnative.SSLContext"
+    },
+    {
+      "type": "io.netty.internal.tcnative.SSLPrivateKeyMethodDecryptTask"
+    },
+    {
+      "type": "io.netty.internal.tcnative.SSLPrivateKeyMethodSignTask"
+    },
+    {
+      "type": "io.netty.internal.tcnative.SSLPrivateKeyMethodTask"
+    },
+    {
+      "type": "io.netty.internal.tcnative.SSLTask"
+    },
+    {
+      "type": "io.netty.util.DefaultAttributeMap"
+    },
+    {
+      "type": "io.netty.util.DefaultAttributeMap$DefaultAttribute"
+    },
+    {
+      "type": "io.netty.util.Recycler$DefaultHandle"
+    },
+    {
+      "type": "io.netty.util.ReferenceCountUtil"
+    },
+    {
+      "type": "io.netty.util.concurrent.ConcurrentSkipListIntObjMultimap"
+    },
+    {
+      "type": "io.netty.util.concurrent.ConcurrentSkipListIntObjMultimap$Index"
+    },
+    {
+      "type": "io.netty.util.concurrent.ConcurrentSkipListIntObjMultimap$Node"
+    },
+    {
+      "type": "io.netty.util.concurrent.DefaultPromise"
+    },
+    {
+      "type": "io.netty.util.concurrent.MpscIntQueue$MpscAtomicIntegerArrayQueue"
+    },
+    {
+      "type": "io.netty.util.concurrent.SingleThreadEventExecutor"
+    },
+    {
+      "type": "io.netty.util.internal.NativeLibraryUtil",
+      "methods": [
+        {
+          "name": "loadLibrary",
+          "parameterTypes": [
+            "java.lang.String",
+            "boolean"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "io.netty.util.internal.shaded.org.jctools.queues.varhandle.BaseLinkedVarHandleQueueConsumerNodeRef",
+      "fields": [
+        {
+          "name": "consumerNode"
+        }
+      ]
+    },
+    {
+      "type": "io.netty.util.internal.shaded.org.jctools.queues.varhandle.BaseLinkedVarHandleQueueProducerNodeRef",
+      "fields": [
+        {
+          "name": "producerNode"
+        }
+      ]
+    },
+    {
+      "type": "io.netty.util.internal.shaded.org.jctools.queues.varhandle.BaseMpscLinkedVarHandleArrayQueueColdProducerFields",
+      "fields": [
+        {
+          "name": "producerLimit"
+        }
+      ]
+    },
+    {
+      "type": "io.netty.util.internal.shaded.org.jctools.queues.varhandle.BaseMpscLinkedVarHandleArrayQueueConsumerFields",
+      "fields": [
+        {
+          "name": "consumerIndex"
+        }
+      ]
+    },
+    {
+      "type": "io.netty.util.internal.shaded.org.jctools.queues.varhandle.BaseMpscLinkedVarHandleArrayQueueProducerFields",
+      "fields": [
+        {
+          "name": "producerIndex"
+        }
+      ]
+    },
+    {
+      "type": "io.netty.util.internal.shaded.org.jctools.queues.varhandle.LinkedQueueVarHandleNode",
+      "fields": [
+        {
+          "name": "next"
+        }
+      ]
+    },
+    {
+      "type": "io.netty.util.internal.shaded.org.jctools.queues.varhandle.MpmcVarHandleArrayQueueConsumerIndexField",
+      "fields": [
+        {
+          "name": "consumerIndex"
+        }
+      ]
+    },
+    {
+      "type": "io.netty.util.internal.shaded.org.jctools.queues.varhandle.MpmcVarHandleArrayQueueProducerIndexField",
+      "fields": [
+        {
+          "name": "producerIndex"
+        }
+      ]
+    },
+    {
+      "type": "io.pebbletemplates.pebble.node.expression.UnaryNotExpression",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.reactivex.Completable"
+    },
+    {
+      "type": "io.reactivex.Maybe"
+    },
+    {
+      "type": "io.reactivex.Observable"
+    },
+    {
+      "type": "io.reactivex.Single"
+    },
+    {
+      "type": "io.reactivex.rxjava3.core.Completable"
+    },
+    {
+      "type": "io.reactivex.rxjava3.core.Flowable"
+    },
+    {
+      "type": "io.reactivex.rxjava3.core.Maybe"
+    },
+    {
+      "type": "io.reactivex.rxjava3.core.Observable"
+    },
+    {
+      "type": "io.reactivex.rxjava3.core.Single"
+    },
+    {
+      "type": "io.vertx.core.eventbus.impl.EventBusImpl"
+    },
+    {
+      "type": "io.vertx.core.http.impl.websocket.WebSocketHandshakeInboundHandler"
+    },
+    {
+      "type": "io.vertx.core.impl.SysProps"
+    },
+    {
+      "type": "io.vertx.core.impl.VertxImpl$InternalTimerHandler",
+      "fields": [
+        {
+          "name": "disposed"
+        }
+      ]
+    },
+    {
+      "type": "io.vertx.core.internal.concurrent.InboundMessageQueue"
+    },
+    {
+      "type": "io.vertx.core.logging.SLF4JLogDelegateFactory",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.vertx.core.net.impl.VertxHandler"
+    },
+    {
+      "type": "io.vertx.core.net.impl.tcp.ChannelProvider$2"
+    },
+    {
+      "type": "io.vertx.core.streams.impl.MessagePassingQueue$MpSc"
+    },
+    {
+      "type": "io.vertx.core.streams.impl.MessagePassingQueue$SpSc"
+    },
+    {
+      "type": "java.io.Serializable"
+    },
+    {
+      "type": "java.lang.Boolean",
+      "jniAccessible": true,
+      "methods": [
+        {
+          "name": "getBoolean",
+          "parameterTypes": [
+            "java.lang.String"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "java.lang.Class",
+      "methods": [
+        {
+          "name": "getModule",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "java.lang.Cloneable"
+    },
+    {
+      "type": "java.lang.Exception"
+    },
+    {
+      "type": "java.lang.IllegalArgumentException"
+    },
+    {
+      "type": "java.lang.Iterable"
+    },
+    {
+      "type": "java.lang.NullPointerException"
+    },
+    {
+      "type": "java.lang.Object[]"
+    },
+    {
+      "type": "java.lang.OutOfMemoryError"
+    },
+    {
+      "type": "java.lang.Record"
+    },
+    {
+      "type": "java.lang.String"
+    },
+    {
+      "type": "java.lang.Thread",
+      "methods": [
+        {
+          "name": "isVirtual",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "java.lang.Thread$VirtualThreadScheduler"
+    },
+    {
+      "type": "java.lang.foreign.MemorySegment",
+      "methods": [
+        {
+          "name": "address",
+          "parameterTypes": []
+        },
+        {
+          "name": "ofBuffer",
+          "parameterTypes": [
+            "java.nio.Buffer"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "java.lang.invoke.MethodHandles",
+      "methods": [
+        {
+          "name": "byteArrayViewVarHandle",
+          "parameterTypes": [
+            "java.lang.Class",
+            "java.nio.ByteOrder"
+          ]
+        },
+        {
+          "name": "byteBufferViewVarHandle",
+          "parameterTypes": [
+            "java.lang.Class",
+            "java.nio.ByteOrder"
+          ]
+        },
+        {
+          "name": "privateLookupIn",
+          "parameterTypes": [
+            "java.lang.Class",
+            "java.lang.invoke.MethodHandles$Lookup"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "java.lang.invoke.MethodHandles$Lookup",
+      "methods": [
+        {
+          "name": "findVarHandle",
+          "parameterTypes": [
+            "java.lang.Class",
+            "java.lang.String",
+            "java.lang.Class"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "java.lang.invoke.VarHandle",
+      "methods": [
+        {
+          "name": "acquireFence",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "java.net.UnixDomainSocketAddress",
+      "methods": [
+        {
+          "name": "getPath",
+          "parameterTypes": []
+        },
+        {
+          "name": "of",
+          "parameterTypes": [
+            "java.nio.file.Path"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "java.nio.ByteBuffer",
+      "methods": [
+        {
+          "name": "alignedSlice",
+          "parameterTypes": [
+            "int"
+          ]
+        },
+        {
+          "name": "put",
+          "parameterTypes": [
+            "int",
+            "java.nio.ByteBuffer",
+            "int",
+            "int"
+          ]
+        },
+        {
+          "name": "put",
+          "parameterTypes": [
+            "int",
+            "byte[]",
+            "int",
+            "int"
+          ]
+        },
+        {
+          "name": "slice",
+          "parameterTypes": [
+            "int",
+            "int"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "java.nio.channels.spi.SelectorProvider"
+    },
+    {
+      "type": "java.security.AlgorithmParametersSpi"
+    },
+    {
+      "type": "java.security.KeyStoreSpi"
+    },
+    {
+      "type": "java.security.interfaces.RSAPrivateKey"
+    },
+    {
+      "type": "java.security.interfaces.RSAPublicKey"
+    },
+    {
+      "type": "java.sql.Date"
+    },
+    {
+      "type": "java.util.AbstractCollection"
+    },
+    {
+      "type": "java.util.AbstractList"
+    },
+    {
+      "type": "java.util.AbstractMap"
+    },
+    {
+      "type": "java.util.Arrays$ArrayList"
+    },
+    {
+      "type": "java.util.Collection"
+    },
+    {
+      "type": "java.util.Collections$SingletonList"
+    },
+    {
+      "type": "java.util.HashMap"
+    },
+    {
+      "type": "java.util.HashMap$Node[]"
+    },
+    {
+      "type": "java.util.List"
+    },
+    {
+      "type": "java.util.Map"
+    },
+    {
+      "type": "java.util.RandomAccess"
+    },
+    {
+      "type": "java.util.SplittableRandom",
+      "methods": [
+        {
+          "name": "nextBytes",
+          "parameterTypes": [
+            "byte[]"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "kotlinx.coroutines.flow.Flow"
+    },
+    {
+      "type": "org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider"
+    },
+    {
+      "type": "org.bouncycastle.jce.provider.BouncyCastleProvider"
+    },
+    {
+      "type": "org.bouncycastle.openssl.PEMParser"
+    },
+    {
+      "type": "reactor.core.publisher.Flux"
+    },
+    {
+      "type": "reactor.core.publisher.FluxReplay$ReplaySubscriber"
+    },
+    {
+      "type": "reactor.core.publisher.LambdaSubscriber"
+    },
+    {
+      "type": "reactor.core.publisher.Mono"
+    },
+    {
+      "type": "reactor.core.publisher.SinkManyReplayProcessor"
+    },
+    {
+      "type": "reactor.core.publisher.SinkManyReplayProcessor$ReplayInner"
+    },
+    {
+      "type": "reactor.core.publisher.SinksSpecs$AbstractSerializedSink"
+    },
+    {
+      "type": "sun.management.VMManagementImpl",
+      "jniAccessible": true,
+      "fields": [
+        {
+          "name": "compTimeMonitoringSupport"
+        },
+        {
+          "name": "currentThreadCpuTimeSupport"
+        },
+        {
+          "name": "objectMonitorUsageSupport"
+        },
+        {
+          "name": "otherThreadCpuTimeSupport"
+        },
+        {
+          "name": "remoteDiagnosticCommandsSupport"
+        },
+        {
+          "name": "synchronizerUsageSupport"
+        },
+        {
+          "name": "threadAllocatedMemorySupport"
+        },
+        {
+          "name": "threadContentionMonitoringSupport"
+        }
+      ]
+    },
+    {
+      "type": "sun.nio.ch.SelectorImpl"
+    },
+    {
+      "type": "sun.security.pkcs12.PKCS12KeyStore",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.pkcs12.PKCS12KeyStore$DualFormatPKCS12",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.provider.DSA$SHA224withDSA",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.provider.DSA$SHA256withDSA",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.provider.JavaKeyStore$DualFormatJKS",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.provider.JavaKeyStore$JKS",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.provider.NativePRNG",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.security.SecureRandomParameters"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.provider.SHA",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.provider.SHA2$SHA224",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.provider.SHA2$SHA256",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.provider.SHA5$SHA384",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.provider.SHA5$SHA512",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.provider.X509Factory",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.rsa.PSSParameters",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.rsa.RSAKeyFactory$Legacy",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.rsa.RSAPSSSignature",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.rsa.RSASignature$SHA224withRSA",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.ssl.KeyManagerFactoryImpl$SunX509",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.ssl.SSLContextImpl$TLS13Context",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.ssl.SSLContextImpl$TLSContext",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.ssl.TrustManagerFactoryImpl$PKIXFactory",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.AuthorityInfoAccessExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.AuthorityKeyIdentifierExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.BasicConstraintsExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.CRLDistributionPointsExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.CertificatePoliciesExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.ExtendedKeyUsageExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.KeyUsageExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.SubjectAlternativeNameExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.SubjectKeyIdentifierExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.text.resources.cldr.FormatData"
+    },
+    {
+      "type": "sun.text.resources.cldr.FormatData_en"
+    },
+    {
+      "type": "sun.text.resources.cldr.FormatData_en_US"
+    },
+    {
+      "type": "sun.util.resources.cldr.CalendarData"
+    },
+    {
+      "type": "tools.jackson.databind.deser.Deserializers[]"
+    },
+    {
+      "type": "tools.jackson.databind.deser.KeyDeserializers[]"
+    },
+    {
+      "type": "tools.jackson.databind.deser.ValueDeserializerModifier[]"
+    },
+    {
+      "type": "tools.jackson.databind.deser.ValueInstantiators[]"
+    },
+    {
+      "type": "tools.jackson.databind.ser.Serializers[]"
+    },
+    {
+      "type": "tools.jackson.databind.ser.ValueSerializerModifier[]"
+    }
+  ],
+  "resources": [
+    {
+      "glob": "META-INF/micronaut"
+    },
+    {
+      "glob": "META-INF/native/libnetty_tcnative.so"
+    },
+    {
+      "glob": "META-INF/native/libnetty_tcnative_linux_x86_64.so"
+    },
+    {
+      "glob": "META-INF/native/libnetty_tcnative_linux_x86_64_fedora.so"
+    },
+    {
+      "glob": "META-INF/native/libnetty_tcnative_x86_64.so"
+    },
+    {
+      "glob": "META-INF/services/ch.qos.logback.classic.spi.Configurator"
+    },
+    {
+      "glob": "META-INF/services/io.fabric8.kubernetes.api.model.KubernetesResource"
+    },
+    {
+      "glob": "META-INF/services/io.fabric8.kubernetes.client.extension.ExtensionAdapter"
+    },
+    {
+      "glob": "META-INF/services/io.fabric8.kubernetes.client.http.HttpClient$Factory"
+    },
+    {
+      "glob": "META-INF/services/io.micronaut.context.ApplicationContextConfigurer"
+    },
+    {
+      "glob": "META-INF/services/io.micronaut.context.env.PropertyExpressionResolver"
+    },
+    {
+      "glob": "META-INF/services/io.micronaut.context.env.PropertySourceImporter"
+    },
+    {
+      "glob": "META-INF/services/io.micronaut.context.env.PropertySourceLoader"
+    },
+    {
+      "glob": "META-INF/services/io.micronaut.core.beans.BeanIntrospectionFallback"
+    },
+    {
+      "glob": "META-INF/services/io.micronaut.core.beans.BeanIntrospectionReference"
+    },
+    {
+      "glob": "META-INF/services/io.micronaut.core.convert.TypeConverterRegistrar"
+    },
+    {
+      "glob": "META-INF/services/io.micronaut.core.optim.StaticOptimizations$Loader"
+    },
+    {
+      "glob": "META-INF/services/io.micronaut.core.type.TypeInformationProvider"
+    },
+    {
+      "glob": "META-INF/services/io.micronaut.http.HttpResponseFactory"
+    },
+    {
+      "glob": "META-INF/services/io.vertx.core.spi.VerticleFactory"
+    },
+    {
+      "glob": "META-INF/services/io.vertx.core.spi.VertxServiceProvider"
+    },
+    {
+      "glob": "META-INF/services/java.net.spi.URLStreamHandlerProvider"
+    },
+    {
+      "glob": "META-INF/services/java.nio.channels.spi.SelectorProvider"
+    },
+    {
+      "glob": "META-INF/services/java.time.zone.ZoneRulesProvider"
+    },
+    {
+      "glob": "META-INF/services/javax.xml.parsers.SAXParserFactory"
+    },
+    {
+      "glob": "META-INF/services/org.slf4j.spi.SLF4JServiceProvider"
+    },
+    {
+      "glob": "META-INF/services/tools.jackson.databind.JacksonModule"
+    },
+    {
+      "glob": "META-INF/vertx/vertx-version.txt"
+    },
+    {
+      "glob": "application.VCAP_APPLICATION"
+    },
+    {
+      "glob": "application.VCAP_SERVICES"
+    },
+    {
+      "glob": "application.json"
+    },
+    {
+      "glob": "application.properties"
+    },
+    {
+      "glob": "ch/qos/logback/classic/logback-classic-version.properties"
+    },
+    {
+      "glob": "ch/qos/logback/core/logback-core-version.properties"
+    },
+    {
+      "glob": "git.properties"
+    },
+    {
+      "glob": "logback.xml"
+    },
+    {
+      "glob": "micronaut-banner.txt"
+    },
+    {
+      "glob": "vertx-default-jul-logging.properties"
+    },
+    {
+      "module": "java.base",
+      "glob": "jdk/internal/icu/impl/data/icudt76b/nfkc.nrm"
+    },
+    {
+      "module": "jdk.jfr",
+      "glob": "jdk/jfr/internal/types/metadata.bin"
+    },
+    {
+      "glob": "templates/**"
+    }
+  ]
+}

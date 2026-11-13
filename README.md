@@ -50,6 +50,31 @@ This repository contains these various parts relating to the operator:
 make build
 ```
 
+The docker image holds the operator as a native executable and nothing else: no JVM and no launcher script. `make build`
+compiles it inside the docker build, so GraalVM is not needed on your machine.
+
+To compile the executable without docker, use a GraalVM JDK 25:
+
+```bash
+./gradlew :java-operator:nativeCompile
+```
+
+The result is `java-operator/build/native/nativeCompile/xp-operator`.
+
+#### Native image metadata
+
+A native executable only reaches by reflection what it was told about at build time. Two sources tell it:
+
+* The Kubernetes model classes the operator reads and writes are registered by the `generateModelMetadata` task in
+  [java-operator/build.gradle](java-operator/build.gradle). When the operator starts to use a model package that is not
+  listed there, add it.
+* What the Kubernetes client and the web server load by name is recorded in
+  [reachability-metadata.json](java-operator/src/main/resources/META-INF/native-image/com.enonic/xp-operator/reachability-metadata.json).
+  It was recorded by running the operator on a JVM with the GraalVM tracing agent
+  (`-agentlib:native-image-agent=config-output-dir=<dir>`) while it served admission requests over TLS and rolled out an
+  `Xp8Deployment`. Record it again after an upgrade of Micronaut or the Kubernetes client, or when the native executable
+  fails with a missing class, method or resource.
+
 
 ### Running and installing operator to kind cluster
 
