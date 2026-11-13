@@ -386,10 +386,9 @@ The operator creates a set of Xp8Configs for every deployment. These are created
 |`all-system` |`system.properties`
 |`all-admin` |`com.enonic.xp.app.main.cfg`
 |`all-logback` |`logback.xml`
-|`<nodegroup>-vhosts` |`com.enonic.xp.web.vhost.cfg`
 |===
 
-The others, such as `all-cluster`, `all-hazelcast` and `<nodegroup>-elasticsearch`, are rewritten by the operator, and edits to them are lost.
+The others, such as `all-cluster`, `all-hazelcast` and `<nodegroup>-elasticsearch`, are rewritten by the operator, and edits to them are lost. This includes `<nodegroup>-vhosts`: the operator regenerates it from the vhost mapping annotations on ingresses, see <<Ingresses>>.
 
 The content of `all-logback` comes from the `logback` value of the operator Helm chart, see <<installation#values,`values.yaml`>>. Changing the value affects only deployments created afterwards.
 
