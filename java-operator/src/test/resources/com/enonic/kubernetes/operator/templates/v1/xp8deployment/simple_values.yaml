@@ -21,8 +21,7 @@ deployment:
   namespace: "mycloud-mysolution-myenv-myservice"
   spec:
     enabled: true
-    xpVersion: "7.13.2"
-    nodesPreinstalledApps: []
+    xpVersion: "8.2.0"
     nodesSharedVolumes: []
     nodesSharedDisks:
     - name: "blobstore"
@@ -68,9 +67,6 @@ events:
 files:
   setEnv: "/enonic-xp/home/setenv.sh"
   vhosts: "com.enonic.xp.web.vhost.cfg"
-finalizers:
-  app:
-    uninstall: "uninstall.app.enonic.cloud"
 image:
   nameTemplate: "enonic/xp:%s-ubuntu"
   pullPolicy: "IfNotPresent"

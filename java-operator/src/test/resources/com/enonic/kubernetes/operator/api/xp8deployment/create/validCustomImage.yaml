@@ -14,7 +14,7 @@ admissionRequest:
           service: myservice2
       spec:
         enabled: true
-        xpVersion: 8.1.0
+        xpVersion: 8.2.0
         image: my-proxy.example.com/enonic/xp:nightly
         imagePullPolicy: Always
         nodesSharedDisks:
@@ -47,7 +47,7 @@ assertResult:
     namespace: "mycloud-mysolution-myenv-myservice2"
   spec:
     enabled: true
-    xpVersion: "8.1.0"
+    xpVersion: "8.2.0"
     image: "my-proxy.example.com/enonic/xp:nightly"
     imagePullPolicy: "Always"
     nodesSharedDisks:

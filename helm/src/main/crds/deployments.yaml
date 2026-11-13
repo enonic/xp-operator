@@ -37,17 +37,6 @@ spec:
                     - Always
                     - IfNotPresent
                     - Never
-                nodesPreinstalledApps:
-                  type: array
-                  default: []
-                  nullable: true
-                  items:
-                    type: object
-                    properties:
-                      name:
-                        type: string
-                      url:
-                        type: string
                 nodesSharedVolumes:
                   type: array
                   default: []

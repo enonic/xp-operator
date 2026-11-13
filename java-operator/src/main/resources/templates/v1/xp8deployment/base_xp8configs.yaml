@@ -20,7 +20,6 @@ spec:
   data: |-
     xp.name = {{ deployment.name | raw }}
     xp.suPassword = ${env.XP_SU_PASSWORD}
-    xp.init.adminUserCreation = false
 ---
 # Disable tour in admin
 apiVersion: enonic.cloud/v1

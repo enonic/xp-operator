@@ -10,7 +10,6 @@ The Enonic XP Kubernetes Operator is a piece of software runs on top of Kubernet
   - [Running and installing operator to kind cluster](#running-and-installing-operator-to-kind-cluster)
   - [Using custom XP docker image](#using-custom-xp-docker-image)
   - [Running operator in IDE](#running-operator-in-ide)
-    - [Enable dns records](#enable-dns-records)
 - [Release](#release)
 
 
@@ -27,7 +26,6 @@ This repository contains these various parts relating to the operator:
 
 * [Enonic XP Kubernetes Operator](./java-operator)
 * [Enonic XP Kubernetes Operator Helm Chart](./helm)
-* [Enonic XP Kubernetes Operator Java Client](./java-client)
 * [Enonic XP kubectl plugin](./kubectl-plugin)
 * [Enonic XP Kubernetes Operator Documentation](./docs/index.adoc)
 
@@ -136,7 +134,7 @@ mutable tags such as `nightly`, so every pod start pulls the current build:
 
 ```yaml
 spec:
-  xpVersion: 8.1.0
+  xpVersion: 8.2.0
   image: enonic/xp:nightly
   imagePullPolicy: Always
 ```
@@ -156,7 +154,7 @@ sidecar and init container images of `Xp8Deployment`, e.g. `enonic/xp:nightly` b
 `library/` path Docker otherwise implies, e.g. `busybox` becomes `.../dockerhub-proxy/library/busybox`. Images that
 already name a registry host, such as `ghcr.io/acme/app:1.0`, are left as is.
 
-`.spec.xpVersion` is still required and is validated to be 8.x.
+`.spec.xpVersion` is still required. A numeric version must be 8.2 or newer; other values are not checked.
 
 ### Running operator in IDE
 
