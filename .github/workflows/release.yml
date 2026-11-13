@@ -5,6 +5,7 @@ on:
     tags:
       - v*
       - '!v*-dev*'
+      - '!v*-debug*'
 
 jobs:
   release-build:

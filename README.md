@@ -10,6 +10,7 @@ The Enonic XP Kubernetes Operator is a piece of software runs on top of Kubernet
   - [Running and installing operator to kind cluster](#running-and-installing-operator-to-kind-cluster)
   - [Using custom XP docker image](#using-custom-xp-docker-image)
   - [Running operator in IDE](#running-operator-in-ide)
+  - [Debugging operator in a cluster](#debugging-operator-in-a-cluster)
 - [Release](#release)
 
 
@@ -187,6 +188,29 @@ make verify-kind
   "gitTreeState": "dirty"
 }
 ```
+
+### Debugging operator in a cluster
+
+The released image is a native executable, which a Java debugger cannot attach to. For debugging, publish a `-debug`
+image: run the *Debug* workflow on the branch to debug. It publishes `enonic/xp-operator:<version>-debug.<N>`, which runs
+the operator on a JVM with a debugger listening on port 5005. Debug images are not for production.
+
+Upgrade the installed operator to that image, using the chart it was installed with:
+
+```bash
+helm upgrade --namespace kube-system --reuse-values --set image.tag=2.0.0-debug.1 xp-operator <chart>
+```
+
+Forward the debug port to your machine:
+
+```bash
+kubectl -n kube-system port-forward deployment/xp-operator 5005
+```
+
+Then attach a *Remote JVM Debug* run configuration in IntelliJ IDEA to `localhost:5005`.
+
+The API server waits 5 seconds for admission webhooks. A request stopped at a breakpoint in the admission code
+fails on the client side when that time runs out.
 
 ## Release
 
