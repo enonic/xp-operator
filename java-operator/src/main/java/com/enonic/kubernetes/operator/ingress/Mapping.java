@@ -12,6 +12,8 @@ import org.jspecify.annotations.Nullable;
  * @param endpoint the XP endpoint the mapping serves; unset, the web endpoint
  * @param allow    principals the mapping lets in, e.g. role:system.admin
  * @param flows    login flows by id provider key, e.g. enonic-cloud -> autologin,k8s
+ * @param authorizationServers issuer URL of the authorization server by id provider key, for OAuth
+ *                 discovery on a mapping that issues no tokens itself
  */
 @NullMarked
 public record Mapping(
@@ -22,7 +24,8 @@ public record Mapping(
     @Nullable String idProviders,
     @Nullable String endpoint,
     @Nullable String allow,
-    Map<String, String> flows )
+    Map<String, String> flows,
+    Map<String, String> authorizationServers )
 {
     public static final String MANAGEMENT_ENDPOINT = "management";
 
@@ -36,11 +39,12 @@ public record Mapping(
         Objects.requireNonNull( source, "source" );
         Objects.requireNonNull( target, "target" );
         flows = Map.copyOf( flows );
+        authorizationServers = Map.copyOf( authorizationServers );
     }
 
     public Mapping withHost( final String host )
     {
-        return new Mapping( name, host, source, target, idProviders, endpoint, allow, flows );
+        return new Mapping( name, host, source, target, idProviders, endpoint, allow, flows, authorizationServers );
     }
 
     /**

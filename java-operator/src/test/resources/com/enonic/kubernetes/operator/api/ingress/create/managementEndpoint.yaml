@@ -14,6 +14,7 @@ admissionRequest:
           enonic.cloud/xp8.vhost.mapping.1.idproviders: enonic-cloud
           enonic.cloud/xp8.vhost.mapping.1.endpoint: management
           enonic.cloud/xp8.vhost.mapping.1.flows.enonic-cloud: autologin,k8s
+          enonic.cloud/xp8.vhost.mapping.1.authorizationServer.enonic-cloud: https://env.purplejs.io/_/idprovider/enonic-cloud
           enonic.cloud/xp8.vhost.mapping.1.allow: role:system.admin
       spec:
         rules:
@@ -48,6 +49,7 @@ assertResult:
       enonic.cloud/xp8.vhost.mapping.1.idproviders: enonic-cloud
       enonic.cloud/xp8.vhost.mapping.1.endpoint: management
       enonic.cloud/xp8.vhost.mapping.1.flows.enonic-cloud: autologin,k8s
+      enonic.cloud/xp8.vhost.mapping.1.authorizationServer.enonic-cloud: https://env.purplejs.io/_/idprovider/enonic-cloud
       enonic.cloud/xp8.vhost.mapping.1.allow: role:system.admin
     labels:
       enonic.cloud/vhost-loaded: "false"

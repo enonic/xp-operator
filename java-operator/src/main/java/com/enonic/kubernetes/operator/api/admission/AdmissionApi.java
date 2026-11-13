@@ -31,10 +31,13 @@ import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Post;
 import io.micronaut.http.annotation.Produces;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -113,6 +116,15 @@ public class AdmissionApi
                 Preconditions.checkArgument( idProviders.contains( idProvider ), String.format(
                     "flows for id provider '%s' in 'enonic.cloud/xp8.vhost.mapping' annotation, which its idproviders do not list",
                     idProvider ) );
+            }
+            for ( Map.Entry<String, String> e : m.authorizationServers().entrySet() )
+            {
+                Preconditions.checkArgument( idProviders.contains( e.getKey() ), String.format(
+                    "authorizationServer for id provider '%s' in 'enonic.cloud/xp8.vhost.mapping' annotation, which its idproviders do not list",
+                    e.getKey() ) );
+                Preconditions.checkArgument( isIssuerUrl( e.getValue() ), String.format(
+                    "authorizationServer '%s' in 'enonic.cloud/xp8.vhost.mapping' annotation is not an http or https URL without query or fragment",
+                    e.getValue() ) );
             }
 
             List<HTTPIngressPath> paths = newIngress.getSpec().getRules().stream().map( r -> r.getHttp()
@@ -370,6 +382,20 @@ public class AdmissionApi
 
             Preconditions.checkState( tmp.isEmpty(), String.format( "Xp8Deployment '%s' does not contain nodeGroups %s",
                                                                     xp8Deployments.get().getMetadata().getName(), nodeGroups ) );
+        }
+    }
+
+    private static boolean isIssuerUrl( final String value )
+    {
+        try
+        {
+            final URI uri = new URI( value );
+            return ( "https".equals( uri.getScheme() ) || "http".equals( uri.getScheme() ) ) && uri.getHost() != null &&
+                uri.getRawQuery() == null && uri.getRawFragment() == null;
+        }
+        catch ( URISyntaxException e )
+        {
+            return false;
         }
     }
 }
