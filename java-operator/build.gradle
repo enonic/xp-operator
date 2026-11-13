@@ -36,7 +36,7 @@ def generateModelMetadata = tasks.register( 'generateModelMetadata' ) {
             }
             path.startsWith( crdPackage ) || modelPackages.contains( path.substring( 0, path.lastIndexOf( '/' ) + 1 ) )
         }
-        def types = new TreeSet<String>()
+        def types = new TreeSet<String>( ['io/fabric8/kubernetes/client/CustomResource.class'] )
         classpath.files.findAll { it.name.startsWith( 'kubernetes-model-' ) }.each { jar ->
             new java.util.zip.ZipFile( jar ).withCloseable { zip ->
                 zip.entries().each { if ( isModel( it.name ) ) types.add( it.name ) }
