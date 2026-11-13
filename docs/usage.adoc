@@ -375,6 +375,24 @@ spec:
 
 NOTE: It can vary how fast XP registers the Xp8Config changes. It can be instant, but it can also take up to a couple of minutes, depending on your Kubernetes cluster setup.
 
+==== Configs created by the operator
+
+The operator creates a set of Xp8Configs for every deployment. These are created once and then left alone, so you can edit them:
+
+[cols="1,2"]
+|===
+|Xp8Config |File
+
+|`all-system` |`system.properties`
+|`all-admin` |`com.enonic.xp.app.main.cfg`
+|`all-logback` |`logback.xml`
+|`<nodegroup>-vhosts` |`com.enonic.xp.web.vhost.cfg`
+|===
+
+The others, such as `all-cluster`, `all-hazelcast` and `<nodegroup>-elasticsearch`, are rewritten by the operator, and edits to them are lost.
+
+The content of `all-logback` comes from the `logback` value of the operator Helm chart, see <<installation#values,`values.yaml`>>. Changing the value affects only deployments created afterwards.
+
 == Added functionality
 
 In addition to new resources, there are also new annotations that add some functionality.
