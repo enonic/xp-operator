@@ -3,5 +3,4 @@ gradlew eol=lf
 *.bat eol=crlf
 Makefile eol=lf
 kubectl-plugin/* eol=lf
-docker/agent-bond-opts eol=lf
 vhost-defaults.cfg eol=lf

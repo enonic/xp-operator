@@ -15,6 +15,54 @@ application {
     mainClass.set('com.enonic.kubernetes.operator.helpers.Main')
 }
 
+def modelMetadataDir = layout.buildDirectory.dir( 'generated/native-image/models' )
+
+def generateModelMetadata = tasks.register( 'generateModelMetadata' ) {
+    description = 'Registers the Kubernetes model classes the operator reads and writes for reflection in the native image'
+    def modelPackages = ['io/fabric8/kubernetes/api/model/', 'io/fabric8/kubernetes/api/model/admission/v1/',
+                         'io/fabric8/kubernetes/api/model/apps/', 'io/fabric8/kubernetes/api/model/authentication/',
+                         'io/fabric8/kubernetes/api/model/networking/v1/', 'io/fabric8/kubernetes/api/model/rbac/']
+    def crdPackage = 'com/enonic/kubernetes/crd/'
+    def classpath = configurations.runtimeClasspath
+    def classesDirs = sourceSets.main.output.classesDirs
+    def outputFile = modelMetadataDir.map { it.file( 'reachability-metadata.json' ) }
+    inputs.files( classpath, classesDirs )
+    outputs.file( outputFile )
+    dependsOn tasks.named( 'compileJava' )
+    doLast {
+        def isModel = { String path ->
+            if ( !path.endsWith( '.class' ) || path ==~ /.*(Builder|Fluent)(\$.*)?\.class/ ) {
+                return false
+            }
+            path.startsWith( crdPackage ) || modelPackages.contains( path.substring( 0, path.lastIndexOf( '/' ) + 1 ) )
+        }
+        def types = new TreeSet<String>()
+        classpath.files.findAll { it.name.startsWith( 'kubernetes-model-' ) }.each { jar ->
+            new java.util.zip.ZipFile( jar ).withCloseable { zip ->
+                zip.entries().each { if ( isModel( it.name ) ) types.add( it.name ) }
+            }
+        }
+        classesDirs.each { dir ->
+            fileTree( dir ).visit { if ( !it.directory && isModel( it.relativePath.pathString ) ) types.add( it.relativePath.pathString ) }
+        }
+        def reflection = types.collect {
+            [type: it.replace( '/', '.' ) - '.class', allDeclaredFields: true, allDeclaredMethods: true, allDeclaredConstructors: true]
+        }
+        outputFile.get().asFile.text = groovy.json.JsonOutput.prettyPrint( groovy.json.JsonOutput.toJson( [reflection: reflection] ) )
+    }
+}
+
+graalvmNative {
+    binaries {
+        main {
+            imageName = 'xp-operator'
+            sharedLibrary = false
+            buildArgs.addAll( '-H:+AddAllCharsets', '--static-nolibc' )
+            configurationFileDirectories.from( files( modelMetadataDir ).builtBy( generateModelMetadata ) )
+        }
+    }
+}
+
 javaGen {
     source = file("${rootDir}/helm/src/main/crds")
     target = file("${buildDir}/generated/sources/crds/java")

@@ -1,5 +1,12 @@
 *
-!java-operator/build/docker/main/layers/app
-!java-operator/build/docker/main/layers/libs
-!java-operator/build/docker/main/layers/resources
-!docker/*
+!.git
+!gradle
+!gradlew
+!gradle.properties
+!settings.gradle
+!build.gradle
+!checkstyle.xml
+!helm/build.gradle
+!helm/src
+!java-operator/build.gradle
+!java-operator/src

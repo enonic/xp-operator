@@ -8,7 +8,7 @@ build-java: ## Build java modules
 	@./gradlew build
 	# Building java modules done!
 
-build-docker: build-java ## Build docker image
+build-docker: build-java ## Build docker image. The native image is compiled inside the build
 	@docker build -f Dockerfile -t ${DOCKER_IMAGE}:$(shell ./get-version.sh) .
 
 build: build-docker
