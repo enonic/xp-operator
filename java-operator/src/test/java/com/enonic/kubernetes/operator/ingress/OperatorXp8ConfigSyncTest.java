@@ -61,6 +61,26 @@ class OperatorXp8ConfigSyncTest
     }
 
     @Test
+    void managementMappingWithAuthorizationServer()
+    {
+        Mapping m = single( Map.of( P + "host", "env-mgmt.example.com", P + "source", "/", P + "target", "/", P + "idproviders",
+                                    "enonic-cloud", P + "endpoint", "management", P + "flows.enonic-cloud", "autologin",
+                                    P + "authorizationServer.enonic-cloud", "https://env.example.com/_/idprovider/enonic-cloud" ) );
+
+        assertEquals( """
+
+
+                          mapping.admin-1.host=env-mgmt.example.com
+                          mapping.admin-1.source=/
+                          mapping.admin-1.target=/
+                          mapping.admin-1.endpoint=management
+                          mapping.admin-1.idProvider.enonic-cloud=default
+                          mapping.admin-1.idProvider.enonic-cloud.flows=autologin
+                          mapping.admin-1.idProvider.enonic-cloud.authorizationServer=https://env.example.com/_/idprovider/enonic-cloud""",
+                      render( m ) );
+    }
+
+    @Test
     void unknownEndpointHasNoPort()
     {
         Mapping m = single( Map.of( P + "source", "/", P + "target", "/", P + "endpoint", "statistics" ) );

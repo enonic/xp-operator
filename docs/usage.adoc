@@ -451,6 +451,15 @@ enonic.cloud/xp8.vhost.mapping.<MAPPING_NAME>.allow: role:system.admin
 
 `endpoint` accepts only `management`. `flows.<IDPROVIDER>` must name an id provider listed in `idproviders`. `flows` and `allow` also work on a web mapping.
 
+A management mapping issues no tokens itself. For OAuth discovery it can name the authorization server where a token for it is issued, by the issuer URL of an id provider on a web mapping that serves its `device` or `code` flow:
+
+[source,yaml]
+----
+enonic.cloud/xp8.vhost.mapping.<MAPPING_NAME>.authorizationServer.<DEFAULT_IDPROVIDER>: https://admin.example.com/_/idprovider/<DEFAULT_IDPROVIDER>
+----
+
+`authorizationServer.<IDPROVIDER>` must name an id provider listed in `idproviders`, and its value must be an http or https URL without query or fragment. It becomes `mapping.<NAME>.idProvider.<IDPROVIDER>.authorizationServer` in the vhost configuration, which XP reads from the version that added OAuth discovery on management mappings (enonic/xp#12604).
+
 NOTE: Like Xp8Config, changes to virtual hosts can take a couple of minutes to register in XP.
 
 === Namespaces

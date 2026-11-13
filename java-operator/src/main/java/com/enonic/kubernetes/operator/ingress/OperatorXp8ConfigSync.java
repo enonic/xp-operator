@@ -87,7 +87,8 @@ public class OperatorXp8ConfigSync
             try {
                 String name = m.replace( prefix, ingress.getMetadata().getName() + "-" );
                 result.add( new Mapping( name, g.apply( "host" ), g.apply( "source" ), g.apply( "target" ), g.apply( "idproviders" ),
-                                            g.apply( "endpoint" ), g.apply( "allow" ), getFlows( annotations, m + ".flows." ) ) );
+                                            g.apply( "endpoint" ), g.apply( "allow" ), byIdProvider( annotations, m + ".flows." ),
+                                            byIdProvider( annotations, m + ".authorizationServer." ) ) );
             } catch (Exception e) {
                 LOG.warn( String.format( "Invalid vhost mappings on ingress '%s'", ingress.getMetadata().getName() ) );
             }
@@ -96,16 +97,15 @@ public class OperatorXp8ConfigSync
         return result;
     }
 
-    // <mapping prefix>.flows.<idprovider> = <flow>,<flow>
-    private static Map<String, String> getFlows( final Map<String, String> annotations, final String flowsPrefix )
+    private static Map<String, String> byIdProvider( final Map<String, String> annotations, final String keyPrefix )
     {
-        Map<String, String> flows = new TreeMap<>();
+        Map<String, String> values = new TreeMap<>();
         for (Map.Entry<String, String> e : annotations.entrySet()) {
-            if (e.getKey().startsWith( flowsPrefix ) && e.getKey().length() > flowsPrefix.length()) {
-                flows.put( e.getKey().substring( flowsPrefix.length() ), e.getValue() );
+            if (e.getKey().startsWith( keyPrefix ) && e.getKey().length() > keyPrefix.length()) {
+                values.put( e.getKey().substring( keyPrefix.length() ), e.getValue() );
             }
         }
-        return flows;
+        return values;
     }
 
     public void handle( final String namespace )
@@ -259,6 +259,11 @@ public class OperatorXp8ConfigSync
                 String flows = m.flows().get( idProvider );
                 if (flows != null) {
                     sb.append( String.format( "\nmapping.%s.idProvider.%s.flows=%s", m.name(), idProvider, flows ) );
+                }
+                String authorizationServer = m.authorizationServers().get( idProvider );
+                if (authorizationServer != null) {
+                    sb.append( String.format( "\nmapping.%s.idProvider.%s.authorizationServer=%s", m.name(), idProvider,
+                                              authorizationServer ) );
                 }
             }
         }
