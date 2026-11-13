@@ -2,8 +2,15 @@ package com.enonic.kubernetes.operator.api.admission;
 
 import com.enonic.kubernetes.crd.v1.Xp8Config;
 import com.enonic.kubernetes.crd.v1.Xp8Deployment;
+import com.enonic.kubernetes.crd.v1.Xp8DeploymentSpec;
 import com.enonic.kubernetes.crd.v1.xp8deploymentspec.NodeGroups;
+import com.enonic.kubernetes.crd.v1.xp8deploymentspec.NodesSharedDisks;
+import com.enonic.kubernetes.crd.v1.xp8deploymentspec.NodesSharedVolumes;
+import com.enonic.kubernetes.crd.v1.xp8deploymentspec.nodegroups.SecretMounts;
 import com.enonic.kubernetes.crd.v1.xp8deploymentspec.nodegroups.Sidecars;
+import com.enonic.kubernetes.crd.v1.xp8deploymentspec.nodegroups.resources.Dirs;
+import com.enonic.kubernetes.crd.v1.xp8deploymentspec.nodegroups.resources.Disks;
+import com.enonic.kubernetes.crd.v1.xp8deploymentspec.nodegroups.resources.Volumes;
 import com.enonic.kubernetes.operator.api.AdmissionOperation;
 import com.enonic.kubernetes.operator.api.BaseAdmissionApi;
 import com.enonic.kubernetes.operator.ingress.Mapping;
@@ -37,6 +44,7 @@ import java.util.stream.Collectors;
 import static com.enonic.kubernetes.common.Configuration.cfgIfBool;
 import static com.enonic.kubernetes.common.Configuration.cfgStr;
 import static com.enonic.kubernetes.common.Validator.dns1123;
+import static java.util.Objects.requireNonNullElse;
 import static com.enonic.kubernetes.kubernetes.Predicates.fieldEquals;
 import static com.enonic.kubernetes.kubernetes.Predicates.inNodeGroupAllOr;
 import static com.enonic.kubernetes.kubernetes.Predicates.inSameNamespaceAs;
@@ -48,6 +56,8 @@ import static com.enonic.kubernetes.operator.ingress.OperatorXp8ConfigSync.getAn
 public class AdmissionApi
     extends BaseAdmissionApi<AdmissionReview>
 {
+    private static final Set<String> BUILT_IN_VOLUMES = Set.of( "config", "extra-config", "tmp", "xp-logs", "events-sa-ca", "empty-sa-token" );
+
     public AdmissionApi()
     {
         super();
@@ -259,6 +269,8 @@ public class AdmissionApi
                     Preconditions.checkState( sidecar.getImage() != null,
                                               "'spec.nodeGroups[" + i + "].sidecars[" + j + "].image' cannot be null" );
                 }
+
+                assertSecretMounts( "spec.nodeGroups[" + i + "]", newDeployment.getSpec(), ng );
             }
 
             // Check replicas
@@ -296,6 +308,34 @@ public class AdmissionApi
         if ( op != AdmissionOperation.DELETE )
         {
             assertSupportedXpVersion( newDeployment.getSpec().getXpVersion() );
+        }
+    }
+
+    private static void assertSecretMounts( final String nodeGroupPath, final Xp8DeploymentSpec spec, final NodeGroups ng )
+    {
+        Preconditions.checkState( ng.getSecretMounts() != null, "'" + nodeGroupPath + ".secretMounts' cannot be null" );
+
+        final Set<String> volumeNames = new HashSet<>( BUILT_IN_VOLUMES );
+        requireNonNullElse( ng.getResources().getDirs(), List.<Dirs>of() ).forEach( dir -> volumeNames.add( dir.getName() ) );
+        requireNonNullElse( ng.getResources().getVolumes(), List.<Volumes>of() ).forEach( volume -> volumeNames.add( volume.getName() ) );
+        requireNonNullElse( ng.getResources().getDisks(), List.<Disks>of() ).forEach( disk -> volumeNames.add( disk.getName() ) );
+        requireNonNullElse( spec.getNodesSharedVolumes(), List.<NodesSharedVolumes>of() ).forEach( volume -> volumeNames.add( volume.getName() ) );
+        requireNonNullElse( spec.getNodesSharedDisks(), List.<NodesSharedDisks>of() ).forEach( disk -> volumeNames.add( disk.getName() ) );
+
+        final List<SecretMounts> secretMounts = ng.getSecretMounts();
+        for ( int j = 0; j < secretMounts.size(); j++ )
+        {
+            final SecretMounts secretMount = secretMounts.get( j );
+            final String path = nodeGroupPath + ".secretMounts[" + j + "]";
+
+            Preconditions.checkState( secretMount.getName() != null, "'" + path + ".name' cannot be null" );
+            dns1123( path + ".name", secretMount.getName() );
+            Preconditions.checkState( secretMount.getSecretName() != null, "'" + path + ".secretName' cannot be null" );
+            Preconditions.checkState( secretMount.getMountPath() != null, "'" + path + ".mountPath' cannot be null" );
+            Preconditions.checkState( secretMount.getMountPath().startsWith( "/" ),
+                                      "'" + path + ".mountPath' with value '" + secretMount.getMountPath() + "' must be an absolute path" );
+            Preconditions.checkState( volumeNames.add( secretMount.getName() ),
+                                      "'" + path + ".name' with value '" + secretMount.getName() + "' is already the name of another volume" );
         }
     }
 
