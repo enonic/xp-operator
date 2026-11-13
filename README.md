@@ -212,6 +212,11 @@ Then attach a *Remote JVM Debug* run configuration in IntelliJ IDEA to `localhos
 The API server waits 5 seconds for admission webhooks. A request stopped at a breakpoint in the admission code
 fails on the client side when that time runs out.
 
+Set breakpoints to suspend only their thread (*Suspend: Thread* in IntelliJ IDEA, `stop thread in` in `jdb`). A
+breakpoint that suspends all threads also stops the webhooks, the informers and the scheduled tasks: with the webhooks'
+`failurePolicy: Fail`, the API server then rejects every change to an `Xp8Deployment`, `Xp8Config` or Ingress until the
+operator resumes. In `jdb`, a thread stopped this way is resumed with `resume <thread id>`, not `cont`.
+
 ## Release
 
 Make sure you workspace contains no uncommitted changes and then run:
