@@ -3,8 +3,15 @@ package com.enonic.kubernetes.operator.api.admission;
 import com.enonic.kubernetes.client.v1.xp7app.Xp7App;
 import com.enonic.kubernetes.client.v1.xp7config.Xp7Config;
 import com.enonic.kubernetes.client.v1.xp7deployment.Xp7Deployment;
+import com.enonic.kubernetes.client.v1.xp7deployment.Xp7DeploymentSpec;
 import com.enonic.kubernetes.client.v1.xp7deployment.Xp7DeploymentSpecNodeGroup;
+import com.enonic.kubernetes.client.v1.xp7deployment.Xp7DeploymentSpecNodeGroupDir;
+import com.enonic.kubernetes.client.v1.xp7deployment.Xp7DeploymentSpecNodeGroupDisk;
+import com.enonic.kubernetes.client.v1.xp7deployment.Xp7DeploymentSpecNodeGroupSecretMount;
 import com.enonic.kubernetes.client.v1.xp7deployment.Xp7DeploymentSpecNodeGroupSidecar;
+import com.enonic.kubernetes.client.v1.xp7deployment.Xp7DeploymentSpecNodeGroupVolume;
+import com.enonic.kubernetes.client.v1.xp7deployment.Xp7DeploymentSpecNodesSharedDisk;
+import com.enonic.kubernetes.client.v1.xp7deployment.Xp7DeploymentSpecNodesSharedVolume;
 import com.enonic.kubernetes.common.Validator;
 import com.enonic.kubernetes.operator.api.AdmissionOperation;
 import com.enonic.kubernetes.operator.api.BaseAdmissionApi;
@@ -39,6 +46,7 @@ import java.util.stream.Collectors;
 import static com.enonic.kubernetes.common.Configuration.cfgIfBool;
 import static com.enonic.kubernetes.common.Configuration.cfgStr;
 import static com.enonic.kubernetes.common.Validator.dns1123;
+import static java.util.Objects.requireNonNullElse;
 import static com.enonic.kubernetes.kubernetes.Predicates.fieldEquals;
 import static com.enonic.kubernetes.kubernetes.Predicates.inNodeGroupAllOr;
 import static com.enonic.kubernetes.kubernetes.Predicates.inSameNamespaceAs;
@@ -51,6 +59,9 @@ import static com.enonic.kubernetes.operator.ingress.OperatorXp7ConfigSync.getAn
 public class AdmissionApi
     extends BaseAdmissionApi<AdmissionReview>
 {
+    private static final Set<String> BUILT_IN_VOLUMES =
+        Set.of( "config", "extra-config", "tmp", "xp-logs", "events-sa-ca", "empty-sa-token" );
+
     public AdmissionApi()
     {
         super();
@@ -271,6 +282,8 @@ public class AdmissionApi
                     Preconditions.checkState( sidecar.getImage() != null,
                                               "'spec.nodeGroups[" + i + "].sidecars[" + j + "].image' cannot be null" );
                 }
+
+                assertSecretMounts( "spec.nodeGroups[" + i + "]", newDeployment.getSpec(), ng );
             }
 
             // Check replicas
@@ -329,6 +342,41 @@ public class AdmissionApi
 
             Preconditions.checkState( currentVersion.compareTo( new ComparableVersion( "7.12.100" ) ) > 0,
                                       "Operator only supports XP version 7.13 and higher" );
+        }
+    }
+
+    private static void assertSecretMounts( final String nodeGroupPath, final Xp7DeploymentSpec spec,
+                                            final Xp7DeploymentSpecNodeGroup ng )
+    {
+        Preconditions.checkState( ng.getXp7DeploymentSpecNodeGroupSecretMounts() != null,
+                                  "'" + nodeGroupPath + ".secretMounts' cannot be null" );
+
+        final Set<String> volumeNames = new HashSet<>( BUILT_IN_VOLUMES );
+        requireNonNullElse( ng.getXp7DeploymentSpecNodeGroupResources().getXp7DeploymentSpecNodeGroupDirs(),
+                            List.<Xp7DeploymentSpecNodeGroupDir>of() ).forEach( dir -> volumeNames.add( dir.getName() ) );
+        requireNonNullElse( ng.getXp7DeploymentSpecNodeGroupResources().getXp7DeploymentSpecNodeGroupVolumes(),
+                            List.<Xp7DeploymentSpecNodeGroupVolume>of() ).forEach( volume -> volumeNames.add( volume.getName() ) );
+        requireNonNullElse( ng.getXp7DeploymentSpecNodeGroupResources().getXp7DeploymentSpecNodeGroupDisks(),
+                            List.<Xp7DeploymentSpecNodeGroupDisk>of() ).forEach( disk -> volumeNames.add( disk.getName() ) );
+        requireNonNullElse( spec.getXp7DeploymentSpecNodesSharedVolumes(),
+                            List.<Xp7DeploymentSpecNodesSharedVolume>of() ).forEach( volume -> volumeNames.add( volume.getName() ) );
+        requireNonNullElse( spec.getXp7DeploymentSpecNodesSharedDisks(),
+                            List.<Xp7DeploymentSpecNodesSharedDisk>of() ).forEach( disk -> volumeNames.add( disk.getName() ) );
+
+        final List<Xp7DeploymentSpecNodeGroupSecretMount> secretMounts = ng.getXp7DeploymentSpecNodeGroupSecretMounts();
+        for ( int j = 0; j < secretMounts.size(); j++ )
+        {
+            final Xp7DeploymentSpecNodeGroupSecretMount secretMount = secretMounts.get( j );
+            final String path = nodeGroupPath + ".secretMounts[" + j + "]";
+
+            Preconditions.checkState( secretMount.getName() != null, "'" + path + ".name' cannot be null" );
+            dns1123( path + ".name", secretMount.getName() );
+            Preconditions.checkState( secretMount.getSecretName() != null, "'" + path + ".secretName' cannot be null" );
+            Preconditions.checkState( secretMount.getMountPath() != null, "'" + path + ".mountPath' cannot be null" );
+            Preconditions.checkState( secretMount.getMountPath().startsWith( "/" ),
+                                      "'" + path + ".mountPath' with value '" + secretMount.getMountPath() + "' must be an absolute path" );
+            Preconditions.checkState( volumeNames.add( secretMount.getName() ),
+                                      "'" + path + ".name' with value '" + secretMount.getName() + "' is already the name of another volume" );
         }
     }
 
