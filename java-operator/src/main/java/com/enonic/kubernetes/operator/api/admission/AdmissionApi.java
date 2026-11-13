@@ -291,16 +291,23 @@ public class AdmissionApi
             final Optional<Xp8Deployment> xp8Deployments = getXp8Deployment( (KubernetesResource) admissionReview.getRequest().getObject() );
             Preconditions.checkState( xp8Deployments.isEmpty(), "There is already an Xp8Deployment in NS '%s'",
                                       newDeployment.getMetadata().getNamespace() );
+        }
 
-            String xpVersion = newDeployment.getSpec().getXpVersion();
-            Matcher m = Pattern.compile( "^(?:enonic/xp:)?([0-9]+)\\.([0-9]+)" ).matcher( xpVersion );
-            if ( m.find() )
-            {
-                final int major = Integer.parseInt( m.group( 1 ) );
-                final int minor = Integer.parseInt( m.group( 2 ) );
-                Preconditions.checkState( major > 8 || ( major == 8 && minor >= 2 ),
-                                          "Operator only supports XP version 8.2 and newer" );
-            }
+        if ( op != AdmissionOperation.DELETE )
+        {
+            assertSupportedXpVersion( newDeployment.getSpec().getXpVersion() );
+        }
+    }
+
+    private void assertSupportedXpVersion( String xpVersion )
+    {
+        Matcher m = Pattern.compile( "^(?:enonic/xp:)?([0-9]+)\\.([0-9]+)" ).matcher( xpVersion );
+        if ( m.find() )
+        {
+            final int major = Integer.parseInt( m.group( 1 ) );
+            final int minor = Integer.parseInt( m.group( 2 ) );
+            Preconditions.checkState( major > 8 || ( major == 8 && minor >= 2 ),
+                                      "Operator only supports XP version 8.2 and newer" );
         }
     }
 
