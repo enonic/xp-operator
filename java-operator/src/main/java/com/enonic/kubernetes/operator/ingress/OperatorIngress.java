@@ -11,8 +11,8 @@ import io.micronaut.runtime.server.event.ServerStartupEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -29,7 +29,7 @@ public class OperatorIngress
     extends InformerEventHandler<Ingress>
     implements ApplicationEventListener<ServerStartupEvent>
 {
-    private static final Logger log = LoggerFactory.getLogger( OperatorIngress.class );
+    private static final Logger LOG = LoggerFactory.getLogger( OperatorIngress.class );
 
     @Inject
     Clients clients;
@@ -82,7 +82,7 @@ public class OperatorIngress
 
         // Label ingress
         if (label && !getXpVHostAnnotations( ingress ).isEmpty()) {
-            log.debug("Label Ingress as vhost not loaded: {} in {}", ingress.getMetadata().getName(), ingress.getMetadata().getNamespace());
+            LOG.debug("Label Ingress as vhost not loaded: {} in {}", ingress.getMetadata().getName(), ingress.getMetadata().getNamespace());
 
             K8sLogHelper.logEdit( clients.k8s().network().v1().ingresses().
                 inNamespace( ingress.getMetadata().getNamespace() ).

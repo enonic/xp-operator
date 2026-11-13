@@ -18,8 +18,8 @@ import io.micronaut.runtime.server.event.ServerStartupEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -35,7 +35,7 @@ public class OperatorXp8DeploymentStatus
     extends InformerEventHandler<Pod>
     implements Runnable, ApplicationEventListener<ServerStartupEvent>
 {
-    private static final Logger log = LoggerFactory.getLogger( OperatorXp8DeploymentStatus.class );
+    private static final Logger LOG = LoggerFactory.getLogger( OperatorXp8DeploymentStatus.class );
 
     @Inject
     Clients clients;
@@ -57,7 +57,7 @@ public class OperatorXp8DeploymentStatus
     protected void onNewAdd( final Pod newPod )
     {
         onCondition(newPod, pod -> {
-                    log.debug("onNew Pod: {} in {}", pod.getMetadata().getNamespace(), pod.getMetadata().getName());
+                    LOG.debug("onNew Pod: {} in {}", pod.getMetadata().getNamespace(), pod.getMetadata().getName());
                     this.handle(pod);
                 }
                 , isEnonicManaged());
@@ -67,7 +67,7 @@ public class OperatorXp8DeploymentStatus
     public void onUpdate( final Pod oldPod, final Pod newPod )
     {
         onCondition( newPod, pod -> {
-            log.debug( "onUpdate Pod: {} in {}", pod.getMetadata().getNamespace(), pod.getMetadata().getName() );
+            LOG.debug( "onUpdate Pod: {} in {}", pod.getMetadata().getNamespace(), pod.getMetadata().getName() );
             this.handle(pod);
         }, isEnonicManaged() );
     }
@@ -76,7 +76,7 @@ public class OperatorXp8DeploymentStatus
     public void onDelete( final Pod oldPod, final boolean deletedFinalStateUnknown )
     {
         onCondition( oldPod, pod -> {
-            log.debug( "onDelete Pod: {} in {}", pod.getMetadata().getNamespace(), pod.getMetadata().getName() );
+            LOG.debug( "onDelete Pod: {} in {}", pod.getMetadata().getNamespace(), pod.getMetadata().getName() );
             this.handle(pod);
         }, isEnonicManaged() );
     }
@@ -87,7 +87,7 @@ public class OperatorXp8DeploymentStatus
     @Override
     public void run()
     {
-        log.debug( "Resync Pods" );
+        LOG.debug( "Resync Pods" );
 
         // Pick one managed pod in each namespace and update status
         searchers.pod().stream().
@@ -166,7 +166,7 @@ public class OperatorXp8DeploymentStatus
     private void updateOnChange( final Xp8Deployment resource, final String oldStatusJson, final Xp8DeploymentStatus newStatus )
     {
         if (!oldStatusJson.equals( Serialization.asJson( newStatus ) )) {
-            log.debug("Set Deployment status : {} {} in {}", newStatus.getState(), resource.getMetadata().getName(), resource.getMetadata().getNamespace());
+            LOG.debug("Set Deployment status : {} {} in {}", newStatus.getState(), resource.getMetadata().getName(), resource.getMetadata().getNamespace());
 
             K8sLogHelper.logEdit( clients.xp8Deployments().
                 inNamespace( resource.getMetadata().getNamespace() ).

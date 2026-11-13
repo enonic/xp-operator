@@ -17,8 +17,8 @@ import io.micronaut.runtime.server.event.ServerStartupEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,7 +38,7 @@ public class OperatorIngressLabel
     extends InformerEventHandler<Xp8Config>
     implements Runnable, ApplicationEventListener<ServerStartupEvent>
 {
-    private static final Logger log = LoggerFactory.getLogger( OperatorIngressLabel.class );
+    private static final Logger LOG = LoggerFactory.getLogger( OperatorIngressLabel.class );
 
     @Inject
     Clients clients;
@@ -71,7 +71,7 @@ public class OperatorIngressLabel
         }
         // Only handle if this is a vhost config and it is loaded
         onCondition( newR, c -> {
-            log.debug( "onUpdate Xp8Config: {} in {}", newR.getMetadata().getNamespace(), newR.getMetadata().getName() );
+            LOG.debug( "onUpdate Xp8Config: {} in {}", newR.getMetadata().getNamespace(), newR.getMetadata().getName() );
             this.handle( c );
         }, this::isVHostConfig, ( c ) -> c.getStatus().getState() == Xp8ConfigStatus.State.READY );
     }
@@ -85,7 +85,7 @@ public class OperatorIngressLabel
     @Override
     public void run()
     {
-        log.debug( "Resync Ingress status" );
+        LOG.debug( "Resync Ingress status" );
 
         searchers.ingress()
             .stream()
@@ -159,7 +159,7 @@ public class OperatorIngressLabel
         // Update if true
         if ( loaded )
         {
-            log.debug( "Label Ingress as vhost loaded: {} in {}", ingress.getMetadata().getName(), ingress.getMetadata().getNamespace() );
+            LOG.debug( "Label Ingress as vhost loaded: {} in {}", ingress.getMetadata().getName(), ingress.getMetadata().getNamespace() );
 
             K8sLogHelper.logEdit( clients.k8s()
                                       .network()

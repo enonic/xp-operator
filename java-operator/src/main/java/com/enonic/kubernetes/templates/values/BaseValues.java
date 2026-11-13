@@ -4,7 +4,7 @@ import com.enonic.kubernetes.common.Preconditions;
 
 import io.micronaut.context.env.PropertySource;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;

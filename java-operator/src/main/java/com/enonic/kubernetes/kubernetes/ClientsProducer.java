@@ -1,6 +1,6 @@
 package com.enonic.kubernetes.kubernetes;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 import com.enonic.kubernetes.crd.v1.Xp8Config;
 import com.enonic.kubernetes.crd.v1.Xp8Deployment;

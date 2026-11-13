@@ -3,7 +3,7 @@ package com.enonic.kubernetes.templates.functions;
 import java.util.List;
 import java.util.function.Function;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 import com.enonic.kubernetes.common.Preconditions;
 

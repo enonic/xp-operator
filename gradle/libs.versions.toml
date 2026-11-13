@@ -1,5 +1,5 @@
 [versions]
-fabric8 = "7.8.0"
+fabric8 = "8.0.0"
 micronaut-gradle-plugin = "5.0.2"
 checkstyle = "14.3.0"
 
@@ -19,7 +19,7 @@ mockito-inline = { module = "org.mockito:mockito-inline", version = "5.2.0" }
 mockito-junitjupiter = { module = "org.mockito:mockito-junit-jupiter", version = "5.21.0" }
 
 # Jackson
-jackson-dataformat-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml" }
+jackson-dataformat-yaml = { module = "tools.jackson.dataformat:jackson-dataformat-yaml" }
 
 # Other
 jspecify = { module = "org.jspecify:jspecify", version = "1.0.0" }

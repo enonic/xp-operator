@@ -12,12 +12,12 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.MappingIterator;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.MappingIterator;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.dataformat.yaml.YAMLMapper;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 
@@ -34,9 +34,10 @@ public abstract class TemplateTest
 
     protected TemplateTest()
     {
-        mapper = new ObjectMapper( new YAMLFactory() );
-        mapper.configure( SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true );
-        mapper.configure( DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false );
+        mapper = YAMLMapper.builder()
+            .configure( SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true )
+            .configure( DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false )
+            .build();
     }
 
     void test( Object values, String expectedValuesFile, String expectedResultFile )

@@ -1,6 +1,6 @@
 package com.enonic.kubernetes.operator.api.admission;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import com.enonic.kubernetes.kubernetes.Searchers;
 

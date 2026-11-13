@@ -15,8 +15,8 @@ import io.micronaut.runtime.server.event.ServerStartupEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -26,7 +26,7 @@ import static com.enonic.kubernetes.kubernetes.Predicates.*;
 
 @Singleton
 public class OperatorXp8ConfigStatus extends InformerEventHandler<Pod> implements ApplicationEventListener<ServerStartupEvent> {
-    private static final Logger log = LoggerFactory.getLogger(OperatorXp8ConfigStatus.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OperatorXp8ConfigStatus.class);
 
     @Value("${operator.charts.values.annotationKeys.configMapUpdated}")
     String configMapUpdatedAnnotation;
@@ -104,10 +104,10 @@ public class OperatorXp8ConfigStatus extends InformerEventHandler<Pod> implement
                     .filter(cfg -> cfg.getSpec().getNodeGroup().equals(configMapName) || cfg.getSpec().getNodeGroup().equals(cfgStr("operator.charts.values.allNodesKey")))
                     .collect(Collectors.toList());
 
-            log.info(String.format("Updating config map %s", configMapName));
+            LOG.info(String.format("Updating config map %s", configMapName));
             for (Xp8Config config : relatedConfigs) {
 
-                log.info(String.format("Updating Xp8Config %s", config.getMetadata().getName()));
+                LOG.info(String.format("Updating Xp8Config %s", config.getMetadata().getName()));
 
                 if (!isEnonicManaged().test(cm)) {
                     markReady(config); // inherited behavior from events.sh implementation
@@ -150,7 +150,7 @@ public class OperatorXp8ConfigStatus extends InformerEventHandler<Pod> implement
         if(xp8Config.getStatus().getState() == Xp8ConfigStatus.State.READY) {
             return;
         }
-        log.debug("markReady Xp8Config: {} in {}", xp8Config.getMetadata().getName(), xp8Config.getMetadata().getNamespace());
+        LOG.debug("markReady Xp8Config: {} in {}", xp8Config.getMetadata().getName(), xp8Config.getMetadata().getNamespace());
 
         K8sLogHelper.logEdit(clients.xp8Configs()
                 .inNamespace(xp8Config.getMetadata().getNamespace())
@@ -171,7 +171,7 @@ public class OperatorXp8ConfigStatus extends InformerEventHandler<Pod> implement
                 .map(p -> p.getMetadata().getName())
                 .collect(Collectors.joining(", "));
 
-        log.debug("markPending Xp8Config: {} in {} {}", xp8Config.getMetadata().getName(),
+        LOG.debug("markPending Xp8Config: {} in {} {}", xp8Config.getMetadata().getName(),
                 xp8Config.getMetadata().getNamespace(), podNames);
 
         K8sLogHelper.logEdit(clients.xp8Configs()

@@ -9,8 +9,8 @@ import io.micronaut.runtime.server.event.ServerStartupEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,7 +24,7 @@ import static com.enonic.kubernetes.common.Configuration.cfgLong;
 public class OperatorInformers
     implements Runnable, ApplicationEventListener<ServerStartupEvent>
 {
-    private static final Logger log = LoggerFactory.getLogger( OperatorInformers.class );
+    private static final Logger LOG = LoggerFactory.getLogger( OperatorInformers.class );
 
     private final Map<Class<? extends HasMetadata>, Integer> failureMap = new ConcurrentHashMap<>();
     private final Map<Class<? extends HasMetadata>, String> resourceVersionMap = new ConcurrentHashMap<>();
@@ -40,7 +40,7 @@ public class OperatorInformers
     {
         // Add hook that terminates the operator on informer errors
         informers.allInformers().values().forEach( informer -> informer.exceptionHandler( ( started, e ) -> {
-            log.error( "Informer exception: " + e.getMessage(), e );
+            LOG.error( "Informer exception: " + e.getMessage(), e );
             Exit.exit( Exit.Code.INFORMER_FAILED, "Unrecoverable error with informers!" );
             return false;
         } ) );
@@ -63,7 +63,7 @@ public class OperatorInformers
         // Log when resource versions change
         String lastResourceVersion = resourceVersionMap.getOrDefault( klass, null );
         if (!Objects.equals( lastResourceVersion, informer.lastSyncResourceVersion() )) {
-            log.debug( String.format( "Informer for %s resource version updated to %s", klass.getSimpleName(), informer.lastSyncResourceVersion() ) );
+            LOG.debug( String.format( "Informer for %s resource version updated to %s", klass.getSimpleName(), informer.lastSyncResourceVersion() ) );
             resourceVersionMap.put( klass, informer.lastSyncResourceVersion() );
         }
 
@@ -71,10 +71,10 @@ public class OperatorInformers
         Integer fails = failureMap.getOrDefault( klass, 0 );
         if (!informer.hasSynced()) {
             fails += 1;
-            log.warn( String.format( "Informer for %s has failed sync %s times", klass.getSimpleName(), fails ) );
+            LOG.warn( String.format( "Informer for %s has failed sync %s times", klass.getSimpleName(), fails ) );
 
             if (fails == 3) {
-                log.warn( String.format( "Informer for %s restart", klass.getSimpleName() ) );
+                LOG.warn( String.format( "Informer for %s restart", klass.getSimpleName() ) );
                 informer.stop();
                 informer.run();
             } else if (fails >= 6) {
