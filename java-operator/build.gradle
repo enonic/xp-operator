@@ -113,10 +113,11 @@ dependencies {
     testImplementation libs.assertj.core
     testImplementation libs.mockito.junitjupiter
 
+    testImplementation platform(libs.junit.bom)
     testImplementation libs.junit.jupiter.api
     testImplementation 'io.fabric8:zjsonpatch'
     testRuntimeOnly libs.junit.jupiter.engine
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testRuntimeOnly libs.junit.platform.launcher
 }
 
 tasks.named('test') {
