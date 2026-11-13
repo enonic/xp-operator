@@ -61,6 +61,7 @@ deployment:
       - name: "XP_OPTS"
         value: "-Xms154m -Xmx154m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof\
           \ -Dhazelcast.shutdownhook.policy=GRACEFUL -Dhazelcast.graceful.shutdown.max.wait=600"
+      secretMounts: []
       resources:
         cpu: "1"
         memory: "512Mi"

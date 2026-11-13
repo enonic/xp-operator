@@ -256,6 +256,11 @@ spec:
         {{- range $disk := $.Values.deployment.spec.nodesSharedDisks }}
         {{- include "volumeMount" (dict "disk" $disk "Values" $.Values) | indent 12 }}
         {{- end }}
+        {{- range $sm := $nodeGroup.secretMounts }}
+            - name: {{ $sm.name }}
+              mountPath: {{ $sm.mountPath }}
+              readOnly: true
+        {{- end }}
         - name: events
           image: {{ $.Values.events.image }}
           imagePullPolicy: {{ $.Values.image.pullPolicy }}
@@ -366,6 +371,15 @@ spec:
           persistentVolumeClaim:
             claimName: {{ $disk.name }}
         {{- end }}
+        {{- end }}
+        {{- range $sm := $nodeGroup.secretMounts }}
+        - name: {{ $sm.name }}
+          secret:
+            secretName: {{ $sm.secretName }}
+            defaultMode: 0440
+            {{- if hasKey $sm "optional" }}
+            optional: {{ $sm.optional }}
+            {{- end }}
         {{- end }}
   volumeClaimTemplates:
     {{- range $volume := $nodeGroup.resources.volumes }}
