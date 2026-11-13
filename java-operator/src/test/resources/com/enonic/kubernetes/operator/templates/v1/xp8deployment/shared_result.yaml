@@ -622,12 +622,12 @@ spec:
           name: "es-transport"
           protocol: "TCP"
         readinessProbe:
-          failureThreshold: 4
+          failureThreshold: 2
           httpGet:
             path: "/ready"
             port: 2609
             scheme: "HTTP"
-          periodSeconds: 5
+          periodSeconds: 10
           timeoutSeconds: 2
         resources:
           limits:
@@ -927,12 +927,12 @@ spec:
           name: "es-transport"
           protocol: "TCP"
         readinessProbe:
-          failureThreshold: 4
+          failureThreshold: 2
           httpGet:
             path: "/ready"
             port: 2609
             scheme: "HTTP"
-          periodSeconds: 5
+          periodSeconds: 10
           timeoutSeconds: 2
         resources:
           limits:
@@ -1281,12 +1281,12 @@ spec:
           name: "es-transport"
           protocol: "TCP"
         readinessProbe:
-          failureThreshold: 4
+          failureThreshold: 2
           httpGet:
             path: "/ready"
             port: 2609
             scheme: "HTTP"
-          periodSeconds: 5
+          periodSeconds: 10
           timeoutSeconds: 2
         resources:
           limits:

@@ -96,8 +96,8 @@ pods:
       periodSeconds: "10"
       timeoutSeconds: "2"
     readiness:
-      failureThreshold: "4"
-      periodSeconds: "5"
+      failureThreshold: "2"
+      periodSeconds: "10"
       timeoutSeconds: "2"
     startup:
       failureThreshold: "55"
