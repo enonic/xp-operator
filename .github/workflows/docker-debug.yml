@@ -1,0 +1,62 @@
+name: Debug
+
+# Publishes the image <version>-debug.<N> from any branch, like the Development workflow does for -dev.
+# The operator runs on a JVM instead of as a native executable, with a debugger listening on port 5005.
+# Debug images are not for production. No Helm chart is published: install a chart with image.tag set.
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: publish-debug
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+
+    outputs:
+      version: ${{ steps.operator_version.outputs.version }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Operator version
+        id: operator_version
+        run: |
+          base="$(sed -n 's/^version *= *//p' gradle.properties)"
+          case "$base" in
+            *-*) echo "gradle.properties version '$base' must be a plain release version"; exit 1 ;;
+          esac
+          git fetch --tags --force --quiet origin
+          last=$(git tag -l "v${base}-debug.*" | sed -n "s/^v${base//./\\.}-debug\.\([0-9][0-9]*\)$/\1/p" | sort -n | tail -1)
+          version="${base}-debug.$(( ${last:-0} + 1 ))"
+          echo "Publishing $version"
+          echo "version=$version" >> $GITHUB_OUTPUT
+
+  image:
+    needs: version
+
+    uses: ./.github/workflows/image.yml
+    with:
+      version: ${{ needs.version.outputs.version }}
+      target: debug
+    secrets:
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+
+  tag:
+    runs-on: ubuntu-latest
+
+    needs: [version, image]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Tag commit
+        run: |
+          git tag "v${{ needs.version.outputs.version }}" "$GITHUB_SHA"
+          git push origin "v${{ needs.version.outputs.version }}"

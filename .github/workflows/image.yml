@@ -10,6 +10,11 @@ on:
         description: Version of the operator, and tag of the image
         required: true
         type: string
+      target:
+        description: Dockerfile stage to build, the production image if empty
+        required: false
+        type: string
+        default: ''
     secrets:
       DOCKERHUB_TOKEN:
         required: true
@@ -52,6 +57,7 @@ jobs:
         with:
           context: .
           file: Dockerfile
+          target: ${{ inputs.target }}
           pull: true
           no-cache: true
           platforms: linux/${{ matrix.arch }}
