@@ -57,7 +57,7 @@ graalvmNative {
         main {
             imageName = 'xp-operator'
             sharedLibrary = false
-            buildArgs.addAll( '-H:+AddAllCharsets', '--static-nolibc' )
+            buildArgs.addAll( '-H:+AddAllCharsets', '--static-nolibc', '-march=compatibility' )
             configurationFileDirectories.from( files( modelMetadataDir ).builtBy( generateModelMetadata ) )
         }
     }
