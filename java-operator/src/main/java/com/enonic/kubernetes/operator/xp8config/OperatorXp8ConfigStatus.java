@@ -146,7 +146,7 @@ public class OperatorXp8ConfigStatus extends InformerEventHandler<Pod> implement
                 .orElse(null);
     }
 
-    private void markReady(final Xp8Config xp8Config) {
+    void markReady(final Xp8Config xp8Config) {
         if(xp8Config.getStatus() != null && xp8Config.getStatus().getState() == Xp8ConfigStatus.State.READY) {
             return;
         }
@@ -163,7 +163,7 @@ public class OperatorXp8ConfigStatus extends InformerEventHandler<Pod> implement
                 });
     }
 
-    private void markPending(final Xp8Config xp8Config, final List<Pod> notUpdatedPods) {
+    void markPending(final Xp8Config xp8Config, final List<Pod> notUpdatedPods) {
         if(xp8Config.getStatus() != null && xp8Config.getStatus().getState() == Xp8ConfigStatus.State.PENDING) {
             return;
         }
