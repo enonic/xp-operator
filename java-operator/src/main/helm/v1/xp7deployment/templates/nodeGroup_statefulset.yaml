@@ -259,7 +259,7 @@ spec:
         {{- range $sm := $nodeGroup.secretMounts }}
             - name: {{ $sm.name }}
               mountPath: {{ $sm.mountPath }}
-              readOnly: {{ if hasKey $sm "readOnly" }}{{ $sm.readOnly }}{{ else }}true{{ end }}
+              readOnly: true
         {{- end }}
         - name: events
           image: {{ $.Values.events.image }}

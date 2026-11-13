@@ -308,8 +308,6 @@ spec:
                               type: string
                             mountPath:
                               type: string
-                            readOnly:
-                              type: boolean
                             defaultMode:
                               type: integer
                               format: int32
