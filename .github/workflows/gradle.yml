@@ -1,13 +1,10 @@
-name: Build
+name: Gradle Build
 
 on:
   push:
-    branches:
-      - master
-    tags:
-      - v*
-      - '!v*-dev*'
   workflow_dispatch:
+
+concurrency: build-${{ github.ref }}
 
 jobs:
   build:
@@ -31,94 +28,11 @@ jobs:
         with:
           version: '3.12.3'
 
-      - name: Build and Publish
-        run: |
-          if [[ "$(./get-version.sh)" == *"-SNAPSHOT" ]]
-          then
-            echo "Building snapshot version"
-            ./gradlew ci
-          else
-            echo "Building release version"
-            ./gradlew build 
-          fi
+      - name: Build with Gradle
+        run: ./gradlew ci
 
       - name: Codecov
         uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./build/reports/jacoco/testCodeCoverageReport/testCodeCoverageReport.xml
-
-  release-build:
-    runs-on: ubuntu-latest
-
-    needs: build
-    if: startsWith(github.ref, 'refs/tags/v')
-
-    outputs:
-      version: ${{ steps.operator_version.outputs.version }}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Setup JDK
-        uses: actions/setup-java@v6
-        with:
-          distribution: 'temurin'
-          java-version: 25
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6
-
-      - name: Setup Helm
-        uses: azure/setup-helm@v5
-        with:
-          version: '3.11.0'
-
-      - name: Get tag
-        id: tag
-        uses: dawidd6/action-get-tag@v1
-        with:
-          strip_v: true
-
-      - name: Operator version
-        id: operator_version
-        run: echo "version=$(./get-version.sh)" >> $GITHUB_OUTPUT
-
-      - name: Assert versions
-        run: |
-          [ "${{ steps.tag.outputs.tag }}" == "${{ steps.operator_version.outputs.version }}" ] || (echo "version in gradle.properties does not match tag"; exit 1)
-
-      - name: Build operator
-        run: ./gradlew build
-
-      - name: Upload helm chart
-        uses: actions/upload-artifact@v7
-        with:
-          name: helm-chart
-          path: helm/build/libs/xp-operator-${{ steps.operator_version.outputs.version }}.tgz
-          if-no-files-found: error
-          retention-days: 1
-
-  image:
-    needs: release-build
-
-    uses: ./.github/workflows/image.yml
-    with:
-      version: ${{ needs.release-build.outputs.version }}
-    secrets:
-      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-
-  release:
-    runs-on: ubuntu-latest
-
-    needs: [release-build, image]
-
-    steps:
-      - name: Download helm chart
-        uses: actions/download-artifact@v8
-        with:
-          name: helm-chart
-
-      - name: Publish helm chart
-        run: curl -u "ci:${{ secrets.ARTIFACTORY_PASSWORD }}" https://repo.enonic.com/helm/ --upload-file xp-operator-${{ needs.release-build.outputs.version }}.tgz -v
