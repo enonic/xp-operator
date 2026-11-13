@@ -1,0 +1,65 @@
+# Setup ES / Hazelcast discovery
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ discoveryService }}
+  namespace: {{ deployment.namespace }}
+  annotations:
+    {{ annotationKeys.applyPriority }}: "100"
+  labels:
+    {{ labelKeys.managed }}: true
+    {%- for e in defaultLabels | entries %}
+    {{ e.key }}: {{ e.value }}
+    {%- endfor %}
+  ownerReferences: {{ ownerReferences | toJson }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  publishNotReadyAddresses: true
+  sessionAffinity: None
+  selector:
+    {{ labelKeys.deployment }}: {{ deployment.name }}
+  ports:
+    - name: hazelcast
+      port: 5701
+      targetPort: 5701
+      protocol: TCP
+    - name: es
+      port: 9300
+      targetPort: 9300
+      protocol: TCP
+---
+
+# Setup service that points to all nodes in the cluster
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ allNodesKey }}
+  namespace: {{ deployment.namespace }}
+  annotations:
+    {{ annotationKeys.applyPriority }}: "100"
+  labels:
+    {{ labelKeys.managed }}: true
+    {%- for e in defaultLabels | entries %}
+    {{ e.key }}: {{ e.value }}
+    {%- endfor %}
+  ownerReferences: {{ ownerReferences | toJson }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  sessionAffinity: None
+  selector:
+    {{ labelKeys.deployment }}: {{ deployment.name }}
+  ports:
+    - name: xp-metrics
+      port: 2609
+      targetPort: 2609
+      protocol: TCP
+    - name: xp-management
+      port: 4848
+      targetPort: 4848
+      protocol: TCP
+    - name: xp-main
+      port: 8080
+      targetPort: 8080
+      protocol: TCP

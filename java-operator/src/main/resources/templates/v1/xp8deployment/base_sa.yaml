@@ -1,0 +1,69 @@
+# Setup SA for nodes
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: xp-node-sa
+  namespace: {{ deployment.namespace }}
+  annotations:
+    {{ annotationKeys.applyPriority }}: "20"
+  ownerReferences: {{ ownerReferences | toJson }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: xp-node-role
+  namespace: {{ deployment.namespace }}
+  annotations:
+    {{ annotationKeys.applyPriority }}: "30"
+  ownerReferences: {{ ownerReferences | toJson }}
+rules:
+{%- if settings.hzApiDiscovery %}
+  # For HZ api discovery
+  - apiGroups:
+      - "*"
+    resources:
+      - endpoints
+      - pods
+      - services
+    verbs:
+      - get
+      - list
+{%- else %}
+  []
+{%- endif %}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: xp-node-role-bindings
+  namespace: {{ deployment.namespace }}
+  annotations:
+    {{ annotationKeys.applyPriority }}: "40"
+  ownerReferences: {{ ownerReferences | toJson }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: xp-node-role
+subjects:
+  - kind: ServiceAccount
+    name: xp-node-sa
+    namespace: {{ deployment.namespace }}
+# Cluster role binding for HZ — binds the pre-created hazelcast ClusterRole to xp-node-sa
+{%- if settings.hzApiDiscovery and deployment.clustered %}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: "{{ deployment.namespace | raw }}-hazelcast"
+  annotations:
+    {{ annotationKeys.applyPriority }}: "40"
+  ownerReferences: {{ ownerReferences | toJson }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ operator.hazelcastClusterRoleName }}
+subjects:
+  - kind: ServiceAccount
+    name: xp-node-sa
+    namespace: {{ deployment.namespace }}
+{%- endif %}

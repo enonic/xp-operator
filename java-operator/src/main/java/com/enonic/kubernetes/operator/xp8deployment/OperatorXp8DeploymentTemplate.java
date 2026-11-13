@@ -1,0 +1,418 @@
+package com.enonic.kubernetes.operator.xp8deployment;
+
+import com.enonic.kubernetes.crd.v1.Xp8Deployment;
+import com.enonic.kubernetes.crd.v1.xp8deploymentspec.NodeGroups;
+import com.enonic.kubernetes.crd.v1.xp8deploymentspec.nodegroups.Env;
+import com.enonic.kubernetes.templates.functions.Templator;
+import com.enonic.kubernetes.templates.values.BaseValues;
+import com.enonic.kubernetes.templates.values.MapValues;
+import com.enonic.kubernetes.templates.values.ValueBuilder;
+import com.enonic.kubernetes.templates.values.Values;
+import com.enonic.kubernetes.kubernetes.Clients;
+import com.enonic.kubernetes.kubernetes.Informers;
+import com.enonic.kubernetes.operator.helpers.HandlerTemplate;
+import com.enonic.kubernetes.operator.ingress.OperatorXp8ConfigSync;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.fabric8.kubernetes.api.model.Namespace;
+import io.fabric8.kubernetes.api.model.rbac.ClusterRoleBinding;
+import io.fabric8.kubernetes.api.model.rbac.RoleBinding;
+import io.fabric8.kubernetes.api.model.rbac.RoleRef;
+import io.fabric8.kubernetes.api.model.rbac.RoleBindingBuilder;
+import io.micronaut.context.annotation.Value;
+import io.micronaut.context.event.ApplicationEventListener;
+import io.micronaut.runtime.server.event.ServerStartupEvent;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static com.enonic.kubernetes.common.Configuration.*;
+import static com.enonic.kubernetes.common.Utils.createOwnerReference;
+
+/**
+ * This operator class creates/updates/deletes resources defined in the xp8deployment templates
+ */
+@Singleton
+public class OperatorXp8DeploymentTemplate
+    extends HandlerTemplate<Xp8Deployment>
+    implements ApplicationEventListener<ServerStartupEvent>
+{
+    @Inject
+    @Named("v1/xp8deployment")
+    Templator templator;
+
+    @Inject
+    OperatorXp8ConfigSync operatorXp8ConfigSync;
+
+    @Inject
+    Informers informers;
+
+    @Inject
+    Clients clients;
+
+    @Value("${operator.operator.name}")
+    String operatorName;
+
+    @Value("${operator.operator.namespace}")
+    String operatorNamespace;
+
+    @Value("${operator.operator.serviceAccountName}")
+    String serviceAccountName;
+
+    @Value("${operator.operator.namespaceRoleName}")
+    String namespaceRoleName;
+
+    @Value("${operator.operator.hazelcastClusterRoleName}")
+    String hazelcastClusterRoleName;
+
+    @Override
+    public void onApplicationEvent( ServerStartupEvent event )
+    {
+        listen( informers.xp8DeploymentInformer() );
+    }
+
+    @Override
+    public void onNewAdd( final Xp8Deployment newResource )
+    {
+        ensureNamespaceReady( newResource );
+        super.onNewAdd( newResource );
+    }
+
+    @Override
+    public void onUpdate( final Xp8Deployment oldResource, final Xp8Deployment newResource )
+    {
+        ensureNamespaceReady( newResource );
+        super.onUpdate( oldResource, newResource );
+    }
+
+    private void ensureNamespaceReady( final Xp8Deployment resource )
+    {
+        final String namespace = resource.getMetadata().getNamespace();
+        final String managedLabelKey = cfgStr( "operator.charts.values.labelKeys.managed" );
+
+        // 1. Check namespace has managed label
+        Namespace ns = clients.k8s().namespaces().withName( namespace ).get();
+        if (!"true".equals( ns.getMetadata().getLabels() == null ? null : ns.getMetadata().getLabels().get( managedLabelKey ) )) {
+            throw new IllegalStateException( String.format(
+                "Namespace '%s' is missing label '%s=true'. " +
+                "A cluster admin must label it manually: kubectl label namespace %s %s=true",
+                namespace, managedLabelKey, namespace, managedLabelKey ) );
+        }
+
+        // 2. Create RoleBinding so the operator SA has permissions in this namespace
+        //    before the templates are applied. References the pre-created ClusterRole.
+        String rbName = operatorName + "-namespace-access";
+        if (isClustered( resource )) {
+            assertHazelcastBindingMatchesConfig( namespace );
+        }
+
+        RoleBinding existing = clients.k8s().rbac().roleBindings().inNamespace( namespace ).withName( rbName ).get();
+        if (existing != null) {
+            assertBindingMatchesConfig( existing, namespace, rbName );
+        } else {
+            clients.k8s().rbac().roleBindings().inNamespace( namespace ).resource(
+                new RoleBindingBuilder()
+                    .withNewMetadata().withName( rbName ).withNamespace( namespace ).endMetadata()
+                    .withNewRoleRef()
+                        .withApiGroup( "rbac.authorization.k8s.io" )
+                        .withKind( "ClusterRole" )
+                        .withName( namespaceRoleName )
+                    .endRoleRef()
+                    .addNewSubject()
+                        .withKind( "ServiceAccount" )
+                        .withName( serviceAccountName )
+                        .withNamespace( operatorNamespace )
+                    .endSubject()
+                    .build()
+            ).create();
+        }
+    }
+
+    private static boolean isClustered( final Xp8Deployment resource )
+    {
+        return resource.getSpec().
+            getNodeGroups().
+            stream().
+            mapToInt( NodeGroups::getReplicas ).sum() > 1;
+    }
+
+    private void assertHazelcastBindingMatchesConfig( final String namespace )
+    {
+        String crbName = namespace + "-hazelcast";
+        ClusterRoleBinding binding = clients.k8s().rbac().clusterRoleBindings().withName( crbName ).get();
+        if (binding == null) {
+            return;
+        }
+
+        RoleRef ref = binding.getRoleRef();
+        if (ref != null && "rbac.authorization.k8s.io".equals( ref.getApiGroup() ) &&
+            "ClusterRole".equals( ref.getKind() ) && hazelcastClusterRoleName.equals( ref.getName() )) {
+            return;
+        }
+
+        throw new IllegalStateException( String.format(
+            "ClusterRoleBinding '%s' references %s, but the operator is configured for ClusterRole/%s. " +
+            "roleRef cannot be changed in place and the operator may not delete a binding referencing " +
+            "another role, so a cluster admin must delete it and let the operator recreate it: " +
+            "kubectl delete clusterrolebinding %s",
+            crbName, ref == null ? "none" : String.format( "%s/%s", ref.getKind(), ref.getName() ),
+            hazelcastClusterRoleName, crbName ) );
+    }
+
+    private void assertBindingMatchesConfig( final RoleBinding binding, final String namespace, final String rbName )
+    {
+        RoleRef ref = binding.getRoleRef();
+        boolean roleMatches = ref != null &&
+            "rbac.authorization.k8s.io".equals( ref.getApiGroup() ) &&
+            "ClusterRole".equals( ref.getKind() ) &&
+            namespaceRoleName.equals( ref.getName() );
+
+        boolean subjectMatches = binding.getSubjects() != null && binding.getSubjects().stream().anyMatch(
+            s -> "ServiceAccount".equals( s.getKind() ) &&
+                 serviceAccountName.equals( s.getName() ) &&
+                 operatorNamespace.equals( s.getNamespace() ) );
+
+        if (roleMatches && subjectMatches) {
+            return;
+        }
+
+        String describedRole = ref == null ? "none" : String.format( "%s/%s", ref.getKind(), ref.getName() );
+        String describedSubjects = binding.getSubjects() == null
+            ? "none"
+            : binding.getSubjects().stream()
+                .map( s -> String.format( "%s %s/%s", s.getKind(), s.getNamespace(), s.getName() ) )
+                .collect( Collectors.joining( ", " ) );
+
+        throw new IllegalStateException( String.format(
+            "RoleBinding '%s' in namespace '%s' references %s and binds %s, but the operator needs " +
+            "ClusterRole/%s bound to ServiceAccount %s/%s. roleRef cannot be changed in place, so a " +
+            "cluster admin must delete it and let the operator recreate it: kubectl delete rolebinding %s -n %s",
+            rbName, namespace, describedRole, describedSubjects,
+            namespaceRoleName, operatorNamespace, serviceAccountName, rbName, namespace ) );
+    }
+
+    @Override
+    protected ValueBuilder<Xp8Deployment> getValueBuilder( final BaseValues baseValues )
+    {
+        return new Xp8DeploymentValueBuilder( baseValues, operatorName, hazelcastClusterRoleName );
+    }
+
+    @Override
+    protected Templator getTemplator()
+    {
+        return templator;
+    }
+
+    @Override
+    protected void postHandle( final String namespace )
+    {
+        // Update all config in namespace after update
+        operatorXp8ConfigSync.handle( namespace );
+    }
+
+    public static class Xp8DeploymentValueBuilder
+        implements ValueBuilder<Xp8Deployment>
+    {
+        private static final ObjectMapper MAPPER = new ObjectMapper();
+
+        private final BaseValues baseValues;
+
+        private final String operatorName;
+
+        private final String hazelcastClusterRoleName;
+
+        public Xp8DeploymentValueBuilder( final BaseValues baseValues, final String operatorName,
+                                          final String hazelcastClusterRoleName )
+        {
+            this.baseValues = baseValues;
+            this.operatorName = operatorName;
+            this.hazelcastClusterRoleName = hazelcastClusterRoleName;
+        }
+
+        @Override
+        public Values apply( final Xp8Deployment in )
+        {
+            Xp8Deployment resource = cloneResource( in );
+            MapValues values = new MapValues( baseValues );
+
+            for (NodeGroups ng : resource.getSpec().getNodeGroups()) {
+                Optional<Env> optionalXpOpts =
+                    ng.getEnv().stream().filter( e -> e.getName().equals( "XP_OPTS" ) ).findFirst();
+
+                Env xpOpts;
+                if (optionalXpOpts.isEmpty()) {
+                    xpOpts = new Env();
+                    xpOpts.setName( "XP_OPTS" );
+                    xpOpts.setValue( "" );
+                    ng.getEnv().add( xpOpts );
+                } else {
+                    xpOpts = optionalXpOpts.get();
+                }
+
+                String opts = xpOpts.getValue();
+
+                if ( !( opts.contains( "-Xms" ) || opts.contains( "-Xmx" ) ) )
+                {
+                    opts = joinOpts( opts, getMemoryOpts( ng ) );
+                }
+
+                if ( !( opts.contains( "-XX:-HeapDumpOnOutOfMemoryError" ) || opts.contains( "-XX:HeapDumpPath" ) ) )
+                {
+                    opts = joinOpts( opts, "-XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof" );
+                }
+
+                if ( !( opts.contains( "-Dhazelcast.shutdownhook.policy" ) ) )
+                {
+                    opts = joinOpts( opts, "-Dhazelcast.shutdownhook.policy=GRACEFUL" );
+                }
+
+                if (!(opts.contains( "-Dhazelcast.graceful.shutdown.max.wait" ))) {
+                    opts = joinOpts( opts, "-Dhazelcast.graceful.shutdown.max.wait=" +
+                        cfgStr( "operator.charts.values.pods.terminationGracePeriodSeconds" ) );
+                }
+
+                xpOpts.setValue( opts );
+            }
+
+            boolean isClustered = isClustered( resource );
+
+            Map<String, Object> deployment = new HashMap<>();
+            deployment.put( "name", resource.getMetadata().getName() );
+            deployment.put( "namespace", resource.getMetadata().getNamespace() );
+            deployment.put( "clustered", isClustered );
+            deployment.put( "hasDedicatedFrontendNodes", hasDedicatedFrontendNodes( resource ) );
+
+            if (isClustered) {
+                deployment.put( "clusterMajority", getClusterMajority( resource.getSpec().getNodeGroups() ) );
+                deployment.put( "minimumMasterNodes", getMinimumMasterNodes( resource.getSpec().getNodeGroups() ) );
+                deployment.put( "minimumDataNodes", getMinimumDataNodes( resource.getSpec().getNodeGroups() ) );
+            }
+
+            deployment.put( "spec", resource.getSpec() );
+
+            values.put( "defaultLabels", defaultLabels( resource ) );
+
+            final Map<String, Object> metadata = new HashMap<>();
+
+            final Map<String, String> annotations = annotations( resource );
+            if(!annotations.isEmpty())
+            {
+                metadata.put( "annotations", annotations );
+                deployment.put( "metadata", metadata );
+            }
+
+            values.put( "deployment", deployment );
+
+            values.put( "ownerReferences", Collections.singletonList( createOwnerReference( resource ) ) );
+
+            // Operator identity values consumed by the templates (e.g. base_sa.yaml)
+            Map<String, Object> operatorValues = new HashMap<>();
+            operatorValues.put( "name", operatorName );
+            operatorValues.put( "hazelcastClusterRoleName", hazelcastClusterRoleName );
+            values.put( "operator", operatorValues );
+
+            return values;
+        }
+
+        private boolean hasDedicatedFrontendNodes( Xp8Deployment deployment )
+        {
+            return deployment.getSpec().getNodeGroups().stream()
+                .filter( n -> !n.getData() )
+                .anyMatch( n -> !n.getMaster() );
+        }
+
+        private Xp8Deployment cloneResource( final Xp8Deployment in )
+        {
+            try {
+                return MAPPER.readValue( MAPPER.writeValueAsString( in ), Xp8Deployment.class );
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException( e );
+            }
+        }
+
+        private int getClusterMajority( final List<NodeGroups> xp8DeploymentSpecNodeGroups )
+        {
+            return (xp8DeploymentSpecNodeGroups.stream().
+                map( NodeGroups::getReplicas ).
+                reduce( 0, Integer::sum ) / 2) + 1;
+        }
+
+        private int getMinimumMasterNodes( final List<NodeGroups> xp8DeploymentSpecNodeGroups )
+        {
+            return (xp8DeploymentSpecNodeGroups.stream().
+                filter( NodeGroups::getMaster ).
+                map( NodeGroups::getReplicas ).
+                reduce( 0, Integer::sum ) / 2) + 1;
+        }
+
+        private Object getMinimumDataNodes( final List<NodeGroups> xp8DeploymentSpecNodeGroups )
+        {
+            return (xp8DeploymentSpecNodeGroups.stream().
+                filter( NodeGroups::getData ).
+                map( NodeGroups::getReplicas ).
+                reduce( 0, Integer::sum ) / 2) + 1;
+        }
+
+        private String getMemoryOpts( final NodeGroups ng )
+        {
+            double memoryInMb = getMemory( ng.getResources().getMemory() );
+
+            double heapMemory;
+            if (ng.getData()) {
+                heapMemory = memoryInMb * cfgFloat( "operator.deployment.xp.heap.data" );
+            } else {
+                heapMemory = memoryInMb * cfgFloat( "operator.deployment.xp.heap.other" );
+            }
+            int heap = Math.toIntExact( Math.min( Math.round( heapMemory ), cfgInt( "operator.deployment.xp.heap.max" ) ) );
+
+            return String.format( "-Xms%sm -Xmx%sm", heap, heap );
+        }
+
+        private double getMemory( final String memory )
+        {
+            if (memory.contains( "Gi" )) {
+                return Double.parseDouble( memory.replace( "Gi", "" ) ) * 1024;
+            } else if (memory.contains( "Mi" )) {
+                return Double.parseDouble( memory.replace( "Mi", "" ) );
+            } else {
+                throw new RuntimeException( "Invalid memory mappings" );
+            }
+        }
+
+        private Map<String, String> defaultLabels( final Xp8Deployment resource )
+        {
+            return resource.getMetadata().getLabels();
+        }
+
+        private Map<String, String> annotations(final Xp8Deployment resource )
+        {
+            return resource.getMetadata().getAnnotations();
+        }
+
+        private boolean isClustered( Xp8Deployment resource )
+        {
+            return resource.getSpec().
+                getNodeGroups().
+                stream().
+                mapToInt( NodeGroups::getReplicas ).sum() > 1;
+        }
+
+        private static String joinOpts( String... opts )
+        {
+            return Stream.of( opts )
+                .filter( Objects::nonNull )
+                .filter( Predicate.not( String::isEmpty ) )
+                .collect( Collectors.joining( " " ) );
+        }
+    }
+}

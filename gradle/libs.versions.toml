@@ -14,6 +14,7 @@ fabric8-kubernetes-servermock = { module = "io.fabric8:kubernetes-server-mock", 
 # JUnit & Mockito
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version = "5.10.0" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version = "5.11.0" }
+assertj-core = { module = "org.assertj:assertj-core", version = "3.27.6" }
 mockito-core = { module = "org.mockito:mockito-core", version = "5.21.0" }
 mockito-inline = { module = "org.mockito:mockito-inline", version = "5.2.0" }
 mockito-junitjupiter = { module = "org.mockito:mockito-junit-jupiter", version = "5.21.0" }
@@ -26,6 +27,8 @@ jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", ver
 # Other
 immutables-value = { module = "org.immutables:value", version = "2.9.3" }
 immutables-valueannotations = { module = "org.immutables:value-annotations", version = "2.9.3" }
+jspecify = { module = "org.jspecify:jspecify", version = "1.0.0" }
+pebble = { module = "io.pebbletemplates:pebble", version = "4.1.2" }
 guava = { module = "com.google.guava:guava", version = "33.5.0-jre" }
 maven-mavenartifact = { module = "org.apache.maven:maven-artifact", version = "3.9.12" }
 jakarta-validation = { module = "jakarta.validation:jakarta.validation-api", version = "2.0.2" }
