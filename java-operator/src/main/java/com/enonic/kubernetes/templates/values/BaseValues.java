@@ -4,6 +4,8 @@ import com.enonic.kubernetes.common.Preconditions;
 
 import io.micronaut.context.env.PropertySource;
 
+import org.jspecify.annotations.NullMarked;
+
 import jakarta.inject.Named;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,6 +27,7 @@ public class BaseValues
         this( clusterId, Map.of() );
     }
 
+    @NullMarked
     public BaseValues( String clusterId, Map<String, String> overrides )
     {
         super();
