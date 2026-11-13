@@ -73,7 +73,7 @@ public class OperatorIngressLabel
         onCondition( newR, c -> {
             LOG.debug( "onUpdate Xp8Config: {} in {}", newR.getMetadata().getNamespace(), newR.getMetadata().getName() );
             this.handle( c );
-        }, this::isVHostConfig, ( c ) -> c.getStatus().getState() == Xp8ConfigStatus.State.READY );
+        }, this::isVHostConfig, ( c ) -> c.getStatus() != null && c.getStatus().getState() == Xp8ConfigStatus.State.READY );
     }
 
     @Override
@@ -129,7 +129,8 @@ public class OperatorIngressLabel
             .filter( inSameNamespaceAs( ingress ) )
             .filter( isDeleted().negate() )
             .filter( this::isVHostConfig )
-            .collect( Collectors.toMap( c -> c.getSpec().getNodeGroup(), c -> c.getStatus().getState() ) );
+            .collect( Collectors.toMap( c -> c.getSpec().getNodeGroup(),
+                                        c -> c.getStatus() != null ? c.getStatus().getState() : Xp8ConfigStatus.State.PENDING ) );
 
         // Set all nodeGroups state
         if ( states.values().stream().anyMatch( s -> !s.equals( Xp8ConfigStatus.State.READY ) ) )
