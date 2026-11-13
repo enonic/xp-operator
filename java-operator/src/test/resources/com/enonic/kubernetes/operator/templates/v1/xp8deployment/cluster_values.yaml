@@ -127,6 +127,20 @@ pods:
   imagePullSecretNames: ""
   nodeGroupAntiAffinity: false
   preStopSleepSeconds: "15"
+  probes:
+    liveness:
+      failureThreshold: "10"
+      periodSeconds: "10"
+      timeoutSeconds: "2"
+    readiness:
+      failureThreshold: "2"
+      periodSeconds: "10"
+      timeoutSeconds: "2"
+    startup:
+      failureThreshold: "55"
+      initialDelaySeconds: "5"
+      periodSeconds: "2"
+      timeoutSeconds: "2"
   readOnlyRootFilesystem: false
   securityContext:
     fsGroup: "1337"
