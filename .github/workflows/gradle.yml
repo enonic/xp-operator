@@ -23,11 +23,6 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
 
-      - name: Setup Helm
-        uses: azure/setup-helm@v5
-        with:
-          version: '3.12.3'
-
       - name: Build with Gradle
         run: ./gradlew ci
 
