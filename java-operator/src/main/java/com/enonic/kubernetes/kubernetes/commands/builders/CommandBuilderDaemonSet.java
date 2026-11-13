@@ -3,16 +3,19 @@ package com.enonic.kubernetes.kubernetes.commands.builders;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.immutables.value.Value;
 
 import io.fabric8.kubernetes.api.model.apps.DaemonSet;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
 
-@Value.Immutable
-public abstract class CommandBuilderDaemonSet
+public class CommandBuilderDaemonSet
     extends GenericBuilder<KubernetesClient, DaemonSet>
 {
+    public CommandBuilderDaemonSet( final KubernetesClient client )
+    {
+        super( client );
+    }
+
     @Override
     protected Optional<DaemonSet> getOldResource( final String namespace, final String name )
     {

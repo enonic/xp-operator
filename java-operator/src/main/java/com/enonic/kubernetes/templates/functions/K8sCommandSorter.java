@@ -5,7 +5,7 @@ import java.util.function.Function;
 
 import javax.inject.Singleton;
 
-import com.google.common.base.Preconditions;
+import com.enonic.kubernetes.common.Preconditions;
 
 import com.enonic.kubernetes.kubernetes.commands.K8sCommand;
 import com.enonic.kubernetes.kubernetes.commands.K8sCommandAction;

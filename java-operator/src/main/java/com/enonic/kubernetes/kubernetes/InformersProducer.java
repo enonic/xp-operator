@@ -25,7 +25,7 @@ import static com.enonic.kubernetes.common.SingletonAssert.singletonAssert;
 @Factory
 public class InformersProducer
 {
-    private static final Logger log = LoggerFactory.getLogger( InformersProducer.class );
+    private static final Logger LOG = LoggerFactory.getLogger( InformersProducer.class );
 
     @Value("${operator.informers.reSync}")
     long informerReSync;
@@ -37,17 +37,8 @@ public class InformersProducer
 
         SharedInformerFactory sf = clients.k8s().informers();
 
-        return InformersImpl.builder()
-            .clients( clients )
-            .informerFactory( sf )
-            .configMapInformer( configInformer( sf ) )
-            .ingressInformer( ingressInformer( sf ) )
-            .namespaceInformer( namespaceInformer( sf ) )
-            .podInformer( podInformer( sf ) )
-            .eventInformer( eventInformer( sf ) )
-            .xp8ConfigInformer( xp8ConfigInformer( sf ) )
-            .xp8DeploymentInformer( xp8DeploymentInformer( sf ) )
-            .build();
+        return new Informers( clients, sf, configInformer( sf ), ingressInformer( sf ), namespaceInformer( sf ), podInformer( sf ),
+                              xp8ConfigInformer( sf ), xp8DeploymentInformer( sf ), eventInformer( sf ) );
     }
 
     private SharedIndexInformer<ConfigMap> configInformer( final SharedInformerFactory sf )

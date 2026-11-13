@@ -13,7 +13,7 @@ import io.fabric8.kubernetes.api.model.HasMetadata;
 
 import com.enonic.kubernetes.kubernetes.commands.K8sCommand;
 import com.enonic.kubernetes.kubernetes.commands.builders.GenericBuilderAction;
-import com.enonic.kubernetes.kubernetes.commands.builders.GenericBuilderParamsImpl;
+import com.enonic.kubernetes.kubernetes.commands.builders.GenericBuilderParams;
 
 
 @Singleton
@@ -34,23 +34,13 @@ public class K8sCommandBuilder
         {
             if ( !newResources.containsKey( r.getKey() ) )
             {
-                GenericBuilderParamsImpl.Builder paramBuilder = GenericBuilderParamsImpl.
-                    builder().
-                    resource( r.getValue() ).
-                    action( GenericBuilderAction.DELETE );
-
-                res.add( params.k8sCommandMapper().getCommand( paramBuilder.build() ) );
+                res.add( params.k8sCommandMapper().getCommand( new GenericBuilderParams<>( r.getValue(), GenericBuilderAction.DELETE ) ) );
             }
         }
 
         for ( Map.Entry<String, HasMetadata> r : newResources.entrySet() )
         {
-            GenericBuilderParamsImpl.Builder paramBuilder = GenericBuilderParamsImpl.
-                builder().
-                resource( r.getValue() ).
-                action( GenericBuilderAction.APPLY );
-
-            res.add( params.k8sCommandMapper().getCommand( paramBuilder.build() ) );
+            res.add( params.k8sCommandMapper().getCommand( new GenericBuilderParams<>( r.getValue(), GenericBuilderAction.APPLY ) ) );
         }
 
         return res;

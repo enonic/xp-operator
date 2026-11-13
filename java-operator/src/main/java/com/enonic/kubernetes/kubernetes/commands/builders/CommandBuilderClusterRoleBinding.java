@@ -1,18 +1,21 @@
 package com.enonic.kubernetes.kubernetes.commands.builders;
 
-import com.google.common.base.Preconditions;
+import com.enonic.kubernetes.common.Preconditions;
 import io.fabric8.kubernetes.api.model.rbac.ClusterRoleBinding;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import org.immutables.value.Value;
 
 import java.util.Objects;
 import java.util.Optional;
 
 
-@Value.Immutable
-public abstract class CommandBuilderClusterRoleBinding
+public class CommandBuilderClusterRoleBinding
     extends GenericBuilder<KubernetesClient, ClusterRoleBinding>
 {
+    public CommandBuilderClusterRoleBinding( final KubernetesClient client )
+    {
+        super( client );
+    }
+
     @Override
     protected Optional<ClusterRoleBinding> getOldResource( final String namespace, final String name )
     {

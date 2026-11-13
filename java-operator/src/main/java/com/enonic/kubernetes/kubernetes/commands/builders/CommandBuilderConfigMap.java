@@ -3,16 +3,19 @@ package com.enonic.kubernetes.kubernetes.commands.builders;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.immutables.value.Value;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
 
-@Value.Immutable
-public abstract class CommandBuilderConfigMap
+public class CommandBuilderConfigMap
     extends GenericBuilder<KubernetesClient, ConfigMap>
 {
+    public CommandBuilderConfigMap( final KubernetesClient client )
+    {
+        super( client );
+    }
+
     @Override
     protected Optional<ConfigMap> getOldResource( final String namespace, final String name )
     {

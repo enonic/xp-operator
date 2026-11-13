@@ -2,16 +2,19 @@ package com.enonic.kubernetes.kubernetes.commands.builders;
 
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import org.immutables.value.Value;
 
 import java.util.Objects;
 import java.util.Optional;
 
 
-@Value.Immutable
-public abstract class CommandBuilderIngress
+public class CommandBuilderIngress
     extends GenericBuilder<KubernetesClient, Ingress>
 {
+    public CommandBuilderIngress( final KubernetesClient client )
+    {
+        super( client );
+    }
+
     @Override
     protected Optional<Ingress> getOldResource( final String namespace, final String name )
     {

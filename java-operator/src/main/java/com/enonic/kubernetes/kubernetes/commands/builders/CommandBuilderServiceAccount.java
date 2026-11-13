@@ -2,16 +2,19 @@ package com.enonic.kubernetes.kubernetes.commands.builders;
 
 import java.util.Optional;
 
-import org.immutables.value.Value;
 
 import io.fabric8.kubernetes.api.model.ServiceAccount;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
 
-@Value.Immutable
-public abstract class CommandBuilderServiceAccount
+public class CommandBuilderServiceAccount
     extends GenericBuilder<KubernetesClient, ServiceAccount>
 {
+    public CommandBuilderServiceAccount( final KubernetesClient client )
+    {
+        super( client );
+    }
+
     @Override
     protected Optional<ServiceAccount> getOldResource( final String namespace, final String name )
     {

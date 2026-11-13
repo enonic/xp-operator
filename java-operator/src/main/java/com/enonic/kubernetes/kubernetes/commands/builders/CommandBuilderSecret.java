@@ -3,16 +3,19 @@ package com.enonic.kubernetes.kubernetes.commands.builders;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.immutables.value.Value;
 
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
 
-@Value.Immutable
-public abstract class CommandBuilderSecret
+public class CommandBuilderSecret
     extends GenericBuilder<KubernetesClient, Secret>
 {
+    public CommandBuilderSecret( final KubernetesClient client )
+    {
+        super( client );
+    }
+
     @Override
     protected Optional<Secret> getOldResource( final String namespace, final String name )
     {

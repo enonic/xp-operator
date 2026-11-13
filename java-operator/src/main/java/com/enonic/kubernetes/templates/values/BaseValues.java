@@ -1,6 +1,6 @@
 package com.enonic.kubernetes.templates.values;
 
-import com.google.common.base.Preconditions;
+import com.enonic.kubernetes.common.Preconditions;
 
 import io.micronaut.context.env.PropertySource;
 

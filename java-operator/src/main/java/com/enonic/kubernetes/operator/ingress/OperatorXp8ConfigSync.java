@@ -5,7 +5,6 @@ import com.enonic.kubernetes.kubernetes.Clients;
 import com.enonic.kubernetes.kubernetes.Searchers;
 import com.enonic.kubernetes.kubernetes.commands.K8sLogHelper;
 import com.enonic.kubernetes.operator.Operator;
-import com.google.common.base.Function;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.networking.v1.HTTPIngressPath;
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
@@ -21,6 +20,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -42,7 +42,7 @@ import static java.util.stream.Collectors.groupingBy;
 public class OperatorXp8ConfigSync
     implements Runnable, ApplicationEventListener<ServerStartupEvent>
 {
-    private static final Logger log = LoggerFactory.getLogger( OperatorXp8ConfigSync.class );
+    private static final Logger LOG = LoggerFactory.getLogger( OperatorXp8ConfigSync.class );
 
     @Inject
     Operator operator;
@@ -86,10 +86,10 @@ public class OperatorXp8ConfigSync
             Function<String, String> g = ( k ) -> annotations.get( m + "." + k );
             try {
                 String name = m.replace( prefix, ingress.getMetadata().getName() + "-" );
-                result.add( MappingImpl.of( name, g.apply( "host" ), g.apply( "source" ), g.apply( "target" ), g.apply( "idproviders" ),
+                result.add( new Mapping( name, g.apply( "host" ), g.apply( "source" ), g.apply( "target" ), g.apply( "idproviders" ),
                                             g.apply( "endpoint" ), g.apply( "allow" ), getFlows( annotations, m + ".flows." ) ) );
             } catch (Exception e) {
-                log.warn( String.format( "Invalid vhost mappings on ingress '%s'", ingress.getMetadata().getName() ) );
+                LOG.warn( String.format( "Invalid vhost mappings on ingress '%s'", ingress.getMetadata().getName() ) );
             }
         }
 
@@ -136,7 +136,7 @@ public class OperatorXp8ConfigSync
 
         // Update if needed
         if (!Objects.equals( xp8Config.getSpec().getData(), data )) {
-            log.debug("Syncing vhost ConfigMap: {} in {}", xp8Config.getMetadata().getName(), xp8Config.getMetadata().getNamespace());
+            LOG.debug("Syncing vhost ConfigMap: {} in {}", xp8Config.getMetadata().getName(), xp8Config.getMetadata().getNamespace());
 
             K8sLogHelper.logEdit( clients.xp8Configs().
                 inNamespace( xp8Config.getMetadata().getNamespace() ).
@@ -201,7 +201,7 @@ public class OperatorXp8ConfigSync
         if (cm.isPresent() && cm.get().getData().containsKey( "vhost-defaults.cfg" )) {
             sb = new StringBuilder( cm.get().getData().get( "vhost-defaults.cfg" ) );
         } else {
-            log.warn( String.format( "Could not find default vhost configuration in NS '%s'", namespace ) );
+            LOG.warn( String.format( "Could not find default vhost configuration in NS '%s'", namespace ) );
             sb = new StringBuilder( "enabled = true" );
         }
 
@@ -223,7 +223,7 @@ public class OperatorXp8ConfigSync
             for (Mapping mapping : mappings) {
                 // Set rule host if missing
                 if (mapping.host() == null) {
-                    mapping = MappingImpl.copyOf( mapping ).withHost( rule.getHost() );
+                    mapping = mapping.withHost( rule.getHost() );
                 }
 
                 // If host matches and the mapping applies to a path of a node group, once per rule:

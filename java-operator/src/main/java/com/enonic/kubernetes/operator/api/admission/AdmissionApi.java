@@ -9,7 +9,7 @@ import com.enonic.kubernetes.operator.api.BaseAdmissionApi;
 import com.enonic.kubernetes.operator.ingress.Mapping;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.common.base.Preconditions;
+import com.enonic.kubernetes.common.Preconditions;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesResource;

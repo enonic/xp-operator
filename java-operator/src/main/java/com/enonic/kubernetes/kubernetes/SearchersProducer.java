@@ -13,14 +13,12 @@ public class SearchersProducer
     Searchers searchers( Informers informers )
     {
         singletonAssert(this, "createSearchers");
-        return SearchersImpl.builder().
-            configMap( new InformerSearcher<>( informers.configMapInformer() ) ).
-            ingress( new InformerSearcher<>( informers.ingressInformer() ) ).
-            namespace( new InformerSearcher<>( informers.namespaceInformer() ) ).
-            pod( new InformerSearcher<>( informers.podInformer() ) ).
-            xp8Config( new InformerSearcher<>( informers.xp8ConfigInformer() ) ).
-            xp8Deployment( new InformerSearcher<>( informers.xp8DeploymentInformer() ) ).
-            event( new InformerSearcher<>( informers.eventInformer() ) ).
-            build();
+        return new Searchers( new InformerSearcher<>( informers.configMapInformer() ),
+                              new InformerSearcher<>( informers.ingressInformer() ),
+                              new InformerSearcher<>( informers.namespaceInformer() ),
+                              new InformerSearcher<>( informers.podInformer() ),
+                              new InformerSearcher<>( informers.xp8ConfigInformer() ),
+                              new InformerSearcher<>( informers.xp8DeploymentInformer() ),
+                              new InformerSearcher<>( informers.eventInformer() ) );
     }
 }
