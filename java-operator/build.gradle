@@ -71,6 +71,7 @@ javaGen {
     source = file("${rootDir}/helm/src/main/crds")
     target = file("${buildDir}/generated/sources/crds/java")
     packageOverrides = ['cloud.enonic.v1': 'com.enonic.kubernetes.crd.v1']
+    alwaysPreserveUnknown = true
 }
 
 checkstyle {
