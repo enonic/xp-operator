@@ -15,6 +15,10 @@ application {
     mainClass.set('com.enonic.kubernetes.operator.helpers.Main')
 }
 
+tasks.named( 'inspectRuntimeClasspath' ) {
+    dependsOn tasks.named( 'generateGitProperties' )
+}
+
 def modelMetadataDir = layout.buildDirectory.dir( 'generated/native-image/models' )
 
 def generateModelMetadata = tasks.register( 'generateModelMetadata' ) {
