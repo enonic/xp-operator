@@ -20,6 +20,7 @@ import com.enonic.kubernetes.kubernetes.commands.K8sCommand;
 import com.enonic.kubernetes.kubernetes.commands.K8sCommandMapper;
 
 import static com.enonic.kubernetes.kubernetes.Predicates.fieldEquals;
+import static com.enonic.kubernetes.kubernetes.Predicates.fieldValueEquals;
 
 public abstract class HandlerTemplate<R extends HasMetadata>
     extends InformerEventHandler<R>
@@ -60,7 +61,13 @@ public abstract class HandlerTemplate<R extends HasMetadata>
     @Override
     public void onUpdate( final R oldResource, final R newResource )
     {
-        if ( fieldEquals( (CustomResource) oldResource, CustomResource::getSpec ).negate().test( (CustomResource) newResource ) )
+        // Labels and annotations are rendered into the templates, so a change to them needs a re-render as well.
+        // Status and other metadata do not, so updates that only touch those are skipped.
+        final boolean unchanged = fieldValueEquals( (CustomResource) oldResource, CustomResource::getSpec ).test( (CustomResource) newResource ) &&
+            fieldEquals( oldResource, r -> r.getMetadata().getLabels() ).test( newResource ) &&
+            fieldEquals( oldResource, r -> r.getMetadata().getAnnotations() ).test( newResource );
+
+        if ( !unchanged )
         {
             handle( oldResource, newResource );
         }
@@ -72,7 +79,7 @@ public abstract class HandlerTemplate<R extends HasMetadata>
         // Do nothing, this is handled by Kubernetes GC
     }
 
-    private void handle( final R oldResource, final R newResource )
+    protected void handle( final R oldResource, final R newResource )
     {
         templateToK8s.
             andThen( k8sCommandBuilder ).

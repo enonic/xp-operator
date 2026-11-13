@@ -9,7 +9,7 @@ import io.micronaut.runtime.server.event.ServerStartupEvent;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
-import static com.enonic.kubernetes.kubernetes.Predicates.fieldEquals;
+import static com.enonic.kubernetes.kubernetes.Predicates.fieldValueEquals;
 import static com.enonic.kubernetes.kubernetes.Predicates.onCondition;
 
 /**
@@ -41,7 +41,7 @@ public class OperatorXp8Config
     @Override
     public void onUpdate( final Xp8Config oldResource, final Xp8Config newResource )
     {
-        onCondition( newResource, this::handle, fieldEquals( oldResource, Xp8Config::getSpec ).negate() );
+        onCondition( newResource, this::handle, fieldValueEquals( oldResource, Xp8Config::getSpec ).negate() );
     }
 
     @Override
