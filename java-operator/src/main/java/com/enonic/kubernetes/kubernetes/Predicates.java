@@ -5,6 +5,7 @@ import com.enonic.kubernetes.crd.v1.Xp8Deployment;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.Namespace;
+import io.fabric8.kubernetes.client.utils.Serialization;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -128,6 +129,26 @@ public class Predicates
     public static <T, R> Predicate<T> fieldEquals( T o, Function<T, R> f )
     {
         return ( r ) -> Objects.equals( f.apply( o ), f.apply( r ) );
+    }
+
+    /**
+     * Compares a field by value through its JSON form. Use it for types that have no equals, such as the classes the
+     * fabric8 java-generator creates from the CRDs: their generated @JsonPropertyOrder keeps the JSON stable.
+     */
+    public static <T, R> Predicate<T> fieldValueEquals( T o, Function<T, R> f )
+    {
+        return ( r ) -> valueEquals( f.apply( o ), f.apply( r ) );
+    }
+
+    public static boolean valueEquals( Object a, Object b )
+    {
+        if (a == b) {
+            return true;
+        }
+        if (a == null || b == null) {
+            return false;
+        }
+        return Serialization.asJson( a ).equals( Serialization.asJson( b ) );
     }
 
     @SafeVarargs

@@ -1,6 +1,5 @@
 package com.enonic.kubernetes.kubernetes.commands.builders;
 
-import java.util.Objects;
 import java.util.Optional;
 
 
@@ -10,6 +9,7 @@ import io.fabric8.kubernetes.client.dsl.Resource;
 
 import com.enonic.kubernetes.crd.v1.Xp8Deployment;
 
+import static com.enonic.kubernetes.kubernetes.Predicates.valueEquals;
 
 public class CommandBuilderXp8Deployment
     extends GenericBuilder<MixedOperation<Xp8Deployment, KubernetesResourceList<Xp8Deployment>, Resource<Xp8Deployment>>, Xp8Deployment>
@@ -57,6 +57,6 @@ public class CommandBuilderXp8Deployment
     @Override
     protected boolean equalsSpec( final Xp8Deployment o, final Xp8Deployment n )
     {
-        return Objects.equals( o.getSpec(), n.getSpec() );
+        return valueEquals( o.getSpec(), n.getSpec() );
     }
 }
