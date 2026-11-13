@@ -198,24 +198,26 @@ spec:
               path: "/health"
               port: 2609
               scheme: HTTP
-            failureThreshold: 20
-            initialDelaySeconds: 10
-            periodSeconds: 5
-            timeoutSeconds: 2
+            failureThreshold: {{ pods.probes.startup.failureThreshold }}
+            initialDelaySeconds: {{ pods.probes.startup.initialDelaySeconds }}
+            periodSeconds: {{ pods.probes.startup.periodSeconds }}
+            timeoutSeconds: {{ pods.probes.startup.timeoutSeconds }}
           livenessProbe:
             httpGet:
               path: "/health"
               port: 2609
               scheme: HTTP
-            failureThreshold: 10
-            timeoutSeconds: 2
+            failureThreshold: {{ pods.probes.liveness.failureThreshold }}
+            periodSeconds: {{ pods.probes.liveness.periodSeconds }}
+            timeoutSeconds: {{ pods.probes.liveness.timeoutSeconds }}
           readinessProbe:
             httpGet:
               path: "/ready"
               port: 2609
               scheme: HTTP
-            failureThreshold: 2
-            timeoutSeconds: 2
+            failureThreshold: {{ pods.probes.readiness.failureThreshold }}
+            periodSeconds: {{ pods.probes.readiness.periodSeconds }}
+            timeoutSeconds: {{ pods.probes.readiness.timeoutSeconds }}
 
           {%- if deployment.clustered %}
           lifecycle:

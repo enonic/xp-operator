@@ -454,6 +454,7 @@ spec:
             path: "/health"
             port: 2609
             scheme: "HTTP"
+          periodSeconds: 10
           timeoutSeconds: 2
         name: "exp"
         ports:
@@ -467,11 +468,12 @@ spec:
           name: "es-transport"
           protocol: "TCP"
         readinessProbe:
-          failureThreshold: 2
+          failureThreshold: 4
           httpGet:
             path: "/ready"
             port: 2609
             scheme: "HTTP"
+          periodSeconds: 5
           timeoutSeconds: 2
         resources:
           limits:
@@ -490,13 +492,13 @@ spec:
           runAsNonRoot: true
           runAsUser: 1337
         startupProbe:
-          failureThreshold: 20
+          failureThreshold: 55
           httpGet:
             path: "/health"
             port: 2609
             scheme: "HTTP"
-          initialDelaySeconds: 10
-          periodSeconds: 5
+          initialDelaySeconds: 5
+          periodSeconds: 2
           timeoutSeconds: 2
         terminationMessagePath: "/dev/termination-log"
         terminationMessagePolicy: "File"
