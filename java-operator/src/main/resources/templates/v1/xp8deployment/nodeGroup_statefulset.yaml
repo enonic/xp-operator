@@ -250,7 +250,7 @@ spec:
             {%- for secretMount in nodeGroup.secretMounts %}
             - name: {{ secretMount.name }}
               mountPath: {{ secretMount.mountPath }}
-              readOnly: {{ secretMount.readOnly | default(true) }}
+              readOnly: true
             {%- endfor %}
         - name: events
           image: {{ imageRef(events.image, image.registryPrefix) }}
