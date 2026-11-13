@@ -364,7 +364,7 @@ spec:
         - name: {{ secretMount.name }}
           secret:
             secretName: {{ secretMount.secretName }}
-            defaultMode: {{ secretMount.defaultMode }}
+            defaultMode: 288 # 0440, in decimal because YAML 1.2 has no leading-zero octal
             optional: {{ secretMount.optional }}
         {%- endfor %}
   volumeClaimTemplates:
