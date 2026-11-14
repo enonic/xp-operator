@@ -77,8 +77,6 @@ data:
     \n\nwhile true; do\n  CURRENT_HASH=\"$(hash_config)\"\n  if [ \"$CURRENT_HASH\"\
     \ != \"$LAST_HASH\" ]; then\n    LAST_HASH=\"$CURRENT_HASH\"\n    patch_annotation\n\
     \  fi\n  sleep 2\ndone\n"
-  vhost-defaults.cfg: "enabled = true\n\nmapping.localhost.host = localhost\nmapping.localhost.source\
-    \ = /\nmapping.localhost.target = /\nmapping.localhost.idProvider.system = default"
 ---
 apiVersion: "v1"
 kind: "ConfigMap"

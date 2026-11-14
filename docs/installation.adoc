@@ -219,7 +219,7 @@ $ kubectl -n my-namespace patch xp8deployment my-deployment --type json \
 $ kubectl -n my-namespace rollout status statefulset main
 ----
 +
-. Activate port forwarding
+. Activate port forwarding. XP answers on `localhost` only with `operator.vhost.localhost=true` in the operator configuration, see <<usage#access-admin, access admin>>.
 +
 [source,bash]
 ----

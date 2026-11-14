@@ -1,5 +1,6 @@
 package com.enonic.kubernetes.operator.ingress;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -78,6 +79,25 @@ class OperatorXp8ConfigSyncTest
                           mapping.admin-1.idProvider.enonic-cloud.flows=autologin
                           mapping.admin-1.idProvider.enonic-cloud.authorizationServer=https://env.example.com/_/idprovider/enonic-cloud""",
                       render( m ) );
+    }
+
+    @Test
+    void noLocalhostMappingByDefault()
+    {
+        assertEquals( "enabled = true", OperatorXp8ConfigSync.createVHostData( List.of(), List.of( "main" ) ) );
+    }
+
+    @Test
+    void localhostMappingWhenConfigured()
+    {
+        assertEquals( """
+                          enabled = true
+
+                          mapping.localhost.host = localhost
+                          mapping.localhost.source = /
+                          mapping.localhost.target = /
+                          mapping.localhost.idProvider.system = default""", OperatorXp8ConfigSync.vhostDefaults( true ) );
+        assertEquals( "enabled = true", OperatorXp8ConfigSync.vhostDefaults( false ) );
     }
 
     @Test

@@ -3,4 +3,3 @@ gradlew eol=lf
 *.bat eol=crlf
 Makefile eol=lf
 kubectl-plugin/* eol=lf
-vhost-defaults.cfg eol=lf
