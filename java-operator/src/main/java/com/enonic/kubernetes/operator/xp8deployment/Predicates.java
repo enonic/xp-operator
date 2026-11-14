@@ -10,10 +10,8 @@ import static com.enonic.kubernetes.kubernetes.Predicates.inSameNamespaceAs;
 
 public class Predicates {
     public static Predicate<Xp8Deployment> running() {
-        return deployment -> deployment
-                .getStatus()
-                .getState()
-                .equals(Xp8DeploymentStatus.State.RUNNING);
+        return deployment -> deployment.getStatus() != null &&
+                deployment.getStatus().getState() == Xp8DeploymentStatus.State.RUNNING;
     }
 
     public static Predicate<Xp8Deployment> parent(HasMetadata r) {

@@ -90,7 +90,7 @@ public class MutationApi
                     patch( mt, true, "/status", newR.getStatus(), defStatus );
                 } else {
                     // Else make sure the old status is not removed
-                    patch( mt, false, "/status", newR.getStatus(), oldR.getStatus() );
+                    patch( mt, false, "/status", newR.getStatus(), oldR.getStatus() != null ? oldR.getStatus() : defStatus );
                 }
                 break;
             case DELETE:
@@ -144,7 +144,7 @@ public class MutationApi
                     patch( mt, true, "/status", newR.getStatus(), defStatus );
                 } else {
                     // Else make sure the old status is not removed
-                    patch( mt, false, "/status", newR.getStatus(), oldR.getStatus() );
+                    patch( mt, false, "/status", newR.getStatus(), oldR.getStatus() != null ? oldR.getStatus() : defStatus );
                 }
                 break;
             case DELETE:
