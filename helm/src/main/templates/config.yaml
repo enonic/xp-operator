@@ -18,5 +18,12 @@ data:
     operator.operator.namespaceRoleName={{ include "namespaceRoleName" . }}
     operator.operator.hazelcastClusterRoleName={{ include "hazelcastClusterRoleName" . }}
     operator.charts.values.labelKeys.managed={{ .Values.managedLabelKey }}
+    {{- if .Values.logback }}
+    operator.charts.values.logbackFile=/deployments/config/xp-logback.xml
+    {{- end }}
+  {{- with .Values.logback }}
+  xp-logback.xml: |-
+{{ indent 4 . }}
+  {{- end }}
 ---
 {{- end }}

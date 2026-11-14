@@ -26,6 +26,10 @@ import io.micronaut.runtime.server.event.ServerStartupEvent;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -245,6 +249,11 @@ public class OperatorXp8DeploymentTemplate
             Xp8Deployment resource = cloneResource( in );
             MapValues values = new MapValues( baseValues );
 
+            if ( values.get( "logbackFile" ) instanceof String logbackFile && !logbackFile.isEmpty() )
+            {
+                values.put( "logback", readFile( logbackFile ) );
+            }
+
             for (NodeGroups ng : resource.getSpec().getNodeGroups()) {
                 Optional<Env> optionalXpOpts =
                     ng.getEnv().stream().filter( e -> e.getName().equals( "XP_OPTS" ) ).findFirst();
@@ -322,6 +331,18 @@ public class OperatorXp8DeploymentTemplate
             values.put( "operator", operatorValues );
 
             return values;
+        }
+
+        private static String readFile( final String path )
+        {
+            try
+            {
+                return Files.readString( Path.of( path ) );
+            }
+            catch ( IOException e )
+            {
+                throw new UncheckedIOException( "Cannot read '" + path + "'", e );
+            }
         }
 
         private boolean hasDedicatedFrontendNodes( Xp8Deployment deployment )

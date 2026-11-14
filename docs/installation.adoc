@@ -36,6 +36,18 @@ config: |-
   # Minimum CPU and RAM to be requested by XP deployments
   operator.charts.values.resources.cpu.defaultRequests=1
   operator.charts.values.resources.memory.defaultRequests=2Gi
+
+# Optional: logback.xml of new XP deployments. Leave out to use the operator's default.
+logback: |-
+  <?xml version="1.0"?>
+  <configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+      <encoder class="ch.qos.logback.classic.encoder.JsonEncoder"/>
+    </appender>
+    <root level="info">
+      <appender-ref ref="STDOUT"/>
+    </root>
+  </configuration>
 ----
 
 [WARNING]

@@ -40,6 +40,10 @@ tls:
   crt: ""
   key: ""
 
+# Default logback.xml of new deployments, written to their all-logback Xp8Config.
+# Empty means the operator's built-in default. Existing all-logback configs are not changed.
+logback: ""
+
 # For a full list of configuration options see operator properties file:
 # https://github.com/enonic/xp-operator/blob/master/java-operator/src/main/resources/application.properties
 config: |-
