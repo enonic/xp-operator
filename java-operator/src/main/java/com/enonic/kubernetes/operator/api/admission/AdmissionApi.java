@@ -100,6 +100,23 @@ public class AdmissionApi
             return;
         }
 
+        for ( Map.Entry<String, String> e : newIngress.getMetadata().getAnnotations().entrySet() )
+        {
+            if ( e.getKey().startsWith( cfgStr( "operator.charts.values.annotationKeys.vhostMapping" ) ) &&
+                e.getKey().endsWith( ".context" ) )
+            {
+                try
+                {
+                    Mapping.parseContext( e.getValue() );
+                }
+                catch ( IllegalArgumentException ex )
+                {
+                    throw new IllegalArgumentException(
+                        String.format( "%s in 'enonic.cloud/xp8.vhost.mapping' annotation '%s'", ex.getMessage(), e.getKey() ) );
+                }
+            }
+        }
+
         final Set<Mapping> mappings = getAnnotationMappings( newIngress );
         Preconditions.checkArgument( !mappings.isEmpty(), "malformed 'enonic.cloud/xp8.vhost.mapping' annotations" );
 

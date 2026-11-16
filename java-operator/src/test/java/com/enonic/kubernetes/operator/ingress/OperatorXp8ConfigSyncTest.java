@@ -81,6 +81,27 @@ class OperatorXp8ConfigSyncTest
     }
 
     @Test
+    void managementMappingWithContext()
+    {
+        Mapping m = single( Map.of( P + "host", "env-mgmt.example.com", P + "source", "/", P + "target", "/", P + "endpoint", "management",
+                                    P + "context", """
+                                        api.rest.enabled=false
+
+                                        api.server:index.verbs = get,reindex
+                                        """ ) );
+
+        assertEquals( """
+
+
+                          mapping.admin-1.host=env-mgmt.example.com
+                          mapping.admin-1.source=/
+                          mapping.admin-1.target=/
+                          mapping.admin-1.endpoint=management
+                          mapping.admin-1.context.api.rest.enabled=false
+                          mapping.admin-1.context.api.server\\:index.verbs=get,reindex""", render( m ) );
+    }
+
+    @Test
     void unknownEndpointHasNoPort()
     {
         Mapping m = single( Map.of( P + "source", "/", P + "target", "/", P + "endpoint", "statistics" ) );
