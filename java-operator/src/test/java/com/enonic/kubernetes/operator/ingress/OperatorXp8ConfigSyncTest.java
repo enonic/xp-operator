@@ -100,6 +100,9 @@ class OperatorXp8ConfigSyncTest
                           mapping.admin-1.endpoint=management
                           mapping.admin-1.context.api.rest.enabled=false
                           mapping.admin-1.context.api.server\\:index.verbs=get,reindex""", render( m ) );
+    }
+
+    @Test
     void noLocalhostMappingByDefault()
     {
         assertEquals( "enabled = true", OperatorXp8ConfigSync.createVHostData( List.of(), List.of( "main" ) ) );
