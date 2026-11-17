@@ -5,7 +5,6 @@ import com.enonic.kubernetes.kubernetes.Clients;
 import com.enonic.kubernetes.kubernetes.Searchers;
 import com.enonic.kubernetes.kubernetes.commands.K8sLogHelper;
 import com.enonic.kubernetes.operator.Operator;
-import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.networking.v1.HTTPIngressPath;
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
 import io.fabric8.kubernetes.api.model.networking.v1.IngressRule;
@@ -22,17 +21,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import static com.enonic.kubernetes.common.Configuration.cfgBool;
 import static com.enonic.kubernetes.common.Configuration.cfgLong;
 import static com.enonic.kubernetes.common.Configuration.cfgStr;
 import static com.enonic.kubernetes.kubernetes.Predicates.inNamespace;
 import static com.enonic.kubernetes.kubernetes.Predicates.inSameNamespaceAs;
 import static com.enonic.kubernetes.kubernetes.Predicates.isDeleted;
-import static com.enonic.kubernetes.kubernetes.Predicates.withName;
 import static java.util.stream.Collectors.groupingBy;
 
 /**
@@ -132,7 +130,7 @@ public class OperatorXp8ConfigSync
             collect( Collectors.toList() );
 
         // Create new data
-        String data = createVHostData( namespace, ingresses, nodeGroups );
+        String data = createVHostData( ingresses, nodeGroups );
 
         // Update if needed
         if (!Objects.equals( xp8Config.getSpec().getData(), data )) {
@@ -188,22 +186,9 @@ public class OperatorXp8ConfigSync
         return false;
     }
 
-    private String createVHostData( final String namespace, final List<Ingress> ingresses, final List<String> nodeGroups )
+    static String createVHostData( final List<Ingress> ingresses, final List<String> nodeGroups )
     {
-        // Create config string builder
-        StringBuilder sb;
-        Optional<ConfigMap> cm = searchers.configMap().stream().
-            filter( inNamespace( namespace ) ).
-            filter( withName( "extra-config" ) ).
-            findFirst();
-
-        // Try to use vhost defaults
-        if (cm.isPresent() && cm.get().getData().containsKey( "vhost-defaults.cfg" )) {
-            sb = new StringBuilder( cm.get().getData().get( "vhost-defaults.cfg" ) );
-        } else {
-            LOG.warn( String.format( "Could not find default vhost configuration in NS '%s'", namespace ) );
-            sb = new StringBuilder( "enabled = true" );
-        }
+        StringBuilder sb = new StringBuilder( vhostDefaults( cfgBool( "operator.vhost.localhost" ) ) );
 
         // Iterate over all ingresses
         for (Ingress ingress : ingresses) {
@@ -213,7 +198,7 @@ public class OperatorXp8ConfigSync
         return sb.toString();
     }
 
-    private void addVHostMappings( final StringBuilder sb, final Ingress ingress, final List<String> nodeGroups )
+    private static void addVHostMappings( final StringBuilder sb, final Ingress ingress, final List<String> nodeGroups )
     {
         Set<Mapping> mappings = getAnnotationMappings( ingress );
 
@@ -239,6 +224,26 @@ public class OperatorXp8ConfigSync
                 }
             }
         }
+    }
+
+    /**
+     * The start of every vhost configuration. The localhost mapping serves XP to anything that reaches a pod's web
+     * port with Host: localhost, e.g. through kubectl port-forward, without an ingress, so it is only there when the
+     * operator is configured to add it.
+     */
+    static String vhostDefaults( final boolean localhost )
+    {
+        if ( !localhost )
+        {
+            return "enabled = true";
+        }
+        return """
+            enabled = true
+
+            mapping.localhost.host = localhost
+            mapping.localhost.source = /
+            mapping.localhost.target = /
+            mapping.localhost.idProvider.system = default""";
     }
 
     static void addVHostMappings( final StringBuilder sb, final Mapping m )

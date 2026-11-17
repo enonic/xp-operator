@@ -538,6 +538,15 @@ The node groups have to pass it to XP, see <<su>>.
 [#access-admin]
 === Access admin (bypassing ingress)
 
+XP answers requests for `localhost` only when the operator adds a `localhost` vhost mapping to every deployment, which it does not by default: anything that reaches a pod's web port with `Host: localhost` gets XP with no ingress in front. Enable it in the operator configuration only where that is wanted, e.g. on a development cluster:
+
+[source,properties]
+----
+operator.vhost.localhost=true
+----
+
+Then forward the web port:
+
 [source,bash]
 ----
 $ kubectl -n my-namespace port-forward main-0 8080
