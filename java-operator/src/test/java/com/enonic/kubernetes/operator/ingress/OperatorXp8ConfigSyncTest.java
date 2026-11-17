@@ -1,5 +1,6 @@
 package com.enonic.kubernetes.operator.ingress;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -99,6 +100,22 @@ class OperatorXp8ConfigSyncTest
                           mapping.admin-1.endpoint=management
                           mapping.admin-1.context.api.rest.enabled=false
                           mapping.admin-1.context.api.server\\:index.verbs=get,reindex""", render( m ) );
+    void noLocalhostMappingByDefault()
+    {
+        assertEquals( "enabled = true", OperatorXp8ConfigSync.createVHostData( List.of(), List.of( "main" ) ) );
+    }
+
+    @Test
+    void localhostMappingWhenConfigured()
+    {
+        assertEquals( """
+                          enabled = true
+
+                          mapping.localhost.host = localhost
+                          mapping.localhost.source = /
+                          mapping.localhost.target = /
+                          mapping.localhost.idProvider.system = default""", OperatorXp8ConfigSync.vhostDefaults( true ) );
+        assertEquals( "enabled = true", OperatorXp8ConfigSync.vhostDefaults( false ) );
     }
 
     @Test

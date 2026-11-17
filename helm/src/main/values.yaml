@@ -52,3 +52,5 @@ config: |-
 
   #operator.charts.values.resources.cpu.defaultRequests=0.2
   #operator.charts.values.resources.memory.defaultRequests=512Mi
+
+  #operator.vhost.localhost=false
