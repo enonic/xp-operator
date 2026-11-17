@@ -16,7 +16,7 @@ junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
-assertj-core = { module = "org.assertj:assertj-core", version = "3.27.6" }
+assertj-core = { module = "org.assertj:assertj-core", version = "3.27.7" }
 mockito-core = { module = "org.mockito:mockito-core", version = "5.24.0" }
 mockito-inline = { module = "org.mockito:mockito-inline", version = "5.2.0" }
 mockito-junitjupiter = { module = "org.mockito:mockito-junit-jupiter", version = "5.24.0" }
