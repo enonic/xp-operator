@@ -86,7 +86,8 @@ public class OperatorXp8ConfigSync
                 String name = m.replace( prefix, ingress.getMetadata().getName() + "-" );
                 result.add( new Mapping( name, g.apply( "host" ), g.apply( "source" ), g.apply( "target" ), g.apply( "idproviders" ),
                                             g.apply( "endpoint" ), g.apply( "allow" ), byIdProvider( annotations, m + ".flows." ),
-                                            byIdProvider( annotations, m + ".authorizationServer." ) ) );
+                                            byIdProvider( annotations, m + ".authorizationServer." ),
+                                            Mapping.parseContext( g.apply( "context" ) ) ) );
             } catch (Exception e) {
                 LOG.warn( String.format( "Invalid vhost mappings on ingress '%s'", ingress.getMetadata().getName() ) );
             }
@@ -274,6 +275,9 @@ public class OperatorXp8ConfigSync
         }
         if (m.allow() != null) {
             sb.append( String.format( "\nmapping.%s.allow=%s", m.name(), m.allow() ) );
+        }
+        for (Map.Entry<String, String> e : m.context().entrySet()) {
+            sb.append( String.format( "\nmapping.%s.context.%s=%s", m.name(), e.getKey().replace( ":", "\\:" ), e.getValue() ) );
         }
     }
 }

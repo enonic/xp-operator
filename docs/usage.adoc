@@ -477,6 +477,17 @@ enonic.cloud/xp8.vhost.mapping.<MAPPING_NAME>.authorizationServer.<DEFAULT_IDPRO
 
 `authorizationServer.<IDPROVIDER>` must name an id provider listed in `idproviders`, and its value must be an http or https URL without query or fragment. It becomes `mapping.<NAME>.idProvider.<IDPROVIDER>.authorizationServer` in the vhost configuration, which XP reads from the version that added OAuth discovery on management mappings (enonic/xp#12604).
 
+A mapping can carry context settings, which XP reads as `mapping.<NAME>.context.<KEY>` in the vhost configuration, e.g. to restrict the management APIs a vhost exposes. Annotation names cannot contain `:`, so they go in one annotation, one `<KEY>=<VALUE>` per line:
+
+[source,yaml]
+----
+enonic.cloud/xp8.vhost.mapping.<MAPPING_NAME>.context: |
+  api.rest.enabled=false
+  api.server:index.verbs=get,reindex
+----
+
+The operator writes each line as `mapping.<NAME>.context.<KEY>=<VALUE>`, escaping `:` in the key as `\:`. Blank lines are skipped. A line without `=`, a key that is empty, contains whitespace or `\`, or starts with `#` or `!`, a value with `\`, and a key given twice are rejected. The operator does not check which keys XP knows.
+
 NOTE: Like Xp8Config, changes to virtual hosts can take a couple of minutes to register in XP.
 
 === Namespaces
