@@ -48,6 +48,7 @@ import java.util.stream.Collectors;
 import static com.enonic.kubernetes.common.Configuration.cfgIfBool;
 import static com.enonic.kubernetes.common.Configuration.cfgStr;
 import static com.enonic.kubernetes.common.Validator.dns1123;
+import static com.enonic.kubernetes.common.Validator.dns1123Label;
 import static java.util.Objects.requireNonNullElse;
 import static com.enonic.kubernetes.kubernetes.Predicates.fieldEquals;
 import static com.enonic.kubernetes.kubernetes.Predicates.inNodeGroupAllOr;
@@ -372,7 +373,7 @@ public class AdmissionApi
             final String path = nodeGroupPath + ".resources.images[" + j + "]";
 
             Preconditions.checkState( image.getName() != null, "'" + path + ".name' cannot be null" );
-            dns1123( path + ".name", image.getName() );
+            dns1123Label( path + ".name", image.getName() );
             Preconditions.checkState( image.getReference() != null && !image.getReference().isBlank(),
                                       "'" + path + ".reference' cannot be empty" );
             Preconditions.checkState( image.getPullPolicy() == null || PULL_POLICIES.contains( image.getPullPolicy() ),
