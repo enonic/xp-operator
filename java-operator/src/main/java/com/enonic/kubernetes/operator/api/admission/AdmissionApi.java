@@ -10,6 +10,7 @@ import com.enonic.kubernetes.crd.v1.xp8deploymentspec.nodegroups.SecretMounts;
 import com.enonic.kubernetes.crd.v1.xp8deploymentspec.nodegroups.Sidecars;
 import com.enonic.kubernetes.crd.v1.xp8deploymentspec.nodegroups.resources.Dirs;
 import com.enonic.kubernetes.crd.v1.xp8deploymentspec.nodegroups.resources.Disks;
+import com.enonic.kubernetes.crd.v1.xp8deploymentspec.nodegroups.resources.Images;
 import com.enonic.kubernetes.crd.v1.xp8deploymentspec.nodegroups.resources.Volumes;
 import com.enonic.kubernetes.operator.api.AdmissionOperation;
 import com.enonic.kubernetes.operator.api.BaseAdmissionApi;
@@ -60,6 +61,8 @@ public class AdmissionApi
     extends BaseAdmissionApi<AdmissionReview>
 {
     private static final Set<String> BUILT_IN_VOLUMES = Set.of( "config", "extra-config", "tmp", "xp-logs", "events-sa-ca", "empty-sa-token" );
+
+    private static final List<String> PULL_POLICIES = List.of( "Always", "IfNotPresent", "Never" );
 
     public AdmissionApi()
     {
@@ -306,7 +309,9 @@ public class AdmissionApi
                                               "'spec.nodeGroups[" + i + "].sidecars[" + j + "].image' cannot be null" );
                 }
 
-                assertSecretMounts( "spec.nodeGroups[" + i + "]", newDeployment.getSpec(), ng );
+                final Set<String> volumeNames = volumeNames( newDeployment.getSpec(), ng );
+                assertImages( "spec.nodeGroups[" + i + "]", ng, volumeNames );
+                assertSecretMounts( "spec.nodeGroups[" + i + "]", ng, volumeNames );
             }
 
             // Check replicas
@@ -347,16 +352,40 @@ public class AdmissionApi
         }
     }
 
-    private static void assertSecretMounts( final String nodeGroupPath, final Xp8DeploymentSpec spec, final NodeGroups ng )
+    private static Set<String> volumeNames( final Xp8DeploymentSpec spec, final NodeGroups ng )
     {
-        Preconditions.checkState( ng.getSecretMounts() != null, "'" + nodeGroupPath + ".secretMounts' cannot be null" );
-
         final Set<String> volumeNames = new HashSet<>( BUILT_IN_VOLUMES );
         requireNonNullElse( ng.getResources().getDirs(), List.<Dirs>of() ).forEach( dir -> volumeNames.add( dir.getName() ) );
         requireNonNullElse( ng.getResources().getVolumes(), List.<Volumes>of() ).forEach( volume -> volumeNames.add( volume.getName() ) );
         requireNonNullElse( ng.getResources().getDisks(), List.<Disks>of() ).forEach( disk -> volumeNames.add( disk.getName() ) );
         requireNonNullElse( spec.getNodesSharedVolumes(), List.<NodesSharedVolumes>of() ).forEach( volume -> volumeNames.add( volume.getName() ) );
         requireNonNullElse( spec.getNodesSharedDisks(), List.<NodesSharedDisks>of() ).forEach( disk -> volumeNames.add( disk.getName() ) );
+        return volumeNames;
+    }
+
+    private static void assertImages( final String nodeGroupPath, final NodeGroups ng, final Set<String> volumeNames )
+    {
+        final List<Images> images = requireNonNullElse( ng.getResources().getImages(), List.of() );
+        for ( int j = 0; j < images.size(); j++ )
+        {
+            final Images image = images.get( j );
+            final String path = nodeGroupPath + ".resources.images[" + j + "]";
+
+            Preconditions.checkState( image.getName() != null, "'" + path + ".name' cannot be null" );
+            dns1123( path + ".name", image.getName() );
+            Preconditions.checkState( image.getReference() != null && !image.getReference().isBlank(),
+                                      "'" + path + ".reference' cannot be empty" );
+            Preconditions.checkState( image.getPullPolicy() == null || PULL_POLICIES.contains( image.getPullPolicy() ),
+                                      "'" + path + ".pullPolicy' with value '" + image.getPullPolicy() + "' must be one of " +
+                                          PULL_POLICIES );
+            Preconditions.checkState( volumeNames.add( image.getName() ),
+                                      "'" + path + ".name' with value '" + image.getName() + "' is already the name of another volume" );
+        }
+    }
+
+    private static void assertSecretMounts( final String nodeGroupPath, final NodeGroups ng, final Set<String> volumeNames )
+    {
+        Preconditions.checkState( ng.getSecretMounts() != null, "'" + nodeGroupPath + ".secretMounts' cannot be null" );
 
         final List<SecretMounts> secretMounts = ng.getSecretMounts();
         for ( int j = 0; j < secretMounts.size(); j++ )
