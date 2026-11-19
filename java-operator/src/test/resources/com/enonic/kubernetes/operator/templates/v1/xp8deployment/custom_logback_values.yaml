@@ -48,6 +48,7 @@ deployment:
           size: "200Mi"
         - name: "work"
           size: "400Mi"
+        images: []
         memory: "512Mi"
         volumes: []
       secretMounts: []

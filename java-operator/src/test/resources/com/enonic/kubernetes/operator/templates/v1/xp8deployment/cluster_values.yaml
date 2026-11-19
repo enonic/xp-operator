@@ -44,6 +44,7 @@ deployment:
         value: "-Xms512m -Xmx512m -XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/enonic-xp/home/data/oom.hprof\
           \ -Dhazelcast.shutdownhook.policy=GRACEFUL -Dhazelcast.graceful.shutdown.max.wait=600"
       resources:
+        images: []
         cpu: "1"
         memory: "1Gi"
         dirs: []
@@ -64,6 +65,7 @@ deployment:
           \ -Dhazelcast.shutdownhook.policy=GRACEFUL -Dhazelcast.graceful.shutdown.max.wait=600"
       resources:
         cpu: "2"
+        images: []
         memory: "2Gi"
         dirs: []
         volumes: []
@@ -87,6 +89,7 @@ deployment:
           \ -Dhazelcast.shutdownhook.policy=GRACEFUL -Dhazelcast.graceful.shutdown.max.wait=600"
       resources:
         cpu: "3"
+        images: []
         memory: "3Gi"
         dirs: []
         volumes: []

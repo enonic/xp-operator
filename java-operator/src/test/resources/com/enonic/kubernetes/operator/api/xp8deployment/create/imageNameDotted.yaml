@@ -1,0 +1,38 @@
+admissionRequest:
+  request:
+    operation: CREATE
+    object:
+      apiVersion: enonic.cloud/v1
+      kind: Xp8Deployment
+      metadata:
+        name: mycloud-mysolution-myenv-myservice2
+        namespace: mycloud-mysolution-myenv-myservice2
+        labels:
+          cloud: mycloud
+          solution: mysolution
+          environment: myenv
+          service: myservice2
+      spec:
+        enabled: true
+        xpVersion: 8.2.0
+        nodesSharedDisks:
+          - name: blobstore
+            size: 1Gi
+          - name: snapshots
+            size: 1Gi
+        nodeGroups:
+          - name: main
+            master: true
+            data: true
+            replicas: 1
+            resources:
+              cpu: "1"
+              memory: 512Mi
+              images:
+                - name: app.utils
+                  reference: enonic/cloud-utils:2.1.0-B10
+              disks:
+                - name: index
+                  size: 200Mi
+
+assertException: "Field 'spec.nodeGroups[0].resources.images[0].name' with value 'app.utils' is not valid, it must be at most 63 characters, consist of lower case alphanumeric characters or '-', and start and end with an alphanumeric character (e.g. 'my-name', regex used for validation is '[a-z0-9]([-a-z0-9]*[a-z0-9])?')"

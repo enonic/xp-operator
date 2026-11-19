@@ -16,4 +16,11 @@ public class Validator
                                   "Field '" + name + "' with value '" + value +
                                       "' is not valid, it must consist of lower case alphanumeric characters, '-' or '.', and must start and end with an alphanumeric character (e.g. 'my-name', regex used for validation is '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*')" );
     }
+
+    public static void dns1123Label( String name, String value )
+    {
+        Preconditions.checkState( value.length() <= 63 && value.matches( "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$" ),
+                                  "Field '" + name + "' with value '" + value +
+                                      "' is not valid, it must be at most 63 characters, consist of lower case alphanumeric characters or '-', and start and end with an alphanumeric character (e.g. 'my-name', regex used for validation is '[a-z0-9]([-a-z0-9]*[a-z0-9])?')" );
+    }
 }

@@ -63,6 +63,7 @@ deployment:
           \ -Dhazelcast.shutdownhook.policy=GRACEFUL -Dhazelcast.graceful.shutdown.max.wait=600"
       resources:
         cpu: "1"
+        images: []
         memory: "512Mi"
         dirs:
         - name: "deploy"

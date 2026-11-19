@@ -1,0 +1,65 @@
+apiVersion: enonic.cloud/v1
+kind: Xp8Deployment
+metadata:
+  name: mycloud-mysolution-myenv-myservice
+  namespace: mycloud-mysolution-myenv-myservice
+  labels:
+    cloud: mycloud
+    solution: mysolution
+    environment: myenv
+    service: myservice
+spec:
+  enabled: true
+  xpVersion: 8.2.0
+
+  nodesSharedDisks:
+    - name: blobstore
+      size: 2Gi
+    - name: snapshots
+      size: 3Gi
+
+  nodeGroups:
+    - name: fisk
+      data: true
+      master: true
+      replicas: 1
+      initContainers:
+        - image: busybox
+          name: my-sidecar-1
+          command:
+            - "/bin/sh"
+          args:
+            - "-c"
+            - "cp /apps/*/*.jar /deploy"
+          mounts:
+            - name: deploy
+              mountPath: /deploy
+            - name: app-cloud-utils
+              mountPath: /apps/cloud-utils
+            - name: app-other
+              mountPath: /apps/other
+      sidecars:
+        - image: ghcr.io/acme/otherbox:1.0
+          name: my-sidecar-2
+          mounts:
+            - name: deploy
+              mountPath: /deploy
+      resources:
+        cpu: "1"
+        memory: 512Mi
+        dirs:
+          - name: deploy
+            size: 100Mi
+        images:
+          - name: app-cloud-utils
+            reference: enonic/cloud-utils:2.1.0
+          - name: app-other
+            reference: ghcr.io/acme/other-app:1.0
+            pullPolicy: Always
+        disks:
+          - name: export
+            size: 234Mi
+          - name: index
+            size: 200Mi
+          - name: work
+            size: 400Mi

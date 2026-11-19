@@ -374,6 +374,18 @@ spec:
                                   type: string
                                 class:
                                   type: string
+                          images:
+                            type: array
+                            default: []
+                            items:
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                                reference:
+                                  type: string
+                                pullPolicy:
+                                  type: string
             status:
               type: object
               nullable: true

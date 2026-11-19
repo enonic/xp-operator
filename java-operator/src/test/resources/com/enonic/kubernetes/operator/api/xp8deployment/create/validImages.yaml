@@ -1,0 +1,82 @@
+admissionRequest:
+  request:
+    operation: CREATE
+    object:
+      apiVersion: enonic.cloud/v1
+      kind: Xp8Deployment
+      metadata:
+        name: mycloud-mysolution-myenv-myservice2
+        namespace: mycloud-mysolution-myenv-myservice2
+        labels:
+          cloud: mycloud
+          solution: mysolution
+          environment: myenv
+          service: myservice2
+      spec:
+        enabled: true
+        xpVersion: 8.2.0
+        nodesSharedDisks:
+          - name: blobstore
+            size: 1Gi
+          - name: snapshots
+            size: 1Gi
+        nodeGroups:
+          - name: main
+            master: true
+            data: true
+            replicas: 1
+            resources:
+              cpu: "1"
+              memory: 512Mi
+              images:
+                - name: app-cloud-utils
+                  reference: enonic/cloud-utils:2.1.0
+                - name: app-snapshotter
+                  reference: enonic/snapshotter:4.0.0
+                  pullPolicy: IfNotPresent
+              disks:
+                - name: index
+                  size: 200Mi
+
+assertResult:
+  apiVersion: "enonic.cloud/v1"
+  kind: "Xp8Deployment"
+  metadata:
+    labels:
+      cloud: "mycloud"
+      solution: "mysolution"
+      environment: "myenv"
+      service: "myservice2"
+    name: "mycloud-mysolution-myenv-myservice2"
+    namespace: "mycloud-mysolution-myenv-myservice2"
+  spec:
+    enabled: true
+    xpVersion: "8.2.0"
+    nodesSharedDisks:
+      - name: "blobstore"
+        size: "1Gi"
+      - name: "snapshots"
+        size: "1Gi"
+    nodeGroups:
+      - name: "main"
+        data: true
+        master: true
+        replicas: 1
+        env: [ ]
+        resources:
+          cpu: "1"
+          memory: "512Mi"
+          images:
+            - name: "app-cloud-utils"
+              reference: "enonic/cloud-utils:2.1.0"
+            - name: "app-snapshotter"
+              reference: "enonic/snapshotter:4.0.0"
+              pullPolicy: "IfNotPresent"
+          disks:
+            - name: "index"
+              size: "200Mi"
+  status:
+    state: "PENDING"
+    message: "Waiting for pods"
+    fields:
+      pods: [ ]

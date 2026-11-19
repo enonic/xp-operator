@@ -118,6 +118,39 @@ Similar to disks, volumes can also be private or shared among nodes. Private vol
 
 A `size` and `class` params can be specified for every volume. If you don't specify them, the default values will be used. To specify default values use the <<installation#values,`values.yaml`>> file during the installation stage.
 
+==== Images
+
+`resources.images` makes volumes out of OCI images (Kubernetes image volumes). The `initContainers` and `sidecars` of the node group mount them by name, like dirs, disks and volumes. The operator does not look into the images, so a container decides what to do with their files, e.g. copy application jars into the `deploy` dir:
+
+[source,yaml]
+----
+initContainers:
+  - name: deploy-apps
+    image: busybox
+    command: ["sh", "-c", "cp /apps/*/*.jar /deploy/"]
+    mounts:
+      - name: deploy
+        mountPath: /deploy
+      - name: app-cloud-utils
+        mountPath: /apps/cloud-utils
+resources:
+  dirs:
+    - name: deploy
+      size: 100Mi
+      mountReadOnly: true
+  images:
+    - name: app-cloud-utils
+      reference: enonic/cloud-utils:2.1.0
+----
+
+An image has these properties:
+
+- `name`: The name of the volume. It must be unique in the node group and must not clash with the names of `dirs`, `volumes` or `disks`.
+- `reference`: The image. `operator.charts.values.image.registryPrefix` applies to it as to container images.
+- `pullPolicy`: `Always`, `IfNotPresent` or `Never`. Without it, Kubernetes decides, as for a container image.
+
+An image volume is read-only. Kubernetes can mount a whole image, or a directory of it with `subPath`, but not a single file. Image volumes need Kubernetes 1.35 or later and a container runtime that supports them, such as containerd 2.1 or later.
+
 ==== initContainers
 
 In the context of Xp8Deployment, `initContainers` are containers launched before the XP container itself, as part of the deployment lifecycle. This mechanism can be useful to install applications (add applications to `deploy` folder of the main container), preinstall custom workloads or set up the settings of the XP container or perform other tasks.
@@ -295,7 +328,7 @@ secretMounts:
 
 Every key of the Secret becomes a file in `mountPath` with mode `0440`: read-only, and readable by the XP process and no other user. A secret mount has these properties:
 
-- `name`: The name of the volume. It must be unique in the node group and must not clash with the names of `dirs`, `volumes` or `disks`.
+- `name`: The name of the volume. It must be unique in the node group and must not clash with the names of `dirs`, `volumes`, `disks` or `images`.
 - `secretName`: The name of the Secret to mount.
 - `mountPath`: The directory in the XP container where the files of the Secret appear.
 - `optional`: Whether the pod may start when the Secret does not exist. Defaults to `false`.

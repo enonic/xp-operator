@@ -350,6 +350,14 @@ spec:
           emptyDir:
             sizeLimit: {{ dir.size }}
         {%- endfor %}
+        {%- for volumeImage in nodeGroup.resources.images %}
+        - name: {{ volumeImage.name }}
+          image:
+            reference: {{ imageRef(volumeImage.reference, image.registryPrefix) }}
+            {%- if volumeImage.pullPolicy is not empty %}
+            pullPolicy: {{ volumeImage.pullPolicy }}
+            {%- endif %}
+        {%- endfor %}
         {%- for volume in deployment.spec.nodesSharedVolumes %}
         - name: {{ volume.name }}
           persistentVolumeClaim:
