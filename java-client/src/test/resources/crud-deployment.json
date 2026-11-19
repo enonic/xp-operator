@@ -26,6 +26,7 @@
         "name" : "test",
         "value" : "test"
       } ],
+      "secretMounts" : [ ],
       "resources" : {
         "cpu" : "1",
         "memory" : "512Mi",
