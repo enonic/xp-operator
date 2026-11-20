@@ -50,6 +50,29 @@ class SingleRunTest
         assertThat( runs ).hasValue( 1 );
     }
 
+    @Test
+    void keysRunIndependently()
+        throws Exception
+    {
+        final SingleRun singleRun = new SingleRun( "test" );
+        final CountDownLatch started = new CountDownLatch( 1 );
+        final CountDownLatch release = new CountDownLatch( 1 );
+        final AtomicInteger runs = new AtomicInteger();
+
+        final Thread first = Thread.ofVirtual().start( () -> singleRun.run( "a", () -> {
+            started.countDown();
+            await( release );
+        } ) );
+        started.await();
+
+        singleRun.run( "a", runs::incrementAndGet );
+        singleRun.run( "b", runs::incrementAndGet );
+        assertThat( runs ).hasValue( 1 );
+
+        release.countDown();
+        first.join();
+    }
+
     private static void await( final CountDownLatch latch )
     {
         try

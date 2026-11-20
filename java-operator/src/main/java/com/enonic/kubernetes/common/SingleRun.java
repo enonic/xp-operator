@@ -1,6 +1,7 @@
 package com.enonic.kubernetes.common;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
@@ -11,7 +12,9 @@ public final class SingleRun
 {
     private static final Logger LOG = LoggerFactory.getLogger( SingleRun.class );
 
-    private final AtomicBoolean running = new AtomicBoolean();
+    private static final String WHOLE = "";
+
+    private final Set<String> running = ConcurrentHashMap.newKeySet();
 
     private final String name;
 
@@ -22,9 +25,14 @@ public final class SingleRun
 
     public void run( final Runnable body )
     {
-        if ( !running.compareAndSet( false, true ) )
+        run( WHOLE, body );
+    }
+
+    public void run( final String key, final Runnable body )
+    {
+        if ( !running.add( key ) )
         {
-            LOG.warn( "{} skipped: the previous run is still in progress", name );
+            LOG.warn( "{} skipped{}: the previous run is still in progress", name, key.isEmpty() ? "" : " for " + key );
             return;
         }
         try
@@ -33,7 +41,7 @@ public final class SingleRun
         }
         finally
         {
-            running.set( false );
+            running.remove( key );
         }
     }
 }

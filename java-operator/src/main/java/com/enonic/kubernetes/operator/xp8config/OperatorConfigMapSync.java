@@ -75,11 +75,6 @@ public class OperatorConfigMapSync
     @Override
     public void run()
     {
-        singleRun.run( this::sync );
-    }
-
-    private void sync()
-    {
         final Set<String> activeNamespaces = searchers.xp8Deployment()
             .stream()
             .filter( Predicates.running() )
@@ -97,11 +92,11 @@ public class OperatorConfigMapSync
     protected void handle( final String namespace )
     {
         // Handle all ConfigMaps in namespace with nodeGroup label
-        limiter.limit( namespace, Function.identity(), () -> searchers.configMap().stream().
+        limiter.limit( namespace, Function.identity(), () -> singleRun.run( namespace, () -> searchers.configMap().stream().
             filter( inNamespace( namespace ) ).
             filter( isDeleted().negate() ).
             filter( hasLabel( cfgStr( "operator.charts.values.labelKeys.nodeGroup" ) ) ).
-            forEach( this::handle ) );
+            forEach( this::handle ) ) );
     }
 
     private void handle( final ConfigMap configMap )
