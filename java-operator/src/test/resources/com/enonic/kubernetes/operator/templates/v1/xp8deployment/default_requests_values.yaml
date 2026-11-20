@@ -122,7 +122,6 @@ resources:
     defaultRequests: "256Mi"
 settings:
   hzApiDiscovery: true
-  linkerd: false
 storage:
   default:
     storageClassName: "standard"

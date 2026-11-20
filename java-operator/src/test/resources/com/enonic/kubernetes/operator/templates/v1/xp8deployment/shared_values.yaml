@@ -167,7 +167,6 @@ resources:
     defaultRequests: null
 settings:
   hzApiDiscovery: true
-  linkerd: false
 storage:
   default:
     storageClassName: "standard"
