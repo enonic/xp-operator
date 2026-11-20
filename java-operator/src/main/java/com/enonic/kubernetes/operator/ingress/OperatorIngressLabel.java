@@ -1,5 +1,6 @@
 package com.enonic.kubernetes.operator.ingress;
 
+import com.enonic.kubernetes.common.SingleRun;
 import com.enonic.kubernetes.crd.v1.Xp8Config;
 import com.enonic.kubernetes.crd.v1.Xp8ConfigStatus;
 import com.enonic.kubernetes.kubernetes.Clients;
@@ -39,6 +40,8 @@ public class OperatorIngressLabel
     implements Runnable, ApplicationEventListener<ServerStartupEvent>
 {
     private static final Logger LOG = LoggerFactory.getLogger( OperatorIngressLabel.class );
+
+    private final SingleRun singleRun = new SingleRun( OperatorIngressLabel.class.getSimpleName() );
 
     @Inject
     Clients clients;
@@ -84,6 +87,11 @@ public class OperatorIngressLabel
 
     @Override
     public void run()
+    {
+        singleRun.run( this::sync );
+    }
+
+    private void sync()
     {
         LOG.debug( "Resync Ingress status" );
 

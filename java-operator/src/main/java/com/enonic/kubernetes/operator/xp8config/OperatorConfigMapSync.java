@@ -1,7 +1,7 @@
 package com.enonic.kubernetes.operator.xp8config;
 
-import com.enonic.kubernetes.crd.v1.Xp8Config;
 import com.enonic.kubernetes.common.TaskRunner;
+import com.enonic.kubernetes.crd.v1.Xp8Config;
 import com.enonic.kubernetes.kubernetes.ActionLimiter;
 import com.enonic.kubernetes.kubernetes.Clients;
 import com.enonic.kubernetes.kubernetes.Searchers;

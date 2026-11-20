@@ -1,6 +1,7 @@
 package com.enonic.kubernetes.operator;
 
 import com.enonic.kubernetes.common.Exit;
+import com.enonic.kubernetes.common.SingleRun;
 import com.enonic.kubernetes.kubernetes.Informers;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
@@ -25,6 +26,8 @@ public class OperatorInformers
     implements Runnable, ApplicationEventListener<ServerStartupEvent>
 {
     private static final Logger LOG = LoggerFactory.getLogger( OperatorInformers.class );
+
+    private final SingleRun singleRun = new SingleRun( OperatorInformers.class.getSimpleName() );
 
     private final Map<Class<? extends HasMetadata>, Integer> failureMap = new ConcurrentHashMap<>();
     private final Map<Class<? extends HasMetadata>, String> resourceVersionMap = new ConcurrentHashMap<>();
@@ -51,6 +54,11 @@ public class OperatorInformers
 
     @Override
     public void run()
+    {
+        singleRun.run( this::sync );
+    }
+
+    private void sync()
     {
         // Check all informers
         for (Map.Entry<Class<? extends HasMetadata>, SharedIndexInformer<?>> e : informers.allInformers().entrySet()) {
