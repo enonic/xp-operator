@@ -22,7 +22,6 @@ import io.micronaut.http.annotation.Produces;
 
 import java.util.*;
 
-import static com.enonic.kubernetes.common.Configuration.cfgBool;
 import static com.enonic.kubernetes.common.Configuration.cfgStr;
 import static com.enonic.kubernetes.common.Utils.createOwnerReference;
 import static com.enonic.kubernetes.kubernetes.Predicates.matchAnnotationPrefix;
@@ -173,22 +172,6 @@ public class MutationApi
             labels.put( cfgStr( "operator.charts.values.labelKeys.ingressVhostLoaded" ), "false" );
             patch( mt, true, "/metadata/labels", newR.getMetadata().getLabels(), labels );
         }
-
-        Map<String, String> oa = newR.getMetadata().getAnnotations() != null ? newR.getMetadata().getAnnotations() : new HashMap<>();
-        Map<String, String> na = new HashMap<>( oa );
-
-        boolean isNginx = "nginx".equals( newR.getSpec().getIngressClassName() ) || "nginx".equals( na.get( "kubernetes.io/ingress.class" ) );
-        if (isNginx && cfgBool( "operator.charts.values.settings.linkerd" )) {
-            // If linkerd is enabled
-            String cfgSnippet = na.get( "nginx.ingress.kubernetes.io/configuration-snippet" );
-            StringBuilder sb = new StringBuilder( cfgSnippet != null ? cfgSnippet : "" ).
-                append( "\n" ).
-                append( "proxy_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;" ).
-                append( "grpc_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;" );
-            na.put( "nginx.ingress.kubernetes.io/configuration-snippet", sb.toString() );
-        }
-
-        patch( mt, true, "/metadata/annotations", newR.getMetadata().getAnnotations(), na );
     }
 
     private void ensureOwnerReference( MutationRequest mt )
