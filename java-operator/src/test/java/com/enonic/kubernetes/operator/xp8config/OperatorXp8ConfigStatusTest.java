@@ -69,6 +69,11 @@ class OperatorXp8ConfigStatusTest
         stored = config( "all" );
         xp8Configs.add( stored );
         configMaps.add( new ConfigMapBuilder().withNewMetadata().withName( "kube-root-ca.crt" ).withNamespace( "ns" ).endMetadata().build() );
+        configMaps.add( managed( new ConfigMapBuilder().withNewMetadata()
+                                     .withName( "extra-config" )
+                                     .addToAnnotations( "updated", "2026-11-20T10:30:00Z" )
+                                     .endMetadata()
+                                     .build() ) );
         configMaps.add( managed( configMap( "main", "10:00" ) ) );
         final Pod pod = managed( pod( "main-0", "main", "09:59" ) );
         pods.add( pod );
@@ -76,6 +81,7 @@ class OperatorXp8ConfigStatusTest
         operator.onNewAdd( pod );
 
         assertThat( replacedStatus().getState() ).isEqualTo( Xp8ConfigStatus.State.PENDING );
+        assertThat( replacedStatus().getMessage() ).isEqualTo( "Not loaded: main-0" );
     }
 
     @Test
