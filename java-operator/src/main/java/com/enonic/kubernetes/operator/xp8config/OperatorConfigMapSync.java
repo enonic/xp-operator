@@ -1,6 +1,5 @@
 package com.enonic.kubernetes.operator.xp8config;
 
-import com.enonic.kubernetes.common.SingleRun;
 import com.enonic.kubernetes.common.TaskRunner;
 import com.enonic.kubernetes.crd.v1.Xp8Config;
 import com.enonic.kubernetes.kubernetes.ActionLimiter;
@@ -49,8 +48,6 @@ public class OperatorConfigMapSync
 {
     private static final Logger LOG = LoggerFactory.getLogger( OperatorConfigMapSync.class );
 
-    private final SingleRun singleRun = new SingleRun( OperatorConfigMapSync.class.getSimpleName() );
-
     @Inject
     Operator operator;
 
@@ -92,11 +89,11 @@ public class OperatorConfigMapSync
     protected void handle( final String namespace )
     {
         // Handle all ConfigMaps in namespace with nodeGroup label
-        limiter.limit( namespace, Function.identity(), () -> singleRun.run( namespace, () -> searchers.configMap().stream().
+        limiter.limit( namespace, Function.identity(), () -> searchers.configMap().stream().
             filter( inNamespace( namespace ) ).
             filter( isDeleted().negate() ).
             filter( hasLabel( cfgStr( "operator.charts.values.labelKeys.nodeGroup" ) ) ).
-            forEach( this::handle ) ) );
+            forEach( this::handle ) );
     }
 
     private void handle( final ConfigMap configMap )
