@@ -1,5 +1,6 @@
 package com.enonic.kubernetes.operator.xp8deployment;
 
+import com.enonic.kubernetes.common.SingleRun;
 import com.enonic.kubernetes.crd.v1.Xp8Deployment;
 import com.enonic.kubernetes.crd.v1.Xp8DeploymentStatus;
 import com.enonic.kubernetes.crd.v1.xp8deploymentspec.NodeGroups;
@@ -36,6 +37,8 @@ public class OperatorXp8DeploymentStatus
     implements Runnable, ApplicationEventListener<ServerStartupEvent>
 {
     private static final Logger LOG = LoggerFactory.getLogger( OperatorXp8DeploymentStatus.class );
+
+    private final SingleRun singleRun = new SingleRun( OperatorXp8DeploymentStatus.class.getSimpleName() );
 
     @Inject
     Clients clients;
@@ -86,6 +89,11 @@ public class OperatorXp8DeploymentStatus
      */
     @Override
     public void run()
+    {
+        singleRun.run( this::sync );
+    }
+
+    private void sync()
     {
         LOG.debug( "Resync Pods" );
 

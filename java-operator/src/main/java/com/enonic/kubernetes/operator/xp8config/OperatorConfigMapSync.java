@@ -1,7 +1,8 @@
 package com.enonic.kubernetes.operator.xp8config;
 
-import com.enonic.kubernetes.crd.v1.Xp8Config;
+import com.enonic.kubernetes.common.SingleRun;
 import com.enonic.kubernetes.common.TaskRunner;
+import com.enonic.kubernetes.crd.v1.Xp8Config;
 import com.enonic.kubernetes.kubernetes.ActionLimiter;
 import com.enonic.kubernetes.kubernetes.Clients;
 import com.enonic.kubernetes.kubernetes.Searchers;
@@ -48,6 +49,8 @@ public class OperatorConfigMapSync
 {
     private static final Logger LOG = LoggerFactory.getLogger( OperatorConfigMapSync.class );
 
+    private final SingleRun singleRun = new SingleRun( OperatorConfigMapSync.class.getSimpleName() );
+
     @Inject
     Operator operator;
 
@@ -71,6 +74,11 @@ public class OperatorConfigMapSync
 
     @Override
     public void run()
+    {
+        singleRun.run( this::sync );
+    }
+
+    private void sync()
     {
         final Set<String> activeNamespaces = searchers.xp8Deployment()
             .stream()

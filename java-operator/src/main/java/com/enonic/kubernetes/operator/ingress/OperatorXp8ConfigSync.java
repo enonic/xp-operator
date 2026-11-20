@@ -1,5 +1,6 @@
 package com.enonic.kubernetes.operator.ingress;
 
+import com.enonic.kubernetes.common.SingleRun;
 import com.enonic.kubernetes.crd.v1.Xp8Config;
 import com.enonic.kubernetes.kubernetes.Clients;
 import com.enonic.kubernetes.kubernetes.Searchers;
@@ -42,6 +43,8 @@ public class OperatorXp8ConfigSync
 {
     private static final Logger LOG = LoggerFactory.getLogger( OperatorXp8ConfigSync.class );
 
+    private final SingleRun singleRun = new SingleRun( OperatorXp8ConfigSync.class.getSimpleName() );
+
     @Inject
     Operator operator;
 
@@ -59,6 +62,11 @@ public class OperatorXp8ConfigSync
 
     @Override
     public void run()
+    {
+        singleRun.run( this::sync );
+    }
+
+    private void sync()
     {
         searchers.xp8Config().stream().collect( groupingBy( r -> r.getMetadata().getNamespace() ) ).
             keySet().
