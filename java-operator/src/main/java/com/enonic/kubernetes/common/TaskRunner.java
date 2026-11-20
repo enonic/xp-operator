@@ -6,8 +6,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import jakarta.inject.Singleton;
@@ -15,7 +13,6 @@ import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.enonic.kubernetes.common.Configuration.cfgInt;
 import static com.enonic.kubernetes.common.SingletonAssert.singletonAssert;
 
 
@@ -34,9 +31,7 @@ public class TaskRunner
         scheduledExecutorService =
             Executors.newScheduledThreadPool( 4, threadFactory( "task-scheduler-" ) );
 
-        executor = new ThreadPoolExecutor( 1, cfgInt( "operator.tasks.threads" ), 60L, TimeUnit.SECONDS, new SynchronousQueue<>(),
-                                           threadFactory( "task-runner-" ),
-                                           new ThreadPoolExecutor.CallerRunsPolicy() );
+        executor = Executors.newThreadPerTaskExecutor( Thread.ofVirtual().name( "task-runner-", 0 ).factory() );
     }
 
     public void scheduleAtFixedRate( final Runnable command, final long initialDelay, final long period, final TimeUnit unit )
