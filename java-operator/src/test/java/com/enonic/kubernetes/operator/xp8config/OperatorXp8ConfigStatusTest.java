@@ -19,6 +19,8 @@ import io.fabric8.kubernetes.client.dsl.Resource;
 import com.enonic.kubernetes.crd.v1.Xp8Config;
 import com.enonic.kubernetes.crd.v1.Xp8ConfigStatus;
 import com.enonic.kubernetes.kubernetes.Clients;
+import com.enonic.kubernetes.kubernetes.Searchers;
+import com.enonic.kubernetes.operator.api.TestInformerSearcher;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -32,6 +34,12 @@ class OperatorXp8ConfigStatusTest
     private final OperatorXp8ConfigStatus operator = new OperatorXp8ConfigStatus();
 
     private final ReplaceDeletable<Xp8Config> replaceable = mock();
+
+    private final TestInformerSearcher<ConfigMap> configMaps = new TestInformerSearcher<>();
+
+    private final TestInformerSearcher<Pod> pods = new TestInformerSearcher<>();
+
+    private final TestInformerSearcher<Xp8Config> xp8Configs = new TestInformerSearcher<>();
 
     private Xp8Config stored;
 
@@ -51,6 +59,56 @@ class OperatorXp8ConfigStatusTest
         operator.podConfigReloadedAnnotation = "reloaded";
         operator.nodeGroupLabel = "group";
         operator.allNodesKey = "all";
+        operator.searchers = new Searchers( configMaps, new TestInformerSearcher<>(), new TestInformerSearcher<>(), pods, xp8Configs,
+                                            new TestInformerSearcher<>(), new TestInformerSearcher<>() );
+    }
+
+    @Test
+    void podEventMarksPendingOnceIgnoringUnmanagedConfigMaps()
+    {
+        stored = config( "all" );
+        xp8Configs.add( stored );
+        configMaps.add( new ConfigMapBuilder().withNewMetadata().withName( "kube-root-ca.crt" ).withNamespace( "ns" ).endMetadata().build() );
+        configMaps.add( managed( configMap( "main", "10:00" ) ) );
+        final Pod pod = managed( pod( "main-0", "main", "09:59" ) );
+        pods.add( pod );
+
+        operator.onNewAdd( pod );
+
+        assertThat( replacedStatus().getState() ).isEqualTo( Xp8ConfigStatus.State.PENDING );
+    }
+
+    @Test
+    void podEventMarksReadyOnceThePodReloaded()
+    {
+        stored = config( "all" );
+        final Xp8ConfigStatus pending = new Xp8ConfigStatus();
+        pending.setState( Xp8ConfigStatus.State.PENDING );
+        stored.setStatus( pending );
+        xp8Configs.add( stored );
+        configMaps.add( managed( configMap( "main", "10:00" ) ) );
+        final Pod reloaded = managed( pod( "main-0", "main", "10:01" ) );
+        pods.add( reloaded );
+
+        operator.onUpdate( managed( pod( "main-0", "main", "09:59" ) ), reloaded );
+
+        assertThat( replacedStatus().getState() ).isEqualTo( Xp8ConfigStatus.State.READY );
+    }
+
+    @Test
+    void unmanagedPodsAndUnchangedPodsAreIgnored()
+    {
+        stored = config( "all" );
+        xp8Configs.add( stored );
+        configMaps.add( managed( configMap( "main", "10:00" ) ) );
+        final Pod managedPod = managed( pod( "main-0", "main", "09:59" ) );
+        pods.add( managedPod );
+
+        operator.onNewAdd( pod( "other-0", "main", "09:59" ) );
+        operator.onUpdate( managedPod, managedPod );
+        operator.onDelete( managedPod, false );
+
+        verify( replaceable, never() ).replace( any() );
     }
 
     @Test
@@ -144,6 +202,20 @@ class OperatorXp8ConfigStatusTest
             .withName( name )
             .addToLabels( "group", nodeGroup )
             .addToAnnotations( "reloaded", "2026-11-20T" + reloadedAt + ":00Z" )
+            .endMetadata()
+            .build();
+    }
+
+    private static Pod managed( final Pod pod )
+    {
+        return new PodBuilder( pod ).editMetadata().withNamespace( "ns" ).addToLabels( "enonic.managed", "true" ).endMetadata().build();
+    }
+
+    private static ConfigMap managed( final ConfigMap configMap )
+    {
+        return new ConfigMapBuilder( configMap ).editMetadata()
+            .withNamespace( "ns" )
+            .addToLabels( "enonic.managed", "true" )
             .endMetadata()
             .build();
     }
