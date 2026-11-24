@@ -21,7 +21,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import static com.enonic.kubernetes.common.Configuration.cfgStr;
 import static com.enonic.kubernetes.kubernetes.Predicates.*;
 
 @Singleton
@@ -33,6 +32,12 @@ public class OperatorXp8ConfigStatus extends InformerEventHandler<Pod> implement
 
     @Value("${operator.charts.values.annotationKeys.podConfigReloaded}")
     String podConfigReloadedAnnotation;
+
+    @Value("${operator.charts.values.labelKeys.nodeGroup}")
+    String nodeGroupLabel;
+
+    @Value("${operator.charts.values.allNodesKey}")
+    String allNodesKey;
 
     @Inject
     Clients clients;
@@ -83,8 +88,10 @@ public class OperatorXp8ConfigStatus extends InformerEventHandler<Pod> implement
     }
 
     private void handle(String namespace) {
-        List<ConfigMap> configMaps = searchers.configMap().stream()
+        List<ConfigMap> nodeGroupConfigMaps = searchers.configMap().stream()
                 .filter(cm -> namespace.equals(cm.getMetadata().getNamespace()))
+                .filter(isEnonicManaged())
+                .filter(hasLabel(nodeGroupLabel))
                 .collect(Collectors.toList());
 
         List<Pod> allPods = searchers.pod().stream()
@@ -92,52 +99,40 @@ public class OperatorXp8ConfigStatus extends InformerEventHandler<Pod> implement
                 .filter(isEnonicManaged())
                 .collect(Collectors.toList());
 
-        List<Xp8Config> allConfigs = searchers.xp8Config().stream()
+        searchers.xp8Config().stream()
                 .filter(cfg -> namespace.equals(cfg.getMetadata().getNamespace()))
-                .collect(Collectors.toList());
+                .forEach(config -> notLoaded(config, nodeGroupConfigMaps, allPods).ifPresent(notLoaded -> {
+                    if (notLoaded.isEmpty()) {
+                        markReady(config);
+                    } else {
+                        markPending(config, notLoaded);
+                    }
+                }));
+    }
 
-        for (ConfigMap cm : configMaps) {
-            String configMapName = cm.getMetadata().getName();
-            String updatedAt = getLastUpdatedTimestamp(cm);
+    Optional<List<Pod>> notLoaded(final Xp8Config config, final List<ConfigMap> nodeGroupConfigMaps, final List<Pod> pods) {
+        final String nodeGroup = config.getSpec().getNodeGroup();
+        final boolean allNodes = nodeGroup.equals(allNodesKey);
 
-            List<Xp8Config> relatedConfigs = allConfigs.stream()
-                    .filter(cfg -> cfg.getSpec().getNodeGroup().equals(configMapName) || cfg.getSpec().getNodeGroup().equals(cfgStr("operator.charts.values.allNodesKey")))
-                    .collect(Collectors.toList());
-
-            LOG.info(String.format("Updating config map %s", configMapName));
-            for (Xp8Config config : relatedConfigs) {
-
-                LOG.info(String.format("Updating Xp8Config %s", config.getMetadata().getName()));
-
-                if (!isEnonicManaged().test(cm)) {
-                    markReady(config); // inherited behavior from events.sh implementation
-                }
-
-                if (updatedAt == null) {
-                    continue;
-                }
-
-                boolean isAllNodes = config.getSpec().getNodeGroup().equals(cfgStr("operator.charts.values.allNodesKey"));
-
-                List<Pod> relevantPods = isAllNodes ? allPods : allPods.stream()
-                        .filter(matchLabel(cfgStr("operator.charts.values.labelKeys.nodeGroup"), config.getSpec().getNodeGroup()))
-                        .collect(Collectors.toList());
-
-                List<Pod> notUpdated = relevantPods.stream()
-                        .filter(p -> {
-                            Map<String, String> annotations = Optional.ofNullable(p.getMetadata().getAnnotations()).orElse(Collections.emptyMap());
-                            String reloadedAt = annotations.get(podConfigReloadedAnnotation);
-                            return reloadedAt == null || reloadedAt.compareTo(updatedAt) < 0;
-                        })
-                        .collect(Collectors.toList());
-
-                if (notUpdated.isEmpty()) {
-                    markReady(config);
-                } else {
-                    markPending(config, notUpdated);
-                }
+        final List<Pod> notLoaded = new ArrayList<>();
+        boolean tracked = false;
+        for (ConfigMap cm : nodeGroupConfigMaps) {
+            final String cmNodeGroup = cm.getMetadata().getLabels().get(nodeGroupLabel);
+            final String updatedAt = getLastUpdatedTimestamp(cm);
+            if ((!allNodes && !nodeGroup.equals(cmNodeGroup)) || updatedAt == null) {
+                continue;
             }
+            tracked = true;
+            pods.stream()
+                    .filter(matchLabel(nodeGroupLabel, cmNodeGroup))
+                    .filter(p -> {
+                        Map<String, String> annotations = Optional.ofNullable(p.getMetadata().getAnnotations()).orElse(Collections.emptyMap());
+                        String reloadedAt = annotations.get(podConfigReloadedAnnotation);
+                        return reloadedAt == null || reloadedAt.compareTo(updatedAt) < 0;
+                    })
+                    .forEach(notLoaded::add);
         }
+        return tracked ? Optional.of(notLoaded) : Optional.empty();
     }
 
     private String getLastUpdatedTimestamp(ConfigMap cm) {
